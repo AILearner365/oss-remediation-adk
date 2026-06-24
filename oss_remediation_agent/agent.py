@@ -11,11 +11,9 @@ from oss_remediation_agent.prompts import (
     REMEDIATION_AGENT_INSTRUCTION,
     PR_CREATION_AGENT_INSTRUCTION,
 )
-from oss_remediation_agent.tools.workflow_tools import (
-    create_pull_request_from_remediation_report,
-    generate_remediation_report,
-    generate_vulnerability_assessment_report,
-)
+from oss_remediation_agent.tools.scanner_tools import generate_vulnerability_assessment_report
+from oss_remediation_agent.tools.remediation_tools import generate_remediation_report
+from oss_remediation_agent.tools.validation_tools import create_pull_request_from_remediation_report
 
 
 # Load .env from project root when running locally with ADK.
