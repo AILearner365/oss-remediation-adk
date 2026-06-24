@@ -1,0 +1,4 @@
+# Python dependencies for the local ADK runtime.
+# System tools such as git, Maven, OSV Scanner, and GitHub CLI are installed separately.
+google-adk>=2.0.0
+python-dotenv>=1.0.1
