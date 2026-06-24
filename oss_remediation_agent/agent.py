@@ -1,22 +1,25 @@
+"""ADK entry point for the OSS remediation multi-agent workflow."""
+
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from google.adk.agents import Agent, SequentialAgent
 
 from oss_remediation_agent.prompts import (
-    SCANNER_AGENT_INSTRUCTION,
+    DISCOVERY_AGENT_INSTRUCTION,
     REMEDIATION_AGENT_INSTRUCTION,
-    VALIDATION_AGENT_INSTRUCTION,
+    PR_CREATION_AGENT_INSTRUCTION,
+)
+from oss_remediation_agent.tools.workflow_tools import (
+    create_pull_request_from_remediation_report,
+    generate_remediation_report,
+    generate_vulnerability_assessment_report,
 )
 
-from oss_remediation_agent.tools.scanner_tools import scan_repository
-from oss_remediation_agent.tools.remediation_tools import apply_remediation
-from oss_remediation_agent.tools.validation_tools import validate_repository
 
-
-# Load .env from project root: ~/oss-remediation-adk/.env
+# Load .env from project root when running locally with ADK.
 env_path = Path(__file__).resolve().parent.parent / ".env"
-
 if load_dotenv(dotenv_path=env_path):
     print("Successfully loaded .env file")
     print(f"GOOGLE_API_KEY loaded: {'YES' if os.getenv('GOOGLE_API_KEY') else 'NO'}")
@@ -24,37 +27,53 @@ else:
     print("Warning: .env file not found or could not be loaded")
 
 
-scanner_agent = Agent(
-    name="scanner_agent",
+discovery_agent = Agent(
+    name="discovery_assessment_agent",
     model="gemini-2.5-flash",
-    description="Scans the repository for OSS vulnerabilities.",
-    instruction=SCANNER_AGENT_INSTRUCTION,
-    tools=[scan_repository],
+    description=(
+        "Agent 1. Clones a Java Spring Boot Maven repository, validates the "
+        "reference branch build, runs OSV Scanner, and emits a Vulnerability "
+        "Assessment Report."
+    ),
+    instruction=DISCOVERY_AGENT_INSTRUCTION,
+    tools=[generate_vulnerability_assessment_report],
 )
 
 remediation_agent = Agent(
-    name="remediation_agent",
+    name="automated_remediation_validation_agent",
     model="gemini-2.5-flash",
-    description="Plans and applies dependency remediation changes.",
+    description=(
+        "Agent 2. Reads the Vulnerability Assessment Report, remediates Critical "
+        "and High Maven dependency vulnerabilities by pom.xml version upgrades "
+        "only, validates build/tests/scan, and emits a Remediation Report."
+    ),
     instruction=REMEDIATION_AGENT_INSTRUCTION,
-    tools=[apply_remediation],
+    tools=[generate_remediation_report],
 )
 
-validation_agent = Agent(
-    name="validation_agent",
+pr_creation_agent = Agent(
+    name="pull_request_creation_agent",
     model="gemini-2.5-flash",
-    description="Validates the repository after remediation.",
-    instruction=VALIDATION_AGENT_INSTRUCTION,
-    tools=[validate_repository],
+    description=(
+        "Agent 3. Reads the Remediation Report, validates PR creation conditions, "
+        "commits allowed Maven dependency changes, pushes the feature branch, "
+        "and creates a GitHub pull request when allowed."
+    ),
+    instruction=PR_CREATION_AGENT_INSTRUCTION,
+    tools=[create_pull_request_from_remediation_report],
 )
 
 
 root_agent = SequentialAgent(
     name="oss_remediation_agent",
-    description="Runs OSS scan, remediation, and validation in sequence.",
+    description=(
+        "Runs the ADK OSS vulnerability remediation workflow in sequence: "
+        "Discovery & Assessment -> Automated Remediation & Validation -> "
+        "Pull Request Creation."
+    ),
     sub_agents=[
-        scanner_agent,
+        discovery_agent,
         remediation_agent,
-        validation_agent,
+        pr_creation_agent,
     ],
 )
