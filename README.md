@@ -144,14 +144,92 @@ scripts/
 requirements.txt                   # Python dependencies
 .env.example                       # Local environment template
 ```
+## Local Setup Instructions
 
-## Run Locally
+### 1. Clone this repository
 
 ```bash
 git clone https://github.com/AILearner365/oss-remediation-adk.git
 cd oss-remediation-adk
+```
+
+### 2. Checkout the workflow branch
+
+```bash
 git checkout <branch-name>
+```
+
+### 3. Make scripts executable
+
+GitHub file creation may not preserve executable permissions. Run:
+
+```bash
+chmod +x scripts/*.sh
+```
+
+### 4. Run local setup
+
+```bash
 bash scripts/setup-local.sh
+```
+
+This script:
+
+- Creates `.venv`
+- Installs `requirements.txt`
+- Creates `.env` from `.env.example` if missing
+- Runs prerequisite checks
+
+### 5. Configure environment variables
+
+Open `.env` and set your Google API key:
+
+```bash
+GOOGLE_API_KEY=replace-with-your-google-api-key
+```
+
+Optional values:
+
+```bash
+ADK_HOST=127.0.0.1
+ADK_PORT=8000
+```
+or
+
+```bash
+gcloud auth application-default login
+gcloud services enable aiplatform.googleapis.com
+```
+
+```bash
+create .env file under the oss-remediation-adk if it doesnt not already exists
+
+GOOGLE_GENAI_USE_ENTERPRISE=1
+GOOGLE_CLOUD_PROJECT=deutschebank-aipocs
+GOOGLE_CLOUD_LOCATION=us-central1
+```
+
+### 6. Verify required tools
+
+```bash
+bash scripts/check-prereqs.sh
+```
+
+The script checks:
+
+- `python3`
+- `git`
+- `java`
+- `mvn`
+- `osv-scanner`
+- `gh`
+- GitHub CLI authentication status
+
+---
+
+## Run Locally with ADK CLI
+
+```bash
 bash scripts/run-adk-cli.sh
 ```
 
@@ -161,7 +239,7 @@ Example prompt:
 Run the OSS remediation workflow for repository https://github.com/example/spring-boot-maven-app.git using reference branch main.
 ```
 
-Expected user input fields:
+The expected user input fields are:
 
 ```json
 {
@@ -169,6 +247,73 @@ Expected user input fields:
   "referenceBranch": "main"
 }
 ```
+
+---
+
+## Start ADK Web UI
+
+```bash
+bash scripts/run-adk-web.sh
+```
+
+Default URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Use the Web UI for local development, prompt testing, and observing agent behavior.
+
+---
+
+## Start ADK API Server
+
+```bash
+bash scripts/run-adk-api-server.sh
+```
+
+Default API server URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Swagger/OpenAPI documentation is typically available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Use the API server mode when integrating this workflow with another service or UI.
+
+---
+---
+
+## Troubleshooting
+
+### `osv-scanner` command not found
+
+Install OSV Scanner and ensure the binary is available on `PATH`:
+
+```bash
+osv-scanner --version
+```
+
+Then rerun:
+
+```bash
+bash scripts/check-prereqs.sh
+```
+
+### `gh` is not authenticated
+
+Run:
+
+```bash
+gh auth login
+gh auth status
+```
+---
 
 ## Local Validation
 
