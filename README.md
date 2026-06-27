@@ -136,6 +136,12 @@ Install these tools on the machine that will run the ADK workflow:
 
 OSV Scanner is not vendored into this repository. It must be installed on the runtime machine and available on `PATH` as `osv-scanner`.
 
+```bash
+cd ~/oss-remediation-adk
+source .venv/bin/activate
+python -m pip install osv-scanner
+```
+
 GitHub CLI must be authenticated before Agent 3 can create pull requests:
 
 ```bash
@@ -157,7 +163,7 @@ cd oss-remediation-adk
 ### 2. Checkout the workflow branch
 
 ```bash
-git checkout feature/adk-oss-remediation-workflow-20260624
+git checkout <branch-name>
 ```
 
 ### 3. Make scripts executable
@@ -194,6 +200,20 @@ Optional values:
 ```bash
 ADK_HOST=127.0.0.1
 ADK_PORT=8000
+```
+or
+
+```bash
+gcloud auth application-default login
+gcloud services enable aiplatform.googleapis.com
+```
+
+```bash
+create .env file under the oss-remediation-adk if it doesnt not already exists
+
+GOOGLE_GENAI_USE_ENTERPRISE=1
+GOOGLE_CLOUD_PROJECT=deutschebank-aipocs
+GOOGLE_CLOUD_LOCATION=us-central1
 ```
 
 ### 6. Verify required tools
