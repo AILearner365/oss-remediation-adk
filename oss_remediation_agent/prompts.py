@@ -137,6 +137,23 @@ Hard constraints:
 - Do not create a pull request.
 - Every vulnerability must end with one of these statuses: FIXED, MANUAL_REVIEW,
   or FAILED.
+- pom.xml Formatting Preservation Rules
+  Agent 2 must preserve the original pom.xml formatting exactly.
+  Agent 2 must not:
+    Reserialize XML.
+    Pretty-print XML.
+    Normalize XML.
+    Rewrite the full XML document.
+    Change XML declaration quote style.
+    Change XML encoding case.
+    Change namespace formatting.
+    Change indentation.
+    Change comments.
+    Change whitespace.
+    Change self-closing tag style.
+    Change line endings.
+    Change the final newline.
+    Change unrelated plugin or configuration sections.
 
 Version selection rules:
 1. Prefer the lowest fixed version that resolves the vulnerability.
