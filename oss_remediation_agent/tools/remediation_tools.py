@@ -1,154 +1,254 @@
 """Automated Maven-only remediation tool for the ADK OSS workflow."""
+
 from __future__ import annotations
-import json, os, re, shlex
+
+import json
+import re
 from pathlib import Path
 from typing import Any
-from oss_remediation_agent.tools.scanner_tools import CRITICAL_HIGH,_extract_vulnerabilities,_run,_run_osv,_trim,_version_key
-B=("clean","install"); T=("test",)
 
-def generate_remediation_report(vulnerability_assessment_report:dict[str,Any], workspace_path:str|None=None)->dict[str,Any]:
-    a=vulnerability_assessment_report or {}; repo=Path(workspace_path or a.get("workspacePath") or ".").resolve(); r=_report(a,repo)
-    vulns=[v for v in a.get("vulnerabilities",[]) if str(v.get("severity","")).upper() in CRITICAL_HIGH]
-    if a.get("buildStatus")!="SUCCESS": r["failedItems"].append(_fail("Agent 1 buildStatus is not SUCCESS.")); return r
-    if not repo.exists(): r["failedItems"].append(_fail(f"Workspace path not found: {repo}")); return r
-    if a.get("featureBranch"):
-        x=_run(["git","checkout","-B",a["featureBranch"]],repo)
-        if x["returncode"]: r["failedItems"].append(_fail("Cannot checkout remediation branch.",x)); return r
-    snap=_snap(repo); orig={_k(v) for v in vulns}
-    for v in vulns:
-        it=_one(repo,v,orig); r[{"FIXED":"remediatedVulnerabilities","MANUAL_REVIEW":"manualReviewItems"}.get(it["status"],"failedItems")].append(it)
-    if r["failedItems"]: _restore(snap); return r
-    r["modifiedFiles"]=_changed(repo,snap)
-    for key,env,goals in (("buildStatus","OSS_REMEDIATION_BUILD_GOALS",B),("testStatus","OSS_REMEDIATION_TEST_GOALS",T)):
-        x=_mvn(repo,_goals(env,goals)); r[key]="SUCCESS" if x["returncode"]==0 else "FAILED"
-        if x["returncode"]: _restore(snap); r["modifiedFiles"]=[]; r["failedItems"].append(_fail(f"{key} failed after remediation.",x)); return r
-    rem=_extract_vulnerabilities(_run_osv(repo).get("json") or {}); man={_k(v) for v in r["manualReviewItems"]}
-    items=[{"dependencyName":v.get("dependencyName"),"severity":v.get("severity"),"vulnerabilityIds":v.get("vulnerabilityIds",[]),"status":"MANUAL_REVIEW" if _k(v) in man else "UNRESOLVED"} for v in rem]
-    r["postRemediationScan"]={"criticalRemaining":sum(i["severity"]=="CRITICAL" for i in items),"highRemaining":sum(i["severity"]=="HIGH" for i in items),"newCriticalOrHighIntroduced":any(_k(v) not in orig for v in rem),"remainingCriticalOrHighItems":items}
-    bad=[i for i in items if i["status"]!="MANUAL_REVIEW"]
-    if bad or r["postRemediationScan"]["newCriticalOrHighIntroduced"]: r["failedItems"].extend(bad); r["remediationStatus"]="FAILED"
-    elif r["manualReviewItems"]: r["remediationStatus"]="PARTIAL_SUCCESS"
-    else: r["remediationStatus"]="SUCCESS"
-    return r
+from oss_remediation_agent.policy import RemediationPolicy
+from oss_remediation_agent.schemas import ItemStatus, RemediationStatus, make_remediation_report, validate_assessment_report, vulnerability_key
+from oss_remediation_agent.tools.maven_tools import PomTarget, apply_target, changed_poms, find_version_targets, insert_dependency_management_target, restore_poms, snapshot_poms
+from oss_remediation_agent.tools.scanner_tools import _extract_vulnerabilities, _run, _trim, _version_key, run_maven, run_osv
 
-def apply_remediation(repo_url,dependency,recommended_version):
-    return {"status":"manual_review","repo_url":repo_url,"dependency":dependency,"requested_version":recommended_version,"message":"Use generate_remediation_report with Agent 1's report."}
 
-def _report(a,repo):
-    return {"repositoryUrl":a.get("repositoryUrl"),"referenceBranch":a.get("referenceBranch"),"featureBranch":a.get("featureBranch"),"remediationStatus":"FAILED","buildStatus":"NOT_RUN","testStatus":"NOT_RUN","workspacePath":str(repo),"modifiedFiles":[],"remediatedVulnerabilities":[],"manualReviewItems":[],"failedItems":[],"postRemediationScan":{"criticalRemaining":0,"highRemaining":0,"newCriticalOrHighIntroduced":False,"remainingCriticalOrHighItems":[]}}
+def generate_remediation_report(vulnerability_assessment_report: dict[str, Any], workspace_path: str | None = None) -> dict[str, Any]:
+    """Plan, apply, validate, and report Maven dependency remediations."""
+    policy = RemediationPolicy.from_env()
+    assessment = vulnerability_assessment_report or {}
+    repo_dir = Path(workspace_path or assessment.get("workspacePath") or ".").resolve()
+    report = make_remediation_report(assessment, repo_dir, policy_metadata=policy.as_report_metadata())
 
-def _one(repo,v,orig):
-    dep=str(v.get("dependencyName") or ""); p=dep.split(":"); fixes=sorted({str(x) for x in v.get("suggestedFixVersions",[]) if x},key=_version_key)
-    if len(p)<2: return _manual(v,f"Not a Maven coordinate: {dep}")
-    if not fixes: return _manual(v,"No suggested fixed versions from OSV.")
-    if re.search(r"\b(jdk|java)\s*(17|21|22|23)\b|requires?\s+(jdk|java)|minimum\s+(jdk|java)",json.dumps(v,default=str).lower()): return _manual(v,"Fix appears to require JDK/Java upgrade, out of scope.")
-    targets=_find_targets(repo,p[0],p[1],str(v.get("affectedPomFile") or "pom.xml"),bool(v.get("isDirectDependency")))
-    if not targets: return _manual(v,"No safe Maven version target found; external parent or non-version build change may be required.")
-    base=_snap(repo); attempts=[]
-    for ver in fixes:
-      for t in targets:
-        _restore(base); u=_apply_target(t,ver)
-        if not u["updated"]: attempts.append({"version":ver,"target":_lbl(t),"reason":u["reason"]}); continue
-        ok,why=_ok(repo,v,orig)
-        if not ok: attempts.append({"version":ver,"target":_lbl(t),"reason":why}); continue
-        pom=str(t[0].relative_to(repo)); return {"dependencyName":dep,"previousVersion":v.get("currentVersion"),"updatedVersion":ver,"severity":str(v.get("severity","")).upper(),"vulnerabilityIds":v.get("vulnerabilityIds",[]),"affectedPomFile":pom,"suggestedFixVersions":fixes,"selectedVersionReason":_why(ver,t),"rejectedVersions":[{"version":x,"reason":_rej(x,ver,attempts)} for x in fixes if x!=ver],"status":"FIXED","modifiedFiles":[pom],"updateStrategy":t[1]}
-    _restore(base); return _manual(v,"No suggested fixed version passed build, tests, and OSV validation.",attempts)
+    schema_result = validate_assessment_report(assessment)
+    if not schema_result.valid:
+        report["failedItems"].append(_fail("Invalid Vulnerability Assessment Report.", {"errors": list(schema_result.errors)}))
+        return report
 
-def _ok(repo,v,orig):
-    for env,goals in (("OSS_REMEDIATION_BUILD_GOALS",B),("OSS_REMEDIATION_TEST_GOALS",T)):
-        x=_mvn(repo,_goals(env,goals))
-        if x["returncode"]: return False,_jdk_fail(x) or "Build/tests failed for candidate."
-    rem=_extract_vulnerabilities(_run_osv(repo).get("json") or {}); keys={_k(x) for x in rem}
-    if _k(v) in keys: return False,"OSV still reports original vulnerability."
-    if any(_k(x) not in orig for x in rem): return False,"Candidate introduced new Critical/High vulnerability."
-    return True,""
+    vulnerabilities = [vulnerability for vulnerability in assessment.get("vulnerabilities", []) if policy.allows_severity(vulnerability.get("severity"))]
+    original_vulnerability_keys = {vulnerability_key(vulnerability) for vulnerability in vulnerabilities}
 
-def _find_targets(repo,g,a,affected,direct):
-    out=[]
-    for managed in (False,True):
-      for pom in _poms(repo,affected): out+=_existing(pom,g,a,managed)
-    if not out and not direct and _tree(repo,g,a) and (repo/"pom.xml").exists(): out.append((repo/"pom.xml","dependencyManagementOverride",g,a,None,True))
-    return _dedupe(out)
+    if assessment.get("buildStatus") != "SUCCESS":
+        report["failedItems"].append(_fail("Agent 1 buildStatus is not SUCCESS."))
+        return report
+    if not repo_dir.exists():
+        report["failedItems"].append(_fail(f"Workspace path not found: {repo_dir}"))
+        return report
 
-def _poms(repo,affected):
-    out=[]
-    for p in [(repo/affected).resolve() if affected else repo/"pom.xml",repo/"pom.xml",*sorted(repo.rglob("pom.xml"))]:
-        try:p.relative_to(repo)
-        except ValueError:continue
-        if p.exists() and p.name=="pom.xml" and p not in out: out.append(p)
-    return out
+    feature_branch = assessment.get("featureBranch")
+    if feature_branch:
+        checkout = _run(["git", "checkout", "-B", feature_branch], repo_dir)
+        if checkout["returncode"] != 0:
+            report["failedItems"].append(_fail("Cannot checkout remediation branch.", _trim(checkout)))
+            return report
 
-def _existing(pom,g,a,want):
-    text=_read(pom); out=[]; ranges=_ranges(text)
-    for m in re.finditer(r"<dependency\b[^>]*>.*?</dependency>",text,re.DOTALL):
-        b=m.group(0); managed=any(s<=m.start()<=e for s,e in ranges)
-        if managed!=want or _tag(b,"groupId")!=g or _tag(b,"artifactId")!=a: continue
-        v=_tag(b,"version")
-        if not v: continue
-        prop=re.fullmatch(r"\$\{([^}]+)\}",v.strip())
-        if prop and _has(text,prop.group(1)): out.append((pom,"propertyVersion",g,a,prop.group(1),managed))
-        elif not prop: out.append((pom,"dependencyVersion",g,a,None,managed))
-    return out
+    workflow_snapshot = snapshot_poms(repo_dir)
+    for vulnerability in vulnerabilities:
+        item = remediate_one_vulnerability(repo_dir, vulnerability, original_vulnerability_keys, policy)
+        report["decisionLog"].append({"dependencyName": item.get("dependencyName"), "status": item.get("status"), "reason": item.get("manualReviewReason") or item.get("reason") or item.get("selectedVersionReason")})
+        bucket = {ItemStatus.FIXED.value: "remediatedVulnerabilities", ItemStatus.MANUAL_REVIEW.value: "manualReviewItems"}.get(item.get("status"), "failedItems")
+        report[bucket].append(item)
 
-def _apply_target(t,ver):
-    return _replace_tag(t[0],t[4],ver) if t[1]=="propertyVersion" else _replace_dep(t[0],t[2],t[3],ver,t[5]) if t[1]=="dependencyVersion" else _insert_dependency_management_override(t[0],t[2],t[3],ver) if t[1]=="dependencyManagementOverride" else {"updated":False,"reason":"Unknown target"}
+    if report["failedItems"]:
+        restore_poms(workflow_snapshot)
+        return report
 
-def _replace_tag(pom,tag,val):
-    text=_read(pom); pat=re.compile(rf"(<{re.escape(tag)}\b[^>]*>)(.*?)(</{re.escape(tag)}>)",re.DOTALL)
-    if not pat.search(text): return {"updated":False,"reason":f"Tag {tag} not found."}
-    _write(pom,pat.sub(lambda m:f"{m.group(1)}{val}{m.group(3)}",text,1)); return {"updated":True,"reason":None}
+    report["modifiedFiles"] = changed_poms(repo_dir, workflow_snapshot)
+    build_result = run_maven(repo_dir, policy.build_goals, policy=policy, timeout=1800)
+    report["buildStatus"] = "SUCCESS" if build_result["returncode"] == 0 else "FAILED"
+    if build_result["returncode"] != 0:
+        restore_poms(workflow_snapshot)
+        report["modifiedFiles"] = []
+        report["failedItems"].append(_fail("buildStatus failed after remediation.", _trim(build_result)))
+        return report
 
-def _replace_dep(pom,g,a,ver,want):
-    text=_read(pom); ranges=_ranges(text)
-    for m in re.finditer(r"<dependency\b[^>]*>.*?</dependency>",text,re.DOTALL):
-        b=m.group(0); managed=any(s<=m.start()<=e for s,e in ranges)
-        if managed!=want or _tag(b,"groupId")!=g or _tag(b,"artifactId")!=a: continue
-        if not re.search(r"<version\b[^>]*>.*?</version>",b,re.DOTALL): return {"updated":False,"reason":"No direct version tag."}
-        nb=re.sub(r"(<version\b[^>]*>)(.*?)(</version>)",lambda x:f"{x.group(1)}{ver}{x.group(3)}",b,1,flags=re.DOTALL); _write(pom,text[:m.start()]+nb+text[m.end():]); return {"updated":True,"reason":None}
-    return {"updated":False,"reason":"Dependency declaration not found."}
+    test_result = run_maven(repo_dir, policy.test_goals, policy=policy, timeout=1800)
+    report["testStatus"] = "SUCCESS" if test_result["returncode"] == 0 else "FAILED"
+    if test_result["returncode"] != 0:
+        restore_poms(workflow_snapshot)
+        report["modifiedFiles"] = []
+        report["failedItems"].append(_fail("testStatus failed after remediation.", _trim(test_result)))
+        return report
 
-def _insert_dependency_management_override(pom,g,a,ver):
-    text=_read(pom); nl="\r\n" if "\r\n" in text else "\n"; im=re.search(r"\n(\s*)<dependencies\b",text); i=im.group(1) if im else "  "
-    dep=f"{i*3}<dependency>{nl}{i*4}<groupId>{g}</groupId>{nl}{i*4}<artifactId>{a}</artifactId>{nl}{i*4}<version>{ver}</version>{nl}{i*3}</dependency>{nl}"; dm=re.search(r"<dependencyManagement\b[^>]*>.*?<dependencies\b[^>]*>",text,re.DOTALL)
-    if dm:
-        at=text.find("</dependencies>",dm.end())
-        if at<0: return {"updated":False,"reason":"Malformed dependencyManagement."}
-        _write(pom,text[:at]+dep+text[at:]); return {"updated":True,"reason":None}
-    at=text.find("</project>")
-    if at<0: return {"updated":False,"reason":"No </project> insertion point."}
-    _write(pom,text[:at]+f"{i}<dependencyManagement>{nl}{i*2}<dependencies>{nl}{dep}{i*2}</dependencies>{nl}{i}</dependencyManagement>{nl}"+text[at:]); return {"updated":True,"reason":None}
+    post_scan = run_osv(repo_dir, policy=policy)
+    if post_scan["returncode"] != 0 and not post_scan.get("json"):
+        restore_poms(workflow_snapshot)
+        report["modifiedFiles"] = []
+        report["failedItems"].append(_fail("Post-remediation OSV scan failed.", _trim(post_scan)))
+        return report
 
-def _mvn(repo,goals): return _run(["./mvnw" if (repo/"mvnw").exists() else "mvn","-B",*shlex.split(os.getenv("OSS_REMEDIATION_MAVEN_ARGS","")),*goals],repo,timeout=1800)
-def _goals(env,default): return shlex.split(os.getenv(env,"")) or list(default)
-def _tree(repo,g,a):
-    x=_mvn(repo,["dependency:tree",f"-Dincludes={g}:{a}"]); return x["returncode"]==0 and f"{g}:{a}" in f"{x.get('stdout','')}\n{x.get('stderr','')}"
-def _tag(b,t):
-    m=re.search(rf"<{t}\b[^>]*>(.*?)</{t}>",b,re.DOTALL); return re.sub(r"\s+"," ",m.group(1)).strip() if m else None
-def _ranges(text): return [(m.start(),m.end()) for m in re.finditer(r"<dependencyManagement\b[^>]*>.*?</dependencyManagement>",text,re.DOTALL)]
-def _has(text,name): return bool(re.search(rf"<{re.escape(name)}\b[^>]*>.*?</{re.escape(name)}>",text,re.DOTALL))
-def _manual(v,reason,attempts=None):
-    x={"dependencyName":v.get("dependencyName"),"currentVersion":v.get("currentVersion"),"severity":str(v.get("severity","")).upper(),"vulnerabilityIds":v.get("vulnerabilityIds",[]),"suggestedFixVersions":v.get("suggestedFixVersions",[]),"affectedPomFile":v.get("affectedPomFile"),"status":"MANUAL_REVIEW","manualReviewRequired":True,"manualReviewReason":reason}
-    if attempts:x["attemptedVersions"]=attempts
-    return x
-def _fail(reason,out=None): return {"status":"FAILED","reason":reason,**({"details":_trim(out)} if out else {})}
-def _jdk_fail(x):
-    text=f"{x.get('stdout','')}\n{x.get('stderr','')}".lower(); return "Candidate fixed version appears to require a JDK upgrade, which is out of scope." if any(s in text for s in ["invalid target release","release version","unsupported class file major version","compiled by a more recent version","source release","target release"]) else None
-def _read(p): return p.read_bytes().decode("utf-8")
-def _write(p,text): p.write_bytes(text.encode("utf-8"))
-def _snap(repo): return {p:_read(p) for p in repo.rglob("pom.xml")}
-def _restore(snap):
-    for p,c in snap.items(): _write(p,c)
-def _changed(repo,snap): return sorted(str(p.relative_to(repo)) for p,c in snap.items() if p.exists() and _read(p)!=c)
-def _dedupe(ts):
-    seen=set(); out=[]
-    for t in ts:
-        k=(t[0],t[1],t[4],t[5])
-        if k not in seen: seen.add(k); out.append(t)
-    return out
-def _lbl(t): return f"{t[0]}:{t[1]}:{t[4] or t[2]+':'+t[3]}"
-def _why(v,t): return f"Selected {v} after build, test, and OSV validation; updated Maven {t[1]} without source-code or JDK changes."
-def _rej(x,sel,attempts):
-    for a in attempts:
-        if a.get("version")==x: return str(a.get("reason") or "Rejected during validation.")
-    return f"Not selected because {sel} was the lowest suggested version that passed validation."
-def _k(item): return str(item.get("dependencyName") or ""),tuple(sorted(str(v) for v in item.get("vulnerabilityIds",[])))
+    remaining_vulnerabilities = _extract_vulnerabilities(post_scan.get("json") or {})
+    manual_review_keys = {vulnerability_key(vulnerability) for vulnerability in report["manualReviewItems"]}
+    remaining_items = [
+        {
+            "dependencyName": vulnerability.get("dependencyName"),
+            "severity": vulnerability.get("severity"),
+            "vulnerabilityIds": vulnerability.get("vulnerabilityIds", []),
+            "status": ItemStatus.MANUAL_REVIEW.value if vulnerability_key(vulnerability) in manual_review_keys else ItemStatus.UNRESOLVED.value,
+        }
+        for vulnerability in remaining_vulnerabilities
+    ]
+    report["postRemediationScan"] = {
+        "criticalRemaining": sum(item["severity"] == "CRITICAL" for item in remaining_items),
+        "highRemaining": sum(item["severity"] == "HIGH" for item in remaining_items),
+        "newCriticalOrHighIntroduced": any(vulnerability_key(vulnerability) not in original_vulnerability_keys for vulnerability in remaining_vulnerabilities),
+        "remainingCriticalOrHighItems": remaining_items,
+    }
+
+    unresolved_items = [item for item in remaining_items if item["status"] != ItemStatus.MANUAL_REVIEW.value]
+    if unresolved_items or report["postRemediationScan"]["newCriticalOrHighIntroduced"]:
+        report["failedItems"].extend(unresolved_items)
+        report["remediationStatus"] = RemediationStatus.FAILED.value
+    elif report["manualReviewItems"]:
+        report["remediationStatus"] = RemediationStatus.PARTIAL_SUCCESS.value
+    else:
+        report["remediationStatus"] = RemediationStatus.SUCCESS.value
+    return report
+
+
+def apply_remediation(repo_url: str, dependency: str, recommended_version: str) -> dict[str, Any]:
+    return {"status": "manual_review", "repo_url": repo_url, "dependency": dependency, "requested_version": recommended_version, "message": "Use generate_remediation_report with Agent 1's report."}
+
+
+def remediate_one_vulnerability(repo_dir: Path, vulnerability: dict[str, Any], original_vulnerability_keys: set[tuple[str, tuple[str, ...]]], policy: RemediationPolicy) -> dict[str, Any]:
+    dependency_name = str(vulnerability.get("dependencyName") or "")
+    coordinate = dependency_name.split(":")
+    candidate_versions = sorted({str(version) for version in vulnerability.get("suggestedFixVersions", []) if version}, key=_version_key)
+
+    if len(coordinate) < 2:
+        return _manual(vulnerability, f"Not a Maven coordinate: {dependency_name}")
+    if not candidate_versions:
+        return _manual(vulnerability, "No suggested fixed versions from OSV.")
+    if policy.block_java_or_jdk_upgrade and _appears_to_require_java_or_jdk_upgrade(vulnerability):
+        return _manual(vulnerability, "Fix appears to require JDK/Java upgrade, out of scope.")
+
+    group_id, artifact_id = coordinate[0], coordinate[1]
+    targets = find_version_targets(repo_dir, group_id, artifact_id, str(vulnerability.get("affectedPomFile") or "pom.xml"), bool(vulnerability.get("isDirectDependency")))
+    if not targets and not bool(vulnerability.get("isDirectDependency")):
+        transitive_target = plan_transitive_dependency_management_override(repo_dir, group_id, artifact_id, policy)
+        if transitive_target:
+            targets.append(transitive_target)
+    if not targets:
+        return _manual(vulnerability, "No safe Maven version target found; external parent, imported BOM, or non-version build change may be required.")
+
+    vulnerability_snapshot = snapshot_poms(repo_dir)
+    attempts: list[dict[str, Any]] = []
+    for candidate_version in candidate_versions:
+        for target in targets:
+            restore_poms(vulnerability_snapshot)
+            update_result = apply_target(target, candidate_version)
+            if not update_result["updated"]:
+                attempts.append({"version": candidate_version, "target": target.label(repo_dir), "reason": update_result["reason"], "evidence": target.evidence})
+                continue
+
+            validation_ok, validation_reason = validate_candidate(repo_dir, vulnerability, original_vulnerability_keys, policy)
+            if not validation_ok:
+                attempts.append({"version": candidate_version, "target": target.label(repo_dir), "reason": validation_reason, "evidence": target.evidence})
+                continue
+
+            pom_file = str(target.pom_path.relative_to(repo_dir))
+            return {
+                "dependencyName": dependency_name,
+                "previousVersion": vulnerability.get("currentVersion"),
+                "updatedVersion": candidate_version,
+                "severity": str(vulnerability.get("severity", "")).upper(),
+                "vulnerabilityIds": vulnerability.get("vulnerabilityIds", []),
+                "affectedPomFile": pom_file,
+                "suggestedFixVersions": candidate_versions,
+                "selectedVersionReason": selected_version_reason(candidate_version, target),
+                "rejectedVersions": [{"version": version, "reason": rejected_version_reason(version, candidate_version, attempts)} for version in candidate_versions if version != candidate_version],
+                "status": ItemStatus.FIXED.value,
+                "modifiedFiles": [pom_file],
+                "updateStrategy": target.strategy,
+                "remediationEvidence": target.evidence,
+            }
+
+    restore_poms(vulnerability_snapshot)
+    return _manual(vulnerability, "No suggested fixed version passed build, tests, and OSV validation.", attempts)
+
+
+def plan_transitive_dependency_management_override(repo_dir: Path, group_id: str, artifact_id: str, policy: RemediationPolicy) -> PomTarget | None:
+    if not policy.allow_dependency_management_overrides:
+        return None
+    evidence = dependency_tree_evidence(repo_dir, group_id, artifact_id, policy)
+    if policy.require_transitive_dependency_evidence and not evidence.get("confirmed"):
+        return None
+    return insert_dependency_management_target(repo_dir, group_id, artifact_id, evidence)
+
+
+def validate_candidate(repo_dir: Path, vulnerability: dict[str, Any], original_vulnerability_keys: set[tuple[str, tuple[str, ...]]], policy: RemediationPolicy) -> tuple[bool, str]:
+    for label, goals in (("build", policy.build_goals), ("tests", policy.test_goals)):
+        result = run_maven(repo_dir, goals, policy=policy, timeout=1800)
+        if result["returncode"] != 0:
+            return False, java_or_jdk_failure_reason(result) or f"Maven {label} failed for candidate."
+
+    scan = run_osv(repo_dir, policy=policy)
+    if scan["returncode"] != 0 and not scan.get("json"):
+        return False, "OSV validation scan failed for candidate."
+    remaining_vulnerabilities = _extract_vulnerabilities(scan.get("json") or {})
+    remaining_keys = {vulnerability_key(item) for item in remaining_vulnerabilities}
+    if vulnerability_key(vulnerability) in remaining_keys:
+        return False, "OSV still reports original vulnerability."
+    if any(vulnerability_key(item) not in original_vulnerability_keys for item in remaining_vulnerabilities):
+        return False, "Candidate introduced new Critical/High vulnerability."
+    return True, ""
+
+
+def dependency_tree_evidence(repo_dir: Path, group_id: str, artifact_id: str, policy: RemediationPolicy) -> dict[str, Any]:
+    includes = f"-Dincludes={group_id}:{artifact_id}"
+    result = run_maven(repo_dir, ["dependency:tree", includes], policy=policy, timeout=1800)
+    output = f"{result.get('stdout', '')}\n{result.get('stderr', '')}"
+    matching_lines = [line.strip() for line in output.splitlines() if f"{group_id}:{artifact_id}" in line]
+    return {"source": "mvn dependency:tree", "command": result.get("command"), "returncode": result.get("returncode"), "confirmed": result.get("returncode") == 0 and bool(matching_lines), "matchingLines": matching_lines[:20]}
+
+
+def _appears_to_require_java_or_jdk_upgrade(vulnerability: dict[str, Any]) -> bool:
+    text = json.dumps(vulnerability, default=str).lower()
+    return bool(re.search(r"\b(jdk|java)\s*(17|21|22|23)\b|requires?\s+(jdk|java)|minimum\s+(jdk|java)", text))
+
+
+def java_or_jdk_failure_reason(result: dict[str, Any]) -> str | None:
+    text = f"{result.get('stdout', '')}\n{result.get('stderr', '')}".lower()
+    indicators = ["invalid target release", "release version", "unsupported class file major version", "compiled by a more recent version", "source release", "target release"]
+    if any(indicator in text for indicator in indicators):
+        return "Candidate fixed version appears to require a JDK upgrade, which is out of scope."
+    return None
+
+
+def _manual(vulnerability: dict[str, Any], reason: str, attempts: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    item: dict[str, Any] = {
+        "dependencyName": vulnerability.get("dependencyName"),
+        "currentVersion": vulnerability.get("currentVersion"),
+        "severity": str(vulnerability.get("severity", "")).upper(),
+        "vulnerabilityIds": vulnerability.get("vulnerabilityIds", []),
+        "suggestedFixVersions": vulnerability.get("suggestedFixVersions", []),
+        "affectedPomFile": vulnerability.get("affectedPomFile"),
+        "status": ItemStatus.MANUAL_REVIEW.value,
+        "manualReviewRequired": True,
+        "manualReviewReason": reason,
+    }
+    if attempts:
+        item["attemptedVersions"] = attempts
+    return item
+
+
+def _fail(reason: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+    item: dict[str, Any] = {"status": ItemStatus.FAILED.value, "reason": reason}
+    if details:
+        item["details"] = details
+    return item
+
+
+def selected_version_reason(version: str, target: PomTarget) -> str:
+    return f"Selected {version} after build, test, and OSV validation; updated Maven {target.strategy} without source-code or JDK changes."
+
+
+def rejected_version_reason(version: str, selected_version: str, attempts: list[dict[str, Any]]) -> str:
+    for attempt in attempts:
+        if attempt.get("version") == version:
+            return str(attempt.get("reason") or "Rejected during validation.")
+    return f"Not selected because {selected_version} was the lowest suggested version that passed validation."
+
+
+_k = vulnerability_key
+_jdk_fail = java_or_jdk_failure_reason
