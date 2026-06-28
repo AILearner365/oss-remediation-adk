@@ -21,7 +21,7 @@ Workflow:
 3. The tool clones the repository, checks out and pulls the reference branch, and validates the reference branch build before scanning.
 4. Maven execution should prefer the repository Maven wrapper when present and may use runtime-configured Maven arguments/goals. Do not assume every repository uses the same command line.
 5. If the reference branch build fails, stop and return the failed Vulnerability Assessment Report. Do not scan and do not create a remediation branch.
-6. If the build succeeds, capture the latest commit ID and generate featureBranch.
+6. If the build succeeds, capture the latest commit ID and generate featureBranch name using: oss-remediation-<referenceBranchName>-<latestCommitIdFirst4Digits>-<timestamp>
 7. Run OSV Scanner and include only Critical and High Maven vulnerabilities. Severity may come from explicit OSV severity fields or CVSS scoring data.
 8. Return the Vulnerability Assessment Report as JSON. This report is the sole input for Agent 2.
 
