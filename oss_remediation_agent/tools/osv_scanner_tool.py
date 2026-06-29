@@ -180,9 +180,11 @@ def _score(value: Any) -> float | None:
     if isinstance(value, (int, float)):
         return float(value)
     if isinstance(value, str):
-        match = re.search(r"\d+(?:\.\d+)?", value)
-        if match:
-            return float(match.group(0))
+        stripped = value.strip()
+        if stripped.upper().startswith("CVSS:"):
+            return None
+        if re.fullmatch(r"\d+(?:\.\d+)?", stripped):
+            return float(stripped)
     return None
 
 
