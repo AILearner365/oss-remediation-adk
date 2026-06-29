@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": ["schemaVersion", "artifactId", "workflowId", "createdBy", "status"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "artifactId": {"type": "string"},
+    "workflowId": {"type": "string"},
+    "createdBy": {"type": "string"},
+    "status": {"type": "string"}
+  },
+  "additionalProperties": true
+}
