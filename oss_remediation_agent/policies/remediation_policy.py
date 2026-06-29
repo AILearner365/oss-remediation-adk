@@ -1,0 +1,77 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+
+
+@dataclass
+class RemediationPolicy:
+    severity_scope: list[str] = field(default_factory=lambda: ["CRITICAL", "HIGH"])
+    max_attempts: int = 3
+    max_additional_investigation_requests_per_attempt: int = 2
+    allow_partial_pr: bool = True
+    allowed_file_patterns: list[str] = field(default_factory=lambda: ["**/pom.xml"])
+    blocked_change_types: list[str] = field(default_factory=lambda: [
+        "JAVA_SOURCE_CHANGE",
+        "TEST_SOURCE_CHANGE",
+        "JDK_VERSION_CHANGE",
+        "PLUGIN_BUILD_LOGIC_CHANGE",
+        "SUPPRESSION_OR_IGNORE_WORKAROUND",
+        "FULL_POM_FORMATTING_REWRITE",
+    ])
+    allowed_patch_change_types: list[str] = field(default_factory=lambda: [
+        "DEPENDENCY_VERSION_VALUE",
+        "MAVEN_PROPERTY_VERSION_VALUE",
+        "DEPENDENCY_MANAGEMENT_VERSION_VALUE",
+        "DEPENDENCY_MANAGEMENT_OVERRIDE",
+        "PARENT_POM_VERSION_VALUE",
+    ])
+
+    @classmethod
+    def load(cls, path: str | Path | None = None) -> "RemediationPolicy":
+        if path is None or not Path(path).exists():
+            return cls()
+        raw = Path(path).read_text(encoding="utf-8")
+        policy = cls()
+        current_key = None
+        lists: dict[str, list[str]] = {}
+        for line in raw.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            if stripped.endswith(":"):
+                current_key = stripped[:-1]
+                lists[current_key] = []
+                continue
+            if current_key and stripped.startswith("-"):
+                lists[current_key].append(stripped[1:].strip().strip('"'))
+                continue
+            if ":" in stripped:
+                key, value = [part.strip() for part in stripped.split(":", 1)]
+                if key == "maxAttempts":
+                    policy.max_attempts = int(value)
+                elif key == "maxAdditionalInvestigationRequestsPerAttempt":
+                    policy.max_additional_investigation_requests_per_attempt = int(value)
+                elif key == "allowPartialPr":
+                    policy.allow_partial_pr = value.lower() == "true"
+                current_key = None
+        if lists.get("severityScope"):
+            policy.severity_scope = lists["severityScope"]
+        if lists.get("allowedFilePatterns"):
+            policy.allowed_file_patterns = lists["allowedFilePatterns"]
+        if lists.get("blockedChangeTypes"):
+            policy.blocked_change_types = lists["blockedChangeTypes"]
+        if lists.get("allowedPatchChangeTypes"):
+            policy.allowed_patch_change_types = lists["allowedPatchChangeTypes"]
+        return policy
+
+    def to_dict(self) -> dict:
+        return {
+            "severityScope": self.severity_scope,
+            "maxAttempts": self.max_attempts,
+            "maxAdditionalInvestigationRequestsPerAttempt": self.max_additional_investigation_requests_per_attempt,
+            "allowPartialPr": self.allow_partial_pr,
+            "allowedFilePatterns": self.allowed_file_patterns,
+            "blockedChangeTypes": self.blocked_change_types,
+            "allowedPatchChangeTypes": self.allowed_patch_change_types,
+        }
