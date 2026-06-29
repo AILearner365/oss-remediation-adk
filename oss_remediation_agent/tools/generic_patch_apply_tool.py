@@ -93,21 +93,37 @@ def apply(attempt_number: int, repository_path: str, patch_plan_path: str, outpu
         Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return ToolResult(tool_name=TOOL, tool_version="1.0.0", operation="apply", status="FAILED", artifact_path=output_path, failure_code="PATCH_APPLY_FAILED", payload={"filesChanged": [], "diffFile": diff_file}, errors=errors).to_dict()
 
-    changed = []
+    # Build all target file contents in memory first so apply remains atomic.
+    updated_contents = dict(file_contents)
     patch_results = []
-    diff_lines = []
     for patch in patches:
         file_path = repo / patch["file"]
-        before = file_contents[file_path]
-        after = before.replace(patch["oldText"], patch["newText"], patch.get("expectedOccurrences", 1))
+        before_for_patch = updated_contents[file_path]
+        expected = patch.get("expectedOccurrences", 1)
+        updated_contents[file_path] = before_for_patch.replace(patch["oldText"], patch["newText"], expected)
+        patch_results.append({
+            "patchId": patch["patchId"],
+            "file": patch["file"],
+            "status": "APPLIED",
+            "expectedOccurrences": expected,
+            "actualOccurrences": file_contents[file_path].count(patch["oldText"]),
+            "oldTextMatched": True,
+        })
+
+    diff_lines = []
+    files_changed = []
+    for file_path, before in file_contents.items():
+        after = updated_contents[file_path]
+        if before == after:
+            continue
         file_path.write_text(after, encoding="utf-8")
-        changed.append(patch["file"])
-        diff_lines.extend(difflib.unified_diff(before.splitlines(), after.splitlines(), fromfile=f"a/{patch['file']}", tofile=f"b/{patch['file']}", lineterm=""))
-        patch_results.append({"patchId": patch["patchId"], "file": patch["file"], "status": "APPLIED", "expectedOccurrences": patch.get("expectedOccurrences", 1), "actualOccurrences": before.count(patch["oldText"]), "oldTextMatched": True})
+        relative = str(file_path.relative_to(repo))
+        files_changed.append(relative)
+        diff_lines.extend(difflib.unified_diff(before.splitlines(), after.splitlines(), fromfile=f"a/{relative}", tofile=f"b/{relative}", lineterm=""))
 
     Path(diff_file).parent.mkdir(parents=True, exist_ok=True)
     Path(diff_file).write_text("\n".join(diff_lines) + ("\n" if diff_lines else ""), encoding="utf-8")
-    files_changed = sorted(set(changed))
+    files_changed = sorted(set(files_changed))
     artifact = common_artifact(
         artifact_id=f"patch-application-proof-attempt-{attempt_number}",
         workflow_id=plan.get("workflowId", "unknown"),
