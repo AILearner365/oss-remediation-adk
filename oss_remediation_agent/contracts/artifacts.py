@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -25,7 +25,18 @@ class Artifact:
     warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "schemaVersion": self.schema_version,
+            "artifactId": self.artifact_id,
+            "workflowId": self.workflow_id,
+            "createdAt": self.created_at,
+            "createdBy": self.created_by,
+            "status": self.status,
+            "policy": self.policy,
+            "artifactReferences": self.artifact_references,
+            "errors": self.errors,
+            "warnings": self.warnings,
+        }
 
     def write_json(self, path: str | Path) -> None:
         path = Path(path)
