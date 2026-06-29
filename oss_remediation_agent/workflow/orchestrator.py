@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+from oss_remediation_agent.agents.remediation_outcome_analysis_agent import create_outcome_analysis_summary
 from oss_remediation_agent.policies import RemediationPolicy
 from oss_remediation_agent.tools.baseline_build_tool import run_baseline_build
 from oss_remediation_agent.tools.generic_patch_apply_tool import apply as apply_patch_plan
@@ -37,6 +39,7 @@ class WorkflowOrchestrator:
             "repository": {"repositoryUrl": repository_url, "referenceBranch": reference_branch},
             "attempts": [],
             "acceptedPatchSet": {"patchIds": [], "vulnerabilityIds": [], "status": "EMPTY"},
+            "additionalInvestigationRequests": [],
         }
         self.manifest_store.save(manifest)
         return manifest
@@ -99,6 +102,46 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return result
 
+    def handle_additional_investigation_request(self, request: dict) -> dict:
+        """Placeholder for Phase 5 additional investigation routing.
+
+        The orchestrator records the request and enforces the configured limit;
+        actual targeted tool execution can be expanded once planner integration
+        is wired in.
+        """
+        manifest = self.manifest_store.load()
+        requests = manifest.setdefault("additionalInvestigationRequests", [])
+        requests.append(request)
+        if len(requests) > self.policy.max_additional_investigation_requests_per_attempt:
+            manifest["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
+            manifest["plannerConstraint"] = "Planner must produce a patch plan or manual review decision."
+        else:
+            manifest["status"] = "ADDITIONAL_INVESTIGATION_REQUESTED"
+        self.manifest_store.save(manifest)
+        return manifest
+
+    def run_attempt_loop(self, patch_plan_paths: list[str]) -> dict:
+        """Run a bounded MVP attempt loop over provided patch-plan artifacts.
+
+        This is an orchestration integration point for planner output. The full
+        LLM planner will later provide these plan paths dynamically.
+        """
+        last_result: dict = {"status": "NOT_RUN"}
+        for attempt_number, patch_plan_path in enumerate(patch_plan_paths[: self.policy.max_attempts], start=1):
+            last_result = self.run_patch_validation_attempt(attempt_number, patch_plan_path)
+            if last_result.get("status") == "SUCCESS":
+                manifest = self.manifest_store.load()
+                manifest["status"] = "VALIDATION_SUCCEEDED"
+                self.manifest_store.save(manifest)
+                return last_result
+        manifest = self.manifest_store.load()
+        if manifest.get("acceptedPatchSet", {}).get("status") == "VALIDATED":
+            manifest["status"] = "PARTIAL_REMEDIATION_READY_FOR_PR"
+        else:
+            manifest["status"] = "FAILED_MAX_ATTEMPTS"
+        self.manifest_store.save(manifest)
+        return last_result
+
     def run_patch_validation_attempt(self, attempt_number: int, patch_plan_path: str) -> dict:
         manifest = self.manifest_store.load()
         restore = restore_attempt_workspace(str(self.workspace.root), attempt_number)
@@ -108,10 +151,13 @@ class WorkflowOrchestrator:
         manifest.setdefault("attempts", []).append(attempt_entry)
         self.manifest_store.save(manifest)
 
-        dry = dry_run_patch_plan(attempt_number, attempt_workspace, patch_plan_path, str(attempt_dir / "patch-dry-run-result.json"))
+        dry_result_path = str(attempt_dir / "patch-dry-run-result.json")
+        dry = dry_run_patch_plan(attempt_number, attempt_workspace, patch_plan_path, dry_result_path)
         attempt_entry["patchDryRunResult"] = f"attempt-{attempt_number}/patch-dry-run-result.json"
         if dry["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_DRY_RUN_FAILED"
+            outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, dry_run_result_path=dry_result_path)
+            attempt_entry["outcomeAnalysisSummary"] = outcome_path
             self.manifest_store.save(manifest)
             return dry
 
@@ -121,15 +167,18 @@ class WorkflowOrchestrator:
         attempt_entry["patchApplicationProof"] = f"attempt-{attempt_number}/patch-application-proof.json"
         if patch["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_APPLICATION_FAILED"
+            outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path)
+            attempt_entry["outcomeAnalysisSummary"] = outcome_path
             self.manifest_store.save(manifest)
             return patch
 
+        validation_path = str(attempt_dir / "validation-result.json")
         validation = validate_attempt(
             attempt_number=attempt_number,
             repository_path=attempt_workspace,
             patch_plan_path=patch_plan_path,
             patch_application_proof_path=proof_path,
-            output_path=str(attempt_dir / "validation-result.json"),
+            output_path=validation_path,
             artifact_output_dir=str(attempt_dir),
             workflow_id=manifest["workflowId"],
             severity_scope=self.policy.severity_scope,
@@ -138,6 +187,52 @@ class WorkflowOrchestrator:
         attempt_entry["validationResult"] = f"attempt-{attempt_number}/validation-result.json"
         attempt_entry["status"] = "VALIDATION_SUCCEEDED" if validation["status"] == "SUCCESS" else "VALIDATION_FAILED"
         if validation["status"] == "SUCCESS":
-            manifest["acceptedPatchSet"] = {"status": "VALIDATED", "patchIds": [], "vulnerabilityIds": []}
+            manifest["acceptedPatchSet"] = self._accepted_patch_set(patch_plan_path, proof_path)
+        else:
+            outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path, validation_result_path=validation_path)
+            attempt_entry["outcomeAnalysisSummary"] = outcome_path
         self.manifest_store.save(manifest)
         return validation
+
+    def run_outcome_analysis(
+        self,
+        attempt_number: int,
+        patch_plan_path: str,
+        patch_application_proof_path: str | None = None,
+        validation_result_path: str | None = None,
+        dry_run_result_path: str | None = None,
+    ) -> str:
+        manifest = self.manifest_store.load()
+        output_path = self.workspace.root / f"attempt-{attempt_number}" / "outcome-analysis-summary.json"
+        create_outcome_analysis_summary(
+            attempt_number=attempt_number,
+            output_path=str(output_path),
+            workflow_id=manifest.get("workflowId", "unknown"),
+            patch_plan_path=patch_plan_path,
+            patch_application_proof_path=patch_application_proof_path,
+            validation_result_path=validation_result_path,
+            dry_run_result_path=dry_run_result_path,
+        )
+        return f"attempt-{attempt_number}/outcome-analysis-summary.json"
+
+    def _accepted_patch_set(self, patch_plan_path: str, patch_proof_path: str) -> dict:
+        plan = self._read_json(patch_plan_path)
+        proof = self._read_json(patch_proof_path)
+        applied_patch_ids = {item.get("patchId") for item in proof.get("patchResults", []) if item.get("status") == "APPLIED"}
+        vulnerability_ids = []
+        for decision in plan.get("vulnerabilityDecisions", []):
+            patch_ids = {patch.get("patchId") for patch in decision.get("patches", [])}
+            if patch_ids and patch_ids.issubset(applied_patch_ids):
+                vulnerability_ids.append(decision.get("vulnerabilityId"))
+        return {
+            "status": "VALIDATED",
+            "patchIds": sorted(item for item in applied_patch_ids if item),
+            "vulnerabilityIds": sorted(item for item in vulnerability_ids if item),
+        }
+
+    @staticmethod
+    def _read_json(path: str) -> dict:
+        try:
+            return json.loads(Path(path).read_text(encoding="utf-8"))
+        except Exception:
+            return {}
