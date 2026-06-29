@@ -4,10 +4,11 @@ This repository contains an ADK-based OSS vulnerability remediation workflow for
 
 ## Architecture Documentation
 
-The finalized architecture and artifact contracts are documented here:
+The finalized architecture, artifact contracts, and deterministic tool APIs are documented here:
 
 - [Phase 1 Architecture: ADK OSS Remediation Workflow](docs/phase-1-architecture.md)
 - [Phase 2 Artifact Contracts](docs/phase-2-artifact-contracts.md)
+- [Phase 3 Deterministic Tool API Definitions](docs/phase-3-deterministic-tool-apis.md)
 
 The Phase 1 document captures:
 
@@ -32,6 +33,22 @@ The Phase 2 document captures:
 - Outcome Analysis Summary contract
 - PR Summary contract
 - Principal Engineer clarifications for validation success, controlled direct patching, and outcome analysis boundaries
+
+The Phase 3 document captures:
+
+- common deterministic tool result envelope
+- tool responsibility matrix
+- capabilities and limitations metadata
+- orchestrator-only manifest update rule
+- Baseline Build Result as a first-class artifact
+- Repo Checkout Tool API
+- Baseline Build Tool API
+- OSV Scanner Tool API
+- Project Analyzer Tool API
+- Generic Patch Apply Tool API
+- Validation Tool API
+- PR Creation Tool API
+- Principal Engineer clarification that tool payloads are summaries only and full outputs must be persisted as workspace artifacts
 
 ## Current Architecture Principle
 
