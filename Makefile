@@ -1,4 +1,4 @@
-.PHONY: compile unit integration test clean
+.PHONY: compile unit integration e2e test clean
 
 PYTHON ?= python
 
@@ -10,6 +10,9 @@ unit:
 
 integration:
 	$(PYTHON) -m unittest discover -s tests/integration -p "test_*.py" -v
+
+e2e:
+	$(PYTHON) -m unittest discover -s tests/e2e -p "test_*.py" -v
 
 test:
 	$(PYTHON) run_tests.py
