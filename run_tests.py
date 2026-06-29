@@ -4,7 +4,8 @@
 The runner is intentionally simple and CI-friendly:
 - compile Python sources
 - run unit tests
-- run fixture-based integration tests
+- run fixture/workflow integration tests
+- run end-to-end workflow tests
 - return non-zero when any step fails
 """
 
@@ -40,6 +41,7 @@ def main() -> int:
         Check("Python compilation", [sys.executable, "-m", "compileall", "-q", "oss_remediation_agent"]),
         Check("Unit tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/unit", "-p", "test_*.py", "-v"]),
         Check("Integration tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/integration", "-p", "test_*.py", "-v"]),
+        Check("End-to-end tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/e2e", "-p", "test_*.py", "-v"]),
     ]
 
     print("OSS Remediation ADK Test Runner")
