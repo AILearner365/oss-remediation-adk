@@ -1,10 +1,73 @@
 # Test Coverage Guide
 
-This guide explains what the current tests prove and why each test exists. The goal is to make the test suite easy to understand before adding fixture-based integration tests.
+This guide explains what the current tests prove and why each test exists. It also documents the canonical commands for running the suite consistently in local development, Cloud Shell, and future CI.
+
+## Test layout
+
+```text
+tests/
+  __init__.py
+  unit/
+    __init__.py
+    test_*.py
+  integration/
+    __init__.py
+    test_*.py
+  fixtures/
+    */pom.xml
+```
+
+The `__init__.py` files make test discovery more predictable across Python versions and environments.
+
+## Canonical commands
+
+Run the full verification suite:
+
+```bash
+python run_tests.py
+```
+
+Or use Make:
+
+```bash
+make test
+```
+
+Run checks individually:
+
+```bash
+python -m compileall -q oss_remediation_agent
+python -m unittest discover -s tests/unit -p "test_*.py" -v
+python -m unittest discover -s tests/integration -p "test_*.py" -v
+```
+
+Make targets:
+
+```bash
+make compile
+make unit
+make integration
+make test
+make clean
+```
+
+If `python -m unittest discover -s tests -v` reports `Ran 0 tests`, use the explicit unit/integration commands above or run `python run_tests.py`.
 
 ## Unit test scope
 
 The current unit tests verify deterministic behavior for contracts, tools, validation, outcome analysis, PR summary generation, and orchestrator routing. These tests use temporary files and mocks where needed. They do not prove the full end-to-end workflow yet.
+
+## Integration test scope
+
+The current integration tests are fixture-based. They use committed Maven fixture projects and exercise real fixture files, generated artifacts, and tool contracts. External command execution is mocked where needed so the tests remain stable across developer machines and CI.
+
+Current Phase A integration coverage:
+
+1. Project Analyzer on single-module fixture.
+2. Project Analyzer on multi-module fixture.
+3. Patch Tool against property-managed fixture POM.
+4. Validation Tool against fixture-generated artifacts.
+5. PR Summary from fixture manifest.
 
 ## Unit test files
 
@@ -151,9 +214,29 @@ Why it matters:
 
 - The orchestrator owns workflow state and manifest updates. Tools and agents must not update the manifest directly.
 
+## Integration test files
+
+### `tests/integration/test_phase_a_fixture_integration.py`
+
+Purpose:
+
+- Verify the deterministic tool layer against committed Maven fixture projects.
+
+Important assertions:
+
+- Single-module fixture analysis detects Maven project facts and dependency evidence.
+- Multi-module fixture analysis detects modules, Spring Boot parent, and dependency management.
+- Property-managed fixture patching updates the Maven property safely.
+- Validation succeeds when change scope, build, tests, and post-remediation OSV validation all pass.
+- PR Summary renders accepted patch metadata from fixture manifest data.
+
+Why it matters:
+
+- These tests bridge the gap between isolated unit tests and future end-to-end orchestrator tests.
+
 ## Fixture projects
 
-The fixture projects are committed Maven inputs for the next integration-test phase.
+The fixture projects are committed Maven inputs for integration testing.
 
 ### `tests/fixtures/maven-single-module-direct`
 
@@ -217,17 +300,7 @@ Useful for testing:
 - Baseline build gate failure.
 - Workflow halt behavior before remediation starts.
 
-## Current verification status
-
-Current unit tests and fixture sanity checks have passed in Cloud Shell.
-
-Recommended commands:
-
-```bash
-python -m compileall -q oss_remediation_agent
-python -m unittest discover -s tests -v
-find tests/fixtures -name pom.xml
-```
+## Fixture sanity checks
 
 Recommended fixture checks:
 
@@ -244,12 +317,22 @@ Expected behavior:
 - The first four fixture projects should build successfully.
 - `baseline-build-failure` should fail intentionally through Maven Enforcer.
 
+## Future CI
+
+A future GitHub Actions workflow should run:
+
+```bash
+python run_tests.py
+```
+
+on every push and pull request.
+
 ## Next phase
 
-After this documentation, the next step is Phase A fixture-based integration testing:
+The next major testing milestone is Phase B workflow integration testing:
 
-1. Project Analyzer on single-module fixture.
-2. Project Analyzer on multi-module fixture.
-3. Patch Tool against property-managed fixture POM.
-4. Validation Tool against fixture-generated artifacts.
-5. PR Summary from fixture manifest.
+1. Successful workflow path.
+2. Build failure path.
+3. Validation failure path.
+4. Manual review path.
+5. Retry path.
