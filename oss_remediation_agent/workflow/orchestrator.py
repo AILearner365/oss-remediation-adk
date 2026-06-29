@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from oss_remediation_agent.agents.remediation_outcome_analysis_agent import create_outcome_analysis_summary
 from oss_remediation_agent.policies import RemediationPolicy
@@ -251,10 +252,23 @@ class WorkflowOrchestrator:
         proof = self._read_json(patch_proof_path)
         applied_patch_ids = {item.get("patchId") for item in proof.get("patchResults", []) if item.get("status") == "APPLIED"}
         vulnerability_ids = []
+        remediation_summary = []
+        accepted_decisions = []
         for decision in plan.get("vulnerabilityDecisions", []):
             patch_ids = {patch.get("patchId") for patch in decision.get("patches", [])}
             if patch_ids and patch_ids.issubset(applied_patch_ids):
-                vulnerability_ids.append(decision.get("vulnerabilityId"))
+                vulnerability_id = decision.get("vulnerabilityId")
+                vulnerability_ids.append(vulnerability_id)
+                row = self._remediation_row(decision)
+                remediation_summary.append(row)
+                accepted_decisions.append({
+                    "vulnerabilityId": vulnerability_id,
+                    "decision": decision.get("decision", "PATCH"),
+                    "patchIds": sorted(item for item in patch_ids if item),
+                    "dependency": row.get("dependency"),
+                    "oldVersion": row.get("oldVersion"),
+                    "newVersion": row.get("newVersion"),
+                })
         return {
             "patchSetId": f"accepted-patch-set-{attempt_number}",
             "status": "VALIDATED",
@@ -263,6 +277,39 @@ class WorkflowOrchestrator:
             "vulnerabilityIds": sorted(item for item in vulnerability_ids if item),
             "validationResult": validation_result_ref,
             "appliesOnBaselineCommit": self.manifest_store.load().get("repository", {}).get("baselineCommit"),
+            "remediationSummary": remediation_summary,
+            "vulnerabilityDecisions": accepted_decisions,
+        }
+
+    @staticmethod
+    def _remediation_row(decision: dict[str, Any]) -> dict[str, Any]:
+        dependency = decision.get("dependency") or {}
+        if isinstance(dependency, dict):
+            package_name = dependency.get("packageName") or _coordinate(dependency)
+            old_version = dependency.get("currentVersion") or dependency.get("oldVersion")
+        else:
+            package_name = dependency or decision.get("packageName")
+            old_version = decision.get("oldVersion")
+        patches = decision.get("patches", []) or []
+        new_version = decision.get("newVersion")
+        if not new_version:
+            for patch in patches:
+                new_version = patch.get("newVersion") or patch.get("targetVersion")
+                if new_version:
+                    break
+        if not old_version:
+            for patch in patches:
+                old_version = patch.get("oldVersion") or patch.get("currentVersion")
+                if old_version:
+                    break
+        return {
+            "vulnerabilityId": decision.get("vulnerabilityId"),
+            "aliases": decision.get("aliases", []),
+            "dependency": package_name or "UNKNOWN",
+            "oldVersion": old_version,
+            "newVersion": new_version,
+            "status": "REMEDIATED",
+            "statusReason": "Patch set validated successfully.",
         }
 
     def _attempt_entry(self, manifest: dict, attempt_number: int) -> dict:
@@ -284,3 +331,11 @@ class WorkflowOrchestrator:
             return json.loads(Path(path).read_text(encoding="utf-8"))
         except Exception:
             return {}
+
+
+def _coordinate(dependency: dict[str, Any]) -> str | None:
+    group_id = dependency.get("groupId")
+    artifact_id = dependency.get("artifactId")
+    if group_id and artifact_id:
+        return f"{group_id}:{artifact_id}"
+    return dependency.get("artifactId") or dependency.get("groupId")
