@@ -4,13 +4,14 @@ This repository contains an ADK-based OSS vulnerability remediation workflow for
 
 ## Architecture Documentation
 
-The finalized architecture, artifact contracts, deterministic tool APIs, AI agent specifications, and workflow orchestration are documented here:
+The finalized architecture, artifact contracts, deterministic tool APIs, AI agent specifications, workflow orchestration, and implementation plan are documented here:
 
 - [Phase 1 Architecture: ADK OSS Remediation Workflow](docs/phase-1-architecture.md)
 - [Phase 2 Artifact Contracts](docs/phase-2-artifact-contracts.md)
 - [Phase 3 Deterministic Tool API Definitions](docs/phase-3-deterministic-tool-apis.md)
 - [Phase 4 AI Agent Specifications](docs/phase-4-ai-agent-specifications.md)
 - [Phase 5 ADK Workflow Orchestration Specification](docs/phase-5-workflow-orchestration-specification.md)
+- [Phase 6 Implementation Plan and Code Structure](docs/phase-6-implementation-plan-and-code-structure.md)
 
 The Phase 1 document captures:
 
@@ -85,6 +86,23 @@ The Phase 5 document captures:
 - PR creation conditions
 - orchestrator decision rules
 - runtime pseudocode
+
+The Phase 6 document captures:
+
+- implementation order and principles
+- final recommended project structure
+- contract model implementation plan
+- JSON schema folder and validation strategy
+- external remediation policy configuration
+- prompt file organization
+- workspace, artifact, and manifest storage layers
+- deterministic tool implementation plan
+- AI agent implementation boundaries
+- orchestrator method structure
+- CLI and ADK entrypoint separation
+- examples and Maven fixture repositories
+- unit and integration testing strategy
+- MVP implementation priority
 
 ## Current Architecture Principle
 
