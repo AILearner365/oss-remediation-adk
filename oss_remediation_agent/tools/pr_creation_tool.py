@@ -26,7 +26,11 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
         status="ELIGIBLE" if eligible else "NOT_ELIGIBLE",
         prTitle="OSS vulnerability remediation",
         prType=pr_type if eligible else "NOT_ELIGIBLE",
-        pullRequestEligibility={"eligible": eligible, "type": pr_type if eligible else "NOT_ELIGIBLE", "reason": "Validated accepted patch set exists." if eligible else "No validated accepted patch set exists."},
+        pullRequestEligibility={
+            "eligible": eligible,
+            "type": pr_type if eligible else "NOT_ELIGIBLE",
+            "reason": "Validated accepted patch set exists." if eligible else "No validated accepted patch set exists.",
+        },
         remediationSummary=remediation_summary,
         validationSummary=validation_summary,
         artifactReferences={"manifest": manifest_path, "prDescription": pr_description_path},
@@ -34,21 +38,43 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return ToolResult.success(TOOL, "create_pr_summary", output_path, prDescriptionPath=pr_description_path, manifestStatus=manifest.get("status"), prType=summary["prType"]).to_dict()
+    return ToolResult.success(
+        TOOL,
+        "create_pr_summary",
+        output_path,
+        prDescriptionPath=pr_description_path,
+        manifestStatus=manifest.get("status"),
+        prType=summary["prType"],
+    ).to_dict()
 
 
 def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     accepted = manifest.get("acceptedPatchSet", {})
-    rows = []
-    for vulnerability_id in accepted.get("vulnerabilityIds", []) or []:
+    accepted_rows = accepted.get("remediationSummary") or accepted.get("vulnerabilityDecisions") or []
+    rows: list[dict[str, Any]] = []
+    for row in accepted_rows:
         rows.append({
-            "vulnerabilityId": vulnerability_id,
-            "dependency": "UNKNOWN",
-            "oldVersion": None,
-            "newVersion": None,
-            "status": "REMEDIATED",
-            "statusReason": "Patch set validated successfully.",
+            "vulnerabilityId": row.get("vulnerabilityId"),
+            "aliases": row.get("aliases", []),
+            "dependency": row.get("dependency") or row.get("packageName") or "UNKNOWN",
+            "oldVersion": row.get("oldVersion"),
+            "newVersion": row.get("newVersion"),
+            "status": row.get("status", "REMEDIATED"),
+            "statusReason": row.get("statusReason", "Patch set validated successfully."),
         })
+
+    # Backward-compatible fallback for older manifests that only stored IDs.
+    if not rows:
+        for vulnerability_id in accepted.get("vulnerabilityIds", []) or []:
+            rows.append({
+                "vulnerabilityId": vulnerability_id,
+                "aliases": [],
+                "dependency": "UNKNOWN",
+                "oldVersion": None,
+                "newVersion": None,
+                "status": "REMEDIATED",
+                "statusReason": "Patch set validated successfully. Dependency/version metadata was not available in the accepted patch set.",
+            })
     return rows
 
 
@@ -83,10 +109,21 @@ def _latest_validation(manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def _markdown(remediation_summary: list[dict[str, Any]], validation_summary: dict[str, Any], pr_type: str) -> str:
-    lines = ["# OSS Vulnerability Remediation", "", f"PR Type: {pr_type}", "", "## Remediation Summary", "", "| Vulnerability ID | Dependency | Old Version | New Version | Status | Status Reason |", "|---|---|---|---|---|---|"]
+    lines = [
+        "# OSS Vulnerability Remediation",
+        "",
+        f"PR Type: {pr_type}",
+        "",
+        "## Remediation Summary",
+        "",
+        "| Vulnerability ID | Dependency | Old Version | New Version | Status | Status Reason |",
+        "|---|---|---|---|---|---|",
+    ]
     if remediation_summary:
         for row in remediation_summary:
-            lines.append(f"| {row.get('vulnerabilityId')} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |")
+            lines.append(
+                f"| {row.get('vulnerabilityId')} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
+            )
     else:
         lines.append("| N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
     lines.extend(["", "## Validation Summary", ""])
