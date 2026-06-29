@@ -66,6 +66,50 @@ class PolicyAndPatchToolTests(unittest.TestCase):
             self.assertEqual(result["status"], "FAILED")
             self.assertEqual(pom.read_text(encoding="utf-8"), original)
 
+    def test_patch_tool_rejects_non_pom_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            source = repo / "src" / "main" / "java" / "App.java"
+            source.parent.mkdir(parents=True)
+            source.write_text("class App {}", encoding="utf-8")
+            plan_path = _write_plan(root, [
+                {
+                    "patchId": "patch-source",
+                    "file": "src/main/java/App.java",
+                    "oldText": "class App {}",
+                    "newText": "class App { }",
+                    "expectedOccurrences": 1,
+                }
+            ])
+            result = apply(1, str(repo), str(plan_path), str(root / "proof.json"), str(root / "patch.diff"))
+            self.assertEqual(result["status"], "FAILED")
+            self.assertIn("unsupported file type", " ".join(result["errors"]))
+            self.assertEqual(source.read_text(encoding="utf-8"), "class App {}")
+
+    def test_patch_tool_replaces_expected_occurrences_greater_than_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = root / "repo"
+            repo.mkdir()
+            pom = repo / "pom.xml"
+            pom.write_text("<project><x>1.0</x><x>1.0</x></project>", encoding="utf-8")
+            plan_path = _write_plan(root, [
+                {
+                    "patchId": "patch-multi",
+                    "file": "pom.xml",
+                    "oldText": "<x>1.0</x>",
+                    "newText": "<x>1.1</x>",
+                    "expectedOccurrences": 2,
+                }
+            ])
+            result = apply(1, str(repo), str(plan_path), str(root / "proof.json"), str(root / "patch.diff"))
+            self.assertEqual(result["status"], "SUCCESS")
+            updated = pom.read_text(encoding="utf-8")
+            self.assertEqual(updated.count("<x>1.1</x>"), 2)
+            self.assertNotIn("<x>1.0</x>", updated)
+
 
 def _write_plan(root: Path, patches: list[dict]) -> Path:
     plan = {
