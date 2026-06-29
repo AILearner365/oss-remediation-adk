@@ -53,21 +53,36 @@ make clean
 
 If `python -m unittest discover -s tests -v` reports `Ran 0 tests`, use the explicit unit/integration commands above or run `python run_tests.py`.
 
+## Current testing pyramid
+
+```text
+                   Real Repository Validation
+                              ^
+                              |
+                  End-to-End Workflow Tests
+                              ^
+                              |
+             Phase B Workflow Integration Tests
+                              ^
+                              |
+        Phase A Fixture-based Integration Tests
+                              ^
+                              |
+                    Deterministic Unit Tests
+```
+
 ## Unit test scope
 
 The current unit tests verify deterministic behavior for contracts, tools, validation, outcome analysis, PR summary generation, and orchestrator routing. These tests use temporary files and mocks where needed. They do not prove the full end-to-end workflow yet.
 
 ## Integration test scope
 
-The current integration tests are fixture-based. They use committed Maven fixture projects and exercise real fixture files, generated artifacts, and tool contracts. External command execution is mocked where needed so the tests remain stable across developer machines and CI.
+The current integration tests have two layers:
 
-Current Phase A integration coverage:
+1. **Phase A - Fixture-based Integration Tests**: validate deterministic tools using committed Maven fixture projects.
+2. **Phase B - Workflow Integration Tests**: validate orchestrator lifecycle, manifest ownership, retry behavior, stop conditions, outcome summary generation, and final PR summary generation.
 
-1. Project Analyzer on single-module fixture.
-2. Project Analyzer on multi-module fixture.
-3. Patch Tool against property-managed fixture POM.
-4. Validation Tool against fixture-generated artifacts.
-5. PR Summary from fixture manifest.
+External command execution and AI planner behavior are mocked where needed so the tests remain stable across developer machines and CI.
 
 ## Unit test files
 
@@ -214,13 +229,15 @@ Why it matters:
 
 - The orchestrator owns workflow state and manifest updates. Tools and agents must not update the manifest directly.
 
-## Integration test files
+## Phase A - Fixture-based Integration Tests
+
+### Purpose
+
+Phase A verifies the deterministic tool layer against committed Maven fixture projects.
+
+These tests use real fixture files, generated artifacts, and tool contracts. External command execution is mocked where needed so the tests remain stable across developer machines and CI.
 
 ### `tests/integration/test_phase_a_fixture_integration.py`
-
-Purpose:
-
-- Verify the deterministic tool layer against committed Maven fixture projects.
 
 Important assertions:
 
@@ -232,7 +249,161 @@ Important assertions:
 
 Why it matters:
 
-- These tests bridge the gap between isolated unit tests and future end-to-end orchestrator tests.
+- These tests bridge the gap between isolated unit tests and workflow-level orchestrator tests.
+
+## Phase B - Workflow Integration Tests
+
+### Purpose
+
+Phase B verifies the workflow orchestration layer rather than individual deterministic tools.
+
+Unlike Phase A, which validates deterministic tools using committed Maven fixtures, Phase B validates the orchestrator's execution lifecycle, workflow state management, retry behavior, stop conditions, manifest ownership, outcome summary generation, accepted patch set generation, and final PR summary generation.
+
+The AI planner remains mocked because these tests verify workflow orchestration rather than AI reasoning.
+
+### `tests/integration/test_phase_b_workflow_integration.py`
+
+Purpose:
+
+- Validate the orchestrator's execution lifecycle using mocked planner/tool responses where appropriate while exercising real workflow state management.
+
+### Test 1 - Successful Remediation Workflow
+
+Purpose:
+
+- Verify the complete successful orchestration flow.
+
+Workflow:
+
+```text
+Initialize
+  -> Attempt 1
+  -> Dry Run
+  -> Patch Apply
+  -> Validation
+  -> Accepted Patch Set
+  -> PR Summary
+```
+
+Important assertions:
+
+- Manifest status becomes `VALIDATION_SUCCEEDED`.
+- Attempt status becomes `VALIDATION_SUCCEEDED`.
+- Accepted Patch Set is created.
+- Source attempt is recorded correctly.
+- PR Summary is generated.
+- PR is marked `ELIGIBLE`.
+
+Why it matters:
+
+- Confirms the orchestrator correctly owns workflow state for a successful remediation.
+
+### Test 2 - Baseline Build Failure
+
+Purpose:
+
+- Verify remediation never starts when the repository baseline cannot build.
+
+Workflow:
+
+```text
+Checkout
+  -> Baseline Build
+  -> Failure
+  -> Workflow Stops
+```
+
+Important assertions:
+
+- Manifest status becomes `BASELINE_BUILD_FAILED`.
+- No remediation attempts are created.
+- Repository baseline path is recorded.
+
+Why it matters:
+
+- Guarantees remediation never proceeds from an invalid baseline.
+
+### Test 3 - Validation Failure
+
+Purpose:
+
+- Verify validation failures generate Outcome Analysis and terminate correctly after reaching the configured attempt limit.
+
+Workflow:
+
+```text
+Patch
+  -> Validation
+  -> Failure
+  -> Outcome Analysis
+  -> Max Attempts
+  -> Workflow Stops
+```
+
+Important assertions:
+
+- Attempt status becomes `VALIDATION_FAILED`.
+- Outcome Analysis Summary is generated.
+- Manifest status becomes `FAILED_MAX_ATTEMPTS`.
+- Accepted Patch Set remains `EMPTY`.
+
+Why it matters:
+
+- Ensures failed remediation attempts are analyzed and workflow stop conditions are enforced.
+
+### Test 4 - Manual Review Workflow
+
+Purpose:
+
+- Verify planner-directed manual review bypasses automated remediation.
+
+Workflow:
+
+```text
+Planner
+  -> MANUAL_REVIEW
+  -> Final PR Summary
+```
+
+Important assertions:
+
+- Manifest status becomes `MANUAL_REVIEW_REQUIRED`.
+- PR Summary is generated.
+- PR is marked `NOT_ELIGIBLE`.
+
+Why it matters:
+
+- Ensures unsupported remediation scenarios are escalated safely.
+
+### Test 5 - Retry Workflow
+
+Purpose:
+
+- Verify the orchestrator correctly retries remediation after an unsuccessful validation.
+
+Workflow:
+
+```text
+Attempt 1
+  -> Validation Failure
+  -> Outcome Analysis
+  -> Attempt 2
+  -> Validation Success
+  -> Accepted Patch Set
+  -> PR Summary
+```
+
+Important assertions:
+
+- First attempt fails.
+- Outcome Analysis is generated for the first attempt.
+- Second attempt succeeds.
+- Accepted Patch Set references Attempt 2.
+- Final PR Summary is generated.
+
+Why it matters:
+
+- Validates retry lifecycle, attempt isolation, and manifest state transitions.
 
 ## Fixture projects
 
@@ -317,6 +488,16 @@ Expected behavior:
 - The first four fixture projects should build successfully.
 - `baseline-build-failure` should fail intentionally through Maven Enforcer.
 
+## Current verification status
+
+```text
+Python compilation                  PASS
+Unit tests                          PASS
+Fixture sanity verification          PASS
+Phase A fixture integration tests    PASS
+Phase B workflow integration tests   PASS
+```
+
 ## Future CI
 
 A future GitHub Actions workflow should run:
@@ -329,10 +510,6 @@ on every push and pull request.
 
 ## Next phase
 
-The next major testing milestone is Phase B workflow integration testing:
+The next major testing milestone is Phase C end-to-end workflow testing.
 
-1. Successful workflow path.
-2. Build failure path.
-3. Validation failure path.
-4. Manual review path.
-5. Retry path.
+Phase C should validate the complete ADK remediation workflow, including the orchestrator, deterministic tools, AI agent integration points, artifact flow, and end-to-end execution against realistic repositories.
