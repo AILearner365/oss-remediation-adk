@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {"type": "string"},
+    "artifact_id": {"type": "string"},
+    "workflow_id": {"type": "string"},
+    "created_by": {"type": "string"},
+    "status": {"type": "string"},
+    "attemptNumber": {"type": "integer"},
+    "patchResults": {"type": "array"},
+    "filesChanged": {"type": "array"}
+  },
+  "additionalProperties": true
+}
