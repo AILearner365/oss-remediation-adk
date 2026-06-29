@@ -581,7 +581,196 @@ Run Outcome Analysis
 
 ---
 
-## 23. Orchestration Pseudocode
+## 23. Workflow Sequence Diagram
+
+The sequence diagram below shows the end-to-end orchestration flow across the Orchestrator, Workspace, Manifest, deterministic tools, and AI agents.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant U as User
+    participant WF as Orchestrator
+    participant WS as Workspace
+    participant M as Manifest
+    participant Repo as Repo Tool
+    participant Base as Baseline Tool
+    participant OSV as OSV Tool
+    participant Analyzer as Analyzer Tool
+    participant Planner as Planning Agent
+    participant Patch as Patch Tool
+    participant Validator as Validation Tool
+    participant Outcome as Outcome Agent
+    participant PR as PR Tool
+
+    U->>WF: Start workflow
+    WF->>WS: Create workspace
+    WF->>M: Initialize manifest
+
+    WF->>Repo: Checkout baseline
+    Repo-->>WS: Store baseline repo
+    Repo-->>WF: Return result
+    WF->>M: Record baseline
+
+    WF->>Base: Run baseline build
+    Base-->>WS: Store build result
+    Base-->>WF: Return result
+    WF->>M: Record baseline build
+
+    alt Baseline build failed
+        WF->>M: Mark baseline failed
+        WF-->>U: Stop with baseline failure
+    else Baseline build passed
+        WF->>OSV: Run baseline scan
+        OSV-->>WS: Store vulnerability report
+        OSV-->>WF: Return result
+        WF->>M: Record vulnerability report
+
+        WF->>Analyzer: Analyze Maven project
+        Analyzer-->>WS: Store project analysis
+        Analyzer-->>WF: Return result
+        WF->>M: Record project analysis
+
+        loop Attempts while within limit
+            WF->>Repo: Restore baseline with accepted patches
+            Repo-->>WS: Store attempt workspace
+            Repo-->>WF: Return result
+            WF->>M: Record attempt workspace
+
+            WF->>Planner: Plan using manifest and artifacts
+
+            alt Additional evidence requested
+                Planner-->>WF: Request more evidence
+                WF->>M: Record evidence request
+
+                alt Request limit reached
+                    WF->>M: Record investigation limit
+                    WF->>Planner: Replan with limit constraint
+                    Planner-->>WF: Return patch plan or manual review
+                else Request allowed
+                    alt Project evidence needed
+                        WF->>Analyzer: Run targeted analysis
+                        Analyzer-->>WS: Store refreshed analysis
+                        Analyzer-->>WF: Return result
+                        WF->>M: Record refreshed analysis
+                    else Scanner evidence needed
+                        WF->>OSV: Run targeted scan
+                        OSV-->>WS: Store refreshed scan
+                        OSV-->>WF: Return result
+                        WF->>M: Record refreshed scan
+                    end
+                    WF->>Planner: Replan with updated artifacts
+                end
+
+            else Patch plan or manual review returned
+                Planner-->>WS: Store patch plan
+                Planner-->>WF: Return plan reference
+                WF->>M: Record patch plan
+
+                alt Manual review only
+                    WF->>M: Record manual review
+
+                    alt Accepted patches exist
+                        WF->>PR: Create partial PR
+                        PR-->>WS: Store PR summary
+                        PR-->>WF: Return result
+                        WF->>M: Record PR created
+                        WF-->>U: Return partial PR
+                    else No accepted patches
+                        WF->>WS: Store manual review report
+                        WF->>M: Record manual review report
+                        WF-->>U: Stop with manual review report
+                    end
+
+                else Patchable items exist
+                    WF->>Patch: Dry run patch plan
+                    Patch-->>WS: Store dry run result
+                    Patch-->>WF: Return result
+                    WF->>M: Record dry run
+
+                    alt Dry run failed
+                        WF->>Outcome: Analyze dry run failure
+                        Outcome->>WS: Read plan and dry run artifacts
+                        Outcome-->>WS: Store outcome summary
+                        Outcome-->>WF: Return outcome reference
+                        WF->>M: Record outcome summary
+                        WF->>M: Increment attempt count
+
+                    else Dry run succeeded
+                        WF->>Patch: Apply patch plan
+                        Patch-->>WS: Store patch proof and diff
+                        Patch-->>WF: Return result
+                        WF->>M: Record patch proof
+
+                        alt Patch apply failed
+                            WF->>Outcome: Analyze patch failure
+                            Outcome->>WS: Read plan and patch artifacts
+                            Outcome-->>WS: Store outcome summary
+                            Outcome-->>WF: Return outcome reference
+                            WF->>M: Record outcome summary
+                            WF->>M: Increment attempt count
+
+                        else Patch applied
+                            WF->>Validator: Validate attempt
+                            Validator->>Validator: Scope validation
+                            Validator->>Validator: Build validation
+                            Validator->>Validator: Test validation
+                            Validator->>OSV: OSV validation
+                            OSV-->>Validator: Return scan result
+                            Validator-->>WS: Store validation result
+                            Validator-->>WF: Return result
+                            WF->>M: Record validation result
+
+                            alt Validation succeeded
+                                WF->>M: Update accepted patch set
+
+                                alt No remaining vulnerabilities
+                                    WF->>PR: Create full PR
+                                    PR-->>WS: Store PR summary
+                                    PR-->>WF: Return result
+                                    WF->>M: Record PR created
+                                    WF-->>U: Return full PR
+                                else Remaining manual review items
+                                    WF->>PR: Create partial PR
+                                    PR-->>WS: Store PR summary
+                                    PR-->>WF: Return result
+                                    WF->>M: Record PR created
+                                    WF-->>U: Return partial PR
+                                end
+
+                            else Validation failed
+                                WF->>Outcome: Analyze validation failure
+                                Outcome->>WS: Read validation artifacts
+                                Outcome-->>WS: Store outcome summary
+                                Outcome-->>WF: Return outcome reference
+                                WF->>M: Record outcome summary
+                                WF->>M: Increment attempt count
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        alt Max attempts reached and accepted patches exist
+            WF->>PR: Create partial PR
+            PR-->>WS: Store PR summary
+            PR-->>WF: Return result
+            WF->>M: Record PR created
+            WF-->>U: Return partial PR
+        else Max attempts reached and no accepted patches
+            WF->>WS: Store max attempts report
+            WF->>M: Mark max attempts failed
+            WF-->>U: Stop with failure report
+        end
+    end
+```
+
+Implementation note: after the investigation-limit path returns a planner result, the Orchestrator should route that result through the same normal planner result handler used for patch plans and manual review decisions. This avoids duplicate branching logic.
+
+---
+
+## 24. Orchestration Pseudocode
 
 ```text
 Initialize Workspace
@@ -682,7 +871,7 @@ EndIf
 
 ---
 
-## 24. Phase 5 Freeze Decision
+## 25. Phase 5 Freeze Decision
 
 Phase 5 is frozen with this ADK Workflow Orchestration Specification.
 
@@ -707,6 +896,7 @@ Phase 5 formally defines:
 - maximum attempt handling
 - PR creation conditions
 - orchestrator decision rules
+- workflow sequence diagram
 - runtime pseudocode
 ```
 
