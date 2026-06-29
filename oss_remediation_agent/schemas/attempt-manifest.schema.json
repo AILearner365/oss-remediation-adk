@@ -1,1 +1,15 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["schema_version","artifact_id","workflow_id","created_by","status"],"properties":{"schema_version":{"type":"string"},"artifact_id":{"type":"string"},"workflow_id":{"type":"string"},"created_at":{"type":"string"},"created_by":{"type":"string"},"status":{"type":"string"},"errors":{"type":"array"},"warnings":{"type":"array"}},"additionalProperties":true}
+{
+  "type": "object",
+  "required": ["schemaVersion", "artifactId", "workflowId", "createdBy", "status"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "artifactId": {"type": "string"},
+    "workflowId": {"type": "string"},
+    "createdAt": {"type": "string"},
+    "createdBy": {"type": "string"},
+    "status": {"type": "string"},
+    "errors": {"type": "array"},
+    "warnings": {"type": "array"}
+  },
+  "additionalProperties": true
+}
