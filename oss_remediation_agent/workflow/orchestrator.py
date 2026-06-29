@@ -9,6 +9,7 @@ from oss_remediation_agent.tools.baseline_build_tool import run_baseline_build
 from oss_remediation_agent.tools.generic_patch_apply_tool import apply as apply_patch_plan
 from oss_remediation_agent.tools.generic_patch_apply_tool import dry_run as dry_run_patch_plan
 from oss_remediation_agent.tools.osv_scanner_tool import generate_vulnerability_assessment
+from oss_remediation_agent.tools.pr_creation_tool import create_pr_summary
 from oss_remediation_agent.tools.project_analyzer_tool import analyze_project
 from oss_remediation_agent.tools.repo_checkout_tool import checkout_baseline, restore_attempt_workspace
 from oss_remediation_agent.tools.validation_tool import validate_attempt
@@ -35,11 +36,13 @@ class WorkflowOrchestrator:
             "workflowId": "oss-remediation-mvp",
             "createdBy": "ADKWorkflowOrchestrator",
             "status": "INITIALIZED",
+            "workspaceRoot": str(self.workspace.root),
             "policy": self.policy.to_dict(),
             "repository": {"repositoryUrl": repository_url, "referenceBranch": reference_branch},
             "attempts": [],
             "acceptedPatchSet": {"patchIds": [], "vulnerabilityIds": [], "status": "EMPTY"},
             "additionalInvestigationRequests": [],
+            "final": {},
         }
         self.manifest_store.save(manifest)
         return manifest
@@ -102,30 +105,40 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return result
 
-    def handle_additional_investigation_request(self, request: dict) -> dict:
-        """Placeholder for Phase 5 additional investigation routing.
+    def handle_planner_result(self, planning_result: dict, attempt_number: int | None = None) -> dict:
+        """Route structured planner output without making remediation decisions."""
+        decision_type = planning_result.get("decisionType") or planning_result.get("type")
+        if decision_type == "REQUEST_ADDITIONAL_EVIDENCE":
+            return self.handle_additional_investigation_request(attempt_number or 1, planning_result)
+        if decision_type == "PATCH_PLAN":
+            patch_plan_path = planning_result["patchPlanPath"]
+            return self.run_patch_validation_attempt(attempt_number or self._next_attempt_number(), patch_plan_path)
+        if decision_type == "MANUAL_REVIEW":
+            manifest = self.manifest_store.load()
+            manifest["status"] = "MANUAL_REVIEW_REQUIRED"
+            self.manifest_store.save(manifest)
+            return self.generate_final_pr_summary()
+        return {"status": "FAILED", "failureCode": "UNKNOWN_PLANNER_RESULT"}
 
-        The orchestrator records the request and enforces the configured limit;
-        actual targeted tool execution can be expanded once planner integration
-        is wired in.
-        """
+    def handle_additional_investigation_request(self, attempt_number: int, request: dict) -> dict:
+        """Record additional investigation requests per attempt and enforce the attempt-scoped limit."""
         manifest = self.manifest_store.load()
-        requests = manifest.setdefault("additionalInvestigationRequests", [])
+        attempt = self._attempt_entry(manifest, attempt_number)
+        requests = attempt.setdefault("additionalInvestigationRequests", [])
         requests.append(request)
+        manifest.setdefault("additionalInvestigationRequests", []).append({"attemptNumber": attempt_number, "request": request})
         if len(requests) > self.policy.max_additional_investigation_requests_per_attempt:
+            attempt["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
             manifest["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
             manifest["plannerConstraint"] = "Planner must produce a patch plan or manual review decision."
         else:
+            attempt["status"] = "ADDITIONAL_INVESTIGATION_REQUESTED"
             manifest["status"] = "ADDITIONAL_INVESTIGATION_REQUESTED"
         self.manifest_store.save(manifest)
         return manifest
 
     def run_attempt_loop(self, patch_plan_paths: list[str]) -> dict:
-        """Run a bounded MVP attempt loop over provided patch-plan artifacts.
-
-        This is an orchestration integration point for planner output. The full
-        LLM planner will later provide these plan paths dynamically.
-        """
+        """Run a bounded MVP attempt loop over provided patch-plan artifacts."""
         last_result: dict = {"status": "NOT_RUN"}
         for attempt_number, patch_plan_path in enumerate(patch_plan_paths[: self.policy.max_attempts], start=1):
             last_result = self.run_patch_validation_attempt(attempt_number, patch_plan_path)
@@ -133,13 +146,16 @@ class WorkflowOrchestrator:
                 manifest = self.manifest_store.load()
                 manifest["status"] = "VALIDATION_SUCCEEDED"
                 self.manifest_store.save(manifest)
+                self.generate_final_pr_summary()
                 return last_result
         manifest = self.manifest_store.load()
         if manifest.get("acceptedPatchSet", {}).get("status") == "VALIDATED":
             manifest["status"] = "PARTIAL_REMEDIATION_READY_FOR_PR"
+            self.manifest_store.save(manifest)
+            self.generate_final_pr_summary()
         else:
             manifest["status"] = "FAILED_MAX_ATTEMPTS"
-        self.manifest_store.save(manifest)
+            self.manifest_store.save(manifest)
         return last_result
 
     def run_patch_validation_attempt(self, attempt_number: int, patch_plan_path: str) -> dict:
@@ -147,8 +163,8 @@ class WorkflowOrchestrator:
         restore = restore_attempt_workspace(str(self.workspace.root), attempt_number)
         attempt_workspace = restore.get("payload", {}).get("attemptWorkspace")
         attempt_dir = self.workspace.root / f"attempt-{attempt_number}"
-        attempt_entry = {"attemptNumber": attempt_number, "status": "STARTED", "patchPlan": patch_plan_path}
-        manifest.setdefault("attempts", []).append(attempt_entry)
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
+        attempt_entry.update({"status": "STARTED", "patchPlan": patch_plan_path})
         self.manifest_store.save(manifest)
 
         dry_result_path = str(attempt_dir / "patch-dry-run-result.json")
@@ -187,7 +203,7 @@ class WorkflowOrchestrator:
         attempt_entry["validationResult"] = f"attempt-{attempt_number}/validation-result.json"
         attempt_entry["status"] = "VALIDATION_SUCCEEDED" if validation["status"] == "SUCCESS" else "VALIDATION_FAILED"
         if validation["status"] == "SUCCESS":
-            manifest["acceptedPatchSet"] = self._accepted_patch_set(patch_plan_path, proof_path)
+            manifest["acceptedPatchSet"] = self._accepted_patch_set(attempt_number, patch_plan_path, proof_path, f"attempt-{attempt_number}/validation-result.json")
         else:
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path, validation_result_path=validation_path)
             attempt_entry["outcomeAnalysisSummary"] = outcome_path
@@ -215,7 +231,22 @@ class WorkflowOrchestrator:
         )
         return f"attempt-{attempt_number}/outcome-analysis-summary.json"
 
-    def _accepted_patch_set(self, patch_plan_path: str, patch_proof_path: str) -> dict:
+    def generate_final_pr_summary(self) -> dict:
+        manifest = self.manifest_store.load()
+        final_dir = self.workspace.root / "final"
+        final_dir.mkdir(parents=True, exist_ok=True)
+        result = create_pr_summary(
+            manifest_path=str(self.workspace.root / "manifest.json"),
+            output_path=str(final_dir / "pr-summary.json"),
+            pr_description_path=str(final_dir / "pr-description.md"),
+            workflow_id=manifest.get("workflowId", "unknown"),
+        )
+        manifest.setdefault("final", {})["prSummary"] = "final/pr-summary.json"
+        manifest["final"]["prDescription"] = "final/pr-description.md"
+        self.manifest_store.save(manifest)
+        return result
+
+    def _accepted_patch_set(self, attempt_number: int, patch_plan_path: str, patch_proof_path: str, validation_result_ref: str) -> dict:
         plan = self._read_json(patch_plan_path)
         proof = self._read_json(patch_proof_path)
         applied_patch_ids = {item.get("patchId") for item in proof.get("patchResults", []) if item.get("status") == "APPLIED"}
@@ -225,10 +256,27 @@ class WorkflowOrchestrator:
             if patch_ids and patch_ids.issubset(applied_patch_ids):
                 vulnerability_ids.append(decision.get("vulnerabilityId"))
         return {
+            "patchSetId": f"accepted-patch-set-{attempt_number}",
             "status": "VALIDATED",
+            "sourceAttempts": [attempt_number],
             "patchIds": sorted(item for item in applied_patch_ids if item),
             "vulnerabilityIds": sorted(item for item in vulnerability_ids if item),
+            "validationResult": validation_result_ref,
+            "appliesOnBaselineCommit": self.manifest_store.load().get("repository", {}).get("baselineCommit"),
         }
+
+    def _attempt_entry(self, manifest: dict, attempt_number: int) -> dict:
+        attempts = manifest.setdefault("attempts", [])
+        for attempt in attempts:
+            if attempt.get("attemptNumber") == attempt_number:
+                return attempt
+        attempt = {"attemptNumber": attempt_number, "status": "INITIALIZED"}
+        attempts.append(attempt)
+        return attempt
+
+    def _next_attempt_number(self) -> int:
+        manifest = self.manifest_store.load()
+        return len(manifest.get("attempts", [])) + 1
 
     @staticmethod
     def _read_json(path: str) -> dict:
