@@ -22,11 +22,11 @@ def create_outcome_analysis_summary(
     validation_result_path: str | None = None,
     dry_run_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """MVP structured-output integration stub for the Outcome Analysis Agent.
+    """Create a deterministic Outcome Analysis Summary artifact.
 
-    This function intentionally does not plan the next remediation. It only
-    summarizes the attempt outcome into the Phase 2 Outcome Analysis Summary
-    artifact shape so the orchestrator can feed the next planner invocation.
+    This is an integration stub for the Remediation Outcome Analysis Agent. It
+    summarizes a failed attempt and deliberately does not produce the next
+    remediation plan.
     """
     plan = _read_json(patch_plan_path)
     proof = _read_json(patch_application_proof_path)
@@ -43,8 +43,9 @@ def create_outcome_analysis_summary(
         "osvValidation": (validation.get("osvValidation") or {}).get("status") if validation else None,
     }
     changed = []
-    for file_name in proof.get("filesChanged", []) if proof else []:
-        changed.append({"file": file_name, "summary": "File changed by patch application."})
+    for result in proof.get("patchResults", []) if proof else []:
+        if result.get("status") == "APPLIED":
+            changed.append({"file": result.get("file"), "summary": f"Applied patch {result.get('patchId')}."})
 
     artifact = common_artifact(
         artifact_id=f"outcome-analysis-summary-attempt-{attempt_number}",
@@ -65,7 +66,7 @@ def create_outcome_analysis_summary(
         whatHappened=what_happened,
         newFactsLearned=_new_facts(dry_run, proof, validation),
         recommendedFocusForPlanner=_planner_focus(failure_category),
-        capabilityGaps=[] if failure_category != "PATCH_TOOL_LIMITATION" else [{"tool": "GenericPatchApplyTool", "summary": "Patch tool could not apply the exact patch plan."}],
+        capabilityGaps=_capability_gaps(failure_category),
         artifactReferences={
             "patchPlan": patch_plan_path,
             "patchApplicationProof": patch_application_proof_path,
@@ -89,9 +90,9 @@ def _read_json(path: str | None) -> dict[str, Any]:
 
 def _failure_category(dry_run: dict, proof: dict, validation: dict) -> str:
     if dry_run and dry_run.get("status") == "FAILED":
-        return "PATCH_TEXT_INCORRECT"
+        return _classify_patch_errors(dry_run)
     if proof and proof.get("status") == "FAILED":
-        return "PATCH_TOOL_LIMITATION"
+        return _classify_patch_errors(proof)
     failed_stage = (validation.get("summary") or {}).get("failedStage") if validation else None
     if failed_stage == "CHANGE_SCOPE_VALIDATION":
         return "CHANGE_SCOPE_FAILURE"
@@ -104,8 +105,24 @@ def _failure_category(dry_run: dict, proof: dict, validation: dict) -> str:
     return "WORKFLOW_FAILURE"
 
 
+def _classify_patch_errors(source: dict[str, Any]) -> str:
+    text = " ".join(str(item) for item in source.get("errors", []))
+    for result in source.get("patchResults", []):
+        text += " " + " ".join(str(value) for value in result.values())
+    lower = text.lower()
+    if "file not found" in lower:
+        return "PATCH_FILE_NOT_FOUND"
+    if "unsupported file" in lower or "unsupported file type" in lower:
+        return "PATCH_UNSUPPORTED_FILE"
+    if "expected" in lower and "occurrence" in lower:
+        return "PATCH_OCCURRENCE_MISMATCH"
+    if "oldtext" in lower or "old text" in lower:
+        return "PATCH_TEXT_INCORRECT"
+    return "PATCH_TOOL_LIMITATION"
+
+
 def _responsibility_area(category: str) -> str:
-    if category == "PATCH_TEXT_INCORRECT":
+    if category in {"PATCH_TEXT_INCORRECT", "PATCH_OCCURRENCE_MISMATCH", "PATCH_FILE_NOT_FOUND", "PATCH_UNSUPPORTED_FILE"}:
         return "PLANNER_DECISION"
     if category == "PATCH_TOOL_LIMITATION":
         return "PATCH_TOOL"
@@ -134,8 +151,14 @@ def _new_facts(dry_run: dict, proof: dict, validation: dict) -> list[str]:
 
 
 def _planner_focus(category: str) -> list[str]:
-    if category == "PATCH_TEXT_INCORRECT":
+    if category in {"PATCH_TEXT_INCORRECT", "PATCH_OCCURRENCE_MISMATCH"}:
         return ["Review exact oldText/newText evidence and produce a corrected patch plan."]
+    if category == "PATCH_FILE_NOT_FOUND":
+        return ["Verify the editable file path in the patch plan against project analyzer POM evidence."]
+    if category == "PATCH_UNSUPPORTED_FILE":
+        return ["Restrict the next patch plan to supported pom.xml files only."]
+    if category == "PATCH_TOOL_LIMITATION":
+        return ["Review whether the patch tool needs enhancement or whether manual review is safer."]
     if category == "CHANGE_SCOPE_FAILURE":
         return ["Ensure the next plan only changes intended dependency version text in pom.xml files."]
     if category == "BUILD_FAILURE":
@@ -145,3 +168,9 @@ def _planner_focus(category: str) -> list[str]:
     if category == "OSV_VALIDATION_FAILURE":
         return ["Review remaining vulnerabilities and dependency resolution evidence before replanning."]
     return ["Review failed attempt artifacts before replanning."]
+
+
+def _capability_gaps(category: str) -> list[dict[str, str]]:
+    if category == "PATCH_TOOL_LIMITATION":
+        return [{"tool": "GenericPatchApplyTool", "summary": "Patch tool could not apply an otherwise valid exact patch plan."}]
+    return []
