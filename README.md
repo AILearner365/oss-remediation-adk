@@ -4,9 +4,10 @@ This repository contains an ADK-based OSS vulnerability remediation workflow for
 
 ## Architecture Documentation
 
-The finalized Phase 1 architecture is documented here:
+The finalized architecture and artifact contracts are documented here:
 
 - [Phase 1 Architecture: ADK OSS Remediation Workflow](docs/phase-1-architecture.md)
+- [Phase 2 Artifact Contracts](docs/phase-2-artifact-contracts.md)
 
 The Phase 1 document captures:
 
@@ -19,6 +20,18 @@ The Phase 1 document captures:
 - retry lifecycle
 - partial PR strategy
 - PR summary requirements
+
+The Phase 2 document captures:
+
+- Attempt Manifest contract
+- Vulnerability Assessment Report contract
+- Project Analyzer Report contract
+- Exact Remediation Patch Plan contract
+- Patch Application Proof contract
+- Validation Result contract
+- Outcome Analysis Summary contract
+- PR Summary contract
+- Principal Engineer clarifications for validation success, controlled direct patching, and outcome analysis boundaries
 
 ## Current Architecture Principle
 
