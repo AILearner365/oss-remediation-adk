@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -19,12 +19,38 @@ class ToolResult:
     warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            "toolName": self.tool_name,
+            "toolVersion": self.tool_version,
+            "operation": self.operation,
+            "status": self.status,
+            "artifactPath": self.artifact_path,
+            "failureCode": self.failure_code,
+            "capabilities": self.capabilities,
+            "limitations": self.limitations,
+            "payload": self.payload,
+            "errors": self.errors,
+            "warnings": self.warnings,
+        }
 
     @classmethod
     def success(cls, tool_name: str, operation: str, artifact_path: str | None = None, **payload: Any) -> "ToolResult":
-        return cls(tool_name=tool_name, tool_version="1.0.0", operation=operation, status="SUCCESS", artifact_path=artifact_path, payload=payload)
+        return cls(
+            tool_name=tool_name,
+            tool_version="1.0.0",
+            operation=operation,
+            status="SUCCESS",
+            artifact_path=artifact_path,
+            payload=payload,
+        )
 
     @classmethod
     def failed(cls, tool_name: str, operation: str, failure_code: str, errors: list[str]) -> "ToolResult":
-        return cls(tool_name=tool_name, tool_version="1.0.0", operation=operation, status="FAILED", failure_code=failure_code, errors=errors)
+        return cls(
+            tool_name=tool_name,
+            tool_version="1.0.0",
+            operation=operation,
+            status="FAILED",
+            failure_code=failure_code,
+            errors=errors,
+        )
