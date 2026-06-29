@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -22,15 +23,21 @@ def collect_maven_facts(repository_path: str, output_path: str, artifact_output_
 
     project_facts = _project_facts(repo, pom_files)
     pom_evidence = _pom_evidence(repo, pom_files)
-    dependency_evidence = _dependency_evidence(repo, dependency_tree_path)
-    _effective_pom(repo, effective_pom_path)
+    dependency_evidence, dependency_tree_status = _dependency_evidence(repo, dependency_tree_path)
+    effective_pom_status = _effective_pom(repo, effective_pom_path)
+    warnings = []
+    if dependency_tree_status != "SUCCESS":
+        warnings.append("dependency:tree did not complete successfully; dependencyResolutionEvidence may be incomplete")
+    if effective_pom_status != "SUCCESS":
+        warnings.append("help:effective-pom did not complete successfully; effective POM artifact may contain command output")
+    status = "PARTIAL" if warnings else "SUCCESS"
 
     Path(pom_index_path).write_text(json.dumps({"pomFiles": pom_files}, indent=2) + "\n", encoding="utf-8")
     artifact = common_artifact(
         artifact_id="project-analyzer-001",
         workflow_id=workflow_id,
         created_by=TOOL,
-        status="SUCCESS",
+        status=status,
         reportType="PROJECT_ANALYZER",
         projectFacts=project_facts,
         dependencyResolutionEvidence=dependency_evidence,
@@ -41,16 +48,25 @@ def collect_maven_facts(repository_path: str, output_path: str, artifact_output_
             "effectivePom": effective_pom_path,
         },
         limitations=["MVP analyzer collects Maven facts and command artifacts; it does not recommend remediation strategy."],
+        warnings=warnings,
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return ToolResult.success(
-        TOOL,
-        "collect_maven_facts",
-        output_path,
-        pomFilesFound=len(pom_files),
-        dependencyTreePath=dependency_tree_path,
-        effectivePomPath=effective_pom_path,
+    return ToolResult(
+        tool_name=TOOL,
+        tool_version="1.0.0",
+        operation="collect_maven_facts",
+        status=status,
+        artifact_path=output_path,
+        capabilities=["POM_DISCOVERY", "MAVEN_PROPERTIES", "DEPENDENCY_MANAGEMENT", "PARENT_POM_DETECTION", "DEPENDENCY_TREE", "EFFECTIVE_POM"],
+        limitations=["Does not recommend remediation strategy"],
+        payload={
+            "pomFilesFound": len(pom_files),
+            "dependencyEvidenceCount": len(dependency_evidence),
+            "dependencyTreePath": dependency_tree_path,
+            "effectivePomPath": effective_pom_path,
+        },
+        warnings=warnings,
     ).to_dict()
 
 
@@ -81,7 +97,7 @@ def _project_facts(repo: Path, pom_files: list[str]) -> dict:
             artifact_id = _text(parent.find("{*}artifactId"))
             version = _text(parent.find("{*}version"))
             parent_hierarchy.append({"groupId": group_id, "artifactId": artifact_id, "version": version, "declaredIn": "pom.xml"})
-            if group_id == "org.springframework.boot" or "spring-boot" in artifact_id:
+            if group_id == "org.springframework.boot" or (artifact_id and "spring-boot" in artifact_id):
                 spring_boot = {"detected": True, "version": version, "source": "parent"}
 
     return {
@@ -112,19 +128,44 @@ def _pom_evidence(repo: Path, pom_files: list[str]) -> list[dict]:
     return evidence[:100]
 
 
-def _dependency_evidence(repo: Path, dependency_tree_path: str) -> list[dict]:
+def _dependency_evidence(repo: Path, dependency_tree_path: str) -> tuple[list[dict], str]:
     result = run_command(["mvn", "dependency:tree", "-DoutputType=text"], cwd=repo, timeout=1800)
+    output = (result.get("stdout") or "") + "\n" + (result.get("stderr") or "")
     Path(dependency_tree_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(dependency_tree_path).write_text((result.get("stdout") or "") + "\n" + (result.get("stderr") or ""), encoding="utf-8")
-    return []
+    Path(dependency_tree_path).write_text(output, encoding="utf-8")
+    evidence = []
+    seen = set()
+    pattern = re.compile(r"([A-Za-z0-9_.-]+(?:\.[A-Za-z0-9_.-]+)+):([A-Za-z0-9_.-]+):[A-Za-z0-9_.-]+:([^:\s]+)(?::([A-Za-z0-9_.-]+))?")
+    for line in output.splitlines():
+        match = pattern.search(line)
+        if not match:
+            continue
+        group_id, artifact_id, version, scope = match.groups()
+        dependency = f"{group_id}:{artifact_id}"
+        key = (dependency, version, scope or "UNKNOWN")
+        if key in seen:
+            continue
+        seen.add(key)
+        direct = "+-" in line or "\\-" in line
+        evidence.append({
+            "dependency": dependency,
+            "resolvedVersion": version,
+            "modulesAffected": ["root"],
+            "dependencyType": "DIRECT" if direct else "TRANSITIVE",
+            "scope": scope or "UNKNOWN",
+            "dependencyPaths": [line.strip()],
+            "evidenceFile": dependency_tree_path,
+        })
+    return evidence, "SUCCESS" if result["exitCode"] == 0 else "FAILED"
 
 
-def _effective_pom(repo: Path, effective_pom_path: str) -> None:
+def _effective_pom(repo: Path, effective_pom_path: str) -> str:
     result = run_command(["mvn", "help:effective-pom", f"-Doutput={effective_pom_path}"], cwd=repo, timeout=1800)
     path = Path(effective_pom_path)
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text((result.get("stdout") or "") + "\n" + (result.get("stderr") or ""), encoding="utf-8")
+    return "SUCCESS" if result["exitCode"] == 0 else "FAILED"
 
 
 def _parse(path: Path):
