@@ -37,8 +37,9 @@ class WorkflowOrchestrator:
         policy: RemediationPolicy | None = None,
         llm_invoker: LLMAgentInvoker | None = None,
     ):
-        self.workspace = WorkspaceManager(workspace_root)
-        self.manifest_store = ManifestStore(Path(workspace_root) / "manifest.json")
+        resolved_workspace_root = str(Path(workspace_root).resolve())
+        self.workspace = WorkspaceManager(resolved_workspace_root)
+        self.manifest_store = ManifestStore(Path(resolved_workspace_root) / "manifest.json")
         self.policy = policy or RemediationPolicy()
         self.llm_invoker = llm_invoker or GoogleGenAIJsonInvoker()
 
@@ -90,7 +91,7 @@ class WorkflowOrchestrator:
             "workflowId": "oss-remediation-mvp",
             "createdBy": "ADKWorkflowOrchestrator",
             "status": "INITIALIZED",
-            "workspaceRoot": str(self.workspace.root),
+            "workspaceRoot": str(Path(self.workspace.root).resolve()),
             "policy": self.policy.to_dict(),
             "repository": {"repositoryUrl": repository_url, "referenceBranch": reference_branch},
             "attempts": [],
@@ -268,10 +269,16 @@ class WorkflowOrchestrator:
 
         dry_result_path = str(attempt_dir / "patch-dry-run-result.json")
         dry = dry_run_patch_plan(attempt_number, attempt_workspace, patch_plan_path, dry_result_path)
+        manifest = self.manifest_store.load()
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
         attempt_entry["patchDryRunResult"] = f"attempt-{attempt_number}/patch-dry-run-result.json"
         if dry["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_DRY_RUN_FAILED"
+            manifest["status"] = "PATCH_DRY_RUN_FAILED"
+            self.manifest_store.save(manifest)
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, dry_run_result_path=dry_result_path)
+            manifest = self.manifest_store.load()
+            attempt_entry = self._attempt_entry(manifest, attempt_number)
             attempt_entry["outcomeAnalysisSummary"] = outcome_path
             self.manifest_store.save(manifest)
             return dry
@@ -279,10 +286,16 @@ class WorkflowOrchestrator:
         proof_path = str(attempt_dir / "patch-application-proof.json")
         diff_path = str(attempt_dir / "patch.diff")
         patch = apply_patch_plan(attempt_number, attempt_workspace, patch_plan_path, proof_path, diff_path)
+        manifest = self.manifest_store.load()
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
         attempt_entry["patchApplicationProof"] = f"attempt-{attempt_number}/patch-application-proof.json"
         if patch["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_APPLICATION_FAILED"
+            manifest["status"] = "PATCH_APPLICATION_FAILED"
+            self.manifest_store.save(manifest)
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path)
+            manifest = self.manifest_store.load()
+            attempt_entry = self._attempt_entry(manifest, attempt_number)
             attempt_entry["outcomeAnalysisSummary"] = outcome_path
             self.manifest_store.save(manifest)
             return patch
@@ -299,14 +312,21 @@ class WorkflowOrchestrator:
             severity_scope=self.policy.severity_scope,
             baseline_assessment_path=str(self.workspace.root / "baseline" / "vulnerability-assessment-report.json"),
         )
+        manifest = self.manifest_store.load()
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
         attempt_entry["validationResult"] = f"attempt-{attempt_number}/validation-result.json"
         attempt_entry["status"] = "VALIDATION_SUCCEEDED" if validation["status"] == "SUCCESS" else "VALIDATION_FAILED"
         if validation["status"] == "SUCCESS":
             manifest["acceptedPatchSet"] = self._accepted_patch_set(attempt_number, patch_plan_path, proof_path, f"attempt-{attempt_number}/validation-result.json")
+            self.manifest_store.save(manifest)
         else:
+            manifest["status"] = "VALIDATION_FAILED"
+            self.manifest_store.save(manifest)
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path, validation_result_path=validation_path)
+            manifest = self.manifest_store.load()
+            attempt_entry = self._attempt_entry(manifest, attempt_number)
             attempt_entry["outcomeAnalysisSummary"] = outcome_path
-        self.manifest_store.save(manifest)
+            self.manifest_store.save(manifest)
         return validation
 
     def run_outcome_analysis(
@@ -373,13 +393,13 @@ class WorkflowOrchestrator:
 
     def runtime_summary(self, progress: list[dict[str, Any]], message: str) -> dict[str, Any]:
         manifest = self.manifest_store.load()
-        workspace_root = Path(self.workspace.root)
+        workspace_root = Path(self.workspace.root).resolve()
         return {
             "status": manifest.get("status", "UNKNOWN"),
             "message": message,
             "workflowId": manifest.get("workflowId"),
             "workspaceRoot": str(workspace_root),
-            "manifestPath": str(workspace_root / "manifest.json"),
+            "manifestPath": str((workspace_root / "manifest.json").resolve()),
             "progress": progress,
             "artifacts": {
                 "baseline": manifest.get("baseline", {}),
@@ -501,6 +521,10 @@ class WorkflowOrchestrator:
             return "Review the planning context artifact and LLM invocation error before retrying."
         if status == "PROJECT_ANALYSIS_COMPLETE":
             return "Invoke the Remediation Planning Agent with the generated assessment and project-analysis artifacts."
+        if status == "PATCH_DRY_RUN_FAILED":
+            return "Run Outcome Analysis for the dry-run failure before replanning."
+        if status == "OUTCOME_ANALYSIS_COMPLETE":
+            return "Reinvoke the Remediation Planning Agent using the outcome-analysis summary for replanning."
         if status == "VALIDATION_SUCCEEDED":
             return "Review the final PR summary artifact before creating a pull request."
         if status == "BASELINE_BUILD_FAILED":
