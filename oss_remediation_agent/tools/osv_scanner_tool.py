@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -19,54 +21,21 @@ def generate_vulnerability_assessment(
     workflow_id: str = "unknown",
 ) -> dict:
     severity_scope = severity_scope or ["CRITICAL", "HIGH"]
-    target_path = str(Path(repository_path).resolve())
-    command = ["osv-scanner", "scan", "source", "-r", target_path, "--format", "json"]
-    result = run_command(command, cwd=repository_path)
-    raw_text = result.get("stdout") or "{}"
-    Path(raw_report_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(raw_report_path).write_text(raw_text, encoding="utf-8")
-    raw_json = _loads(raw_text)
-    vulnerabilities = normalize_osv_findings(raw_json, severity_scope, raw_report_path)
-    scanner_error = result.get("stderr", "") or ""
-    no_package_sources = "No package sources found" in scanner_error
-    status = "SUCCESS" if result["exitCode"] in (0, 1) and not no_package_sources else "FAILED"
-    artifact = common_artifact(
-        artifact_id="vulnerability-assessment-001",
+    return _run_osv_scan(
+        repository_path=repository_path,
+        output_path=output_path,
+        raw_report_path=raw_report_path,
+        severity_scope=severity_scope,
         workflow_id=workflow_id,
-        created_by=TOOL,
-        status=status,
-        reportType="VULNERABILITY_ASSESSMENT",
-        scanner={"name": "OSV", "command": " ".join(command), "rawReportPath": raw_report_path},
-        severityScope=severity_scope,
-        vulnerabilities=vulnerabilities,
-        summary={
-            "criticalCount": sum(1 for item in vulnerabilities if item["severity"] == "CRITICAL"),
-            "highCount": sum(1 for item in vulnerabilities if item["severity"] == "HIGH"),
-            "totalInScopeCount": len(vulnerabilities),
-        },
-        artifactReferences={"rawOsvReport": raw_report_path},
-        errors=[] if status == "SUCCESS" else [scanner_error],
-    )
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return ToolResult(
-        tool_name=TOOL,
-        tool_version="1.0.0",
         operation="generate_vulnerability_assessment",
-        status=status,
-        artifact_path=output_path,
-        failure_code=None if status == "SUCCESS" else "OSV_SCAN_FAILED",
-        capabilities=["OSV_SCAN", "SEVERITY_FILTERING", "MAVEN_ECOSYSTEM_NORMALIZATION"],
-        payload=artifact["summary"] | {"rawReportPath": raw_report_path},
-        errors=[] if status == "SUCCESS" else [scanner_error],
-    ).to_dict()
+        report_type="VULNERABILITY_ASSESSMENT",
+    )
 
 
 def validate_post_remediation(repository_path: str, output_path: str, severity_scope: list[str] | None = None) -> dict:
     severity_scope = severity_scope or ["CRITICAL", "HIGH"]
-    target_path = str(Path(repository_path).resolve())
-    command = ["osv-scanner", "scan", "source", "-r", target_path, "--format", "json"]
-    result = run_command(command, cwd=repository_path)
+    raw_report_path = output_path
+    result = _scan_repository(repository_path)
     raw_text = result.get("stdout") or "{}"
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(raw_text, encoding="utf-8")
@@ -87,9 +56,86 @@ def validate_post_remediation(repository_path: str, output_path: str, severity_s
             "remainingCriticalCount": sum(1 for item in remaining if item["severity"] == "CRITICAL"),
             "remainingHighCount": sum(1 for item in remaining if item["severity"] == "HIGH"),
             "remainingVulnerabilities": remaining,
+            "rawReportPath": raw_report_path,
         },
         errors=[] if status == "SUCCESS" else [scanner_error],
     ).to_dict()
+
+
+def _run_osv_scan(
+    repository_path: str,
+    output_path: str,
+    raw_report_path: str,
+    severity_scope: list[str],
+    workflow_id: str,
+    operation: str,
+    report_type: str,
+) -> dict:
+    result = _scan_repository(repository_path)
+    raw_text = result.get("stdout") or "{}"
+    Path(raw_report_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(raw_report_path).write_text(raw_text, encoding="utf-8")
+    raw_json = _loads(raw_text)
+    vulnerabilities = normalize_osv_findings(raw_json, severity_scope, raw_report_path)
+    scanner_error = result.get("stderr", "") or ""
+    no_package_sources = "No package sources found" in scanner_error
+    status = "SUCCESS" if result["exitCode"] in (0, 1) and not no_package_sources else "FAILED"
+    artifact = common_artifact(
+        artifact_id="vulnerability-assessment-001",
+        workflow_id=workflow_id,
+        created_by=TOOL,
+        status=status,
+        reportType=report_type,
+        scanner={
+            "name": "OSV",
+            "command": " ".join(result.get("command", [])),
+            "requestedRepositoryPath": str(Path(repository_path).resolve()),
+            "rawReportPath": raw_report_path,
+        },
+        severityScope=severity_scope,
+        vulnerabilities=vulnerabilities,
+        summary={
+            "criticalCount": sum(1 for item in vulnerabilities if item["severity"] == "CRITICAL"),
+            "highCount": sum(1 for item in vulnerabilities if item["severity"] == "HIGH"),
+            "totalInScopeCount": len(vulnerabilities),
+        },
+        artifactReferences={"rawOsvReport": raw_report_path},
+        errors=[] if status == "SUCCESS" else [scanner_error],
+    )
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return ToolResult(
+        tool_name=TOOL,
+        tool_version="1.0.0",
+        operation=operation,
+        status=status,
+        artifact_path=output_path,
+        failure_code=None if status == "SUCCESS" else "OSV_SCAN_FAILED",
+        capabilities=["OSV_SCAN", "SEVERITY_FILTERING", "MAVEN_ECOSYSTEM_NORMALIZATION"],
+        payload=artifact["summary"] | {"rawReportPath": raw_report_path},
+        errors=[] if status == "SUCCESS" else [scanner_error],
+    ).to_dict()
+
+
+def _scan_repository(repository_path: str) -> dict:
+    """Run OSV from a temporary scan copy so parent .gitignore rules cannot hide the workspace.
+
+    When the remediation workspace is listed in the parent repository's .gitignore,
+    OSV Scanner can treat the cloned target as ignored and return "No package
+    sources found". Copying the checked-out repository to an isolated temporary
+    directory preserves reproducible artifacts while preventing parent ignore
+    rules from suppressing pom.xml discovery.
+    """
+    source = Path(repository_path).resolve()
+    with tempfile.TemporaryDirectory(prefix="oss-remediation-osv-scan-") as temp_dir:
+        staged = Path(temp_dir) / "repository"
+        shutil.copytree(
+            source,
+            staged,
+            ignore=shutil.ignore_patterns(".git", "target", ".mvn/.gradle", ".gradle"),
+        )
+        command = ["osv-scanner", "scan", "source", "-r", str(staged), "--format", "json"]
+        return run_command(command, cwd=str(staged))
 
 
 def normalize_osv_findings(raw_json: Any, severity_scope: list[str], raw_path: str | Path) -> list[dict[str, Any]]:
