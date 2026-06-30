@@ -85,8 +85,16 @@ class WorkflowOrchestrator:
         progress = progress if progress is not None else []
         attempt_number = 1
         injected_output = first_planning_agent_output
+        prepared_attempts: set[int] = set()
 
         while attempt_number <= self.policy.max_attempts:
+            if attempt_number not in prepared_attempts:
+                prepared = self.prepare_attempt_workspace(attempt_number)
+                self._record(progress, f"prepare_attempt_{attempt_number}", prepared)
+                if prepared.get("status") != "SUCCESS":
+                    return self.runtime_summary(progress, "Workflow stopped because attempt workspace preparation failed.")
+                prepared_attempts.add(attempt_number)
+
             planning_result = self.run_planning_agent_boundary(
                 attempt_number=attempt_number,
                 planning_agent_output=injected_output,
@@ -101,6 +109,9 @@ class WorkflowOrchestrator:
 
             if routed.get("status") == "ADDITIONAL_INVESTIGATION_COMPLETE":
                 continue
+
+            if routed.get("failureCode") == "PLANNING_CONSTRAINT_VIOLATION":
+                return self.runtime_summary(progress, "Workflow stopped because the Planning Agent violated the investigation-limit constraint.")
 
             if routed.get("status") in {"MANUAL_REVIEW_REQUIRED", "PR_SUMMARY_CREATED", "SUCCESS"}:
                 return self.runtime_summary(progress, "Workflow reached a terminal routing decision.")
@@ -199,6 +210,68 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return result
 
+    def prepare_attempt_workspace(self, attempt_number: int) -> dict:
+        """Restore clean baseline and replay the accepted patch set for an attempt."""
+        manifest = self.manifest_store.load()
+        restore = restore_attempt_workspace(str(self.workspace.root), attempt_number)
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
+        attempt_workspace = restore.get("payload", {}).get("attemptWorkspace")
+        attempt_entry["attemptWorkspace"] = attempt_workspace
+        attempt_entry["status"] = "ATTEMPT_WORKSPACE_PREPARED" if restore.get("status") == "SUCCESS" else "ATTEMPT_WORKSPACE_PREPARE_FAILED"
+        attempt_entry["workspacePreparation"] = {
+            "restoreCleanBaseline": restore,
+            "acceptedPatchSetReplay": [],
+        }
+        self.manifest_store.save(manifest)
+        if restore.get("status") != "SUCCESS":
+            return restore
+
+        replay = self.replay_accepted_patch_set(attempt_number, attempt_workspace)
+        manifest = self.manifest_store.load()
+        attempt_entry = self._attempt_entry(manifest, attempt_number)
+        attempt_entry.setdefault("workspacePreparation", {})["acceptedPatchSetReplay"] = replay.get("replayResults", [])
+        if replay.get("status") != "SUCCESS":
+            attempt_entry["status"] = "ACCEPTED_PATCH_SET_REPLAY_FAILED"
+            manifest["status"] = "ACCEPTED_PATCH_SET_REPLAY_FAILED"
+            self.manifest_store.save(manifest)
+            return replay
+        self.manifest_store.save(manifest)
+        return {"status": "SUCCESS", "attemptWorkspace": attempt_workspace, "acceptedPatchSetReplay": replay}
+
+    def replay_accepted_patch_set(self, attempt_number: int, attempt_workspace: str | None) -> dict:
+        """Replay validated accepted patches onto the clean baseline attempt workspace."""
+        if not attempt_workspace:
+            return {"status": "FAILED", "failureCode": "ATTEMPT_WORKSPACE_MISSING", "replayResults": []}
+        manifest = self.manifest_store.load()
+        accepted = manifest.get("acceptedPatchSet", {})
+        if not self._has_accepted_patch_set(manifest):
+            return {"status": "SUCCESS", "replayResults": [], "message": "No accepted patch set to replay."}
+
+        replay_results: list[dict[str, Any]] = []
+        for source_attempt in accepted.get("sourceAttempts", []):
+            source_entry = self._find_attempt(manifest, int(source_attempt))
+            patch_plan_ref = source_entry.get("patchPlan") if source_entry else None
+            if not patch_plan_ref:
+                replay_results.append({"status": "SKIPPED", "sourceAttempt": source_attempt, "reason": "Patch plan not found."})
+                continue
+            patch_plan_path = self._resolve_workspace_ref(patch_plan_ref)
+            replay_dir = self.workspace.root / f"attempt-{attempt_number}" / "accepted-patch-set-replay"
+            replay_dir.mkdir(parents=True, exist_ok=True)
+            proof_path = str(replay_dir / f"source-attempt-{source_attempt}-patch-application-proof.json")
+            diff_path = str(replay_dir / f"source-attempt-{source_attempt}.diff")
+            result = apply_patch_plan(attempt_number, attempt_workspace, patch_plan_path, proof_path, diff_path)
+            replay_results.append({
+                "status": result.get("status"),
+                "sourceAttempt": source_attempt,
+                "patchPlan": self._relative_ref(patch_plan_path),
+                "patchApplicationProof": self._relative_ref(proof_path),
+                "diff": self._relative_ref(diff_path),
+                "failureCode": result.get("failureCode"),
+            })
+            if result.get("status") != "SUCCESS":
+                return {"status": "FAILED", "failureCode": "ACCEPTED_PATCH_SET_REPLAY_FAILED", "replayResults": replay_results}
+        return {"status": "SUCCESS", "replayResults": replay_results}
+
     def run_planning_agent_boundary(
         self,
         attempt_number: int,
@@ -267,7 +340,13 @@ class WorkflowOrchestrator:
         requests.append(request)
         manifest.setdefault("additionalInvestigationRequests", []).append({"attemptNumber": attempt_number, "request": request})
 
-        if len(requests) > self.policy.max_additional_investigation_requests_per_attempt:
+        limit = self.policy.max_additional_investigation_requests_per_attempt
+        if len(requests) > limit:
+            if manifest.get("plannerConstraint"):
+                attempt["status"] = "PLANNING_CONSTRAINT_VIOLATION"
+                manifest["status"] = "PLANNING_CONSTRAINT_VIOLATION"
+                self.manifest_store.save(manifest)
+                return {"status": "FAILED", "failureCode": "PLANNING_CONSTRAINT_VIOLATION"}
             attempt["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
             manifest["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
             manifest["plannerConstraint"] = "Additional investigation limit reached. Planning Agent must return PATCH_PLAN or MANUAL_REVIEW."
@@ -286,13 +365,25 @@ class WorkflowOrchestrator:
             "artifactPath": investigation_result.get("artifactPath"),
             "requestedTool": investigation_result.get("requestedTool"),
             "status": investigation_result.get("status"),
+            "reusedArtifact": investigation_result.get("reusedArtifact", False),
         })
         self.manifest_store.save(manifest)
         return investigation_result
 
     def execute_additional_investigation(self, attempt_number: int, investigation_number: int, request: dict) -> dict:
-        """Invoke a registered deterministic evidence tool requested by the planner."""
+        """Invoke or reuse a registered deterministic evidence tool requested by the planner."""
         requested_tool = self._requested_tool_name(request)
+        if not self._force_regenerate_requested(request):
+            reusable = self._find_reusable_investigation_artifact(requested_tool)
+            if reusable:
+                return {
+                    "status": "ADDITIONAL_INVESTIGATION_COMPLETE",
+                    "requestedTool": requested_tool,
+                    "artifactPath": reusable,
+                    "toolStatus": "SUCCESS",
+                    "reusedArtifact": True,
+                }
+
         registry = self._investigation_tool_registry()
         runner = registry.get(requested_tool)
         if runner is None:
@@ -392,7 +483,33 @@ class WorkflowOrchestrator:
             "artifactPath": self._relative_ref(str(artifact_path)),
             "toolStatus": result.get("status"),
             "failureCode": result.get("failureCode"),
+            "reusedArtifact": False,
         }
+
+    def _find_reusable_investigation_artifact(self, requested_tool: str | None) -> str | None:
+        manifest = self.manifest_store.load()
+        for item in reversed(manifest.get("additionalInvestigationArtifacts", [])):
+            if item.get("requestedTool") != requested_tool:
+                continue
+            artifact_ref = item.get("artifactPath")
+            if not artifact_ref:
+                continue
+            artifact_path = self._resolve_workspace_ref(artifact_ref)
+            payload = self._read_json(artifact_path)
+            if payload.get("status") == "SUCCESS" and payload.get("requestedTool") == requested_tool:
+                return artifact_ref
+        return None
+
+    @staticmethod
+    def _force_regenerate_requested(request: dict) -> bool:
+        force_keys = ("forceRegenerate", "regenerate", "refresh", "rerunTool", "ignoreCachedArtifact")
+        if any(bool(request.get(key)) for key in force_keys):
+            return True
+        mode = str(request.get("mode") or request.get("dataRegenerationPolicy") or "").upper()
+        if mode in {"REGENERATE", "REFRESH", "RERUN"}:
+            return True
+        reason = str(request.get("reason") or request.get("statusReason") or "").lower()
+        return "corrupt" in reason or "truncated" in reason or "stale" in reason or "insufficient" in reason
 
     @staticmethod
     def _requested_tool_name(request: dict) -> str | None:
@@ -405,6 +522,7 @@ class WorkflowOrchestrator:
         """Run a bounded MVP attempt loop over provided patch-plan artifacts."""
         last_result: dict = {"status": "NOT_RUN"}
         for attempt_number, patch_plan_path in enumerate(patch_plan_paths[: self.policy.max_attempts], start=1):
+            self.prepare_attempt_workspace(attempt_number)
             last_result = self.run_patch_validation_attempt(attempt_number, patch_plan_path)
             if last_result.get("status") == "SUCCESS":
                 self._finalize_successful_validation()
@@ -413,11 +531,18 @@ class WorkflowOrchestrator:
 
     def run_patch_validation_attempt(self, attempt_number: int, patch_plan_path: str) -> dict:
         manifest = self.manifest_store.load()
-        restore = restore_attempt_workspace(str(self.workspace.root), attempt_number)
-        attempt_workspace = restore.get("payload", {}).get("attemptWorkspace")
-        attempt_dir = self.workspace.root / f"attempt-{attempt_number}"
         attempt_entry = self._attempt_entry(manifest, attempt_number)
-        attempt_entry.update({"status": "STARTED", "patchPlan": patch_plan_path})
+        attempt_workspace = attempt_entry.get("attemptWorkspace")
+        if not attempt_workspace:
+            prepare = self.prepare_attempt_workspace(attempt_number)
+            if prepare.get("status") != "SUCCESS":
+                return prepare
+            manifest = self.manifest_store.load()
+            attempt_entry = self._attempt_entry(manifest, attempt_number)
+            attempt_workspace = attempt_entry.get("attemptWorkspace")
+
+        attempt_dir = self.workspace.root / f"attempt-{attempt_number}"
+        attempt_entry.update({"status": "PATCH_EXECUTION_STARTED", "patchPlan": patch_plan_path})
         self.manifest_store.save(manifest)
 
         dry_result_path = str(attempt_dir / "patch-dry-run-result.json")
@@ -677,9 +802,20 @@ class WorkflowOrchestrator:
         attempts.append(attempt)
         return attempt
 
+    @staticmethod
+    def _find_attempt(manifest: dict[str, Any], attempt_number: int) -> dict[str, Any] | None:
+        for attempt in manifest.get("attempts", []):
+            if int(attempt.get("attemptNumber", 0)) == attempt_number:
+                return attempt
+        return None
+
     def _next_attempt_number(self) -> int:
         manifest = self.manifest_store.load()
         return len(manifest.get("attempts", [])) + 1
+
+    def _resolve_workspace_ref(self, reference: str) -> str:
+        path = Path(reference)
+        return str(path if path.is_absolute() else self.workspace.root / path)
 
     def _relative_ref(self, path: str | None) -> str | None:
         if not path:
@@ -717,6 +853,8 @@ class WorkflowOrchestrator:
             return "Review the planning context artifact and LLM invocation error before retrying."
         if status == "OUTCOME_ANALYSIS_AGENT_INVOCATION_FAILED":
             return "Review the outcome-analysis context artifact and LLM invocation error before retrying."
+        if status == "PLANNING_CONSTRAINT_VIOLATION":
+            return "Review the planning decision because the Planning Agent requested additional evidence after the investigation limit was reached."
         return "Workflow completed or stopped at a terminal state; review the manifest and generated artifacts."
 
     @staticmethod
