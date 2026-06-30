@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from oss_remediation_agent.agents.remediation_outcome_analysis_agent import create_outcome_analysis_summary
+from oss_remediation_agent.agents.remediation_outcome_analysis_agent import build_outcome_analysis_context
+from oss_remediation_agent.agents.remediation_planning_agent import build_planning_context, persist_planning_agent_output
 from oss_remediation_agent.policies import RemediationPolicy
 from oss_remediation_agent.tools.baseline_build_tool import run_baseline_build
 from oss_remediation_agent.tools.generic_patch_apply_tool import apply as apply_patch_plan
@@ -18,16 +19,62 @@ from oss_remediation_agent.workspace import ManifestStore, WorkspaceManager
 
 
 class WorkflowOrchestrator:
-    """MVP orchestration skeleton.
+    """MVP workflow orchestrator.
 
-    The orchestrator owns execution order and manifest updates. AI planning and
-    outcome analysis remain integration points for the ADK application layer.
+    The orchestrator owns execution order, workflow lifecycle transitions, retry
+    state, and manifest updates. AI agents remain reasoning boundaries that emit
+    structured JSON contracts; deterministic tools only collect evidence or
+    execute exact instructions.
     """
 
     def __init__(self, workspace_root: str, policy: RemediationPolicy | None = None):
         self.workspace = WorkspaceManager(workspace_root)
         self.manifest_store = ManifestStore(Path(workspace_root) / "manifest.json")
         self.policy = policy or RemediationPolicy()
+
+    def run_workflow(
+        self,
+        repository_url: str,
+        reference_branch: str,
+        planning_agent_output: str | dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Run the production MVP workflow entry path.
+
+        This method keeps ADK ``agent.py`` thin. It performs deterministic
+        baseline, assessment, and project-analysis steps, then enters the LLM
+        Planning Agent boundary. When ``planning_agent_output`` is provided, it
+        is treated as the LLM's structured JSON output, persisted as a planner
+        artifact, and routed through ``handle_planner_result``. When it is not
+        provided, the orchestrator persists the Planning Agent context artifact
+        and pauses safely at ``AWAITING_PLANNING_AGENT_OUTPUT``.
+        """
+        progress: list[dict[str, Any]] = []
+
+        baseline = self.checkout_and_baseline(repository_url, reference_branch)
+        self._record(progress, "checkout_and_baseline", baseline)
+        if baseline.get("status") != "SUCCESS":
+            return self.runtime_summary(progress, "Workflow stopped because baseline build did not pass.")
+
+        assessment = self.run_assessment()
+        self._record(progress, "vulnerability_assessment", assessment)
+        if assessment.get("status") != "SUCCESS":
+            return self.runtime_summary(progress, "Workflow stopped because vulnerability assessment failed.")
+
+        analysis = self.run_project_analysis()
+        self._record(progress, "project_analysis", analysis)
+        if analysis.get("status") not in {"SUCCESS", "PARTIAL"}:
+            return self.runtime_summary(progress, "Workflow stopped because project analysis failed.")
+
+        planning_result = self.run_planning_agent_boundary(attempt_number=1, planning_agent_output=planning_agent_output)
+        self._record(progress, "remediation_planning_agent", planning_result)
+        if planning_result.get("status") == "AWAITING_LLM_OUTPUT":
+            return self.runtime_summary(progress, "Workflow paused at the Remediation Planning Agent boundary.")
+        if planning_result.get("status") != "SUCCESS":
+            return self.runtime_summary(progress, "Workflow stopped because planning output could not be processed.")
+
+        routed = self.handle_planner_result(planning_result, attempt_number=1)
+        self._record(progress, "planner_result_routing", routed)
+        return self.runtime_summary(progress, "Workflow routed the Remediation Planning Agent output.")
 
     def initialize(self, repository_url: str, reference_branch: str) -> dict:
         self.workspace.initialize()
@@ -106,13 +153,48 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return result
 
+    def run_planning_agent_boundary(
+        self,
+        attempt_number: int,
+        planning_agent_output: str | dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Enter the LLM Planning Agent boundary without doing deterministic planning."""
+        manifest = self.manifest_store.load()
+        if planning_agent_output is None:
+            context = build_planning_context(self.workspace.root, attempt_number=attempt_number)
+            context_path = self.workspace.root / f"attempt-{attempt_number}" / "remediation-planning-context.json"
+            context_path.parent.mkdir(parents=True, exist_ok=True)
+            context_path.write_text(json.dumps(context, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            manifest["status"] = "AWAITING_PLANNING_AGENT_OUTPUT"
+            manifest.setdefault("planning", {})["context"] = f"attempt-{attempt_number}/remediation-planning-context.json"
+            manifest["planning"]["agent"] = "RemediationPlanningAgent"
+            manifest["planning"]["expectedDecisionTypes"] = ["PATCH_PLAN", "MANUAL_REVIEW", "REQUEST_ADDITIONAL_EVIDENCE"]
+            self.manifest_store.save(manifest)
+            return {
+                "status": "AWAITING_LLM_OUTPUT",
+                "decisionType": "PLANNING_AGENT_CONTEXT",
+                "artifactPath": str(context_path),
+            }
+
+        result = persist_planning_agent_output(
+            self.workspace.root,
+            planning_agent_output,
+            attempt_number=attempt_number,
+        )
+        manifest.setdefault("planning", {})["lastDecision"] = self._relative_ref(result["artifactPath"])
+        manifest["status"] = "PLANNING_COMPLETE"
+        self.manifest_store.save(manifest)
+        return result
+
     def handle_planner_result(self, planning_result: dict, attempt_number: int | None = None) -> dict:
         """Route structured planner output without making remediation decisions."""
         decision_type = planning_result.get("decisionType") or planning_result.get("type")
         if decision_type == "REQUEST_ADDITIONAL_EVIDENCE":
             return self.handle_additional_investigation_request(attempt_number or 1, planning_result)
         if decision_type == "PATCH_PLAN":
-            patch_plan_path = planning_result["patchPlanPath"]
+            patch_plan_path = planning_result.get("patchPlanPath") or planning_result.get("artifactPath")
+            if not patch_plan_path:
+                return {"status": "FAILED", "failureCode": "PATCH_PLAN_ARTIFACT_MISSING"}
             result = self.run_patch_validation_attempt(attempt_number or self._next_attempt_number(), patch_plan_path)
             if result.get("status") == "SUCCESS":
                 self._finalize_successful_validation()
@@ -120,6 +202,7 @@ class WorkflowOrchestrator:
         if decision_type == "MANUAL_REVIEW":
             manifest = self.manifest_store.load()
             manifest["status"] = "MANUAL_REVIEW_REQUIRED"
+            manifest.setdefault("planning", {})["manualReviewDecision"] = self._relative_ref(planning_result.get("artifactPath"))
             self.manifest_store.save(manifest)
             return self.generate_final_pr_summary()
         return {"status": "FAILED", "failureCode": "UNKNOWN_PLANNER_RESULT"}
@@ -174,7 +257,7 @@ class WorkflowOrchestrator:
         if dry["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_DRY_RUN_FAILED"
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, dry_run_result_path=dry_result_path)
-            attempt_entry["outcomeAnalysisSummary"] = outcome_path
+            attempt_entry["outcomeAnalysisContext"] = outcome_path
             self.manifest_store.save(manifest)
             return dry
 
@@ -185,7 +268,7 @@ class WorkflowOrchestrator:
         if patch["status"] != "SUCCESS":
             attempt_entry["status"] = "PATCH_APPLICATION_FAILED"
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path)
-            attempt_entry["outcomeAnalysisSummary"] = outcome_path
+            attempt_entry["outcomeAnalysisContext"] = outcome_path
             self.manifest_store.save(manifest)
             return patch
 
@@ -207,7 +290,7 @@ class WorkflowOrchestrator:
             manifest["acceptedPatchSet"] = self._accepted_patch_set(attempt_number, patch_plan_path, proof_path, f"attempt-{attempt_number}/validation-result.json")
         else:
             outcome_path = self.run_outcome_analysis(attempt_number, patch_plan_path, patch_application_proof_path=proof_path, validation_result_path=validation_path)
-            attempt_entry["outcomeAnalysisSummary"] = outcome_path
+            attempt_entry["outcomeAnalysisContext"] = outcome_path
         self.manifest_store.save(manifest)
         return validation
 
@@ -219,18 +302,18 @@ class WorkflowOrchestrator:
         validation_result_path: str | None = None,
         dry_run_result_path: str | None = None,
     ) -> str:
-        manifest = self.manifest_store.load()
-        output_path = self.workspace.root / f"attempt-{attempt_number}" / "outcome-analysis-summary.json"
-        create_outcome_analysis_summary(
+        context = build_outcome_analysis_context(
+            workspace_root=self.workspace.root,
             attempt_number=attempt_number,
-            output_path=str(output_path),
-            workflow_id=manifest.get("workflowId", "unknown"),
             patch_plan_path=patch_plan_path,
             patch_application_proof_path=patch_application_proof_path,
             validation_result_path=validation_result_path,
             dry_run_result_path=dry_run_result_path,
         )
-        return f"attempt-{attempt_number}/outcome-analysis-summary.json"
+        output_path = self.workspace.root / f"attempt-{attempt_number}" / "outcome-analysis-context.json"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(context, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return f"attempt-{attempt_number}/outcome-analysis-context.json"
 
     def generate_final_pr_summary(self) -> dict:
         manifest = self.manifest_store.load()
@@ -247,13 +330,27 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return result
 
-    def _finalize_successful_validation(self) -> dict:
-        """Apply the common successful-validation lifecycle transition.
+    def runtime_summary(self, progress: list[dict[str, Any]], message: str) -> dict[str, Any]:
+        manifest = self.manifest_store.load()
+        workspace_root = Path(self.workspace.root)
+        return {
+            "status": manifest.get("status", "UNKNOWN"),
+            "message": message,
+            "workflowId": manifest.get("workflowId"),
+            "workspaceRoot": str(workspace_root),
+            "manifestPath": str(workspace_root / "manifest.json"),
+            "progress": progress,
+            "artifacts": {
+                "baseline": manifest.get("baseline", {}),
+                "planning": manifest.get("planning", {}),
+                "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
+                "final": manifest.get("final", {}),
+            },
+            "nextAction": self._next_action(manifest),
+        }
 
-        Both direct planner PATCH_PLAN routing and the bounded attempt loop use
-        this method so a successful validation always produces the same final
-        manifest state and PR summary artifacts.
-        """
+    def _finalize_successful_validation(self) -> dict:
+        """Apply the common successful-validation lifecycle transition."""
         manifest = self.manifest_store.load()
         manifest["status"] = "VALIDATION_SUCCEEDED"
         self.manifest_store.save(manifest)
@@ -336,6 +433,44 @@ class WorkflowOrchestrator:
     def _next_attempt_number(self) -> int:
         manifest = self.manifest_store.load()
         return len(manifest.get("attempts", [])) + 1
+
+    def _relative_ref(self, path: str | None) -> str | None:
+        if not path:
+            return None
+        candidate = Path(path)
+        try:
+            return str(candidate.relative_to(self.workspace.root))
+        except ValueError:
+            return str(candidate)
+
+    @staticmethod
+    def _record(progress: list[dict[str, Any]], step: str, result: dict[str, Any]) -> None:
+        progress.append({
+            "step": step,
+            "status": result.get("status"),
+            "failureCode": result.get("failureCode"),
+            "decisionType": result.get("decisionType"),
+            "artifactPath": result.get("artifactPath"),
+        })
+
+    @staticmethod
+    def _next_action(manifest: dict[str, Any]) -> str:
+        status = manifest.get("status")
+        if status == "AWAITING_PLANNING_AGENT_OUTPUT":
+            return "Invoke the LLM Remediation Planning Agent with the generated planning context artifact."
+        if status == "PROJECT_ANALYSIS_COMPLETE":
+            return "Invoke the Remediation Planning Agent with the generated assessment and project-analysis artifacts."
+        if status == "VALIDATION_SUCCEEDED":
+            return "Review the final PR summary artifact before creating a pull request."
+        if status == "BASELINE_BUILD_FAILED":
+            return "Fix the repository baseline before attempting remediation."
+        if status == "FAILED_MAX_ATTEMPTS":
+            return "Review outcome-analysis artifacts and decide whether manual remediation is required."
+        if status == "MANUAL_REVIEW_REQUIRED":
+            return "Manual review is required; automated PR creation should remain disabled."
+        if status == "ADDITIONAL_INVESTIGATION_REQUESTED":
+            return "Run the requested deterministic investigation through the orchestrator, then reinvoke the Planning Agent."
+        return "Review the manifest and generated artifacts for the next workflow action."
 
     @staticmethod
     def _read_json(path: str) -> dict:
