@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from oss_remediation_agent.agents import GoogleGenAIJsonInvoker, LLMAgentInvoker, LLMInvocationError
 from oss_remediation_agent.agents.remediation_outcome_analysis_agent import (
@@ -52,10 +52,10 @@ class WorkflowOrchestrator:
         """Run the production MVP workflow entry path.
 
         This method keeps ADK ``agent.py`` thin. It performs deterministic
-        baseline, assessment, and project-analysis steps, then invokes the LLM
-        Planning Agent boundary. ``planning_agent_output`` is retained only as a
-        test/integration hook for callers that inject pre-generated structured
-        JSON; production flow obtains that output through ``LLMAgentInvoker``.
+        baseline, assessment, and project-analysis steps, then delegates the
+        autonomous Phase 5 routing loop to the orchestrator. ``planning_agent_output``
+        is retained only as a test/integration hook for callers that inject one
+        pre-generated structured JSON response for the first planning invocation.
         """
         progress: list[dict[str, Any]] = []
 
@@ -74,14 +74,53 @@ class WorkflowOrchestrator:
         if analysis.get("status") not in {"SUCCESS", "PARTIAL"}:
             return self.runtime_summary(progress, "Workflow stopped because project analysis failed.")
 
-        planning_result = self.run_planning_agent_boundary(attempt_number=1, planning_agent_output=planning_agent_output)
-        self._record(progress, "remediation_planning_agent", planning_result)
-        if planning_result.get("status") != "SUCCESS":
-            return self.runtime_summary(progress, "Workflow stopped because the Planning Agent did not return usable structured output.")
+        return self.run_orchestration_loop(progress, first_planning_agent_output=planning_agent_output)
 
-        routed = self.handle_planner_result(planning_result, attempt_number=1)
-        self._record(progress, "planner_result_routing", routed)
-        return self.runtime_summary(progress, "Workflow routed the Remediation Planning Agent output.")
+    def run_orchestration_loop(
+        self,
+        progress: list[dict[str, Any]] | None = None,
+        first_planning_agent_output: str | dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Run the bounded Phase 5 planning/patch/outcome/replanning loop."""
+        progress = progress if progress is not None else []
+        attempt_number = 1
+        injected_output = first_planning_agent_output
+
+        while attempt_number <= self.policy.max_attempts:
+            planning_result = self.run_planning_agent_boundary(
+                attempt_number=attempt_number,
+                planning_agent_output=injected_output,
+            )
+            injected_output = None
+            self._record(progress, f"remediation_planning_agent_attempt_{attempt_number}", planning_result)
+            if planning_result.get("status") != "SUCCESS":
+                return self.runtime_summary(progress, "Workflow stopped because the Planning Agent did not return usable structured output.")
+
+            routed = self.handle_planner_result(planning_result, attempt_number=attempt_number)
+            self._record(progress, f"planner_result_routing_attempt_{attempt_number}", routed)
+
+            if routed.get("status") == "ADDITIONAL_INVESTIGATION_COMPLETE":
+                continue
+
+            if routed.get("status") in {"MANUAL_REVIEW_REQUIRED", "PR_SUMMARY_CREATED", "SUCCESS"}:
+                return self.runtime_summary(progress, "Workflow reached a terminal routing decision.")
+
+            manifest = self.manifest_store.load()
+            if manifest.get("status") == "OUTCOME_ANALYSIS_AGENT_INVOCATION_FAILED":
+                return self.runtime_summary(progress, "Workflow stopped because Outcome Analysis Agent invocation failed.")
+
+            if manifest.get("status") == "OUTCOME_ANALYSIS_COMPLETE":
+                attempt_number += 1
+                continue
+
+            if routed.get("status") == "FAILED" and routed.get("failureCode") == "PATCH_PLAN_ARTIFACT_MISSING":
+                return self.runtime_summary(progress, "Workflow stopped because the Planning Agent did not provide a patch-plan artifact.")
+
+            attempt_number += 1
+
+        max_attempts_result = self.handle_max_attempts_reached()
+        self._record(progress, "max_attempts_routing", max_attempts_result)
+        return self.runtime_summary(progress, "Workflow reached the configured remediation-attempt limit.")
 
     def initialize(self, repository_url: str, reference_branch: str) -> dict:
         self.workspace.initialize()
@@ -205,40 +244,162 @@ class WorkflowOrchestrator:
     def handle_planner_result(self, planning_result: dict, attempt_number: int | None = None) -> dict:
         """Route structured planner output without making remediation decisions."""
         decision_type = planning_result.get("decisionType") or planning_result.get("type")
+        current_attempt = attempt_number or 1
         if decision_type == "REQUEST_ADDITIONAL_EVIDENCE":
-            return self.handle_additional_investigation_request(attempt_number or 1, planning_result)
+            return self.handle_additional_investigation_request(current_attempt, planning_result)
         if decision_type == "PATCH_PLAN":
             patch_plan_path = planning_result.get("patchPlanPath") or planning_result.get("artifactPath")
             if not patch_plan_path:
                 return {"status": "FAILED", "failureCode": "PATCH_PLAN_ARTIFACT_MISSING"}
-            result = self.run_patch_validation_attempt(attempt_number or self._next_attempt_number(), patch_plan_path)
+            result = self.run_patch_validation_attempt(current_attempt, patch_plan_path)
             if result.get("status") == "SUCCESS":
                 self._finalize_successful_validation()
             return result
         if decision_type == "MANUAL_REVIEW":
-            manifest = self.manifest_store.load()
-            manifest["status"] = "MANUAL_REVIEW_REQUIRED"
-            manifest.setdefault("planning", {})["manualReviewDecision"] = self._relative_ref(planning_result.get("artifactPath"))
-            self.manifest_store.save(manifest)
-            return self.generate_final_pr_summary()
+            return self.handle_manual_review(planning_result)
         return {"status": "FAILED", "failureCode": "UNKNOWN_PLANNER_RESULT"}
 
     def handle_additional_investigation_request(self, attempt_number: int, request: dict) -> dict:
-        """Record additional investigation requests per attempt and enforce the attempt-scoped limit."""
+        """Execute an LLM-requested deterministic investigation and replan in the loop."""
         manifest = self.manifest_store.load()
         attempt = self._attempt_entry(manifest, attempt_number)
         requests = attempt.setdefault("additionalInvestigationRequests", [])
         requests.append(request)
         manifest.setdefault("additionalInvestigationRequests", []).append({"attemptNumber": attempt_number, "request": request})
+
         if len(requests) > self.policy.max_additional_investigation_requests_per_attempt:
             attempt["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
             manifest["status"] = "ADDITIONAL_INVESTIGATION_LIMIT_REACHED"
-            manifest["plannerConstraint"] = "Planner must produce a patch plan or manual review decision."
-        else:
-            attempt["status"] = "ADDITIONAL_INVESTIGATION_REQUESTED"
-            manifest["status"] = "ADDITIONAL_INVESTIGATION_REQUESTED"
+            manifest["plannerConstraint"] = "Additional investigation limit reached. Planning Agent must return PATCH_PLAN or MANUAL_REVIEW."
+            self.manifest_store.save(manifest)
+            return {"status": "ADDITIONAL_INVESTIGATION_COMPLETE", "limitReached": True}
+
         self.manifest_store.save(manifest)
-        return manifest
+        investigation_result = self.execute_additional_investigation(attempt_number, len(requests), request)
+        manifest = self.manifest_store.load()
+        attempt = self._attempt_entry(manifest, attempt_number)
+        attempt["status"] = "ADDITIONAL_INVESTIGATION_COMPLETE"
+        attempt.setdefault("additionalInvestigationArtifacts", []).append(investigation_result.get("artifactPath"))
+        manifest["status"] = "ADDITIONAL_INVESTIGATION_COMPLETE"
+        manifest.setdefault("additionalInvestigationArtifacts", []).append({
+            "attemptNumber": attempt_number,
+            "artifactPath": investigation_result.get("artifactPath"),
+            "requestedTool": investigation_result.get("requestedTool"),
+            "status": investigation_result.get("status"),
+        })
+        self.manifest_store.save(manifest)
+        return investigation_result
+
+    def execute_additional_investigation(self, attempt_number: int, investigation_number: int, request: dict) -> dict:
+        """Invoke a registered deterministic evidence tool requested by the planner."""
+        requested_tool = self._requested_tool_name(request)
+        registry = self._investigation_tool_registry()
+        runner = registry.get(requested_tool)
+        if runner is None:
+            return self._write_investigation_result(
+                attempt_number,
+                investigation_number,
+                requested_tool,
+                {
+                    "status": "FAILED",
+                    "failureCode": "UNSUPPORTED_INVESTIGATION_TOOL",
+                    "requestedTool": requested_tool,
+                    "request": request,
+                    "message": "Requested deterministic investigation tool is not registered with the orchestrator.",
+                },
+            )
+        result = runner(attempt_number, investigation_number, request)
+        return self._write_investigation_result(attempt_number, investigation_number, requested_tool, result)
+
+    def _investigation_tool_registry(self) -> dict[str, Callable[[int, int, dict], dict]]:
+        return {
+            "ProjectAnalyzerTool": self._run_project_analyzer_investigation,
+            "project_analyzer": self._run_project_analyzer_investigation,
+            "PROJECT_ANALYZER": self._run_project_analyzer_investigation,
+            "OSVScannerTool": self._run_osv_scanner_investigation,
+            "osv_scanner": self._run_osv_scanner_investigation,
+            "OSV_SCANNER": self._run_osv_scanner_investigation,
+            "ArtifactReferenceTool": self._run_artifact_reference_investigation,
+            "artifact_reference": self._run_artifact_reference_investigation,
+            "ManifestArtifactReader": self._run_artifact_reference_investigation,
+        }
+
+    def _run_project_analyzer_investigation(self, attempt_number: int, investigation_number: int, request: dict) -> dict:
+        manifest = self.manifest_store.load()
+        repository_path = manifest.get("baseline", {}).get("repositoryPath")
+        if not repository_path:
+            return {"status": "FAILED", "failureCode": "BASELINE_NOT_READY", "request": request}
+        artifact_dir = self.workspace.root / f"attempt-{attempt_number}" / f"investigation-{investigation_number}"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        return analyze_project(
+            repository_path=repository_path,
+            vulnerability_assessment_path=str(self.workspace.root / "baseline" / "vulnerability-assessment-report.json"),
+            output_path=str(artifact_dir / "project-analyzer-report.json"),
+            artifact_output_dir=str(artifact_dir),
+            workflow_id=manifest["workflowId"],
+        )
+
+    def _run_osv_scanner_investigation(self, attempt_number: int, investigation_number: int, request: dict) -> dict:
+        manifest = self.manifest_store.load()
+        repository_path = manifest.get("baseline", {}).get("repositoryPath")
+        if not repository_path:
+            return {"status": "FAILED", "failureCode": "BASELINE_NOT_READY", "request": request}
+        artifact_dir = self.workspace.root / f"attempt-{attempt_number}" / f"investigation-{investigation_number}"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        return generate_vulnerability_assessment(
+            repository_path=repository_path,
+            output_path=str(artifact_dir / "vulnerability-assessment-report.json"),
+            raw_report_path=str(artifact_dir / "osv-report.json"),
+            severity_scope=self.policy.severity_scope,
+            workflow_id=manifest["workflowId"],
+        )
+
+    def _run_artifact_reference_investigation(self, attempt_number: int, investigation_number: int, request: dict) -> dict:
+        manifest = self.manifest_store.load()
+        return {
+            "status": "SUCCESS",
+            "request": request,
+            "artifactReferences": {
+                "manifest": str(self.workspace.root / "manifest.json"),
+                "baseline": manifest.get("baseline", {}),
+                "attempts": manifest.get("attempts", []),
+                "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
+            },
+        }
+
+    def _write_investigation_result(
+        self,
+        attempt_number: int,
+        investigation_number: int,
+        requested_tool: str | None,
+        result: dict,
+    ) -> dict:
+        artifact_dir = self.workspace.root / f"attempt-{attempt_number}" / f"investigation-{investigation_number}"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        artifact_path = artifact_dir / "additional-investigation-result.json"
+        payload = {
+            "artifactId": f"additional-investigation-{attempt_number}-{investigation_number}",
+            "attemptNumber": attempt_number,
+            "investigationNumber": investigation_number,
+            "requestedTool": requested_tool,
+            "status": result.get("status", "UNKNOWN"),
+            "result": result,
+        }
+        artifact_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return {
+            "status": "ADDITIONAL_INVESTIGATION_COMPLETE",
+            "requestedTool": requested_tool,
+            "artifactPath": self._relative_ref(str(artifact_path)),
+            "toolStatus": result.get("status"),
+            "failureCode": result.get("failureCode"),
+        }
+
+    @staticmethod
+    def _requested_tool_name(request: dict) -> str | None:
+        requested_tool = request.get("requestedTool") or request.get("tool") or request.get("toolName")
+        if isinstance(requested_tool, dict):
+            return requested_tool.get("name") or requested_tool.get("toolName")
+        return requested_tool
 
     def run_attempt_loop(self, patch_plan_paths: list[str]) -> dict:
         """Run a bounded MVP attempt loop over provided patch-plan artifacts."""
@@ -248,15 +409,7 @@ class WorkflowOrchestrator:
             if last_result.get("status") == "SUCCESS":
                 self._finalize_successful_validation()
                 return last_result
-        manifest = self.manifest_store.load()
-        if manifest.get("acceptedPatchSet", {}).get("status") == "VALIDATED":
-            manifest["status"] = "PARTIAL_REMEDIATION_READY_FOR_PR"
-            self.manifest_store.save(manifest)
-            self.generate_final_pr_summary()
-        else:
-            manifest["status"] = "FAILED_MAX_ATTEMPTS"
-            self.manifest_store.save(manifest)
-        return last_result
+        return self.handle_max_attempts_reached() or last_result
 
     def run_patch_validation_attempt(self, attempt_number: int, patch_plan_path: str) -> dict:
         manifest = self.manifest_store.load()
@@ -376,6 +529,33 @@ class WorkflowOrchestrator:
         self.manifest_store.save(manifest)
         return self._relative_ref(result["artifactPath"]) or f"attempt-{attempt_number}/outcome-analysis-summary.json"
 
+    def handle_manual_review(self, planning_result: dict) -> dict:
+        manifest = self.manifest_store.load()
+        manifest["status"] = "MANUAL_REVIEW_REQUIRED"
+        manifest.setdefault("planning", {})["manualReviewDecision"] = self._relative_ref(planning_result.get("artifactPath"))
+        self.manifest_store.save(manifest)
+        if self._has_accepted_patch_set(manifest) and self.policy.allow_partial_pr:
+            result = self.generate_final_pr_summary()
+            manifest = self.manifest_store.load()
+            manifest["status"] = "PR_SUMMARY_CREATED"
+            manifest.setdefault("final", {})["prType"] = "PARTIAL_REMEDIATION"
+            self.manifest_store.save(manifest)
+            return result
+        return {"status": "MANUAL_REVIEW_REQUIRED", "artifactPath": planning_result.get("artifactPath")}
+
+    def handle_max_attempts_reached(self) -> dict:
+        manifest = self.manifest_store.load()
+        if self._has_accepted_patch_set(manifest) and self.policy.allow_partial_pr:
+            result = self.generate_final_pr_summary()
+            manifest = self.manifest_store.load()
+            manifest["status"] = "PR_SUMMARY_CREATED"
+            manifest.setdefault("final", {})["prType"] = "PARTIAL_REMEDIATION"
+            self.manifest_store.save(manifest)
+            return result
+        manifest["status"] = "FAILED_MAX_ATTEMPTS"
+        self.manifest_store.save(manifest)
+        return {"status": "FAILED", "failureCode": "FAILED_MAX_ATTEMPTS"}
+
     def generate_final_pr_summary(self) -> dict:
         manifest = self.manifest_store.load()
         final_dir = self.workspace.root / "final"
@@ -406,6 +586,7 @@ class WorkflowOrchestrator:
                 "planning": manifest.get("planning", {}),
                 "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
                 "final": manifest.get("final", {}),
+                "additionalInvestigationArtifacts": manifest.get("additionalInvestigationArtifacts", []),
             },
             "nextAction": self._next_action(manifest),
         }
@@ -450,6 +631,11 @@ class WorkflowOrchestrator:
             "remediationSummary": remediation_summary,
             "vulnerabilityDecisions": accepted_decisions,
         }
+
+    @staticmethod
+    def _has_accepted_patch_set(manifest: dict[str, Any]) -> bool:
+        accepted = manifest.get("acceptedPatchSet", {})
+        return accepted.get("status") == "VALIDATED" and bool(accepted.get("patchIds"))
 
     @staticmethod
     def _remediation_row(decision: dict[str, Any]) -> dict[str, Any]:
@@ -517,14 +703,8 @@ class WorkflowOrchestrator:
     @staticmethod
     def _next_action(manifest: dict[str, Any]) -> str:
         status = manifest.get("status")
-        if status == "PLANNING_AGENT_INVOCATION_FAILED":
-            return "Review the planning context artifact and LLM invocation error before retrying."
-        if status == "PROJECT_ANALYSIS_COMPLETE":
-            return "Invoke the Remediation Planning Agent with the generated assessment and project-analysis artifacts."
-        if status == "PATCH_DRY_RUN_FAILED":
-            return "Run Outcome Analysis for the dry-run failure before replanning."
-        if status == "OUTCOME_ANALYSIS_COMPLETE":
-            return "Reinvoke the Remediation Planning Agent using the outcome-analysis summary for replanning."
+        if status == "PR_SUMMARY_CREATED":
+            return "Review the generated PR summary artifact before creating a pull request."
         if status == "VALIDATION_SUCCEEDED":
             return "Review the final PR summary artifact before creating a pull request."
         if status == "BASELINE_BUILD_FAILED":
@@ -532,12 +712,12 @@ class WorkflowOrchestrator:
         if status == "FAILED_MAX_ATTEMPTS":
             return "Review outcome-analysis artifacts and decide whether manual remediation is required."
         if status == "MANUAL_REVIEW_REQUIRED":
-            return "Manual review is required; automated PR creation should remain disabled."
-        if status == "ADDITIONAL_INVESTIGATION_REQUESTED":
-            return "Run the requested deterministic investigation through the orchestrator, then reinvoke the Planning Agent."
+            return "Manual review is required; automated PR creation should remain disabled because no accepted patch set exists."
+        if status == "PLANNING_AGENT_INVOCATION_FAILED":
+            return "Review the planning context artifact and LLM invocation error before retrying."
         if status == "OUTCOME_ANALYSIS_AGENT_INVOCATION_FAILED":
-            return "Review the outcome-analysis context artifact and LLM invocation error before replanning."
-        return "Review the manifest and generated artifacts for the next workflow action."
+            return "Review the outcome-analysis context artifact and LLM invocation error before retrying."
+        return "Workflow completed or stopped at a terminal state; review the manifest and generated artifacts."
 
     @staticmethod
     def _read_json(path: str) -> dict:
