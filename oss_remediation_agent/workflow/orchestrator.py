@@ -113,7 +113,10 @@ class WorkflowOrchestrator:
             return self.handle_additional_investigation_request(attempt_number or 1, planning_result)
         if decision_type == "PATCH_PLAN":
             patch_plan_path = planning_result["patchPlanPath"]
-            return self.run_patch_validation_attempt(attempt_number or self._next_attempt_number(), patch_plan_path)
+            result = self.run_patch_validation_attempt(attempt_number or self._next_attempt_number(), patch_plan_path)
+            if result.get("status") == "SUCCESS":
+                self._finalize_successful_validation()
+            return result
         if decision_type == "MANUAL_REVIEW":
             manifest = self.manifest_store.load()
             manifest["status"] = "MANUAL_REVIEW_REQUIRED"
@@ -144,10 +147,7 @@ class WorkflowOrchestrator:
         for attempt_number, patch_plan_path in enumerate(patch_plan_paths[: self.policy.max_attempts], start=1):
             last_result = self.run_patch_validation_attempt(attempt_number, patch_plan_path)
             if last_result.get("status") == "SUCCESS":
-                manifest = self.manifest_store.load()
-                manifest["status"] = "VALIDATION_SUCCEEDED"
-                self.manifest_store.save(manifest)
-                self.generate_final_pr_summary()
+                self._finalize_successful_validation()
                 return last_result
         manifest = self.manifest_store.load()
         if manifest.get("acceptedPatchSet", {}).get("status") == "VALIDATED":
@@ -246,6 +246,18 @@ class WorkflowOrchestrator:
         manifest["final"]["prDescription"] = "final/pr-description.md"
         self.manifest_store.save(manifest)
         return result
+
+    def _finalize_successful_validation(self) -> dict:
+        """Apply the common successful-validation lifecycle transition.
+
+        Both direct planner PATCH_PLAN routing and the bounded attempt loop use
+        this method so a successful validation always produces the same final
+        manifest state and PR summary artifacts.
+        """
+        manifest = self.manifest_store.load()
+        manifest["status"] = "VALIDATION_SUCCEEDED"
+        self.manifest_store.save(manifest)
+        return self.generate_final_pr_summary()
 
     def _accepted_patch_set(self, attempt_number: int, patch_plan_path: str, patch_proof_path: str, validation_result_ref: str) -> dict:
         plan = self._read_json(patch_plan_path)
