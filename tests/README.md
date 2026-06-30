@@ -13,6 +13,9 @@ tests/
   integration/
     __init__.py
     test_*.py
+  e2e/
+    __init__.py
+    test_*.py
   fixtures/
     */pom.xml
 ```
@@ -39,6 +42,7 @@ Run checks individually:
 python -m compileall -q oss_remediation_agent
 python -m unittest discover -s tests/unit -p "test_*.py" -v
 python -m unittest discover -s tests/integration -p "test_*.py" -v
+python -m unittest discover -s tests/e2e -p "test_*.py" -v
 ```
 
 Make targets:
@@ -47,11 +51,12 @@ Make targets:
 make compile
 make unit
 make integration
+make e2e
 make test
 make clean
 ```
 
-If `python -m unittest discover -s tests -v` reports `Ran 0 tests`, use the explicit unit/integration commands above or run `python run_tests.py`.
+If `python -m unittest discover -s tests -v` reports `Ran 0 tests`, use the explicit unit/integration/e2e commands above or run `python run_tests.py`.
 
 ## Current testing pyramid
 
@@ -75,12 +80,13 @@ If `python -m unittest discover -s tests -v` reports `Ran 0 tests`, use the expl
 
 The current unit tests verify deterministic behavior for contracts, tools, validation, outcome analysis, PR summary generation, and orchestrator routing. These tests use temporary files and mocks where needed. They do not prove the full end-to-end workflow yet.
 
-## Integration test scope
+## Integration and E2E scope
 
-The current integration tests have two layers:
+The current non-unit tests have three layers:
 
 1. **Phase A - Fixture-based Integration Tests**: validate deterministic tools using committed Maven fixture projects.
 2. **Phase B - Workflow Integration Tests**: validate orchestrator lifecycle, manifest ownership, retry behavior, stop conditions, outcome summary generation, and final PR summary generation.
+3. **Phase C - End-to-End Workflow Tests**: validate the complete MVP workflow path from checkout/baseline through assessment, project analysis, planner routing, remediation attempts, validation, outcome analysis, accepted patch set generation, and PR summary generation.
 
 External command execution and AI planner behavior are mocked where needed so the tests remain stable across developer machines and CI.
 
@@ -267,143 +273,88 @@ Purpose:
 
 - Validate the orchestrator's execution lifecycle using mocked planner/tool responses where appropriate while exercising real workflow state management.
 
-### Test 1 - Successful Remediation Workflow
+Phase B scenarios:
 
-Purpose:
-
-- Verify the complete successful orchestration flow.
-
-Workflow:
-
-```text
-Initialize
-  -> Attempt 1
-  -> Dry Run
-  -> Patch Apply
-  -> Validation
-  -> Accepted Patch Set
-  -> PR Summary
-```
-
-Important assertions:
-
-- Manifest status becomes `VALIDATION_SUCCEEDED`.
-- Attempt status becomes `VALIDATION_SUCCEEDED`.
-- Accepted Patch Set is created.
-- Source attempt is recorded correctly.
-- PR Summary is generated.
-- PR is marked `ELIGIBLE`.
+1. Successful remediation workflow.
+2. Baseline build failure stops before remediation attempts.
+3. Validation failure generates Outcome Analysis and stops after max attempts.
+4. Manual review generates a `NOT_ELIGIBLE` PR summary.
+5. Retry succeeds on a second attempt after first validation failure.
 
 Why it matters:
 
-- Confirms the orchestrator correctly owns workflow state for a successful remediation.
+- Validates retry lifecycle, attempt isolation, stop conditions, and manifest state transitions.
 
-### Test 2 - Baseline Build Failure
+## Phase C - End-to-End Workflow Tests
 
-Purpose:
+### Purpose
 
-- Verify remediation never starts when the repository baseline cannot build.
+Phase C validates complete MVP workflow paths. These tests start at checkout/baseline, continue through assessment and project analysis, then exercise planner routing, remediation attempts, validation, outcome analysis, accepted patch set creation, and PR summary generation.
 
-Workflow:
+### `tests/e2e/test_phase_c_end_to_end_workflow.py`
 
-```text
-Checkout
-  -> Baseline Build
-  -> Failure
-  -> Workflow Stops
-```
+Phase C scenarios:
 
-Important assertions:
-
-- Manifest status becomes `BASELINE_BUILD_FAILED`.
-- No remediation attempts are created.
-- Repository baseline path is recorded.
-
-Why it matters:
-
-- Guarantees remediation never proceeds from an invalid baseline.
-
-### Test 3 - Validation Failure
-
-Purpose:
-
-- Verify validation failures generate Outcome Analysis and terminate correctly after reaching the configured attempt limit.
-
-Workflow:
-
-```text
-Patch
-  -> Validation
-  -> Failure
-  -> Outcome Analysis
-  -> Max Attempts
-  -> Workflow Stops
-```
+1. Successful remediation generates an eligible PR summary.
+2. Baseline build failure stops before assessment and remediation attempts.
+3. Manual review produces a `NOT_ELIGIBLE` PR summary.
+4. Retry succeeds on the second attempt and records attempt 2 as the accepted patch source.
+5. Max attempts reached terminates without an accepted patch set.
+6. Unsafe change scope is rejected and classified as `CHANGE_SCOPE_FAILURE`.
+7. New Critical/High vulnerability introduced is rejected and classified as `OSV_VALIDATION_FAILURE`.
 
 Important assertions:
 
-- Attempt status becomes `VALIDATION_FAILED`.
-- Outcome Analysis Summary is generated.
-- Manifest status becomes `FAILED_MAX_ATTEMPTS`.
-- Accepted Patch Set remains `EMPTY`.
+- Manifest state transitions are written by the orchestrator.
+- Attempt records are created, updated, and isolated correctly.
+- Failed attempts create Outcome Analysis artifacts.
+- Accepted Patch Set is only created after successful validation.
+- Final PR Summary is eligible only for validated remediation.
+- Manual review and failed workflows do not create an accepted patch set.
 
 Why it matters:
 
-- Ensures failed remediation attempts are analyzed and workflow stop conditions are enforced.
+- These tests provide MVP-level end-to-end confidence before moving to CI and real repository validation.
 
-### Test 4 - Manual Review Workflow
+## Design observation captured from Phase C
 
-Purpose:
+### `handle_planner_result(PATCH_PLAN)` versus `run_attempt_loop(...)`
 
-- Verify planner-directed manual review bypasses automated remediation.
+During Phase C review, we observed a design inconsistency in the successful remediation path:
 
-Workflow:
+- `run_attempt_loop(...)` sets the manifest status to `VALIDATION_SUCCEEDED` and generates the final PR summary after a successful validation.
+- `handle_planner_result({"decisionType": "PATCH_PLAN"})` routes directly to `run_patch_validation_attempt(...)`. After a successful validation, it updates the attempt and accepted patch set, but it does not set the top-level manifest status to `VALIDATION_SUCCEEDED` and does not automatically generate the final PR summary.
 
-```text
-Planner
-  -> MANUAL_REVIEW
-  -> Final PR Summary
-```
+This means a direct single-plan planner route can leave the top-level manifest status at the previous lifecycle state, such as `PROJECT_ANALYSIS_COMPLETE`, even though the attempt succeeded.
 
-Important assertions:
+### Why this design adjustment is needed
 
-- Manifest status becomes `MANUAL_REVIEW_REQUIRED`.
-- PR Summary is generated.
-- PR is marked `NOT_ELIGIBLE`.
+The orchestrator should provide one consistent post-validation lifecycle regardless of how a patch plan is supplied. Otherwise, callers need to know whether they invoked the attempt through `run_attempt_loop(...)` or directly through `handle_planner_result(...)`, which creates inconsistent workflow behavior.
 
-Why it matters:
+Recommended design adjustment:
 
-- Ensures unsupported remediation scenarios are escalated safely.
+- Prefer routing planner `PATCH_PLAN` decisions through the same bounded attempt lifecycle used by `run_attempt_loop(...)`; or
+- Add a shared post-validation finalization method that both `handle_planner_result(PATCH_PLAN)` and `run_attempt_loop(...)` call.
 
-### Test 5 - Retry Workflow
+Expected finalization behavior after successful validation:
 
-Purpose:
+1. Set top-level manifest status to `VALIDATION_SUCCEEDED`.
+2. Preserve the accepted patch set.
+3. Generate final PR summary artifacts.
+4. Save final manifest state once.
 
-- Verify the orchestrator correctly retries remediation after an unsuccessful validation.
+This should be implemented as a follow-up design/implementation refinement rather than hidden inside the tests.
 
-Workflow:
+## Minor follow-up improvements
 
-```text
-Attempt 1
-  -> Validation Failure
-  -> Outcome Analysis
-  -> Attempt 2
-  -> Validation Success
-  -> Accepted Patch Set
-  -> PR Summary
-```
+These are not blockers for the current passing suite, but should be addressed before production readiness:
 
-Important assertions:
-
-- First attempt fails.
-- Outcome Analysis is generated for the first attempt.
-- Second attempt succeeds.
-- Accepted Patch Set references Attempt 2.
-- Final PR Summary is generated.
-
-Why it matters:
-
-- Validates retry lifecycle, attempt isolation, and manifest state transitions.
+1. Add contract/schema validation assertions for generated artifacts.
+2. Refactor the orchestrator so successful `handle_planner_result(PATCH_PLAN)` and `run_attempt_loop(...)` share the same finalization path.
+3. Consider changing the successful Phase C test to use `run_attempt_loop(...)` unless testing direct planner routing is intentional.
+4. Add one less-mocked E2E profile that runs real Maven on fixture repositories.
+5. Add GitHub Actions CI to run `python run_tests.py` on every push and pull request.
+6. Add real Maven repository validation after CI is stable.
 
 ## Fixture projects
 
@@ -496,6 +447,7 @@ Unit tests                          PASS
 Fixture sanity verification          PASS
 Phase A fixture integration tests    PASS
 Phase B workflow integration tests   PASS
+Phase C end-to-end workflow tests    PASS
 ```
 
 ## Future CI
@@ -510,6 +462,4 @@ on every push and pull request.
 
 ## Next phase
 
-The next major testing milestone is Phase C end-to-end workflow testing.
-
-Phase C should validate the complete ADK remediation workflow, including the orchestrator, deterministic tools, AI agent integration points, artifact flow, and end-to-end execution against realistic repositories.
+The next major milestone is to implement the documented orchestrator finalization design adjustment, then add GitHub Actions CI and real repository validation.
