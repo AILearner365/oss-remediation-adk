@@ -19,20 +19,24 @@ def generate_vulnerability_assessment(
     workflow_id: str = "unknown",
 ) -> dict:
     severity_scope = severity_scope or ["CRITICAL", "HIGH"]
-    result = run_command(["osv-scanner", "scan", "source", "-r", ".", "--format", "json"], cwd=repository_path)
+    target_path = str(Path(repository_path).resolve())
+    command = ["osv-scanner", "scan", "source", "-r", target_path, "--format", "json"]
+    result = run_command(command, cwd=repository_path)
     raw_text = result.get("stdout") or "{}"
     Path(raw_report_path).parent.mkdir(parents=True, exist_ok=True)
     Path(raw_report_path).write_text(raw_text, encoding="utf-8")
     raw_json = _loads(raw_text)
     vulnerabilities = normalize_osv_findings(raw_json, severity_scope, raw_report_path)
-    status = "SUCCESS" if result["exitCode"] in (0, 1) else "FAILED"
+    scanner_error = result.get("stderr", "") or ""
+    no_package_sources = "No package sources found" in scanner_error
+    status = "SUCCESS" if result["exitCode"] in (0, 1) and not no_package_sources else "FAILED"
     artifact = common_artifact(
         artifact_id="vulnerability-assessment-001",
         workflow_id=workflow_id,
         created_by=TOOL,
         status=status,
         reportType="VULNERABILITY_ASSESSMENT",
-        scanner={"name": "OSV", "command": "osv-scanner scan source -r . --format json", "rawReportPath": raw_report_path},
+        scanner={"name": "OSV", "command": " ".join(command), "rawReportPath": raw_report_path},
         severityScope=severity_scope,
         vulnerabilities=vulnerabilities,
         summary={
@@ -41,7 +45,7 @@ def generate_vulnerability_assessment(
             "totalInScopeCount": len(vulnerabilities),
         },
         artifactReferences={"rawOsvReport": raw_report_path},
-        errors=[] if status == "SUCCESS" else [result.get("stderr", "")],
+        errors=[] if status == "SUCCESS" else [scanner_error],
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -54,24 +58,29 @@ def generate_vulnerability_assessment(
         failure_code=None if status == "SUCCESS" else "OSV_SCAN_FAILED",
         capabilities=["OSV_SCAN", "SEVERITY_FILTERING", "MAVEN_ECOSYSTEM_NORMALIZATION"],
         payload=artifact["summary"] | {"rawReportPath": raw_report_path},
-        errors=[] if status == "SUCCESS" else [result.get("stderr", "")],
+        errors=[] if status == "SUCCESS" else [scanner_error],
     ).to_dict()
 
 
 def validate_post_remediation(repository_path: str, output_path: str, severity_scope: list[str] | None = None) -> dict:
     severity_scope = severity_scope or ["CRITICAL", "HIGH"]
-    result = run_command(["osv-scanner", "scan", "source", "-r", ".", "--format", "json"], cwd=repository_path)
+    target_path = str(Path(repository_path).resolve())
+    command = ["osv-scanner", "scan", "source", "-r", target_path, "--format", "json"]
+    result = run_command(command, cwd=repository_path)
     raw_text = result.get("stdout") or "{}"
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(raw_text, encoding="utf-8")
     remaining = normalize_osv_findings(_loads(raw_text), severity_scope, output_path)
+    scanner_error = result.get("stderr", "") or ""
+    no_package_sources = "No package sources found" in scanner_error
+    status = "SUCCESS" if result["exitCode"] in (0, 1) and not no_package_sources else "FAILED"
     return ToolResult(
         tool_name=TOOL,
         tool_version="1.0.0",
         operation="validate_post_remediation",
-        status="SUCCESS" if result["exitCode"] in (0, 1) else "FAILED",
+        status=status,
         artifact_path=output_path,
-        failure_code=None if result["exitCode"] in (0, 1) else "OSV_SCAN_FAILED",
+        failure_code=None if status == "SUCCESS" else "OSV_SCAN_FAILED",
         capabilities=["POST_REMEDIATION_SCAN"],
         payload={
             "scanResultFile": output_path,
@@ -79,7 +88,7 @@ def validate_post_remediation(repository_path: str, output_path: str, severity_s
             "remainingHighCount": sum(1 for item in remaining if item["severity"] == "HIGH"),
             "remainingVulnerabilities": remaining,
         },
-        errors=[] if result["exitCode"] in (0, 1) else [result.get("stderr", "")],
+        errors=[] if status == "SUCCESS" else [scanner_error],
     ).to_dict()
 
 
