@@ -30,7 +30,12 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
     manifest = _read_json(workspace / "manifest.json")
     baseline = manifest.get("baseline", {})
     attempts = manifest.get("attempts", [])
+    current_attempt = _attempt_by_number(attempts, attempt_number)
     previous_attempt = _previous_attempt(attempts, attempt_number)
+    additional_investigation_artifacts = _resolve_artifact_list(
+        workspace,
+        (current_attempt or {}).get("additionalInvestigationArtifacts") or manifest.get("additionalInvestigationArtifacts", []),
+    )
 
     return {
         "agent": "RemediationPlanningAgent",
@@ -46,8 +51,12 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
             "previousPatchApplicationProof": _resolve(workspace, previous_attempt.get("patchApplicationProof") if previous_attempt else None),
             "previousValidationResult": _resolve(workspace, previous_attempt.get("validationResult") if previous_attempt else None),
             "previousOutcomeAnalysisSummary": _resolve(workspace, previous_attempt.get("outcomeAnalysisSummary") if previous_attempt else None),
+            "additionalInvestigationArtifacts": additional_investigation_artifacts,
         },
         "workflowPolicy": manifest.get("policy", {}),
+        "plannerConstraint": manifest.get("plannerConstraint"),
+        "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
+        "additionalInvestigationRequests": (current_attempt or {}).get("additionalInvestigationRequests", []),
         "outputContract": {
             "allowedDecisionTypes": sorted(_ALLOWED_DECISION_TYPES),
             "requiredBehavior": "Return structured JSON only. Do not run tools, mutate files, update manifest, or create pull requests.",
@@ -122,11 +131,31 @@ def _default_output_path(workspace: Path, decision_type: str, attempt_number: in
     return workspace / f"attempt-{attempt_number}" / "manual-review-decision.json"
 
 
+def _attempt_by_number(attempts: list[dict[str, Any]], attempt_number: int) -> dict[str, Any] | None:
+    for attempt in attempts:
+        if int(attempt.get("attemptNumber", 0)) == attempt_number:
+            return attempt
+    return None
+
+
 def _previous_attempt(attempts: list[dict[str, Any]], attempt_number: int) -> dict[str, Any] | None:
     previous = [attempt for attempt in attempts if int(attempt.get("attemptNumber", 0)) < attempt_number]
     if not previous:
         return None
     return sorted(previous, key=lambda item: int(item.get("attemptNumber", 0)))[-1]
+
+
+def _resolve_artifact_list(workspace: Path, references: list[Any]) -> list[str]:
+    resolved: list[str] = []
+    for item in references:
+        if isinstance(item, dict):
+            ref = item.get("artifactPath") or item.get("path") or item.get("ref")
+        else:
+            ref = item
+        value = _resolve(workspace, ref)
+        if value:
+            resolved.append(value)
+    return resolved
 
 
 def _resolve(workspace: Path, reference: str | None) -> str | None:
