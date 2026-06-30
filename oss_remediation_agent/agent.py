@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from google.adk.agents import Agent
@@ -26,7 +27,7 @@ def run_oss_remediation_workflow(
     manifest, make remediation decisions, apply patches, run validation, or
     create pull requests.
     """
-    workspace = workspace_root or tempfile.mkdtemp(prefix="oss-remediation-workspace-")
+    workspace = workspace_root or _default_workspace_root()
     policy = RemediationPolicy.load(policy_path)
     orchestrator = WorkflowOrchestrator(workspace, policy=policy)
     return orchestrator.run_workflow(
@@ -34,6 +35,17 @@ def run_oss_remediation_workflow(
         reference_branch=reference_branch,
         planning_agent_output=planning_agent_output,
     )
+
+
+def _default_workspace_root() -> str:
+    """Create a visible project-local workspace path for ADK smoke tests.
+
+    ``workspace_root`` can still be supplied explicitly to use /tmp or another
+    external location, but the default should be easy to inspect from Cloud Shell
+    Editor and local IDE explorers.
+    """
+    run_id = datetime.now(timezone.utc).strftime("oss-remediation-%Y%m%d-%H%M%S")
+    return str((Path.cwd() / ".oss-remediation-workspaces" / run_id).resolve())
 
 
 root_agent = Agent(
@@ -45,8 +57,7 @@ root_agent = Agent(
         "call run_oss_remediation_workflow with the repository URL and reference branch. "
         "Do not mutate repositories directly, do not update manifests directly, do not apply patches directly, "
         "and do not create pull requests. All workflow execution must be delegated to "
-        "WorkflowOrchestrator.run_workflow through the exposed tool. If the workflow returns "
-        "AWAITING_PLANNING_AGENT_OUTPUT, report the planning context artifact path and next action. "
+        "WorkflowOrchestrator.run_workflow through the exposed tool. "
         "Return the workspace path, manifest path, progress steps, final status, artifacts, and next action."
     ),
     tools=[run_oss_remediation_workflow],
