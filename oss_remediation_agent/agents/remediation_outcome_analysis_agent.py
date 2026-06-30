@@ -4,173 +4,145 @@ import json
 from pathlib import Path
 from typing import Any
 
-from oss_remediation_agent.contracts import common_artifact
-
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_agent.md"
+
+_REQUIRED_OUTCOME_FIELDS = {
+    "failureCategory",
+    "responsibilityArea",
+    "whatWeTried",
+    "whatChanged",
+    "whatHappened",
+    "newFactsLearned",
+    "recommendedFocusForPlanner",
+}
 
 
 def load_prompt() -> str:
+    """Load the reviewable prompt for the LLM-backed outcome analysis agent."""
     return PROMPT_PATH.read_text(encoding="utf-8")
 
 
-def create_outcome_analysis_summary(
+def build_outcome_analysis_context(
+    workspace_root: str | Path,
     attempt_number: int,
-    output_path: str,
-    workflow_id: str = "unknown",
     patch_plan_path: str | None = None,
     patch_application_proof_path: str | None = None,
     validation_result_path: str | None = None,
     dry_run_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """Create a deterministic Outcome Analysis Summary artifact.
+    """Build artifact-reference context for the Outcome Analysis Agent LLM.
 
-    This is an integration stub for the Remediation Outcome Analysis Agent. It
-    summarizes a failed attempt and deliberately does not produce the next
-    remediation plan.
+    The Outcome Analysis Agent is an AI reasoning component, not a deterministic
+    classifier. This helper does not inspect logs or classify failures. It only
+    packages the persisted artifact references that the orchestrator can pass to
+    the LLM prompt.
     """
-    plan = _read_json(patch_plan_path)
-    proof = _read_json(patch_application_proof_path)
-    validation = _read_json(validation_result_path)
-    dry_run = _read_json(dry_run_result_path)
+    workspace = Path(workspace_root)
+    manifest = _read_json(workspace / "manifest.json")
+    attempt = _attempt(manifest.get("attempts", []), attempt_number)
 
-    failure_category = _failure_category(dry_run, proof, validation)
-    what_happened = {
-        "patchDryRun": dry_run.get("status") if dry_run else None,
-        "patchApplication": proof.get("status") if proof else None,
-        "changeScopeValidation": (validation.get("changeScopeValidation") or {}).get("status") if validation else None,
-        "buildValidation": (validation.get("buildValidation") or {}).get("status") if validation else None,
-        "testValidation": (validation.get("testValidation") or {}).get("status") if validation else None,
-        "osvValidation": (validation.get("osvValidation") or {}).get("status") if validation else None,
+    return {
+        "agent": "RemediationOutcomeAnalysisAgent",
+        "attemptNumber": attempt_number,
+        "prompt": load_prompt(),
+        "workspaceRoot": str(workspace),
+        "manifestPath": str(workspace / "manifest.json"),
+        "artifactReferences": {
+            "manifest": str(workspace / "manifest.json"),
+            "patchPlan": _resolve(workspace, patch_plan_path or attempt.get("patchPlan")),
+            "patchApplicationProof": _resolve(workspace, patch_application_proof_path or attempt.get("patchApplicationProof")),
+            "validationResult": _resolve(workspace, validation_result_path or attempt.get("validationResult")),
+            "dryRunResult": _resolve(workspace, dry_run_result_path or attempt.get("patchDryRunResult")),
+        },
+        "outputContract": {
+            "artifactType": "Outcome Analysis Summary",
+            "requiredFields": sorted(_REQUIRED_OUTCOME_FIELDS),
+            "requiredBehavior": "Return structured JSON only. Do not create patches, run tools, mutate files, update manifest, or create pull requests.",
+        },
     }
-    changed = []
-    for result in proof.get("patchResults", []) if proof else []:
-        if result.get("status") == "APPLIED":
-            changed.append({"file": result.get("file"), "summary": f"Applied patch {result.get('patchId')}."})
 
-    artifact = common_artifact(
-        artifact_id=f"outcome-analysis-summary-attempt-{attempt_number}",
-        workflow_id=workflow_id,
-        created_by="RemediationOutcomeAnalysisAgent",
-        status="COMPLETED",
-        attemptNumber=attempt_number,
-        basedOnArtifacts={
-            "patchPlan": patch_plan_path,
-            "patchApplicationProof": patch_application_proof_path,
-            "validationResult": validation_result_path,
-            "dryRunResult": dry_run_result_path,
-        },
-        failureCategory=failure_category,
-        responsibilityArea=_responsibility_area(failure_category),
-        whatWeTried=_summarize_plan(plan),
-        whatChanged=changed,
-        whatHappened=what_happened,
-        newFactsLearned=_new_facts(dry_run, proof, validation),
-        recommendedFocusForPlanner=_planner_focus(failure_category),
-        capabilityGaps=_capability_gaps(failure_category),
-        artifactReferences={
-            "patchPlan": patch_plan_path,
-            "patchApplicationProof": patch_application_proof_path,
-            "validationResult": validation_result_path,
-            "dryRunResult": dry_run_result_path,
-        },
+
+def persist_outcome_analysis_agent_output(
+    workspace_root: str | Path,
+    llm_output: str | dict[str, Any],
+    attempt_number: int,
+    output_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Persist the LLM-generated Outcome Analysis Summary artifact.
+
+    This wrapper parses and minimally validates the LLM output, writes it to the
+    remediation workspace, and returns a compact artifact reference for the
+    orchestrator. It intentionally does not classify failures using Python rules.
+    """
+    workspace = Path(workspace_root)
+    outcome = _parse_json_object(llm_output)
+    missing = sorted(field for field in _REQUIRED_OUTCOME_FIELDS if field not in outcome)
+    if missing:
+        raise ValueError(f"Outcome Analysis Agent output is missing required fields: {', '.join(missing)}")
+
+    artifact_path = Path(output_path) if output_path else workspace / f"attempt-{attempt_number}" / "outcome-analysis-summary.json"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact = {
+        "schemaVersion": outcome.get("schemaVersion", "1.0"),
+        "artifactId": outcome.get("artifactId", f"outcome-analysis-summary-attempt-{attempt_number}"),
+        "workflowId": outcome.get("workflowId", _read_json(workspace / "manifest.json").get("workflowId", "unknown")),
+        "createdBy": outcome.get("createdBy", "RemediationOutcomeAnalysisAgent"),
+        "status": outcome.get("status", "COMPLETED"),
+        "attemptNumber": outcome.get("attemptNumber", attempt_number),
+        **outcome,
+    }
+    artifact_path.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {
+        "status": "SUCCESS",
+        "artifactPath": str(artifact_path),
+        "failureCategory": artifact.get("failureCategory"),
+        "responsibilityArea": artifact.get("responsibilityArea"),
+    }
+
+
+def create_outcome_analysis_summary(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+    """Deprecated compatibility guard.
+
+    Outcome summaries must be produced by the LLM-backed Remediation Outcome
+    Analysis Agent and then persisted with persist_outcome_analysis_agent_output().
+    This function intentionally refuses deterministic failure classification so
+    the implementation remains aligned with the frozen Phase 1-6 architecture.
+    """
+    raise RuntimeError(
+        "Deterministic outcome analysis is disabled. Invoke the LLM Remediation "
+        "Outcome Analysis Agent and persist its structured JSON output with "
+        "persist_outcome_analysis_agent_output()."
     )
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return artifact
 
 
-def _read_json(path: str | None) -> dict[str, Any]:
-    if not path:
-        return {}
+def _attempt(attempts: list[dict[str, Any]], attempt_number: int) -> dict[str, Any]:
+    for attempt in attempts:
+        if int(attempt.get("attemptNumber", 0)) == attempt_number:
+            return attempt
+    return {}
+
+
+def _resolve(workspace: Path, reference: str | None) -> str | None:
+    if not reference:
+        return None
+    path = Path(reference)
+    return str(path if path.is_absolute() else workspace / path)
+
+
+def _parse_json_object(value: str | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ValueError("Outcome Analysis Agent output must be valid JSON.") from exc
+    if not isinstance(parsed, dict):
+        raise ValueError("Outcome Analysis Agent output must be a JSON object.")
+    return parsed
+
+
+def _read_json(path: str | Path) -> dict[str, Any]:
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception:
         return {}
-
-
-def _failure_category(dry_run: dict, proof: dict, validation: dict) -> str:
-    if dry_run and dry_run.get("status") == "FAILED":
-        return _classify_patch_errors(dry_run)
-    if proof and proof.get("status") == "FAILED":
-        return _classify_patch_errors(proof)
-    failed_stage = (validation.get("summary") or {}).get("failedStage") if validation else None
-    if failed_stage == "CHANGE_SCOPE_VALIDATION":
-        return "CHANGE_SCOPE_FAILURE"
-    if failed_stage == "BUILD_VALIDATION":
-        return "BUILD_FAILURE"
-    if failed_stage == "TEST_VALIDATION":
-        return "TEST_FAILURE"
-    if failed_stage == "OSV_VALIDATION":
-        return "OSV_VALIDATION_FAILURE"
-    return "WORKFLOW_FAILURE"
-
-
-def _classify_patch_errors(source: dict[str, Any]) -> str:
-    text = " ".join(str(item) for item in source.get("errors", []))
-    for result in source.get("patchResults", []):
-        text += " " + " ".join(str(value) for value in result.values())
-    lower = text.lower()
-    if "file not found" in lower:
-        return "PATCH_FILE_NOT_FOUND"
-    if "unsupported file" in lower or "unsupported file type" in lower:
-        return "PATCH_UNSUPPORTED_FILE"
-    if "expected" in lower and "occurrence" in lower:
-        return "PATCH_OCCURRENCE_MISMATCH"
-    if "oldtext" in lower or "old text" in lower:
-        return "PATCH_TEXT_INCORRECT"
-    return "PATCH_TOOL_LIMITATION"
-
-
-def _responsibility_area(category: str) -> str:
-    if category in {"PATCH_TEXT_INCORRECT", "PATCH_OCCURRENCE_MISMATCH", "PATCH_FILE_NOT_FOUND", "PATCH_UNSUPPORTED_FILE"}:
-        return "PLANNER_DECISION"
-    if category == "PATCH_TOOL_LIMITATION":
-        return "PATCH_TOOL"
-    if category in {"CHANGE_SCOPE_FAILURE", "BUILD_FAILURE", "TEST_FAILURE", "OSV_VALIDATION_FAILURE"}:
-        return "VALIDATION"
-    return "REPOSITORY_STRUCTURE"
-
-
-def _summarize_plan(plan: dict) -> str:
-    decisions = plan.get("vulnerabilityDecisions", []) if plan else []
-    patch_count = sum(1 for decision in decisions if decision.get("decision") == "PATCH")
-    manual_count = sum(1 for decision in decisions if decision.get("decision") == "MANUAL_REVIEW")
-    return f"Attempted plan with {patch_count} patch decision(s) and {manual_count} manual-review decision(s)."
-
-
-def _new_facts(dry_run: dict, proof: dict, validation: dict) -> list[str]:
-    facts: list[str] = []
-    for source in (dry_run, proof, validation):
-        for error in source.get("errors", []) if source else []:
-            if error:
-                facts.append(str(error))
-    summary = validation.get("summary") if validation else {}
-    if summary and summary.get("failureSummary"):
-        facts.append(summary["failureSummary"])
-    return facts or ["The previous attempt did not complete successfully."]
-
-
-def _planner_focus(category: str) -> list[str]:
-    if category in {"PATCH_TEXT_INCORRECT", "PATCH_OCCURRENCE_MISMATCH"}:
-        return ["Review exact oldText/newText evidence and produce a corrected patch plan."]
-    if category == "PATCH_FILE_NOT_FOUND":
-        return ["Verify the editable file path in the patch plan against project analyzer POM evidence."]
-    if category == "PATCH_UNSUPPORTED_FILE":
-        return ["Restrict the next patch plan to supported pom.xml files only."]
-    if category == "PATCH_TOOL_LIMITATION":
-        return ["Review whether the patch tool needs enhancement or whether manual review is safer."]
-    if category == "CHANGE_SCOPE_FAILURE":
-        return ["Ensure the next plan only changes intended dependency version text in pom.xml files."]
-    if category == "BUILD_FAILURE":
-        return ["Review build logs and consider manual review if the fix requires source, JDK, plugin, or framework changes."]
-    if category == "TEST_FAILURE":
-        return ["Review test logs and consider manual review if behavior changes are outside POM-only remediation scope."]
-    if category == "OSV_VALIDATION_FAILURE":
-        return ["Review remaining vulnerabilities and dependency resolution evidence before replanning."]
-    return ["Review failed attempt artifacts before replanning."]
-
-
-def _capability_gaps(category: str) -> list[dict[str, str]]:
-    if category == "PATCH_TOOL_LIMITATION":
-        return [{"tool": "GenericPatchApplyTool", "summary": "Patch tool could not apply an otherwise valid exact patch plan."}]
-    return []
