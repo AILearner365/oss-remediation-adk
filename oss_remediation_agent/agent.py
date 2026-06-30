@@ -45,7 +45,7 @@ def _default_workspace_root() -> str:
     Editor and local IDE explorers.
     """
     run_id = datetime.now(timezone.utc).strftime("oss-remediation-%Y%m%d-%H%M%S")
-    return str((Path.cwd() / ".oss-remediation-workspaces" / run_id).resolve())
+    return str((Path.cwd() / "oss-remediation-workspaces" / run_id).resolve())
 
 
 root_agent = Agent(
