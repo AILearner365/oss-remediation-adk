@@ -204,6 +204,19 @@ Partial remediation is allowed.
 
 ---
 
+## Fixed Version Selection Rule
+
+For every PATCH decision:
+
+```text
+- fixedVersionSelected must be present in the Vulnerability Assessment Report fixedVersions list.
+- The selected version must be supported by deterministic scanner evidence.
+- If the fixed version cannot be traced to OSV evidence, do not guess.
+- If fixed-version evidence is missing or ambiguous, return REQUEST_ADDITIONAL_EVIDENCE or MANUAL_REVIEW.
+```
+
+---
+
 ## PATCH Decision Requirements
 
 For every PATCH decision, include an exact-text patch that the Generic Patch Apply Tool can apply deterministically.
@@ -243,6 +256,8 @@ Patch rules:
 ## MANUAL_REVIEW Decision Requirements
 
 Return MANUAL_REVIEW when automation is unsafe, unsupported, or evidence is insufficient after allowed investigation.
+
+A top-level MANUAL_REVIEW output is allowed only when no vulnerabilities are safely patchable in the current planner response. If at least one vulnerability is patchable, return a PATCH_PLAN containing both PATCH and MANUAL_REVIEW vulnerability decisions.
 
 Every MANUAL_REVIEW decision must include:
 
@@ -294,14 +309,26 @@ Additional investigation request JSON:
 
 ```json
 {
+  "schemaVersion": "1.0",
+  "artifactId": "additional-investigation-request-attempt-1",
+  "workflowId": "oss-remediation-20260628-001",
+  "createdBy": "RemediationPlanningAgent",
+  "status": "REQUESTED",
   "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+  "attemptNumber": 1,
   "requestedTool": "ProjectAnalyzerTool",
   "reason": "Dependency tree evidence is missing for module-b.",
   "requiredArtifact": "Module-level dependency tree for module-b",
   "expectedOutcome": "Identify the exact editable dependency declaration for GHSA-xxxx.",
   "evidenceReferences": [
     "baseline/project-analyzer-report.json"
-  ]
+  ],
+  "artifactReferences": {
+    "manifest": "manifest.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json"
+  },
+  "errors": [],
+  "warnings": []
 }
 ```
 
@@ -343,6 +370,14 @@ You must return one of these top-level decision types:
 PATCH_PLAN
 REQUEST_ADDITIONAL_EVIDENCE
 MANUAL_REVIEW
+```
+
+Top-level decision selection rules:
+
+```text
+- Use PATCH_PLAN when at least one vulnerability is patchable. Include manual-review decisions inside the same plan for non-patchable vulnerabilities.
+- Use REQUEST_ADDITIONAL_EVIDENCE only when a specific allowed deterministic tool output is required before a safe decision can be made.
+- Use MANUAL_REVIEW only when no vulnerabilities are safely patchable and no further allowed investigation should be requested.
 ```
 
 ---
@@ -431,9 +466,41 @@ Use this structure when at least one vulnerability is patchable, including parti
 
 ---
 
+## REQUEST_ADDITIONAL_EVIDENCE Output Contract
+
+Use this structure when evidence is insufficient and an allowed deterministic investigation can resolve the gap.
+
+```json
+{
+  "schemaVersion": "1.0",
+  "artifactId": "additional-investigation-request-attempt-1",
+  "workflowId": "oss-remediation-20260628-001",
+  "createdBy": "RemediationPlanningAgent",
+  "status": "REQUESTED",
+  "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+  "attemptNumber": 1,
+  "requestedTool": "ProjectAnalyzerTool",
+  "reason": "The project analyzer report does not include module-level dependency tree evidence for module-b.",
+  "requiredArtifact": "Module-level dependency tree for module-b",
+  "expectedOutcome": "Identify whether org.yaml:snakeyaml is direct, transitive, property-managed, or dependencyManagement-managed in module-b.",
+  "evidenceReferences": [
+    "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+    "baseline/project-analyzer-report.json"
+  ],
+  "artifactReferences": {
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json"
+  },
+  "errors": [],
+  "warnings": []
+}
+```
+
+---
+
 ## MANUAL_REVIEW Output Contract
 
-Use this structure when no automated patch should be attempted.
+Use this structure only when no automated patch should be attempted for the current planner response.
 
 ```json
 {
@@ -484,8 +551,11 @@ Before returning output, verify:
 - JSON is valid.
 - decisionType is present.
 - Every in-scope vulnerability has PATCH or MANUAL_REVIEW.
+- Top-level MANUAL_REVIEW is used only when there are no patchable vulnerabilities.
 - Every PATCH has exact oldText/newText/expectedOccurrences.
+- Every PATCH fixedVersionSelected is traceable to OSV fixedVersions evidence.
 - Every decision has evidenceReferences.
+- REQUEST_ADDITIONAL_EVIDENCE includes full artifact metadata and a specific requestedTool.
 - No forbidden change type is present.
 - Manual review decisions include category and status reason.
 - No tool execution or manifest mutation is requested.
