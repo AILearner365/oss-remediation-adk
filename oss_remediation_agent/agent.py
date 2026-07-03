@@ -7,7 +7,7 @@ from typing import Any
 from google.adk.agents import Agent
 
 from oss_remediation_agent.policies import RemediationPolicy
-from oss_remediation_agent.workflow.phase5_orchestrator import Phase5WorkflowOrchestrator
+from oss_remediation_agent.workflow.phase6_orchestrator import Phase6WorkflowOrchestrator
 
 
 def run_oss_remediation_workflow(
@@ -25,11 +25,12 @@ def run_oss_remediation_workflow(
 
     The agent does not sequence workflow steps, mutate repositories, update the
     manifest, make remediation decisions, apply patches, run validation, or
-    create pull requests.
+    create pull requests directly. Phase 6 PR behavior is delegated to the
+    deterministic orchestrator and controlled by policy.
     """
     workspace = workspace_root or _default_workspace_root()
     policy = RemediationPolicy.load(policy_path)
-    orchestrator = Phase5WorkflowOrchestrator(workspace, policy=policy)
+    orchestrator = Phase6WorkflowOrchestrator(workspace, policy=policy)
     return orchestrator.run_workflow(
         repository_url=repository_url,
         reference_branch=reference_branch,
@@ -56,8 +57,8 @@ root_agent = Agent(
         "You are the OSS remediation workflow entrypoint. When the user asks to run remediation, "
         "call run_oss_remediation_workflow with the repository URL and reference branch. "
         "Do not mutate repositories directly, do not update manifests directly, do not apply patches directly, "
-        "and do not create pull requests. All workflow execution must be delegated to "
-        "WorkflowOrchestrator.run_workflow through the exposed tool. "
+        "and do not create pull requests directly. All workflow execution, including policy-controlled Phase 6 "
+        "PR handling, must be delegated to WorkflowOrchestrator.run_workflow through the exposed tool. "
         "Return the workspace path, manifest path, progress steps, final status, artifacts, and next action."
     ),
     tools=[run_oss_remediation_workflow],
