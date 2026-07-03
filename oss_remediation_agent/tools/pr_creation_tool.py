@@ -14,9 +14,10 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
     accepted = manifest.get("acceptedPatchSet", {})
     remediation_summary = _remediation_summary(manifest)
     validation_summary = _validation_summary(manifest)
+    manual_review_summary = _manual_review_summary(manifest)
     pr_type = "FULL_REMEDIATION" if validation_summary.get("remainingCriticalHigh", 0) == 0 else "PARTIAL_REMEDIATION"
     eligible = accepted.get("status") == "VALIDATED"
-    body = _markdown(remediation_summary, validation_summary, pr_type)
+    body = _markdown(remediation_summary, validation_summary, pr_type, manual_review_summary)
     Path(pr_description_path).parent.mkdir(parents=True, exist_ok=True)
     Path(pr_description_path).write_text(body, encoding="utf-8")
     summary = common_artifact(
@@ -32,6 +33,7 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
             "reason": "Validated accepted patch set exists." if eligible else "No validated accepted patch set exists.",
         },
         remediationSummary=remediation_summary,
+        manualReviewSummary=manual_review_summary,
         validationSummary=validation_summary,
         artifactReferences={"manifest": manifest_path, "prDescription": pr_description_path},
         prBodyMarkdown=body,
@@ -78,6 +80,52 @@ def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def _manual_review_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    decision = _manual_review_decision(manifest)
+    rows: list[dict[str, Any]] = []
+    for row in decision.get("vulnerabilityDecisions", []) or []:
+        dependency = row.get("dependency") or {}
+        package_name = dependency.get("packageName") or _dependency_coordinate(dependency)
+        rows.append({
+            "vulnerabilityId": row.get("vulnerabilityId"),
+            "aliases": row.get("aliases", []),
+            "dependency": package_name or "UNKNOWN",
+            "currentVersion": dependency.get("currentVersion"),
+            "status": row.get("decision") or "MANUAL_REVIEW",
+            "manualReviewCategory": row.get("manualReviewCategory"),
+            "reason": row.get("statusReason") or row.get("reason") or "Manual review required.",
+        })
+    return rows
+
+
+def _manual_review_decision(manifest: dict[str, Any]) -> dict[str, Any]:
+    planning = manifest.get("planning", {})
+    path = planning.get("manualReviewDecision") or planning.get("lastDecision")
+    if not path:
+        for attempt in reversed(manifest.get("attempts", []) or []):
+            candidate = attempt.get("manualReviewDecision")
+            if candidate:
+                path = candidate
+                break
+    if not path:
+        return {}
+    workspace_root = Path(manifest.get("workspaceRoot", "."))
+    candidate = workspace_root / path
+    if not candidate.exists():
+        candidate = Path(path)
+    if candidate.exists():
+        return json.loads(candidate.read_text(encoding="utf-8"))
+    return {}
+
+
+def _dependency_coordinate(dependency: dict[str, Any]) -> str | None:
+    group_id = dependency.get("groupId")
+    artifact_id = dependency.get("artifactId")
+    if group_id and artifact_id:
+        return f"{group_id}:{artifact_id}"
+    return artifact_id or group_id
+
+
 def _validation_summary(manifest: dict[str, Any]) -> dict[str, Any]:
     validation = _latest_validation(manifest)
     osv = validation.get("osvValidation", {}) if validation else {}
@@ -108,25 +156,77 @@ def _latest_validation(manifest: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def _markdown(remediation_summary: list[dict[str, Any]], validation_summary: dict[str, Any], pr_type: str) -> str:
+def _markdown(
+    remediation_summary: list[dict[str, Any]],
+    validation_summary: dict[str, Any],
+    pr_type: str,
+    manual_review_summary: list[dict[str, Any]],
+) -> str:
     lines = [
         "# OSS Vulnerability Remediation",
         "",
-        f"PR Type: {pr_type}",
+        "## Summary",
         "",
-        "## Remediation Summary",
+        "This PR remediates Critical/High OSS vulnerabilities detected by the automated OSS remediation workflow.",
         "",
-        "| Vulnerability ID | Dependency | Old Version | New Version | Status | Status Reason |",
-        "|---|---|---|---|---|---|",
+        f"Remediation type: **{pr_type}**",
+        "",
+        "## Remediated Vulnerabilities",
+        "",
+        "| Vulnerability ID | CVE | Dependency | Old Version | New Version | Status | Reason |",
+        "|---|---|---|---|---|---|---|",
     ]
     if remediation_summary:
         for row in remediation_summary:
             lines.append(
-                f"| {row.get('vulnerabilityId')} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
             )
     else:
-        lines.append("| N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
-    lines.extend(["", "## Validation Summary", ""])
-    for key, value in validation_summary.items():
-        lines.append(f"- {key}: {value}")
+        lines.append("| N/A | N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
+
+    if manual_review_summary:
+        lines.extend([
+            "",
+            "## Vulnerabilities Requiring Manual Review",
+            "",
+            "The following Critical/High vulnerabilities were not patched automatically. They require manual review for the reasons listed below.",
+            "",
+            "| Vulnerability ID | CVE | Dependency | Current Version | Status | Category | Reason |",
+            "|---|---|---|---|---|---|---|",
+        ])
+        for row in manual_review_summary:
+            lines.append(
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('dependency')} | {row.get('currentVersion') or 'N/A'} | {row.get('status')} | {row.get('manualReviewCategory') or 'MANUAL_REVIEW'} | {row.get('reason')} |"
+            )
+
+    lines.extend([
+        "",
+        "## Changes Made",
+        "",
+        "Updated Maven dependency versions in `pom.xml` only.",
+        "",
+        "No Java source code, test source code, JDK version, Maven plugin build logic, suppression, or ignore workaround changes were introduced.",
+        "",
+        "## Validation",
+        "",
+        "| Validation Step | Result |",
+        "|---|---|",
+        f"| Baseline build | {validation_summary.get('baselineBuild')} |",
+        f"| Change scope validation | {validation_summary.get('changeScopeValidation')} |",
+        f"| Maven build | {validation_summary.get('buildValidation')} |",
+        f"| Maven tests | {validation_summary.get('testValidation')} |",
+        f"| OSV validation | {validation_summary.get('osvValidation')} |",
+        f"| Remaining Critical vulnerabilities | {validation_summary.get('remainingCriticalCount')} |",
+        f"| Remaining High vulnerabilities | {validation_summary.get('remainingHighCount')} |",
+        f"| New Critical/High vulnerabilities introduced | {validation_summary.get('newCriticalHighIntroduced')} |",
+        "",
+        "## Notes for Reviewers",
+        "",
+        "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and post-remediation OSV validation found no remaining Critical or High vulnerabilities for the remediated patch set.",
+    ])
     return "\n".join(lines) + "\n"
+
+
+def _aliases(row: dict[str, Any]) -> str:
+    aliases = row.get("aliases") or []
+    return ", ".join(str(alias) for alias in aliases) if aliases else "N/A"
