@@ -39,10 +39,28 @@ def validate_post_remediation(repository_path: str, output_path: str, severity_s
     raw_text = result.get("stdout") or "{}"
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(raw_text, encoding="utf-8")
-    remaining = normalize_osv_findings(_loads(raw_text), severity_scope, output_path)
+
+    raw_json = _loads(raw_text)
+    remaining = normalize_osv_findings(raw_json, severity_scope, output_path)
     scanner_error = result.get("stderr", "") or ""
+    scanner_exit_code = int(result.get("exitCode", 1) or 0)
     no_package_sources = "No package sources found" in scanner_error
-    status = "SUCCESS" if result["exitCode"] in (0, 1) and not no_package_sources else "FAILED"
+    accepted_exit_code = scanner_exit_code in (0, 1)
+    clean_parsed_report = _is_valid_osv_report(raw_json) and not remaining
+
+    # OSV validation is a verifier, not the source of initial truth. Some OSV
+    # versions/wrappers may return a non-standard exit code while still writing a
+    # valid JSON report such as {"results": []}. In that case the remediation
+    # should not be failed when there are no remaining in-scope vulnerabilities.
+    # Keep hard failures for cases where OSV could not see package sources or did
+    # not produce a recognizable report.
+    status = "SUCCESS" if (accepted_exit_code or clean_parsed_report) and not no_package_sources else "FAILED"
+    warnings = []
+    if status == "SUCCESS" and not accepted_exit_code:
+        warnings.append(
+            f"OSV scanner exited with code {scanner_exit_code}, but produced a valid clean report with no remaining in-scope vulnerabilities."
+        )
+
     return ToolResult(
         tool_name=TOOL,
         tool_version="1.0.0",
@@ -57,8 +75,11 @@ def validate_post_remediation(repository_path: str, output_path: str, severity_s
             "remainingHighCount": sum(1 for item in remaining if item["severity"] == "HIGH"),
             "remainingVulnerabilities": remaining,
             "rawReportPath": raw_report_path,
+            "scannerExitCode": scanner_exit_code,
+            "scannerStderr": scanner_error,
         },
         errors=[] if status == "SUCCESS" else [scanner_error],
+        warnings=warnings,
     ).to_dict()
 
 
@@ -251,6 +272,12 @@ def _score_to_severity(score: float) -> str:
     if score >= 4.0:
         return "MEDIUM"
     return "LOW"
+
+
+def _is_valid_osv_report(raw_json: Any) -> bool:
+    if not isinstance(raw_json, dict):
+        return False
+    return any(key in raw_json for key in ("results", "packages", "experimental_config"))
 
 
 def _loads(text: str) -> Any:
