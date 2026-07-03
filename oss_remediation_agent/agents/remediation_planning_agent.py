@@ -22,12 +22,13 @@ def load_prompt() -> str:
 
 
 def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) -> dict[str, Any]:
-    """Build the artifact-reference context for the Planning Agent LLM.
+    """Build the artifact-reference and compact-evidence context for the Planning Agent LLM.
 
     The Planning Agent is an AI reasoning component, not a deterministic tool.
-    This helper intentionally does not inspect repository files, select fixed
-    versions, or synthesize patches. It only gives the runtime a small,
-    artifact-driven context to pass to the LLM prompt.
+    This helper intentionally does not select fixed versions or synthesize
+    patches. It packages artifact references for traceability and compact
+    evidence from persisted deterministic artifacts so the LLM does not have to
+    reason from file paths alone.
     """
     workspace = Path(workspace_root)
     manifest = _read_json(workspace / "manifest.json")
@@ -35,10 +36,34 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
     attempts = manifest.get("attempts", [])
     current_attempt = _attempt_by_number(attempts, attempt_number)
     previous_attempt = _previous_attempt(attempts, attempt_number)
+    vulnerability_assessment_path = _resolve(workspace, baseline.get("vulnerabilityAssessmentReport"))
+    project_analyzer_path = _resolve(workspace, baseline.get("projectAnalyzerReport"))
+    previous_patch_plan_path = _resolve(workspace, previous_attempt.get("patchPlan") if previous_attempt else None)
+    previous_patch_application_proof_path = _resolve(workspace, previous_attempt.get("patchApplicationProof") if previous_attempt else None)
+    previous_validation_result_path = _resolve(workspace, previous_attempt.get("validationResult") if previous_attempt else None)
+    previous_outcome_analysis_path = _resolve(workspace, previous_attempt.get("outcomeAnalysisSummary") if previous_attempt else None)
     additional_investigation_artifacts = _resolve_artifact_list(
         workspace,
         (current_attempt or {}).get("additionalInvestigationArtifacts") or manifest.get("additionalInvestigationArtifacts", []),
     )
+
+    vulnerability_assessment = _read_json(vulnerability_assessment_path) if vulnerability_assessment_path else {}
+    project_analyzer = _read_json(project_analyzer_path) if project_analyzer_path else {}
+    evidence = {
+        "vulnerabilityAssessment": _compact_vulnerability_assessment(vulnerability_assessment),
+        "projectAnalyzer": _compact_project_analyzer(project_analyzer, workspace, vulnerability_assessment),
+        "previousAttempt": _compact_previous_attempt(
+            previous_patch_plan_path=previous_patch_plan_path,
+            previous_patch_application_proof_path=previous_patch_application_proof_path,
+            previous_validation_result_path=previous_validation_result_path,
+            previous_outcome_analysis_path=previous_outcome_analysis_path,
+        ),
+        "additionalInvestigations": _compact_additional_investigations(additional_investigation_artifacts, workspace, vulnerability_assessment),
+        "notes": [
+            "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
+            "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence.",
+        ],
+    }
 
     return {
         "agent": "RemediationPlanningAgent",
@@ -48,14 +73,15 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
         "manifestPath": str(workspace / "manifest.json"),
         "artifactReferences": {
             "manifest": str(workspace / "manifest.json"),
-            "vulnerabilityAssessmentReport": _resolve(workspace, baseline.get("vulnerabilityAssessmentReport")),
-            "projectAnalyzerReport": _resolve(workspace, baseline.get("projectAnalyzerReport")),
-            "previousPatchPlan": _resolve(workspace, previous_attempt.get("patchPlan") if previous_attempt else None),
-            "previousPatchApplicationProof": _resolve(workspace, previous_attempt.get("patchApplicationProof") if previous_attempt else None),
-            "previousValidationResult": _resolve(workspace, previous_attempt.get("validationResult") if previous_attempt else None),
-            "previousOutcomeAnalysisSummary": _resolve(workspace, previous_attempt.get("outcomeAnalysisSummary") if previous_attempt else None),
+            "vulnerabilityAssessmentReport": vulnerability_assessment_path,
+            "projectAnalyzerReport": project_analyzer_path,
+            "previousPatchPlan": previous_patch_plan_path,
+            "previousPatchApplicationProof": previous_patch_application_proof_path,
+            "previousValidationResult": previous_validation_result_path,
+            "previousOutcomeAnalysisSummary": previous_outcome_analysis_path,
             "additionalInvestigationArtifacts": additional_investigation_artifacts,
         },
+        "evidence": evidence,
         "workflowPolicy": manifest.get("policy", {}),
         "plannerConstraint": manifest.get("plannerConstraint"),
         "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
@@ -422,7 +448,9 @@ def _parse_json_object(value: str | dict[str, Any]) -> dict[str, Any]:
     return parsed
 
 
-def _read_json(path: str | Path) -> dict[str, Any]:
+def _read_json(path: str | Path | None) -> dict[str, Any]:
+    if not path:
+        return {}
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception:

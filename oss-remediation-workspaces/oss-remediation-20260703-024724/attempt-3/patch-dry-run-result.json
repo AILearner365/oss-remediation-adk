@@ -1,0 +1,23 @@
+{
+  "artifactId": "patch-dry-run-attempt-3",
+  "artifactReferences": {},
+  "attemptNumber": 3,
+  "createdAt": "2026-07-03T03:01:08Z",
+  "createdBy": "GenericPatchApplyTool",
+  "errors": [
+    "patch-ghsa-jfh8-c2jv-pw2w-1: file not found"
+  ],
+  "patchResults": [
+    {
+      "error": "file not found",
+      "file": "parent/pom.xml",
+      "patchId": "patch-ghsa-jfh8-c2jv-pw2w-1",
+      "status": "FAILED"
+    }
+  ],
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "FAILED",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260703-024724"
+}

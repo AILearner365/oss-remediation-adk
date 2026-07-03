@@ -1,0 +1,107 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-2",
+  "artifactReferences": {
+    "previousOutcomeAnalysisSummary": "attempt-1/outcome-analysis-summary.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 2,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-2",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 2,
+    "patchDecisionCount": 1
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2023-4586"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "spring-boot",
+        "currentVersion": "2.7.10",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework.boot",
+        "packageName": "org.springframework.boot:spring-boot"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/projectFacts/springBoot",
+        "attempt-1/outcome-analysis-summary.json#/failedPatches/0"
+      ],
+      "manualReviewCategory": "MANUAL_SPRING_BOOT_OR_JDK_COMPATIBILITY",
+      "statusReason": "The previous attempt to upgrade Spring Boot to 2.7.18 failed validation due to compatibility issues. Subsequent fixed versions (3.x.x) require a major Spring Boot migration, which is outside the allowed POM-only scope and would likely require code changes not permitted by policy.",
+      "vulnerabilityId": "GHSA-j995-32g6-x4g7"
+    },
+    {
+      "aliases": [
+        "CVE-2023-34035"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "spring-security-oauth2-resource-server",
+        "currentVersion": "5.7.9",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework.security",
+        "packageName": "org.springframework.security:spring-security-oauth2-resource-server"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/0/editableLocations/1",
+        "attempt-1/outcome-analysis-summary.json#/successfulPatches/0"
+      ],
+      "fixedVersionSelected": "5.8.6",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/0/editableLocations/1"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<dependency>\n      <groupId>org.springframework.security</groupId>\n      <artifactId>spring-security-oauth2-resource-server</artifactId>\n      <version>5.8.6</version>\n    </dependency>",
+          "newVersion": "5.8.6",
+          "oldText": "<dependency>\n      <groupId>org.springframework.security</groupId>\n      <artifactId>spring-security-oauth2-resource-server</artifactId>\n      <version>5.7.9</version>\n    </dependency>",
+          "oldVersion": "5.7.9",
+          "patchId": "patch-1"
+        }
+      ],
+      "rationale": "The project analyzer report shows a direct dependency with an explicit version. The selected fixed version 5.8.6 is the lowest compatible secure version from the OSV fixedVersions list, and the previous attempt to patch this vulnerability was successful according to the outcome analysis.",
+      "vulnerabilityId": "GHSA-v7gc-m2g9-9g7p"
+    },
+    {
+      "aliases": [
+        "CVE-2024-9999"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "unpatchable-lib",
+        "currentVersion": "1.0.0",
+        "ecosystem": "Maven",
+        "groupId": "com.example",
+        "packageName": "com.example:unpatchable-lib"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is available in the vulnerability assessment report for this dependency.",
+      "vulnerabilityId": "GHSA-unknown-fixed-version"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260703-024724"
+}
