@@ -253,48 +253,46 @@ Patch rules:
 
 ---
 
-## MANUAL_REVIEW Decision Requirements
+## Direct and Transitive Dependency Rules
 
-Return MANUAL_REVIEW when automation is unsafe, unsupported, or evidence is insufficient after allowed investigation.
+Use Project Analyzer `dependencyResolutionEvidence` to classify the affected dependency. Each entry provides `dependencyType` (DIRECT or TRANSITIVE), `depth` (1 = direct, >= 2 = transitive), and, for transitive entries, `introducedBy` (the parent coordinate one level up).
 
-A top-level MANUAL_REVIEW output is allowed only when no vulnerabilities are safely patchable in the current planner response. If at least one vulnerability is patchable, return a PATCH_PLAN containing both PATCH and MANUAL_REVIEW vulnerability decisions.
+If the vulnerable dependency is DIRECT (`depth` 1), patch the exact editable location identified by Project Analyzer `pomEvidence`.
 
-Every MANUAL_REVIEW decision must include:
-
-```text
-- vulnerabilityId
-- dependency
-- decision = MANUAL_REVIEW
-- manualReviewCategory
-- statusReason
-- evidenceReferences
-```
-
-Supported manual review categories:
+If the vulnerable dependency is TRANSITIVE (`depth` >= 2), it has no direct declaration to edit. Resolve it in this order:
 
 ```text
-MANUAL_JDK_UPGRADE
-MANUAL_MAJOR_FRAMEWORK_UPGRADE
-MANUAL_SOURCE_CODE_CHANGE
-MANUAL_PLUGIN_CHANGE
-MANUAL_EXTERNAL_PARENT
-MANUAL_IMPORTED_BOM
-MANUAL_NO_SAFE_VERSION
-MANUAL_UNSUPPORTED_REPOSITORY
-MANUAL_MAX_ATTEMPTS
-MANUAL_INSUFFICIENT_EVIDENCE
-MANUAL_PATCH_SCOPE_UNSAFE
+1. Implicit parent bump (preferred):
+- If the vulnerable transitive dependency is introducedBy a DIRECT dependency
+  that itself has a fixed version in the vulnerability assessment, patch the
+  parent's version. The validation OSV re-scan confirms the transitive
+  dependency is resolved by the parent upgrade.
+- Do not also override the transitive dependency in this case.
+
+2. Explicit dependencyManagement override:
+- Use when no parent bump resolves the transitive dependency, and
+  projectFacts.dependencyManagementPresent is true, and workflowPolicy
+  allows DEPENDENCY_MANAGEMENT_OVERRIDE.
+- fixedVersionSelected must come from the transitive dependency's own
+  vulnerability node fixedVersions.
+- Represent the override as an EXACT_TEXT_ONLY replacement anchored on an
+  existing pomEvidence snippet (for example the opening of the existing
+  <dependencyManagement><dependencies> block). newText repeats the anchor
+  text and appends one minimal <dependency> pin for the transitive
+  coordinate. Never invent an anchor that is not in pomEvidence.
 ```
 
-Do not return a generic manual-review decision without category and reasoning.
+Set `changeType` to `DEPENDENCY_MANAGEMENT_OVERRIDE` for option 2, and reference `introducedBy` in the decision `rationale`.
+
+If neither option is supported by evidence and policy, return REQUEST_ADDITIONAL_EVIDENCE when deterministic analysis can help, otherwise MANUAL_REVIEW with `MANUAL_TRANSITIVE_REMEDIATION_UNCLEAR`.
 
 ---
 
-## Additional Deterministic Investigation Behavior
+## Replanning Rules
 
-If required evidence is missing, truncated, corrupted, or insufficient, request additional deterministic investigation instead of guessing.
+Every replanning attempt must begin by reviewing `artifactReferences.previousOutcomeAnalysisSummary` when it is present. Do not generate another independent plan without using the previous failure analysis.
 
-Allowed requested tools for MVP:
+When previous Outcome Analysis is provided:
 
 ```text
 ProjectAnalyzerTool

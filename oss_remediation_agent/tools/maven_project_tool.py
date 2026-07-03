@@ -128,35 +128,100 @@ def _pom_evidence(repo: Path, pom_files: list[str]) -> list[dict]:
     return evidence[:100]
 
 
-def _dependency_evidence(repo: Path, dependency_tree_path: str) -> tuple[list[dict], str]:
-    result = run_command(["mvn", "dependency:tree", "-DoutputType=text"], cwd=repo, timeout=1800)
+
+def _dependency_evidence(
+    repo: Path,
+    dependency_tree_path: str,
+) -> tuple[list[dict], str]:
+
+    result = run_command(
+        command=["mvn", "dependency:tree", "-DoutputType=text"],
+        cwd=repo,
+        timeout=1800,
+    )
+
     output = (result.get("stdout") or "") + "\n" + (result.get("stderr") or "")
+
     Path(dependency_tree_path).parent.mkdir(parents=True, exist_ok=True)
     Path(dependency_tree_path).write_text(output, encoding="utf-8")
+
     evidence = []
     seen = set()
-    pattern = re.compile(r"([A-Za-z0-9_.-]+(?:\.[A-Za-z0-9_.-]+)+):([A-Za-z0-9_.-]+):[A-Za-z0-9_.-]+:([^:\s]+)(?::([A-Za-z0-9_.-]+))?")
+
+    # groupId may be dotless (e.g. commons-io, commons-fileupload);
+    # do not require a dot.
+    pattern = re.compile(r"([A-Za-z0-9_.-]+):([A-Za-z0-9_.-]+):[A-Za-z0-9_.-]+:([^:\s]+)(?::([A-Za-z0-9_.-]+))?")
+    ancestors: dict[int, str] = {}
+
     for line in output.splitlines():
         match = pattern.search(line)
         if not match:
             continue
+
         group_id, artifact_id, version, scope = match.groups()
+
         dependency = f"{group_id}:{artifact_id}"
+        depth = _dependency_depth(line)
+
+        # Drop stale deeper ancestors so the parent is the entry exactly one level up.
+        for stale in [level for level in ancestors if level >= depth]:
+            ancestors.pop(stale, None)
+
+        introduced_by = ancestors.get(depth - 1) if depth >= 2 else None
+        ancestors[depth] = dependency
+
         key = (dependency, version, scope or "UNKNOWN")
         if key in seen:
             continue
+
         seen.add(key)
-        direct = "+-" in line or "\\-" in line
-        evidence.append({
+
+        entry = {
             "dependency": dependency,
             "resolvedVersion": version,
             "modulesAffected": ["root"],
-            "dependencyType": "DIRECT" if direct else "TRANSITIVE",
+            "dependencyType": "DIRECT" if depth == 1 else "TRANSITIVE",
+            "depth": depth,
             "scope": scope or "UNKNOWN",
             "dependencyPaths": [line.strip()],
             "evidenceFile": dependency_tree_path,
-        })
+        }
+
+        if introduced_by:
+            entry["introducedBy"] = introduced_by
+
+        evidence.append(entry)
+
     return evidence, "SUCCESS" if result["exitCode"] == 0 else "FAILED"
+
+def _dependency_depth(line: str) -> int:
+    """
+    Return dependency-tree depth from Maven text output.
+
+    0 = project root line,
+    1 = direct dependency,
+    >=2 = transitive.
+
+    Maven indents each level by a 3-character unit ("|  " or "   ")
+    before the "+-" or "\\-" connector, so depth is derived from
+    the connector's column.
+    """
+
+    body = line
+
+    if body.lstrip().startswith("[") and "] " in body:
+        body = body.split("] ", maxsplit=1)[1]
+
+    positions = [
+        pos
+        for pos in (body.find("+-"), body.find("\\-"))
+        if pos != -1
+    ]
+
+    if not positions:
+        return 0
+
+    return (min(positions) // 3) + 1
 
 
 def _effective_pom(repo: Path, effective_pom_path: str) -> str:

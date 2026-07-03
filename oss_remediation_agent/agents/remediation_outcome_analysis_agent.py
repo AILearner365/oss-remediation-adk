@@ -30,16 +30,63 @@ def build_outcome_analysis_context(
     validation_result_path: str | None = None,
     dry_run_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """Build artifact-reference context for the Outcome Analysis Agent LLM.
+    """Build artifact-reference and compact-evidence context for the Outcome Analysis Agent LLM.
 
     The Outcome Analysis Agent is an AI reasoning component, not a deterministic
-    classifier. This helper does not inspect logs or classify failures. It only
-    packages the persisted artifact references that the orchestrator can pass to
-    the LLM prompt.
+    classifier. This helper does not classify failures. It packages artifact
+    references for traceability and compact artifact contents so the LLM reasons
+    from real failure evidence instead of file paths alone.
     """
+
     workspace = Path(workspace_root)
     manifest = _read_json(workspace / "manifest.json")
     attempt = _attempt(manifest.get("attempts", []), attempt_number)
+
+    patch_plan_ref = _resolve(workspace, patch_plan_path or attempt.get("patchPlan"))
+    patch_application_proof_ref = _resolve(
+        workspace,
+        patch_application_proof_path or attempt.get("patchApplicationProof"),
+    )
+    validation_result_ref = _resolve(
+        workspace,
+        validation_result_path or attempt.get("validationResult"),
+    )
+    dry_run_result_ref = _resolve(
+        workspace,
+        dry_run_result_path or attempt.get("patchDryRunResult"),
+    )
+
+    patch_plan = _read_json(patch_plan_ref) if patch_plan_ref else {}
+    dry_run_result = _read_json(dry_run_result_ref) if dry_run_result_ref else {}
+    patch_application_proof = (
+        _read_json(patch_application_proof_ref)
+        if patch_application_proof_ref
+        else {}
+    )
+    validation_result = (
+        _read_json(validation_result_ref)
+        if validation_result_ref
+        else {}
+    )
+
+    evidence = {
+        "patchPlan": _compact_patch_plan(patch_plan) if patch_plan else None,
+        "patchDryRunResult": _compact_dry_run_result(dry_run_result)
+        if dry_run_result
+        else None,
+        "patchApplicationProof": _compact_patch_application_proof(
+            patch_application_proof
+        )
+        if patch_application_proof
+        else None,
+        "validationResult": _compact_validation_result(validation_result)
+        if validation_result
+        else None,
+        "notes": [
+            "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
+            "Report only failures and facts present in this evidence. Do not invent occurrence counts, fields, or patch results.",
+        ],
+    }
 
     return {
         "agent": "RemediationOutcomeAnalysisAgent",
@@ -49,11 +96,12 @@ def build_outcome_analysis_context(
         "manifestPath": str(workspace / "manifest.json"),
         "artifactReferences": {
             "manifest": str(workspace / "manifest.json"),
-            "patchPlan": _resolve(workspace, patch_plan_path or attempt.get("patchPlan")),
-            "patchApplicationProof": _resolve(workspace, patch_application_proof_path or attempt.get("patchApplicationProof")),
-            "validationResult": _resolve(workspace, validation_result_path or attempt.get("validationResult")),
-            "dryRunResult": _resolve(workspace, dry_run_result_path or attempt.get("patchDryRunResult")),
+            "patchPlan": patch_plan_ref,
+            "patchApplicationProof": patch_application_proof_ref,
+            "validationResult": validation_result_ref,
+            "dryRunResult": dry_run_result_ref,
         },
+        "evidence": evidence,
         "outputContract": {
             "artifactType": "Outcome Analysis Summary",
             "requiredFields": sorted(_REQUIRED_OUTCOME_FIELDS),
@@ -61,6 +109,67 @@ def build_outcome_analysis_context(
         },
     }
 
+def _compact_patch_plan(plan: dict[str, Any]) -> dict[str, Any]:
+    decisions = []
+
+    for decision in plan.get("vulnerabilityDecisions", []):
+        decisions.append({
+            "vulnerabilityId": decision.get("vulnerabilityId"),
+            "decision": decision.get("decision"),
+            "dependency": decision.get("dependency", {}),
+            "fixedVersionSelected": decision.get("fixedVersionSelected"),
+            "manualReviewCategory": decision.get("manualReviewCategory"),
+            "patches": [
+                {
+                    "patchId": patch.get("patchId"),
+                    "file": patch.get("file"),
+                    "changeType": patch.get("changeType"),
+                    "oldText": patch.get("oldText"),
+                    "newText": patch.get("newText"),
+                    "oldVersion": patch.get("oldVersion"),
+                    "newVersion": patch.get("newVersion"),
+                    "expectedOccurrences": patch.get("expectedOccurrences"),
+                }
+                for patch in decision.get("patches", [])
+            ],
+        })
+
+    return {
+        "artifactId": plan.get("artifactId"),
+        "decisionType": plan.get("decisionType"),
+        "attemptNumber": plan.get("attemptNumber"),
+        "summary": plan.get("summary", {}),
+        "vulnerabilityDecisions": decisions,
+    }
+
+
+def _compact_dry_run_result(dry_run: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": dry_run.get("status"),
+        "patchResults": dry_run.get("patchResults", []),
+        "errors": dry_run.get("errors", []),
+        "warnings": dry_run.get("warnings", []),
+    }
+
+def _compact_patch_application_proof(proof: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": proof.get("status"),
+        "patchResults": proof.get("patchResults", []),
+        "filesChanged": proof.get("filesChanged", []),
+        "errors": proof.get("errors", []),
+        "warnings": proof.get("warnings", []),
+    }
+
+
+def _compact_validation_result(validation: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": validation.get("status"),
+        "summary": validation.get("summary", {}),
+        "buildResult": validation.get("buildResult", {}),
+        "residualVulnerabilities": validation.get("residualVulnerabilities", []),
+        "errors": validation.get("errors", []),
+        "warnings": validation.get("warnings", []),
+    }
 
 def persist_outcome_analysis_agent_output(
     workspace_root: str | Path,
