@@ -1,0 +1,88 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-1",
+  "artifactReferences": {
+    "patchApplicationProof": null,
+    "patchDryRunResult": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json",
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/remediation-patch-plan.json",
+    "validationResult": null
+  },
+  "attemptNumber": 1,
+  "capabilityGaps": [],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [],
+  "failureCategory": "PATCH_OCCURRENCE_MISMATCH",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/patchResults/3"
+      ],
+      "fact": "Patch 'patch-4', intended to add a dependency management override for 'commons-io:commons-io', failed dry run because its 'oldText' (\"            <dependency>\") occurred 3 times in 'pom.xml', not the expected 1 time."
+    },
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/remediation-patch-plan.json#/vulnerabilityDecisions/3/patches/0"
+      ],
+      "fact": "The 'oldText' for patch-4 was too generic for the intended 'DEPENDENCY_MANAGEMENT_OVERRIDE' change type, leading to an occurrence mismatch."
+    },
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/patchResults/0",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/patchResults/1",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/patchResults/2"
+      ],
+      "fact": "Patches 'patch-1', 'patch-2', and 'patch-3' (dependency version updates for 'commons-fileupload', 'commons-text', and 'org.json') were successfully verified in dry-run, but not applied due to the failure of 'patch-4'."
+    }
+  ],
+  "recommendedFocusForPlanner": [
+    "Review the exact 'oldText' and 'expectedOccurrences' for 'patch-4' (GHSA-78wr-2p64-hpwj, commons-io) to ensure it correctly identifies a unique and appropriate insertion point for the 'DEPENDENCY_MANAGEMENT_OVERRIDE'.",
+    "Consider using more specific contextual 'oldText' for 'DEPENDENCY_MANAGEMENT_OVERRIDE' changes to avoid ambiguity.",
+    "Do not repeat the same patch for 'patch-4' without validating the occurrence count against refreshed project evidence."
+  ],
+  "responsibilityArea": "PLANNER_DECISION",
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [],
+    "changedFiles": [],
+    "diffArtifact": null,
+    "failedPatchIds": [
+      "patch-4"
+    ],
+    "repositoryModified": false,
+    "summary": "Patch dry-run failed before repository modification due to an occurrence mismatch for one patch. No files were changed."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/patchResults/3",
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/patch-dry-run-result.json#/errors/0"
+    ],
+    "failedStage": "PATCH_DRY_RUN",
+    "failureSummary": "The dry run for patch 'patch-4' failed because the 'oldText' specified in the patch plan was found 3 times, but the plan expected exactly 1 occurrence. The overall dry-run status is FAILED.",
+    "logReferences": []
+  },
+  "whatWeTried": {
+    "changeTypes": [
+      "DEPENDENCY_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_OVERRIDE"
+    ],
+    "dependencies": [
+      "commons-fileupload:commons-fileupload",
+      "org.apache.commons:commons-text",
+      "org.json:json",
+      "commons-io:commons-io"
+    ],
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-1/remediation-patch-plan.json",
+    "summary": "Attempted to update multiple vulnerable Maven dependency versions, including a dependency management override, using an exact-text patch plan.",
+    "targetedFiles": [
+      "pom.xml"
+    ],
+    "vulnerabilityIds": [
+      "GHSA-vv7r-c36w-3prj",
+      "GHSA-599f-7c49-w659",
+      "GHSA-4jq9-2xhw-jpx7",
+      "GHSA-78wr-2p64-hpwj"
+    ]
+  },
+  "workflowId": "oss-remediation-20260703-192004"
+}

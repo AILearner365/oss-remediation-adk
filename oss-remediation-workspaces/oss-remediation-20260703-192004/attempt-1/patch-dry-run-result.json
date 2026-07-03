@@ -1,0 +1,45 @@
+{
+  "artifactId": "patch-dry-run-attempt-1",
+  "artifactReferences": {},
+  "attemptNumber": 1,
+  "createdAt": "2026-07-03T19:21:37Z",
+  "createdBy": "GenericPatchApplyTool",
+  "errors": [
+    "patch-4: expected 1 occurrence(s), found 3"
+  ],
+  "patchResults": [
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-1",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-2",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-3",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 3,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-4",
+      "status": "FAILED"
+    }
+  ],
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "FAILED",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260628-001"
+}

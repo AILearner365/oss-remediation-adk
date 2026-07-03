@@ -1,0 +1,149 @@
+{
+  "artifactId": "pull-request-publication-001",
+  "artifactReferences": {},
+  "baseBranch": "master",
+  "branchName": "oss-remediation-master-bd8d-20260703T195212Z",
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "commands": [
+    {
+      "command": [
+        "git",
+        "clone",
+        "https://github.com/AILearner365/maven-multimodule-app",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/pr-publisher-worktree"
+      ],
+      "exitCode": 0,
+      "stderrTail": "Cloning into '/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/pr-publisher-worktree'...\n",
+      "stdoutTail": ""
+    },
+    {
+      "command": [
+        "git",
+        "checkout",
+        "bd8d7d28849ebb314d83b18a4740b6147bcb6d47"
+      ],
+      "exitCode": 0,
+      "stderrTail": "Note: switching to 'bd8d7d28849ebb314d83b18a4740b6147bcb6d47'.\n\nYou are in 'detached HEAD' state. You can look around, make experimental\nchanges and commit them, and you can discard any commits you make in this\nstate without impacting any branches by switching back to a branch.\n\nIf you want to create a new branch to retain commits you create, you may\ndo so (now or later) by using -c with the switch command. Example:\n\n  git switch -c <new-branch-name>\n\nOr undo this operation with:\n\n  git switch -\n\nTurn off this advice by setting config variable advice.detachedHead to false\n\nHEAD is now at bd8d7d2 Merge pull request #41 from AILearner365/feature/vulnerable-dependencies-branch\n",
+      "stdoutTail": ""
+    },
+    {
+      "command": [
+        "git",
+        "checkout",
+        "-b",
+        "oss-remediation-master-bd8d-20260703T195212Z"
+      ],
+      "exitCode": 0,
+      "stderrTail": "Switched to a new branch 'oss-remediation-master-bd8d-20260703T195212Z'\n",
+      "stdoutTail": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "exitCode": 0,
+      "stderrTail": "",
+      "stdoutTail": " M pom.xml\n"
+    },
+    {
+      "command": [
+        "git",
+        "add",
+        "--",
+        "pom.xml"
+      ],
+      "exitCode": 0,
+      "stderrTail": "",
+      "stdoutTail": ""
+    },
+    {
+      "command": [
+        "git",
+        "commit",
+        "-m",
+        "Remediate OSS vulnerabilities"
+      ],
+      "exitCode": 0,
+      "stderrTail": "",
+      "stdoutTail": "[oss-remediation-master-bd8d-20260703T195212Z 9ea68d5] Remediate OSS vulnerabilities\n 1 file changed, 3 insertions(+), 3 deletions(-)\n"
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "stderrTail": "",
+      "stdoutTail": "9ea68d5a87c15a9f4b1c8d2accc1ddc595b81063\n"
+    },
+    {
+      "command": [
+        "git",
+        "push",
+        "origin",
+        "oss-remediation-master-bd8d-20260703T195212Z"
+      ],
+      "exitCode": 0,
+      "stderrTail": "remote: \nremote: Create a pull request for 'oss-remediation-master-bd8d-20260703T195212Z' on GitHub by visiting:        \nremote:      https://github.com/AILearner365/maven-multimodule-app/pull/new/oss-remediation-master-bd8d-20260703T195212Z        \nremote: \nTo https://github.com/AILearner365/maven-multimodule-app\n * [new branch]      oss-remediation-master-bd8d-20260703T195212Z -> oss-remediation-master-bd8d-20260703T195212Z\n",
+      "stdoutTail": ""
+    },
+    {
+      "command": [
+        "gh",
+        "pr",
+        "create",
+        "--repo",
+        "AILearner365/maven-multimodule-app",
+        "--base",
+        "master",
+        "--head",
+        "oss-remediation-master-bd8d-20260703T195212Z",
+        "--title",
+        "OSS vulnerability remediation",
+        "--body-file",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/pr-description.md",
+        "--draft"
+      ],
+      "exitCode": 0,
+      "stderrTail": "",
+      "stdoutTail": "https://github.com/AILearner365/maven-multimodule-app/pull/68\n"
+    }
+  ],
+  "commitSha": "9ea68d5a87c15a9f4b1c8d2accc1ddc595b81063",
+  "createdAt": "2026-07-03T19:52:15Z",
+  "createdBy": "PullRequestPublisherTool",
+  "draft": true,
+  "errors": [],
+  "failureCode": null,
+  "policy": {},
+  "prUrl": "https://github.com/AILearner365/maven-multimodule-app/pull/68",
+  "replay": {
+    "commands": [],
+    "replayResults": [
+      {
+        "diff": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/patch-source-attempt-1.diff",
+        "failureCode": null,
+        "patchApplicationProof": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/patch-application-proof-source-attempt-1.json",
+        "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-195010/final/accepted-patch-plan-source-attempt-1.json",
+        "sourceAttempt": 1,
+        "status": "SUCCESS"
+      }
+    ],
+    "status": "SUCCESS"
+  },
+  "repoFullName": "AILearner365/maven-multimodule-app",
+  "repository": {
+    "baselineCommit": "bd8d7d28849ebb314d83b18a4740b6147bcb6d47",
+    "referenceBranch": "master",
+    "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app"
+  },
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "warnings": [],
+  "workflowId": "oss-remediation-mvp"
+}

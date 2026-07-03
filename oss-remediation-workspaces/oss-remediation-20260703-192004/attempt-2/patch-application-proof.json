@@ -1,0 +1,55 @@
+{
+  "artifactId": "patch-application-proof-attempt-2",
+  "artifactReferences": {
+    "diffFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/attempt-2/patch.diff"
+  },
+  "attemptNumber": 2,
+  "createdAt": "2026-07-03T19:22:36Z",
+  "createdBy": "GenericPatchApplyTool",
+  "errors": [],
+  "filesChanged": [
+    "pom.xml"
+  ],
+  "patchResults": [
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "oldTextMatched": true,
+      "patchId": "patch-1",
+      "status": "APPLIED"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "oldTextMatched": true,
+      "patchId": "patch-2",
+      "status": "APPLIED"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "oldTextMatched": true,
+      "patchId": "patch-3",
+      "status": "APPLIED"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "oldTextMatched": true,
+      "patchId": "patch-4",
+      "status": "APPLIED"
+    }
+  ],
+  "patchesApplied": 4,
+  "patchesRequested": 4,
+  "planId": "plan-attempt-2",
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260703-192004"
+}

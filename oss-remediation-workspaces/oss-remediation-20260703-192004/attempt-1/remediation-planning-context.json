@@ -1,0 +1,1009 @@
+{
+  "acceptedPatchSet": {
+    "patchIds": [],
+    "status": "EMPTY",
+    "vulnerabilityIds": []
+  },
+  "additionalInvestigationRequests": [],
+  "agent": "RemediationPlanningAgent",
+  "artifactReferences": {
+    "additionalInvestigationArtifacts": [],
+    "manifest": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/manifest.json",
+    "previousOutcomeAnalysisSummary": null,
+    "previousPatchApplicationProof": null,
+    "previousPatchPlan": null,
+    "previousValidationResult": null,
+    "projectAnalyzerReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "evidence": {
+    "additionalInvestigations": [],
+    "notes": [
+      "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
+      "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence."
+    ],
+    "previousAttempt": {
+      "outcomeAnalysisSummary": null,
+      "patchApplicationProof": null,
+      "patchPlan": null,
+      "validationResult": null
+    },
+    "projectAnalyzer": {
+      "artifactReferences": {
+        "dependencyTree": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/baseline/dependency-tree.txt",
+        "effectivePom": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/baseline/effective-pom.xml",
+        "pomIndex": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/baseline/pom-index.json"
+      },
+      "dependencyResolutionEvidence": [
+        {
+          "dependency": "org.apache.commons:commons-text",
+          "dependencyPaths": [
+            "[INFO] +- org.apache.commons:commons-text:jar:1.9:compile"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.9",
+          "scope": "compile"
+        },
+        {
+          "dependency": "commons-fileupload:commons-fileupload",
+          "dependencyPaths": [
+            "[INFO] +- commons-fileupload:commons-fileupload:jar:1.5:compile"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.5",
+          "scope": "compile"
+        },
+        {
+          "dependency": "commons-io:commons-io",
+          "dependencyPaths": [
+            "[INFO] |  \\- commons-io:commons-io:jar:2.11.0:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "commons-fileupload:commons-fileupload",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.11.0",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.json:json",
+          "dependencyPaths": [
+            "[INFO] \\- org.json:json:jar:20230227:compile"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "20230227",
+          "scope": "compile"
+        },
+        {
+          "dependency": "com.example.secureapp:secure-multimodule-springboot-java21",
+          "dependencyPaths": [
+            "[INFO] com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 0,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0-SNAPSHOT",
+          "scope": "UNKNOWN"
+        },
+        {
+          "dependency": "org.apache.commons:commons-lang3",
+          "dependencyPaths": [
+            "[INFO] |  \\- org.apache.commons:commons-lang3:jar:3.19.0:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.apache.commons:commons-text",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "3.19.0",
+          "scope": "compile"
+        },
+        {
+          "dependency": "com.example.secureapp:task-common",
+          "dependencyPaths": [
+            "[INFO] com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 0,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0-SNAPSHOT",
+          "scope": "UNKNOWN"
+        },
+        {
+          "dependency": "com.example.secureapp:task-domain",
+          "dependencyPaths": [
+            "[INFO] com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 0,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0-SNAPSHOT",
+          "scope": "UNKNOWN"
+        },
+        {
+          "dependency": "com.example.secureapp:task-service",
+          "dependencyPaths": [
+            "[INFO] com.example.secureapp:task-service:jar:1.0.0-SNAPSHOT"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 0,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0-SNAPSHOT",
+          "scope": "UNKNOWN"
+        },
+        {
+          "dependency": "com.example.secureapp:task-domain",
+          "dependencyPaths": [
+            "[INFO] +- com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT:compile"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0-SNAPSHOT",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework:spring-context",
+          "dependencyPaths": [
+            "[INFO] +- org.springframework:spring-context:jar:7.0.7:compile"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "7.0.7",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework:spring-aop",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework:spring-aop:jar:7.0.7:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework:spring-context",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "7.0.7",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework:spring-beans",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework:spring-beans:jar:7.0.7:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework:spring-context",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "7.0.7",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework:spring-core",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework:spring-core:jar:7.0.7:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework:spring-context",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "7.0.7",
+          "scope": "compile"
+        },
+        {
+          "dependency": "commons-logging:commons-logging",
+          "dependencyPaths": [
+            "[INFO] |  |  +- commons-logging:commons-logging:jar:1.3.6:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework:spring-core",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.3.6",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.jspecify:jspecify",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- org.jspecify:jspecify:jar:1.0.0:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework:spring-core",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.0.0",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework:spring-expression",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework:spring-expression:jar:7.0.7:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework:spring-context",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "7.0.7",
+          "scope": "compile"
+        },
+        {
+          "dependency": "io.micrometer:micrometer-observation",
+          "dependencyPaths": [
+            "[INFO] |  \\- io.micrometer:micrometer-observation:jar:1.16.5:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework:spring-context",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.16.5",
+          "scope": "compile"
+        },
+        {
+          "dependency": "io.micrometer:micrometer-commons",
+          "dependencyPaths": [
+            "[INFO] |     \\- io.micrometer:micrometer-commons:jar:1.16.5:compile"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "io.micrometer:micrometer-observation",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.16.5",
+          "scope": "compile"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-starter-test",
+          "dependencyPaths": [
+            "[INFO] +- org.springframework.boot:spring-boot-starter-test:jar:4.0.6:test"
+          ],
+          "dependencyType": "DIRECT",
+          "depth": 1,
+          "introducedBy": null,
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-starter",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-starter-logging",
+          "dependencyPaths": [
+            "[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework.boot:spring-boot-starter",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "ch.qos.logback:logback-classic",
+          "dependencyPaths": [
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 4,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.5.32",
+          "scope": "test"
+        },
+        {
+          "dependency": "ch.qos.logback:logback-core",
+          "dependencyPaths": [
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 5,
+          "introducedBy": "ch.qos.logback:logback-classic",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "1.5.32",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.apache.logging.log4j:log4j-to-slf4j",
+          "dependencyPaths": [
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 4,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.25.4",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.apache.logging.log4j:log4j-api",
+          "dependencyPaths": [
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 5,
+          "introducedBy": "org.apache.logging.log4j:log4j-to-slf4j",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.25.4",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.slf4j:jul-to-slf4j",
+          "dependencyPaths": [
+            "[INFO] |  |  |  \\- org.slf4j:jul-to-slf4j:jar:2.0.17:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 4,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.0.17",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-autoconfigure",
+          "dependencyPaths": [
+            "[INFO] |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework.boot:spring-boot-starter",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "jakarta.annotation:jakarta.annotation-api",
+          "dependencyPaths": [
+            "[INFO] |  |  +- jakarta.annotation:jakarta.annotation-api:jar:3.0.0:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework.boot:spring-boot-starter",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "3.0.0",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.yaml:snakeyaml",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- org.yaml:snakeyaml:jar:2.5:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework.boot:spring-boot-starter",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.5",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-test",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework.boot:spring-boot-test:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- org.springframework.boot:spring-boot:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "org.springframework.boot:spring-boot-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.springframework.boot:spring-boot-test-autoconfigure",
+          "dependencyPaths": [
+            "[INFO] |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:4.0.6:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.6",
+          "scope": "test"
+        },
+        {
+          "dependency": "com.jayway.jsonpath:json-path",
+          "dependencyPaths": [
+            "[INFO] |  +- com.jayway.jsonpath:json-path:jar:2.10.0:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.10.0",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.slf4j:slf4j-api",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- org.slf4j:slf4j-api:jar:2.0.17:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "com.jayway.jsonpath:json-path",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.0.17",
+          "scope": "test"
+        },
+        {
+          "dependency": "jakarta.xml.bind:jakarta.xml.bind-api",
+          "dependencyPaths": [
+            "[INFO] |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.4:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "4.0.4",
+          "scope": "test"
+        },
+        {
+          "dependency": "jakarta.activation:jakarta.activation-api",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- jakarta.activation:jakarta.activation-api:jar:2.1.4:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "jakarta.xml.bind:jakarta.xml.bind-api",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.1.4",
+          "scope": "test"
+        },
+        {
+          "dependency": "net.minidev:json-smart",
+          "dependencyPaths": [
+            "[INFO] |  +- net.minidev:json-smart:jar:2.6.0:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 2,
+          "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.6.0",
+          "scope": "test"
+        },
+        {
+          "dependency": "net.minidev:accessors-smart",
+          "dependencyPaths": [
+            "[INFO] |  |  \\- net.minidev:accessors-smart:jar:2.6.0:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 3,
+          "introducedBy": "net.minidev:json-smart",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "2.6.0",
+          "scope": "test"
+        },
+        {
+          "dependency": "org.ow2.asm:asm",
+          "dependencyPaths": [
+            "[INFO] |  |     \\- org.ow2.asm:asm:jar:9.7.1:test"
+          ],
+          "dependencyType": "TRANSITIVE",
+          "depth": 4,
+          "introducedBy": "net.minidev:accessors-smart",
+          "modulesAffected": [
+            "root"
+          ],
+          "resolvedVersion": "9.7.1",
+          "scope": "test"
+        }
+      ],
+      "pomEvidence": [
+        {
+          "file": "pom.xml",
+          "lineEnd": 65,
+          "lineStart": 61,
+          "occurrenceCount": 1,
+          "snippet": "            <groupId>org.apache.commons</groupId>\n            <artifactId>commons-text</artifactId>\n            <version>1.9</version>\n        </dependency>\n        <dependency>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 70,
+          "lineStart": 66,
+          "occurrenceCount": 1,
+          "snippet": "            <groupId>commons-fileupload</groupId>\n            <artifactId>commons-fileupload</artifactId>\n            <version>1.5</version>\n        </dependency>\n        <dependency>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 75,
+          "lineStart": 71,
+          "occurrenceCount": 1,
+          "snippet": "            <groupId>org.json</groupId>\n            <artifactId>json</artifactId>\n            <version>20230227</version>\n        </dependency>\n    </dependencies>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 12,
+          "lineStart": 8,
+          "occurrenceCount": 1,
+          "snippet": "        <groupId>org.springframework.boot</groupId>\n        <artifactId>spring-boot-starter-parent</artifactId>\n        <version>4.0.6</version>\n        <relativePath/>\n    </parent>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 18,
+          "lineStart": 14,
+          "occurrenceCount": 1,
+          "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <packaging>pom</packaging>\n",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 32,
+          "lineStart": 28,
+          "occurrenceCount": 1,
+          "snippet": "\n    <properties>\n        <java.version>21</java.version>\n        <maven.compiler.release>21</maven.compiler.release>\n        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 37,
+          "lineStart": 33,
+          "occurrenceCount": 1,
+          "snippet": "        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>\n\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 38,
+          "lineStart": 34,
+          "occurrenceCount": 1,
+          "snippet": "\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 39,
+          "lineStart": 35,
+          "occurrenceCount": 1,
+          "snippet": "        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>\n",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 42,
+          "lineStart": 38,
+          "occurrenceCount": 1,
+          "snippet": "    </properties>\n\n    <dependencyManagement>\n        <dependencies>\n            <dependency>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 47,
+          "lineStart": 43,
+          "occurrenceCount": 1,
+          "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-common</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 52,
+          "lineStart": 48,
+          "occurrenceCount": 1,
+          "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-domain</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 57,
+          "lineStart": 53,
+          "occurrenceCount": 1,
+          "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-service</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n        </dependencies>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 83,
+          "lineStart": 79,
+          "occurrenceCount": 1,
+          "snippet": "                <groupId>org.apache.maven.plugins</groupId>\n                <artifactId>maven-enforcer-plugin</artifactId>\n                <version>${maven.enforcer.version}</version>\n                <executions>\n                    <execution>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 94,
+          "lineStart": 90,
+          "occurrenceCount": 1,
+          "snippet": "                            <rules>\n                                <requireJavaVersion>\n                                    <version>[21,)</version>\n                                    <message>This sample project is intentionally compiled and run on Java 21 or newer.</message>\n                                </requireJavaVersion>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 98,
+          "lineStart": 94,
+          "occurrenceCount": 1,
+          "snippet": "                                </requireJavaVersion>\n                                <requireMavenVersion>\n                                    <version>[3.6.3,)</version>\n                                    <message>Spring Boot Maven builds require Maven 3.6.3 or newer.</message>\n                                </requireMavenVersion>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 133,
+          "lineStart": 129,
+          "occurrenceCount": 1,
+          "snippet": "                        <groupId>org.apache.maven.plugins</groupId>\n                        <artifactId>maven-enforcer-plugin</artifactId>\n                        <version>${maven.enforcer.version}</version>\n                        <executions>\n                            <execution>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 164,
+          "lineStart": 160,
+          "occurrenceCount": 1,
+          "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 187,
+          "lineStart": 183,
+          "occurrenceCount": 1,
+          "snippet": "                        <groupId>org.owasp</groupId>\n                        <artifactId>dependency-check-maven</artifactId>\n                        <version>${owasp.dependency-check.version}</version>\n                        <inherited>false</inherited>\n                        <configuration>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "pom.xml",
+          "lineEnd": 209,
+          "lineStart": 205,
+          "occurrenceCount": 1,
+          "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "task-common/pom.xml",
+          "lineEnd": 12,
+          "lineStart": 8,
+          "occurrenceCount": 1,
+          "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "task-domain/pom.xml",
+          "lineEnd": 12,
+          "lineStart": 8,
+          "occurrenceCount": 1,
+          "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "task-service/pom.xml",
+          "lineEnd": 12,
+          "lineStart": 8,
+          "occurrenceCount": 1,
+          "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+          "snippetType": "POM_SNIPPET"
+        },
+        {
+          "file": "task-web/pom.xml",
+          "lineEnd": 9,
+          "lineStart": 5,
+          "occurrenceCount": 1,
+          "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <relativePath>../pom.xml</relativePath>\n  </parent>",
+          "snippetType": "POM_SNIPPET"
+        }
+      ],
+      "pomEvidenceTruncated": false,
+      "pomFiles": [
+        "pom.xml",
+        "task-common/pom.xml",
+        "task-domain/pom.xml",
+        "task-service/pom.xml",
+        "task-web/pom.xml"
+      ],
+      "projectFacts": {
+        "dependencyManagementPresent": true,
+        "isMultiModule": true,
+        "java": {
+          "detectedVersions": [
+            "21"
+          ],
+          "source": "pom-properties"
+        },
+        "mavenProperties": {
+          "cyclonedx.maven.plugin.version": "2.9.1",
+          "java.version": "21",
+          "maven.compiler.release": "21",
+          "maven.enforcer.version": "3.6.2",
+          "owasp.dependency-check.version": "12.2.2",
+          "project.build.sourceEncoding": "UTF-8",
+          "project.reporting.outputEncoding": "UTF-8"
+        },
+        "modules": [
+          {
+            "moduleName": "task-common",
+            "modulePath": "task-common",
+            "pomFile": "task-common/pom.xml"
+          },
+          {
+            "moduleName": "task-domain",
+            "modulePath": "task-domain",
+            "pomFile": "task-domain/pom.xml"
+          },
+          {
+            "moduleName": "task-service",
+            "modulePath": "task-service",
+            "pomFile": "task-service/pom.xml"
+          },
+          {
+            "moduleName": "task-web",
+            "modulePath": "task-web",
+            "pomFile": "task-web/pom.xml"
+          }
+        ],
+        "parentHierarchy": [
+          {
+            "artifactId": "spring-boot-starter-parent",
+            "declaredIn": "pom.xml",
+            "groupId": "org.springframework.boot",
+            "version": "4.0.6"
+          }
+        ],
+        "pomFiles": [
+          "pom.xml",
+          "task-common/pom.xml",
+          "task-domain/pom.xml",
+          "task-service/pom.xml",
+          "task-web/pom.xml"
+        ],
+        "projectType": "MAVEN_SPRING_BOOT",
+        "rootPom": "pom.xml",
+        "springBoot": {
+          "detected": true,
+          "source": "parent",
+          "version": "4.0.6"
+        }
+      },
+      "status": "SUCCESS",
+      "unrelatedDependencyEvidenceTruncated": true
+    },
+    "vulnerabilityAssessment": {
+      "severityScope": [
+        "CRITICAL",
+        "HIGH"
+      ],
+      "status": "SUCCESS",
+      "summary": {
+        "criticalCount": 1,
+        "highCount": 3,
+        "totalInScopeCount": 4
+      },
+      "vulnerabilities": [
+        {
+          "aliases": [
+            "CVE-2025-48976"
+          ],
+          "dependency": {
+            "artifactId": "commons-fileupload",
+            "currentVersion": "1.5",
+            "ecosystem": "Maven",
+            "groupId": "commons-fileupload",
+            "packageName": "commons-fileupload:commons-fileupload"
+          },
+          "fixedVersions": [
+            "1.6.0",
+            "2.0.0-M4"
+          ],
+          "nodeRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+          "scannerSummary": "Apache Commons FileUpload, Apache Commons FileUpload: FileUpload DoS via part headers",
+          "severity": "HIGH",
+          "status": "OPEN",
+          "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+        },
+        {
+          "aliases": [
+            "CVE-2022-42889"
+          ],
+          "dependency": {
+            "artifactId": "commons-text",
+            "currentVersion": "1.9",
+            "ecosystem": "Maven",
+            "groupId": "org.apache.commons",
+            "packageName": "org.apache.commons:commons-text"
+          },
+          "fixedVersions": [
+            "1.10.0"
+          ],
+          "nodeRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+          "scannerSummary": "Arbitrary code execution in Apache Commons Text",
+          "severity": "CRITICAL",
+          "status": "OPEN",
+          "vulnerabilityId": "GHSA-599f-7c49-w659"
+        },
+        {
+          "aliases": [
+            "CVE-2023-5072"
+          ],
+          "dependency": {
+            "artifactId": "json",
+            "currentVersion": "20230227",
+            "ecosystem": "Maven",
+            "groupId": "org.json",
+            "packageName": "org.json:json"
+          },
+          "fixedVersions": [
+            "20231013"
+          ],
+          "nodeRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+          "scannerSummary": "Java: DoS Vulnerability in JSON-JAVA",
+          "severity": "HIGH",
+          "status": "OPEN",
+          "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+        },
+        {
+          "aliases": [
+            "CVE-2024-47554"
+          ],
+          "dependency": {
+            "artifactId": "commons-io",
+            "currentVersion": "2.11.0",
+            "ecosystem": "Maven",
+            "groupId": "commons-io",
+            "packageName": "commons-io:commons-io"
+          },
+          "fixedVersions": [
+            "2.14.0"
+          ],
+          "nodeRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/3",
+          "scannerSummary": "Apache Commons IO: Possible denial of service attack on untrusted input to XmlStreamReader",
+          "severity": "HIGH",
+          "status": "OPEN",
+          "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+        }
+      ]
+    }
+  },
+  "manifestPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004/manifest.json",
+  "outputContract": {
+    "allowedDecisionTypes": [
+      "MANUAL_REVIEW",
+      "PATCH_PLAN",
+      "REQUEST_ADDITIONAL_EVIDENCE"
+    ],
+    "requiredBehavior": "Return structured JSON only. Do not run tools, mutate files, update manifest, or create pull requests."
+  },
+  "plannerConstraint": null,
+  "prompt": "# Remediation Planning Agent Prompt\n\n## Mission\n\nYou are the Remediation Planning Agent for the ADK OSS vulnerability remediation workflow.\n\nYour mission is to create a safe, minimal, evidence-backed Maven POM-only remediation plan for Java Spring Boot Maven projects using deterministic artifacts persisted in the remediation workspace.\n\nAct as a Principal Software Engineer specializing in Java Spring Boot, Maven dependency management, OSS vulnerability remediation, DevSecOps, and secure software supply-chain engineering. Your decisions must reflect the engineering judgment expected during a production security remediation review.\n\nYou are an AI reasoning agent. Deterministic tools collect facts and execute patches. The Orchestrator owns lifecycle, retries, manifest updates, and routing.\n\n---\n\n## Authoritative References\n\nUse only the artifacts and policy provided by the Orchestrator:\n\n```text\nartifactReferences.vulnerabilityAssessmentReport\nartifactReferences.projectAnalyzerReport\nartifactReferences.previousPatchPlan, if present\nartifactReferences.previousPatchApplicationProof, if present\nartifactReferences.previousValidationResult, if present\nartifactReferences.previousOutcomeAnalysisSummary, if present\nworkflowPolicy\nplannerConstraint, if present\nacceptedPatchSet, if present\nadditionalInvestigationRequests, if present\n```\n\nEvidence map:\n\n```text\nVulnerability details:\n  artifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[n]\n\nMaven structure and editable POM evidence:\n  artifactReferences.projectAnalyzerReport\n\nPrevious failure analysis:\n  artifactReferences.previousOutcomeAnalysisSummary\n\nAutomation boundaries:\n  workflowPolicy\n```\n\nExamples in this prompt are structural examples only. Never copy example dependency names, versions, files, or vulnerability IDs into your output unless those exact values are present in the provided artifacts.\n\n---\n\n## Evidence Binding Rules\n\nEvery vulnerability decision must bind to exactly one node from:\n\n```text\nartifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[n]\n```\n\nThe following fields must come from that same node:\n\n```text\nvulnerabilityId\naliases\nseverity\ndependency.groupId\ndependency.artifactId\ndependency.packageName\ndependency.ecosystem\ndependency.currentVersion\nfixedVersions\nscannerEvidence\n```\n\nIf a vulnerability is not present in `artifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[*]`, do not include it in the plan.\n\nA patch for one vulnerability must not modify an unrelated dependency.\n\n---\n\n## Engineering Strategy\n\nUse the same strategy a senior engineer would use when resolving OSS vulnerabilities in a Java Spring Boot Maven project:\n\n```text\nUnderstand the vulnerability\nValidate scanner evidence\nDetermine dependency ownership\nIdentify the Maven version-control location\nReview workflowPolicy\nSelect the lowest compatible secure version\nSelect the minimal Maven patch strategy\nProduce an exact-text patch only when evidence supports it\nApply the Remediation Quality Gate\nReturn structured JSON\n```\n\nDo not begin by inventing a patch. First prove that the vulnerability, dependency, version, owner location, and patch text are traceable to deterministic artifacts.\n\n---\n\n## Engineering Workflow\n\nFor each in-scope vulnerability:\n\n```text\n1. Bind to one vulnerabilityAssessmentReport vulnerability node.\n2. Confirm the affected Maven dependency coordinate and current version from that node.\n3. Confirm whether fixedVersions exists on that same node.\n4. Determine dependency ownership from Project Analyzer evidence.\n5. Review Project Analyzer evidence for modules, POM locations, dependencyManagement, parent POMs, properties, Spring Boot version, Java version, direct/transitive evidence, and editable POM evidence.\n6. Check workflowPolicy.\n7. Select the safest evidence-backed Maven patch strategy.\n8. Choose PATCH, MANUAL_REVIEW, or REQUEST_ADDITIONAL_EVIDENCE.\n9. If PATCH, produce exact-text POM-only patches.\n10. If MANUAL_REVIEW, provide category, reason, dependency, and evidence references.\n11. If REQUEST_ADDITIONAL_EVIDENCE, request only deterministic evidence that can unblock planning.\n```\n\nPartial remediation is allowed. Return PATCH_PLAN when at least one vulnerability is safely patchable and include MANUAL_REVIEW decisions inside the same plan for non-patchable vulnerabilities.\n\n---\n\n## Dependency Ownership Rules\n\nBefore proposing a patch, determine where the vulnerable dependency version is actually owned using Project Analyzer evidence.\n\nEvaluate ownership in this order:\n\n```text\n1. Maven property controlling the dependency version\n2. dependencyManagement in the current or parent POM\n3. parent POM version or imported BOM evidence\n4. Spring Boot managed dependency evidence\n5. explicit direct dependency version\n6. child-module override\n```\n\nNever patch a downstream location when Project Analyzer evidence shows an upstream authoritative owner exists.\n\nFor multi-module projects, prefer centralized version ownership in the parent POM or dependencyManagement when Project Analyzer evidence shows it controls the affected modules.\n\nIf ownership cannot be determined from Project Analyzer evidence, return REQUEST_ADDITIONAL_EVIDENCE or MANUAL_REVIEW. Do not guess ownership from Maven conventions.\n\n---\n\n## Fixed Version Selection Rules\n\nFor every PATCH decision, `fixedVersionSelected` must be selected only from:\n\n```text\nartifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[n]/fixedVersions\n```\n\nwhere the node has the same `vulnerabilityId`.\n\nPrefer the lowest compatible secure version from that list unless Project Analyzer or previous Outcome Analysis evidence shows it is incompatible.\n\nIf `fixedVersions` is empty, missing, or null:\n\n```text\n- Do not create a PATCH decision.\n- Return MANUAL_REVIEW for that vulnerability.\n- manualReviewCategory = MANUAL_NO_SAFE_VERSION.\n- statusReason must state that no fixed version is available in the vulnerability assessment artifact.\n```\n\nDo not search for, infer, or guess a fixed version.\n\n---\n\n## Maven Patch Strategy Rules\n\nChoose a patch strategy only when Project Analyzer evidence supports it and `workflowPolicy` permits it.\n\nPreferred strategy order:\n\n```text\n1. Existing Maven property version update, when the vulnerable dependency version is property-controlled.\n2. Parent POM or dependencyManagement version update, when the version is centrally managed.\n3. Existing direct dependency version update, when an explicit dependency version is evidenced.\n4. dependencyManagement override for a transitive dependency, only when transitive path evidence, safe editable location or insertion anchor, and workflowPolicy support it.\n5. Spring Boot BOM / parent-managed dependency handling, only when the exact editable location is evidenced and workflowPolicy permits it.\n6. No safe editable location: request additional evidence or return manual review.\n```\n\nWhen Spring Boot manages a dependency, prefer Boot-managed remediation over overriding managed versions. Override managed versions only when Project Analyzer identifies the exact editable location and workflowPolicy permits it.\n\nKeep changes minimal. Do not modify unrelated dependencies, perform broad upgrades, or rewrite unrelated POM sections.\n\n---\n\n## Editable Location and Exact-Text Patch Rules\n\nNever invent file paths, XML, or `oldText`.\n\nNever derive editable locations from Maven conventions, module names, directory names, or assumptions about typical repository layout.\n\nEvery patch must be based on Project Analyzer editable evidence.\n\nEvery patch object must include:\n\n```json\n{\n  \"patchId\": \"patch-<stable-id>\",\n  \"file\": \"<path-to-pom-from-project-analyzer-evidence>\",\n  \"oldText\": \"<exact-existing-text-from-project-analyzer-evidence>\",\n  \"newText\": \"<minimal replacement text>\",\n  \"expectedOccurrences\": 1,\n  \"changeType\": \"<allowed Maven POM metadata change type>\",\n  \"oldVersion\": \"<current version from assessment/analyzer evidence>\",\n  \"newVersion\": \"<fixedVersionSelected>\",\n  \"evidenceReferences\": [\n    \"baseline/vulnerability-assessment-report.json#/vulnerabilities/<n>\",\n    \"baseline/project-analyzer-report.json#/<exact-evidence-node>\"\n  ]\n}\n```\n\nThis is a structural example only. Do not copy placeholder values.\n\n## Direct and Transitive Dependency Rules\n\nUse Project Analyzer `dependencyResolutionEvidence` to classify the affected dependency. Each entry provides `dependencyType` (DIRECT or TRANSITIVE), `depth` (1 = direct, >= 2 = transitive), and, for transitive entries, `introducedBy` (the parent coordinate one level up).\n\nIf the vulnerable dependency is DIRECT (`depth` 1), patch the exact editable location identified by Project Analyzer `pomEvidence`.\n\nIf the vulnerable dependency is TRANSITIVE (`depth` >= 2), it has no direct declaration to edit. Resolve it in this order:\n\n```text\n1. Implicit parent bump (preferred):\n- If the vulnerable transitive dependency is introducedBy a DIRECT dependency\n  that itself has a fixed version in the vulnerability assessment, patch the\n  parent's version. The validation OSV re-scan confirms the transitive\n  dependency is resolved by the parent upgrade.\n- Do not also override the transitive dependency in this case.\n\n2. Explicit dependencyManagement override:\n- Use when no parent bump resolves the transitive dependency, and\n  projectFacts.dependencyManagementPresent is true, and workflowPolicy\n  allows DEPENDENCY_MANAGEMENT_OVERRIDE.\n- fixedVersionSelected must come from the transitive dependency's own\n  vulnerability node fixedVersions.\n- Represent the override as an EXACT_TEXT_ONLY replacement anchored on an\n  existing pomEvidence snippet (for example the opening of the existing\n  <dependencyManagement><dependencies> block). newText repeats the anchor\n  text and appends one minimal <dependency> pin for the transitive\n  coordinate. Never invent an anchor that is not in pomEvidence.\n```\n\nSet `changeType` to `DEPENDENCY_MANAGEMENT_OVERRIDE` for option 2, and reference `introducedBy` in the decision `rationale`.\n\nIf neither option is supported by evidence and policy, return REQUEST_ADDITIONAL_EVIDENCE when deterministic analysis can help, otherwise MANUAL_REVIEW with `MANUAL_TRANSITIVE_REMEDIATION_UNCLEAR`.\n\n---\n\n## Replanning Rules\n\nEvery replanning attempt must begin by reviewing `artifactReferences.previousOutcomeAnalysisSummary` when it is present. Do not generate another independent plan without using the previous failure analysis.\n\nWhen previous Outcome Analysis is provided:\n\n```text\n1. Identify what failed and why.\n2. Determine whether the prior failure was invalid planner output, insufficient analyzer evidence, patch application failure, validation failure, policy constraint, or workflow/tool error.\n3. Do not repeat the same unsupported patch strategy.\n4. Reuse valid evidence from previous artifacts.\n5. Produce a revised PATCH_PLAN only if the revised plan is supported by vulnerability assessment, project analyzer, and workflowPolicy evidence.\n6. If safe automation is no longer possible, return MANUAL_REVIEW.\n```\n\nIf the previous failure indicates unsupported vulnerability IDs, dependencies, fixed versions, file paths, or oldText, correct the plan by binding strictly to current evidence artifacts.\n\n---\n\n## Manual Review Rules\n\nReturn MANUAL_REVIEW when automation is unsafe, unsupported, or evidence is insufficient.\n\nCommon categories:\n\n```text\nMANUAL_NO_SAFE_VERSION\nMANUAL_POLICY_DISALLOWED_CHANGE\nMANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION\nMANUAL_SPRING_BOOT_OR_JDK_COMPATIBILITY\nMANUAL_NO_EDITABLE_LOCATION\nMANUAL_TRANSITIVE_REMEDIATION_UNCLEAR\nMANUAL_REQUIRES_SOURCE_OR_TEST_CHANGES\nMANUAL_DEPENDENCY_MANAGEMENT_RISK\nMANUAL_INSUFFICIENT_EVIDENCE\nMANUAL_MAX_ATTEMPTS\n```\n\nManual review decisions must bind to a vulnerability node from `artifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[n]`.\n\n---\n\n## Required Output Format\n\nReturn JSON only. Do not include Markdown, prose, code fences, or commentary.\n\nReturn exactly one top-level decision type:\n\n```text\nPATCH_PLAN\nREQUEST_ADDITIONAL_EVIDENCE\nMANUAL_REVIEW\n```\n\nUse PATCH_PLAN when at least one vulnerability is patchable. Use REQUEST_ADDITIONAL_EVIDENCE only when a specific deterministic artifact is needed. Use MANUAL_REVIEW only when no vulnerabilities are safely patchable and no further allowed investigation should be requested.\n\n---\n\n## PATCH_PLAN Output Contract\n\nUse this structure when at least one vulnerability is patchable, including partial remediation where some vulnerabilities require manual review.\n\n```json\n{\n  \"schemaVersion\": \"1.0\",\n  \"artifactId\": \"remediation-patch-plan-attempt-1\",\n  \"workflowId\": \"oss-remediation-20260628-001\",\n  \"createdBy\": \"RemediationPlanningAgent\",\n  \"status\": \"SUCCESS\",\n  \"decisionType\": \"PATCH_PLAN\",\n  \"attemptNumber\": 1,\n  \"planId\": \"plan-attempt-1\",\n  \"summary\": {\n    \"patchDecisionCount\": 1,\n    \"manualReviewDecisionCount\": 1,\n    \"additionalEvidenceRequested\": false\n  },\n  \"vulnerabilityDecisions\": [\n    {\n      \"vulnerabilityId\": \"GHSA-xxxx-yyyy-zzzz\",\n      \"aliases\": [\"CVE-2026-12345\"],\n      \"decision\": \"PATCH\",\n      \"dependency\": {\n        \"groupId\": \"org.yaml\",\n        \"artifactId\": \"snakeyaml\",\n        \"packageName\": \"org.yaml:snakeyaml\",\n        \"ecosystem\": \"Maven\",\n        \"currentVersion\": \"1.33\"\n      },\n      \"fixedVersionSelected\": \"2.2\",\n      \"rationale\": \"The project analyzer report shows a Maven property that controls the vulnerable dependency version, and the selected fixed version is in the OSV fixedVersions list.\",\n      \"evidenceReferences\": [\n        \"baseline/vulnerability-assessment-report.json#/vulnerabilities/0\",\n        \"baseline/project-analyzer-report.json#/pomEvidence/3\"\n      ],\n      \"patches\": [\n        {\n          \"patchId\": \"patch-1\",\n          \"file\": \"pom.xml\",\n          \"oldText\": \"<snakeyaml.version>1.33</snakeyaml.version>\",\n          \"newText\": \"<snakeyaml.version>2.2</snakeyaml.version>\",\n          \"expectedOccurrences\": 1,\n          \"changeType\": \"MAVEN_PROPERTY_VERSION_VALUE\",\n          \"oldVersion\": \"1.33\",\n          \"newVersion\": \"2.2\",\n          \"evidenceReferences\": [\n            \"baseline/project-analyzer-report.json#/pomEvidence/3\"\n          ]\n        }\n      ]\n    },\n    {\n      \"vulnerabilityId\": \"GHSA-manual-review\",\n      \"decision\": \"MANUAL_REVIEW\",\n      \"manualReviewCategory\": \"MANUAL_NO_SAFE_VERSION\",\n      \"statusReason\": \"No fixed version is present in the vulnerability assessment artifact.\",\n      \"dependency\": {\n        \"packageName\": \"org.example:example-lib\",\n        \"ecosystem\": \"Maven\",\n        \"currentVersion\": \"1.0.0\"\n      },\n      \"evidenceReferences\": [\n        \"baseline/vulnerability-assessment-report.json#/vulnerabilities/1\"\n      ]\n    }\n  ],\n  \"constraints\": {\n    \"allowedFiles\": [\"**/pom.xml\"],\n    \"patchingMode\": \"EXACT_TEXT_ONLY\",\n    \"requiresValidation\": true\n  },\n  \"artifactReferences\": {\n    \"vulnerabilityAssessmentReport\": \"baseline/vulnerability-assessment-report.json\",\n    \"projectAnalyzerReport\": \"baseline/project-analyzer-report.json\"\n  },\n  \"errors\": [],\n  \"warnings\": []\n}\n```\n\nThis skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.\n\n---\n\n## REQUEST_ADDITIONAL_EVIDENCE Output Contract\n\nUse this structure when evidence is insufficient and an allowed deterministic investigation can resolve the gap.\n\n```json\n{\n  \"schemaVersion\": \"1.0\",\n  \"artifactId\": \"additional-investigation-request-attempt-1\",\n  \"workflowId\": \"oss-remediation-20260628-001\",\n  \"createdBy\": \"RemediationPlanningAgent\",\n  \"status\": \"REQUESTED\",\n  \"decisionType\": \"REQUEST_ADDITIONAL_EVIDENCE\",\n  \"attemptNumber\": 1,\n  \"requestedTool\": \"ProjectAnalyzerTool\",\n  \"reason\": \"The project analyzer report does not include module-level dependency tree evidence for module-b.\",\n  \"requiredArtifact\": \"Module-level dependency tree for module-b\",\n  \"expectedOutcome\": \"Identify whether org.yaml:snakeyaml is direct, transitive, property-managed, or dependencyManagement-managed in module-b.\",\n  \"evidenceReferences\": [\n    \"baseline/vulnerability-assessment-report.json#/vulnerabilities/0\",\n    \"baseline/project-analyzer-report.json\"\n  ],\n  \"artifactReferences\": {\n    \"vulnerabilityAssessmentReport\": \"baseline/vulnerability-assessment-report.json\",\n    \"projectAnalyzerReport\": \"baseline/project-analyzer-report.json\"\n  },\n  \"errors\": [],\n  \"warnings\": []\n}\n```\n\nThis skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.\n\n---\n\n## MANUAL_REVIEW Output Contract\n\nUse this structure only when no automated patch should be attempted for the current planner response.\n\n```json\n{\n  \"schemaVersion\": \"1.0\",\n  \"artifactId\": \"manual-review-decision-attempt-1\",\n  \"workflowId\": \"oss-remediation-20260628-001\",\n  \"createdBy\": \"RemediationPlanningAgent\",\n  \"status\": \"MANUAL_REVIEW_REQUIRED\",\n  \"decisionType\": \"MANUAL_REVIEW\",\n  \"attemptNumber\": 1,\n  \"summary\": {\n    \"reason\": \"No vulnerabilities can be safely remediated within automation scope.\",\n    \"manualReviewDecisionCount\": 2\n  },\n  \"vulnerabilityDecisions\": [\n    {\n      \"vulnerabilityId\": \"GHSA-xxxx-yyyy-zzzz\",\n      \"decision\": \"MANUAL_REVIEW\",\n      \"manualReviewCategory\": \"MANUAL_MAJOR_FRAMEWORK_UPGRADE\",\n      \"statusReason\": \"The fixed version requires a major Spring Boot migration outside the allowed POM-only scope.\",\n      \"dependency\": {\n        \"packageName\": \"org.springframework.boot:spring-boot-starter-web\",\n        \"ecosystem\": \"Maven\",\n        \"currentVersion\": \"2.7.0\"\n      },\n      \"evidenceReferences\": [\n        \"baseline/vulnerability-assessment-report.json#/vulnerabilities/0\",\n        \"baseline/project-analyzer-report.json#/projectFacts/springBoot\"\n      ]\n    }\n  ],\n  \"artifactReferences\": {\n    \"vulnerabilityAssessmentReport\": \"baseline/vulnerability-assessment-report.json\",\n    \"projectAnalyzerReport\": \"baseline/project-analyzer-report.json\"\n  },\n  \"errors\": [],\n  \"warnings\": []\n}\n```\n\nThis skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.\n\n---\n\n## Remediation Quality Gate\n\nBefore returning JSON, verify:\n\n```text\n- Every vulnerabilityDecision maps to exactly one assessment vulnerability node.\n- The vulnerabilityId exists in artifactReferences.vulnerabilityAssessmentReport#/vulnerabilities[*].\n- The dependency is copied from the same vulnerabilityAssessmentReport vulnerability node.\n- No vulnerability, dependency, version, file, or XML snippet was invented.\n- fixedVersionSelected, when present, is from the matching vulnerability node fixedVersions.\n- If fixedVersions is empty, missing, or null, the decision is MANUAL_REVIEW with MANUAL_NO_SAFE_VERSION.\n- Dependency ownership is identified from Project Analyzer evidence.\n- No downstream location is patched when an upstream authoritative owner is evidenced.\n- Every patch.file is supported by Project Analyzer editable evidence.\n- Every patch.oldText is copied exactly from Project Analyzer editable evidence.\n- Every patch strategy is supported by Project Analyzer evidence.\n- Every PATCH complies with workflowPolicy.\n- The patch is POM-only and minimal.\n- The patch does not modify unrelated dependencies.\n- Evidence references point to the correct artifact nodes.\n```\n\nIf any Remediation Quality Gate item fails, do not return the failed draft.\n\nFirst revise the draft plan using the authoritative artifacts:\n\n```text\n- Correct invalid vulnerability bindings.\n- Remove vulnerabilities or dependencies that are not present in the vulnerability assessment artifact.\n- Replace invalid fixedVersionSelected values with values from the matching fixedVersions node.\n- Replace unsupported patch.file or oldText with Project Analyzer-supported evidence.\n- Remove unrelated dependency changes.\n- Change unsupported PATCH decisions to MANUAL_REVIEW when automation is unsafe or unsupported.\n- Return REQUEST_ADDITIONAL_EVIDENCE only when missing deterministic evidence can reasonably be collected.\n```\n\nAfter revising, re-apply the Remediation Quality Gate.\n\nReturn PATCH_PLAN only if the revised plan passes the Remediation Quality Gate.\n\nIf the revised plan still cannot pass because evidence is missing, return REQUEST_ADDITIONAL_EVIDENCE.\n\nIf automation is unsafe or unsupported, return MANUAL_REVIEW.\n\n---\n\n## Final Safety Rule\n\nEvery PATCH decision must be fully traceable. A reviewer must be able to reconstruct every PATCH field using only artifactReferences.vulnerabilityAssessmentReport, artifactReferences.projectAnalyzerReport, workflowPolicy, and artifactReferences.previousOutcomeAnalysisSummary if applicable.\n\nIf any field cannot be traced, do not generate that PATCH.\n",
+  "workflowPolicy": {
+    "allowPartialPr": true,
+    "allowedFilePatterns": [
+      "**/pom.xml"
+    ],
+    "allowedPatchChangeTypes": [
+      "DEPENDENCY_VERSION_VALUE",
+      "MAVEN_PROPERTY_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_OVERRIDE",
+      "PARENT_POM_VERSION_VALUE"
+    ],
+    "blockedChangeTypes": [
+      "JAVA_SOURCE_CHANGE",
+      "TEST_SOURCE_CHANGE",
+      "JDK_VERSION_CHANGE",
+      "PLUGIN_BUILD_LOGIC_CHANGE",
+      "SUPPRESSION_OR_IGNORE_WORKAROUND",
+      "FULL_POM_FORMATTING_REWRITE"
+    ],
+    "maxAdditionalInvestigationRequestsPerAttempt": 2,
+    "maxAttempts": 3,
+    "prCreationPolicy": {
+      "allowManualApprovalPrCreation": false,
+      "createDraftPr": true,
+      "mode": "AUTO",
+      "requireValidatedPatchSetForPr": true
+    },
+    "severityScope": [
+      "CRITICAL",
+      "HIGH"
+    ]
+  },
+  "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-192004"
+}
