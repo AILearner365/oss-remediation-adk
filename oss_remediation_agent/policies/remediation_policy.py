@@ -10,6 +10,10 @@ class RemediationPolicy:
     max_attempts: int = 3
     max_additional_investigation_requests_per_attempt: int = 2
     allow_partial_pr: bool = True
+    pr_creation_mode: str = "SUMMARY_ONLY"
+    create_draft_pr: bool = True
+    require_validated_patch_set_for_pr: bool = True
+    allow_manual_approval_pr_creation: bool = False
     allowed_file_patterns: list[str] = field(default_factory=lambda: ["**/pom.xml"])
     blocked_change_types: list[str] = field(default_factory=lambda: [
         "JAVA_SOURCE_CHANGE",
@@ -48,12 +52,21 @@ class RemediationPolicy:
                 continue
             if ":" in stripped:
                 key, value = [part.strip() for part in stripped.split(":", 1)]
+                value = value.strip('"')
                 if key == "maxAttempts":
                     policy.max_attempts = int(value)
                 elif key == "maxAdditionalInvestigationRequestsPerAttempt":
                     policy.max_additional_investigation_requests_per_attempt = int(value)
                 elif key == "allowPartialPr":
                     policy.allow_partial_pr = value.lower() == "true"
+                elif key == "prCreationMode":
+                    policy.pr_creation_mode = value.upper()
+                elif key == "createDraftPr":
+                    policy.create_draft_pr = value.lower() == "true"
+                elif key == "requireValidatedPatchSetForPr":
+                    policy.require_validated_patch_set_for_pr = value.lower() == "true"
+                elif key == "allowManualApprovalPrCreation":
+                    policy.allow_manual_approval_pr_creation = value.lower() == "true"
                 current_key = None
         if lists.get("severityScope"):
             policy.severity_scope = lists["severityScope"]
@@ -71,6 +84,12 @@ class RemediationPolicy:
             "maxAttempts": self.max_attempts,
             "maxAdditionalInvestigationRequestsPerAttempt": self.max_additional_investigation_requests_per_attempt,
             "allowPartialPr": self.allow_partial_pr,
+            "prCreationPolicy": {
+                "mode": self.pr_creation_mode,
+                "createDraftPr": self.create_draft_pr,
+                "requireValidatedPatchSetForPr": self.require_validated_patch_set_for_pr,
+                "allowManualApprovalPrCreation": self.allow_manual_approval_pr_creation,
+            },
             "allowedFilePatterns": self.allowed_file_patterns,
             "blockedChangeTypes": self.blocked_change_types,
             "allowedPatchChangeTypes": self.allowed_patch_change_types,
