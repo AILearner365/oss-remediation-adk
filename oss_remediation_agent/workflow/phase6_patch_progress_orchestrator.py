@@ -9,6 +9,7 @@ from oss_remediation_agent.workflow.phase6_orchestrator import Phase6WorkflowOrc
 
 class Phase6PatchProgressOrchestrator(Phase6WorkflowOrchestrator):
     def run_patch_validation_attempt(self, attempt_number: int, patch_plan_path: str) -> dict:
+        self._remove_redundant_transitive_dependency_management_overrides(patch_plan_path)
         result = super().run_patch_validation_attempt(attempt_number, patch_plan_path)
         manifest = self.manifest_store.load()
         attempt_entry = self._attempt_entry(manifest, attempt_number)
@@ -24,6 +25,138 @@ class Phase6PatchProgressOrchestrator(Phase6WorkflowOrchestrator):
         self._enrich_accepted_patch_set_severity(manifest)
         self.manifest_store.save(manifest)
         return result
+
+    def _remove_redundant_transitive_dependency_management_overrides(self, patch_plan_path: str) -> None:
+        """Prefer parent-bump validation over same-attempt transitive overrides.
+
+        If a transitive vulnerable dependency is introduced by a direct dependency
+        that is already patched in the same plan, do not also add a
+        dependencyManagement override for the transitive dependency. The parent
+        bump should be validated first; a transitive override is only appropriate
+        after validation proves the parent bump did not resolve it, or when no
+        safe parent bump exists.
+        """
+        plan_path = Path(patch_plan_path)
+        if not plan_path.is_absolute():
+            plan_path = self.workspace.root / plan_path
+        if not plan_path.exists():
+            return
+        try:
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        if plan.get("decisionType") != "PATCH_PLAN":
+            return
+
+        analyzer = self._read_project_analyzer_report(plan)
+        if not analyzer:
+            return
+        dependency_evidence = analyzer.get("dependencyResolutionEvidence", []) or []
+        direct_dependencies = {
+            item.get("dependency")
+            for item in dependency_evidence
+            if item.get("dependency") and item.get("dependencyType") == "DIRECT"
+        }
+        transitive_introducer_by_dependency = {
+            item.get("dependency"): item.get("introducedBy")
+            for item in dependency_evidence
+            if item.get("dependency")
+            and item.get("dependencyType") == "TRANSITIVE"
+            and item.get("introducedBy")
+        }
+
+        patched_direct_dependencies: set[str] = set()
+        patch_ids_by_dependency: dict[str, list[str]] = {}
+        for decision in plan.get("vulnerabilityDecisions", []) or []:
+            dependency = self._decision_dependency_coordinate(decision)
+            if not dependency or dependency not in direct_dependencies:
+                continue
+            patch_ids = [
+                patch.get("patchId")
+                for patch in decision.get("patches", []) or []
+                if patch.get("patchId") and patch.get("changeType") != "DEPENDENCY_MANAGEMENT_OVERRIDE"
+            ]
+            if patch_ids:
+                patched_direct_dependencies.add(dependency)
+                patch_ids_by_dependency[dependency] = patch_ids
+
+        if not patched_direct_dependencies:
+            return
+
+        changed = False
+        warnings = plan.setdefault("warnings", [])
+        for decision in plan.get("vulnerabilityDecisions", []) or []:
+            dependency = self._decision_dependency_coordinate(decision)
+            introduced_by = transitive_introducer_by_dependency.get(dependency)
+            if not dependency or not introduced_by or introduced_by not in patched_direct_dependencies:
+                continue
+            patches = decision.get("patches", []) or []
+            retained_patches = [
+                patch
+                for patch in patches
+                if patch.get("changeType") != "DEPENDENCY_MANAGEMENT_OVERRIDE"
+            ]
+            if len(retained_patches) == len(patches):
+                continue
+
+            removed_patch_ids = [
+                patch.get("patchId")
+                for patch in patches
+                if patch.get("changeType") == "DEPENDENCY_MANAGEMENT_OVERRIDE" and patch.get("patchId")
+            ]
+            decision["patches"] = retained_patches
+            decision["transitiveRemediationStrategy"] = "IMPLICIT_PARENT_BUMP"
+            decision["resolvedByDependency"] = introduced_by
+            decision["coveredByPatchIds"] = patch_ids_by_dependency.get(introduced_by, [])
+            decision["statusReason"] = (
+                f"DependencyManagement override removed because {dependency} is a transitive dependency "
+                f"introduced by {introduced_by}, and {introduced_by} is already patched in this plan. "
+                "Validation must confirm whether the parent dependency upgrade resolves the transitive vulnerability."
+            )
+            warnings.append(
+                f"Removed redundant DEPENDENCY_MANAGEMENT_OVERRIDE patch(es) {removed_patch_ids} for {dependency}; "
+                f"covered by parent dependency patch for {introduced_by}."
+            )
+            changed = True
+
+        if not changed:
+            return
+
+        summary = plan.setdefault("summary", {})
+        summary["patchDecisionCount"] = sum(
+            1
+            for decision in plan.get("vulnerabilityDecisions", []) or []
+            if decision.get("decision") == "PATCH" and bool(decision.get("patches"))
+        )
+        plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    def _read_project_analyzer_report(self, plan: dict[str, Any]) -> dict[str, Any]:
+        analyzer_ref = (plan.get("artifactReferences") or {}).get("projectAnalyzerReport")
+        if not analyzer_ref:
+            analyzer_ref = "baseline/project-analyzer-report.json"
+        analyzer_path = Path(analyzer_ref)
+        if not analyzer_path.is_absolute():
+            analyzer_path = self.workspace.root / analyzer_path
+        if not analyzer_path.exists():
+            return {}
+        try:
+            return json.loads(analyzer_path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _decision_dependency_coordinate(decision: dict[str, Any]) -> str | None:
+        dependency = decision.get("dependency") or {}
+        if isinstance(dependency, str):
+            return dependency
+        package_name = dependency.get("packageName")
+        if package_name:
+            return package_name
+        group_id = dependency.get("groupId")
+        artifact_id = dependency.get("artifactId")
+        if group_id and artifact_id:
+            return f"{group_id}:{artifact_id}"
+        return artifact_id or group_id
 
     def _enrich_accepted_patch_set_severity(self, manifest: dict[str, Any]) -> None:
         accepted = manifest.get("acceptedPatchSet") or {}
