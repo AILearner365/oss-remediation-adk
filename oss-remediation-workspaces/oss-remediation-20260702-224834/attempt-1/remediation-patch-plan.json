@@ -1,0 +1,98 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-1",
+  "artifactReferences": {
+    "projectAnalyzerReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-1",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 2,
+    "patchDecisionCount": 1
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2023-12345"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "snakeyaml",
+        "currentVersion": "1.33",
+        "ecosystem": "Maven",
+        "groupId": "org.yaml",
+        "packageName": "org.yaml:snakeyaml"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/0/properties/snakeyaml.version"
+      ],
+      "fixedVersionSelected": "2.2",
+      "patches": [
+        {
+          "changeType": "MAVEN_PROPERTY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/0/properties/snakeyaml.version"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<snakeyaml.version>2.2</snakeyaml.version>",
+          "newVersion": "2.2",
+          "oldText": "<snakeyaml.version>1.33</snakeyaml.version>",
+          "oldVersion": "1.33",
+          "patchId": "patch-1"
+        }
+      ],
+      "rationale": "The Project Analyzer Report shows that the version of 'org.yaml:snakeyaml' is controlled by a Maven property, which can be safely updated to a fixed version ('2.2') listed in the Vulnerability Assessment Report, without requiring any forbidden changes. The fixed version is available and compatible with existing project constraints.",
+      "vulnerabilityId": "GHSA-xxxx-yyyy-zzzz"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "spring-core",
+        "currentVersion": "5.3.0",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework",
+        "packageName": "org.springframework:spring-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/projectFacts/springBootVersion"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_FRAMEWORK_UPGRADE",
+      "statusReason": "The vulnerable dependency 'org.springframework:spring-core' version '5.3.0' is likely brought in transitively by Spring Boot 2.7.0. The fixed version '6.0.0' would require a major Spring Boot migration (e.g., to 3.x), which is outside the allowed automated patch scope as it typically involves significant code changes and potential JDK upgrades.",
+      "vulnerabilityId": "GHSA-manual-review-spring-core"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "other-lib",
+        "currentVersion": "1.0.0",
+        "ecosystem": "Maven",
+        "groupId": "org.example",
+        "packageName": "org.example:other-lib"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "The Vulnerability Assessment Report does not provide any fixed versions for 'org.example:other-lib:1.0.0', making automated remediation impossible without guessing or further, unsupported investigation.",
+      "vulnerabilityId": "GHSA-other-vulnerability"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260702-224834"
+}

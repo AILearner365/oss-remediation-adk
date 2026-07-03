@@ -1,0 +1,66 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-2",
+  "artifactReferences": {
+    "patchApplicationProof": null,
+    "patchDryRunResult": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-2/patch-dry-run-result.json",
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-2/remediation-patch-plan.json",
+    "validationResult": null
+  },
+  "attemptNumber": 2,
+  "capabilityGaps": [],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [],
+  "failureCategory": "PATCH_OCCURRENCE_MISMATCH",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-2/patch-dry-run-result.json#/patchResults/0"
+      ],
+      "fact": "The exact oldText specified in 'patch-1' was not found in the target 'pom.xml' file, leading to an occurrence mismatch."
+    }
+  ],
+  "recommendedFocusForPlanner": [
+    "Review exact POM evidence (e.g., from Project Analyzer artifacts) to determine the correct 'oldText' pattern for the dependency property version.",
+    "Ensure the 'expectedOccurrences' count accurately reflects the current state of the repository.",
+    "Do not repeat the same patch plan for 'patch-1' without updated evidence regarding the 'oldText' and its occurrences."
+  ],
+  "responsibilityArea": "PLANNER_DECISION",
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [],
+    "changedFiles": [],
+    "diffArtifact": null,
+    "failedPatchIds": [
+      "patch-1"
+    ],
+    "repositoryModified": false,
+    "summary": "Patch dry-run failed before repository modification. No files were changed."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-2/patch-dry-run-result.json#/patchResults/0"
+    ],
+    "failedStage": "PATCH_DRY_RUN",
+    "failureSummary": "The patch tool encountered an occurrence mismatch. The expected 'oldText' for 'patch-1' was not found in 'pom.xml' the specified number of times (expected 1, found 0).",
+    "logReferences": []
+  },
+  "whatWeTried": {
+    "changeTypes": [
+      "MAVEN_PROPERTY_VERSION_VALUE"
+    ],
+    "dependencies": [
+      "org.yaml:snakeyaml"
+    ],
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-2/remediation-patch-plan.json",
+    "summary": "Attempted to update a vulnerable Maven dependency property version using an exact-text patch plan.",
+    "targetedFiles": [
+      "pom.xml"
+    ],
+    "vulnerabilityIds": [
+      "GHSA-g7hh-x4p9-x776"
+    ]
+  },
+  "workflowId": "oss-remediation-20260702-224834"
+}

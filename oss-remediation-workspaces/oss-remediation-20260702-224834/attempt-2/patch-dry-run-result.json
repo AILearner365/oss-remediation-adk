@@ -1,0 +1,24 @@
+{
+  "artifactId": "patch-dry-run-attempt-2",
+  "artifactReferences": {},
+  "attemptNumber": 2,
+  "createdAt": "2026-07-02T22:55:22Z",
+  "createdBy": "GenericPatchApplyTool",
+  "errors": [
+    "patch-1: expected 1 occurrence(s), found 0"
+  ],
+  "patchResults": [
+    {
+      "actualOccurrences": 0,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-1",
+      "status": "FAILED"
+    }
+  ],
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "FAILED",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260702-224834"
+}
