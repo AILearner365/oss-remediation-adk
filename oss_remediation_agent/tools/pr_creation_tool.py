@@ -100,7 +100,7 @@ def _manual_review_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _manual_review_decision(manifest: dict[str, Any]) -> dict[str, Any]:
     planning = manifest.get("planning", {})
-    path = planning.get("manualReviewDecision") or planning.get("lastDecision")
+    path = planning.get("manualReviewDecision")
     if not path:
         for attempt in reversed(manifest.get("attempts", []) or []):
             candidate = attempt.get("manualReviewDecision")
@@ -113,9 +113,10 @@ def _manual_review_decision(manifest: dict[str, Any]) -> dict[str, Any]:
     candidate = workspace_root / path
     if not candidate.exists():
         candidate = Path(path)
-    if candidate.exists():
-        return json.loads(candidate.read_text(encoding="utf-8"))
-    return {}
+    if not candidate.exists():
+        return {}
+    payload = json.loads(candidate.read_text(encoding="utf-8"))
+    return payload if payload.get("decisionType") == "MANUAL_REVIEW" else {}
 
 
 def _dependency_coordinate(dependency: dict[str, Any]) -> str | None:
@@ -222,9 +223,15 @@ def _markdown(
         "",
         "## Notes for Reviewers",
         "",
-        "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and post-remediation OSV validation found no remaining Critical or High vulnerabilities for the remediated patch set.",
+        _reviewer_notes(pr_type),
     ])
     return "\n".join(lines) + "\n"
+
+
+def _reviewer_notes(pr_type: str) -> str:
+    if pr_type == "PARTIAL_REMEDIATION":
+        return "The validated patch set was applied successfully. Any remaining Critical/High vulnerabilities are listed in the manual-review section with reasons."
+    return "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and post-remediation OSV validation found no remaining Critical or High vulnerabilities."
 
 
 def _aliases(row: dict[str, Any]) -> str:
