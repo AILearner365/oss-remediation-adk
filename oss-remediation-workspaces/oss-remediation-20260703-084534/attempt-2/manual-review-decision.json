@@ -1,0 +1,82 @@
+{
+  "artifactId": "manual-review-decision-attempt-2",
+  "artifactReferences": {
+    "previousOutcomeAnalysisSummary": "attempt-1/outcome-analysis-summary.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 2,
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "MANUAL_REVIEW",
+  "errors": [],
+  "schemaVersion": "1.0",
+  "status": "MANUAL_REVIEW_REQUIRED",
+  "summary": {
+    "manualReviewDecisionCount": 3,
+    "reason": "Previous attempt's validation scan failed, preventing assessment of applied patches. Further automated planning is unsafe until validation is resolved."
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "attempt-1/outcome-analysis-summary.json#/whatHappened"
+      ],
+      "manualReviewCategory": "MANUAL_INSUFFICIENT_EVIDENCE",
+      "statusReason": "Patches from the previous attempt were applied, but the subsequent OSV validation scan failed. This prevents an accurate assessment of the current vulnerability status and makes further automated patching unsafe as per the previous outcome analysis recommendations.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "attempt-1/outcome-analysis-summary.json#/whatHappened"
+      ],
+      "manualReviewCategory": "MANUAL_INSUFFICIENT_EVIDENCE",
+      "statusReason": "Patches from the previous attempt were applied, but the subsequent OSV validation scan failed. This prevents an accurate assessment of the current vulnerability status and makes further automated patching unsafe as per the previous outcome analysis recommendations.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+        "attempt-1/outcome-analysis-summary.json#/whatHappened"
+      ],
+      "manualReviewCategory": "MANUAL_INSUFFICIENT_EVIDENCE",
+      "statusReason": "Patches from the previous attempt were applied, but the subsequent OSV validation scan failed. This prevents an accurate assessment of the current vulnerability status and makes further automated patching unsafe as per the previous outcome analysis recommendations.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260703-084534"
+}

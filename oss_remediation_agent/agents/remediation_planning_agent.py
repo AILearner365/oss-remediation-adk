@@ -382,7 +382,19 @@ def _vulnerable_coordinates(report: dict[str, Any]) -> set[str]:
             coordinates.add(f"{group_id}:{artifact_id}")
     return coordinates
 
+def _vulnerable_artifact_ids(report: dict[str, Any]) -> set[str]:
+    tokens: set[str] = set()
 
+    for item in report.get("vulnerabilities", []):
+        dependency = item.get("dependency", {})
+        artifact_id = dependency.get("artifactId")
+
+        if artifact_id:
+            tokens.add(artifact_id)
+
+    return tokens
+
+    
 def _read_pom_index(project_analyzer: dict[str, Any], workspace: Path) -> list[str]:
     pom_index = project_analyzer.get("artifactReferences", {}).get("pomIndex")
     if not pom_index:
