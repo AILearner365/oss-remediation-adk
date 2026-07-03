@@ -45,7 +45,7 @@ Automation boundaries:
   workflowPolicy
 ```
 
-Examples in this prompt are structural only. Never copy example dependency names, versions, files, or vulnerability IDs into your output.
+Examples in this prompt are structural examples only. Never copy example dependency names, versions, files, or vulnerability IDs into your output unless those exact values are present in the provided artifacts.
 
 ---
 
@@ -297,33 +297,168 @@ Use PATCH_PLAN when at least one vulnerability is patchable. Use REQUEST_ADDITIO
 
 ## PATCH_PLAN Output Contract
 
-Use PATCH_PLAN when at least one vulnerability is patchable.
+Use this structure when at least one vulnerability is patchable, including partial remediation where some vulnerabilities require manual review.
 
-The response must include schemaVersion, artifactId, workflowId, createdBy, status, decisionType, attemptNumber, planId, summary, artifactReferences, vulnerabilityDecisions, warnings, and errors.
+```json
+{
+  "schemaVersion": "1.0",
+  "artifactId": "remediation-patch-plan-attempt-1",
+  "workflowId": "oss-remediation-20260628-001",
+  "createdBy": "RemediationPlanningAgent",
+  "status": "SUCCESS",
+  "decisionType": "PATCH_PLAN",
+  "attemptNumber": 1,
+  "planId": "plan-attempt-1",
+  "summary": {
+    "patchDecisionCount": 1,
+    "manualReviewDecisionCount": 1,
+    "additionalEvidenceRequested": false
+  },
+  "vulnerabilityDecisions": [
+    {
+      "vulnerabilityId": "GHSA-xxxx-yyyy-zzzz",
+      "aliases": ["CVE-2026-12345"],
+      "decision": "PATCH",
+      "dependency": {
+        "groupId": "org.yaml",
+        "artifactId": "snakeyaml",
+        "packageName": "org.yaml:snakeyaml",
+        "ecosystem": "Maven",
+        "currentVersion": "1.33"
+      },
+      "fixedVersionSelected": "2.2",
+      "rationale": "The project analyzer report shows a Maven property that controls the vulnerable dependency version, and the selected fixed version is in the OSV fixedVersions list.",
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/3"
+      ],
+      "patches": [
+        {
+          "patchId": "patch-1",
+          "file": "pom.xml",
+          "oldText": "<snakeyaml.version>1.33</snakeyaml.version>",
+          "newText": "<snakeyaml.version>2.2</snakeyaml.version>",
+          "expectedOccurrences": 1,
+          "changeType": "MAVEN_PROPERTY_VERSION_VALUE",
+          "oldVersion": "1.33",
+          "newVersion": "2.2",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/3"
+          ]
+        }
+      ]
+    },
+    {
+      "vulnerabilityId": "GHSA-manual-review",
+      "decision": "MANUAL_REVIEW",
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact.",
+      "dependency": {
+        "packageName": "org.example:example-lib",
+        "ecosystem": "Maven",
+        "currentVersion": "1.0.0"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1"
+      ]
+    }
+  ],
+  "constraints": {
+    "allowedFiles": ["**/pom.xml"],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "artifactReferences": {
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json"
+  },
+  "errors": [],
+  "warnings": []
+}
+```
 
-Each PATCH vulnerabilityDecision must include vulnerabilityId, aliases, decision, dependency, fixedVersionSelected, rationale, evidenceReferences, and patches.
-
-Each MANUAL_REVIEW vulnerabilityDecision inside a PATCH_PLAN must include vulnerabilityId, aliases, decision, manualReviewCategory, statusReason, dependency, and evidenceReferences.
-
----
-
-## MANUAL_REVIEW Output Contract
-
-Use top-level MANUAL_REVIEW only when no vulnerabilities are safely patchable.
-
-It must include schemaVersion, artifactId, workflowId, createdBy, status, decisionType, attemptNumber, manualReviewCategory, statusReason, vulnerabilityDecisions, evidenceReferences, warnings, and errors.
-
-Every vulnerability decision must reference an assessment vulnerability node.
+This skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.
 
 ---
 
 ## REQUEST_ADDITIONAL_EVIDENCE Output Contract
 
-Use REQUEST_ADDITIONAL_EVIDENCE when planning cannot safely continue without a specific deterministic artifact.
+Use this structure when evidence is insufficient and an allowed deterministic investigation can resolve the gap.
 
-It must include schemaVersion, artifactId, workflowId, createdBy, status, decisionType, attemptNumber, requestedTool, requiredArtifact, reason, expectedOutcome, evidenceReferences, artifactReferences, warnings, and errors.
+```json
+{
+  "schemaVersion": "1.0",
+  "artifactId": "additional-investigation-request-attempt-1",
+  "workflowId": "oss-remediation-20260628-001",
+  "createdBy": "RemediationPlanningAgent",
+  "status": "REQUESTED",
+  "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+  "attemptNumber": 1,
+  "requestedTool": "ProjectAnalyzerTool",
+  "reason": "The project analyzer report does not include module-level dependency tree evidence for module-b.",
+  "requiredArtifact": "Module-level dependency tree for module-b",
+  "expectedOutcome": "Identify whether org.yaml:snakeyaml is direct, transitive, property-managed, or dependencyManagement-managed in module-b.",
+  "evidenceReferences": [
+    "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+    "baseline/project-analyzer-report.json"
+  ],
+  "artifactReferences": {
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json"
+  },
+  "errors": [],
+  "warnings": []
+}
+```
 
-The request must be specific enough for the Orchestrator to route to a deterministic evidence-producing tool.
+This skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.
+
+---
+
+## MANUAL_REVIEW Output Contract
+
+Use this structure only when no automated patch should be attempted for the current planner response.
+
+```json
+{
+  "schemaVersion": "1.0",
+  "artifactId": "manual-review-decision-attempt-1",
+  "workflowId": "oss-remediation-20260628-001",
+  "createdBy": "RemediationPlanningAgent",
+  "status": "MANUAL_REVIEW_REQUIRED",
+  "decisionType": "MANUAL_REVIEW",
+  "attemptNumber": 1,
+  "summary": {
+    "reason": "No vulnerabilities can be safely remediated within automation scope.",
+    "manualReviewDecisionCount": 2
+  },
+  "vulnerabilityDecisions": [
+    {
+      "vulnerabilityId": "GHSA-xxxx-yyyy-zzzz",
+      "decision": "MANUAL_REVIEW",
+      "manualReviewCategory": "MANUAL_MAJOR_FRAMEWORK_UPGRADE",
+      "statusReason": "The fixed version requires a major Spring Boot migration outside the allowed POM-only scope.",
+      "dependency": {
+        "packageName": "org.springframework.boot:spring-boot-starter-web",
+        "ecosystem": "Maven",
+        "currentVersion": "2.7.0"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/projectFacts/springBoot"
+      ]
+    }
+  ],
+  "artifactReferences": {
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json"
+  },
+  "errors": [],
+  "warnings": []
+}
+```
+
+This skeleton is structural only. Replace all values with artifact-backed values from the current workflow context.
 
 ---
 
@@ -349,7 +484,27 @@ Before returning JSON, verify:
 - Evidence references point to the correct artifact nodes.
 ```
 
-If any quality gate item fails, do not return an invalid PATCH decision. Return REQUEST_ADDITIONAL_EVIDENCE or MANUAL_REVIEW.
+If any Remediation Quality Gate item fails, do not return the failed draft.
+
+First revise the draft plan using the authoritative artifacts:
+
+```text
+- Correct invalid vulnerability bindings.
+- Remove vulnerabilities or dependencies that are not present in the vulnerability assessment artifact.
+- Replace invalid fixedVersionSelected values with values from the matching fixedVersions node.
+- Replace unsupported patch.file or oldText with Project Analyzer-supported evidence.
+- Remove unrelated dependency changes.
+- Change unsupported PATCH decisions to MANUAL_REVIEW when automation is unsafe or unsupported.
+- Return REQUEST_ADDITIONAL_EVIDENCE only when missing deterministic evidence can reasonably be collected.
+```
+
+After revising, re-apply the Remediation Quality Gate.
+
+Return PATCH_PLAN only if the revised plan passes the Remediation Quality Gate.
+
+If the revised plan still cannot pass because evidence is missing, return REQUEST_ADDITIONAL_EVIDENCE.
+
+If automation is unsafe or unsupported, return MANUAL_REVIEW.
 
 ---
 
