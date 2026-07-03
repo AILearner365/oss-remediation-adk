@@ -1,0 +1,108 @@
+{
+  "artifactId": "manual-review-decision-attempt-1",
+  "artifactReferences": {
+    "additionalInvestigationArtifacts": [
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/attempt-1/investigation-1/additional-investigation-result.json"
+    ],
+    "projectAnalyzerReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "MANUAL_REVIEW",
+  "errors": [],
+  "schemaVersion": "1.0",
+  "status": "MANUAL_REVIEW_REQUIRED",
+  "summary": {
+    "manualReviewDecisionCount": 4,
+    "reason": "No vulnerabilities can be safely remediated within automation scope due to insufficient Project Analyzer evidence for exact-text patching."
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/attempt-1/investigation-1/additional-investigation-result.json"
+      ],
+      "manualReviewCategory": "MANUAL_INSUFFICIENT_EVIDENCE",
+      "statusReason": "The Project Analyzer report and additional investigation evidence do not contain 'commons-fileupload' as a resolved dependency, preventing determination of ownership or an editable location.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/attempt-1/investigation-1/additional-investigation-result.json#/projectAnalyzer/dependencyResolutionEvidence/1"
+      ],
+      "manualReviewCategory": "MANUAL_NO_EDITABLE_LOCATION",
+      "statusReason": "The Project Analyzer evidence, even after additional investigation, does not provide exact XML snippets for the direct dependency 'org.apache.commons:commons-text', preventing the creation of an exact-text patch for the 'oldText' value and file location.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/attempt-1/investigation-1/additional-investigation-result.json#/projectAnalyzer/dependencyResolutionEvidence/3"
+      ],
+      "manualReviewCategory": "MANUAL_NO_EDITABLE_LOCATION",
+      "statusReason": "The Project Analyzer evidence, even after additional investigation, does not provide exact XML snippets for the direct dependency 'org.json:json', preventing the creation of an exact-text patch for the 'oldText' value and file location.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "aliases": [
+        "CVE-2024-47554"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-io",
+        "currentVersion": "2.11.0",
+        "ecosystem": "Maven",
+        "groupId": "commons-io",
+        "packageName": "commons-io:commons-io"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/3",
+        "baseline/project-analyzer-report.json",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-043638/attempt-1/investigation-1/additional-investigation-result.json"
+      ],
+      "manualReviewCategory": "MANUAL_INSUFFICIENT_EVIDENCE",
+      "statusReason": "The Project Analyzer report and additional investigation evidence do not contain 'commons-io' as a resolved dependency, preventing determination of ownership or an editable location.",
+      "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+    }
+  ],
+  "warnings": [
+    "The Project Analyzer output, even after an explicit request for detailed POM evidence including exact XML snippets, still lacks the necessary information (specifically, 'pomEvidence' with 'oldText' and 'file' details) to construct exact-text patches. This prevents automated remediation for all identified direct dependencies."
+  ],
+  "workflowId": "oss-remediation-20260703-043638"
+}
