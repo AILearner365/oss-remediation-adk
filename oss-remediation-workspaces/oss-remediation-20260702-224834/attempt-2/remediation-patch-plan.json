@@ -1,0 +1,89 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-2",
+  "artifactReferences": {
+    "previousOutcomeAnalysisSummary": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-1/outcome-analysis-summary.json",
+    "previousPatchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/attempt-1/remediation-patch-plan.json",
+    "projectAnalyzerReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260702-224834/baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 2,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-2",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 1,
+    "patchDecisionCount": 1
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2022-25857"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "2.13.0",
+        "ecosystem": "Maven",
+        "groupId": "com.fasterxml.jackson.core",
+        "packageName": "com.fasterxml.jackson.core:jackson-databind"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/0/properties/jackson.version",
+        "attempt-1/outcome-analysis-summary.json#/analysis/failedVulnerabilities/0"
+      ],
+      "manualReviewCategory": "MANUAL_PATCH_SCOPE_UNSAFE",
+      "statusReason": "Previous patch for this vulnerability (upgrading jackson-databind to 2.13.4.2) resulted in application startup failure during validation, as indicated by the Outcome Analysis Summary. This suggests deeper incompatibilities or required code changes that cannot be resolved via a simple version bump without further analysis, placing it outside the scope of automated remediation.",
+      "vulnerabilityId": "GHSA-jfh8-c2jp-5wqx"
+    },
+    {
+      "aliases": [
+        "CVE-2023-38039"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "spring-boot",
+        "currentVersion": "2.7.5",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework.boot",
+        "packageName": "org.springframework.boot:spring-boot"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/0/properties/spring-boot.version",
+        "attempt-1/outcome-analysis-summary.json#/analysis/failedVulnerabilities/1"
+      ],
+      "fixedVersionSelected": "2.7.13",
+      "patches": [
+        {
+          "changeType": "MAVEN_PROPERTY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/0/properties/spring-boot.version"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<spring-boot.version>2.7.13</spring-boot.version>",
+          "newVersion": "2.7.13",
+          "oldText": "<spring-boot.version>2.7.5</spring-boot.version>",
+          "oldVersion": "2.7.5",
+          "patchId": "patch-1"
+        }
+      ],
+      "rationale": "The previous attempt to patch this vulnerability by upgrading the Spring Boot version to 2.7.13 was successful during validation, as confirmed by the Outcome Analysis Summary. The selected fixed version is present in the Vulnerability Assessment Report's fixedVersions list. The Project Analyzer Report shows that the version is controlled by a Maven property 'spring-boot.version'. No forbidden changes are required.",
+      "vulnerabilityId": "GHSA-v4gq-x734-7362"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260702-224834"
+}
