@@ -130,6 +130,65 @@ class Phase6PatchProgressOrchestrator(Phase6WorkflowOrchestrator):
         )
         plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+    def _accepted_patch_set(self, attempt_number: int, patch_plan_path: str, patch_proof_path: str, validation_result_ref: str) -> dict:
+        plan = self._read_json(patch_plan_path)
+        proof = self._read_json(patch_proof_path)
+        applied_patch_ids = {item.get("patchId") for item in proof.get("patchResults", []) if item.get("status") == "APPLIED"}
+        vulnerability_ids = []
+        remediation_summary = []
+        accepted_decisions = []
+        for decision in plan.get("vulnerabilityDecisions", []):
+            patch_ids = {patch.get("patchId") for patch in decision.get("patches", [])}
+            covered_patch_ids = {patch_id for patch_id in decision.get("coveredByPatchIds", []) if patch_id}
+            implicit_parent_bump = decision.get("transitiveRemediationStrategy") == "IMPLICIT_PARENT_BUMP"
+            if patch_ids and patch_ids.issubset(applied_patch_ids):
+                vulnerability_id = decision.get("vulnerabilityId")
+                vulnerability_ids.append(vulnerability_id)
+                row = self._remediation_row(decision)
+                remediation_summary.append(row)
+                accepted_decisions.append({
+                    "vulnerabilityId": vulnerability_id,
+                    "decision": decision.get("decision", "PATCH"),
+                    "patchIds": sorted(item for item in patch_ids if item),
+                    "dependency": row.get("dependency"),
+                    "oldVersion": row.get("oldVersion"),
+                    "newVersion": row.get("newVersion"),
+                })
+            elif implicit_parent_bump and covered_patch_ids and covered_patch_ids.issubset(applied_patch_ids):
+                vulnerability_id = decision.get("vulnerabilityId")
+                vulnerability_ids.append(vulnerability_id)
+                row = self._remediation_row(decision)
+                row["status"] = "REMEDIATED"
+                row["statusReason"] = decision.get("statusReason") or (
+                    "Validated implicitly through the parent dependency upgrade. No direct dependencyManagement override was applied."
+                )
+                row["remediationType"] = "IMPLICIT_PARENT_BUMP"
+                row["resolvedByDependency"] = decision.get("resolvedByDependency")
+                row["coveredByPatchIds"] = sorted(covered_patch_ids)
+                remediation_summary.append(row)
+                accepted_decisions.append({
+                    "vulnerabilityId": vulnerability_id,
+                    "decision": decision.get("decision", "PATCH"),
+                    "patchIds": [],
+                    "coveredByPatchIds": sorted(covered_patch_ids),
+                    "dependency": row.get("dependency"),
+                    "oldVersion": row.get("oldVersion"),
+                    "newVersion": row.get("newVersion"),
+                    "remediationType": "IMPLICIT_PARENT_BUMP",
+                    "resolvedByDependency": decision.get("resolvedByDependency"),
+                })
+        return {
+            "patchSetId": f"accepted-patch-set-{attempt_number}",
+            "status": "VALIDATED",
+            "sourceAttempts": [attempt_number],
+            "patchIds": sorted(item for item in applied_patch_ids if item),
+            "vulnerabilityIds": sorted(item for item in vulnerability_ids if item),
+            "validationResult": validation_result_ref,
+            "appliesOnBaselineCommit": self.manifest_store.load().get("repository", {}).get("baselineCommit"),
+            "remediationSummary": remediation_summary,
+            "vulnerabilityDecisions": accepted_decisions,
+        }
+
     def _read_project_analyzer_report(self, plan: dict[str, Any]) -> dict[str, Any]:
         analyzer_ref = (plan.get("artifactReferences") or {}).get("projectAnalyzerReport")
         if not analyzer_ref:
