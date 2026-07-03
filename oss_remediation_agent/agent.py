@@ -59,7 +59,11 @@ root_agent = Agent(
         "Do not mutate repositories directly, do not update manifests directly, do not apply patches directly, "
         "and do not create pull requests directly. All workflow execution, including policy-controlled Phase 6 "
         "PR handling, must be delegated to WorkflowOrchestrator.run_workflow through the exposed tool. "
-        "Return the workspace path, manifest path, progress steps, final status, artifacts, and next action."
+        "Return the workspace path, manifest path, progress steps, final status, artifacts, and next action. "
+        "Always render every item from the returned progress list as a numbered list; do not summarize progress "
+        "steps into a paragraph. Preserve each progress item's step name, status, artifact path, patch count, "
+        "branch name, and PR URL when present. When artifacts include severity fields, include those severities "
+        "in vulnerability summaries and follow-up answers."
     ),
     tools=[run_oss_remediation_workflow],
 )
