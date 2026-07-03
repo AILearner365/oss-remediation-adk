@@ -54,10 +54,13 @@ def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     accepted = manifest.get("acceptedPatchSet", {})
     accepted_rows = accepted.get("remediationSummary") or accepted.get("vulnerabilityDecisions") or []
     rows: list[dict[str, Any]] = []
+    severity_by_vulnerability = _severity_by_vulnerability_id(manifest)
     for row in accepted_rows:
+        vulnerability_id = row.get("vulnerabilityId")
         rows.append({
-            "vulnerabilityId": row.get("vulnerabilityId"),
+            "vulnerabilityId": vulnerability_id,
             "aliases": row.get("aliases", []),
+            "severity": row.get("severity") or severity_by_vulnerability.get(vulnerability_id),
             "dependency": row.get("dependency") or row.get("packageName") or "UNKNOWN",
             "oldVersion": row.get("oldVersion"),
             "newVersion": row.get("newVersion"),
@@ -71,6 +74,7 @@ def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             rows.append({
                 "vulnerabilityId": vulnerability_id,
                 "aliases": [],
+                "severity": severity_by_vulnerability.get(vulnerability_id),
                 "dependency": "UNKNOWN",
                 "oldVersion": None,
                 "newVersion": None,
@@ -83,12 +87,15 @@ def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 def _manual_review_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     decision = _manual_review_decision(manifest)
     rows: list[dict[str, Any]] = []
+    severity_by_vulnerability = _severity_by_vulnerability_id(manifest)
     for row in decision.get("vulnerabilityDecisions", []) or []:
         dependency = row.get("dependency") or {}
         package_name = dependency.get("packageName") or _dependency_coordinate(dependency)
+        vulnerability_id = row.get("vulnerabilityId")
         rows.append({
-            "vulnerabilityId": row.get("vulnerabilityId"),
+            "vulnerabilityId": vulnerability_id,
             "aliases": row.get("aliases", []),
+            "severity": row.get("severity") or severity_by_vulnerability.get(vulnerability_id),
             "dependency": package_name or "UNKNOWN",
             "currentVersion": dependency.get("currentVersion"),
             "status": row.get("decision") or "MANUAL_REVIEW",
@@ -125,6 +132,29 @@ def _dependency_coordinate(dependency: dict[str, Any]) -> str | None:
     if group_id and artifact_id:
         return f"{group_id}:{artifact_id}"
     return artifact_id or group_id
+
+
+def _severity_by_vulnerability_id(manifest: dict[str, Any]) -> dict[str, str]:
+    assessment_ref = (manifest.get("baseline") or {}).get("vulnerabilityAssessmentReport")
+    if not assessment_ref:
+        return {}
+    workspace_root = Path(manifest.get("workspaceRoot", "."))
+    assessment_path = Path(assessment_ref)
+    if not assessment_path.is_absolute():
+        assessment_path = workspace_root / assessment_path
+    if not assessment_path.exists():
+        return {}
+    try:
+        assessment = json.loads(assessment_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    result: dict[str, str] = {}
+    for vulnerability in assessment.get("vulnerabilities", []) or []:
+        vulnerability_id = vulnerability.get("vulnerabilityId")
+        severity = vulnerability.get("severity")
+        if vulnerability_id and severity:
+            result[str(vulnerability_id)] = str(severity)
+    return result
 
 
 def _validation_summary(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -174,16 +204,16 @@ def _markdown(
         "",
         "## Remediated Vulnerabilities",
         "",
-        "| Vulnerability ID | CVE | Dependency | Old Version | New Version | Status | Reason |",
-        "|---|---|---|---|---|---|---|",
+        "| Vulnerability ID | CVE | Severity | Dependency | Old Version | New Version | Status | Reason |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     if remediation_summary:
         for row in remediation_summary:
             lines.append(
-                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
             )
     else:
-        lines.append("| N/A | N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
+        lines.append("| N/A | N/A | N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
 
     if manual_review_summary:
         lines.extend([
@@ -192,12 +222,12 @@ def _markdown(
             "",
             "The following Critical/High vulnerabilities were not patched automatically. They require manual review for the reasons listed below.",
             "",
-            "| Vulnerability ID | CVE | Dependency | Current Version | Status | Category | Reason |",
-            "|---|---|---|---|---|---|---|",
+            "| Vulnerability ID | CVE | Severity | Dependency | Current Version | Status | Category | Reason |",
+            "|---|---|---|---|---|---|---|---|",
         ])
         for row in manual_review_summary:
             lines.append(
-                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('dependency')} | {row.get('currentVersion') or 'N/A'} | {row.get('status')} | {row.get('manualReviewCategory') or 'MANUAL_REVIEW'} | {row.get('reason')} |"
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('currentVersion') or 'N/A'} | {row.get('status')} | {row.get('manualReviewCategory') or 'MANUAL_REVIEW'} | {row.get('reason')} |"
             )
 
     lines.extend([
