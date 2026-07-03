@@ -7,7 +7,7 @@ from typing import Any
 from google.adk.agents import Agent
 
 from oss_remediation_agent.policies import RemediationPolicy
-from oss_remediation_agent.workflow.phase6_orchestrator import Phase6WorkflowOrchestrator
+from oss_remediation_agent.workflow.phase6_patch_progress_orchestrator import Phase6PatchProgressOrchestrator
 
 
 def run_oss_remediation_workflow(
@@ -30,7 +30,7 @@ def run_oss_remediation_workflow(
     """
     workspace = workspace_root or _default_workspace_root()
     policy = RemediationPolicy.load(policy_path)
-    orchestrator = Phase6WorkflowOrchestrator(workspace, policy=policy)
+    orchestrator = Phase6PatchProgressOrchestrator(workspace, policy=policy)
     return orchestrator.run_workflow(
         repository_url=repository_url,
         reference_branch=reference_branch,
