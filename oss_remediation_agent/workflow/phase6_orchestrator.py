@@ -16,6 +16,27 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     exists: AUTO, SUMMARY_ONLY, MANUAL_APPROVAL, or DISABLED.
     """
 
+    def runtime_summary(self, progress: list[dict[str, Any]], message: str) -> dict[str, Any]:
+        manifest = self.manifest_store.load()
+        enriched_progress = self._enrich_progress(progress, manifest)
+        workspace_root = Path(self.workspace.root).resolve()
+        return {
+            "status": manifest.get("status", "UNKNOWN"),
+            "message": message,
+            "workflowId": manifest.get("workflowId"),
+            "workspaceRoot": str(workspace_root),
+            "manifestPath": str((workspace_root / "manifest.json").resolve()),
+            "progress": enriched_progress,
+            "artifacts": {
+                "baseline": manifest.get("baseline", {}),
+                "planning": manifest.get("planning", {}),
+                "acceptedPatchSet": manifest.get("acceptedPatchSet", {}),
+                "final": manifest.get("final", {}),
+                "additionalInvestigationArtifacts": manifest.get("additionalInvestigationArtifacts", []),
+            },
+            "nextAction": self._next_action(manifest),
+        }
+
     def _finalize_successful_validation(self) -> dict:
         manifest = self.manifest_store.load()
         manifest["status"] = "VALIDATION_SUCCEEDED"
@@ -124,16 +145,60 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         status = manifest.get("status")
         final = manifest.get("final", {})
         if status == "PULL_REQUEST_CREATED":
-            pr_url = (final.get("pullRequest") or {}).get("prUrl")
-            return f"Pull request created: {pr_url}" if pr_url else "Pull request created; review final.pullRequest metadata."
+            pull_request = final.get("pullRequest") or {}
+            pr_url = pull_request.get("prUrl")
+            is_draft = bool(pull_request.get("draft"))
+            if is_draft and pr_url:
+                return f"Review the generated draft pull request, verify the dependency-only changes, and mark it ready for review when approved: {pr_url}"
+            if pr_url:
+                return f"Review the generated pull request and proceed with repository review/merge policy: {pr_url}"
+            return "Review final.pullRequest metadata and proceed with repository review/merge policy."
         if status == "PR_CREATION_FAILED":
             return "Review final/pull-request-publication.json and final.prCreationFailure, then fix the deterministic PR publishing failure."
         if status == "PR_SUMMARY_CREATED":
             return "PR summary generated only because prCreationPolicy.mode is SUMMARY_ONLY. No pull request was created by policy."
         if status == "PR_AWAITING_MANUAL_APPROVAL":
-            return "PR summary generated; prCreationPolicy.mode is MANUAL_APPROVAL, so an explicit approval step is required before publishing."
+            return "Review the generated PR summary and approve publishing if the validated patch set should be pushed as a pull request."
         if status == "PR_CREATION_DISABLED":
             return "PR creation is disabled by policy. Review validation and summary artifacts as needed."
         if status == "VALIDATION_SUCCEEDED":
             return "Validation succeeded; Phase 6 PR policy handling should generate summary, await approval, or publish based on policy."
         return WorkflowOrchestrator._next_action(manifest)
+
+    @staticmethod
+    def _enrich_progress(progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+        enriched = list(progress)
+        seen_steps = {item.get("step") for item in enriched}
+
+        for attempt in manifest.get("attempts", []) or []:
+            attempt_number = attempt.get("attemptNumber")
+            prefix = f"attempt_{attempt_number}"
+            if attempt.get("patchDryRunResult") and f"patch_dry_run_{prefix}" not in seen_steps:
+                enriched.append({"step": f"patch_dry_run_{prefix}", "status": "SUCCESS", "artifactPath": attempt.get("patchDryRunResult")})
+            if attempt.get("patchApplicationProof") and f"patch_apply_{prefix}" not in seen_steps:
+                enriched.append({"step": f"patch_apply_{prefix}", "status": "SUCCESS", "artifactPath": attempt.get("patchApplicationProof")})
+            if attempt.get("validationResult") and f"validation_{prefix}" not in seen_steps:
+                enriched.append({"step": f"validation_{prefix}", "status": attempt.get("status"), "artifactPath": attempt.get("validationResult")})
+
+        accepted = manifest.get("acceptedPatchSet", {})
+        if accepted.get("status") == "VALIDATED" and "accepted_patch_set_created" not in seen_steps:
+            enriched.append({
+                "step": "accepted_patch_set_created",
+                "status": "SUCCESS",
+                "patchSetId": accepted.get("patchSetId"),
+                "patchCount": len(accepted.get("patchIds", []) or []),
+            })
+
+        final = manifest.get("final", {})
+        if final.get("prSummary") and "pr_summary_created" not in seen_steps:
+            enriched.append({"step": "pr_summary_created", "status": "SUCCESS", "artifactPath": final.get("prSummary")})
+        if final.get("pullRequestPublication") and "pull_request_published" not in seen_steps:
+            pull_request = final.get("pullRequest") or {}
+            enriched.append({
+                "step": "pull_request_published",
+                "status": "SUCCESS" if manifest.get("status") == "PULL_REQUEST_CREATED" else manifest.get("status"),
+                "artifactPath": final.get("pullRequestPublication"),
+                "prUrl": pull_request.get("prUrl"),
+                "branchName": pull_request.get("branchName"),
+            })
+        return enriched
