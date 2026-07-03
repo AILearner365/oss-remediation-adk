@@ -1,0 +1,66 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-3",
+  "artifactReferences": {
+    "patchApplicationProof": null,
+    "patchDryRunResult": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-024724/attempt-3/patch-dry-run-result.json",
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-024724/attempt-3/remediation-patch-plan.json",
+    "validationResult": null
+  },
+  "attemptNumber": 3,
+  "capabilityGaps": [],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [],
+  "failureCategory": "PATCH_OCCURRENCE_MISMATCH",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "attempt-3/patch-dry-run-result.json#/patchResults/0"
+      ],
+      "fact": "The 'oldText' specified in 'patch-1' for updating 'org.apache.logging.log4j:log4j-core' (e.g., 'log4j.version=2.15.0') was not present in 'src/main/resources/application.properties' at all, contrary to the expectation of 1 occurrence."
+    }
+  ],
+  "recommendedFocusForPlanner": [
+    "Review the exact 'oldText' value in the patch plan against the current content of 'src/main/resources/application.properties' using the latest available project evidence.",
+    "Verify if the property key or version value might have changed since the initial plan was generated, or if the property is defined elsewhere.",
+    "Do not repeat the same patch plan without re-evaluating the 'oldText' and 'expectedOccurrences' based on refreshed evidence."
+  ],
+  "responsibilityArea": "PLANNER_DECISION",
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [],
+    "changedFiles": [],
+    "diffArtifact": null,
+    "failedPatchIds": [
+      "patch-1"
+    ],
+    "repositoryModified": false,
+    "summary": "Patch dry-run failed. No files were changed in the repository."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "attempt-3/patch-dry-run-result.json#/patchResults/0"
+    ],
+    "failedStage": "PATCH_DRY_RUN",
+    "failureSummary": "The patch dry-run failed because the 'oldText' for 'patch-1' was not found the expected number of times in 'src/main/resources/application.properties'. Expected 1 occurrence, but found 0.",
+    "logReferences": []
+  },
+  "whatWeTried": {
+    "changeTypes": [
+      "EXACT_TEXT_REPLACE"
+    ],
+    "dependencies": [
+      "org.apache.logging.log4j:log4j-core"
+    ],
+    "patchPlan": "attempt-3/remediation-patch-plan.json",
+    "summary": "Attempted to update a vulnerable dependency version in a properties file using an exact-text patch plan.",
+    "targetedFiles": [
+      "src/main/resources/application.properties"
+    ],
+    "vulnerabilityIds": [
+      "GHSA-abcd-efgh-ijkl"
+    ]
+  },
+  "workflowId": "oss-remediation-20260703-024724"
+}

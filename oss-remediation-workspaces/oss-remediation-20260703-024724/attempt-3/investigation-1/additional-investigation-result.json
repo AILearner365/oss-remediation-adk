@@ -1,0 +1,34 @@
+{
+  "artifactId": "additional-investigation-3-1",
+  "attemptNumber": 3,
+  "investigationNumber": 1,
+  "requestedTool": "ProjectAnalyzerTool",
+  "result": {
+    "artifactPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-024724/attempt-3/investigation-1/project-analyzer-report.json",
+    "capabilities": [
+      "POM_DISCOVERY",
+      "MAVEN_PROPERTIES",
+      "DEPENDENCY_MANAGEMENT",
+      "PARENT_POM_DETECTION",
+      "DEPENDENCY_TREE",
+      "EFFECTIVE_POM"
+    ],
+    "errors": [],
+    "failureCode": null,
+    "limitations": [
+      "Does not recommend remediation strategy"
+    ],
+    "operation": "collect_maven_facts",
+    "payload": {
+      "dependencyEvidenceCount": 107,
+      "dependencyTreePath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-024724/attempt-3/investigation-1/dependency-tree.txt",
+      "effectivePomPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260703-024724/attempt-3/investigation-1/effective-pom.xml",
+      "pomFilesFound": 5
+    },
+    "status": "SUCCESS",
+    "toolName": "MavenProjectTool",
+    "toolVersion": "1.0.0",
+    "warnings": []
+  },
+  "status": "SUCCESS"
+}
