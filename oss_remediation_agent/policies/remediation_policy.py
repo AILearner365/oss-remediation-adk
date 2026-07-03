@@ -10,7 +10,7 @@ class RemediationPolicy:
     max_attempts: int = 3
     max_additional_investigation_requests_per_attempt: int = 2
     allow_partial_pr: bool = True
-    pr_creation_mode: str = "SUMMARY_ONLY"
+    pr_creation_mode: str = "AUTO"
     create_draft_pr: bool = True
     require_validated_patch_set_for_pr: bool = True
     allow_manual_approval_pr_creation: bool = False
@@ -39,6 +39,7 @@ class RemediationPolicy:
         policy = cls()
         current_key = None
         lists: dict[str, list[str]] = {}
+        nested: dict[str, dict[str, str]] = {}
         for line in raw.splitlines():
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
@@ -46,6 +47,7 @@ class RemediationPolicy:
             if stripped.endswith(":"):
                 current_key = stripped[:-1]
                 lists[current_key] = []
+                nested[current_key] = {}
                 continue
             if current_key and stripped.startswith("-"):
                 lists[current_key].append(stripped[1:].strip().strip('"'))
@@ -53,6 +55,9 @@ class RemediationPolicy:
             if ":" in stripped:
                 key, value = [part.strip() for part in stripped.split(":", 1)]
                 value = value.strip('"')
+                if current_key and current_key == "prCreationPolicy":
+                    nested[current_key][key] = value
+                    continue
                 if key == "maxAttempts":
                     policy.max_attempts = int(value)
                 elif key == "maxAdditionalInvestigationRequestsPerAttempt":
@@ -68,6 +73,16 @@ class RemediationPolicy:
                 elif key == "allowManualApprovalPrCreation":
                     policy.allow_manual_approval_pr_creation = value.lower() == "true"
                 current_key = None
+        pr_creation_policy = nested.get("prCreationPolicy", {})
+        if pr_creation_policy:
+            if "mode" in pr_creation_policy:
+                policy.pr_creation_mode = pr_creation_policy["mode"].upper()
+            if "createDraftPr" in pr_creation_policy:
+                policy.create_draft_pr = pr_creation_policy["createDraftPr"].lower() == "true"
+            if "requireValidatedPatchSetForPr" in pr_creation_policy:
+                policy.require_validated_patch_set_for_pr = pr_creation_policy["requireValidatedPatchSetForPr"].lower() == "true"
+            if "allowManualApprovalPrCreation" in pr_creation_policy:
+                policy.allow_manual_approval_pr_creation = pr_creation_policy["allowManualApprovalPrCreation"].lower() == "true"
         if lists.get("severityScope"):
             policy.severity_scope = lists["severityScope"]
         if lists.get("allowedFilePatterns"):
