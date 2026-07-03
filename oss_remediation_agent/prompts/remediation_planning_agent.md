@@ -219,21 +219,38 @@ Every patch object must include:
 
 This is a structural example only. Do not copy placeholder values.
 
-For insertion-style changes, such as adding dependencyManagement, the patch must still be represented as exact-text replacement using an existing analyzer-provided anchor.
-
-If Project Analyzer does not provide enough evidence to safely identify `file`, `oldText`, or an insertion anchor, return REQUEST_ADDITIONAL_EVIDENCE if additional deterministic analysis can provide it; otherwise return MANUAL_REVIEW.
-
----
-
 ## Direct and Transitive Dependency Rules
 
-Use Project Analyzer evidence to determine whether the affected dependency is direct or transitive.
+Use Project Analyzer `dependencyResolutionEvidence` to classify the affected dependency. Each entry provides `dependencyType` (DIRECT or TRANSITIVE), `depth` (1 = direct, >= 2 = transitive), and, for transitive entries, `introducedBy` (the parent coordinate one level up).
 
-If direct, patch the exact editable location identified by Project Analyzer.
+If the vulnerable dependency is DIRECT (`depth` 1), patch the exact editable location identified by Project Analyzer `pomEvidence`.
 
-If transitive, do not guess the parent dependency or dependencyManagement override. Use dependencyManagement override only when Project Analyzer provides transitive path evidence, a safe editable dependencyManagement location or insertion anchor, and workflowPolicy permits the change.
+If the vulnerable dependency is TRANSITIVE (`depth` >= 2), it has no direct declaration to edit. Resolve it in this order:
 
-If transitive remediation evidence is insufficient, return REQUEST_ADDITIONAL_EVIDENCE or MANUAL_REVIEW.
+```text
+1. Implicit parent bump (preferred):
+- If the vulnerable transitive dependency is introducedBy a DIRECT dependency
+  that itself has a fixed version in the vulnerability assessment, patch the
+  parent's version. The validation OSV re-scan confirms the transitive
+  dependency is resolved by the parent upgrade.
+- Do not also override the transitive dependency in this case.
+
+2. Explicit dependencyManagement override:
+- Use when no parent bump resolves the transitive dependency, and
+  projectFacts.dependencyManagementPresent is true, and workflowPolicy
+  allows DEPENDENCY_MANAGEMENT_OVERRIDE.
+- fixedVersionSelected must come from the transitive dependency's own
+  vulnerability node fixedVersions.
+- Represent the override as an EXACT_TEXT_ONLY replacement anchored on an
+  existing pomEvidence snippet (for example the opening of the existing
+  <dependencyManagement><dependencies> block). newText repeats the anchor
+  text and appends one minimal <dependency> pin for the transitive
+  coordinate. Never invent an anchor that is not in pomEvidence.
+```
+
+Set `changeType` to `DEPENDENCY_MANAGEMENT_OVERRIDE` for option 2, and reference `introducedBy` in the decision `rationale`.
+
+If neither option is supported by evidence and policy, return REQUEST_ADDITIONAL_EVIDENCE when deterministic analysis can help, otherwise MANUAL_REVIEW with `MANUAL_TRANSITIVE_REMEDIATION_UNCLEAR`.
 
 ---
 

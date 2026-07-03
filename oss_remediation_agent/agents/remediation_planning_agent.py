@@ -12,6 +12,7 @@ _ALLOWED_DECISION_TYPES = {
     "REQUEST_ADDITIONAL_EVIDENCE",
 }
 _MAX_DEPENDENCY_EVIDENCE = 40
+_MAX_POM_EVIDENCE = 80
 _MAX_ADDITIONAL_INVESTIGATION_SUMMARIES = 5
 
 
@@ -174,25 +175,93 @@ def _compact_vulnerability_assessment(report: dict[str, Any]) -> dict[str, Any]:
 
 def _compact_project_analyzer(project_analyzer: dict[str, Any], workspace: Path, vulnerability_assessment: dict[str, Any]) -> dict[str, Any]:
     vulnerable_coordinates = _vulnerable_coordinates(vulnerability_assessment)
-    dependency_evidence = []
+    prioritized: list[dict[str, Any]] = []
+    unrelated: list[dict[str, Any]] = []
+
     for item in project_analyzer.get("dependencyResolutionEvidence", []):
-        dependency = item.get("dependency")
-        if dependency in vulnerable_coordinates or len(dependency_evidence) < _MAX_DEPENDENCY_EVIDENCE:
-            dependency_evidence.append({
-                "dependency": dependency,
-                "dependencyType": item.get("dependencyType"),
-                "resolvedVersion": item.get("resolvedVersion"),
-                "scope": item.get("scope"),
-                "modulesAffected": item.get("modulesAffected", []),
-                "dependencyPaths": item.get("dependencyPaths", [])[:3],
-            })
-    pom_files = _read_pom_index(project_analyzer, workspace)
+        compact = {
+            "dependency": item.get("dependency"),
+            "dependencyType": item.get("dependencyType"),
+            "resolvedVersion": item.get("resolvedVersion"),
+            "scope": item.get("scope"),
+            "depth": item.get("depth"),
+            "introducedBy": item.get("introducedBy"),
+            "modulesAffected": item.get("modulesAffected", []),
+            "dependencyPaths": item.get("dependencyPaths", [])[:3],
+        }
+
+        if item.get("dependency") in vulnerable_coordinates:
+            prioritized.append(compact)
+        else:
+            unrelated.append(compact)
+
+    # Vulnerable-related evidence is always retained; only unrelated dependencies
+    # are subject to truncation so the planner never loses evidence it needs.
+    capacity = max(_MAX_DEPENDENCY_EVIDENCE - len(prioritized), 0)
+    dependency_evidence = prioritized + unrelated[:capacity]
+
+    pom_evidence, pom_evidence_truncated = _compact_pom_evidence(project_analyzer, vulnerability_assessment)
+
+    pom_files = _read_pom_index(project_analyzer, workspace) or project_analyzer.get("projectFacts", {}).get("pomFiles", [])
+
     return {
         "status": project_analyzer.get("status"),
         "artifactReferences": project_analyzer.get("artifactReferences", {}),
+        "projectFacts": _compact_project_facts(project_analyzer),
         "pomFiles": pom_files,
+        "pomEvidence": pom_evidence,
+        "pomEvidenceTruncated": pom_evidence_truncated,
         "dependencyResolutionEvidence": dependency_evidence,
-        "dependencyResolutionEvidenceTruncated": len(project_analyzer.get("dependencyResolutionEvidence", [])) > len(dependency_evidence),
+        "unrelatedDependencyEvidenceTruncated": len(unrelated) > capacity,
+    }
+
+def _compact_pom_evidence(project_analyzer: dict[str, Any], vulnerability_assessment: dict[str, Any]) -> tuple[list[dict[str, Any]], bool]:
+    """Forward exact editable POM snippets (the source of patch oldText).
+
+    Snippets that reference a vulnerable artifactId are prioritized so they are
+    never dropped by the cap. This is the evidence EXACT_TEXT_ONLY patching needs.
+    """
+
+    artifact_tokens = _vulnerable_artifact_ids(vulnerability_assessment)
+    prioritized: list[dict[str, Any]] = []
+    remaining: list[dict[str, Any]] = []
+
+    for item in project_analyzer.get("pomEvidence", []):
+        snippet = item.get("snippet", "")
+        compact = {
+            "file": item.get("file"),
+            "lineStart": item.get("lineStart"),
+            "lineEnd": item.get("lineEnd"),
+            "occurrenceCount": item.get("occurrenceCount"),
+            "snippet": snippet,
+            "snippetType": item.get("snippetType"),
+        }
+
+        if any(token and token in snippet for token in artifact_tokens):
+            prioritized.append(compact)
+        else:
+            remaining.append(compact)
+
+    capacity = max(_MAX_POM_EVIDENCE - len(prioritized), 0)
+    return prioritized + remaining[:capacity], len(remaining) > capacity
+
+def _compact_project_facts(project_analyzer: dict[str, Any]) -> dict[str, Any]:
+    """Forward the ownership-relevant project facts (properties, parent, modules)."""
+    facts = project_analyzer.get("projectFacts", {})
+    if not isinstance(facts, dict) or not facts:
+        return {}
+
+    return {
+        "projectType": facts.get("projectType"),
+        "isMultiModule": facts.get("isMultiModule"),
+        "rootPom": facts.get("rootPom"),
+        "pomFiles": facts.get("pomFiles", []),
+        "modules": facts.get("modules", []),
+        "parentHierarchy": facts.get("parentHierarchy", []),
+        "mavenProperties": facts.get("mavenProperties", {}),
+        "dependencyManagementPresent": facts.get("dependencyManagementPresent"),
+        "springBoot": facts.get("springBoot", {}),
+        "java": facts.get("java", {}),
     }
 
 
