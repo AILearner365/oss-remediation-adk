@@ -1,0 +1,80 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-1",
+  "artifactReferences": {
+    "patchApplicationProof": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/patch-application-proof.json",
+    "patchDryRunResult": null,
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/remediation-patch-plan.json",
+    "referencedBuildLog": null,
+    "referencedOsvReport": null,
+    "referencedTestLog": null,
+    "validationResult": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/validation-result.json"
+  },
+  "attemptNumber": 1,
+  "capabilityGaps": [],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [
+    "Maven build failed"
+  ],
+  "failureCategory": "BUILD_FAILURE",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/validation-result.json#/errors",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/validation-result.json#/summary"
+      ],
+      "fact": "The selected new dependency versions (commons-fileupload:1.6.0, org.apache.commons:commons-text:1.10.0, org.json:json:20231013) collectively caused the Maven build to fail after application."
+    }
+  ],
+  "recommendedFocusForPlanner": [
+    "Review the build validation logs and error output to understand the root cause of the build failure.",
+    "Consider if the chosen fixed versions have compatibility issues that require broader changes (e.g., source code, JDK, framework) or if alternative fixed versions should be explored.",
+    "If the fix requires source code changes, a JDK upgrade, plugin changes, or a major framework migration, consider classifying the vulnerability for manual review."
+  ],
+  "responsibilityArea": "VALIDATION",
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [
+      "patch-ghsa-vv7r-c36w-3prj-1",
+      "patch-ghsa-599f-7c49-w659-1",
+      "patch-ghsa-4jq9-2xhw-jpx7-1"
+    ],
+    "changedFiles": [
+      "pom.xml"
+    ],
+    "diffArtifact": null,
+    "failedPatchIds": [],
+    "repositoryModified": true,
+    "summary": "Multiple dependency version updates were successfully applied to pom.xml."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/validation-result.json#/summary"
+    ],
+    "failedStage": "BUILD_VALIDATION",
+    "failureSummary": "Maven build failed after the dependency version updates were applied.",
+    "logReferences": []
+  },
+  "whatWeTried": {
+    "changeTypes": [
+      "DEPENDENCY_VERSION_VALUE"
+    ],
+    "dependencies": [
+      "commons-fileupload:commons-fileupload:1.5",
+      "org.apache.commons:commons-text:1.9",
+      "org.json:json:20230227"
+    ],
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/remediation-patch-plan.json",
+    "summary": "Attempted to update multiple vulnerable Maven dependency versions for commons-fileupload, commons-text, and json using exact-text patch plans.",
+    "targetedFiles": [
+      "pom.xml"
+    ],
+    "vulnerabilityIds": [
+      "GHSA-vv7r-c36w-3prj",
+      "GHSA-599f-7c49-w659",
+      "GHSA-4jq9-2xhw-jpx7"
+    ]
+  },
+  "workflowId": "oss-remediation-20260704-025336"
+}

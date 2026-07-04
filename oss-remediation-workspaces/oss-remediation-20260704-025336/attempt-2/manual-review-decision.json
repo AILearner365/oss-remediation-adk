@@ -1,0 +1,88 @@
+{
+  "artifactId": "manual-review-decision-attempt-2",
+  "artifactReferences": {
+    "previousOutcomeAnalysisSummary": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/outcome-analysis-summary.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 2,
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "MANUAL_REVIEW",
+  "errors": [],
+  "schemaVersion": "1.0",
+  "status": "MANUAL_REVIEW_REQUIRED",
+  "summary": {
+    "manualReviewDecisionCount": 3,
+    "reason": "No vulnerabilities can be safely remediated automatically because previous automated patch attempts for all identified vulnerabilities collectively caused a Maven build failure during validation. The fixed versions either proved incompatible or represent major version upgrades requiring broader changes beyond POM-only modifications."
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/1",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/1",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/outcome-analysis-summary.json#/newFactsLearned/0"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "The previous attempt to upgrade commons-fileupload to fixed version 1.6.0 resulted in a Maven build failure during validation. The only other available fixed version (2.0.0-M4) is a major version upgrade (1.x to 2.x), which likely introduces breaking API changes and requires manual code review or broader platform changes, which is outside the scope of automated POM-only remediation, as recommended by the previous outcome analysis summary.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/0",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/0",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/outcome-analysis-summary.json#/newFactsLearned/0"
+      ],
+      "manualReviewCategory": "MANUAL_SPRING_BOOT_OR_JDK_COMPATIBILITY",
+      "statusReason": "The previous attempt to upgrade org.apache.commons:commons-text to the only available fixed version (1.10.0) resulted in a Maven build failure during validation. This indicates a compatibility issue that cannot be resolved with a simple POM-only version change, suggesting deeper project or framework compatibility problems, as recommended by the previous outcome analysis summary.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+        "baseline/project-analyzer-report.json#/pomEvidence/2",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/2",
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-025336/attempt-1/outcome-analysis-summary.json#/newFactsLearned/0"
+      ],
+      "manualReviewCategory": "MANUAL_SPRING_BOOT_OR_JDK_COMPATIBILITY",
+      "statusReason": "The previous attempt to upgrade org.json:json to the only available fixed version (20231013) resulted in a Maven build failure during validation. This indicates a compatibility issue that cannot be resolved with a simple POM-only version change, suggesting deeper project or framework compatibility problems, as recommended by the previous outcome analysis summary.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260704-025336"
+}

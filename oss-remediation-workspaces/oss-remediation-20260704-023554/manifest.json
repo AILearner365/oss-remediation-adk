@@ -1,0 +1,236 @@
+{
+  "acceptedPatchSet": {
+    "appliesOnBaselineCommit": "921b113381bf30ecb879af2959d5de21de0f904e",
+    "patchIds": [
+      "patch-1",
+      "patch-2",
+      "patch-3"
+    ],
+    "patchSetId": "accepted-patch-set-1",
+    "remediationSummary": [
+      {
+        "aliases": [
+          "CVE-2025-48976"
+        ],
+        "dependency": "commons-fileupload:commons-fileupload",
+        "newVersion": "1.6.0",
+        "oldVersion": "1.5",
+        "severity": "HIGH",
+        "status": "REMEDIATED",
+        "statusReason": "Patch set validated successfully.",
+        "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+      },
+      {
+        "aliases": [
+          "CVE-2022-42889"
+        ],
+        "dependency": "org.apache.commons:commons-text",
+        "newVersion": "1.10.0",
+        "oldVersion": "1.9",
+        "severity": "CRITICAL",
+        "status": "REMEDIATED",
+        "statusReason": "Patch set validated successfully.",
+        "vulnerabilityId": "GHSA-599f-7c49-w659"
+      },
+      {
+        "aliases": [
+          "CVE-2023-5072"
+        ],
+        "dependency": "org.json:json",
+        "newVersion": "20231013",
+        "oldVersion": "20230227",
+        "severity": "HIGH",
+        "status": "REMEDIATED",
+        "statusReason": "Patch set validated successfully.",
+        "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+      },
+      {
+        "aliases": [
+          "CVE-2024-47554"
+        ],
+        "coveredByPatchIds": [
+          "patch-1"
+        ],
+        "dependency": "commons-io:commons-io",
+        "newVersion": null,
+        "oldVersion": "2.11.0",
+        "remediationType": "IMPLICIT_PARENT_BUMP",
+        "resolvedByDependency": "commons-fileupload:commons-fileupload",
+        "severity": "HIGH",
+        "status": "REMEDIATED",
+        "statusReason": "DependencyManagement override removed because commons-io:commons-io is a transitive dependency introduced by commons-fileupload:commons-fileupload, and commons-fileupload:commons-fileupload is already patched in this plan. Validation must confirm whether the parent dependency upgrade resolves the transitive vulnerability.",
+        "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+      }
+    ],
+    "sourceAttempts": [
+      1
+    ],
+    "status": "VALIDATED",
+    "validationResult": "attempt-1/validation-result.json",
+    "vulnerabilityDecisions": [
+      {
+        "decision": "PATCH",
+        "dependency": "commons-fileupload:commons-fileupload",
+        "newVersion": "1.6.0",
+        "oldVersion": "1.5",
+        "patchIds": [
+          "patch-1"
+        ],
+        "severity": "HIGH",
+        "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+      },
+      {
+        "decision": "PATCH",
+        "dependency": "org.apache.commons:commons-text",
+        "newVersion": "1.10.0",
+        "oldVersion": "1.9",
+        "patchIds": [
+          "patch-2"
+        ],
+        "severity": "CRITICAL",
+        "vulnerabilityId": "GHSA-599f-7c49-w659"
+      },
+      {
+        "decision": "PATCH",
+        "dependency": "org.json:json",
+        "newVersion": "20231013",
+        "oldVersion": "20230227",
+        "patchIds": [
+          "patch-3"
+        ],
+        "severity": "HIGH",
+        "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+      },
+      {
+        "coveredByPatchIds": [
+          "patch-1"
+        ],
+        "decision": "PATCH",
+        "dependency": "commons-io:commons-io",
+        "newVersion": null,
+        "oldVersion": "2.11.0",
+        "patchIds": [],
+        "remediationType": "IMPLICIT_PARENT_BUMP",
+        "resolvedByDependency": "commons-fileupload:commons-fileupload",
+        "severity": "HIGH",
+        "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+      }
+    ],
+    "vulnerabilityIds": [
+      "GHSA-4jq9-2xhw-jpx7",
+      "GHSA-599f-7c49-w659",
+      "GHSA-78wr-2p64-hpwj",
+      "GHSA-vv7r-c36w-3prj"
+    ]
+  },
+  "additionalInvestigationRequests": [],
+  "artifactId": "manifest",
+  "attempts": [
+    {
+      "attemptNumber": 1,
+      "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-023554/attempt-1/repository",
+      "patchApplicationProof": "attempt-1/patch-application-proof.json",
+      "patchDiff": "attempt-1/patch.diff",
+      "patchDryRunResult": "attempt-1/patch-dry-run-result.json",
+      "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-023554/attempt-1/remediation-patch-plan.json",
+      "status": "VALIDATION_SUCCEEDED",
+      "validationResult": "attempt-1/validation-result.json",
+      "workspacePreparation": {
+        "acceptedPatchSetReplay": [],
+        "restoreCleanBaseline": {
+          "artifactPath": null,
+          "capabilities": [],
+          "errors": [],
+          "failureCode": null,
+          "limitations": [],
+          "operation": "restore_attempt_workspace",
+          "payload": {
+            "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-023554/attempt-1/repository"
+          },
+          "status": "SUCCESS",
+          "toolName": "RepoCheckoutTool",
+          "toolVersion": "1.0.0",
+          "warnings": []
+        }
+      }
+    }
+  ],
+  "baseline": {
+    "baselineBuildResult": "baseline/baseline-build-result.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "repositoryPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-023554/baseline/repository",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "createdBy": "ADKWorkflowOrchestrator",
+  "final": {
+    "prCreationPolicy": {
+      "allowManualApprovalPrCreation": false,
+      "createDraftPr": true,
+      "mode": "AUTO",
+      "requireValidatedPatchSetForPr": true
+    },
+    "prDescription": "final/pr-description.md",
+    "prSummary": "final/pr-summary.json",
+    "prType": "FULL_REMEDIATION",
+    "pullRequest": {
+      "branchName": "oss-remediation-feature-multi-introducer-commons-compress-921b-20260704T023801Z",
+      "commitSha": "50413ead779861800558547b59b18e6699446571",
+      "draft": true,
+      "prUrl": "https://github.com/AILearner365/maven-multimodule-app/pull/71",
+      "status": "CREATED"
+    },
+    "pullRequestPublication": "final/pull-request-publication.json"
+  },
+  "planning": {
+    "agent": "RemediationPlanningAgent",
+    "context": "attempt-1/remediation-planning-context.json",
+    "expectedDecisionTypes": [
+      "PATCH_PLAN",
+      "MANUAL_REVIEW",
+      "REQUEST_ADDITIONAL_EVIDENCE"
+    ],
+    "lastDecision": "attempt-1/remediation-patch-plan.json"
+  },
+  "policy": {
+    "allowPartialPr": true,
+    "allowedFilePatterns": [
+      "**/pom.xml"
+    ],
+    "allowedPatchChangeTypes": [
+      "DEPENDENCY_VERSION_VALUE",
+      "MAVEN_PROPERTY_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_OVERRIDE",
+      "PARENT_POM_VERSION_VALUE"
+    ],
+    "blockedChangeTypes": [
+      "JAVA_SOURCE_CHANGE",
+      "TEST_SOURCE_CHANGE",
+      "JDK_VERSION_CHANGE",
+      "PLUGIN_BUILD_LOGIC_CHANGE",
+      "SUPPRESSION_OR_IGNORE_WORKAROUND",
+      "FULL_POM_FORMATTING_REWRITE"
+    ],
+    "maxAdditionalInvestigationRequestsPerAttempt": 2,
+    "maxAttempts": 3,
+    "prCreationPolicy": {
+      "allowManualApprovalPrCreation": false,
+      "createDraftPr": true,
+      "mode": "AUTO",
+      "requireValidatedPatchSetForPr": true
+    },
+    "severityScope": [
+      "CRITICAL",
+      "HIGH"
+    ]
+  },
+  "repository": {
+    "baselineCommit": "921b113381bf30ecb879af2959d5de21de0f904e",
+    "referenceBranch": "feature/multi-introducer-commons-compress",
+    "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app"
+  },
+  "schemaVersion": "1.0",
+  "status": "PULL_REQUEST_CREATED",
+  "workflowId": "oss-remediation-mvp",
+  "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260704-023554"
+}
