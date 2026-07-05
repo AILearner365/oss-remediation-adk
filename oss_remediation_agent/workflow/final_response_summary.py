@@ -7,6 +7,26 @@ from typing import Any
 
 _DEFAULT_NA = "Not applicable for this workflow outcome."
 
+_INTERNAL_FAILURE_LABELS = {
+    "CHECKOUT_FAILED": "Repository Checkout Failed",
+    "SCANNING_FAILED": "OSS Vulnerability Assessment Failed",
+    "PROJECT_ANALYSIS_FAILED": "Maven Project Analysis Failed",
+    "PATCH_DRY_RUN_FAILED": "Patch Dry Run Failed",
+    "PATCH_APPLICATION_FAILED": "Patch Application Failed",
+    "FAILED_MAX_ATTEMPTS": "Maximum Remediation Attempts Reached",
+    "PLANNING_CONSTRAINT_VIOLATION": "Planning Constraint Violation",
+}
+
+_INTERNAL_FAILURE_STAGE = {
+    "CHECKOUT_FAILED": "Repository Preparation",
+    "SCANNING_FAILED": "Assessment",
+    "PROJECT_ANALYSIS_FAILED": "Assessment",
+    "PATCH_DRY_RUN_FAILED": "Remediation",
+    "PATCH_APPLICATION_FAILED": "Remediation",
+    "FAILED_MAX_ATTEMPTS": "Remediation",
+    "PLANNING_CONSTRAINT_VIOLATION": "Remediation Planning",
+}
+
 
 def build_final_response_summary(
     manifest: dict[str, Any],
@@ -22,7 +42,8 @@ def build_final_response_summary(
     manifest and persisted artifacts into a stable response contract.
     """
     workspace = Path(workspace_root)
-    status = str(display_status or manifest.get("status") or "UNKNOWN").upper()
+    internal_status = str(manifest.get("status") or "UNKNOWN").upper()
+    status = str(display_status or internal_status).upper()
     outcome = _latest_outcome_analysis(manifest, workspace)
     latest_attempt = _latest_attempt(manifest)
     patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or (manifest.get("planning") or {}).get("lastDecision"))
@@ -31,6 +52,8 @@ def build_final_response_summary(
     publication = _read_artifact(workspace, (manifest.get("final") or {}).get("pullRequestPublication"))
     pr_summary = _read_artifact(workspace, (manifest.get("final") or {}).get("prSummary"))
 
+    if internal_status in _INTERNAL_FAILURE_LABELS:
+        return _internal_failure_summary(manifest, workspace, internal_status, patch_plan, validation, outcome, fallback_message)
     if status == "PULL_REQUEST_CREATED":
         return _pull_request_created_summary(manifest, patch_plan, validation, pr_summary, workspace)
     if status == "VALIDATION_FAILED":
@@ -214,6 +237,90 @@ def _manual_review_required_summary(
     )
 
 
+def _internal_failure_summary(
+    manifest: dict[str, Any],
+    workspace: Path,
+    internal_status: str,
+    patch_plan: dict[str, Any],
+    validation: dict[str, Any],
+    outcome: dict[str, Any],
+    fallback_message: str,
+) -> dict[str, Any]:
+    label = _INTERNAL_FAILURE_LABELS.get(internal_status, internal_status.replace("_", " ").title())
+    stage = _INTERNAL_FAILURE_STAGE.get(internal_status, "Workflow")
+    reason = _internal_failure_reason(manifest, internal_status, validation, outcome, fallback_message)
+    recommended_next_step = _internal_failure_next_step(internal_status)
+    planning_assessment = _internal_failure_planning_assessment(internal_status, patch_plan)
+
+    return _summary_model(
+        workflow_outcome=label,
+        outcome_summary=f"Workflow stopped during {stage}. {reason}",
+        root_cause=reason,
+        planning_assessment=planning_assessment,
+        evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=bool(outcome)),
+        recommended_next_step=recommended_next_step,
+        pr_status=_internal_failure_pr_status(internal_status),
+    )
+
+
+def _internal_failure_reason(
+    manifest: dict[str, Any],
+    internal_status: str,
+    validation: dict[str, Any],
+    outcome: dict[str, Any],
+    fallback_message: str,
+) -> str:
+    what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
+    root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
+    validation_summary = validation.get("summary") if isinstance(validation.get("summary"), dict) else {}
+    reason = (
+        root_cause.get("primaryCause")
+        or what_happened.get("failureSummary")
+        or validation_summary.get("failureSummary")
+        or (manifest.get("final") or {}).get("prCreationFailure")
+        or fallback_message
+    )
+    if reason:
+        return str(reason)
+    defaults = {
+        "CHECKOUT_FAILED": "Repository checkout failed before baseline assessment could complete.",
+        "SCANNING_FAILED": "OSS vulnerability assessment failed before remediation planning could complete.",
+        "PROJECT_ANALYSIS_FAILED": "Maven project analysis failed before remediation planning could safely continue.",
+        "PATCH_DRY_RUN_FAILED": "The remediation patch plan could not be safely dry-run against the attempt workspace.",
+        "PATCH_APPLICATION_FAILED": "The remediation patch plan could not be applied successfully to the attempt workspace.",
+        "FAILED_MAX_ATTEMPTS": "The workflow exhausted the configured maximum remediation attempts without reaching a validated PR-ready state.",
+        "PLANNING_CONSTRAINT_VIOLATION": "The planning output violated workflow constraints and could not proceed to patch application.",
+    }
+    return defaults.get(internal_status, "Workflow failed before a final PR-ready state was reached.")
+
+
+def _internal_failure_next_step(internal_status: str) -> str:
+    next_steps = {
+        "CHECKOUT_FAILED": "Verify repository URL, branch, credentials, and checkout permissions, then rerun the workflow.",
+        "SCANNING_FAILED": "Review scanner configuration and vulnerability assessment logs, then rerun assessment.",
+        "PROJECT_ANALYSIS_FAILED": "Review Maven project analysis artifacts, effective POM generation, dependency tree generation, and parser errors before replanning.",
+        "PATCH_DRY_RUN_FAILED": "Review the patch plan and dry-run result, correct exact-text patch targets, and rerun the dry run.",
+        "PATCH_APPLICATION_FAILED": "Review patch application proof, fix unmatched or unsafe patch entries, and rerun patch application.",
+        "FAILED_MAX_ATTEMPTS": "Review outcome-analysis summaries across attempts, resolve recurring blockers manually, and increase attempts only after updating the planning strategy.",
+        "PLANNING_CONSTRAINT_VIOLATION": "Review the planner output against allowed files and change types, then regenerate a compliant patch plan.",
+    }
+    return next_steps.get(internal_status, "Review generated artifacts, correct the failing stage, and rerun the workflow.")
+
+
+def _internal_failure_planning_assessment(internal_status: str, patch_plan: dict[str, Any]) -> str:
+    if internal_status in {"CHECKOUT_FAILED", "SCANNING_FAILED", "PROJECT_ANALYSIS_FAILED"}:
+        return "Not applicable; the workflow failed before remediation planning could safely complete."
+    if internal_status == "PLANNING_CONSTRAINT_VIOLATION":
+        return "The generated plan must be corrected because it violated workflow constraints such as allowed files, change types, or automation scope."
+    return _planning_assessment_from_counts(patch_plan)
+
+
+def _internal_failure_pr_status(internal_status: str) -> str:
+    if internal_status in {"PATCH_DRY_RUN_FAILED", "PATCH_APPLICATION_FAILED", "FAILED_MAX_ATTEMPTS", "PLANNING_CONSTRAINT_VIOLATION"}:
+        return "Draft PR was not created because the workflow did not produce a validated PR-ready patch set."
+    return "Draft PR was not created because the workflow failed before remediation reached a PR-ready stage."
+
+
 def _generic_summary(manifest: dict[str, Any], workspace: Path, display_status: str, fallback_message: str) -> dict[str, Any]:
     return _summary_model(
         workflow_outcome=str(display_status or manifest.get("status") or "Unknown"),
@@ -278,9 +385,16 @@ def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
     summary = patch_plan.get("summary", {}) if isinstance(patch_plan, dict) else {}
     return {
         "totalDecisionCount": len(decisions or []),
-        "patchDecisionCount": patch_count or int(summary.get("patchDecisionCount") or 0),
-        "manualReviewCount": manual_count or int(summary.get("manualReviewDecisionCount") or 0),
+        "patchDecisionCount": patch_count or _safe_int(summary.get("patchDecisionCount")),
+        "manualReviewCount": manual_count or _safe_int(summary.get("manualReviewDecisionCount")),
     }
+
+
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
 
 
 def _pr_status_created(pull_request: dict[str, Any]) -> str:
