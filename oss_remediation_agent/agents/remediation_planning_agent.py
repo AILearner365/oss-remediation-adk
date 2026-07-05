@@ -55,7 +55,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
     artifact_listing = list_workspace_artifacts(str(workspace), attempt_number=attempt_number)
     relevant_artifacts = artifact_listing.get("relevantArtifacts", [])
     compact_artifact_reads = [
-        read_workspace_artifact(str(workspace), str(item.get("path")), mode="compact", attempt_number=attempt_number)
+        read_workspace_artifact(str(workspace), str(item.get("path")), attempt_number=attempt_number)
         for item in relevant_artifacts
         if item.get("path")
     ]
@@ -68,16 +68,14 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
             "availableFunctions": [
                 {
                     "name": "list_workspace_artifacts",
-                    "purpose": "Return workspace artifact metadata from manifest.json for baseline, current attempt, previous attempts, and final delivery artifacts.",
+                    "purpose": "Return workspace artifact metadata when artifactListing/artifactCatalog/relevantArtifacts are missing or stale. These metadata fields are already included in the default context.",
                 },
                 {
                     "name": "read_workspace_artifact",
-                    "purpose": "Safely read one workspace artifact by path in metadata, compact, full_json, or log_excerpt mode.",
-                    "supportedModes": ["metadata", "compact", "full_json", "log_excerpt"],
-                },
-                {
-                    "name": "read_workspace_log_excerpt",
-                    "purpose": "Safely read bounded failure-oriented excerpts from logs inside the workspace.",
+                    "purpose": "Safely read one workspace artifact by path. Default read is compact. Request mode='full' only when compact evidence is insufficient.",
+                    "defaultMode": "compact",
+                    "supportedPublicModes": ["compact", "full"],
+                    "preferredUsage": "read_workspace_artifact(artifact_path) for compact evidence; read_workspace_artifact(artifact_path, mode='full') only when explicitly needed.",
                 },
             ],
             "pathSafety": "Artifact reads are restricted to files under workspaceRoot.",
@@ -96,8 +94,9 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
         ),
         "additionalInvestigations": _compact_additional_investigations(additional_investigation_artifacts, workspace, vulnerability_assessment_read.get("content", {})),
         "notes": [
-            "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
-            "workspaceArtifactTool metadata and compactArtifactReads are the preferred reusable evidence layer for planning.",
+            "artifactListing, artifactCatalog, and relevantArtifacts are default metadata context; do not request list_workspace_artifacts unless metadata is missing or stale.",
+            "Use compactArtifactReads as the primary readable evidence; each item is produced by read_workspace_artifact default compact mode.",
+            "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required planning decision.",
             "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence.",
             "When replanning, review previous outcome analysis and validation evidence before proposing a new plan.",
         ],
@@ -187,7 +186,7 @@ def create_remediation_planning_decision(*_args: Any, **_kwargs: Any) -> dict[st
 def _read_artifact_if_available(workspace: Path, artifact_ref: str | None, attempt_number: int) -> dict[str, Any]:
     if not artifact_ref:
         return {"status": "SKIPPED", "content": {}}
-    return read_workspace_artifact(str(workspace), artifact_ref, mode="compact", attempt_number=attempt_number)
+    return read_workspace_artifact(str(workspace), artifact_ref, attempt_number=attempt_number)
 
 
 def _compact_previous_attempt(
