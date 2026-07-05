@@ -20,8 +20,30 @@ _DEFAULT_LOG_KEYWORDS = [
     "unable",
 ]
 
+_LOG_REFERENCE_KEYS = {
+    "logfile",
+    "buildlog",
+    "testlog",
+    "validationlog",
+    "logpath",
+    "logref",
+    "logreference",
+}
+
+_INLINE_LOG_KEYS = {
+    "logexcerpt",
+    "excerpt",
+    "stdout",
+    "stderr",
+    "message",
+    "errormessage",
+    "stacktrace",
+    "failuresummary",
+}
+
 _MAX_FULL_JSON_BYTES = 200_000
 _MAX_FULL_TEXT_BYTES = 200_000
+_MAX_LOG_REF_LENGTH = 500
 _TEXT_EXTENSIONS = {
     ".txt",
     ".log",
@@ -86,14 +108,25 @@ def read_workspace_artifact(
     workspace = Path(workspace_root).resolve()
     try:
         path = _safe_resolve(workspace, artifact_path)
-    except ValueError as exc:
+    except (OSError, ValueError) as exc:
         return {"status": "FAILED", "failureCode": "UNSAFE_ARTIFACT_PATH", "error": str(exc)}
 
     normalized_mode = _normalize_mode(mode)
     if normalized_mode == "log_excerpt":
         return read_workspace_log_excerpt(workspace_root, artifact_path)
 
-    if not path.exists() or not path.is_file():
+    try:
+        exists = path.exists()
+        is_file = path.is_file() if exists else False
+    except OSError as exc:
+        return {
+            "status": "FAILED",
+            "failureCode": "ARTIFACT_PATH_STAT_FAILED",
+            "workspaceRoot": str(workspace),
+            "artifactPath": artifact_path,
+            "error": str(exc),
+        }
+    if not exists or not is_file:
         return {
             "status": "FAILED",
             "failureCode": "ARTIFACT_NOT_FOUND",
@@ -135,10 +168,21 @@ def read_workspace_log_excerpt(
     workspace = Path(workspace_root).resolve()
     try:
         path = _safe_resolve(workspace, log_path)
-    except ValueError as exc:
-        return {"status": "FAILED", "failureCode": "UNSAFE_LOG_PATH", "error": str(exc)}
+    except (OSError, ValueError) as exc:
+        return {"status": "FAILED", "failureCode": "UNSAFE_LOG_PATH", "logPath": log_path, "error": str(exc)}
 
-    if not path.exists() or not path.is_file():
+    try:
+        exists = path.exists()
+        is_file = path.is_file() if exists else False
+    except OSError as exc:
+        return {
+            "status": "FAILED",
+            "failureCode": "LOG_PATH_STAT_FAILED",
+            "workspaceRoot": str(workspace),
+            "logPath": log_path,
+            "error": str(exc),
+        }
+    if not exists or not is_file:
         return {
             "status": "FAILED",
             "failureCode": "LOG_NOT_FOUND",
@@ -436,19 +480,40 @@ def _find_log_references(payload: Any) -> list[str]:
     refs: list[str] = []
 
     def walk(value: Any, key_hint: str = "") -> None:
+        key = _normalize_key(key_hint)
         if isinstance(value, dict):
-            for key, item in value.items():
-                walk(item, str(key))
+            for child_key, item in value.items():
+                walk(item, str(child_key))
         elif isinstance(value, list):
             for item in value:
                 walk(item, key_hint)
         elif isinstance(value, str):
-            lowered = value.lower()
-            if ("log" in key_hint.lower() or lowered.endswith(".log") or ".log" in lowered) and value not in refs:
+            if key in _INLINE_LOG_KEYS:
+                return
+            if key in _LOG_REFERENCE_KEYS and _looks_like_log_path(value) and value not in refs:
+                refs.append(value)
+            elif key not in _INLINE_LOG_KEYS and _looks_like_log_path(value) and value not in refs:
                 refs.append(value)
 
     walk(payload)
     return refs
+
+
+def _normalize_key(value: str) -> str:
+    return "".join(ch for ch in str(value or "").lower() if ch.isalnum())
+
+
+def _looks_like_log_path(value: str) -> bool:
+    if not value or "\n" in value or "\r" in value:
+        return False
+    if len(value) > _MAX_LOG_REF_LENGTH:
+        return False
+    lowered = value.lower().strip()
+    if not lowered:
+        return False
+    if lowered.startswith("[") or lowered.startswith("{"):
+        return False
+    return lowered.endswith(".log") or ".log/" in lowered or "/logs/" in lowered or "/log/" in lowered
 
 
 def _safe_resolve(workspace: Path, requested_path: str) -> Path:
