@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -9,34 +10,15 @@ from oss_remediation_agent.workflow.phase5_orchestrator import Phase5WorkflowOrc
 
 
 class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
-    """Policy-aware Phase 6 finalization for PR summary and publication.
-
-    PR publication is not unconditional. The deterministic orchestrator follows
-    RemediationPolicy.pr_creation_mode after a validated accepted patch set
-    exists: AUTO, SUMMARY_ONLY, MANUAL_APPROVAL, or DISABLED.
-    """
+    """Policy-aware Phase 6 finalization for PR summary and publication."""
 
     WORKFLOW_STAGES: list[dict[str, Any]] = [
-        {
-            "name": "Repository Preparation",
-            "steps": ["Repository Checkout", "Baseline Build"],
-        },
-        {
-            "name": "Assessment",
-            "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"],
-        },
-        {
-            "name": "Remediation",
-            "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"],
-        },
-        {
-            "name": "Validation",
-            "steps": ["Validation", "Accepted Patch Set"],
-        },
-        {
-            "name": "Delivery",
-            "steps": ["PR Summary", "Draft Pull Request"],
-        },
+        {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build"]},
+        {"name": "Assessment", "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"]},
+        {"name": "Remediation", "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"]},
+        {"name": "Validation", "steps": ["Validation", "Accepted Patch Set"]},
+        {"name": "Outcome Analysis", "steps": ["Failure Analysis"]},
+        {"name": "Delivery", "steps": ["PR Summary", "Draft Pull Request"]},
     ]
 
     SUCCESS_STATUSES = {
@@ -46,6 +28,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         "VALIDATION_SUCCEEDED",
         "PULL_REQUEST_CREATED",
         "PR_SUMMARY_CREATED",
+        "COMPLETED",
+        "SKIPPED",
     }
 
     FAILURE_STATUSES = {
@@ -59,6 +43,14 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         "VALIDATION_FAILED",
         "PR_CREATION_FAILED",
         "FAILED_MAX_ATTEMPTS",
+    }
+
+    USER_FACING_FINAL_STATUSES = {
+        "PULL_REQUEST_CREATED",
+        "PR_CREATION_FAILED",
+        "VALIDATION_FAILED",
+        "BASELINE_BUILD_FAILED",
+        "MANUAL_REVIEW_REQUIRED",
     }
 
     ARTIFACT_LABELS: dict[tuple[str, str], str] = {
@@ -78,8 +70,10 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         workspace_root = Path(self.workspace.root).resolve()
         pr_info = self._pull_request_info(manifest)
         artifact_summary = self._artifact_summary(manifest)
+        display_status = self._user_facing_final_status(manifest)
         adk_web_response = self._format_adk_web_response(
             manifest=manifest,
+            display_status=display_status,
             message=message,
             workspace_root=workspace_root,
             workflow_stages=workflow_stages,
@@ -87,7 +81,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             pull_request=pr_info,
         )
         return {
-            "status": manifest.get("status", "UNKNOWN"),
+            "status": display_status,
+            "internalStatus": manifest.get("status", "UNKNOWN"),
             "message": message,
             "workflowId": manifest.get("workflowId"),
             "workspaceRoot": str(workspace_root),
@@ -143,26 +138,28 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
 
         if mode == "DISABLED":
             manifest = self.manifest_store.load()
-            manifest["status"] = "PR_CREATION_DISABLED"
+            manifest["status"] = "PR_CREATION_FAILED"
+            manifest.setdefault("final", {})["prCreationFailure"] = "PR creation is disabled by policy."
             self.manifest_store.save(manifest)
-            return {"status": "PR_CREATION_DISABLED", "reason": "PR creation is disabled by policy."}
+            return {"status": "PR_CREATION_FAILED", "reason": "PR creation is disabled by policy."}
 
         summary_result = self.generate_final_pr_summary()
 
         if mode == "SUMMARY_ONLY":
             manifest = self.manifest_store.load()
-            manifest["status"] = "PR_SUMMARY_CREATED"
+            manifest["status"] = "PR_CREATION_FAILED"
             manifest.setdefault("final", {})["prType"] = pr_type
+            manifest["final"]["prCreationFailure"] = "PR creation policy is SUMMARY_ONLY."
             self.manifest_store.save(manifest)
-            return summary_result
+            return {"status": "PR_CREATION_FAILED", "artifactPath": summary_result.get("artifactPath"), "reason": "PR creation policy is SUMMARY_ONLY."}
 
         if mode == "MANUAL_APPROVAL":
             manifest = self.manifest_store.load()
-            manifest["status"] = "PR_AWAITING_MANUAL_APPROVAL"
+            manifest["status"] = "MANUAL_REVIEW_REQUIRED"
             manifest.setdefault("final", {})["prType"] = pr_type
             self.manifest_store.save(manifest)
             return {
-                "status": "PR_AWAITING_MANUAL_APPROVAL",
+                "status": "MANUAL_REVIEW_REQUIRED",
                 "artifactPath": summary_result.get("artifactPath"),
                 "reason": "PR creation policy requires manual approval after summary generation.",
             }
@@ -172,14 +169,14 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             manifest["status"] = "PR_CREATION_FAILED"
             manifest.setdefault("final", {})["prCreationFailure"] = f"Unsupported prCreationPolicy.mode: {mode}"
             self.manifest_store.save(manifest)
-            return {"status": "FAILED", "failureCode": "UNSUPPORTED_PR_CREATION_MODE", "mode": mode}
+            return {"status": "PR_CREATION_FAILED", "failureCode": "UNSUPPORTED_PR_CREATION_MODE", "mode": mode}
 
         manifest = self.manifest_store.load()
         if getattr(self.policy, "require_validated_patch_set_for_pr", True) and not self._has_accepted_patch_set(manifest):
             manifest["status"] = "PR_CREATION_FAILED"
             manifest.setdefault("final", {})["prCreationFailure"] = "Validated accepted patch set is required by policy."
             self.manifest_store.save(manifest)
-            return {"status": "FAILED", "failureCode": "VALIDATED_PATCH_SET_REQUIRED"}
+            return {"status": "PR_CREATION_FAILED", "failureCode": "VALIDATED_PATCH_SET_REQUIRED"}
 
         final_dir = self.workspace.root / "final"
         publication_path = final_dir / "pull-request-publication.json"
@@ -224,12 +221,6 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return "Pull request metadata was created in final.pullRequest."
         if status == "PR_CREATION_FAILED":
             return "PR creation failed. Review final/pull-request-publication.json and final.prCreationFailure."
-        if status == "PR_SUMMARY_CREATED":
-            return "PR summary generated only because prCreationPolicy.mode is SUMMARY_ONLY. No pull request was created by policy."
-        if status == "PR_AWAITING_MANUAL_APPROVAL":
-            return "PR summary generated and waiting for manual approval by policy."
-        if status == "PR_CREATION_DISABLED":
-            return "PR creation is disabled by policy. Review validation and summary artifacts as needed."
         if status == "VALIDATION_SUCCEEDED":
             return "Validation succeeded; Phase 6 PR policy handling completed according to policy."
         return WorkflowOrchestrator._next_action(manifest)
@@ -260,6 +251,10 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     def _display_steps_for_internal_step(internal_step: str) -> list[str]:
         if internal_step == "checkout_and_baseline":
             return ["Repository Checkout", "Baseline Build"]
+        if internal_step == "repository_checkout":
+            return ["Repository Checkout"]
+        if internal_step == "baseline_build":
+            return ["Baseline Build"]
         if internal_step == "vulnerability_assessment":
             return ["OSS Vulnerability Assessment"]
         if internal_step == "project_analysis":
@@ -274,6 +269,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return ["Validation"]
         if internal_step == "accepted_patch_set_created":
             return ["Accepted Patch Set"]
+        if internal_step == "outcome_analysis":
+            return ["Failure Analysis"]
         if internal_step == "pr_summary_created":
             return ["PR Summary"]
         if internal_step == "pull_request_published":
@@ -325,19 +322,65 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return "⏳"
         return "▫️"
 
-    @staticmethod
-    def _display_status(status: str) -> str:
+    @classmethod
+    def _display_status(cls, status: str) -> str:
+        display_status = cls._normalize_final_status(status)
         labels = {
             "PULL_REQUEST_CREATED": "Draft Pull Request Created",
-            "PR_SUMMARY_CREATED": "PR Summary Created",
-            "PR_AWAITING_MANUAL_APPROVAL": "PR Awaiting Manual Approval",
-            "PR_CREATION_DISABLED": "PR Creation Disabled",
             "PR_CREATION_FAILED": "PR Creation Failed",
+            "VALIDATION_FAILED": "Validation Failed",
+            "BASELINE_BUILD_FAILED": "Baseline Build Failed",
             "MANUAL_REVIEW_REQUIRED": "Manual Review Required",
-            "VALIDATION_SUCCEEDED": "Validation Succeeded",
-            "FAILED_MAX_ATTEMPTS": "Failed Max Attempts",
         }
-        return labels.get(str(status or "UNKNOWN"), str(status or "UNKNOWN").replace("_", " ").title())
+        return labels.get(display_status, display_status.replace("_", " ").title())
+
+    @classmethod
+    def _normalize_final_status(cls, status: str) -> str:
+        status = str(status or "UNKNOWN")
+        if status in cls.USER_FACING_FINAL_STATUSES:
+            return status
+        if status in {"PATCH_DRY_RUN_FAILED", "PATCH_APPLICATION_FAILED"}:
+            return "VALIDATION_FAILED"
+        if status in {"OUTCOME_ANALYSIS_COMPLETE", "FAILED_MAX_ATTEMPTS", "PLANNING_CONSTRAINT_VIOLATION", "PR_AWAITING_MANUAL_APPROVAL"}:
+            return "MANUAL_REVIEW_REQUIRED"
+        if status in {"PR_SUMMARY_CREATED", "PR_CREATION_DISABLED"}:
+            return "PR_CREATION_FAILED"
+        if status.endswith("FAILED"):
+            return "MANUAL_REVIEW_REQUIRED"
+        return status
+
+    def _user_facing_final_status(self, manifest: dict[str, Any]) -> str:
+        status = str(manifest.get("status") or "UNKNOWN")
+        if status == "OUTCOME_ANALYSIS_COMPLETE":
+            outcome = self._latest_outcome_analysis(manifest)
+            outcome_status = str(outcome.get("recommendedDisposition") or outcome.get("status") or "").upper()
+            if outcome_status in self.USER_FACING_FINAL_STATUSES:
+                return outcome_status
+            if outcome.get("failedStage") or outcome.get("whatHappened"):
+                return "VALIDATION_FAILED"
+            return "MANUAL_REVIEW_REQUIRED"
+        return self._normalize_final_status(status)
+
+    def _latest_outcome_analysis(self, manifest: dict[str, Any]) -> dict[str, Any]:
+        for attempt in reversed(manifest.get("attempts", []) or []):
+            ref = attempt.get("outcomeAnalysisSummary")
+            if not ref:
+                continue
+            artifact = self._read_artifact(ref)
+            if artifact:
+                return artifact
+        return {}
+
+    def _read_artifact(self, artifact_ref: str | None) -> dict[str, Any]:
+        if not artifact_ref:
+            return {}
+        path = Path(artifact_ref)
+        if not path.is_absolute():
+            path = self.workspace.root / path
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
 
     @staticmethod
     def _pull_request_info(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -363,6 +406,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 ("patchDryRunResult", "Patch Dry Run Result"),
                 ("patchApplicationProof", "Patch Application Proof"),
                 ("validationResult", "Validation Result"),
+                ("outcomeAnalysisSummary", "Outcome Analysis Summary"),
             ):
                 artifact_ref = attempt.get(key)
                 if artifact_ref and artifact_ref not in seen_paths:
@@ -378,18 +422,22 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     def _format_adk_web_response(
         cls,
         manifest: dict[str, Any],
+        display_status: str,
         message: str,
         workspace_root: Path,
         workflow_stages: list[dict[str, Any]],
         artifacts: list[dict[str, str]],
         pull_request: dict[str, Any],
     ) -> str:
-        status = str(manifest.get("status", "UNKNOWN"))
         lines = [
             "## OSS Remediation Workflow",
             "",
-            f"**Final Status:** {cls._display_status(status)}",
+            f"**Final Status:** {cls._display_status(display_status)}",
             f"**Workspace:** `{workspace_root.name}`",
+            "",
+            "### Summary",
+            "",
+            message,
             "",
             "### Workflow Progress",
             "",
@@ -412,13 +460,15 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 lines.append(f"- **{artifact['name']}**: `{artifact['path']}`")
             lines.append("")
 
-        if message:
-            lines.extend(["### Workflow Message", "", message, ""])
-
         return "\n".join(lines).strip()
 
-    @staticmethod
-    def _enrich_progress(progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    def _artifact_status(self, artifact_ref: str | None, fallback: str = "SUCCESS") -> str:
+        if not artifact_ref:
+            return fallback
+        artifact = self._read_artifact(artifact_ref)
+        return str(artifact.get("status") or fallback)
+
+    def _enrich_progress(self, progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
         enriched = list(progress)
         seen_steps = {item.get("step") for item in enriched}
 
@@ -426,11 +476,13 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             attempt_number = attempt.get("attemptNumber")
             prefix = f"attempt_{attempt_number}"
             if attempt.get("patchDryRunResult") and f"patch_dry_run_{prefix}" not in seen_steps:
-                enriched.append({"step": f"patch_dry_run_{prefix}", "status": "SUCCESS", "artifactPath": attempt.get("patchDryRunResult")})
+                enriched.append({"step": f"patch_dry_run_{prefix}", "status": self._artifact_status(attempt.get("patchDryRunResult")), "artifactPath": attempt.get("patchDryRunResult")})
             if attempt.get("patchApplicationProof") and f"patch_apply_{prefix}" not in seen_steps:
-                enriched.append({"step": f"patch_apply_{prefix}", "status": "SUCCESS", "artifactPath": attempt.get("patchApplicationProof")})
+                enriched.append({"step": f"patch_apply_{prefix}", "status": self._artifact_status(attempt.get("patchApplicationProof")), "artifactPath": attempt.get("patchApplicationProof")})
             if attempt.get("validationResult") and f"validation_{prefix}" not in seen_steps:
-                enriched.append({"step": f"validation_{prefix}", "status": attempt.get("status"), "artifactPath": attempt.get("validationResult")})
+                enriched.append({"step": f"validation_{prefix}", "status": self._artifact_status(attempt.get("validationResult"), attempt.get("status", "UNKNOWN")), "artifactPath": attempt.get("validationResult")})
+            if attempt.get("outcomeAnalysisSummary") and "outcome_analysis" not in seen_steps:
+                enriched.append({"step": "outcome_analysis", "status": self._artifact_status(attempt.get("outcomeAnalysisSummary")), "artifactPath": attempt.get("outcomeAnalysisSummary")})
 
         accepted = manifest.get("acceptedPatchSet", {})
         if accepted.get("status") == "VALIDATED" and "accepted_patch_set_created" not in seen_steps:
@@ -443,7 +495,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
 
         final = manifest.get("final", {})
         if final.get("prSummary") and "pr_summary_created" not in seen_steps:
-            enriched.append({"step": "pr_summary_created", "status": "SUCCESS", "artifactPath": final.get("prSummary")})
+            enriched.append({"step": "pr_summary_created", "status": self._artifact_status(final.get("prSummary")), "artifactPath": final.get("prSummary")})
         if final.get("pullRequestPublication") and "pull_request_published" not in seen_steps:
             pull_request = final.get("pullRequest") or {}
             enriched.append({
