@@ -87,6 +87,7 @@ Understand the vulnerability
 Validate scanner evidence
 Determine dependency ownership
 Identify the Maven version-control location
+Review all Project Analyzer POM evidence for the affected dependency
 Review workflowPolicy
 Select the lowest compatible secure version
 Select the minimal Maven patch strategy
@@ -109,12 +110,13 @@ For each in-scope vulnerability:
 3. Confirm whether fixedVersions exists on that same node.
 4. Determine dependency ownership from Project Analyzer evidence.
 5. Review Project Analyzer evidence for modules, POM locations, dependencyManagement, parent POMs, properties, Spring Boot version, Java version, direct/transitive evidence, and editable POM evidence.
-6. Check workflowPolicy.
-7. Select the safest evidence-backed Maven patch strategy.
-8. Choose PATCH, MANUAL_REVIEW, or REQUEST_ADDITIONAL_EVIDENCE.
-9. If PATCH, produce exact-text POM-only patches.
-10. If MANUAL_REVIEW, provide category, reason, dependency, and evidence references.
-11. If REQUEST_ADDITIONAL_EVIDENCE, request only deterministic evidence that can unblock planning.
+6. For the impacted dependency, inspect all relevant Project Analyzer pomEvidence entries before deciding patch coverage.
+7. Check workflowPolicy.
+8. Select the safest evidence-backed Maven patch strategy.
+9. Choose PATCH, MANUAL_REVIEW, or REQUEST_ADDITIONAL_EVIDENCE.
+10. If PATCH, produce exact-text POM-only patches for every editable location required by the selected ownership strategy.
+11. If MANUAL_REVIEW, provide category, reason, dependency, and evidence references.
+12. If REQUEST_ADDITIONAL_EVIDENCE, request only deterministic evidence that can unblock planning.
 ```
 
 Partial remediation is allowed. Return PATCH_PLAN when at least one vulnerability is safely patchable and include MANUAL_REVIEW decisions inside the same plan for non-patchable vulnerabilities.
@@ -219,11 +221,15 @@ Every patch object must include:
 
 This is a structural example only. Do not copy placeholder values.
 
+---
+
 ## Direct and Transitive Dependency Rules
 
 Use Project Analyzer `dependencyResolutionEvidence` to classify the affected dependency. Each entry provides `dependencyType` (DIRECT or TRANSITIVE), `depth` (1 = direct, >= 2 = transitive), and, for transitive entries, `introducedBy` (the parent coordinate one level up).
 
 If the vulnerable dependency is DIRECT (`depth` 1), patch the exact editable location identified by Project Analyzer `pomEvidence`.
+
+For direct dependency version updates, do not stop after finding the first editable POM snippet. Review all Project Analyzer `pomEvidence` entries that reference the same affected `groupId`, `artifactId`, and current version. If more than one editable declaration represents the same selected ownership location or required module-level override, include all required patches or explicitly explain why a matching declaration is intentionally excluded.
 
 If the vulnerable dependency is TRANSITIVE (`depth` >= 2), it has no direct declaration to edit. Resolve it in this order:
 
@@ -269,7 +275,7 @@ When previous Outcome Analysis is provided:
 6. If safe automation is no longer possible, return MANUAL_REVIEW.
 ```
 
-If the previous failure indicates unsupported vulnerability IDs, dependencies, fixed versions, file paths, or oldText, correct the plan by binding strictly to current evidence artifacts.
+If the previous failure indicates unsupported vulnerability IDs, dependencies, fixed versions, file paths, oldText, missed module declarations, or Maven dependency convergence caused by partial version coverage, correct the plan by binding strictly to current evidence artifacts.
 
 ---
 
@@ -495,6 +501,10 @@ Before returning JSON, verify:
 - Every patch.file is supported by Project Analyzer editable evidence.
 - Every patch.oldText is copied exactly from Project Analyzer editable evidence.
 - Every patch strategy is supported by Project Analyzer evidence.
+- For every PATCH decision, review Project Analyzer pomEvidence for the affected dependency coordinate before finalizing the plan.
+- For explicit direct dependency version updates, verify every matching pomEvidence declaration for the affected groupId, artifactId, and current version is either included as a patch, intentionally excluded with an evidence-backed rationale, or covered by a higher-authority ownership location such as a Maven property, dependencyManagement, parent POM, or BOM.
+- For multi-module projects, confirm the selected patch strategy will not leave conflicting versions of the same impacted dependency across module POMs.
+- Do not return PATCH_PLAN if Project Analyzer pomEvidence shows an impacted dependency declaration that still requires the same version update but is not accounted for by patches or by an authoritative owner.
 - Every PATCH complies with workflowPolicy.
 - The patch is POM-only and minimal.
 - The patch does not modify unrelated dependencies.
@@ -510,6 +520,8 @@ First revise the draft plan using the authoritative artifacts:
 - Remove vulnerabilities or dependencies that are not present in the vulnerability assessment artifact.
 - Replace invalid fixedVersionSelected values with values from the matching fixedVersions node.
 - Replace unsupported patch.file or oldText with Project Analyzer-supported evidence.
+- Add missing Project Analyzer-supported patch entries for impacted dependency declarations that require the same version update.
+- Document evidence-backed exclusions when a matching pomEvidence declaration is intentionally not patched because a higher-authority owner controls it.
 - Remove unrelated dependency changes.
 - Change unsupported PATCH decisions to MANUAL_REVIEW when automation is unsafe or unsupported.
 - Return REQUEST_ADDITIONAL_EVIDENCE only when missing deterministic evidence can reasonably be collected.
