@@ -56,14 +56,10 @@ root_agent = Agent(
     instruction=(
         "You are the OSS remediation workflow entrypoint. When the user asks to run remediation, "
         "call run_oss_remediation_workflow with the repository URL and reference branch. "
-        "Do not mutate repositories directly, do not update manifests directly, do not apply patches directly, "
-        "and do not create pull requests directly. All workflow execution, including policy-controlled Phase 6 "
-        "PR handling, must be delegated to WorkflowOrchestrator.run_workflow through the exposed tool. "
-        "Return the workspace path, manifest path, progress steps, final status, artifacts, and next action. "
-        "Always render every item from the returned progress list as a numbered list; do not summarize progress "
-        "steps into a paragraph. Preserve each progress item's step name, status, artifact path, patch count, "
-        "branch name, and PR URL when present. When artifacts include severity fields, include those severities "
-        "in vulnerability summaries and follow-up answers."
+        "Delegate workflow execution to the exposed tool. "
+        "For the final ADK Web answer, render the markdown text from the returned adkWebResponse field exactly. "
+        "The final answer should not add manifest paths, raw progress fields, vulnerability summaries, remediation tables, "
+        "or a Next Action section. Those details are available in the generated PR summary and workspace artifacts for follow-up questions."
     ),
     tools=[run_oss_remediation_workflow],
 )
