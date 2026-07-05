@@ -21,6 +21,22 @@ _DEFAULT_LOG_KEYWORDS = [
 ]
 
 _MAX_FULL_JSON_BYTES = 200_000
+_MAX_FULL_TEXT_BYTES = 200_000
+_TEXT_EXTENSIONS = {
+    ".txt",
+    ".log",
+    ".md",
+    ".json",
+    ".xml",
+    ".pom",
+    ".properties",
+    ".yml",
+    ".yaml",
+    ".gradle",
+    ".diff",
+    ".patch",
+    ".csv",
+}
 
 
 def list_workspace_artifacts(workspace_root: str, attempt_number: int = 1) -> dict[str, Any]:
@@ -59,6 +75,7 @@ def read_workspace_artifact(
     - metadata: return catalog metadata only when available
     - compact: return bounded artifact content suitable for LLM reasoning
     - full_json: return full JSON only when the JSON artifact is small enough
+    - full_text: return bounded full text for supported text artifacts, logs, diffs, and markdown
     - log_excerpt: treat artifact_path as a log and return bounded excerpts
     """
     workspace = Path(workspace_root).resolve()
@@ -67,7 +84,8 @@ def read_workspace_artifact(
     except ValueError as exc:
         return {"status": "FAILED", "failureCode": "UNSAFE_ARTIFACT_PATH", "error": str(exc)}
 
-    if mode == "log_excerpt":
+    normalized_mode = str(mode or "compact").lower()
+    if normalized_mode == "log_excerpt":
         return read_workspace_log_excerpt(workspace_root, artifact_path)
 
     if not path.exists() or not path.is_file():
@@ -79,7 +97,7 @@ def read_workspace_artifact(
         }
 
     metadata = _metadata_for_path(workspace, artifact_path, attempt_number)
-    if mode == "metadata":
+    if normalized_mode == "metadata":
         return {
             "status": "SUCCESS",
             "workspaceRoot": str(workspace),
@@ -87,11 +105,14 @@ def read_workspace_artifact(
             "metadata": metadata,
         }
 
+    if normalized_mode in {"full_text", "full", "raw_text"}:
+        return _read_full_text_artifact(workspace, artifact_path, path, metadata)
+
     if path.suffix != ".json":
         return read_workspace_log_excerpt(workspace_root, artifact_path)
 
     payload = _read_json(path)
-    if mode == "full_json":
+    if normalized_mode == "full_json":
         size = path.stat().st_size
         if size > _MAX_FULL_JSON_BYTES:
             return {
@@ -166,6 +187,38 @@ def read_workspace_log_excerpt(
         "lineCount": len(lines),
         "matchedLineCount": len(matching),
         "excerpt": selected,
+    }
+
+
+def _read_full_text_artifact(workspace: Path, artifact_path: str, path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
+    size = path.stat().st_size
+    if path.suffix.lower() not in _TEXT_EXTENSIONS:
+        return {
+            "status": "FAILED",
+            "failureCode": "UNSUPPORTED_FULL_TEXT_ARTIFACT",
+            "artifactPath": artifact_path,
+            "extension": path.suffix,
+        }
+    if size > _MAX_FULL_TEXT_BYTES:
+        return {
+            "status": "FAILED",
+            "failureCode": "ARTIFACT_TOO_LARGE_FOR_FULL_TEXT",
+            "artifactPath": artifact_path,
+            "sizeBytes": size,
+            "maxBytes": _MAX_FULL_TEXT_BYTES,
+        }
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception as exc:
+        return {"status": "FAILED", "failureCode": "FULL_TEXT_READ_FAILED", "artifactPath": artifact_path, "error": str(exc)}
+    return {
+        "status": "SUCCESS",
+        "workspaceRoot": str(workspace),
+        "artifactPath": artifact_path,
+        "mode": "full_text",
+        "metadata": metadata,
+        "sizeBytes": size,
+        "content": text,
     }
 
 
