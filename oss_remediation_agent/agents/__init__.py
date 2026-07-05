@@ -110,13 +110,14 @@ def _build_contents(prompt: str, payload: dict[str, Any], round_index: int) -> s
     tool_instruction = ""
     if payload.get("toolAccess", {}).get("enabled"):
         tool_instruction = (
-            "\n\nWorkspaceArtifactTool access is enabled. If the provided compact context is insufficient, "
-            "return JSON with a top-level toolRequests array instead of the final contract. "
-            "After tool results are supplied, return the final required JSON contract.\n"
-            "Tool request shape:\n"
-            "{\"toolRequests\":[{\"tool\":\"list_workspace_artifacts\",\"arguments\":{\"attempt_number\":1}},"
-            "{\"tool\":\"read_workspace_artifact\",\"arguments\":{\"artifact_path\":\"attempt-1/validation-result.json\",\"mode\":\"compact\"}},"
-            "{\"tool\":\"read_workspace_log_excerpt\",\"arguments\":{\"log_path\":\"attempt-1/build.log\",\"max_lines\":80}}]}\n"
+            "\n\nWorkspaceArtifactTool access is enabled. artifactListing/artifactCatalog/relevantArtifacts "
+            "are already provided in the context, so do not call list_workspace_artifacts unless that "
+            "metadata is missing or stale. If the provided compact context is insufficient, return JSON "
+            "with a top-level toolRequests array instead of the final contract. After tool results are "
+            "supplied, return the final required JSON contract.\n"
+            "Preferred tool request shapes:\n"
+            "{\"toolRequests\":[{\"tool\":\"read_workspace_artifact\",\"arguments\":{\"artifact_path\":\"attempt-1/validation-result.json\"}}]}\n"
+            "The default read mode is compact. Request {\"mode\":\"full\"} only when compact evidence is insufficient.\n"
             "Do not request files outside workspaceRoot. Do not use toolRequests in the final answer."
         )
     phase = "Use the following persisted workspace context. Return JSON only."
