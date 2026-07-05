@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from oss_remediation_agent.tools.pr_publisher_tool import publish_pull_request
+from oss_remediation_agent.workflow.final_response_summary import build_final_response_summary
 from oss_remediation_agent.workflow.orchestrator import WorkflowOrchestrator
 from oss_remediation_agent.workflow.phase5_orchestrator import Phase5WorkflowOrchestrator
 
@@ -71,11 +72,18 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         pr_info = self._pull_request_info(manifest)
         artifact_summary = self._artifact_summary(manifest)
         display_status = self._user_facing_final_status(manifest)
-        display_message = self._summary_message(manifest, message)
+        final_response_summary = build_final_response_summary(
+            manifest=manifest,
+            workspace_root=workspace_root,
+            display_status=display_status,
+            fallback_message=message,
+        )
+        display_message = self._summary_text(final_response_summary, message)
         adk_web_response = self._format_adk_web_response(
             manifest=manifest,
             display_status=display_status,
             message=display_message,
+            final_response_summary=final_response_summary,
             workspace_root=workspace_root,
             workflow_stages=workflow_stages,
             artifacts=artifact_summary,
@@ -89,6 +97,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             "workspaceRoot": str(workspace_root),
             "manifestPath": str((workspace_root / "manifest.json").resolve()),
             "adkWebResponse": adk_web_response,
+            "finalResponseSummary": final_response_summary,
             "workflowStages": workflow_stages,
             "progress": enriched_progress,
             "artifacts": {
@@ -362,42 +371,11 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return "MANUAL_REVIEW_REQUIRED"
         return self._normalize_final_status(status)
 
-    def _summary_message(self, manifest: dict[str, Any], fallback_message: str) -> str:
-        if str(manifest.get("status") or "UNKNOWN") != "OUTCOME_ANALYSIS_COMPLETE":
+    @staticmethod
+    def _summary_text(summary: dict[str, Any], fallback_message: str) -> str:
+        if not summary:
             return fallback_message
-
-        outcome = self._latest_outcome_analysis(manifest)
-        if not outcome:
-            return fallback_message
-
-        parts: list[str] = []
-        what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
-        root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
-        recommended_focus = outcome.get("recommendedFocusForPlanner")
-
-        failed_stage = what_happened.get("failedStage")
-        failure_summary = what_happened.get("failureSummary")
-        if failure_summary:
-            if failed_stage:
-                parts.append(f"{failed_stage.replace('_', ' ').title()}: {failure_summary}")
-            else:
-                parts.append(str(failure_summary))
-
-        primary_cause = root_cause.get("primaryCause")
-        if primary_cause:
-            parts.append(str(primary_cause))
-
-        if recommended_focus:
-            focus_items = recommended_focus if isinstance(recommended_focus, list) else [recommended_focus]
-            focus_text = next((str(item).strip() for item in focus_items if str(item).strip()), "")
-            if focus_text:
-                parts.append(f"Recommended next step: {focus_text}")
-
-        if not parts:
-            return fallback_message
-
-        pr_note = "No Draft PR was created because the workflow did not reach a validated PR-ready state."
-        return "\n\n".join(parts + [pr_note])
+        return str(summary.get("outcomeSummary") or fallback_message or "Workflow completed with the recorded status.")
 
     def _latest_outcome_analysis(self, manifest: dict[str, Any]) -> dict[str, Any]:
         for attempt in reversed(manifest.get("attempts", []) or []):
@@ -462,6 +440,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         manifest: dict[str, Any],
         display_status: str,
         message: str,
+        final_response_summary: dict[str, Any],
         workspace_root: Path,
         workflow_stages: list[dict[str, Any]],
         artifacts: list[dict[str, str]],
@@ -475,11 +454,9 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             "",
             "### Summary",
             "",
-            message,
-            "",
-            "### Workflow Progress",
-            "",
         ]
+        lines.extend(cls._format_final_response_summary(final_response_summary, message))
+        lines.extend(["", "### Workflow Progress", ""])
         for index, stage in enumerate(workflow_stages, start=1):
             stage_icon = cls._status_icon(stage["status"])
             lines.append(f"#### {stage_icon} Stage {index} — {stage['name']}")
@@ -499,6 +476,47 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             lines.append("")
 
         return "\n".join(lines).strip()
+
+    @staticmethod
+    def _format_final_response_summary(summary: dict[str, Any], fallback_message: str) -> list[str]:
+        if not summary:
+            return [fallback_message]
+
+        lines = [
+            "#### Workflow Outcome",
+            str(summary.get("workflowOutcome") or "Unknown"),
+            "",
+            "#### Outcome Summary",
+            str(summary.get("outcomeSummary") or fallback_message or "No summary was available."),
+            "",
+            "#### Root Cause",
+            str(summary.get("rootCause") or "Not applicable for this workflow outcome."),
+            "",
+            "#### Planning Assessment",
+            str(summary.get("planningAssessment") or "Not applicable for this workflow outcome."),
+            "",
+            "#### Evidence Reviewed",
+        ]
+        evidence = summary.get("evidenceReviewed") or []
+        if evidence:
+            for item in evidence:
+                if isinstance(item, dict):
+                    name = item.get("name") or "Evidence"
+                    path = item.get("path") or ""
+                    lines.append(f"- **{name}**: `{path}`" if path else f"- **{name}**")
+                else:
+                    lines.append(f"- {item}")
+        else:
+            lines.append("- No additional evidence was available.")
+        lines.extend([
+            "",
+            "#### Recommended Next Step",
+            str(summary.get("recommendedNextStep") or "Review generated artifacts for next steps."),
+            "",
+            "#### PR Status",
+            str(summary.get("prStatus") or "PR status was not available."),
+        ])
+        return lines
 
     def _artifact_status(self, artifact_ref: str | None, fallback: str = "SUCCESS") -> str:
         if not artifact_ref:
