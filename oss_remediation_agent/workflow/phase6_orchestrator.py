@@ -16,16 +16,84 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     exists: AUTO, SUMMARY_ONLY, MANUAL_APPROVAL, or DISABLED.
     """
 
+    WORKFLOW_STAGES: list[dict[str, Any]] = [
+        {
+            "name": "Repository Preparation",
+            "steps": ["Repository Checkout", "Baseline Build"],
+        },
+        {
+            "name": "Assessment",
+            "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"],
+        },
+        {
+            "name": "Remediation",
+            "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"],
+        },
+        {
+            "name": "Validation",
+            "steps": ["Validation", "Accepted Patch Set"],
+        },
+        {
+            "name": "Delivery",
+            "steps": ["PR Summary", "Draft Pull Request"],
+        },
+    ]
+
+    SUCCESS_STATUSES = {
+        "SUCCESS",
+        "PARTIAL",
+        "VALIDATED",
+        "VALIDATION_SUCCEEDED",
+        "PULL_REQUEST_CREATED",
+        "PR_SUMMARY_CREATED",
+    }
+
+    FAILURE_STATUSES = {
+        "FAILED",
+        "CHECKOUT_FAILED",
+        "BASELINE_BUILD_FAILED",
+        "SCANNING_FAILED",
+        "PROJECT_ANALYSIS_FAILED",
+        "PATCH_DRY_RUN_FAILED",
+        "PATCH_APPLICATION_FAILED",
+        "VALIDATION_FAILED",
+        "PR_CREATION_FAILED",
+        "FAILED_MAX_ATTEMPTS",
+    }
+
+    ARTIFACT_LABELS: dict[tuple[str, str], str] = {
+        ("baseline", "baselineBuildResult"): "Baseline Build Result",
+        ("baseline", "vulnerabilityAssessmentReport"): "Vulnerability Assessment Report",
+        ("baseline", "projectAnalyzerReport"): "Project Analyzer Report",
+        ("planning", "lastDecision"): "Remediation Patch Plan",
+        ("final", "prSummary"): "PR Summary",
+        ("final", "prDescription"): "PR Description",
+        ("final", "pullRequestPublication"): "Pull Request Publication Result",
+    }
+
     def runtime_summary(self, progress: list[dict[str, Any]], message: str) -> dict[str, Any]:
         manifest = self.manifest_store.load()
         enriched_progress = self._enrich_progress(progress, manifest)
+        workflow_stages = self._workflow_stages(enriched_progress)
         workspace_root = Path(self.workspace.root).resolve()
+        pr_info = self._pull_request_info(manifest)
+        artifact_summary = self._artifact_summary(manifest)
+        adk_web_response = self._format_adk_web_response(
+            manifest=manifest,
+            message=message,
+            workspace_root=workspace_root,
+            workflow_stages=workflow_stages,
+            artifacts=artifact_summary,
+            pull_request=pr_info,
+        )
         return {
             "status": manifest.get("status", "UNKNOWN"),
             "message": message,
             "workflowId": manifest.get("workflowId"),
             "workspaceRoot": str(workspace_root),
             "manifestPath": str((workspace_root / "manifest.json").resolve()),
+            "adkWebResponse": adk_web_response,
+            "workflowStages": workflow_stages,
             "progress": enriched_progress,
             "artifacts": {
                 "baseline": manifest.get("baseline", {}),
@@ -34,6 +102,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 "final": manifest.get("final", {}),
                 "additionalInvestigationArtifacts": manifest.get("additionalInvestigationArtifacts", []),
             },
+            "pullRequest": pr_info,
             "nextAction": self._next_action(manifest),
         }
 
@@ -149,21 +218,204 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             pr_url = pull_request.get("prUrl")
             is_draft = bool(pull_request.get("draft"))
             if is_draft and pr_url:
-                return f"Review the generated draft pull request, verify the dependency-only changes, and mark it ready for review when approved: {pr_url}"
+                return f"Draft pull request created for dependency-only review: {pr_url}"
             if pr_url:
-                return f"Review the generated pull request and proceed with repository review/merge policy: {pr_url}"
-            return "Review final.pullRequest metadata and proceed with repository review/merge policy."
+                return f"Pull request created for repository review: {pr_url}"
+            return "Pull request metadata was created in final.pullRequest."
         if status == "PR_CREATION_FAILED":
-            return "Review final/pull-request-publication.json and final.prCreationFailure, then fix the deterministic PR publishing failure."
+            return "PR creation failed. Review final/pull-request-publication.json and final.prCreationFailure."
         if status == "PR_SUMMARY_CREATED":
             return "PR summary generated only because prCreationPolicy.mode is SUMMARY_ONLY. No pull request was created by policy."
         if status == "PR_AWAITING_MANUAL_APPROVAL":
-            return "Review the generated PR summary and approve publishing if the validated patch set should be pushed as a pull request."
+            return "PR summary generated and waiting for manual approval by policy."
         if status == "PR_CREATION_DISABLED":
             return "PR creation is disabled by policy. Review validation and summary artifacts as needed."
         if status == "VALIDATION_SUCCEEDED":
-            return "Validation succeeded; Phase 6 PR policy handling should generate summary, await approval, or publish based on policy."
+            return "Validation succeeded; Phase 6 PR policy handling completed according to policy."
         return WorkflowOrchestrator._next_action(manifest)
+
+    @classmethod
+    def _workflow_stages(cls, progress: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        step_statuses = cls._display_step_statuses(progress)
+        stages: list[dict[str, Any]] = []
+        for stage in cls.WORKFLOW_STAGES:
+            steps = []
+            for step_name in stage["steps"]:
+                steps.append({"name": step_name, "status": step_statuses.get(step_name, "NOT_RUN")})
+            stage_status = cls._aggregate_status([step["status"] for step in steps])
+            stages.append({"name": stage["name"], "status": stage_status, "steps": steps})
+        return stages
+
+    @classmethod
+    def _display_step_statuses(cls, progress: list[dict[str, Any]]) -> dict[str, str]:
+        statuses: dict[str, str] = {}
+        for item in progress:
+            internal_step = str(item.get("step") or "")
+            status = cls._normalize_step_status(item.get("status"))
+            for display_step in cls._display_steps_for_internal_step(internal_step):
+                statuses[display_step] = cls._merge_status(statuses.get(display_step), status)
+        return statuses
+
+    @staticmethod
+    def _display_steps_for_internal_step(internal_step: str) -> list[str]:
+        if internal_step == "checkout_and_baseline":
+            return ["Repository Checkout", "Baseline Build"]
+        if internal_step == "vulnerability_assessment":
+            return ["OSS Vulnerability Assessment"]
+        if internal_step == "project_analysis":
+            return ["Maven Project Analysis"]
+        if internal_step.startswith("remediation_planning_agent"):
+            return ["Remediation Planning"]
+        if internal_step.startswith("patch_dry_run"):
+            return ["Patch Dry Run"]
+        if internal_step.startswith("patch_apply"):
+            return ["Dependency Patch Application"]
+        if internal_step.startswith("validation"):
+            return ["Validation"]
+        if internal_step == "accepted_patch_set_created":
+            return ["Accepted Patch Set"]
+        if internal_step == "pr_summary_created":
+            return ["PR Summary"]
+        if internal_step == "pull_request_published":
+            return ["Draft Pull Request"]
+        return []
+
+    @classmethod
+    def _normalize_step_status(cls, status: Any) -> str:
+        normalized = str(status or "UNKNOWN").upper()
+        if normalized in cls.SUCCESS_STATUSES:
+            return "SUCCESS"
+        if normalized in cls.FAILURE_STATUSES or normalized.endswith("FAILED"):
+            return "FAILED"
+        if normalized in {"MANUAL_REVIEW_REQUIRED", "PR_AWAITING_MANUAL_APPROVAL"}:
+            return "ATTENTION_REQUIRED"
+        return "UNKNOWN"
+
+    @staticmethod
+    def _merge_status(existing: str | None, candidate: str) -> str:
+        if existing == "FAILED" or candidate == "FAILED":
+            return "FAILED"
+        if existing == "ATTENTION_REQUIRED" or candidate == "ATTENTION_REQUIRED":
+            return "ATTENTION_REQUIRED"
+        if existing == "SUCCESS" or candidate == "SUCCESS":
+            return "SUCCESS"
+        return candidate or existing or "UNKNOWN"
+
+    @staticmethod
+    def _aggregate_status(statuses: list[str]) -> str:
+        if any(status == "FAILED" for status in statuses):
+            return "FAILED"
+        if any(status == "ATTENTION_REQUIRED" for status in statuses):
+            return "ATTENTION_REQUIRED"
+        if all(status == "SUCCESS" for status in statuses):
+            return "SUCCESS"
+        if any(status == "SUCCESS" for status in statuses):
+            return "IN_PROGRESS"
+        return "NOT_RUN"
+
+    @staticmethod
+    def _status_icon(status: str) -> str:
+        if status == "SUCCESS":
+            return "✅"
+        if status == "FAILED":
+            return "❌"
+        if status == "ATTENTION_REQUIRED":
+            return "⚠️"
+        if status == "IN_PROGRESS":
+            return "⏳"
+        return "▫️"
+
+    @staticmethod
+    def _display_status(status: str) -> str:
+        labels = {
+            "PULL_REQUEST_CREATED": "Draft Pull Request Created",
+            "PR_SUMMARY_CREATED": "PR Summary Created",
+            "PR_AWAITING_MANUAL_APPROVAL": "PR Awaiting Manual Approval",
+            "PR_CREATION_DISABLED": "PR Creation Disabled",
+            "PR_CREATION_FAILED": "PR Creation Failed",
+            "MANUAL_REVIEW_REQUIRED": "Manual Review Required",
+            "VALIDATION_SUCCEEDED": "Validation Succeeded",
+            "FAILED_MAX_ATTEMPTS": "Failed Max Attempts",
+        }
+        return labels.get(str(status or "UNKNOWN"), str(status or "UNKNOWN").replace("_", " ").title())
+
+    @staticmethod
+    def _pull_request_info(manifest: dict[str, Any]) -> dict[str, Any]:
+        pull_request = (manifest.get("final") or {}).get("pullRequest") or {}
+        return {
+            "url": pull_request.get("prUrl"),
+            "branchName": pull_request.get("branchName"),
+            "draft": pull_request.get("draft"),
+            "status": pull_request.get("status"),
+        }
+
+    @classmethod
+    def _artifact_summary(cls, manifest: dict[str, Any]) -> list[dict[str, str]]:
+        artifacts: list[dict[str, str]] = []
+        seen_paths: set[str] = set()
+        for (section_name, key), label in cls.ARTIFACT_LABELS.items():
+            artifact_ref = (manifest.get(section_name) or {}).get(key)
+            if artifact_ref and artifact_ref not in seen_paths:
+                artifacts.append({"name": label, "path": str(artifact_ref)})
+                seen_paths.add(str(artifact_ref))
+        for attempt in manifest.get("attempts", []) or []:
+            for key, label in (
+                ("patchDryRunResult", "Patch Dry Run Result"),
+                ("patchApplicationProof", "Patch Application Proof"),
+                ("validationResult", "Validation Result"),
+            ):
+                artifact_ref = attempt.get(key)
+                if artifact_ref and artifact_ref not in seen_paths:
+                    artifacts.append({"name": label, "path": str(artifact_ref)})
+                    seen_paths.add(str(artifact_ref))
+        accepted = manifest.get("acceptedPatchSet") or {}
+        validation_ref = accepted.get("validationResult")
+        if accepted.get("status") == "VALIDATED" and validation_ref:
+            artifacts.append({"name": "Accepted Patch Set", "path": "manifest.acceptedPatchSet"})
+        return artifacts
+
+    @classmethod
+    def _format_adk_web_response(
+        cls,
+        manifest: dict[str, Any],
+        message: str,
+        workspace_root: Path,
+        workflow_stages: list[dict[str, Any]],
+        artifacts: list[dict[str, str]],
+        pull_request: dict[str, Any],
+    ) -> str:
+        status = str(manifest.get("status", "UNKNOWN"))
+        lines = [
+            "## OSS Remediation Workflow",
+            "",
+            f"**Final Status:** {cls._display_status(status)}",
+            f"**Workspace:** `{workspace_root.name}`",
+            "",
+            "### Workflow Progress",
+            "",
+        ]
+        for index, stage in enumerate(workflow_stages, start=1):
+            stage_icon = cls._status_icon(stage["status"])
+            lines.append(f"#### {stage_icon} Stage {index} — {stage['name']}")
+            for step in stage["steps"]:
+                lines.append(f"- {cls._status_icon(step['status'])} {step['name']}")
+            lines.append("")
+
+        pr_url = pull_request.get("url")
+        if pr_url:
+            draft_label = "Draft Pull Request" if pull_request.get("draft") is not False else "Pull Request"
+            lines.extend([f"### {draft_label}", "", str(pr_url), ""])
+
+        if artifacts:
+            lines.extend(["### Artifacts", ""])
+            for artifact in artifacts:
+                lines.append(f"- **{artifact['name']}**: `{artifact['path']}`")
+            lines.append("")
+
+        if message:
+            lines.extend(["### Workflow Message", "", message, ""])
+
+        return "\n".join(lines).strip()
 
     @staticmethod
     def _enrich_progress(progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
