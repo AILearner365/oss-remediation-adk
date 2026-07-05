@@ -4,10 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from oss_remediation_agent.agents.artifact_catalog import (
-    build_artifact_catalog,
-    compact_selected_artifacts,
-    select_relevant_artifacts,
+from oss_remediation_agent.tools.workspace_artifact_tool import (
+    list_workspace_artifacts,
+    read_workspace_artifact,
 )
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_agent.md"
@@ -39,11 +38,12 @@ def build_outcome_analysis_context(
     """Build metadata-first context for the Outcome Analysis Agent LLM.
 
     The Outcome Analysis Agent is an AI reasoning component, not a deterministic
-    classifier. This helper gives it an artifact catalog first, then a relevant
-    artifact shortlist and compact evidence selected from the workspace.
+    classifier. This context now exposes reusable artifact-tool results: a
+    metadata catalog, selected artifact metadata, and compact artifact reads with
+    bounded log excerpts where available.
     """
 
-    workspace = Path(workspace_root)
+    workspace = Path(workspace_root).resolve()
     manifest = _read_json(workspace / "manifest.json")
     attempt = _attempt(manifest.get("attempts", []), attempt_number)
 
@@ -53,9 +53,13 @@ def build_outcome_analysis_context(
     dry_run_result_ref = _resolve(workspace, dry_run_result_path or attempt.get("patchDryRunResult"))
     planning_context_ref = _resolve(workspace, (manifest.get("planning") or {}).get("context"))
 
-    artifact_catalog = build_artifact_catalog(workspace, manifest, attempt_number)
-    relevant_artifacts = select_relevant_artifacts(artifact_catalog, manifest, attempt_number)
-    compact_artifacts = compact_selected_artifacts(workspace, relevant_artifacts)
+    artifact_listing = list_workspace_artifacts(str(workspace), attempt_number=attempt_number)
+    relevant_artifacts = artifact_listing.get("relevantArtifacts", [])
+    compact_artifact_reads = [
+        read_workspace_artifact(str(workspace), str(item.get("path")), mode="compact", attempt_number=attempt_number)
+        for item in relevant_artifacts
+        if item.get("path")
+    ]
 
     legacy_evidence = _legacy_compact_evidence(
         patch_plan_ref=patch_plan_ref,
@@ -65,14 +69,34 @@ def build_outcome_analysis_context(
     )
 
     evidence = {
-        "artifactCatalog": artifact_catalog,
+        "workspaceArtifactTool": {
+            "availableFunctions": [
+                {
+                    "name": "list_workspace_artifacts",
+                    "purpose": "Return workspace artifact metadata from manifest.json for baseline, current attempt, previous attempts, and final delivery artifacts.",
+                },
+                {
+                    "name": "read_workspace_artifact",
+                    "purpose": "Safely read one workspace artifact by path in metadata, compact, full_json, or log_excerpt mode.",
+                    "supportedModes": ["metadata", "compact", "full_json", "log_excerpt"],
+                },
+                {
+                    "name": "read_workspace_log_excerpt",
+                    "purpose": "Safely read bounded failure-oriented excerpts from logs inside the workspace.",
+                },
+            ],
+            "pathSafety": "Artifact reads are restricted to files under workspaceRoot.",
+        },
+        "artifactListing": artifact_listing,
+        "artifactCatalog": artifact_listing.get("artifactCatalog", {}),
         "relevantArtifacts": relevant_artifacts,
-        "compactArtifacts": compact_artifacts,
+        "compactArtifactReads": compact_artifact_reads,
         **legacy_evidence,
         "notes": [
-            "Use artifactCatalog to understand what baseline, attempt, previous-attempt, and final artifacts are available and what each contains.",
+            "Use artifactListing/artifactCatalog to understand what baseline, attempt, previous-attempt, and final artifacts are available and what each contains.",
             "Use relevantArtifacts as the first evidence shortlist for the current failure state.",
-            "Use compactArtifacts and the legacy compact evidence to support every outcome statement with artifact-backed facts.",
+            "Use compactArtifactReads as the primary readable evidence; each item is produced by the reusable WorkspaceArtifactTool.",
+            "Compact artifact reads include bounded log excerpts when referenced logs are available inside the workspace.",
             "When deciding whether the patch plan contributed, compare remediation-patch-plan.json with remediation-planning-context.json when available.",
             "Do not invent occurrence counts, file paths, log details, fields, dependency paths, or patch results.",
         ],
@@ -177,6 +201,9 @@ def _compact_validation_result(validation: dict[str, Any]) -> dict[str, Any]:
         "status": validation.get("status"),
         "summary": validation.get("summary", {}),
         "buildResult": validation.get("buildResult", {}),
+        "buildValidation": validation.get("buildValidation", {}),
+        "testValidation": validation.get("testValidation", {}),
+        "osvValidation": validation.get("osvValidation", {}),
         "residualVulnerabilities": validation.get("residualVulnerabilities", []),
         "errors": validation.get("errors", []),
         "warnings": validation.get("warnings", []),
