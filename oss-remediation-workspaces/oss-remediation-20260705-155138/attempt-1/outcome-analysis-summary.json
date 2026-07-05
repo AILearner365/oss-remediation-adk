@@ -1,0 +1,89 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-1",
+  "artifactReferences": {
+    "buildLog": "attempt-1/build.log",
+    "patchApplicationProof": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/patch-application-proof.json",
+    "patchDryRunResult": null,
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/remediation-patch-plan.json",
+    "validationResult": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/validation-result.json"
+  },
+  "attemptNumber": 1,
+  "capabilityGaps": [],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [],
+  "failureCategory": "BUILD_FAILURE",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/validation-result.json"
+      ],
+      "fact": "The combination of updated dependency versions (commons-fileupload:1.6.0, commons-text:1.10.0, log4j-core:2.17.0, json:20231013, snakeyaml:2.0, commons-io:2.14.0) caused a Maven build failure."
+    }
+  ],
+  "recommendedFocusForPlanner": [
+    "Review the Maven build log (attempt-1/build.log) to understand the nature of the build failure (e.g., compilation errors, missing classes, incompatible APIs).",
+    "Investigate if any of the new dependency versions introduce breaking changes or require specific Java Development Kit (JDK) versions or framework upgrades.",
+    "Consider isolating the dependency upgrades to determine which specific change(s) led to the build failure.",
+    "If the build failure points to major API incompatibilities, classify the relevant vulnerabilities for manual review requiring broader code changes or framework migrations."
+  ],
+  "responsibilityArea": "VALIDATION",
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [
+      "patch-GHSA-vv7r-c36w-3prj-1",
+      "patch-GHSA-599f-7c49-w659-1",
+      "patch-log4j-core-1",
+      "patch-GHSA-4jq9-2xhw-jpx7-1",
+      "patch-GHSA-mjmj-j48q-9wg2-1",
+      "patch-GHSA-78wr-2p64-hpwj-1"
+    ],
+    "changedFiles": [
+      "pom.xml"
+    ],
+    "diffArtifact": null,
+    "failedPatchIds": [],
+    "repositoryModified": true,
+    "summary": "All 6 intended patches, including dependency version updates and one dependency management override, were successfully applied to pom.xml."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/validation-result.json#/summary",
+      "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/validation-result.json#/errors"
+    ],
+    "failedStage": "BUILD_VALIDATION",
+    "failureSummary": "Maven build failed after the application of the remediation patches.",
+    "logReferences": [
+      "attempt-1/build.log"
+    ]
+  },
+  "whatWeTried": {
+    "changeTypes": [
+      "DEPENDENCY_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_OVERRIDE"
+    ],
+    "dependencies": [
+      "commons-fileupload:commons-fileupload",
+      "org.apache.commons:commons-text",
+      "org.apache.logging.log4j:log4j-core",
+      "org.json:json",
+      "org.yaml:snakeyaml",
+      "commons-io:commons-io"
+    ],
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260705-155138/attempt-1/remediation-patch-plan.json",
+    "summary": "Attempted to update versions for multiple vulnerable Maven dependencies, including one dependency management override, based on the patch plan.",
+    "targetedFiles": [
+      "pom.xml"
+    ],
+    "vulnerabilityIds": [
+      "GHSA-vv7r-c36w-3prj",
+      "GHSA-599f-7c49-w659",
+      "GHSA-7rjr-3q55-vv33",
+      "GHSA-4jq9-2xhw-jpx7",
+      "GHSA-mjmj-j48q-9wg2",
+      "GHSA-78wr-2p64-hpwj"
+    ]
+  },
+  "workflowId": "oss-remediation-20260705-155138"
+}

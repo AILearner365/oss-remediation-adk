@@ -1,0 +1,31 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-1",
+  "artifactReferences": {
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-1",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 0,
+    "patchDecisionCount": 0
+  },
+  "vulnerabilityDecisions": [],
+  "warnings": [
+    "No vulnerabilities were found in the provided vulnerability assessment report. No remediation plan is required."
+  ],
+  "workflowId": "oss-remediation-20260705-154217"
+}
