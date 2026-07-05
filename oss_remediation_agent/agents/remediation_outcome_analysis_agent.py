@@ -109,6 +109,7 @@ def build_outcome_analysis_context(
         },
     }
 
+
 def _compact_patch_plan(plan: dict[str, Any]) -> dict[str, Any]:
     decisions = []
 
