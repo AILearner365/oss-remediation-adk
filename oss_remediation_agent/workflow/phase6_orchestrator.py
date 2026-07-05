@@ -71,10 +71,11 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         pr_info = self._pull_request_info(manifest)
         artifact_summary = self._artifact_summary(manifest)
         display_status = self._user_facing_final_status(manifest)
+        display_message = self._summary_message(manifest, message)
         adk_web_response = self._format_adk_web_response(
             manifest=manifest,
             display_status=display_status,
-            message=message,
+            message=display_message,
             workspace_root=workspace_root,
             workflow_stages=workflow_stages,
             artifacts=artifact_summary,
@@ -83,7 +84,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         return {
             "status": display_status,
             "internalStatus": manifest.get("status", "UNKNOWN"),
-            "message": message,
+            "message": display_message,
             "workflowId": manifest.get("workflowId"),
             "workspaceRoot": str(workspace_root),
             "manifestPath": str((workspace_root / "manifest.json").resolve()),
@@ -360,6 +361,43 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 return "VALIDATION_FAILED"
             return "MANUAL_REVIEW_REQUIRED"
         return self._normalize_final_status(status)
+
+    def _summary_message(self, manifest: dict[str, Any], fallback_message: str) -> str:
+        if str(manifest.get("status") or "UNKNOWN") != "OUTCOME_ANALYSIS_COMPLETE":
+            return fallback_message
+
+        outcome = self._latest_outcome_analysis(manifest)
+        if not outcome:
+            return fallback_message
+
+        parts: list[str] = []
+        what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
+        root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
+        recommended_focus = outcome.get("recommendedFocusForPlanner")
+
+        failed_stage = what_happened.get("failedStage")
+        failure_summary = what_happened.get("failureSummary")
+        if failure_summary:
+            if failed_stage:
+                parts.append(f"{failed_stage.replace('_', ' ').title()}: {failure_summary}")
+            else:
+                parts.append(str(failure_summary))
+
+        primary_cause = root_cause.get("primaryCause")
+        if primary_cause:
+            parts.append(str(primary_cause))
+
+        if recommended_focus:
+            focus_items = recommended_focus if isinstance(recommended_focus, list) else [recommended_focus]
+            focus_text = next((str(item).strip() for item in focus_items if str(item).strip()), "")
+            if focus_text:
+                parts.append(f"Recommended next step: {focus_text}")
+
+        if not parts:
+            return fallback_message
+
+        pr_note = "No Draft PR was created because the workflow did not reach a validated PR-ready state."
+        return "\n\n".join(parts + [pr_note])
 
     def _latest_outcome_analysis(self, manifest: dict[str, Any]) -> dict[str, Any]:
         for attempt in reversed(manifest.get("attempts", []) or []):
