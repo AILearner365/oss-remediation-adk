@@ -4,6 +4,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from oss_remediation_agent.tools.workspace_artifact_tool import (
+    list_workspace_artifacts,
+    read_workspace_artifact,
+)
+
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_planning_agent.md"
 
 _ALLOWED_DECISION_TYPES = {
@@ -22,20 +27,20 @@ def load_prompt() -> str:
 
 
 def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) -> dict[str, Any]:
-    """Build the artifact-reference and compact-evidence context for the Planning Agent LLM.
+    """Build metadata-first, reusable-tool-backed context for the Planning Agent LLM.
 
     The Planning Agent is an AI reasoning component, not a deterministic tool.
-    This helper intentionally does not select fixed versions or synthesize
-    patches. It packages artifact references for traceability and compact
-    evidence from persisted deterministic artifacts so the LLM does not have to
-    reason from file paths alone.
+    This helper does not select fixed versions or synthesize patches. It exposes
+    artifact metadata and compact artifact reads through the same reusable
+    WorkspaceArtifactTool used by Outcome Analysis.
     """
-    workspace = Path(workspace_root)
+    workspace = Path(workspace_root).resolve()
     manifest = _read_json(workspace / "manifest.json")
     baseline = manifest.get("baseline", {})
     attempts = manifest.get("attempts", [])
     current_attempt = _attempt_by_number(attempts, attempt_number)
     previous_attempt = _previous_attempt(attempts, attempt_number)
+
     vulnerability_assessment_path = _resolve(workspace, baseline.get("vulnerabilityAssessmentReport"))
     project_analyzer_path = _resolve(workspace, baseline.get("projectAnalyzerReport"))
     previous_patch_plan_path = _resolve(workspace, previous_attempt.get("patchPlan") if previous_attempt else None)
@@ -47,21 +52,54 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
         (current_attempt or {}).get("additionalInvestigationArtifacts") or manifest.get("additionalInvestigationArtifacts", []),
     )
 
-    vulnerability_assessment = _read_json(vulnerability_assessment_path) if vulnerability_assessment_path else {}
-    project_analyzer = _read_json(project_analyzer_path) if project_analyzer_path else {}
+    artifact_listing = list_workspace_artifacts(str(workspace), attempt_number=attempt_number)
+    relevant_artifacts = artifact_listing.get("relevantArtifacts", [])
+    compact_artifact_reads = [
+        read_workspace_artifact(str(workspace), str(item.get("path")), mode="compact", attempt_number=attempt_number)
+        for item in relevant_artifacts
+        if item.get("path")
+    ]
+
+    vulnerability_assessment_read = _read_artifact_if_available(workspace, baseline.get("vulnerabilityAssessmentReport"), attempt_number)
+    project_analyzer_read = _read_artifact_if_available(workspace, baseline.get("projectAnalyzerReport"), attempt_number)
+
     evidence = {
-        "vulnerabilityAssessment": _compact_vulnerability_assessment(vulnerability_assessment),
-        "projectAnalyzer": _compact_project_analyzer(project_analyzer, workspace, vulnerability_assessment),
+        "workspaceArtifactTool": {
+            "availableFunctions": [
+                {
+                    "name": "list_workspace_artifacts",
+                    "purpose": "Return workspace artifact metadata from manifest.json for baseline, current attempt, previous attempts, and final delivery artifacts.",
+                },
+                {
+                    "name": "read_workspace_artifact",
+                    "purpose": "Safely read one workspace artifact by path in metadata, compact, full_json, or log_excerpt mode.",
+                    "supportedModes": ["metadata", "compact", "full_json", "log_excerpt"],
+                },
+                {
+                    "name": "read_workspace_log_excerpt",
+                    "purpose": "Safely read bounded failure-oriented excerpts from logs inside the workspace.",
+                },
+            ],
+            "pathSafety": "Artifact reads are restricted to files under workspaceRoot.",
+        },
+        "artifactListing": artifact_listing,
+        "artifactCatalog": artifact_listing.get("artifactCatalog", {}),
+        "relevantArtifacts": relevant_artifacts,
+        "compactArtifactReads": compact_artifact_reads,
+        "vulnerabilityAssessment": vulnerability_assessment_read.get("content", {}),
+        "projectAnalyzer": project_analyzer_read.get("content", {}),
         "previousAttempt": _compact_previous_attempt(
             previous_patch_plan_path=previous_patch_plan_path,
             previous_patch_application_proof_path=previous_patch_application_proof_path,
             previous_validation_result_path=previous_validation_result_path,
             previous_outcome_analysis_path=previous_outcome_analysis_path,
         ),
-        "additionalInvestigations": _compact_additional_investigations(additional_investigation_artifacts, workspace, vulnerability_assessment),
+        "additionalInvestigations": _compact_additional_investigations(additional_investigation_artifacts, workspace, vulnerability_assessment_read.get("content", {})),
         "notes": [
             "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
+            "workspaceArtifactTool metadata and compactArtifactReads are the preferred reusable evidence layer for planning.",
             "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence.",
+            "When replanning, review previous outcome analysis and validation evidence before proposing a new plan.",
         ],
     }
 
@@ -139,306 +177,67 @@ def persist_planning_agent_output(
 
 
 def create_remediation_planning_decision(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
-    """Deprecated compatibility guard.
-
-    Planning decisions must be produced by the LLM-backed Remediation Planning
-    Agent and then passed through persist_planning_agent_output(). This function
-    intentionally refuses deterministic patch synthesis so the implementation
-    remains aligned with the frozen Phase 1-6 architecture.
-    """
+    """Deprecated compatibility guard."""
     raise RuntimeError(
         "Deterministic planning is disabled. Invoke the LLM Remediation Planning Agent "
         "and persist its structured JSON output with persist_planning_agent_output()."
     )
 
 
-def _compact_vulnerability_assessment(report: dict[str, Any]) -> dict[str, Any]:
-    vulnerabilities = []
-    for index, item in enumerate(report.get("vulnerabilities", [])):
-        vulnerabilities.append({
-            "nodeRef": f"baseline/vulnerability-assessment-report.json#/vulnerabilities/{index}",
-            "vulnerabilityId": item.get("vulnerabilityId"),
-            "aliases": item.get("aliases", []),
-            "severity": item.get("severity"),
-            "status": item.get("status"),
-            "dependency": item.get("dependency", {}),
-            "fixedVersions": item.get("fixedVersions", []),
-            "scannerSummary": item.get("scannerEvidence", {}).get("summary"),
-        })
-    return {
-        "status": report.get("status"),
-        "summary": report.get("summary", {}),
-        "severityScope": report.get("severityScope", []),
-        "vulnerabilities": vulnerabilities,
-    }
-
-
-def _compact_project_analyzer(project_analyzer: dict[str, Any], workspace: Path, vulnerability_assessment: dict[str, Any]) -> dict[str, Any]:
-    vulnerable_coordinates = _vulnerable_coordinates(vulnerability_assessment)
-    prioritized: list[dict[str, Any]] = []
-    unrelated: list[dict[str, Any]] = []
-
-    for item in project_analyzer.get("dependencyResolutionEvidence", []):
-        compact = {
-            "dependency": item.get("dependency"),
-            "dependencyType": item.get("dependencyType"),
-            "resolvedVersion": item.get("resolvedVersion"),
-            "scope": item.get("scope"),
-            "depth": item.get("depth"),
-            "introducedBy": item.get("introducedBy"),
-            "modulesAffected": item.get("modulesAffected", []),
-            "dependencyPaths": item.get("dependencyPaths", [])[:3],
-        }
-
-        if item.get("dependency") in vulnerable_coordinates:
-            prioritized.append(compact)
-        else:
-            unrelated.append(compact)
-
-    # Vulnerable-related evidence is always retained; only unrelated dependencies
-    # are subject to truncation so the planner never loses evidence it needs.
-    capacity = max(_MAX_DEPENDENCY_EVIDENCE - len(prioritized), 0)
-    dependency_evidence = prioritized + unrelated[:capacity]
-
-    pom_evidence, pom_evidence_truncated = _compact_pom_evidence(project_analyzer, vulnerability_assessment)
-
-    pom_files = _read_pom_index(project_analyzer, workspace) or project_analyzer.get("projectFacts", {}).get("pomFiles", [])
-
-    return {
-        "status": project_analyzer.get("status"),
-        "artifactReferences": project_analyzer.get("artifactReferences", {}),
-        "projectFacts": _compact_project_facts(project_analyzer),
-        "pomFiles": pom_files,
-        "pomEvidence": pom_evidence,
-        "pomEvidenceTruncated": pom_evidence_truncated,
-        "dependencyResolutionEvidence": dependency_evidence,
-        "unrelatedDependencyEvidenceTruncated": len(unrelated) > capacity,
-    }
-
-def _compact_pom_evidence(project_analyzer: dict[str, Any], vulnerability_assessment: dict[str, Any]) -> tuple[list[dict[str, Any]], bool]:
-    """Forward exact editable POM snippets (the source of patch oldText).
-
-    Snippets that reference a vulnerable artifactId are prioritized so they are
-    never dropped by the cap. This is the evidence EXACT_TEXT_ONLY patching needs.
-    """
-
-    artifact_tokens = _vulnerable_artifact_ids(vulnerability_assessment)
-    prioritized: list[dict[str, Any]] = []
-    remaining: list[dict[str, Any]] = []
-
-    for item in project_analyzer.get("pomEvidence", []):
-        snippet = item.get("snippet", "")
-        compact = {
-            "file": item.get("file"),
-            "lineStart": item.get("lineStart"),
-            "lineEnd": item.get("lineEnd"),
-            "occurrenceCount": item.get("occurrenceCount"),
-            "snippet": snippet,
-            "snippetType": item.get("snippetType"),
-        }
-
-        if any(token and token in snippet for token in artifact_tokens):
-            prioritized.append(compact)
-        else:
-            remaining.append(compact)
-
-    capacity = max(_MAX_POM_EVIDENCE - len(prioritized), 0)
-    return prioritized + remaining[:capacity], len(remaining) > capacity
-
-def _compact_project_facts(project_analyzer: dict[str, Any]) -> dict[str, Any]:
-    """Forward the ownership-relevant project facts (properties, parent, modules)."""
-    facts = project_analyzer.get("projectFacts", {})
-    if not isinstance(facts, dict) or not facts:
-        return {}
-
-    return {
-        "projectType": facts.get("projectType"),
-        "isMultiModule": facts.get("isMultiModule"),
-        "rootPom": facts.get("rootPom"),
-        "pomFiles": facts.get("pomFiles", []),
-        "modules": facts.get("modules", []),
-        "parentHierarchy": facts.get("parentHierarchy", []),
-        "mavenProperties": facts.get("mavenProperties", {}),
-        "dependencyManagementPresent": facts.get("dependencyManagementPresent"),
-        "springBoot": facts.get("springBoot", {}),
-        "java": facts.get("java", {}),
-    }
+def _read_artifact_if_available(workspace: Path, artifact_ref: str | None, attempt_number: int) -> dict[str, Any]:
+    if not artifact_ref:
+        return {"status": "SKIPPED", "content": {}}
+    return read_workspace_artifact(str(workspace), artifact_ref, mode="compact", attempt_number=attempt_number)
 
 
 def _compact_previous_attempt(
-    *,
     previous_patch_plan_path: str | None,
     previous_patch_application_proof_path: str | None,
     previous_validation_result_path: str | None,
     previous_outcome_analysis_path: str | None,
-) -> dict[str, Any]:
-    patch_plan = _read_json(previous_patch_plan_path) if previous_patch_plan_path else {}
-    proof = _read_json(previous_patch_application_proof_path) if previous_patch_application_proof_path else {}
-    validation = _read_json(previous_validation_result_path) if previous_validation_result_path else {}
-    outcome = _read_json(previous_outcome_analysis_path) if previous_outcome_analysis_path else {}
+) -> dict[str, Any] | None:
+    if not any([previous_patch_plan_path, previous_patch_application_proof_path, previous_validation_result_path, previous_outcome_analysis_path]):
+        return None
     return {
-        "patchPlan": _compact_patch_plan(patch_plan) if patch_plan else None,
-        "patchApplicationProof": _compact_patch_application_proof(proof) if proof else None,
-        "validationResult": _compact_validation_result(validation) if validation else None,
-        "outcomeAnalysisSummary": _compact_outcome_analysis(outcome) if outcome else None,
+        "patchPlan": _read_json(previous_patch_plan_path) if previous_patch_plan_path else None,
+        "patchApplicationProof": _read_json(previous_patch_application_proof_path) if previous_patch_application_proof_path else None,
+        "validationResult": _read_json(previous_validation_result_path) if previous_validation_result_path else None,
+        "outcomeAnalysisSummary": _read_json(previous_outcome_analysis_path) if previous_outcome_analysis_path else None,
     }
 
 
-def _compact_additional_investigations(artifact_paths: list[str], workspace: Path, vulnerability_assessment: dict[str, Any]) -> list[dict[str, Any]]:
+def _compact_additional_investigations(
+    artifact_paths: list[str],
+    workspace: Path,
+    vulnerability_assessment: dict[str, Any],
+) -> list[dict[str, Any]]:
     summaries = []
     for artifact_path in artifact_paths[:_MAX_ADDITIONAL_INVESTIGATION_SUMMARIES]:
         payload = _read_json(artifact_path)
-        result = payload.get("result", {})
-        summary: dict[str, Any] = {
+        result = payload.get("result", payload)
+        summaries.append({
             "artifactPath": artifact_path,
-            "requestedTool": payload.get("requestedTool"),
-            "status": payload.get("status"),
-            "toolStatus": result.get("status"),
+            "requestedTool": payload.get("requestedTool") or result.get("requestedTool"),
+            "status": payload.get("status") or result.get("status"),
             "failureCode": result.get("failureCode"),
-            "payload": result.get("payload", {}),
-        }
-        analyzer_path = result.get("artifactPath")
-        if analyzer_path:
-            analyzer_report = _read_json(analyzer_path)
-            if analyzer_report:
-                summary["projectAnalyzer"] = _compact_project_analyzer(analyzer_report, workspace, vulnerability_assessment)
-        summaries.append(summary)
-    return summaries
-
-
-def _compact_patch_plan(plan: dict[str, Any]) -> dict[str, Any]:
-    decisions = []
-    for decision in plan.get("vulnerabilityDecisions", []):
-        decisions.append({
-            "vulnerabilityId": decision.get("vulnerabilityId"),
-            "decision": decision.get("decision"),
-            "dependency": decision.get("dependency", {}),
-            "fixedVersionSelected": decision.get("fixedVersionSelected"),
-            "manualReviewCategory": decision.get("manualReviewCategory"),
-            "patches": [
-                {
-                    "patchId": patch.get("patchId"),
-                    "file": patch.get("file"),
-                    "changeType": patch.get("changeType"),
-                    "oldVersion": patch.get("oldVersion"),
-                    "newVersion": patch.get("newVersion"),
-                    "expectedOccurrences": patch.get("expectedOccurrences"),
-                }
-                for patch in decision.get("patches", [])
-            ],
+            "summary": result.get("summary", {}),
+            "artifactReferences": result.get("artifactReferences", {}),
         })
-    return {
-        "artifactId": plan.get("artifactId"),
-        "decisionType": plan.get("decisionType"),
-        "attemptNumber": plan.get("attemptNumber"),
-        "summary": plan.get("summary", {}),
-        "vulnerabilityDecisions": decisions,
-    }
-
-
-def _compact_patch_application_proof(proof: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "status": proof.get("status"),
-        "patchResults": proof.get("patchResults", []),
-        "filesChanged": proof.get("filesChanged", []),
-        "errors": proof.get("errors", []),
-    }
-
-
-def _compact_validation_result(validation: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "status": validation.get("status"),
-        "summary": validation.get("summary", {}),
-        "errors": validation.get("errors", []),
-        "warnings": validation.get("warnings", []),
-    }
-
-
-def _compact_outcome_analysis(outcome: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "status": outcome.get("status"),
-        "failureCategory": outcome.get("failureCategory"),
-        "responsibilityArea": outcome.get("responsibilityArea"),
-        "whatWeTried": outcome.get("whatWeTried"),
-        "whatChanged": outcome.get("whatChanged"),
-        "whatHappened": outcome.get("whatHappened"),
-        "newFactsLearned": outcome.get("newFactsLearned", []),
-        "recommendedFocusForPlanner": outcome.get("recommendedFocusForPlanner", []),
-        "capabilityGaps": outcome.get("capabilityGaps", []),
-        "warnings": outcome.get("warnings", []),
-    }
-
-
-def _vulnerable_coordinates(report: dict[str, Any]) -> set[str]:
-    coordinates: set[str] = set()
-    for item in report.get("vulnerabilities", []):
-        dependency = item.get("dependency", {})
-        package_name = dependency.get("packageName")
-        group_id = dependency.get("groupId")
-        artifact_id = dependency.get("artifactId")
-        if package_name:
-            coordinates.add(package_name)
-        if group_id and artifact_id:
-            coordinates.add(f"{group_id}:{artifact_id}")
-    return coordinates
-
-def _vulnerable_artifact_ids(report: dict[str, Any]) -> set[str]:
-    tokens: set[str] = set()
-
-    for item in report.get("vulnerabilities", []):
-        dependency = item.get("dependency", {})
-        artifact_id = dependency.get("artifactId")
-
-        if artifact_id:
-            tokens.add(artifact_id)
-
-    return tokens
-
-    
-def _read_pom_index(project_analyzer: dict[str, Any], workspace: Path) -> list[str]:
-    pom_index = project_analyzer.get("artifactReferences", {}).get("pomIndex")
-    if not pom_index:
-        return []
-    path = Path(pom_index)
-    if not path.is_absolute():
-        path = workspace / path
-    payload = _read_json(path)
-    return payload.get("pomFiles", []) if isinstance(payload.get("pomFiles", []), list) else []
-
-
-def _default_output_path(workspace: Path, decision_type: str, attempt_number: int) -> Path:
-    if decision_type == "PATCH_PLAN":
-        return workspace / f"attempt-{attempt_number}" / "remediation-patch-plan.json"
-    if decision_type == "REQUEST_ADDITIONAL_EVIDENCE":
-        return workspace / f"attempt-{attempt_number}" / "additional-investigation-request.json"
-    return workspace / f"attempt-{attempt_number}" / "manual-review-decision.json"
+    return summaries
 
 
 def _attempt_by_number(attempts: list[dict[str, Any]], attempt_number: int) -> dict[str, Any] | None:
     for attempt in attempts:
-        if int(attempt.get("attemptNumber", 0)) == attempt_number:
+        if int(attempt.get("attemptNumber") or 0) == int(attempt_number):
             return attempt
     return None
 
 
 def _previous_attempt(attempts: list[dict[str, Any]], attempt_number: int) -> dict[str, Any] | None:
-    previous = [attempt for attempt in attempts if int(attempt.get("attemptNumber", 0)) < attempt_number]
+    previous = [attempt for attempt in attempts if int(attempt.get("attemptNumber") or 0) < int(attempt_number)]
     if not previous:
         return None
-    return sorted(previous, key=lambda item: int(item.get("attemptNumber", 0)))[-1]
-
-
-def _resolve_artifact_list(workspace: Path, references: list[Any]) -> list[str]:
-    resolved: list[str] = []
-    for item in references:
-        if isinstance(item, dict):
-            ref = item.get("artifactPath") or item.get("path") or item.get("ref")
-        else:
-            ref = item
-        value = _resolve(workspace, ref)
-        if value:
-            resolved.append(value)
-    return resolved
+    return sorted(previous, key=lambda item: int(item.get("attemptNumber") or 0))[-1]
 
 
 def _resolve(workspace: Path, reference: str | None) -> str | None:
@@ -446,6 +245,16 @@ def _resolve(workspace: Path, reference: str | None) -> str | None:
         return None
     path = Path(reference)
     return str(path if path.is_absolute() else workspace / path)
+
+
+def _resolve_artifact_list(workspace: Path, values: list[Any]) -> list[str]:
+    resolved: list[str] = []
+    for value in values:
+        artifact_ref = value.get("artifactPath") if isinstance(value, dict) else value
+        path = _resolve(workspace, artifact_ref)
+        if path:
+            resolved.append(path)
+    return resolved
 
 
 def _parse_json_object(value: str | dict[str, Any]) -> dict[str, Any]:
@@ -458,6 +267,14 @@ def _parse_json_object(value: str | dict[str, Any]) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise ValueError("Planning Agent output must be a JSON object.")
     return parsed
+
+
+def _default_output_path(workspace: Path, decision_type: str, attempt_number: int) -> Path:
+    if decision_type == "PATCH_PLAN":
+        return workspace / f"attempt-{attempt_number}" / "remediation-patch-plan.json"
+    if decision_type == "MANUAL_REVIEW":
+        return workspace / f"attempt-{attempt_number}" / "manual-review-decision.json"
+    return workspace / f"attempt-{attempt_number}" / "additional-evidence-request.json"
 
 
 def _read_json(path: str | Path | None) -> dict[str, Any]:
