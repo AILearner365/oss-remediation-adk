@@ -38,9 +38,9 @@ def build_outcome_analysis_context(
     """Build metadata-first context for the Outcome Analysis Agent LLM.
 
     The Outcome Analysis Agent is an AI reasoning component, not a deterministic
-    classifier. This context now exposes reusable artifact-tool results: a
-    metadata catalog, selected artifact metadata, and compact artifact reads with
-    bounded log excerpts where available.
+    classifier. This context exposes reusable artifact-tool results: a metadata
+    catalog, selected artifact metadata, and compact artifact reads with bounded
+    log excerpts where available.
     """
 
     workspace = Path(workspace_root).resolve()
@@ -56,7 +56,7 @@ def build_outcome_analysis_context(
     artifact_listing = list_workspace_artifacts(str(workspace), attempt_number=attempt_number)
     relevant_artifacts = artifact_listing.get("relevantArtifacts", [])
     compact_artifact_reads = [
-        read_workspace_artifact(str(workspace), str(item.get("path")), mode="compact", attempt_number=attempt_number)
+        read_workspace_artifact(str(workspace), str(item.get("path")), attempt_number=attempt_number)
         for item in relevant_artifacts
         if item.get("path")
     ]
@@ -73,16 +73,14 @@ def build_outcome_analysis_context(
             "availableFunctions": [
                 {
                     "name": "list_workspace_artifacts",
-                    "purpose": "Return workspace artifact metadata from manifest.json for baseline, current attempt, previous attempts, and final delivery artifacts.",
+                    "purpose": "Return workspace artifact metadata when artifactListing/artifactCatalog/relevantArtifacts are missing or stale. These metadata fields are already included in the default context.",
                 },
                 {
                     "name": "read_workspace_artifact",
-                    "purpose": "Safely read one workspace artifact by path in metadata, compact, full_json, or log_excerpt mode.",
-                    "supportedModes": ["metadata", "compact", "full_json", "log_excerpt"],
-                },
-                {
-                    "name": "read_workspace_log_excerpt",
-                    "purpose": "Safely read bounded failure-oriented excerpts from logs inside the workspace.",
+                    "purpose": "Safely read one workspace artifact by path. Default read is compact. Request mode='full' only when compact evidence is insufficient.",
+                    "defaultMode": "compact",
+                    "supportedPublicModes": ["compact", "full"],
+                    "preferredUsage": "read_workspace_artifact(artifact_path) for compact evidence; read_workspace_artifact(artifact_path, mode='full') only when explicitly needed.",
                 },
             ],
             "pathSafety": "Artifact reads are restricted to files under workspaceRoot.",
@@ -93,10 +91,10 @@ def build_outcome_analysis_context(
         "compactArtifactReads": compact_artifact_reads,
         **legacy_evidence,
         "notes": [
-            "Use artifactListing/artifactCatalog to understand what baseline, attempt, previous-attempt, and final artifacts are available and what each contains.",
+            "artifactListing, artifactCatalog, and relevantArtifacts are default metadata context; do not request list_workspace_artifacts unless metadata is missing or stale.",
             "Use relevantArtifacts as the first evidence shortlist for the current failure state.",
-            "Use compactArtifactReads as the primary readable evidence; each item is produced by the reusable WorkspaceArtifactTool.",
-            "Compact artifact reads include bounded log excerpts when referenced logs are available inside the workspace.",
+            "Use compactArtifactReads as the primary readable evidence; each item is produced by read_workspace_artifact default compact mode.",
+            "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required outcome conclusion.",
             "When deciding whether the patch plan contributed, compare remediation-patch-plan.json with remediation-planning-context.json when available.",
             "Do not invent occurrence counts, file paths, log details, fields, dependency paths, or patch results.",
         ],
