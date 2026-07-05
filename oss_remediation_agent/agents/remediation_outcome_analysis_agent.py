@@ -4,6 +4,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from oss_remediation_agent.agents.artifact_catalog import (
+    build_artifact_catalog,
+    compact_selected_artifacts,
+    select_relevant_artifacts,
+)
+
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_agent.md"
 
 _REQUIRED_OUTCOME_FIELDS = {
@@ -30,12 +36,11 @@ def build_outcome_analysis_context(
     validation_result_path: str | None = None,
     dry_run_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """Build artifact-reference and compact-evidence context for the Outcome Analysis Agent LLM.
+    """Build metadata-first context for the Outcome Analysis Agent LLM.
 
     The Outcome Analysis Agent is an AI reasoning component, not a deterministic
-    classifier. This helper does not classify failures. It packages artifact
-    references for traceability and compact artifact contents so the LLM reasons
-    from real failure evidence instead of file paths alone.
+    classifier. This helper gives it an artifact catalog first, then a relevant
+    artifact shortlist and compact evidence selected from the workspace.
     """
 
     workspace = Path(workspace_root)
@@ -43,48 +48,33 @@ def build_outcome_analysis_context(
     attempt = _attempt(manifest.get("attempts", []), attempt_number)
 
     patch_plan_ref = _resolve(workspace, patch_plan_path or attempt.get("patchPlan"))
-    patch_application_proof_ref = _resolve(
-        workspace,
-        patch_application_proof_path or attempt.get("patchApplicationProof"),
-    )
-    validation_result_ref = _resolve(
-        workspace,
-        validation_result_path or attempt.get("validationResult"),
-    )
-    dry_run_result_ref = _resolve(
-        workspace,
-        dry_run_result_path or attempt.get("patchDryRunResult"),
-    )
+    patch_application_proof_ref = _resolve(workspace, patch_application_proof_path or attempt.get("patchApplicationProof"))
+    validation_result_ref = _resolve(workspace, validation_result_path or attempt.get("validationResult"))
+    dry_run_result_ref = _resolve(workspace, dry_run_result_path or attempt.get("patchDryRunResult"))
+    planning_context_ref = _resolve(workspace, (manifest.get("planning") or {}).get("context"))
 
-    patch_plan = _read_json(patch_plan_ref) if patch_plan_ref else {}
-    dry_run_result = _read_json(dry_run_result_ref) if dry_run_result_ref else {}
-    patch_application_proof = (
-        _read_json(patch_application_proof_ref)
-        if patch_application_proof_ref
-        else {}
-    )
-    validation_result = (
-        _read_json(validation_result_ref)
-        if validation_result_ref
-        else {}
+    artifact_catalog = build_artifact_catalog(workspace, manifest, attempt_number)
+    relevant_artifacts = select_relevant_artifacts(artifact_catalog, manifest, attempt_number)
+    compact_artifacts = compact_selected_artifacts(workspace, relevant_artifacts)
+
+    legacy_evidence = _legacy_compact_evidence(
+        patch_plan_ref=patch_plan_ref,
+        patch_application_proof_ref=patch_application_proof_ref,
+        validation_result_ref=validation_result_ref,
+        dry_run_result_ref=dry_run_result_ref,
     )
 
     evidence = {
-        "patchPlan": _compact_patch_plan(patch_plan) if patch_plan else None,
-        "patchDryRunResult": _compact_dry_run_result(dry_run_result)
-        if dry_run_result
-        else None,
-        "patchApplicationProof": _compact_patch_application_proof(
-            patch_application_proof
-        )
-        if patch_application_proof
-        else None,
-        "validationResult": _compact_validation_result(validation_result)
-        if validation_result
-        else None,
+        "artifactCatalog": artifact_catalog,
+        "relevantArtifacts": relevant_artifacts,
+        "compactArtifacts": compact_artifacts,
+        **legacy_evidence,
         "notes": [
-            "artifactReferences provide traceability paths; evidence contains compact artifact contents for reasoning.",
-            "Report only failures and facts present in this evidence. Do not invent occurrence counts, fields, or patch results.",
+            "Use artifactCatalog to understand what baseline, attempt, previous-attempt, and final artifacts are available and what each contains.",
+            "Use relevantArtifacts as the first evidence shortlist for the current failure state.",
+            "Use compactArtifacts and the legacy compact evidence to support every outcome statement with artifact-backed facts.",
+            "When deciding whether the patch plan contributed, compare remediation-patch-plan.json with remediation-planning-context.json when available.",
+            "Do not invent occurrence counts, file paths, log details, fields, dependency paths, or patch results.",
         ],
     }
 
@@ -96,6 +86,7 @@ def build_outcome_analysis_context(
         "manifestPath": str(workspace / "manifest.json"),
         "artifactReferences": {
             "manifest": str(workspace / "manifest.json"),
+            "planningContext": planning_context_ref,
             "patchPlan": patch_plan_ref,
             "patchApplicationProof": patch_application_proof_ref,
             "validationResult": validation_result_ref,
@@ -107,6 +98,24 @@ def build_outcome_analysis_context(
             "requiredFields": sorted(_REQUIRED_OUTCOME_FIELDS),
             "requiredBehavior": "Return structured JSON only. Do not create patches, run tools, mutate files, update manifest, or create pull requests.",
         },
+    }
+
+
+def _legacy_compact_evidence(
+    patch_plan_ref: str | None,
+    patch_application_proof_ref: str | None,
+    validation_result_ref: str | None,
+    dry_run_result_ref: str | None,
+) -> dict[str, Any]:
+    patch_plan = _read_json(patch_plan_ref) if patch_plan_ref else {}
+    dry_run_result = _read_json(dry_run_result_ref) if dry_run_result_ref else {}
+    patch_application_proof = _read_json(patch_application_proof_ref) if patch_application_proof_ref else {}
+    validation_result = _read_json(validation_result_ref) if validation_result_ref else {}
+    return {
+        "patchPlan": _compact_patch_plan(patch_plan) if patch_plan else None,
+        "patchDryRunResult": _compact_dry_run_result(dry_run_result) if dry_run_result else None,
+        "patchApplicationProof": _compact_patch_application_proof(patch_application_proof) if patch_application_proof else None,
+        "validationResult": _compact_validation_result(validation_result) if validation_result else None,
     }
 
 
@@ -152,6 +161,7 @@ def _compact_dry_run_result(dry_run: dict[str, Any]) -> dict[str, Any]:
         "warnings": dry_run.get("warnings", []),
     }
 
+
 def _compact_patch_application_proof(proof: dict[str, Any]) -> dict[str, Any]:
     return {
         "status": proof.get("status"),
@@ -171,6 +181,7 @@ def _compact_validation_result(validation: dict[str, Any]) -> dict[str, Any]:
         "errors": validation.get("errors", []),
         "warnings": validation.get("warnings", []),
     }
+
 
 def persist_outcome_analysis_agent_output(
     workspace_root: str | Path,
@@ -251,7 +262,9 @@ def _parse_json_object(value: str | dict[str, Any]) -> dict[str, Any]:
     return parsed
 
 
-def _read_json(path: str | Path) -> dict[str, Any]:
+def _read_json(path: str | Path | None) -> dict[str, Any]:
+    if not path:
+        return {}
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception:
