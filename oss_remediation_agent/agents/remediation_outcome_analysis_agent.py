@@ -12,13 +12,37 @@ from oss_remediation_agent.tools.workspace_artifact_tool import (
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_agent.md"
 
 _REQUIRED_OUTCOME_FIELDS = {
+    "schemaVersion",
+    "artifactId",
+    "workflowId",
+    "createdBy",
+    "status",
+    "attemptNumber",
     "failureCategory",
     "responsibilityArea",
+    "recommendedDisposition",
     "whatWeTried",
     "whatChanged",
     "whatHappened",
+    "rootCauseAnalysis",
+    "planningContextAssessment",
     "newFactsLearned",
     "recommendedFocusForPlanner",
+    "capabilityGaps",
+    "artifactReferences",
+    "evidenceSummary",
+    "errors",
+    "warnings",
+}
+
+_REQUIRED_EVIDENCE_BACKED_FIELDS = {
+    "whatWeTried",
+    "whatChanged",
+    "whatHappened",
+    "rootCauseAnalysis",
+    "planningContextAssessment",
+    "evidenceSummary",
+    "artifactReferences",
 }
 
 
@@ -118,6 +142,7 @@ def build_outcome_analysis_context(
         "outputContract": {
             "artifactType": "Outcome Analysis Summary",
             "requiredFields": sorted(_REQUIRED_OUTCOME_FIELDS),
+            "requiredEvidenceBackedFields": sorted(_REQUIRED_EVIDENCE_BACKED_FIELDS),
             "requiredBehavior": "Return structured JSON only. Do not create patches, run tools, mutate files, update manifest, or create pull requests.",
         },
     }
@@ -216,15 +241,13 @@ def persist_outcome_analysis_agent_output(
 ) -> dict[str, Any]:
     """Persist the LLM-generated Outcome Analysis Summary artifact.
 
-    This wrapper parses and minimally validates the LLM output, writes it to the
-    remediation workspace, and returns a compact artifact reference for the
+    This wrapper parses and structurally validates the LLM output, writes it to
+    the remediation workspace, and returns a compact artifact reference for the
     orchestrator. It intentionally does not classify failures using Python rules.
     """
     workspace = Path(workspace_root)
     outcome = _parse_json_object(llm_output)
-    missing = sorted(field for field in _REQUIRED_OUTCOME_FIELDS if field not in outcome)
-    if missing:
-        raise ValueError(f"Outcome Analysis Agent output is missing required fields: {', '.join(missing)}")
+    _validate_outcome_analysis_output(outcome)
 
     artifact_path = Path(output_path) if output_path else workspace / f"attempt-{attempt_number}" / "outcome-analysis-summary.json"
     artifact_path.parent.mkdir(parents=True, exist_ok=True)
@@ -244,6 +267,32 @@ def persist_outcome_analysis_agent_output(
         "failureCategory": artifact.get("failureCategory"),
         "responsibilityArea": artifact.get("responsibilityArea"),
     }
+
+
+def _validate_outcome_analysis_output(outcome: dict[str, Any]) -> None:
+    missing = sorted(field for field in _REQUIRED_OUTCOME_FIELDS if field not in outcome)
+    if missing:
+        raise ValueError(f"Outcome Analysis Agent output is missing required fields: {', '.join(missing)}")
+
+    empty_evidence_fields = sorted(
+        field for field in _REQUIRED_EVIDENCE_BACKED_FIELDS
+        if not _has_structural_evidence(outcome.get(field))
+    )
+    if empty_evidence_fields:
+        raise ValueError(
+            "Outcome Analysis Agent output is missing evidence-backed content for fields: "
+            f"{', '.join(empty_evidence_fields)}"
+        )
+
+
+def _has_structural_evidence(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
 
 
 def create_outcome_analysis_summary(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
