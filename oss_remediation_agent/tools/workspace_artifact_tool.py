@@ -40,7 +40,7 @@ _TEXT_EXTENSIONS = {
 
 
 def list_workspace_artifacts(workspace_root: str, attempt_number: int = 1) -> dict[str, Any]:
-    """Return metadata for workspace artifacts indexed by manifest.json."""
+    """Return default metadata context for workspace artifacts indexed by manifest.json."""
     workspace = Path(workspace_root).resolve()
     manifest = _read_json(workspace / "manifest.json")
     if not manifest:
@@ -69,14 +69,19 @@ def read_workspace_artifact(
     mode: str = "compact",
     attempt_number: int = 1,
 ) -> dict[str, Any]:
-    """Safely read a workspace artifact by workspace-relative or in-workspace absolute path.
+    """Safely read a workspace artifact.
 
-    Supported modes:
-    - metadata: return catalog metadata only when available
-    - compact: return bounded artifact content suitable for LLM reasoning
-    - full_json: return full JSON only when the JSON artifact is small enough
-    - full_text: return bounded full text for supported text artifacts, logs, diffs, and markdown
-    - log_excerpt: treat artifact_path as a log and return bounded excerpts
+    Public modes:
+    - compact: default. Return a bounded, LLM-friendly representation when
+      available. Known JSON artifacts use artifact-specific compact views,
+      unknown JSON uses a generic compact view, and readable text artifacts use
+      bounded excerpts. If no compact representation is available for a readable
+      supported artifact, safely fall back to full content within size limits.
+    - full: return complete JSON or complete supported text content only when
+      explicitly requested and size limits allow it.
+
+    Backward-compatible aliases accepted: metadata, full_json, full_text,
+    raw_text, log_excerpt.
     """
     workspace = Path(workspace_root).resolve()
     try:
@@ -84,7 +89,7 @@ def read_workspace_artifact(
     except ValueError as exc:
         return {"status": "FAILED", "failureCode": "UNSAFE_ARTIFACT_PATH", "error": str(exc)}
 
-    normalized_mode = str(mode or "compact").lower()
+    normalized_mode = _normalize_mode(mode)
     if normalized_mode == "log_excerpt":
         return read_workspace_log_excerpt(workspace_root, artifact_path)
 
@@ -102,53 +107,22 @@ def read_workspace_artifact(
             "status": "SUCCESS",
             "workspaceRoot": str(workspace),
             "artifactPath": artifact_path,
+            "mode": "metadata",
             "metadata": metadata,
         }
 
-    if normalized_mode in {"full_text", "full", "raw_text"}:
-        return _read_full_text_artifact(workspace, artifact_path, path, metadata)
+    if normalized_mode == "full":
+        return _read_full_artifact(workspace, artifact_path, path, metadata)
 
-    if path.suffix != ".json":
-        return read_workspace_log_excerpt(workspace_root, artifact_path)
-
-    payload = _read_json(path)
-    if normalized_mode == "full_json":
-        size = path.stat().st_size
-        if size > _MAX_FULL_JSON_BYTES:
-            return {
-                "status": "FAILED",
-                "failureCode": "ARTIFACT_TOO_LARGE_FOR_FULL_JSON",
-                "artifactPath": artifact_path,
-                "sizeBytes": size,
-                "maxBytes": _MAX_FULL_JSON_BYTES,
-            }
-        return {
-            "status": "SUCCESS",
-            "workspaceRoot": str(workspace),
-            "artifactPath": artifact_path,
-            "metadata": metadata,
-            "content": payload,
-        }
-
-    artifact_type = str((metadata or {}).get("artifactType") or _infer_artifact_type(artifact_path))
-    compact = _compact_by_type(artifact_type, payload)
-    log_refs = _find_log_references(payload)
-    if log_refs:
-        compact["logReferences"] = log_refs[:10]
-        compact["logExcerpts"] = [
-            read_workspace_log_excerpt(workspace_root, log_ref).get("excerpt")
-            for log_ref in log_refs[:5]
-        ]
-        compact["logExcerpts"] = [excerpt for excerpt in compact["logExcerpts"] if excerpt]
-
-    return {
-        "status": "SUCCESS",
-        "workspaceRoot": str(workspace),
-        "artifactPath": artifact_path,
-        "mode": "compact",
-        "metadata": metadata,
-        "content": compact,
-    }
+    compact = _read_compact_artifact(workspace_root, workspace, artifact_path, path, metadata)
+    if compact.get("status") == "FAILED" and compact.get("failureCode") == "UNSUPPORTED_COMPACT_ARTIFACT":
+        full = _read_full_artifact(workspace, artifact_path, path, metadata)
+        if full.get("status") == "SUCCESS":
+            full["mode"] = "compact"
+            full["compactStrategy"] = "SAFE_FULL_FALLBACK"
+            full["message"] = "No compact representation was available; returned safe full artifact content within size limits."
+        return full
+    return compact
 
 
 def read_workspace_log_excerpt(
@@ -157,7 +131,7 @@ def read_workspace_log_excerpt(
     keywords: list[str] | None = None,
     max_lines: int = 80,
 ) -> dict[str, Any]:
-    """Safely read bounded excerpts from a workspace log."""
+    """Safely read bounded excerpts from a workspace log or text artifact."""
     workspace = Path(workspace_root).resolve()
     try:
         path = _safe_resolve(workspace, log_path)
@@ -190,32 +164,125 @@ def read_workspace_log_excerpt(
     }
 
 
-def _read_full_text_artifact(workspace: Path, artifact_path: str, path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
-    size = path.stat().st_size
-    if path.suffix.lower() not in _TEXT_EXTENSIONS:
+def _normalize_mode(mode: str) -> str:
+    value = str(mode or "compact").lower()
+    if value in {"full", "complete", "complete_file", "full_file", "full_json", "full_text", "raw_text"}:
+        return "full"
+    if value in {"log_excerpt", "excerpt"}:
+        return "log_excerpt"
+    if value == "metadata":
+        return "metadata"
+    return "compact"
+
+
+def _read_compact_artifact(
+    workspace_root: str,
+    workspace: Path,
+    artifact_path: str,
+    path: Path,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    if path.suffix != ".json":
+        if path.suffix.lower() not in _TEXT_EXTENSIONS:
+            return {
+                "status": "FAILED",
+                "failureCode": "UNSUPPORTED_COMPACT_ARTIFACT",
+                "workspaceRoot": str(workspace),
+                "artifactPath": artifact_path,
+                "mode": "compact",
+                "metadata": metadata,
+                "message": "Compact mode could not summarize this artifact type.",
+            }
+        excerpt = read_workspace_log_excerpt(workspace_root, artifact_path)
         return {
-            "status": "FAILED",
-            "failureCode": "UNSUPPORTED_FULL_TEXT_ARTIFACT",
+            "status": excerpt.get("status"),
+            "workspaceRoot": str(workspace),
             "artifactPath": artifact_path,
-            "extension": path.suffix,
+            "mode": "compact",
+            "compactStrategy": "TEXT_EXCERPT",
+            "metadata": metadata,
+            "content": {
+                "artifactKind": "TEXT_EXCERPT",
+                "lineCount": excerpt.get("lineCount"),
+                "matchedLineCount": excerpt.get("matchedLineCount"),
+                "excerpt": excerpt.get("excerpt", []),
+            },
+            "failureCode": excerpt.get("failureCode"),
+            "error": excerpt.get("error"),
         }
-    if size > _MAX_FULL_TEXT_BYTES:
-        return {
-            "status": "FAILED",
-            "failureCode": "ARTIFACT_TOO_LARGE_FOR_FULL_TEXT",
-            "artifactPath": artifact_path,
-            "sizeBytes": size,
-            "maxBytes": _MAX_FULL_TEXT_BYTES,
-        }
-    try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except Exception as exc:
-        return {"status": "FAILED", "failureCode": "FULL_TEXT_READ_FAILED", "artifactPath": artifact_path, "error": str(exc)}
+
+    payload = _read_json(path)
+    artifact_type = str((metadata or {}).get("artifactType") or _infer_artifact_type(artifact_path))
+    compact = _compact_by_type(artifact_type, payload)
+    strategy = "GENERIC_JSON" if artifact_type == "UNKNOWN_ARTIFACT" else f"{artifact_type}_COMPACT"
+    log_refs = _find_log_references(payload)
+    if log_refs:
+        compact["logReferences"] = log_refs[:10]
+        compact["logExcerpts"] = [
+            read_workspace_log_excerpt(workspace_root, log_ref).get("excerpt")
+            for log_ref in log_refs[:5]
+        ]
+        compact["logExcerpts"] = [excerpt for excerpt in compact["logExcerpts"] if excerpt]
+
     return {
         "status": "SUCCESS",
         "workspaceRoot": str(workspace),
         "artifactPath": artifact_path,
-        "mode": "full_text",
+        "mode": "compact",
+        "compactStrategy": strategy,
+        "metadata": metadata,
+        "content": compact,
+    }
+
+
+def _read_full_artifact(workspace: Path, artifact_path: str, path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
+    size = path.stat().st_size
+    if path.suffix == ".json":
+        if size > _MAX_FULL_JSON_BYTES:
+            return {
+                "status": "FAILED",
+                "failureCode": "ARTIFACT_TOO_LARGE_FOR_FULL",
+                "artifactPath": artifact_path,
+                "sizeBytes": size,
+                "maxBytes": _MAX_FULL_JSON_BYTES,
+                "metadata": metadata,
+            }
+        return {
+            "status": "SUCCESS",
+            "workspaceRoot": str(workspace),
+            "artifactPath": artifact_path,
+            "mode": "full",
+            "metadata": metadata,
+            "sizeBytes": size,
+            "content": _read_json(path),
+        }
+
+    if path.suffix.lower() not in _TEXT_EXTENSIONS:
+        return {
+            "status": "FAILED",
+            "failureCode": "UNSUPPORTED_FULL_ARTIFACT",
+            "artifactPath": artifact_path,
+            "extension": path.suffix,
+            "metadata": metadata,
+        }
+    if size > _MAX_FULL_TEXT_BYTES:
+        return {
+            "status": "FAILED",
+            "failureCode": "ARTIFACT_TOO_LARGE_FOR_FULL",
+            "artifactPath": artifact_path,
+            "sizeBytes": size,
+            "maxBytes": _MAX_FULL_TEXT_BYTES,
+            "metadata": metadata,
+        }
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception as exc:
+        return {"status": "FAILED", "failureCode": "FULL_READ_FAILED", "artifactPath": artifact_path, "error": str(exc), "metadata": metadata}
+    return {
+        "status": "SUCCESS",
+        "workspaceRoot": str(workspace),
+        "artifactPath": artifact_path,
+        "mode": "full",
         "metadata": metadata,
         "sizeBytes": size,
         "content": text,
