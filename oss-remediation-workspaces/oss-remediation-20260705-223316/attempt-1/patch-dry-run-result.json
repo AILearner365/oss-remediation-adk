@@ -1,0 +1,71 @@
+{
+  "artifactId": "patch-dry-run-attempt-1",
+  "artifactReferences": {},
+  "attemptNumber": 1,
+  "createdAt": "2026-07-05T22:34:43Z",
+  "createdBy": "GenericPatchApplyTool",
+  "errors": [],
+  "patchResults": [
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-commons-fileupload",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-log4j-1-x",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-commons-text",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-log4j-core-2-x",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-log4j-core-2-x",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-log4j-core-2-x",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-org-json",
+      "status": "READY"
+    },
+    {
+      "actualOccurrences": 1,
+      "expectedOccurrences": 1,
+      "file": "pom.xml",
+      "patchId": "patch-snakeyaml",
+      "status": "READY"
+    }
+  ],
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260705-223316"
+}
