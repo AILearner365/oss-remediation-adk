@@ -1,0 +1,9 @@
+{
+  "pomFiles": [
+    "pom.xml",
+    "task-common/pom.xml",
+    "task-domain/pom.xml",
+    "task-service/pom.xml",
+    "task-web/pom.xml"
+  ]
+}
