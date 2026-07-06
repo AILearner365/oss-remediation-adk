@@ -1,0 +1,2342 @@
+{
+  "agent": "RemediationOutcomeAnalysisAgent",
+  "artifactReferences": {
+    "dryRunResult": null,
+    "manifest": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/manifest.json",
+    "patchApplicationProof": null,
+    "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/attempt-1/additional-evidence-request.json",
+    "planningContext": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/attempt-1/remediation-planning-context.json",
+    "validationResult": null
+  },
+  "attemptNumber": 1,
+  "evidence": {
+    "artifactCatalog": {
+      "baseline": [
+        {
+          "artifactType": "BASELINE_BUILD_RESULT",
+          "contains": [
+            "build status",
+            "command",
+            "exit code",
+            "log reference",
+            "failure summary"
+          ],
+          "exists": true,
+          "path": "baseline/baseline-build-result.json",
+          "producer": "BaselineBuildTool",
+          "purpose": "Baseline repository build result before remediation.",
+          "referencedLogs": [
+            "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+            "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n"
+          ],
+          "stage": "BASELINE",
+          "status": "SUCCESS"
+        },
+        {
+          "artifactType": "VULNERABILITY_ASSESSMENT_REPORT",
+          "contains": [
+            "vulnerability IDs",
+            "aliases",
+            "severity",
+            "dependency coordinates",
+            "current versions",
+            "fixed versions"
+          ],
+          "exists": true,
+          "path": "baseline/vulnerability-assessment-report.json",
+          "producer": "VulnerabilityAssessmentAgent",
+          "purpose": "OSV vulnerability assessment for the baseline repository.",
+          "stage": "BASELINE",
+          "status": "FAILED"
+        },
+        {
+          "artifactType": "PROJECT_ANALYZER_REPORT",
+          "contains": [
+            "project facts",
+            "modules",
+            "pom evidence",
+            "dependency resolution evidence",
+            "dependency management"
+          ],
+          "exists": true,
+          "path": "baseline/project-analyzer-report.json",
+          "producer": "ProjectAnalyzerAgent",
+          "purpose": "Maven project structure and dependency ownership evidence.",
+          "referencedLogs": [
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:compile"
+          ],
+          "stage": "BASELINE",
+          "status": "SUCCESS"
+        }
+      ],
+      "currentAttempt": [
+        {
+          "artifactType": "REMEDIATION_PLANNING_CONTEXT",
+          "attemptNumber": 1,
+          "contains": [
+            "planner prompt",
+            "vulnerability assessment evidence",
+            "project analyzer evidence",
+            "pom evidence",
+            "dependency resolution evidence",
+            "previous attempt evidence"
+          ],
+          "exists": true,
+          "path": "attempt-1/remediation-planning-context.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Exact compact evidence and prompt context shared with the Remediation Planning Agent.",
+          "referencedLogs": [
+            "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+            "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n",
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+          ],
+          "stage": "REMEDIATION_PLANNING",
+          "status": null
+        }
+      ],
+      "final": [],
+      "manifest": {
+        "artifactType": "MANIFEST",
+        "contains": [
+          "workflow status",
+          "repository metadata",
+          "baseline references",
+          "attempt references",
+          "final references",
+          "policy snapshot"
+        ],
+        "exists": true,
+        "path": "manifest.json",
+        "producer": "WorkflowOrchestrator",
+        "purpose": "Workflow index containing repository, baseline, attempt, final, and policy references.",
+        "stage": "WORKFLOW",
+        "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+      },
+      "previousAttempts": []
+    },
+    "artifactListing": {
+      "artifactCatalog": {
+        "baseline": [
+          {
+            "artifactType": "BASELINE_BUILD_RESULT",
+            "contains": [
+              "build status",
+              "command",
+              "exit code",
+              "log reference",
+              "failure summary"
+            ],
+            "exists": true,
+            "path": "baseline/baseline-build-result.json",
+            "producer": "BaselineBuildTool",
+            "purpose": "Baseline repository build result before remediation.",
+            "referencedLogs": [
+              "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+              "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n"
+            ],
+            "stage": "BASELINE",
+            "status": "SUCCESS"
+          },
+          {
+            "artifactType": "VULNERABILITY_ASSESSMENT_REPORT",
+            "contains": [
+              "vulnerability IDs",
+              "aliases",
+              "severity",
+              "dependency coordinates",
+              "current versions",
+              "fixed versions"
+            ],
+            "exists": true,
+            "path": "baseline/vulnerability-assessment-report.json",
+            "producer": "VulnerabilityAssessmentAgent",
+            "purpose": "OSV vulnerability assessment for the baseline repository.",
+            "stage": "BASELINE",
+            "status": "FAILED"
+          },
+          {
+            "artifactType": "PROJECT_ANALYZER_REPORT",
+            "contains": [
+              "project facts",
+              "modules",
+              "pom evidence",
+              "dependency resolution evidence",
+              "dependency management"
+            ],
+            "exists": true,
+            "path": "baseline/project-analyzer-report.json",
+            "producer": "ProjectAnalyzerAgent",
+            "purpose": "Maven project structure and dependency ownership evidence.",
+            "referencedLogs": [
+              "ch.qos.logback:logback-classic",
+              "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+              "ch.qos.logback:logback-core",
+              "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+              "org.apache.logging.log4j:log4j-to-slf4j",
+              "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+              "org.apache.logging.log4j:log4j-api",
+              "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test",
+              "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile",
+              "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:compile"
+            ],
+            "stage": "BASELINE",
+            "status": "SUCCESS"
+          }
+        ],
+        "currentAttempt": [
+          {
+            "artifactType": "REMEDIATION_PLANNING_CONTEXT",
+            "attemptNumber": 1,
+            "contains": [
+              "planner prompt",
+              "vulnerability assessment evidence",
+              "project analyzer evidence",
+              "pom evidence",
+              "dependency resolution evidence",
+              "previous attempt evidence"
+            ],
+            "exists": true,
+            "path": "attempt-1/remediation-planning-context.json",
+            "producer": "WorkflowOrchestrator",
+            "purpose": "Exact compact evidence and prompt context shared with the Remediation Planning Agent.",
+            "referencedLogs": [
+              "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+              "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n",
+              "ch.qos.logback:logback-classic",
+              "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+              "ch.qos.logback:logback-core",
+              "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+              "org.apache.logging.log4j:log4j-to-slf4j",
+              "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+              "org.apache.logging.log4j:log4j-api",
+              "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+            ],
+            "stage": "REMEDIATION_PLANNING",
+            "status": null
+          }
+        ],
+        "final": [],
+        "manifest": {
+          "artifactType": "MANIFEST",
+          "contains": [
+            "workflow status",
+            "repository metadata",
+            "baseline references",
+            "attempt references",
+            "final references",
+            "policy snapshot"
+          ],
+          "exists": true,
+          "path": "manifest.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Workflow index containing repository, baseline, attempt, final, and policy references.",
+          "stage": "WORKFLOW",
+          "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+        },
+        "previousAttempts": []
+      },
+      "attemptNumber": 1,
+      "manifestStatus": "ADDITIONAL_INVESTIGATION_COMPLETE",
+      "relevantArtifacts": [
+        {
+          "artifactType": "MANIFEST",
+          "contains": [
+            "workflow status",
+            "repository metadata",
+            "baseline references",
+            "attempt references",
+            "final references",
+            "policy snapshot"
+          ],
+          "exists": true,
+          "path": "manifest.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Workflow index containing repository, baseline, attempt, final, and policy references.",
+          "stage": "WORKFLOW",
+          "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+        },
+        {
+          "artifactType": "VULNERABILITY_ASSESSMENT_REPORT",
+          "contains": [
+            "vulnerability IDs",
+            "aliases",
+            "severity",
+            "dependency coordinates",
+            "current versions",
+            "fixed versions"
+          ],
+          "exists": true,
+          "path": "baseline/vulnerability-assessment-report.json",
+          "producer": "VulnerabilityAssessmentAgent",
+          "purpose": "OSV vulnerability assessment for the baseline repository.",
+          "stage": "BASELINE",
+          "status": "FAILED"
+        },
+        {
+          "artifactType": "PROJECT_ANALYZER_REPORT",
+          "contains": [
+            "project facts",
+            "modules",
+            "pom evidence",
+            "dependency resolution evidence",
+            "dependency management"
+          ],
+          "exists": true,
+          "path": "baseline/project-analyzer-report.json",
+          "producer": "ProjectAnalyzerAgent",
+          "purpose": "Maven project structure and dependency ownership evidence.",
+          "referencedLogs": [
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:compile"
+          ],
+          "stage": "BASELINE",
+          "status": "SUCCESS"
+        },
+        {
+          "artifactType": "REMEDIATION_PLANNING_CONTEXT",
+          "attemptNumber": 1,
+          "contains": [
+            "planner prompt",
+            "vulnerability assessment evidence",
+            "project analyzer evidence",
+            "pom evidence",
+            "dependency resolution evidence",
+            "previous attempt evidence"
+          ],
+          "exists": true,
+          "path": "attempt-1/remediation-planning-context.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Exact compact evidence and prompt context shared with the Remediation Planning Agent.",
+          "referencedLogs": [
+            "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+            "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n",
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+          ],
+          "stage": "REMEDIATION_PLANNING",
+          "status": null
+        }
+      ],
+      "status": "SUCCESS",
+      "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+    },
+    "compactArtifactReads": [
+      {
+        "artifactPath": "manifest.json",
+        "compactStrategy": "MANIFEST_COMPACT",
+        "content": {
+          "acceptedPatchSet": {
+            "patchIds": [],
+            "status": "EMPTY",
+            "vulnerabilityIds": []
+          },
+          "attempts": [
+            {
+              "additionalInvestigationArtifacts": [
+                "attempt-1/investigation-1/additional-investigation-result.json"
+              ],
+              "additionalInvestigationRequests": [
+                {
+                  "artifactId": "additional-investigation-request-attempt-1",
+                  "artifactReferences": {
+                    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+                    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+                  },
+                  "attemptNumber": 1,
+                  "createdBy": "RemediationPlanningAgent",
+                  "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+                  "errors": [],
+                  "evidenceReferences": [
+                    "baseline/vulnerability-assessment-report.json"
+                  ],
+                  "expectedOutcome": "Receive an updated vulnerability assessment report with a 'SUCCESS' status and a list of vulnerabilities to process for remediation.",
+                  "reason": "The provided vulnerability assessment report (artifactReferences.vulnerabilityAssessmentReport) has a 'FAILED' status and contains no identified vulnerabilities. Without a successful and populated vulnerability assessment, remediation planning cannot proceed as there are no specific vulnerabilities to address.",
+                  "requestedTool": "VulnerabilityAssessmentAgent",
+                  "requiredArtifact": "A successful vulnerability assessment report with a list of identified vulnerabilities.",
+                  "schemaVersion": "1.0",
+                  "status": "REQUESTED",
+                  "warnings": [],
+                  "workflowId": "oss-remediation-20260706-162450"
+                }
+              ],
+              "attemptNumber": 1,
+              "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+            }
+          ],
+          "baseline": {
+            "baselineBuildResult": "baseline/baseline-build-result.json",
+            "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+            "repositoryPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository",
+            "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+          },
+          "final": {},
+          "planning": {
+            "agent": "RemediationPlanningAgent",
+            "context": "attempt-1/remediation-planning-context.json",
+            "expectedDecisionTypes": [
+              "PATCH_PLAN",
+              "MANUAL_REVIEW",
+              "REQUEST_ADDITIONAL_EVIDENCE"
+            ],
+            "lastDecision": "attempt-1/additional-evidence-request.json"
+          },
+          "repository": {
+            "baselineCommit": "268c7036baf037135de452654c1e0984ad477dc9",
+            "referenceBranch": "main",
+            "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app"
+          },
+          "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+        },
+        "metadata": {
+          "artifactType": "MANIFEST",
+          "contains": [
+            "workflow status",
+            "repository metadata",
+            "baseline references",
+            "attempt references",
+            "final references",
+            "policy snapshot"
+          ],
+          "exists": true,
+          "path": "manifest.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Workflow index containing repository, baseline, attempt, final, and policy references.",
+          "stage": "WORKFLOW",
+          "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+        },
+        "mode": "compact",
+        "status": "SUCCESS",
+        "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+      },
+      {
+        "artifactPath": "baseline/vulnerability-assessment-report.json",
+        "compactStrategy": "VULNERABILITY_ASSESSMENT_REPORT_COMPACT",
+        "content": {
+          "status": "FAILED",
+          "summary": {
+            "criticalCount": 0,
+            "highCount": 0,
+            "totalInScopeCount": 0
+          },
+          "vulnerabilities": []
+        },
+        "metadata": {
+          "artifactType": "VULNERABILITY_ASSESSMENT_REPORT",
+          "contains": [
+            "vulnerability IDs",
+            "aliases",
+            "severity",
+            "dependency coordinates",
+            "current versions",
+            "fixed versions"
+          ],
+          "exists": true,
+          "path": "baseline/vulnerability-assessment-report.json",
+          "producer": "VulnerabilityAssessmentAgent",
+          "purpose": "OSV vulnerability assessment for the baseline repository.",
+          "stage": "BASELINE",
+          "status": "FAILED"
+        },
+        "mode": "compact",
+        "status": "SUCCESS",
+        "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+      },
+      {
+        "artifactPath": "baseline/project-analyzer-report.json",
+        "compactStrategy": "PROJECT_ANALYZER_REPORT_COMPACT",
+        "content": {
+          "dependencyResolutionEvidence": [
+            {
+              "dependency": "com.example.secureapp:secure-multimodule-springboot-java21",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "org.apache.commons:commons-text",
+              "dependencyPaths": [
+                "[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.10.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.apache.commons:commons-lang3",
+              "dependencyPaths": [
+                "[INFO] |  \\- org.apache.commons:commons-lang3:jar:3.19.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.apache.commons:commons-text",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "3.19.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.json:json",
+              "dependencyPaths": [
+                "[INFO] +- org.json:json:jar:20231013:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "20231013",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-fileupload:commons-fileupload",
+              "dependencyPaths": [
+                "[INFO] \\- commons-fileupload:commons-fileupload:jar:1.6.0:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.6.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-io:commons-io",
+              "dependencyPaths": [
+                "[INFO]    \\- commons-io:commons-io:jar:2.19.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "commons-fileupload:commons-fileupload",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.19.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "com.example.secureapp:task-common",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-domain",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-service",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-service:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-domain",
+              "dependencyPaths": [
+                "[INFO] +- com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-context",
+              "dependencyPaths": [
+                "[INFO] +- org.springframework:spring-context:jar:7.0.7:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-aop",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-aop:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-beans",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-beans:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-core",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-core:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-logging:commons-logging",
+              "dependencyPaths": [
+                "[INFO] |  |  +- commons-logging:commons-logging:jar:1.3.6:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-core",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.3.6",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.jspecify:jspecify",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- org.jspecify:jspecify:jar:1.0.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-core",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-expression",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-expression:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "io.micrometer:micrometer-observation",
+              "dependencyPaths": [
+                "[INFO] |  \\- io.micrometer:micrometer-observation:jar:1.16.5:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.16.5",
+              "scope": "compile"
+            },
+            {
+              "dependency": "io.micrometer:micrometer-commons",
+              "dependencyPaths": [
+                "[INFO] |     \\- io.micrometer:micrometer-commons:jar:1.16.5:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "io.micrometer:micrometer-observation",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.16.5",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter-test",
+              "dependencyPaths": [
+                "[INFO] +- org.springframework.boot:spring-boot-starter-test:jar:4.0.6:test"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter-logging",
+              "dependencyPaths": [
+                "[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "ch.qos.logback:logback-classic",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.5.32",
+              "scope": "test"
+            },
+            {
+              "dependency": "ch.qos.logback:logback-core",
+              "dependencyPaths": [
+                "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 5,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "ch.qos.logback:logback-classic",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.5.32",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.apache.logging.log4j:log4j-to-slf4j",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.25.4",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.apache.logging.log4j:log4j-api",
+              "dependencyPaths": [
+                "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 5,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.apache.logging.log4j:log4j-to-slf4j",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.25.4",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.slf4j:jul-to-slf4j",
+              "dependencyPaths": [
+                "[INFO] |  |  |  \\- org.slf4j:jul-to-slf4j:jar:2.0.17:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.0.17",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-autoconfigure",
+              "dependencyPaths": [
+                "[INFO] |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "jakarta.annotation:jakarta.annotation-api",
+              "dependencyPaths": [
+                "[INFO] |  |  +- jakarta.annotation:jakarta.annotation-api:jar:3.0.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "3.0.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.yaml:snakeyaml",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- org.yaml:snakeyaml:jar:2.5:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.5",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-test",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework.boot:spring-boot-test:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- org.springframework.boot:spring-boot:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-test-autoconfigure",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "com.jayway.jsonpath:json-path",
+              "dependencyPaths": [
+                "[INFO] |  +- com.jayway.jsonpath:json-path:jar:2.10.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.10.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.slf4j:slf4j-api",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- org.slf4j:slf4j-api:jar:2.0.17:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "com.jayway.jsonpath:json-path",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.0.17",
+              "scope": "test"
+            },
+            {
+              "dependency": "jakarta.xml.bind:jakarta.xml.bind-api",
+              "dependencyPaths": [
+                "[INFO] |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.4:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.4",
+              "scope": "test"
+            },
+            {
+              "dependency": "jakarta.activation:jakarta.activation-api",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- jakarta.activation:jakarta.activation-api:jar:2.1.4:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "jakarta.xml.bind:jakarta.xml.bind-api",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.1.4",
+              "scope": "test"
+            },
+            {
+              "dependency": "net.minidev:json-smart",
+              "dependencyPaths": [
+                "[INFO] |  +- net.minidev:json-smart:jar:2.6.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.6.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "net.minidev:accessors-smart",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- net.minidev:accessors-smart:jar:2.6.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "net.minidev:json-smart",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.6.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.ow2.asm:asm",
+              "dependencyPaths": [
+                "[INFO] |  |     \\- org.ow2.asm:asm:jar:9.7.1:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "net.minidev:accessors-smart",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "9.7.1",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.assertj:assertj-core",
+              "dependencyPaths": [
+                "[INFO] |  +- org.assertj:assertj-core:jar:3.27.7:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "3.27.7",
+              "scope": "test"
+            },
+            {
+              "dependency": "net.bytebuddy:byte-buddy",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- net.bytebuddy:byte-buddy:jar:1.17.8:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.assertj:assertj-core",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.17.8",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.awaitility:awaitility",
+              "dependencyPaths": [
+                "[INFO] |  +- org.awaitility:awaitility:jar:4.3.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.3.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.hamcrest:hamcrest",
+              "dependencyPaths": [
+                "[INFO] |  +- org.hamcrest:hamcrest:jar:3.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "3.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.junit.jupiter:junit-jupiter",
+              "dependencyPaths": [
+                "[INFO] |  +- org.junit.jupiter:junit-jupiter:jar:6.0.3:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "6.0.3",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.junit.jupiter:junit-jupiter-api",
+              "dependencyPaths": [
+                "[INFO] |  |  +- org.junit.jupiter:junit-jupiter-api:jar:6.0.3:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.junit.jupiter:junit-jupiter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "6.0.3",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.opentest4j:opentest4j",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- org.opentest4j:opentest4j:jar:1.3.0:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.junit.jupiter:junit-jupiter-api",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.3.0",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.junit.platform:junit-platform-commons",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- org.junit.platform:junit-platform-commons:jar:6.0.3:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.junit.jupiter:junit-jupiter-api",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "6.0.3",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.apiguardian:apiguardian-api",
+              "dependencyPaths": [
+                "[INFO] |  |  |  \\- org.apiguardian:apiguardian-api:jar:1.1.2:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.junit.jupiter:junit-jupiter-api",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.1.2",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.junit.jupiter:junit-jupiter-params",
+              "dependencyPaths": [
+                "[INFO] |  |  +- org.junit.jupiter:junit-jupiter-params:jar:6.0.3:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.junit.jupiter:junit-jupiter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "6.0.3",
+              "scope": "test"
+            }
+          ],
+          "errors": [],
+          "pomEvidence": [
+            {
+              "file": "pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>org.springframework.boot</groupId>\n        <artifactId>spring-boot-starter-parent</artifactId>\n        <version>4.0.6</version>\n        <relativePath/>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 18,
+              "lineStart": 14,
+              "occurrenceCount": 1,
+              "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <packaging>pom</packaging>\n",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 32,
+              "lineStart": 28,
+              "occurrenceCount": 1,
+              "snippet": "\n    <properties>\n        <java.version>21</java.version>\n        <maven.compiler.release>21</maven.compiler.release>\n        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 37,
+              "lineStart": 33,
+              "occurrenceCount": 1,
+              "snippet": "        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>\n\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 38,
+              "lineStart": 34,
+              "occurrenceCount": 1,
+              "snippet": "\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 39,
+              "lineStart": 35,
+              "occurrenceCount": 1,
+              "snippet": "        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>\n",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 42,
+              "lineStart": 38,
+              "occurrenceCount": 1,
+              "snippet": "    </properties>\n\n    <dependencyManagement>\n        <dependencies>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 47,
+              "lineStart": 43,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-common</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 52,
+              "lineStart": 48,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-domain</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 57,
+              "lineStart": 53,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-service</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n        </dependencies>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 65,
+              "lineStart": 61,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>org.apache.commons</groupId>\n            <artifactId>commons-text</artifactId>\n            <version>1.10.0</version>\n        </dependency>\n        <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 70,
+              "lineStart": 66,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>org.json</groupId>\n            <artifactId>json</artifactId>\n            <version>20231013</version>\n        </dependency>\n        <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 75,
+              "lineStart": 71,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>commons-fileupload</groupId>\n            <artifactId>commons-fileupload</artifactId>\n            <version>1.6.0</version>\n        </dependency>\n    </dependencies>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 83,
+              "lineStart": 79,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>org.apache.maven.plugins</groupId>\n                <artifactId>maven-enforcer-plugin</artifactId>\n                <version>${maven.enforcer.version}</version>\n                <executions>\n                    <execution>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 94,
+              "lineStart": 90,
+              "occurrenceCount": 1,
+              "snippet": "                            <rules>\n                                <requireJavaVersion>\n                                    <version>[21,)</version>\n                                    <message>This sample project is intentionally compiled and run on Java 21 or newer.</message>\n                                </requireJavaVersion>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 98,
+              "lineStart": 94,
+              "occurrenceCount": 1,
+              "snippet": "                                </requireJavaVersion>\n                                <requireMavenVersion>\n                                    <version>[3.6.3,)</version>\n                                    <message>Spring Boot Maven builds require Maven 3.6.3 or newer.</message>\n                                </requireMavenVersion>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 133,
+              "lineStart": 129,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.apache.maven.plugins</groupId>\n                        <artifactId>maven-enforcer-plugin</artifactId>\n                        <version>${maven.enforcer.version}</version>\n                        <executions>\n                            <execution>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 164,
+              "lineStart": 160,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 187,
+              "lineStart": 183,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.owasp</groupId>\n                        <artifactId>dependency-check-maven</artifactId>\n                        <version>${owasp.dependency-check.version}</version>\n                        <inherited>false</inherited>\n                        <configuration>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 209,
+              "lineStart": 205,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-common/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-domain/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-service/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-web/pom.xml",
+              "lineEnd": 9,
+              "lineStart": 5,
+              "occurrenceCount": 1,
+              "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <relativePath>../pom.xml</relativePath>\n  </parent>",
+              "snippetType": "POM_SNIPPET"
+            }
+          ],
+          "projectFacts": {
+            "dependencyManagementPresent": true,
+            "isMultiModule": true,
+            "java": {
+              "detectedVersions": [
+                "21"
+              ],
+              "source": "pom-properties"
+            },
+            "mavenProperties": {
+              "cyclonedx.maven.plugin.version": "2.9.1",
+              "java.version": "21",
+              "maven.compiler.release": "21",
+              "maven.enforcer.version": "3.6.2",
+              "owasp.dependency-check.version": "12.2.2",
+              "project.build.sourceEncoding": "UTF-8",
+              "project.reporting.outputEncoding": "UTF-8"
+            },
+            "modules": [
+              {
+                "moduleName": "task-common",
+                "modulePath": "task-common",
+                "pomFile": "task-common/pom.xml"
+              },
+              {
+                "moduleName": "task-domain",
+                "modulePath": "task-domain",
+                "pomFile": "task-domain/pom.xml"
+              },
+              {
+                "moduleName": "task-service",
+                "modulePath": "task-service",
+                "pomFile": "task-service/pom.xml"
+              },
+              {
+                "moduleName": "task-web",
+                "modulePath": "task-web",
+                "pomFile": "task-web/pom.xml"
+              }
+            ],
+            "parentHierarchy": [
+              {
+                "artifactId": "spring-boot-starter-parent",
+                "declaredIn": "pom.xml",
+                "groupId": "org.springframework.boot",
+                "version": "4.0.6"
+              }
+            ],
+            "pomFiles": [
+              "pom.xml",
+              "task-common/pom.xml",
+              "task-domain/pom.xml",
+              "task-service/pom.xml",
+              "task-web/pom.xml"
+            ],
+            "projectType": "MAVEN_SPRING_BOOT",
+            "rootPom": "pom.xml",
+            "springBoot": {
+              "detected": true,
+              "source": "parent",
+              "version": "4.0.6"
+            }
+          },
+          "status": "SUCCESS",
+          "warnings": []
+        },
+        "metadata": {
+          "artifactType": "PROJECT_ANALYZER_REPORT",
+          "contains": [
+            "project facts",
+            "modules",
+            "pom evidence",
+            "dependency resolution evidence",
+            "dependency management"
+          ],
+          "exists": true,
+          "path": "baseline/project-analyzer-report.json",
+          "producer": "ProjectAnalyzerAgent",
+          "purpose": "Maven project structure and dependency ownership evidence.",
+          "referencedLogs": [
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:compile"
+          ],
+          "stage": "BASELINE",
+          "status": "SUCCESS"
+        },
+        "mode": "compact",
+        "status": "SUCCESS",
+        "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+      },
+      {
+        "artifactPath": "attempt-1/remediation-planning-context.json",
+        "compactStrategy": "REMEDIATION_PLANNING_CONTEXT_COMPACT",
+        "content": {
+          "agent": "RemediationPlanningAgent",
+          "artifactReferences": {
+            "additionalInvestigationArtifacts": [],
+            "manifest": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/manifest.json",
+            "previousOutcomeAnalysisSummary": null,
+            "previousPatchApplicationProof": null,
+            "previousPatchPlan": null,
+            "previousValidationResult": null,
+            "projectAnalyzerReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/project-analyzer-report.json",
+            "vulnerabilityAssessmentReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/vulnerability-assessment-report.json"
+          },
+          "attemptNumber": 1,
+          "baselineBuildResult": null,
+          "dependencyResolutionEvidenceSample": [
+            {
+              "dependency": "com.example.secureapp:secure-multimodule-springboot-java21",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "org.apache.commons:commons-text",
+              "dependencyPaths": [
+                "[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.10.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.apache.commons:commons-lang3",
+              "dependencyPaths": [
+                "[INFO] |  \\- org.apache.commons:commons-lang3:jar:3.19.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.apache.commons:commons-text",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "3.19.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.json:json",
+              "dependencyPaths": [
+                "[INFO] +- org.json:json:jar:20231013:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "20231013",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-fileupload:commons-fileupload",
+              "dependencyPaths": [
+                "[INFO] \\- commons-fileupload:commons-fileupload:jar:1.6.0:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.6.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-io:commons-io",
+              "dependencyPaths": [
+                "[INFO]    \\- commons-io:commons-io:jar:2.19.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "commons-fileupload:commons-fileupload",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.19.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "com.example.secureapp:task-common",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-domain",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-service",
+              "dependencyPaths": [
+                "[INFO] com.example.secureapp:task-service:jar:1.0.0-SNAPSHOT"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 0,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "UNKNOWN"
+            },
+            {
+              "dependency": "com.example.secureapp:task-domain",
+              "dependencyPaths": [
+                "[INFO] +- com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0-SNAPSHOT",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-context",
+              "dependencyPaths": [
+                "[INFO] +- org.springframework:spring-context:jar:7.0.7:compile"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-aop",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-aop:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-beans",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-beans:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-core",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-core:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "commons-logging:commons-logging",
+              "dependencyPaths": [
+                "[INFO] |  |  +- commons-logging:commons-logging:jar:1.3.6:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-core",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.3.6",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.jspecify:jspecify",
+              "dependencyPaths": [
+                "[INFO] |  |  \\- org.jspecify:jspecify:jar:1.0.0:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-core",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.0.0",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework:spring-expression",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework:spring-expression:jar:7.0.7:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "7.0.7",
+              "scope": "compile"
+            },
+            {
+              "dependency": "io.micrometer:micrometer-observation",
+              "dependencyPaths": [
+                "[INFO] |  \\- io.micrometer:micrometer-observation:jar:1.16.5:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework:spring-context",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.16.5",
+              "scope": "compile"
+            },
+            {
+              "dependency": "io.micrometer:micrometer-commons",
+              "dependencyPaths": [
+                "[INFO] |     \\- io.micrometer:micrometer-commons:jar:1.16.5:compile"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "io.micrometer:micrometer-observation",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.16.5",
+              "scope": "compile"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter-test",
+              "dependencyPaths": [
+                "[INFO] +- org.springframework.boot:spring-boot-starter-test:jar:4.0.6:test"
+              ],
+              "dependencyType": "DIRECT",
+              "depth": 1,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter",
+              "dependencyPaths": [
+                "[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 2,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-test",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.springframework.boot:spring-boot-starter-logging",
+              "dependencyPaths": [
+                "[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:4.0.6:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 3,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "4.0.6",
+              "scope": "test"
+            },
+            {
+              "dependency": "ch.qos.logback:logback-classic",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.5.32",
+              "scope": "test"
+            },
+            {
+              "dependency": "ch.qos.logback:logback-core",
+              "dependencyPaths": [
+                "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 5,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "ch.qos.logback:logback-classic",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "1.5.32",
+              "scope": "test"
+            },
+            {
+              "dependency": "org.apache.logging.log4j:log4j-to-slf4j",
+              "dependencyPaths": [
+                "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test"
+              ],
+              "dependencyType": "TRANSITIVE",
+              "depth": 4,
+              "evidenceFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/dependency-tree.txt",
+              "introducedBy": "org.springframework.boot:spring-boot-starter-logging",
+              "modulesAffected": [
+                "root"
+              ],
+              "resolvedVersion": "2.25.4",
+              "scope": "test"
+            }
+          ],
+          "logExcerpts": [
+            [
+              "[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed",
+              "[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed",
+              "[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed",
+              "[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed",
+              "[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed",
+              "[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed",
+              "[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed",
+              "[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed",
+              "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.388 s -- in com.example.secureapp.service.InMemoryTaskServiceTest",
+              "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0",
+              "[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed",
+              "[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed",
+              "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.241 s -- in com.example.secureapp.web.TaskApplicationTest",
+              "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0"
+            ]
+          ],
+          "logReferences": [
+            "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log"
+          ],
+          "notes": [
+            "artifactListing, artifactCatalog, and relevantArtifacts are default metadata context; do not request list_workspace_artifacts unless metadata is missing or stale.",
+            "Use compactArtifactReads as the primary readable evidence; each item is produced by read_workspace_artifact default compact mode.",
+            "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required planning decision.",
+            "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence.",
+            "When replanning, review previous outcome analysis and validation evidence before proposing a new plan."
+          ],
+          "pomEvidenceSample": [
+            {
+              "file": "pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>org.springframework.boot</groupId>\n        <artifactId>spring-boot-starter-parent</artifactId>\n        <version>4.0.6</version>\n        <relativePath/>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 18,
+              "lineStart": 14,
+              "occurrenceCount": 1,
+              "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <packaging>pom</packaging>\n",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 32,
+              "lineStart": 28,
+              "occurrenceCount": 1,
+              "snippet": "\n    <properties>\n        <java.version>21</java.version>\n        <maven.compiler.release>21</maven.compiler.release>\n        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 37,
+              "lineStart": 33,
+              "occurrenceCount": 1,
+              "snippet": "        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>\n\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 38,
+              "lineStart": 34,
+              "occurrenceCount": 1,
+              "snippet": "\n        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 39,
+              "lineStart": 35,
+              "occurrenceCount": 1,
+              "snippet": "        <maven.enforcer.version>3.6.2</maven.enforcer.version>\n        <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n    </properties>\n",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 42,
+              "lineStart": 38,
+              "occurrenceCount": 1,
+              "snippet": "    </properties>\n\n    <dependencyManagement>\n        <dependencies>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 47,
+              "lineStart": 43,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-common</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 52,
+              "lineStart": 48,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-domain</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 57,
+              "lineStart": 53,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-service</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n        </dependencies>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 65,
+              "lineStart": 61,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>org.apache.commons</groupId>\n            <artifactId>commons-text</artifactId>\n            <version>1.10.0</version>\n        </dependency>\n        <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 70,
+              "lineStart": 66,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>org.json</groupId>\n            <artifactId>json</artifactId>\n            <version>20231013</version>\n        </dependency>\n        <dependency>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 75,
+              "lineStart": 71,
+              "occurrenceCount": 1,
+              "snippet": "            <groupId>commons-fileupload</groupId>\n            <artifactId>commons-fileupload</artifactId>\n            <version>1.6.0</version>\n        </dependency>\n    </dependencies>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 83,
+              "lineStart": 79,
+              "occurrenceCount": 1,
+              "snippet": "                <groupId>org.apache.maven.plugins</groupId>\n                <artifactId>maven-enforcer-plugin</artifactId>\n                <version>${maven.enforcer.version}</version>\n                <executions>\n                    <execution>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 94,
+              "lineStart": 90,
+              "occurrenceCount": 1,
+              "snippet": "                            <rules>\n                                <requireJavaVersion>\n                                    <version>[21,)</version>\n                                    <message>This sample project is intentionally compiled and run on Java 21 or newer.</message>\n                                </requireJavaVersion>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 98,
+              "lineStart": 94,
+              "occurrenceCount": 1,
+              "snippet": "                                </requireJavaVersion>\n                                <requireMavenVersion>\n                                    <version>[3.6.3,)</version>\n                                    <message>Spring Boot Maven builds require Maven 3.6.3 or newer.</message>\n                                </requireMavenVersion>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 133,
+              "lineStart": 129,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.apache.maven.plugins</groupId>\n                        <artifactId>maven-enforcer-plugin</artifactId>\n                        <version>${maven.enforcer.version}</version>\n                        <executions>\n                            <execution>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 164,
+              "lineStart": 160,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 187,
+              "lineStart": 183,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.owasp</groupId>\n                        <artifactId>dependency-check-maven</artifactId>\n                        <version>${owasp.dependency-check.version}</version>\n                        <inherited>false</inherited>\n                        <configuration>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "pom.xml",
+              "lineEnd": 209,
+              "lineStart": 205,
+              "occurrenceCount": 1,
+              "snippet": "                        <groupId>org.cyclonedx</groupId>\n                        <artifactId>cyclonedx-maven-plugin</artifactId>\n                        <version>${cyclonedx.maven.plugin.version}</version>\n                        <inherited>false</inherited>\n                        <executions>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-common/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-domain/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-service/pom.xml",
+              "lineEnd": 12,
+              "lineStart": 8,
+              "occurrenceCount": 1,
+              "snippet": "        <groupId>com.example.secureapp</groupId>\n        <artifactId>secure-multimodule-springboot-java21</artifactId>\n        <version>1.0.0-SNAPSHOT</version>\n        <relativePath>../pom.xml</relativePath>\n    </parent>",
+              "snippetType": "POM_SNIPPET"
+            },
+            {
+              "file": "task-web/pom.xml",
+              "lineEnd": 9,
+              "lineStart": 5,
+              "occurrenceCount": 1,
+              "snippet": "    <groupId>com.example.secureapp</groupId>\n    <artifactId>secure-multimodule-springboot-java21</artifactId>\n    <version>1.0.0-SNAPSHOT</version>\n    <relativePath>../pom.xml</relativePath>\n  </parent>",
+              "snippetType": "POM_SNIPPET"
+            }
+          ],
+          "previousAttempt": null,
+          "projectAnalyzerKeys": [
+            "dependencyResolutionEvidence",
+            "errors",
+            "pomEvidence",
+            "projectFacts",
+            "status",
+            "warnings"
+          ],
+          "promptAvailable": true,
+          "vulnerabilitiesSample": [],
+          "vulnerabilityAssessmentSummary": {
+            "criticalCount": 0,
+            "highCount": 0,
+            "totalInScopeCount": 0
+          }
+        },
+        "metadata": {
+          "artifactType": "REMEDIATION_PLANNING_CONTEXT",
+          "attemptNumber": 1,
+          "contains": [
+            "planner prompt",
+            "vulnerability assessment evidence",
+            "project analyzer evidence",
+            "pom evidence",
+            "dependency resolution evidence",
+            "previous attempt evidence"
+          ],
+          "exists": true,
+          "path": "attempt-1/remediation-planning-context.json",
+          "producer": "WorkflowOrchestrator",
+          "purpose": "Exact compact evidence and prompt context shared with the Remediation Planning Agent.",
+          "referencedLogs": [
+            "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+            "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n",
+            "ch.qos.logback:logback-classic",
+            "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+            "ch.qos.logback:logback-core",
+            "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+            "org.apache.logging.log4j:log4j-to-slf4j",
+            "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+            "org.apache.logging.log4j:log4j-api",
+            "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+          ],
+          "stage": "REMEDIATION_PLANNING",
+          "status": null
+        },
+        "mode": "compact",
+        "status": "SUCCESS",
+        "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+      }
+    ],
+    "notes": [
+      "artifactListing, artifactCatalog, and relevantArtifacts are default metadata context; do not request list_workspace_artifacts unless metadata is missing or stale.",
+      "Use relevantArtifacts as the first evidence shortlist for the current failure state.",
+      "Use compactArtifactReads as the primary readable evidence; each item is produced by read_workspace_artifact default compact mode.",
+      "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required outcome conclusion.",
+      "When deciding whether the patch plan contributed, compare remediation-patch-plan.json with remediation-planning-context.json when available.",
+      "Do not invent occurrence counts, file paths, log details, fields, dependency paths, or patch results."
+    ],
+    "patchApplicationProof": null,
+    "patchDryRunResult": null,
+    "patchPlan": {
+      "artifactId": "additional-investigation-request-attempt-1",
+      "attemptNumber": 1,
+      "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+      "summary": {},
+      "vulnerabilityDecisions": []
+    },
+    "relevantArtifacts": [
+      {
+        "artifactType": "MANIFEST",
+        "contains": [
+          "workflow status",
+          "repository metadata",
+          "baseline references",
+          "attempt references",
+          "final references",
+          "policy snapshot"
+        ],
+        "exists": true,
+        "path": "manifest.json",
+        "producer": "WorkflowOrchestrator",
+        "purpose": "Workflow index containing repository, baseline, attempt, final, and policy references.",
+        "stage": "WORKFLOW",
+        "status": "ADDITIONAL_INVESTIGATION_COMPLETE"
+      },
+      {
+        "artifactType": "VULNERABILITY_ASSESSMENT_REPORT",
+        "contains": [
+          "vulnerability IDs",
+          "aliases",
+          "severity",
+          "dependency coordinates",
+          "current versions",
+          "fixed versions"
+        ],
+        "exists": true,
+        "path": "baseline/vulnerability-assessment-report.json",
+        "producer": "VulnerabilityAssessmentAgent",
+        "purpose": "OSV vulnerability assessment for the baseline repository.",
+        "stage": "BASELINE",
+        "status": "FAILED"
+      },
+      {
+        "artifactType": "PROJECT_ANALYZER_REPORT",
+        "contains": [
+          "project facts",
+          "modules",
+          "pom evidence",
+          "dependency resolution evidence",
+          "dependency management"
+        ],
+        "exists": true,
+        "path": "baseline/project-analyzer-report.json",
+        "producer": "ProjectAnalyzerAgent",
+        "purpose": "Maven project structure and dependency ownership evidence.",
+        "referencedLogs": [
+          "ch.qos.logback:logback-classic",
+          "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+          "ch.qos.logback:logback-core",
+          "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+          "org.apache.logging.log4j:log4j-to-slf4j",
+          "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+          "org.apache.logging.log4j:log4j-api",
+          "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test",
+          "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile",
+          "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:compile"
+        ],
+        "stage": "BASELINE",
+        "status": "SUCCESS"
+      },
+      {
+        "artifactType": "REMEDIATION_PLANNING_CONTEXT",
+        "attemptNumber": 1,
+        "contains": [
+          "planner prompt",
+          "vulnerability assessment evidence",
+          "project analyzer evidence",
+          "pom evidence",
+          "dependency resolution evidence",
+          "previous attempt evidence"
+        ],
+        "exists": true,
+        "path": "attempt-1/remediation-planning-context.json",
+        "producer": "WorkflowOrchestrator",
+        "purpose": "Exact compact evidence and prompt context shared with the Remediation Planning Agent.",
+        "referencedLogs": [
+          "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/baseline-build.log",
+          "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.252 s]\n[INFO] task-common ........................................ SUCCESS [  3.334 s]\n[INFO] task-domain ........................................ SUCCESS [  0.574 s]\n[INFO] task-service ....................................... SUCCESS [  4.057 s]\n[INFO] task-web ........................................... SUCCESS [ 12.823 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  22.966 s\n[INFO] Finished at: 2026-07-06T16:25:16Z\n[INFO] ------------------------------------------------------------------------\n",
+          "ch.qos.logback:logback-classic",
+          "[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test",
+          "ch.qos.logback:logback-core",
+          "[INFO] |  |  |  |  \\- ch.qos.logback:logback-core:jar:1.5.32:test",
+          "org.apache.logging.log4j:log4j-to-slf4j",
+          "[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.4:test",
+          "org.apache.logging.log4j:log4j-api",
+          "[INFO] |  |  |  |  \\- org.apache.logging.log4j:log4j-api:jar:2.25.4:test"
+        ],
+        "stage": "REMEDIATION_PLANNING",
+        "status": null
+      }
+    ],
+    "validationResult": null,
+    "workspaceArtifactTool": {
+      "availableFunctions": [
+        {
+          "name": "list_workspace_artifacts",
+          "purpose": "Return workspace artifact metadata when artifactListing/artifactCatalog/relevantArtifacts are missing or stale. These metadata fields are already included in the default context."
+        },
+        {
+          "defaultMode": "compact",
+          "name": "read_workspace_artifact",
+          "preferredUsage": "read_workspace_artifact(artifact_path) for compact evidence; read_workspace_artifact(artifact_path, mode='full') only when explicitly needed.",
+          "purpose": "Safely read one workspace artifact by path. Default read is compact. Request mode='full' only when compact evidence is insufficient.",
+          "supportedPublicModes": [
+            "compact",
+            "full"
+          ]
+        }
+      ],
+      "pathSafety": "Artifact reads are restricted to files under workspaceRoot."
+    }
+  },
+  "manifestPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450/manifest.json",
+  "outputContract": {
+    "artifactType": "Outcome Analysis Summary",
+    "requiredBehavior": "Return structured JSON only. Do not create patches, run tools, mutate files, update manifest, or create pull requests.",
+    "requiredEvidenceBackedFields": [
+      "artifactReferences",
+      "evidenceSummary",
+      "planningContextAssessment",
+      "rootCauseAnalysis",
+      "whatChanged",
+      "whatHappened",
+      "whatWeTried"
+    ],
+    "requiredFields": [
+      "artifactId",
+      "artifactReferences",
+      "attemptNumber",
+      "capabilityGaps",
+      "createdBy",
+      "errors",
+      "evidenceSummary",
+      "failureCategory",
+      "newFactsLearned",
+      "planningContextAssessment",
+      "recommendedDisposition",
+      "recommendedFocusForPlanner",
+      "responsibilityArea",
+      "rootCauseAnalysis",
+      "schemaVersion",
+      "status",
+      "warnings",
+      "whatChanged",
+      "whatHappened",
+      "whatWeTried",
+      "workflowId"
+    ]
+  },
+  "prompt": "# Remediation Outcome Analysis Agent Prompt\n\n## Role\n\nYou are the Remediation Outcome Analysis Agent for the ADK OSS vulnerability remediation workflow.\n\nAct as a Principal Java Engineer, Spring Boot Engineer, Maven Expert, OSS Security Engineer, and DevSecOps Engineer reviewing an unsuccessful remediation workflow outcome.\n\nYour responsibility is to analyze persisted workspace artifacts and produce an evidence-backed Outcome Analysis Summary artifact.\n\nYou are an AI reasoning agent. You are not a deterministic execution tool and you are not the remediation planner.\n\n---\n\n## Architectural Boundary\n\nFollow the frozen workflow architecture.\n\n```text\nAI Agents            = reasoning and engineering decisions\nDeterministic Tools  = fact collection and execution\nOrchestrator         = workflow lifecycle, state transitions, retries, manifest updates\nWorkspace            = persisted artifacts\nManifest             = artifact index and workflow status\n```\n\nYour job is failure investigation, root-cause explanation, and disposition recommendation only.\n\nYou must not generate the next remediation patch. The Remediation Planning Agent owns patch planning and replanning.\n\n---\n\n## Inputs\n\nThe orchestrator provides:\n\n```text\nmanifestPath\nartifactReferences\nartifactCatalog\nrelevantArtifacts\ncompactArtifacts\nlegacy compact evidence, when available\n```\n\nUse persisted workspace artifacts as the source of truth.\n\n### Artifact catalog\n\nThe artifact catalog describes available workspace artifacts and metadata such as:\n\n```text\npath\nstage\nartifactType\npurpose\nproducer\ncontains\nexists\nstatus\nreferencedLogs\nattemptNumber, when applicable\n```\n\nThe catalog may include:\n\n```text\nbaseline artifacts\ncurrent attempt artifacts\nprevious attempt artifacts\nfinal delivery artifacts\n```\n\nUse the catalog to understand what data exists and what each artifact contains before reasoning.\n\n### Relevant artifacts\n\nThe relevantArtifacts list is a selected evidence shortlist for the current workflow state.\n\nStart with relevantArtifacts. Use artifactCatalog only when additional context is needed to explain the failure accurately.\n\n### Compact artifacts\n\ncompactArtifacts contains selected artifact contents, usually enough to explain:\n\n```text\nwhat failed\nwhat caused the failure\nwhether the patch plan contributed\nwhether the Planning Agent had enough context\nwhat evidence supports the conclusion\n```\n\n---\n\n## Authority Model\n\nYou may:\n\n```text\n- Review persisted artifact metadata and compact artifact contents\n- Explain what was attempted\n- Explain what changed\n- Explain what failed\n- Explain what caused the failure\n- Determine whether the patch plan, validation rule, repository state, policy, tooling, or external condition contributed\n- Determine whether the Planning Agent had sufficient context by comparing the patch plan with the planning context when available\n- Recommend investigation or planning focus for the next Planning Agent iteration\n```\n\nYou must:\n\n```text\n- Produce structured JSON only\n- Base every conclusion on artifact evidence\n- Preserve artifact references for traceability\n- Distinguish planner gaps from tool limitations, validation failures, repository constraints, policy constraints, and workspace inconsistencies\n- Explain uncertainty when evidence is insufficient\n```\n\nYou must not:\n\n```text\n- Generate patches\n- Recommend exact replacement text\n- Recommend exact next dependency versions\n- Modify repository files\n- Run Maven, OSV, Git, or any tool\n- Update the manifest\n- Create pull requests\n- Invent logs, file paths, line numbers, dependency paths, repository content, or artifact fields\n```\n\n---\n\n## Analysis Method\n\nBefore producing the summary, perform this reasoning sequence:\n\n### 1. Identify the failed workflow point\n\nUse manifest status, current attempt status, and relevant artifact statuses to identify where the workflow stopped or degraded.\n\nPossible workflow points include:\n\n```text\nBASELINE_BUILD\nVULNERABILITY_ASSESSMENT\nPROJECT_ANALYSIS\nREMEDIATION_PLANNING\nPATCH_DRY_RUN\nPATCH_APPLICATION\nVALIDATION\nACCEPTED_PATCH_SET\nOUTCOME_ANALYSIS\nPR_SUMMARY\nPR_CREATION\nMAX_ATTEMPTS\n```\n\n### 2. Select evidence deliberately\n\nUse relevantArtifacts first.\n\nOnly use additional catalog artifacts when needed to answer one of these questions:\n\n```text\nWhat failed?\nWhat artifact proves the failure?\nWhich report or log explains why?\nDid the patch plan contribute?\nDid the planner have enough context?\nWhat should happen next?\n```\n\nDo not blindly summarize every artifact.\n\n### 3. Explain what failed and what caused it\n\nYour explanation must be specific enough to be useful, but generic enough to apply across many failure types.\n\nAvoid vague statements like:\n\n```text\nThe dependency updates caused the build failure.\n```\n\nPrefer evidence-based statements like:\n\n```text\nValidation failed during build validation. The validation artifact identifies the build step as failed, and the referenced build log explains the specific build rule or command failure. Patch application completed before validation, so the failure occurred after repository modification.\n```\n\n### 4. Decide whether the patch plan contributed\n\nIf validation failed after planning or patching, review:\n\n```text\nremediation-patch-plan.json\nremediation-planning-context.json, if available\npatch-dry-run-result.json\npatch-application-proof.json\nvalidation-result.json\nreferenced logs, if available\n```\n\nDetermine whether the patch plan contributed to the failure. Examples of generic planning gaps include:\n\n```text\nThe plan did not account for a project build constraint visible in available evidence.\nThe plan selected a patch that could apply but could not produce a validation-ready state.\nThe plan left an unresolved dependency or conflict that validation requires to be addressed.\nThe plan targeted the wrong ownership location or an incomplete set of editable declarations.\nThe plan was reasonable, but the planning context did not include the evidence needed to foresee the failure.\nThe failure was unrelated to the patch plan and came from an existing repository condition or external condition.\n```\n\nDo not blame the planner unless artifacts support that conclusion.\n\n### 5. Decide whether the Planning Agent had sufficient context\n\nWhen remediation-planning-context.json is available, compare it with the patch plan and failed validation evidence.\n\nYou may conclude one of the following, but only with artifact support:\n\n```text\nPlanner had sufficient context but did not account for it.\nPlanner did not have sufficient context; the missing evidence should be exposed before replanning.\nPlanner context was sufficient for the attempted patch, but validation revealed a new fact.\nInsufficient evidence to determine planner context adequacy.\n```\n\n### 6. Recommend disposition\n\nReturn one user-facing disposition:\n\n```text\nVALIDATION_FAILED\nBASELINE_BUILD_FAILED\nMANUAL_REVIEW_REQUIRED\nPR_CREATION_FAILED\nPULL_REQUEST_CREATED\n```\n\nFor unsuccessful remediation attempts, most outcomes should be one of:\n\n```text\nVALIDATION_FAILED\nBASELINE_BUILD_FAILED\nMANUAL_REVIEW_REQUIRED\nPR_CREATION_FAILED\n```\n\nDo not return OUTCOME_ANALYSIS_COMPLETE as the recommended disposition. That is only an internal milestone.\n\n---\n\n## Failure Categories\n\nChoose the most specific failureCategory supported by evidence.\n\n```text\nPATCH_TEXT_INCORRECT\nPATCH_OCCURRENCE_MISMATCH\nPATCH_FILE_NOT_FOUND\nPATCH_UNSUPPORTED_FILE\nPATCH_SCOPE_UNSAFE\nPATCH_TOOL_LIMITATION\nWORKSPACE_INCONSISTENCY\nARTIFACT_MISSING_OR_CORRUPTED\nCHANGE_SCOPE_FAILURE\nBUILD_FAILURE\nTEST_FAILURE\nOSV_VALIDATION_FAILURE\nNEW_CRITICAL_HIGH_INTRODUCED\nREMAINING_CRITICAL_HIGH_NOT_REMEDIATED\nUNSUPPORTED_REPOSITORY_STRUCTURE\nREQUIRES_JDK_UPGRADE\nREQUIRES_MAJOR_FRAMEWORK_UPGRADE\nREQUIRES_SOURCE_CODE_CHANGE\nREQUIRES_PLUGIN_OR_BUILD_LOGIC_CHANGE\nPOLICY_CONSTRAINT\nPR_CREATION_FAILURE\nMAX_ATTEMPTS_REACHED\nWORKFLOW_FAILURE\nUNKNOWN\n```\n\nIf several categories apply, choose the primary category that best explains why the attempt cannot be accepted, and include secondary findings in newFactsLearned or warnings.\n\n---\n\n## Responsibility Areas\n\nChoose one responsibilityArea:\n\n```text\nPLANNER_DECISION\nPATCH_TOOL\nVALIDATION\nREPOSITORY_STRUCTURE\nWORKSPACE_STATE\nPOLICY_CONSTRAINT\nPR_DELIVERY\nEXTERNAL_DEPENDENCY\nUNKNOWN\n```\n\nUse PLANNER_DECISION only when artifact evidence shows a planning gap or unsupported planning assumption.\n\nUse VALIDATION when the patch applied but validation artifacts explain the failure.\n\nUse REPOSITORY_STRUCTURE or POLICY_CONSTRAINT when the required remediation cannot be safely automated within current dependency-only rules.\n\nUse WORKSPACE_STATE when artifacts are missing, inconsistent, or corrupted.\n\nUse UNKNOWN when evidence is insufficient.\n\n---\n\n## Required Output Fields\n\nReturn JSON only. Do not include markdown, prose, or code fences.\n\nYour output must include:\n\n```text\nschemaVersion\nartifactId\nworkflowId\ncreatedBy\nstatus\nattemptNumber\nfailureCategory\nresponsibilityArea\nrecommendedDisposition\nwhatWeTried\nwhatChanged\nwhatHappened\nrootCauseAnalysis\nplanningContextAssessment\nnewFactsLearned\nrecommendedFocusForPlanner\ncapabilityGaps\nartifactReferences\nevidenceSummary\nerrors\nwarnings\n```\n\n---\n\n## Field Requirements\n\n### whatWeTried\n\nSummarize the attempted remediation without creating a new plan.\n\nInclude:\n\n```text\nattemptNumber\npatch plan path\nvulnerability IDs attempted\ndependency coordinates involved\nfiles targeted\nchange types attempted\n```\n\n### whatChanged\n\nSummarize observed repository changes from patch proof or dry-run result.\n\nInclude:\n\n```text\nrepositoryModified\nchanged files\napplied patch IDs\nfailed patch IDs\ndiff artifact reference, if available\nsummary\n```\n\nIf dry run failed before modification, explicitly state that no repository modification occurred.\n\n### whatHappened\n\nExplain the failed stage using persisted evidence.\n\nInclude:\n\n```text\nfailedStage\nfailureSummary\nevidenceReferences\nlogReferences\n```\n\n### rootCauseAnalysis\n\nExplain the most likely root cause with evidence.\n\nInclude:\n\n```text\nprimaryCause\ncontributingFactors\ncausedByPatchPlan: true | false | unknown\nconfidence: HIGH | MEDIUM | LOW\nsupportingEvidence\n```\n\n### planningContextAssessment\n\nExplain whether the Planning Agent had enough context.\n\nInclude:\n\n```text\nplanningContextAvailable: true | false\nsufficientContext: true | false | unknown\nassessment\nsupportingEvidence\n```\n\n### newFactsLearned\n\nList concise facts learned from the failure. Every fact must include evidenceReferences.\n\n### recommendedFocusForPlanner\n\nProvide guidance to the Planning Agent without producing the next patch.\n\nAllowed style:\n\n```text\nReview build validation evidence before replanning.\nRe-check editable POM ownership using project analyzer evidence.\nAccount for the repository constraint identified by validation evidence.\nRequest targeted deterministic evidence if the current catalog does not contain enough information.\nAvoid repeating the same unsupported assumption.\n```\n\nForbidden style:\n\n```text\nReplace this exact text with this exact text.\nUpgrade dependency X to version Y.\nCreate a PR.\nModify Java source.\n```\n\n### evidenceSummary\n\nFor each important conclusion, include a statement and artifact-backed support.\n\nExample shape:\n\n```json\n{\n  \"statement\": \"Validation failed during build validation.\",\n  \"supports\": [\n    \"attempt-1/validation-result.json#/status\",\n    \"attempt-1/validation-result.json#/buildResult\"\n  ]\n}\n```\n\n---\n\n## Quality Gate\n\nBefore returning output, verify:\n\n```text\n- JSON is valid.\n- recommendedDisposition is user-facing and is not OUTCOME_ANALYSIS_COMPLETE.\n- Every conclusion is supported by artifact evidence.\n- The failed workflow point is identified from artifact status, not guessed.\n- The root-cause explanation answers what failed and what caused it.\n- The analysis states whether the patch plan contributed, or says evidence is insufficient.\n- If planning contribution is claimed, planning context or patch plan evidence supports it.\n- If planning contribution is not claimed, evidence supports the alternate cause.\n- recommendedFocusForPlanner addresses the root cause without generating a patch.\n- No exact replacement text or exact next dependency version is recommended.\n- No repository mutation, tool execution, manifest update, or PR creation is requested.\n```\n\n---\n\n## Required JSON Shape\n\n```json\n{\n  \"schemaVersion\": \"1.0\",\n  \"artifactId\": \"outcome-analysis-summary-attempt-1\",\n  \"workflowId\": \"oss-remediation-mvp\",\n  \"createdBy\": \"RemediationOutcomeAnalysisAgent\",\n  \"status\": \"COMPLETED\",\n  \"attemptNumber\": 1,\n  \"failureCategory\": \"BUILD_FAILURE\",\n  \"responsibilityArea\": \"VALIDATION\",\n  \"recommendedDisposition\": \"VALIDATION_FAILED\",\n  \"whatWeTried\": {\n    \"summary\": \"Describe the attempted remediation using patch plan evidence.\",\n    \"patchPlan\": \"attempt-1/remediation-patch-plan.json\",\n    \"vulnerabilityIds\": [],\n    \"dependencies\": [],\n    \"targetedFiles\": [],\n    \"changeTypes\": []\n  },\n  \"whatChanged\": {\n    \"repositoryModified\": true,\n    \"changedFiles\": [],\n    \"appliedPatchIds\": [],\n    \"failedPatchIds\": [],\n    \"diffArtifact\": null,\n    \"summary\": \"Describe observed repository changes using patch proof evidence.\"\n  },\n  \"whatHappened\": {\n    \"failedStage\": \"BUILD_VALIDATION\",\n    \"failureSummary\": \"Describe the failed stage using validation evidence.\",\n    \"evidenceReferences\": [],\n    \"logReferences\": []\n  },\n  \"rootCauseAnalysis\": {\n    \"primaryCause\": \"Describe the primary cause supported by artifacts.\",\n    \"contributingFactors\": [],\n    \"causedByPatchPlan\": \"unknown\",\n    \"confidence\": \"MEDIUM\",\n    \"supportingEvidence\": []\n  },\n  \"planningContextAssessment\": {\n    \"planningContextAvailable\": false,\n    \"sufficientContext\": \"unknown\",\n    \"assessment\": \"Describe whether the planner had enough context, if determinable.\",\n    \"supportingEvidence\": []\n  },\n  \"newFactsLearned\": [],\n  \"recommendedFocusForPlanner\": [],\n  \"capabilityGaps\": [],\n  \"artifactReferences\": {},\n  \"evidenceSummary\": [],\n  \"errors\": [],\n  \"warnings\": []\n}\n```\n",
+  "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-162450"
+}

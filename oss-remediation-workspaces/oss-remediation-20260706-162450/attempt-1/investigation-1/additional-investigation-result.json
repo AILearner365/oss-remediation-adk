@@ -1,0 +1,35 @@
+{
+  "artifactId": "additional-investigation-1-1",
+  "attemptNumber": 1,
+  "investigationNumber": 1,
+  "requestedTool": "VulnerabilityAssessmentAgent",
+  "result": {
+    "failureCode": "UNSUPPORTED_INVESTIGATION_TOOL",
+    "message": "Requested deterministic investigation tool is not registered with the orchestrator.",
+    "request": {
+      "artifactId": "additional-investigation-request-attempt-1",
+      "artifactReferences": {
+        "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+        "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+      },
+      "attemptNumber": 1,
+      "createdBy": "RemediationPlanningAgent",
+      "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+      "errors": [],
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json"
+      ],
+      "expectedOutcome": "Receive an updated vulnerability assessment report with a 'SUCCESS' status and a list of vulnerabilities to process for remediation.",
+      "reason": "The provided vulnerability assessment report (artifactReferences.vulnerabilityAssessmentReport) has a 'FAILED' status and contains no identified vulnerabilities. Without a successful and populated vulnerability assessment, remediation planning cannot proceed as there are no specific vulnerabilities to address.",
+      "requestedTool": "VulnerabilityAssessmentAgent",
+      "requiredArtifact": "A successful vulnerability assessment report with a list of identified vulnerabilities.",
+      "schemaVersion": "1.0",
+      "status": "REQUESTED",
+      "warnings": [],
+      "workflowId": "oss-remediation-20260706-162450"
+    },
+    "requestedTool": "VulnerabilityAssessmentAgent",
+    "status": "FAILED"
+  },
+  "status": "FAILED"
+}
