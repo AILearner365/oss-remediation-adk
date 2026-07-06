@@ -34,16 +34,11 @@ def build_final_response_summary(
     display_status: str,
     fallback_message: str = "",
 ) -> dict[str, Any]:
-    """Build a consistent, status-driven ADK Web summary model.
-
-    The workflow and agents produce detailed artifacts. This helper normalizes
-    those artifacts into a predictable user-facing summary structure. It does not
-    classify failures or change workflow state; it only renders the current
-    manifest and persisted artifacts into a stable response contract.
-    """
+    """Build a consistent, status-driven ADK Web summary model."""
     workspace = Path(workspace_root)
     internal_status = str(manifest.get("status") or "UNKNOWN").upper()
     status = str(display_status or internal_status).upper()
+
     outcome = _latest_outcome_analysis(manifest, workspace)
     latest_attempt = _latest_attempt(manifest)
     patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or (manifest.get("planning") or {}).get("lastDecision"))
@@ -56,6 +51,8 @@ def build_final_response_summary(
         return _internal_failure_summary(manifest, workspace, internal_status, patch_plan, validation, outcome, fallback_message)
     if status == "PULL_REQUEST_CREATED":
         return _pull_request_created_summary(manifest, patch_plan, validation, pr_summary, workspace)
+    if status == "VALIDATION_SUCCEEDED":
+        return _validation_succeeded_summary(manifest, validation, patch_plan, workspace)
     if status == "VALIDATION_FAILED":
         return _validation_failed_summary(manifest, outcome, validation, patch_plan, workspace, fallback_message)
     if status == "PR_CREATION_FAILED":
@@ -64,9 +61,6 @@ def build_final_response_summary(
         return _baseline_build_failed_summary(manifest, baseline_build, workspace, fallback_message)
     if status == "MANUAL_REVIEW_REQUIRED":
         return _manual_review_required_summary(manifest, outcome, patch_plan, pr_summary, workspace, fallback_message)
-    if status == "VALIDATION_SUCCEEDED":
-        return _validation_succeeded_summary(manifest, validation, patch_plan, workspace)
-
     return _generic_summary(manifest, workspace, display_status, fallback_message)
 
 
@@ -81,39 +75,28 @@ def _pull_request_created_summary(
     pull_request = final.get("pullRequest") or {}
     pr_type = str(final.get("prType") or "FULL_REMEDIATION")
     counts = _patch_plan_counts(patch_plan)
-    accepted = manifest.get("acceptedPatchSet") or {}
-    accepted_count = len(accepted.get("vulnerabilityIds", []) or accepted.get("patchIds", []) or [])
-    validated_change_count = accepted_count or counts["patchDecisionCount"]
-    partial = pr_type == "PARTIAL_REMEDIATION" or counts["manualReviewCount"] > 0
-    dependency_summary = _patch_dependency_summary(patch_plan)
-    severity_summary = _severity_summary(patch_plan, decision_type="PATCH")
-    manual_severity_summary = _severity_summary(patch_plan, decision_type="MANUAL_REVIEW")
-    pr_reference = _pull_request_reference(pull_request)
+    accepted_count = _accepted_count(manifest)
+    resolved_count = accepted_count or counts["patchDecisionCount"]
+    pending_count = counts["manualReviewCount"]
+    partial = pr_type == "PARTIAL_REMEDIATION" or pending_count > 0
 
     outcome_label = "Partial Remediation Draft PR Created" if partial else "Draft Pull Request Created"
-    summary_parts = [
-        f"{'Partial remediation completed' if partial else 'Remediation completed'} successfully: validation passed and {pr_reference} was created.",
-        f"The PR contains {validated_change_count} validated dependency-only change(s) from {counts['patchDecisionCount']} automated patch decision(s).",
-    ]
-    if severity_summary:
-        summary_parts.append(f"Resolved vulnerability severity mix: {severity_summary}.")
-    if dependency_summary:
-        summary_parts.append(f"Updated dependencies include: {dependency_summary}.")
-    if counts["manualReviewCount"]:
-        manual_text = f"{counts['manualReviewCount']} item(s) remain for manual review"
-        if manual_severity_summary:
-            manual_text += f" ({manual_severity_summary})"
-        summary_parts.append(f"{manual_text}; these were intentionally left outside the validated automated PR scope.")
-    else:
-        summary_parts.append("No manual-review items were reported in the final patch plan.")
+    outcome_summary = _success_outcome_summary(
+        resolved_count=resolved_count,
+        resolved_severity=_severity_summary(patch_plan, "PATCH"),
+        pending_count=pending_count,
+        pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW"),
+        validation_label="Passed",
+        delivery_label="Partial Draft PR created for validated fixes" if partial else "Draft PR created",
+    )
 
     return _summary_model(
         workflow_outcome=outcome_label,
-        outcome_summary=" ".join(summary_parts),
+        outcome_summary=outcome_summary,
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, partial, dependency_summary),
+        planning_assessment=_success_planning_assessment(counts, partial),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
-        recommended_next_step="Review the Draft PR, verify the validated dependency-only changes, and handle any remaining manual review items before merge.",
+        recommended_next_step="Review the Draft PR and verify the validated dependency-only changes before merge. Handle pending manual-review items separately if any remain.",
         pr_status=_pr_status_created(pull_request),
     )
 
@@ -125,23 +108,20 @@ def _validation_succeeded_summary(
     workspace: Path,
 ) -> dict[str, Any]:
     counts = _patch_plan_counts(patch_plan)
-    accepted = manifest.get("acceptedPatchSet") or {}
-    accepted_count = len(accepted.get("vulnerabilityIds", []) or accepted.get("patchIds", []) or [])
-    dependency_summary = _patch_dependency_summary(patch_plan)
-    severity_summary = _severity_summary(patch_plan, decision_type="PATCH")
-    summary_parts = [
-        f"Validation succeeded for {accepted_count or counts['patchDecisionCount']} dependency-only change(s).",
-        "The accepted patch set is ready for PR policy handling.",
-    ]
-    if severity_summary:
-        summary_parts.append(f"Validated vulnerability severity mix: {severity_summary}.")
-    if dependency_summary:
-        summary_parts.append(f"Validated dependency updates include: {dependency_summary}.")
+    resolved_count = _accepted_count(manifest) or counts["patchDecisionCount"]
+    pending_count = counts["manualReviewCount"]
     return _summary_model(
         workflow_outcome="Validation Succeeded",
-        outcome_summary=" ".join(summary_parts),
+        outcome_summary=_success_outcome_summary(
+            resolved_count=resolved_count,
+            resolved_severity=_severity_summary(patch_plan, "PATCH"),
+            pending_count=pending_count,
+            pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW"),
+            validation_label="Passed",
+            delivery_label="PR handling pending or policy-controlled",
+        ),
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, counts["manualReviewCount"] > 0, dependency_summary),
+        planning_assessment=_success_planning_assessment(counts, pending_count > 0),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Proceed with PR creation policy handling or review the accepted patch set if manual approval is required.",
         pr_status="Draft PR has not been created yet; validation completed successfully and PR handling is pending or policy-controlled.",
@@ -159,13 +139,11 @@ def _validation_failed_summary(
     what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
     planning = outcome.get("planningContextAssessment") if isinstance(outcome.get("planningContextAssessment"), dict) else {}
-
     failed_stage = what_happened.get("failedStage") or (validation.get("summary") or {}).get("failedStage") or "VALIDATION"
     failure_summary = what_happened.get("failureSummary") or (validation.get("summary") or {}).get("failureSummary") or fallback_message or "Validation failed."
     primary_cause = root_cause.get("primaryCause") or failure_summary
     planning_assessment = planning.get("assessment") or _planning_assessment_from_counts(patch_plan)
     next_step = _first_text(outcome.get("recommendedFocusForPlanner")) or "Review validation artifacts, update the remediation plan, and rerun validation."
-
     return _summary_model(
         workflow_outcome="Validation Failed",
         outcome_summary=f"{str(failed_stage).replace('_', ' ').title()}: {failure_summary}",
@@ -186,17 +164,9 @@ def _pr_creation_failed_summary(
     fallback_message: str,
 ) -> dict[str, Any]:
     final = manifest.get("final") or {}
-    reason = (
-        final.get("prCreationFailure")
-        or publication.get("failureCode")
-        or publication.get("error")
-        or publication.get("reason")
-        or fallback_message
-        or "PR creation failed."
-    )
+    reason = final.get("prCreationFailure") or publication.get("failureCode") or publication.get("error") or publication.get("reason") or fallback_message or "PR creation failed."
     validated = (manifest.get("acceptedPatchSet") or {}).get("status") == "VALIDATED" or validation.get("status") == "SUCCESS"
     summary = "Validation succeeded, but Draft PR creation failed." if validated else "Draft PR creation failed before a validated PR-ready state was confirmed."
-
     return _summary_model(
         workflow_outcome="PR Creation Failed",
         outcome_summary=summary,
@@ -208,12 +178,7 @@ def _pr_creation_failed_summary(
     )
 
 
-def _baseline_build_failed_summary(
-    manifest: dict[str, Any],
-    baseline_build: dict[str, Any],
-    workspace: Path,
-    fallback_message: str,
-) -> dict[str, Any]:
+def _baseline_build_failed_summary(manifest: dict[str, Any], baseline_build: dict[str, Any], workspace: Path, fallback_message: str) -> dict[str, Any]:
     summary = (baseline_build.get("summary") or {}).get("failureSummary") or baseline_build.get("failureSummary") or fallback_message or "Baseline build failed before remediation could safely proceed."
     return _summary_model(
         workflow_outcome="Baseline Build Failed",
@@ -239,17 +204,14 @@ def _manual_review_required_summary(
     planning = outcome.get("planningContextAssessment") if isinstance(outcome.get("planningContextAssessment"), dict) else {}
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
     pr_policy = final.get("prCreationPolicy") or {}
-
     if pr_policy.get("mode") == "MANUAL_APPROVAL":
         summary = "Manual approval is required by PR creation policy after summary generation."
         pr_status = "Draft PR was not created automatically because policy requires manual approval."
     else:
         summary = fallback_message or "Manual review is required before the workflow can create a validated Draft PR."
         pr_status = "Draft PR was not created because manual review is required."
-
     if counts["manualReviewCount"]:
         summary += f" {counts['manualReviewCount']} dependency decision(s) require manual review."
-
     return _summary_model(
         workflow_outcome="Manual Review Required",
         outcome_summary=summary,
@@ -273,37 +235,44 @@ def _internal_failure_summary(
     label = _INTERNAL_FAILURE_LABELS.get(internal_status, internal_status.replace("_", " ").title())
     stage = _INTERNAL_FAILURE_STAGE.get(internal_status, "Workflow")
     reason = _internal_failure_reason(manifest, internal_status, validation, outcome, fallback_message)
-    recommended_next_step = _internal_failure_next_step(internal_status)
-    planning_assessment = _internal_failure_planning_assessment(internal_status, patch_plan)
-
     return _summary_model(
         workflow_outcome=label,
         outcome_summary=f"Workflow stopped during {stage}. {reason}",
         root_cause=reason,
-        planning_assessment=planning_assessment,
+        planning_assessment=_internal_failure_planning_assessment(internal_status, patch_plan),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=bool(outcome)),
-        recommended_next_step=recommended_next_step,
+        recommended_next_step=_internal_failure_next_step(internal_status),
         pr_status=_internal_failure_pr_status(internal_status),
     )
 
 
-def _internal_failure_reason(
-    manifest: dict[str, Any],
-    internal_status: str,
-    validation: dict[str, Any],
-    outcome: dict[str, Any],
-    fallback_message: str,
+def _success_outcome_summary(
+    resolved_count: int,
+    resolved_severity: str,
+    pending_count: int,
+    pending_severity: str,
+    validation_label: str,
+    delivery_label: str,
 ) -> str:
+    resolved_severity_text = resolved_severity or "severity not available in patch plan"
+    pending_severity_text = pending_severity or ("none" if pending_count == 0 else "severity not available in patch plan")
+    return "\n".join(
+        [
+            f"- Resolved: {resolved_count} vulnerability item(s)",
+            f"- Resolved severity: {resolved_severity_text}",
+            f"- Pending manual review: {pending_count} item(s)",
+            f"- Pending severity: {pending_severity_text}",
+            f"- Validation: {validation_label}",
+            f"- Delivery: {delivery_label}",
+        ]
+    )
+
+
+def _internal_failure_reason(manifest: dict[str, Any], internal_status: str, validation: dict[str, Any], outcome: dict[str, Any], fallback_message: str) -> str:
     what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
     validation_summary = validation.get("summary") if isinstance(validation.get("summary"), dict) else {}
-    reason = (
-        root_cause.get("primaryCause")
-        or what_happened.get("failureSummary")
-        or validation_summary.get("failureSummary")
-        or (manifest.get("final") or {}).get("prCreationFailure")
-        or fallback_message
-    )
+    reason = root_cause.get("primaryCause") or what_happened.get("failureSummary") or validation_summary.get("failureSummary") or (manifest.get("final") or {}).get("prCreationFailure") or fallback_message
     if reason:
         return str(reason)
     defaults = {
@@ -357,15 +326,7 @@ def _generic_summary(manifest: dict[str, Any], workspace: Path, display_status: 
     )
 
 
-def _summary_model(
-    workflow_outcome: str,
-    outcome_summary: str,
-    root_cause: str,
-    planning_assessment: str,
-    evidence_reviewed: list[dict[str, str]],
-    recommended_next_step: str,
-    pr_status: str,
-) -> dict[str, Any]:
+def _summary_model(workflow_outcome: str, outcome_summary: str, root_cause: str, planning_assessment: str, evidence_reviewed: list[dict[str, str]], recommended_next_step: str, pr_status: str) -> dict[str, Any]:
     return {
         "workflowOutcome": workflow_outcome or "Unknown",
         "outcomeSummary": outcome_summary or "No summary was available.",
@@ -377,27 +338,17 @@ def _summary_model(
     }
 
 
-def _success_planning_assessment(counts: dict[str, int], partial: bool, dependency_summary: str = "") -> str:
+def _success_planning_assessment(counts: dict[str, int], partial: bool) -> str:
     if partial:
-        message = (
-            "The planning agent separated automatable dependency-only changes from manual-review items. "
-            f"{counts['patchDecisionCount']} patch decision(s) were validated while {counts['manualReviewCount']} item(s) remain outside the automated scope."
-        )
-    else:
-        message = f"The planning agent produced {counts['patchDecisionCount']} dependency-only patch decision(s) that passed validation."
-    if dependency_summary:
-        message += f" Validated updates: {dependency_summary}."
-    return message
+        return f"The planning agent separated automatable fixes from manual-review items: {counts['patchDecisionCount']} patch decision(s) validated and {counts['manualReviewCount']} item(s) pending manual review."
+    return f"The planning agent produced {counts['patchDecisionCount']} dependency-only patch decision(s) that passed validation."
 
 
 def _planning_assessment_from_counts(patch_plan: dict[str, Any]) -> str:
     counts = _patch_plan_counts(patch_plan)
     if not counts["totalDecisionCount"]:
         return "No patch-plan decision details were available."
-    return (
-        f"The remediation plan included {counts['patchDecisionCount']} patch decision(s) and "
-        f"{counts['manualReviewCount']} manual-review decision(s). Review validation and outcome artifacts to decide whether replanning is required."
-    )
+    return f"The remediation plan included {counts['patchDecisionCount']} patch decision(s) and {counts['manualReviewCount']} manual-review decision(s). Review validation and outcome artifacts to decide whether replanning is required."
 
 
 def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
@@ -418,80 +369,21 @@ def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
     }
 
 
-def _patch_dependency_summary(patch_plan: dict[str, Any], limit: int = 5) -> str:
-    decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
-    updates: list[str] = []
-    for decision in decisions or []:
-        if str(decision.get("decision") or "").upper() != "PATCH":
-            continue
-        coordinate = _dependency_coordinate(decision)
-        fixed_version = _first_present(
-            decision,
-            "fixedVersionSelected",
-            "fixedVersion",
-            "targetVersion",
-            "recommendedVersion",
-            "newVersion",
-            "toVersion",
-        )
-        if coordinate and fixed_version:
-            text = f"{coordinate} -> {fixed_version}"
-        else:
-            text = coordinate or str(decision.get("vulnerabilityId") or decision.get("patchId") or "").strip()
-        if text and text not in updates:
-            updates.append(text)
-    if not updates:
-        return ""
-    suffix = "" if len(updates) <= limit else f", and {len(updates) - limit} more"
-    return ", ".join(updates[:limit]) + suffix
-
-
-def _dependency_coordinate(decision: dict[str, Any]) -> str:
-    for key in ("dependencyCoordinate", "dependency", "targetDependency", "currentDependency", "gav", "packageName"):
-        value = decision.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-        if isinstance(value, dict):
-            coordinate = _coordinate_from_dict(value)
-            if coordinate:
-                return coordinate
-    coordinate = _coordinate_from_dict(decision)
-    return coordinate
-
-
-def _coordinate_from_dict(value: dict[str, Any]) -> str:
-    group = value.get("groupId") or value.get("group")
-    artifact = value.get("artifactId") or value.get("artifact") or value.get("name")
-    if group and artifact:
-        return f"{group}:{artifact}"
-    return str(artifact or group or "").strip()
-
-
 def _severity_summary(patch_plan: dict[str, Any], decision_type: str) -> str:
     decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
     counts: dict[str, int] = {}
     target = decision_type.upper()
     for decision in decisions or []:
         current_type = str(decision.get("decision") or "").upper()
-        if target == "MANUAL_REVIEW":
-            matches = current_type == "MANUAL_REVIEW" or bool(decision.get("manualReviewCategory"))
-        else:
-            matches = current_type == target
+        matches = current_type == target or (target == "MANUAL_REVIEW" and bool(decision.get("manualReviewCategory")))
         if not matches:
             continue
-        severity = str(decision.get("severity") or decision.get("maxSeverity") or decision.get("cvssSeverity") or "UNKNOWN").upper()
+        severity = str(decision.get("severity") or decision.get("maxSeverity") or decision.get("cvssSeverity") or "").upper()
+        if not severity or severity == "UNKNOWN":
+            continue
         counts[severity] = counts.get(severity, 0) + 1
-    ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
-    parts = [f"{counts[level]} {level.lower()}" for level in ordered if counts.get(level)]
-    return ", ".join(parts)
-
-
-def _first_present(payload: dict[str, Any], *keys: str) -> str:
-    for key in keys:
-        value = payload.get(key)
-        if value is not None and str(value).strip():
-            return str(value).strip()
-    return ""
+    ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    return ", ".join(f"{counts[level]} {level.lower()}" for level in ordered if counts.get(level))
 
 
 def _safe_int(value: Any) -> int:
@@ -501,11 +393,9 @@ def _safe_int(value: Any) -> int:
         return 0
 
 
-def _pull_request_reference(pull_request: dict[str, Any]) -> str:
-    url = str(pull_request.get("prUrl") or "").strip()
-    if url:
-        return "the Draft PR"
-    return "a Draft PR"
+def _accepted_count(manifest: dict[str, Any]) -> int:
+    accepted = manifest.get("acceptedPatchSet") or {}
+    return len(accepted.get("vulnerabilityIds", []) or accepted.get("patchIds", []) or [])
 
 
 def _pr_status_created(pull_request: dict[str, Any]) -> str:
@@ -539,14 +429,12 @@ def _evidence_reviewed(manifest: dict[str, Any], workspace: Path, include_outcom
     add("Project Analyzer Report", baseline.get("projectAnalyzerReport"))
     add("Planning Context", planning.get("context"))
     add("Remediation Patch Plan", planning.get("lastDecision"))
-
     for attempt in manifest.get("attempts", []) or []:
         add("Patch Dry Run Result", attempt.get("patchDryRunResult"))
         add("Patch Application Proof", attempt.get("patchApplicationProof"))
         add("Validation Result", attempt.get("validationResult"))
         if include_outcome:
             add("Outcome Analysis Summary", attempt.get("outcomeAnalysisSummary"))
-
     add("PR Summary", final.get("prSummary"))
     add("Pull Request Publication", final.get("pullRequestPublication"))
     return items
