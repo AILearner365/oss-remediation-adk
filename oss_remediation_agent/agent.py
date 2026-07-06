@@ -97,6 +97,8 @@ def run_remediation_planning_stage(
         attempt_number=attempt_number,
         planning_agent_output=planning_agent_output,
     )
+    if result.get("artifactPath"):
+        _record_attempt_planning_metadata(orchestrator, attempt_number, result)
     return _stage_result(
         stage="Remediation Planning",
         workspace_root=workspace_root,
@@ -120,7 +122,7 @@ def run_patch_validation_stage(
     """Stage 5: route the plan, apply dependency patches, and validate."""
     orchestrator = _orchestrator(workspace_root, policy_path)
     manifest = orchestrator.manifest_store.load()
-    planning_ref = (manifest.get("planning") or {}).get("lastDecision")
+    planning_ref = _planning_ref_for_attempt(manifest, attempt_number) or (manifest.get("planning") or {}).get("lastDecision")
     if not planning_ref:
         return _stage_result(
             stage="Patch and Validation",
@@ -196,10 +198,10 @@ def run_outcome_analysis_stage(
         outcome_path = orchestrator._resolve_workspace_ref(str(outcome_ref))
         result = _read_json(outcome_path)
         result.setdefault("artifactPath", str(outcome_path))
-        progress = [{"step": "outcome_analysis", "status": result.get("status", "SUCCESS"), "artifactPath": outcome_ref}]
+        progress = [{"step": f"outcome_analysis_attempt_{attempt_number}", "status": result.get("status", "SUCCESS"), "artifactPath": outcome_ref}]
         return _stage_result("Outcome Analysis", workspace_root, result, progress)
 
-    patch_plan_ref = (attempt or {}).get("patchPlan") or (manifest.get("planning") or {}).get("lastDecision")
+    patch_plan_ref = (attempt or {}).get("patchPlan") or _planning_ref_for_attempt(manifest, attempt_number) or (manifest.get("planning") or {}).get("lastDecision")
     if not patch_plan_ref:
         result = {"status": "SKIPPED", "reason": "No patch plan artifact is available for outcome analysis."}
         return _stage_result("Outcome Analysis", workspace_root, result, [{"step": "outcome_analysis", "status": "SKIPPED"}])
@@ -218,8 +220,105 @@ def run_outcome_analysis_stage(
         "Outcome Analysis",
         workspace_root,
         result,
-        [{"step": "outcome_analysis", "status": result.get("status", "SUCCESS"), "artifactPath": outcome_ref}],
+        [{"step": f"outcome_analysis_attempt_{attempt_number}", "status": result.get("status", "SUCCESS"), "artifactPath": outcome_ref}],
     )
+
+
+def run_replanning_loop_stage(
+    workspace_root: str,
+    policy_path: str | None = None,
+) -> dict[str, Any]:
+    """Stage 6b: continue bounded replanning after validation failure.
+
+    ADK Web runs fixed sequential subagents. This stage bridges that fixed graph
+    with the deterministic retry policy by continuing attempts after Stage 6 has
+    produced outcome analysis for a failed validation attempt.
+    """
+    orchestrator = _orchestrator(workspace_root, policy_path)
+    manifest = orchestrator.manifest_store.load()
+    progress: list[dict[str, Any]] = []
+    accepted = manifest.get("acceptedPatchSet") or {}
+    max_attempts = _policy_max_attempts(manifest, orchestrator)
+    latest_attempt = _latest_attempt(manifest)
+    latest_attempt_number = _attempt_number(latest_attempt)
+
+    if accepted.get("status") == "VALIDATED":
+        result = {"status": "SKIPPED", "reason": "Validated accepted patch set already exists; replanning is not required."}
+        return _stage_result("Replanning Loop", workspace_root, result, _progress_from_manifest(manifest, orchestrator.workspace.root))
+
+    if not _requires_validation_replan(manifest, latest_attempt):
+        result = {"status": "SKIPPED", "reason": "Latest workflow state does not require validation-failure replanning."}
+        return _stage_result("Replanning Loop", workspace_root, result, _progress_from_manifest(manifest, orchestrator.workspace.root))
+
+    if latest_attempt_number >= max_attempts:
+        result = orchestrator.handle_max_attempts_reached()
+        manifest = orchestrator.manifest_store.load()
+        progress = _progress_from_manifest(manifest, orchestrator.workspace.root)
+        progress.append({"step": "max_attempts_routing", "status": result.get("status"), "failureCode": result.get("failureCode")})
+        return _stage_result("Replanning Loop", workspace_root, result, progress)
+
+    next_attempt_number = latest_attempt_number + 1
+    last_result: dict[str, Any] = {"status": "NOT_RUN"}
+
+    while next_attempt_number <= max_attempts:
+        source_attempt = _latest_attempt(orchestrator.manifest_store.load())
+        source_attempt_number = _attempt_number(source_attempt)
+        source_outcome_ref = source_attempt.get("outcomeAnalysisSummary") if source_attempt else None
+
+        _mark_replan_required(orchestrator, source_attempt_number, next_attempt_number, source_outcome_ref)
+
+        prepared = orchestrator.prepare_attempt_workspace(next_attempt_number)
+        progress.append({"step": f"prepare_attempt_{next_attempt_number}", "status": prepared.get("status")})
+        if prepared.get("status") != "SUCCESS":
+            return _stage_result("Replanning Loop", workspace_root, prepared, progress)
+
+        _mark_replan_attempt(orchestrator, next_attempt_number, source_attempt_number, source_outcome_ref)
+
+        planning_result = orchestrator.run_planning_agent_boundary(attempt_number=next_attempt_number)
+        _record_attempt_planning_metadata(orchestrator, next_attempt_number, planning_result)
+        progress.append(
+            {
+                "step": f"remediation_planning_agent_attempt_{next_attempt_number}",
+                "status": planning_result.get("status"),
+                "artifactPath": planning_result.get("artifactPath"),
+                "decisionType": planning_result.get("decisionType") or planning_result.get("type"),
+            }
+        )
+        if planning_result.get("status") != "SUCCESS":
+            return _stage_result("Replanning Loop", workspace_root, planning_result, progress)
+
+        routed = orchestrator.handle_planner_result(planning_result, attempt_number=next_attempt_number)
+        progress.append({"step": f"planner_result_routing_attempt_{next_attempt_number}", "status": routed.get("status"), "failureCode": routed.get("failureCode")})
+
+        manifest = orchestrator.manifest_store.load()
+        progress.extend(_attempt_progress_from_manifest(manifest, orchestrator.workspace.root, next_attempt_number))
+        last_result = routed
+
+        if routed.get("status") in {"MANUAL_REVIEW_REQUIRED", "PR_SUMMARY_CREATED", "SUCCESS"}:
+            return _stage_result("Replanning Loop", workspace_root, routed, _progress_from_manifest(manifest, orchestrator.workspace.root))
+
+        if manifest.get("status") == "OUTCOME_ANALYSIS_AGENT_INVOCATION_FAILED":
+            return _stage_result("Replanning Loop", workspace_root, routed, _progress_from_manifest(manifest, orchestrator.workspace.root))
+
+        latest_attempt = _latest_attempt(manifest)
+        if _requires_validation_replan(manifest, latest_attempt) and _attempt_number(latest_attempt) < max_attempts:
+            next_attempt_number = _attempt_number(latest_attempt) + 1
+            continue
+
+        if _requires_validation_replan(manifest, latest_attempt) and _attempt_number(latest_attempt) >= max_attempts:
+            max_attempts_result = orchestrator.handle_max_attempts_reached()
+            manifest = orchestrator.manifest_store.load()
+            progress = _progress_from_manifest(manifest, orchestrator.workspace.root)
+            progress.append({"step": "max_attempts_routing", "status": max_attempts_result.get("status"), "failureCode": max_attempts_result.get("failureCode")})
+            return _stage_result("Replanning Loop", workspace_root, max_attempts_result, progress)
+
+        return _stage_result("Replanning Loop", workspace_root, routed, _progress_from_manifest(manifest, orchestrator.workspace.root))
+
+    max_attempts_result = orchestrator.handle_max_attempts_reached()
+    manifest = orchestrator.manifest_store.load()
+    progress = _progress_from_manifest(manifest, orchestrator.workspace.root)
+    progress.append({"step": "max_attempts_routing", "status": max_attempts_result.get("status"), "failureCode": max_attempts_result.get("failureCode")})
+    return _stage_result("Replanning Loop", workspace_root, max_attempts_result or last_result, progress)
 
 
 def run_pull_request_delivery_stage(
@@ -285,6 +384,7 @@ def _progress_from_manifest(manifest: dict[str, Any], workspace_root: str | Path
     workspace = Path(workspace_root)
     baseline = manifest.get("baseline") or {}
     planning = manifest.get("planning") or {}
+    attempts = manifest.get("attempts", []) or []
 
     if baseline.get("repositoryPath"):
         progress.append({"step": "repository_checkout", "status": "SUCCESS"})
@@ -298,12 +398,15 @@ def _progress_from_manifest(manifest: dict[str, Any], workspace_root: str | Path
     if baseline.get("projectAnalyzerReport"):
         progress.append(_artifact_progress("project_analysis", workspace, baseline.get("projectAnalyzerReport")))
 
-    if planning.get("lastDecision"):
+    if attempts:
+        for attempt in attempts:
+            attempt_number = _attempt_number(attempt) or 1
+            planning_ref = attempt.get("planningDecision") or attempt.get("patchPlan")
+            if planning_ref:
+                progress.append(_artifact_progress(f"remediation_planning_agent_attempt_{attempt_number}", workspace, planning_ref))
+            progress.extend(_attempt_progress_from_attempt(workspace, attempt, attempt_number))
+    elif planning.get("lastDecision"):
         progress.append(_artifact_progress("remediation_planning_agent_attempt_1", workspace, planning.get("lastDecision")))
-
-    for attempt in manifest.get("attempts", []) or []:
-        attempt_number = int(attempt.get("attemptNumber") or 1)
-        progress.extend(_attempt_progress_from_attempt(workspace, attempt, attempt_number))
 
     return progress
 
@@ -322,23 +425,107 @@ def _attempt_progress_from_attempt(workspace: Path, attempt: dict[str, Any], att
     if attempt.get("validationResult"):
         progress.append(_artifact_progress(f"validation_attempt_{attempt_number}", workspace, attempt.get("validationResult")))
     if attempt.get("outcomeAnalysisSummary"):
-        progress.append(_artifact_progress("outcome_analysis", workspace, attempt.get("outcomeAnalysisSummary")))
+        progress.append(_artifact_progress(f"outcome_analysis_attempt_{attempt_number}", workspace, attempt.get("outcomeAnalysisSummary")))
     return progress
 
 
 def _artifact_progress(step: str, workspace: Path, artifact_ref: str | None) -> dict[str, Any]:
     artifact = _read_json(workspace / str(artifact_ref)) if artifact_ref else {}
     status = artifact.get("status") or "UNKNOWN"
-    if step == "validation_attempt_1" and status == "SUCCESS":
+    if step.startswith("validation_attempt_") and status == "SUCCESS":
         status = "VALIDATION_SUCCEEDED"
     return {"step": step, "status": status, "artifactPath": artifact_ref}
 
 
 def _find_attempt(manifest: dict[str, Any], attempt_number: int) -> dict[str, Any] | None:
     for attempt in manifest.get("attempts", []) or []:
-        if int(attempt.get("attemptNumber") or 0) == int(attempt_number):
+        if _attempt_number(attempt) == int(attempt_number):
             return attempt
     return None
+
+
+def _latest_attempt(manifest: dict[str, Any]) -> dict[str, Any]:
+    attempts = manifest.get("attempts", []) or []
+    if not attempts:
+        return {}
+    return sorted(attempts, key=_attempt_number)[-1]
+
+
+def _attempt_number(attempt: dict[str, Any] | None) -> int:
+    if not attempt:
+        return 0
+    try:
+        return int(attempt.get("attemptNumber") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _policy_max_attempts(manifest: dict[str, Any], orchestrator: Phase6PatchProgressOrchestrator) -> int:
+    try:
+        return int((manifest.get("policy") or {}).get("maxAttempts") or orchestrator.policy.max_attempts)
+    except (TypeError, ValueError):
+        return int(orchestrator.policy.max_attempts)
+
+
+def _requires_validation_replan(manifest: dict[str, Any], latest_attempt: dict[str, Any] | None) -> bool:
+    accepted = manifest.get("acceptedPatchSet") or {}
+    return (
+        manifest.get("status") == "OUTCOME_ANALYSIS_COMPLETE"
+        and (latest_attempt or {}).get("status") == "VALIDATION_FAILED"
+        and accepted.get("status") != "VALIDATED"
+    )
+
+
+def _planning_ref_for_attempt(manifest: dict[str, Any], attempt_number: int) -> str | None:
+    attempt = _find_attempt(manifest, attempt_number) or {}
+    return attempt.get("planningDecision") or attempt.get("patchPlan")
+
+
+def _record_attempt_planning_metadata(
+    orchestrator: Phase6PatchProgressOrchestrator,
+    attempt_number: int,
+    planning_result: dict[str, Any],
+) -> None:
+    artifact_path = planning_result.get("artifactPath")
+    if not artifact_path:
+        return
+    manifest = orchestrator.manifest_store.load()
+    attempt = orchestrator._attempt_entry(manifest, attempt_number)
+    attempt["planningDecision"] = orchestrator._relative_ref(str(artifact_path))
+    attempt["planningDecisionType"] = planning_result.get("decisionType") or planning_result.get("type")
+    orchestrator.manifest_store.save(manifest)
+
+
+def _mark_replan_required(
+    orchestrator: Phase6PatchProgressOrchestrator,
+    source_attempt_number: int,
+    next_attempt_number: int,
+    outcome_ref: str | None,
+) -> None:
+    manifest = orchestrator.manifest_store.load()
+    source_attempt = _find_attempt(manifest, source_attempt_number)
+    if source_attempt:
+        source_attempt["nextAction"] = "REPLAN_REQUIRED"
+        source_attempt["nextAttemptNumber"] = next_attempt_number
+        source_attempt["replanReason"] = "VALIDATION_FAILED"
+        if outcome_ref:
+            source_attempt["replanInput"] = outcome_ref
+    orchestrator.manifest_store.save(manifest)
+
+
+def _mark_replan_attempt(
+    orchestrator: Phase6PatchProgressOrchestrator,
+    attempt_number: int,
+    source_attempt_number: int,
+    outcome_ref: str | None,
+) -> None:
+    manifest = orchestrator.manifest_store.load()
+    attempt = orchestrator._attempt_entry(manifest, attempt_number)
+    attempt["replanSourceAttempt"] = source_attempt_number
+    attempt["replanReason"] = "VALIDATION_FAILED"
+    if outcome_ref:
+        attempt["replanInputOutcomeAnalysis"] = outcome_ref
+    orchestrator.manifest_store.save(manifest)
 
 
 def _abs_ref(orchestrator: Phase6PatchProgressOrchestrator, ref: str | None) -> str | None:
@@ -449,12 +636,24 @@ outcome_analysis_agent = LlmAgent(
     output_key="outcome_analysis_result",
 )
 
+replanning_loop_agent = LlmAgent(
+    name="replanning_loop_agent",
+    model="gemini-2.5-flash",
+    description="Continues bounded remediation attempts after validation failure and outcome analysis.",
+    instruction=(
+        "Run Stage 6b. Read workspaceRoot from {outcome_analysis_result}. "
+        "Call run_replanning_loop_stage with that workspaceRoot. Return the tool result only."
+    ),
+    tools=[run_replanning_loop_stage],
+    output_key="replanning_loop_result",
+)
+
 pull_request_delivery_agent = LlmAgent(
     name="pull_request_delivery_agent",
     model="gemini-2.5-flash",
     description="Executes PR summary generation and Draft PR delivery.",
     instruction=(
-        "Run Stage 7. Read workspaceRoot from {outcome_analysis_result}. "
+        "Run Stage 7. Read workspaceRoot from {replanning_loop_result}. "
         "Call run_pull_request_delivery_stage with that workspaceRoot. "
         "For the final ADK Web answer, output exactly the markdown text in the returned adkWebResponse field. "
         "Do not add vulnerability summaries, remediation tables, manifest paths, or a Next Action section."
@@ -469,7 +668,8 @@ root_agent = SequentialAgent(
     description=(
         "Executes the OSS remediation workflow through deterministic staged ADK subagents. "
         "The subagents run in fixed order: repository preparation, vulnerability assessment, "
-        "project analysis, remediation planning, patch validation, outcome analysis, and pull request delivery."
+        "project analysis, remediation planning, patch validation, outcome analysis, bounded replanning loop, "
+        "and pull request delivery."
     ),
     sub_agents=[
         repository_preparation_agent,
@@ -478,6 +678,7 @@ root_agent = SequentialAgent(
         remediation_planning_agent,
         patch_validation_agent,
         outcome_analysis_agent,
+        replanning_loop_agent,
         pull_request_delivery_agent,
     ],
 )
