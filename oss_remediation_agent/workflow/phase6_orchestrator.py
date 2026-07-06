@@ -58,7 +58,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         ("baseline", "baselineBuildResult"): "Baseline Build Result",
         ("baseline", "vulnerabilityAssessmentReport"): "Vulnerability Assessment Report",
         ("baseline", "projectAnalyzerReport"): "Project Analyzer Report",
-        ("planning", "lastDecision"): "Remediation Patch Plan",
+        ("planning", "lastDecision"): "Latest Planning Decision",
+        ("planning", "manualReviewDecision"): "Manual Review Decision",
         ("final", "prSummary"): "PR Summary",
         ("final", "prDescription"): "PR Description",
         ("final", "pullRequestPublication"): "Pull Request Publication Result",
@@ -237,6 +238,9 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
 
     @classmethod
     def _workflow_stages(cls, progress: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if cls._has_attempt_progress(progress):
+            return cls._attempt_aware_workflow_stages(progress)
+
         step_statuses = cls._display_step_statuses(progress)
         stages: list[dict[str, Any]] = []
         for stage in cls.WORKFLOW_STAGES:
@@ -246,6 +250,90 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             stage_status = cls._aggregate_status([step["status"] for step in steps])
             stages.append({"name": stage["name"], "status": stage_status, "steps": steps})
         return stages
+
+    @classmethod
+    def _attempt_aware_workflow_stages(cls, progress: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        base_statuses = cls._display_step_statuses([item for item in progress if not cls._attempt_number_from_step(str(item.get("step") or ""))])
+        stages = [
+            cls._stage_from_statuses("Repository Preparation", ["Repository Checkout", "Baseline Build"], base_statuses),
+            cls._stage_from_statuses("Assessment", ["OSS Vulnerability Assessment", "Maven Project Analysis"], base_statuses),
+        ]
+
+        attempt_statuses: dict[int, dict[str, str]] = {}
+        for item in progress:
+            internal_step = str(item.get("step") or "")
+            attempt_number = cls._attempt_number_from_step(internal_step)
+            if not attempt_number:
+                continue
+            statuses = attempt_statuses.setdefault(attempt_number, {})
+            for step_name, status in cls._attempt_display_steps_for_progress_item(item):
+                statuses[step_name] = cls._merge_status(statuses.get(step_name), status)
+
+        for attempt_number in sorted(attempt_statuses):
+            statuses = attempt_statuses[attempt_number]
+            ordered_steps = [
+                "Remediation Planning",
+                "Patch Dry Run",
+                "Dependency Patch Application",
+                "Validation",
+                "Failure Analysis",
+                "Manual Review Decision",
+                "Accepted Patch Set",
+            ]
+            steps = [{"name": step_name, "status": statuses.get(step_name, "NOT_RUN")} for step_name in ordered_steps if statuses.get(step_name, "NOT_RUN") != "NOT_RUN"]
+            stage_status = cls._aggregate_status([step["status"] for step in steps])
+            stages.append({"name": f"Attempt {attempt_number}", "status": stage_status, "steps": steps})
+
+        delivery_statuses = cls._display_step_statuses([item for item in progress if str(item.get("step") or "") in {"pr_summary_created", "pull_request_published"}])
+        if delivery_statuses:
+            stages.append(cls._stage_from_statuses("Delivery", ["PR Summary", "Draft Pull Request"], delivery_statuses))
+        return stages
+
+    @classmethod
+    def _stage_from_statuses(cls, name: str, ordered_steps: list[str], statuses: dict[str, str]) -> dict[str, Any]:
+        steps = [{"name": step_name, "status": statuses.get(step_name, "NOT_RUN")} for step_name in ordered_steps]
+        stage_status = cls._aggregate_status([step["status"] for step in steps])
+        return {"name": name, "status": stage_status, "steps": steps}
+
+    @staticmethod
+    def _has_attempt_progress(progress: list[dict[str, Any]]) -> bool:
+        return any(Phase6WorkflowOrchestrator._attempt_number_from_step(str(item.get("step") or "")) for item in progress)
+
+    @classmethod
+    def _attempt_display_steps_for_progress_item(cls, item: dict[str, Any]) -> list[tuple[str, str]]:
+        internal_step = str(item.get("step") or "")
+        status = cls._normalize_step_status(item.get("status"))
+        decision_type = str(item.get("decisionType") or "").upper()
+        if internal_step.startswith("remediation_planning_agent"):
+            steps = [("Remediation Planning", status)]
+            if decision_type == "MANUAL_REVIEW":
+                steps.append(("Manual Review Decision", "ATTENTION_REQUIRED"))
+            return steps
+        if internal_step.startswith("patch_dry_run"):
+            return [("Patch Dry Run", status)]
+        if internal_step.startswith("patch_apply"):
+            return [("Dependency Patch Application", status)]
+        if internal_step.startswith("validation"):
+            return [("Validation", status)]
+        if internal_step.startswith("outcome_analysis"):
+            return [("Failure Analysis", status)]
+        if internal_step == "accepted_patch_set_created":
+            return [("Accepted Patch Set", status)]
+        return []
+
+    @staticmethod
+    def _attempt_number_from_step(internal_step: str) -> int | None:
+        markers = ("_attempt_", "attempt_")
+        for marker in markers:
+            if marker not in internal_step:
+                continue
+            tail = internal_step.split(marker, 1)[1]
+            token = tail.split("_", 1)[0]
+            try:
+                return int(token)
+            except (TypeError, ValueError):
+                return None
+        return None
 
     @classmethod
     def _display_step_statuses(cls, progress: list[dict[str, Any]]) -> dict[str, str]:
@@ -279,7 +367,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return ["Validation"]
         if internal_step == "accepted_patch_set_created":
             return ["Accepted Patch Set"]
-        if internal_step == "outcome_analysis":
+        if internal_step.startswith("outcome_analysis"):
             return ["Failure Analysis"]
         if internal_step == "pr_summary_created":
             return ["PR Summary"]
@@ -314,7 +402,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return "FAILED"
         if any(status == "ATTENTION_REQUIRED" for status in statuses):
             return "ATTENTION_REQUIRED"
-        if all(status == "SUCCESS" for status in statuses):
+        if statuses and all(status == "SUCCESS" for status in statuses):
             return "SUCCESS"
         if any(status == "SUCCESS" for status in statuses):
             return "IN_PROGRESS"
@@ -418,11 +506,13 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 artifacts.append({"name": label, "path": str(artifact_ref)})
                 seen_paths.add(str(artifact_ref))
         for attempt in manifest.get("attempts", []) or []:
+            attempt_number = attempt.get("attemptNumber")
             for key, label in (
-                ("patchDryRunResult", "Patch Dry Run Result"),
-                ("patchApplicationProof", "Patch Application Proof"),
-                ("validationResult", "Validation Result"),
-                ("outcomeAnalysisSummary", "Outcome Analysis Summary"),
+                ("planningDecision", f"Planning Decision Attempt {attempt_number}"),
+                ("patchDryRunResult", f"Patch Dry Run Result Attempt {attempt_number}"),
+                ("patchApplicationProof", f"Patch Application Proof Attempt {attempt_number}"),
+                ("validationResult", f"Validation Result Attempt {attempt_number}"),
+                ("outcomeAnalysisSummary", f"Outcome Analysis Summary Attempt {attempt_number}"),
             ):
                 artifact_ref = attempt.get(key)
                 if artifact_ref and artifact_ref not in seen_paths:
@@ -524,6 +614,13 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         artifact = self._read_artifact(artifact_ref)
         return str(artifact.get("status") or fallback)
 
+    def _artifact_decision_type(self, artifact_ref: str | None) -> str | None:
+        if not artifact_ref:
+            return None
+        artifact = self._read_artifact(artifact_ref)
+        decision_type = artifact.get("decisionType") or artifact.get("type")
+        return str(decision_type) if decision_type else None
+
     def _enrich_progress(self, progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
         enriched = list(progress)
         seen_steps = {item.get("step") for item in enriched}
@@ -531,14 +628,22 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         for attempt in manifest.get("attempts", []) or []:
             attempt_number = attempt.get("attemptNumber")
             prefix = f"attempt_{attempt_number}"
+            planning_ref = attempt.get("planningDecision") or attempt.get("patchPlan")
+            if planning_ref and f"remediation_planning_agent_{prefix}" not in seen_steps:
+                enriched.append({
+                    "step": f"remediation_planning_agent_{prefix}",
+                    "status": self._artifact_status(planning_ref),
+                    "artifactPath": planning_ref,
+                    "decisionType": self._artifact_decision_type(planning_ref) or attempt.get("planningDecisionType"),
+                })
             if attempt.get("patchDryRunResult") and f"patch_dry_run_{prefix}" not in seen_steps:
                 enriched.append({"step": f"patch_dry_run_{prefix}", "status": self._artifact_status(attempt.get("patchDryRunResult")), "artifactPath": attempt.get("patchDryRunResult")})
             if attempt.get("patchApplicationProof") and f"patch_apply_{prefix}" not in seen_steps:
                 enriched.append({"step": f"patch_apply_{prefix}", "status": self._artifact_status(attempt.get("patchApplicationProof")), "artifactPath": attempt.get("patchApplicationProof")})
             if attempt.get("validationResult") and f"validation_{prefix}" not in seen_steps:
                 enriched.append({"step": f"validation_{prefix}", "status": self._artifact_status(attempt.get("validationResult"), attempt.get("status", "UNKNOWN")), "artifactPath": attempt.get("validationResult")})
-            if attempt.get("outcomeAnalysisSummary") and "outcome_analysis" not in seen_steps:
-                enriched.append({"step": "outcome_analysis", "status": self._artifact_status(attempt.get("outcomeAnalysisSummary")), "artifactPath": attempt.get("outcomeAnalysisSummary")})
+            if attempt.get("outcomeAnalysisSummary") and f"outcome_analysis_{prefix}" not in seen_steps:
+                enriched.append({"step": f"outcome_analysis_{prefix}", "status": self._artifact_status(attempt.get("outcomeAnalysisSummary")), "artifactPath": attempt.get("outcomeAnalysisSummary")})
 
         accepted = manifest.get("acceptedPatchSet", {})
         if accepted.get("status") == "VALIDATED" and "accepted_patch_set_created" not in seen_steps:
