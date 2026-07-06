@@ -41,18 +41,20 @@ def build_final_response_summary(
 
     outcome = _latest_outcome_analysis(manifest, workspace)
     latest_attempt = _latest_attempt(manifest)
+    baseline = manifest.get("baseline") or {}
     patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or (manifest.get("planning") or {}).get("lastDecision"))
     validation = _read_artifact(workspace, latest_attempt.get("validationResult"))
-    baseline_build = _read_artifact(workspace, (manifest.get("baseline") or {}).get("baselineBuildResult"))
+    baseline_build = _read_artifact(workspace, baseline.get("baselineBuildResult"))
+    vulnerability_assessment = _read_artifact(workspace, baseline.get("vulnerabilityAssessmentReport"))
     publication = _read_artifact(workspace, (manifest.get("final") or {}).get("pullRequestPublication"))
     pr_summary = _read_artifact(workspace, (manifest.get("final") or {}).get("prSummary"))
 
     if internal_status in _INTERNAL_FAILURE_LABELS:
         return _internal_failure_summary(manifest, workspace, internal_status, patch_plan, validation, outcome, fallback_message)
     if status == "PULL_REQUEST_CREATED":
-        return _pull_request_created_summary(manifest, patch_plan, validation, pr_summary, workspace)
+        return _pull_request_created_summary(manifest, patch_plan, vulnerability_assessment, validation, pr_summary, workspace)
     if status == "VALIDATION_SUCCEEDED":
-        return _validation_succeeded_summary(manifest, validation, patch_plan, workspace)
+        return _validation_succeeded_summary(manifest, validation, patch_plan, vulnerability_assessment, workspace)
     if status == "VALIDATION_FAILED":
         return _validation_failed_summary(manifest, outcome, validation, patch_plan, workspace, fallback_message)
     if status == "PR_CREATION_FAILED":
@@ -67,6 +69,7 @@ def build_final_response_summary(
 def _pull_request_created_summary(
     manifest: dict[str, Any],
     patch_plan: dict[str, Any],
+    vulnerability_assessment: dict[str, Any],
     validation: dict[str, Any],
     pr_summary: dict[str, Any],
     workspace: Path,
@@ -83,10 +86,9 @@ def _pull_request_created_summary(
     outcome_label = "Partial Remediation Draft PR Created" if partial else "Draft Pull Request Created"
     outcome_summary = _success_outcome_summary(
         resolved_count=resolved_count,
-        resolved_severity=_severity_summary(patch_plan, "PATCH"),
+        resolved_severity=_severity_summary(patch_plan, "PATCH", vulnerability_assessment),
         pending_count=pending_count,
-        pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW"),
-        validation_label="Passed",
+        pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
         delivery_label="Partial Draft PR created for validated fixes" if partial else "Draft PR created",
     )
 
@@ -105,6 +107,7 @@ def _validation_succeeded_summary(
     manifest: dict[str, Any],
     validation: dict[str, Any],
     patch_plan: dict[str, Any],
+    vulnerability_assessment: dict[str, Any],
     workspace: Path,
 ) -> dict[str, Any]:
     counts = _patch_plan_counts(patch_plan)
@@ -114,10 +117,9 @@ def _validation_succeeded_summary(
         workflow_outcome="Validation Succeeded",
         outcome_summary=_success_outcome_summary(
             resolved_count=resolved_count,
-            resolved_severity=_severity_summary(patch_plan, "PATCH"),
+            resolved_severity=_severity_summary(patch_plan, "PATCH", vulnerability_assessment),
             pending_count=pending_count,
-            pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW"),
-            validation_label="Passed",
+            pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
             delivery_label="PR handling pending or policy-controlled",
         ),
         root_cause=_DEFAULT_NA,
@@ -251,18 +253,16 @@ def _success_outcome_summary(
     resolved_severity: str,
     pending_count: int,
     pending_severity: str,
-    validation_label: str,
     delivery_label: str,
 ) -> str:
-    resolved_severity_text = resolved_severity or "severity not available in patch plan"
-    pending_severity_text = pending_severity or ("none" if pending_count == 0 else "severity not available in patch plan")
+    resolved_severity_text = resolved_severity or "severity not available"
+    pending_severity_text = pending_severity or ("none" if pending_count == 0 else "severity not available")
     return "\n".join(
         [
             f"- Resolved: {resolved_count} vulnerability item(s)",
             f"- Resolved severity: {resolved_severity_text}",
             f"- Pending manual review: {pending_count} item(s)",
             f"- Pending severity: {pending_severity_text}",
-            f"- Validation: {validation_label}",
             f"- Delivery: {delivery_label}",
         ]
     )
@@ -369,8 +369,9 @@ def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
     }
 
 
-def _severity_summary(patch_plan: dict[str, Any], decision_type: str) -> str:
+def _severity_summary(patch_plan: dict[str, Any], decision_type: str, vulnerability_assessment: dict[str, Any] | None = None) -> str:
     decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
+    severity_by_id = _severity_by_vulnerability_id(vulnerability_assessment or {})
     counts: dict[str, int] = {}
     target = decision_type.upper()
     for decision in decisions or []:
@@ -378,12 +379,65 @@ def _severity_summary(patch_plan: dict[str, Any], decision_type: str) -> str:
         matches = current_type == target or (target == "MANUAL_REVIEW" and bool(decision.get("manualReviewCategory")))
         if not matches:
             continue
-        severity = str(decision.get("severity") or decision.get("maxSeverity") or decision.get("cvssSeverity") or "").upper()
-        if not severity or severity == "UNKNOWN":
+        severity = _decision_severity(decision, severity_by_id)
+        if not severity:
             continue
         counts[severity] = counts.get(severity, 0) + 1
     ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
     return ", ".join(f"{counts[level]} {level.lower()}" for level in ordered if counts.get(level))
+
+
+def _decision_severity(decision: dict[str, Any], severity_by_id: dict[str, str]) -> str:
+    for key in ("severity", "maxSeverity", "cvssSeverity"):
+        severity = _normalize_severity(decision.get(key))
+        if severity:
+            return severity
+    for key in ("vulnerabilityId", "id", "osvId", "ghsaId", "advisoryId"):
+        vulnerability_id = str(decision.get(key) or "").strip()
+        if vulnerability_id and severity_by_id.get(vulnerability_id):
+            return severity_by_id[vulnerability_id]
+    return ""
+
+
+def _severity_by_vulnerability_id(payload: Any) -> dict[str, str]:
+    result: dict[str, str] = {}
+
+    def walk(value: Any) -> None:
+        if isinstance(value, dict):
+            severity = _normalize_severity(value.get("severity") or value.get("maxSeverity") or value.get("cvssSeverity"))
+            identifiers = _vulnerability_identifiers(value)
+            if severity:
+                for identifier in identifiers:
+                    result.setdefault(identifier, severity)
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+
+    walk(payload)
+    return result
+
+
+def _vulnerability_identifiers(value: dict[str, Any]) -> list[str]:
+    identifiers: list[str] = []
+    for key in ("vulnerabilityId", "id", "osvId", "ghsaId", "advisoryId"):
+        raw = value.get(key)
+        if isinstance(raw, str) and raw.strip():
+            identifiers.append(raw.strip())
+    aliases = value.get("aliases") or value.get("cves") or []
+    if isinstance(aliases, list):
+        for alias in aliases:
+            if isinstance(alias, str) and alias.strip():
+                identifiers.append(alias.strip())
+    return identifiers
+
+
+def _normalize_severity(value: Any) -> str:
+    severity = str(value or "").strip().upper()
+    if severity in {"CRITICAL", "HIGH", "MEDIUM", "LOW"}:
+        return severity
+    return ""
 
 
 def _safe_int(value: Any) -> int:
