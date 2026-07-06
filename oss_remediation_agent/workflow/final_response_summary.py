@@ -83,21 +83,35 @@ def _pull_request_created_summary(
     counts = _patch_plan_counts(patch_plan)
     accepted = manifest.get("acceptedPatchSet") or {}
     accepted_count = len(accepted.get("vulnerabilityIds", []) or accepted.get("patchIds", []) or [])
+    validated_change_count = accepted_count or counts["patchDecisionCount"]
     partial = pr_type == "PARTIAL_REMEDIATION" or counts["manualReviewCount"] > 0
+    dependency_summary = _patch_dependency_summary(patch_plan)
+    severity_summary = _severity_summary(patch_plan, decision_type="PATCH")
+    manual_severity_summary = _severity_summary(patch_plan, decision_type="MANUAL_REVIEW")
+    pr_reference = _pull_request_reference(pull_request)
 
     outcome_label = "Partial Remediation Draft PR Created" if partial else "Draft Pull Request Created"
-    summary = (
-        f"{'Partial remediation completed' if partial else 'Remediation completed'} and validation succeeded. "
-        f"A Draft PR was created for {accepted_count or counts['patchDecisionCount']} validated dependency-only change(s)."
-    )
+    summary_parts = [
+        f"{'Partial remediation completed' if partial else 'Remediation completed'} successfully: validation passed and {pr_reference} was created.",
+        f"The PR contains {validated_change_count} validated dependency-only change(s) from {counts['patchDecisionCount']} automated patch decision(s).",
+    ]
+    if severity_summary:
+        summary_parts.append(f"Resolved vulnerability severity mix: {severity_summary}.")
+    if dependency_summary:
+        summary_parts.append(f"Updated dependencies include: {dependency_summary}.")
     if counts["manualReviewCount"]:
-        summary += f" {counts['manualReviewCount']} item(s) remain for manual review."
+        manual_text = f"{counts['manualReviewCount']} item(s) remain for manual review"
+        if manual_severity_summary:
+            manual_text += f" ({manual_severity_summary})"
+        summary_parts.append(f"{manual_text}; these were intentionally left outside the validated automated PR scope.")
+    else:
+        summary_parts.append("No manual-review items were reported in the final patch plan.")
 
     return _summary_model(
         workflow_outcome=outcome_label,
-        outcome_summary=summary,
+        outcome_summary=" ".join(summary_parts),
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, partial),
+        planning_assessment=_success_planning_assessment(counts, partial, dependency_summary),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Review the Draft PR, verify the validated dependency-only changes, and handle any remaining manual review items before merge.",
         pr_status=_pr_status_created(pull_request),
@@ -113,11 +127,21 @@ def _validation_succeeded_summary(
     counts = _patch_plan_counts(patch_plan)
     accepted = manifest.get("acceptedPatchSet") or {}
     accepted_count = len(accepted.get("vulnerabilityIds", []) or accepted.get("patchIds", []) or [])
+    dependency_summary = _patch_dependency_summary(patch_plan)
+    severity_summary = _severity_summary(patch_plan, decision_type="PATCH")
+    summary_parts = [
+        f"Validation succeeded for {accepted_count or counts['patchDecisionCount']} dependency-only change(s).",
+        "The accepted patch set is ready for PR policy handling.",
+    ]
+    if severity_summary:
+        summary_parts.append(f"Validated vulnerability severity mix: {severity_summary}.")
+    if dependency_summary:
+        summary_parts.append(f"Validated dependency updates include: {dependency_summary}.")
     return _summary_model(
         workflow_outcome="Validation Succeeded",
-        outcome_summary=f"Validation succeeded. {accepted_count or counts['patchDecisionCount']} dependency-only change(s) are ready for PR policy handling.",
+        outcome_summary=" ".join(summary_parts),
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, counts["manualReviewCount"] > 0),
+        planning_assessment=_success_planning_assessment(counts, counts["manualReviewCount"] > 0, dependency_summary),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Proceed with PR creation policy handling or review the accepted patch set if manual approval is required.",
         pr_status="Draft PR has not been created yet; validation completed successfully and PR handling is pending or policy-controlled.",
@@ -353,13 +377,17 @@ def _summary_model(
     }
 
 
-def _success_planning_assessment(counts: dict[str, int], partial: bool) -> str:
+def _success_planning_assessment(counts: dict[str, int], partial: bool, dependency_summary: str = "") -> str:
     if partial:
-        return (
+        message = (
             "The planning agent separated automatable dependency-only changes from manual-review items. "
             f"{counts['patchDecisionCount']} patch decision(s) were validated while {counts['manualReviewCount']} item(s) remain outside the automated scope."
         )
-    return f"The planning agent produced {counts['patchDecisionCount']} dependency-only patch decision(s) that passed validation."
+    else:
+        message = f"The planning agent produced {counts['patchDecisionCount']} dependency-only patch decision(s) that passed validation."
+    if dependency_summary:
+        message += f" Validated updates: {dependency_summary}."
+    return message
 
 
 def _planning_assessment_from_counts(patch_plan: dict[str, Any]) -> str:
@@ -390,11 +418,94 @@ def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _patch_dependency_summary(patch_plan: dict[str, Any], limit: int = 5) -> str:
+    decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
+    updates: list[str] = []
+    for decision in decisions or []:
+        if str(decision.get("decision") or "").upper() != "PATCH":
+            continue
+        coordinate = _dependency_coordinate(decision)
+        fixed_version = _first_present(
+            decision,
+            "fixedVersionSelected",
+            "fixedVersion",
+            "targetVersion",
+            "recommendedVersion",
+            "newVersion",
+            "toVersion",
+        )
+        if coordinate and fixed_version:
+            text = f"{coordinate} -> {fixed_version}"
+        else:
+            text = coordinate or str(decision.get("vulnerabilityId") or decision.get("patchId") or "").strip()
+        if text and text not in updates:
+            updates.append(text)
+    if not updates:
+        return ""
+    suffix = "" if len(updates) <= limit else f", and {len(updates) - limit} more"
+    return ", ".join(updates[:limit]) + suffix
+
+
+def _dependency_coordinate(decision: dict[str, Any]) -> str:
+    for key in ("dependencyCoordinate", "dependency", "targetDependency", "currentDependency", "gav", "packageName"):
+        value = decision.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+        if isinstance(value, dict):
+            coordinate = _coordinate_from_dict(value)
+            if coordinate:
+                return coordinate
+    coordinate = _coordinate_from_dict(decision)
+    return coordinate
+
+
+def _coordinate_from_dict(value: dict[str, Any]) -> str:
+    group = value.get("groupId") or value.get("group")
+    artifact = value.get("artifactId") or value.get("artifact") or value.get("name")
+    if group and artifact:
+        return f"{group}:{artifact}"
+    return str(artifact or group or "").strip()
+
+
+def _severity_summary(patch_plan: dict[str, Any], decision_type: str) -> str:
+    decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
+    counts: dict[str, int] = {}
+    target = decision_type.upper()
+    for decision in decisions or []:
+        current_type = str(decision.get("decision") or "").upper()
+        if target == "MANUAL_REVIEW":
+            matches = current_type == "MANUAL_REVIEW" or bool(decision.get("manualReviewCategory"))
+        else:
+            matches = current_type == target
+        if not matches:
+            continue
+        severity = str(decision.get("severity") or decision.get("maxSeverity") or decision.get("cvssSeverity") or "UNKNOWN").upper()
+        counts[severity] = counts.get(severity, 0) + 1
+    ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
+    parts = [f"{counts[level]} {level.lower()}" for level in ordered if counts.get(level)]
+    return ", ".join(parts)
+
+
+def _first_present(payload: dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = payload.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
 def _safe_int(value: Any) -> int:
     try:
         return int(value or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _pull_request_reference(pull_request: dict[str, Any]) -> str:
+    url = str(pull_request.get("prUrl") or "").strip()
+    if url:
+        return "the Draft PR"
+    return "a Draft PR"
 
 
 def _pr_status_created(pull_request: dict[str, Any]) -> str:
@@ -453,7 +564,7 @@ def _latest_attempt(manifest: dict[str, Any]) -> dict[str, Any]:
     attempts = manifest.get("attempts", []) or []
     if not attempts:
         return {}
-    return sorted(attempts, key=lambda item: int(item.get("attemptNumber") or 0))[-1]
+    return sorted(attempts, key=lambda item: _safe_int(item.get("attemptNumber")))[-1]
 
 
 def _read_artifact(workspace: Path, artifact_ref: Any) -> dict[str, Any]:
