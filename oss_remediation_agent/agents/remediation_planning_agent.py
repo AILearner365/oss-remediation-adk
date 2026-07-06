@@ -10,6 +10,7 @@ from oss_remediation_agent.tools.workspace_artifact_tool import (
 )
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_planning_agent.md"
+MILESTONE2_PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_planning_milestone2.md"
 
 _ALLOWED_DECISION_TYPES = {
     "PATCH_PLAN",
@@ -23,7 +24,10 @@ _MAX_ADDITIONAL_INVESTIGATION_SUMMARIES = 5
 
 def load_prompt() -> str:
     """Load the reviewable prompt for the LLM-backed planning agent."""
-    return PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = PROMPT_PATH.read_text(encoding="utf-8")
+    if MILESTONE2_PROMPT_PATH.exists():
+        prompt += "\n\n" + MILESTONE2_PROMPT_PATH.read_text(encoding="utf-8")
+    return prompt
 
 
 def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) -> dict[str, Any]:
@@ -43,6 +47,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
 
     vulnerability_assessment_path = _resolve(workspace, baseline.get("vulnerabilityAssessmentReport"))
     project_analyzer_path = _resolve(workspace, baseline.get("projectAnalyzerReport"))
+    baseline_build_path = _resolve(workspace, baseline.get("baselineBuildResult"))
     previous_patch_plan_path = _resolve(workspace, previous_attempt.get("patchPlan") if previous_attempt else None)
     previous_patch_application_proof_path = _resolve(workspace, previous_attempt.get("patchApplicationProof") if previous_attempt else None)
     previous_validation_result_path = _resolve(workspace, previous_attempt.get("validationResult") if previous_attempt else None)
@@ -62,6 +67,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
 
     vulnerability_assessment_read = _read_artifact_if_available(workspace, baseline.get("vulnerabilityAssessmentReport"), attempt_number)
     project_analyzer_read = _read_artifact_if_available(workspace, baseline.get("projectAnalyzerReport"), attempt_number)
+    baseline_build_read = _read_artifact_if_available(workspace, baseline.get("baselineBuildResult"), attempt_number)
 
     evidence = {
         "workspaceArtifactTool": {
@@ -84,6 +90,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
         "artifactCatalog": artifact_listing.get("artifactCatalog", {}),
         "relevantArtifacts": relevant_artifacts,
         "compactArtifactReads": compact_artifact_reads,
+        "baselineBuildResult": baseline_build_read.get("content", {}),
         "vulnerabilityAssessment": vulnerability_assessment_read.get("content", {}),
         "projectAnalyzer": project_analyzer_read.get("content", {}),
         "previousAttempt": _compact_previous_attempt(
@@ -99,6 +106,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
             "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required planning decision.",
             "Do not infer vulnerabilities, dependency coordinates, fixed versions, or patch files beyond this evidence.",
             "When replanning, review previous outcome analysis and validation evidence before proposing a new plan.",
+            "When previous outcome analysis says the remaining blocker existed in baseline or is outside allowed automation scope, decide whether MANUAL_REVIEW is the correct next decision instead of repeating an equivalent PATCH_PLAN.",
         ],
     }
 
@@ -110,6 +118,7 @@ def build_planning_context(workspace_root: str | Path, attempt_number: int = 1) 
         "manifestPath": str(workspace / "manifest.json"),
         "artifactReferences": {
             "manifest": str(workspace / "manifest.json"),
+            "baselineBuildResult": baseline_build_path,
             "vulnerabilityAssessmentReport": vulnerability_assessment_path,
             "projectAnalyzerReport": project_analyzer_path,
             "previousPatchPlan": previous_patch_plan_path,
@@ -169,7 +178,7 @@ def persist_planning_agent_output(
         })
     elif decision_type == "MANUAL_REVIEW":
         result.update({
-            "reason": decision.get("reason") or decision.get("statusReason"),
+            "reason": decision.get("reason") or decision.get("statusReason") or (decision.get("summary") or {}).get("reason"),
             "manualReviewCategory": decision.get("manualReviewCategory"),
         })
     return result
