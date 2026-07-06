@@ -1,0 +1,375 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-2",
+  "artifactReferences": {
+    "previousOutcomeAnalysisSummary": "attempt-1/outcome-analysis-summary.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 2,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-2",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 9,
+    "patchDecisionCount": 5
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/11"
+      ],
+      "fixedVersionSelected": "1.6.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/11"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.6.0</version>",
+          "newVersion": "1.6.0",
+          "oldText": "<version>1.5</version>",
+          "oldVersion": "1.5",
+          "patchId": "patch-GHSA-vv7r-c36w-3prj-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows a direct dependency declaration for commons-fileupload:commons-fileupload:1.5 in pom.xml. The lowest compatible fixed version is 1.6.0. This patch did not cause any policy violations in the previous attempt.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2019-17571"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact for log4j:log4j:1.2.17.",
+      "vulnerabilityId": "GHSA-2qrg-x229-3v8q"
+    },
+    {
+      "aliases": [
+        "CVE-2022-23305"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact for log4j:log4j:1.2.17.",
+      "vulnerabilityId": "GHSA-65fg-84f6-3jq3"
+    },
+    {
+      "aliases": [
+        "CVE-2022-23307"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/3"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact for log4j:log4j:1.2.17.",
+      "vulnerabilityId": "GHSA-f7vh-qwp3-x37m"
+    },
+    {
+      "aliases": [
+        "CVE-2021-4104"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/4"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact for log4j:log4j:1.2.17.",
+      "vulnerabilityId": "GHSA-fp5r-v3w9-4333"
+    },
+    {
+      "aliases": [
+        "CVE-2023-26464"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/5",
+        "baseline/project-analyzer-report.json#/pomEvidence/15",
+        "artifactReferences.previousOutcomeAnalysisSummary"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The patched version '2.0' of log4j:log4j was flagged as banned by the Maven Enforcer Plugin, as indicated in the previous outcome analysis summary. Automated remediation is blocked by policy and requires manual intervention to resolve the enforcer rule conflict.",
+      "vulnerabilityId": "GHSA-vp98-w2p3-mv35"
+    },
+    {
+      "aliases": [
+        "CVE-2022-23302"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j",
+        "currentVersion": "1.2.17",
+        "ecosystem": "Maven",
+        "groupId": "log4j",
+        "packageName": "log4j:log4j"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/6"
+      ],
+      "manualReviewCategory": "MANUAL_NO_SAFE_VERSION",
+      "statusReason": "No fixed version is present in the vulnerability assessment artifact for log4j:log4j:1.2.17.",
+      "vulnerabilityId": "GHSA-w9p3-5cr8-m3jj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/7",
+        "baseline/project-analyzer-report.json#/pomEvidence/10"
+      ],
+      "fixedVersionSelected": "1.10.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/10"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.10.0</version>",
+          "newVersion": "1.10.0",
+          "oldText": "<version>1.9</version>",
+          "oldVersion": "1.9",
+          "patchId": "patch-GHSA-599f-7c49-w659-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows a direct dependency declaration for org.apache.commons:commons-text:1.9 in pom.xml. The lowest compatible fixed version is 1.10.0. This patch did not cause any policy violations in the previous attempt.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2021-45046"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j-core",
+        "currentVersion": "2.14.1",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.logging.log4j",
+        "packageName": "org.apache.logging.log4j:log4j-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/8",
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/9",
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/10",
+        "baseline/project-analyzer-report.json#/pomEvidence/14",
+        "artifactReferences.previousOutcomeAnalysisSummary"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The patched version '2.17.0' of org.apache.logging.log4j:log4j-core was flagged as banned by the Maven Enforcer Plugin, as indicated in the previous outcome analysis summary. Automated remediation is blocked by policy and requires manual intervention to resolve the enforcer rule conflict.",
+      "vulnerabilityId": "GHSA-7rjr-3q55-vv33"
+    },
+    {
+      "aliases": [
+        "CVE-2021-44228"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j-core",
+        "currentVersion": "2.14.1",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.logging.log4j",
+        "packageName": "org.apache.logging.log4j:log4j-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/9",
+        "baseline/project-analyzer-report.json#/pomEvidence/14",
+        "artifactReferences.previousOutcomeAnalysisSummary"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The patched version '2.17.0' of org.apache.logging.log4j:log4j-core was flagged as banned by the Maven Enforcer Plugin, as indicated in the previous outcome analysis summary. Automated remediation is blocked by policy and requires manual intervention to resolve the enforcer rule conflict.",
+      "vulnerabilityId": "GHSA-jfh8-c2jp-5v3q"
+    },
+    {
+      "aliases": [
+        "CVE-2021-45105"
+      ],
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "log4j-core",
+        "currentVersion": "2.14.1",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.logging.log4j",
+        "packageName": "org.apache.logging.log4j:log4j-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/10",
+        "baseline/project-analyzer-report.json#/pomEvidence/14",
+        "artifactReferences.previousOutcomeAnalysisSummary"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The patched version '2.17.0' of org.apache.logging.log4j:log4j-core was flagged as banned by the Maven Enforcer Plugin, as indicated in the previous outcome analysis summary. Automated remediation is blocked by policy and requires manual intervention to resolve the enforcer rule conflict.",
+      "vulnerabilityId": "GHSA-p6xc-xr62-6r2g"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/11",
+        "baseline/project-analyzer-report.json#/pomEvidence/12"
+      ],
+      "fixedVersionSelected": "20231013",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/12"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>20231013</version>",
+          "newVersion": "20231013",
+          "oldText": "<version>20230227</version>",
+          "oldVersion": "20230227",
+          "patchId": "patch-GHSA-4jq9-2xhw-jpx7-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows a direct dependency declaration for org.json:json:20230227 in pom.xml. The lowest compatible fixed version is 20231013. This patch did not cause any policy violations in the previous attempt.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "aliases": [
+        "CVE-2022-1471"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "snakeyaml",
+        "currentVersion": "1.33",
+        "ecosystem": "Maven",
+        "groupId": "org.yaml",
+        "packageName": "org.yaml:snakeyaml"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/12",
+        "baseline/project-analyzer-report.json#/pomEvidence/13"
+      ],
+      "fixedVersionSelected": "2.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/13"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>2.0</version>",
+          "newVersion": "2.0",
+          "oldText": "<version>1.33</version>",
+          "oldVersion": "1.33",
+          "patchId": "patch-GHSA-mjmj-j48q-9wg2-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows a direct dependency declaration for org.yaml:snakeyaml:1.33 in pom.xml. The lowest compatible fixed version is 2.0. This patch did not cause any policy violations in the previous attempt.",
+      "vulnerabilityId": "GHSA-mjmj-j48q-9wg2"
+    },
+    {
+      "aliases": [
+        "CVE-2024-47554"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-io",
+        "currentVersion": "2.11.0",
+        "ecosystem": "Maven",
+        "groupId": "commons-io",
+        "packageName": "commons-io:commons-io"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/13",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/4",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/3",
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0"
+      ],
+      "fixedVersionSelected": "2.14.0",
+      "patches": [],
+      "rationale": "This transitive vulnerability (commons-io:commons-io:2.11.0) is introduced by commons-fileupload:commons-fileupload. The parent dependency commons-fileupload will be upgraded (GHSA-vv7r-c36w-3prj) from 1.5 to 1.6.0. This implicitly resolves the commons-io vulnerability as per the 'implicit parent bump' strategy. No direct override is applied for commons-io. This approach did not cause any policy violations in the previous attempt.",
+      "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260706-030751"
+}
