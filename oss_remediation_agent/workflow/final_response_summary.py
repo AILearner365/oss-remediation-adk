@@ -206,21 +206,41 @@ def _manual_review_required_summary(
     planning = outcome.get("planningContextAssessment") if isinstance(outcome.get("planningContextAssessment"), dict) else {}
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
     pr_policy = final.get("prCreationPolicy") or {}
+    attempt_summary = _attempt_summary(manifest)
+    manual_reason = _manual_review_reason(patch_plan) or fallback_message
+    baseline_note = _baseline_comparison_note(outcome)
+
+    summary_lines = [
+        f"- Attempts completed: {attempt_summary['attemptCount']}",
+        "- Planner decision: Manual review required",
+    ]
+    if attempt_summary["validationFailedCount"]:
+        summary_lines.append(f"- Validation failures before escalation: {attempt_summary['validationFailedCount']}")
+    if counts["patchDecisionCount"]:
+        summary_lines.append(f"- Automatable patch decisions considered: {counts['patchDecisionCount']}")
+    if counts["manualReviewCount"]:
+        summary_lines.append(f"- Manual-review decisions: {counts['manualReviewCount']}")
+    if baseline_note:
+        summary_lines.append(f"- Baseline comparison: {baseline_note}")
+    if manual_reason:
+        summary_lines.append(f"- Reason: {manual_reason}")
+    summary_lines.append("- Delivery: No Draft PR created")
+
     if pr_policy.get("mode") == "MANUAL_APPROVAL":
-        summary = "Manual approval is required by PR creation policy after summary generation."
         pr_status = "Draft PR was not created automatically because policy requires manual approval."
     else:
-        summary = fallback_message or "Manual review is required before the workflow can create a validated Draft PR."
-        pr_status = "Draft PR was not created because manual review is required."
-    if counts["manualReviewCount"]:
-        summary += f" {counts['manualReviewCount']} dependency decision(s) require manual review."
+        pr_status = "Draft PR was not created because the latest planner decision requires manual review before a validated PR-ready patch set can be produced."
+
+    planning_assessment = planning.get("assessment") or _manual_review_planning_assessment(patch_plan, attempt_summary)
+    next_step = _first_text(outcome.get("recommendedFocusForPlanner")) or "Review the manual-review decision, resolve the project or policy blocker, then rerun the workflow when automated validation can succeed."
+
     return _summary_model(
         workflow_outcome="Manual Review Required",
-        outcome_summary=summary,
-        root_cause=str(root_cause.get("primaryCause") or final.get("prCreationFailure") or summary),
-        planning_assessment=str(planning.get("assessment") or _planning_assessment_from_counts(patch_plan)),
+        outcome_summary="\n".join(summary_lines),
+        root_cause=str(root_cause.get("primaryCause") or manual_reason or fallback_message or "Manual review is required before automated remediation can continue."),
+        planning_assessment=str(planning_assessment),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=bool(outcome)),
-        recommended_next_step=_first_text(outcome.get("recommendedFocusForPlanner")) or "Review manual-review decisions, resolve unsupported dependency changes, and rerun the workflow when the project is ready for automated validation.",
+        recommended_next_step=next_step,
         pr_status=pr_status,
     )
 
@@ -237,9 +257,18 @@ def _internal_failure_summary(
     label = _INTERNAL_FAILURE_LABELS.get(internal_status, internal_status.replace("_", " ").title())
     stage = _INTERNAL_FAILURE_STAGE.get(internal_status, "Workflow")
     reason = _internal_failure_reason(manifest, internal_status, validation, outcome, fallback_message)
+    outcome_summary = f"Workflow stopped during {stage}. {reason}"
+    if internal_status == "FAILED_MAX_ATTEMPTS":
+        attempts = _attempt_summary(manifest)
+        outcome_summary = "\n".join([
+            f"- Attempts completed: {attempts['attemptCount']}",
+            f"- Validation failures: {attempts['validationFailedCount']}",
+            "- Delivery: No Draft PR created",
+            f"- Reason: {reason}",
+        ])
     return _summary_model(
         workflow_outcome=label,
-        outcome_summary=f"Workflow stopped during {stage}. {reason}",
+        outcome_summary=outcome_summary,
         root_cause=reason,
         planning_assessment=_internal_failure_planning_assessment(internal_status, patch_plan),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=bool(outcome)),
@@ -349,6 +378,59 @@ def _planning_assessment_from_counts(patch_plan: dict[str, Any]) -> str:
     if not counts["totalDecisionCount"]:
         return "No patch-plan decision details were available."
     return f"The remediation plan included {counts['patchDecisionCount']} patch decision(s) and {counts['manualReviewCount']} manual-review decision(s). Review validation and outcome artifacts to decide whether replanning is required."
+
+
+def _manual_review_planning_assessment(patch_plan: dict[str, Any], attempt_summary: dict[str, int]) -> str:
+    reason = _manual_review_reason(patch_plan)
+    prefix = f"The latest planning attempt returned MANUAL_REVIEW after {attempt_summary['attemptCount']} attempt(s)."
+    if reason:
+        return f"{prefix} Planner rationale: {reason}"
+    return f"{prefix} Review the manual-review decision artifact for dependency-level rationale."
+
+
+def _manual_review_reason(patch_plan: dict[str, Any]) -> str:
+    summary = patch_plan.get("summary") if isinstance(patch_plan.get("summary"), dict) else {}
+    for candidate in (summary.get("reason"), patch_plan.get("reason"), patch_plan.get("statusReason")):
+        text = str(candidate or "").strip()
+        if text:
+            return text
+    decisions = patch_plan.get("vulnerabilityDecisions", []) if isinstance(patch_plan, dict) else []
+    reasons: list[str] = []
+    for decision in decisions or []:
+        text = str(decision.get("statusReason") or decision.get("rationale") or "").strip()
+        if text and text not in reasons:
+            reasons.append(text)
+        if len(reasons) >= 2:
+            break
+    return " ".join(reasons)
+
+
+def _baseline_comparison_note(outcome: dict[str, Any]) -> str:
+    evidence = outcome.get("evidenceSummary") if isinstance(outcome.get("evidenceSummary"), list) else []
+    new_facts = outcome.get("newFactsLearned") if isinstance(outcome.get("newFactsLearned"), list) else []
+    root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
+    haystack = " ".join(
+        [
+            _first_text(evidence),
+            _first_text(new_facts),
+            str(root_cause.get("primaryCause") or ""),
+            " ".join(str(item) for item in root_cause.get("contributingFactors", []) or []),
+        ]
+    ).lower()
+    if "baseline" in haystack and ("same" in haystack or "already" in haystack or "pre-existing" in haystack):
+        return "same or related blocker existed before remediation"
+    if "baseline" in haystack:
+        return "baseline build evidence was reviewed"
+    return ""
+
+
+def _attempt_summary(manifest: dict[str, Any]) -> dict[str, int]:
+    attempts = manifest.get("attempts", []) or []
+    return {
+        "attemptCount": len(attempts),
+        "validationFailedCount": sum(1 for attempt in attempts if str(attempt.get("status") or "").upper() == "VALIDATION_FAILED"),
+        "manualReviewDecisionCount": sum(1 for attempt in attempts if str(attempt.get("planningDecisionType") or "").upper() == "MANUAL_REVIEW"),
+    }
 
 
 def _patch_plan_counts(patch_plan: dict[str, Any]) -> dict[str, int]:
@@ -482,13 +564,16 @@ def _evidence_reviewed(manifest: dict[str, Any], workspace: Path, include_outcom
     add("Vulnerability Assessment Report", baseline.get("vulnerabilityAssessmentReport"))
     add("Project Analyzer Report", baseline.get("projectAnalyzerReport"))
     add("Planning Context", planning.get("context"))
-    add("Remediation Patch Plan", planning.get("lastDecision"))
+    add("Latest Planning Decision", planning.get("lastDecision"))
+    add("Manual Review Decision", planning.get("manualReviewDecision"))
     for attempt in manifest.get("attempts", []) or []:
-        add("Patch Dry Run Result", attempt.get("patchDryRunResult"))
-        add("Patch Application Proof", attempt.get("patchApplicationProof"))
-        add("Validation Result", attempt.get("validationResult"))
+        attempt_number = attempt.get("attemptNumber") or "?"
+        add(f"Planning Decision Attempt {attempt_number}", attempt.get("planningDecision"))
+        add(f"Patch Dry Run Result Attempt {attempt_number}", attempt.get("patchDryRunResult"))
+        add(f"Patch Application Proof Attempt {attempt_number}", attempt.get("patchApplicationProof"))
+        add(f"Validation Result Attempt {attempt_number}", attempt.get("validationResult"))
         if include_outcome:
-            add("Outcome Analysis Summary", attempt.get("outcomeAnalysisSummary"))
+            add(f"Outcome Analysis Summary Attempt {attempt_number}", attempt.get("outcomeAnalysisSummary"))
     add("PR Summary", final.get("prSummary"))
     add("Pull Request Publication", final.get("pullRequestPublication"))
     return items
