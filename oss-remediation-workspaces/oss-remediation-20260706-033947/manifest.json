@@ -1,0 +1,174 @@
+{
+  "acceptedPatchSet": {
+    "patchIds": [],
+    "status": "EMPTY",
+    "vulnerabilityIds": []
+  },
+  "additionalInvestigationRequests": [],
+  "artifactId": "manifest",
+  "attempts": [
+    {
+      "attemptNumber": 1,
+      "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-1/repository",
+      "nextAction": "REPLAN_REQUIRED",
+      "nextAttemptNumber": 2,
+      "outcomeAnalysisContext": "attempt-1/outcome-analysis-context.json",
+      "outcomeAnalysisSummary": "attempt-1/outcome-analysis-summary.json",
+      "patchApplicationProof": "attempt-1/patch-application-proof.json",
+      "patchDiff": "attempt-1/patch.diff",
+      "patchDryRunResult": "attempt-1/patch-dry-run-result.json",
+      "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-1/remediation-patch-plan.json",
+      "planningDecision": "attempt-1/remediation-patch-plan.json",
+      "planningDecisionType": "PATCH_PLAN",
+      "replanInput": "attempt-1/outcome-analysis-summary.json",
+      "replanReason": "VALIDATION_FAILED",
+      "status": "VALIDATION_FAILED",
+      "validationResult": "attempt-1/validation-result.json",
+      "workspacePreparation": {
+        "acceptedPatchSetReplay": [],
+        "restoreCleanBaseline": {
+          "artifactPath": null,
+          "capabilities": [],
+          "errors": [],
+          "failureCode": null,
+          "limitations": [],
+          "operation": "restore_attempt_workspace",
+          "payload": {
+            "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-1/repository"
+          },
+          "status": "SUCCESS",
+          "toolName": "RepoCheckoutTool",
+          "toolVersion": "1.0.0",
+          "warnings": []
+        }
+      }
+    },
+    {
+      "attemptNumber": 2,
+      "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-2/repository",
+      "nextAction": "REPLAN_REQUIRED",
+      "nextAttemptNumber": 3,
+      "outcomeAnalysisContext": "attempt-2/outcome-analysis-context.json",
+      "outcomeAnalysisSummary": "attempt-2/outcome-analysis-summary.json",
+      "patchApplicationProof": "attempt-2/patch-application-proof.json",
+      "patchDiff": "attempt-2/patch.diff",
+      "patchDryRunResult": "attempt-2/patch-dry-run-result.json",
+      "patchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-2/remediation-patch-plan.json",
+      "planningDecision": "attempt-2/remediation-patch-plan.json",
+      "planningDecisionType": "PATCH_PLAN",
+      "replanInput": "attempt-2/outcome-analysis-summary.json",
+      "replanInputOutcomeAnalysis": "attempt-1/outcome-analysis-summary.json",
+      "replanReason": "VALIDATION_FAILED",
+      "replanSourceAttempt": 1,
+      "status": "VALIDATION_FAILED",
+      "validationResult": "attempt-2/validation-result.json",
+      "workspacePreparation": {
+        "acceptedPatchSetReplay": [],
+        "restoreCleanBaseline": {
+          "artifactPath": null,
+          "capabilities": [],
+          "errors": [],
+          "failureCode": null,
+          "limitations": [],
+          "operation": "restore_attempt_workspace",
+          "payload": {
+            "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-2/repository"
+          },
+          "status": "SUCCESS",
+          "toolName": "RepoCheckoutTool",
+          "toolVersion": "1.0.0",
+          "warnings": []
+        }
+      }
+    },
+    {
+      "attemptNumber": 3,
+      "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-3/repository",
+      "planningDecision": "attempt-3/manual-review-decision.json",
+      "planningDecisionType": "MANUAL_REVIEW",
+      "replanInputOutcomeAnalysis": "attempt-2/outcome-analysis-summary.json",
+      "replanReason": "VALIDATION_FAILED",
+      "replanSourceAttempt": 2,
+      "status": "ATTEMPT_WORKSPACE_PREPARED",
+      "workspacePreparation": {
+        "acceptedPatchSetReplay": [],
+        "restoreCleanBaseline": {
+          "artifactPath": null,
+          "capabilities": [],
+          "errors": [],
+          "failureCode": null,
+          "limitations": [],
+          "operation": "restore_attempt_workspace",
+          "payload": {
+            "attemptWorkspace": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/attempt-3/repository"
+          },
+          "status": "SUCCESS",
+          "toolName": "RepoCheckoutTool",
+          "toolVersion": "1.0.0",
+          "warnings": []
+        }
+      }
+    }
+  ],
+  "baseline": {
+    "baselineBuildResult": "baseline/baseline-build-result.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "repositoryPath": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947/baseline/repository",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "createdBy": "ADKWorkflowOrchestrator",
+  "final": {},
+  "planning": {
+    "agent": "RemediationPlanningAgent",
+    "context": "attempt-3/remediation-planning-context.json",
+    "expectedDecisionTypes": [
+      "PATCH_PLAN",
+      "MANUAL_REVIEW",
+      "REQUEST_ADDITIONAL_EVIDENCE"
+    ],
+    "lastDecision": "attempt-3/manual-review-decision.json",
+    "manualReviewDecision": "attempt-3/manual-review-decision.json"
+  },
+  "policy": {
+    "allowPartialPr": true,
+    "allowedFilePatterns": [
+      "**/pom.xml"
+    ],
+    "allowedPatchChangeTypes": [
+      "DEPENDENCY_VERSION_VALUE",
+      "MAVEN_PROPERTY_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_VERSION_VALUE",
+      "DEPENDENCY_MANAGEMENT_OVERRIDE",
+      "PARENT_POM_VERSION_VALUE"
+    ],
+    "blockedChangeTypes": [
+      "JAVA_SOURCE_CHANGE",
+      "TEST_SOURCE_CHANGE",
+      "JDK_VERSION_CHANGE",
+      "PLUGIN_BUILD_LOGIC_CHANGE",
+      "SUPPRESSION_OR_IGNORE_WORKAROUND",
+      "FULL_POM_FORMATTING_REWRITE"
+    ],
+    "maxAdditionalInvestigationRequestsPerAttempt": 2,
+    "maxAttempts": 3,
+    "prCreationPolicy": {
+      "allowManualApprovalPrCreation": false,
+      "createDraftPr": true,
+      "mode": "AUTO",
+      "requireValidatedPatchSetForPr": true
+    },
+    "severityScope": [
+      "CRITICAL",
+      "HIGH"
+    ]
+  },
+  "repository": {
+    "baselineCommit": "8222558f56da6a9d02c457b983ea5bdf4a01f203",
+    "referenceBranch": "feature/adk-vulnerable-dependency-test",
+    "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app"
+  },
+  "schemaVersion": "1.0",
+  "status": "MANUAL_REVIEW_REQUIRED",
+  "workflowId": "oss-remediation-mvp",
+  "workspaceRoot": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260706-033947"
+}
