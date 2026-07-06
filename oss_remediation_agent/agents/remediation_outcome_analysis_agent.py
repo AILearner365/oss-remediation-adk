@@ -10,6 +10,7 @@ from oss_remediation_agent.tools.workspace_artifact_tool import (
 )
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_agent.md"
+MILESTONE2_PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "remediation_outcome_analysis_milestone2.md"
 
 _REQUIRED_OUTCOME_FIELDS = {
     "schemaVersion",
@@ -48,7 +49,10 @@ _REQUIRED_EVIDENCE_BACKED_FIELDS = {
 
 def load_prompt() -> str:
     """Load the reviewable prompt for the LLM-backed outcome analysis agent."""
-    return PROMPT_PATH.read_text(encoding="utf-8")
+    prompt = PROMPT_PATH.read_text(encoding="utf-8")
+    if MILESTONE2_PROMPT_PATH.exists():
+        prompt += "\n\n" + MILESTONE2_PROMPT_PATH.read_text(encoding="utf-8")
+    return prompt
 
 
 def build_outcome_analysis_context(
@@ -59,18 +63,14 @@ def build_outcome_analysis_context(
     validation_result_path: str | None = None,
     dry_run_result_path: str | None = None,
 ) -> dict[str, Any]:
-    """Build metadata-first context for the Outcome Analysis Agent LLM.
-
-    The Outcome Analysis Agent is an AI reasoning component, not a deterministic
-    classifier. This context exposes reusable artifact-tool results: a metadata
-    catalog, selected artifact metadata, and compact artifact reads with bounded
-    log excerpts where available.
-    """
+    """Build metadata-first context for the Outcome Analysis Agent LLM."""
 
     workspace = Path(workspace_root).resolve()
     manifest = _read_json(workspace / "manifest.json")
     attempt = _attempt(manifest.get("attempts", []), attempt_number)
+    baseline = manifest.get("baseline") or {}
 
+    baseline_build_ref = _resolve(workspace, baseline.get("baselineBuildResult"))
     patch_plan_ref = _resolve(workspace, patch_plan_path or attempt.get("patchPlan"))
     patch_application_proof_ref = _resolve(workspace, patch_application_proof_path or attempt.get("patchApplicationProof"))
     validation_result_ref = _resolve(workspace, validation_result_path or attempt.get("validationResult"))
@@ -85,7 +85,10 @@ def build_outcome_analysis_context(
         if item.get("path")
     ]
 
+    baseline_build_read = read_workspace_artifact(str(workspace), baseline.get("baselineBuildResult"), attempt_number=attempt_number) if baseline.get("baselineBuildResult") else {"status": "SKIPPED", "content": {}}
+
     legacy_evidence = _legacy_compact_evidence(
+        baseline_build_ref=baseline_build_ref,
         patch_plan_ref=patch_plan_ref,
         patch_application_proof_ref=patch_application_proof_ref,
         validation_result_ref=validation_result_ref,
@@ -113,12 +116,14 @@ def build_outcome_analysis_context(
         "artifactCatalog": artifact_listing.get("artifactCatalog", {}),
         "relevantArtifacts": relevant_artifacts,
         "compactArtifactReads": compact_artifact_reads,
+        "baselineBuildResult": baseline_build_read.get("content", {}),
         **legacy_evidence,
         "notes": [
             "artifactListing, artifactCatalog, and relevantArtifacts are default metadata context; do not request list_workspace_artifacts unless metadata is missing or stale.",
             "Use relevantArtifacts as the first evidence shortlist for the current failure state.",
             "Use compactArtifactReads as the primary readable evidence; each item is produced by read_workspace_artifact default compact mode.",
             "Request read_workspace_artifact with mode='full' only when compact evidence is insufficient for a required outcome conclusion.",
+            "When validation fails during build validation, compare baselineBuildResult with validationResult before deciding whether the patch plan introduced the failure.",
             "When deciding whether the patch plan contributed, compare remediation-patch-plan.json with remediation-planning-context.json when available.",
             "Do not invent occurrence counts, file paths, log details, fields, dependency paths, or patch results.",
         ],
@@ -132,6 +137,9 @@ def build_outcome_analysis_context(
         "manifestPath": str(workspace / "manifest.json"),
         "artifactReferences": {
             "manifest": str(workspace / "manifest.json"),
+            "baselineBuildResult": baseline_build_ref,
+            "baselineVulnerabilityReport": _resolve(workspace, baseline.get("vulnerabilityAssessmentReport")),
+            "baselineProjectAnalyzerReport": _resolve(workspace, baseline.get("projectAnalyzerReport")),
             "planningContext": planning_context_ref,
             "patchPlan": patch_plan_ref,
             "patchApplicationProof": patch_application_proof_ref,
@@ -149,20 +157,35 @@ def build_outcome_analysis_context(
 
 
 def _legacy_compact_evidence(
+    baseline_build_ref: str | None,
     patch_plan_ref: str | None,
     patch_application_proof_ref: str | None,
     validation_result_ref: str | None,
     dry_run_result_ref: str | None,
 ) -> dict[str, Any]:
+    baseline_build = _read_json(baseline_build_ref) if baseline_build_ref else {}
     patch_plan = _read_json(patch_plan_ref) if patch_plan_ref else {}
     dry_run_result = _read_json(dry_run_result_ref) if dry_run_result_ref else {}
     patch_application_proof = _read_json(patch_application_proof_ref) if patch_application_proof_ref else {}
     validation_result = _read_json(validation_result_ref) if validation_result_ref else {}
     return {
+        "baselineBuildResult": _compact_build_result(baseline_build) if baseline_build else None,
         "patchPlan": _compact_patch_plan(patch_plan) if patch_plan else None,
         "patchDryRunResult": _compact_dry_run_result(dry_run_result) if dry_run_result else None,
         "patchApplicationProof": _compact_patch_application_proof(patch_application_proof) if patch_application_proof else None,
         "validationResult": _compact_validation_result(validation_result) if validation_result else None,
+    }
+
+
+def _compact_build_result(build: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": build.get("status"),
+        "command": build.get("command"),
+        "exitCode": build.get("exitCode"),
+        "logExcerpt": build.get("logExcerpt"),
+        "logFile": build.get("logFile") or (build.get("artifactReferences") or {}).get("buildLog"),
+        "errors": build.get("errors", []),
+        "warnings": build.get("warnings", []),
     }
 
 
@@ -176,6 +199,8 @@ def _compact_patch_plan(plan: dict[str, Any]) -> dict[str, Any]:
             "dependency": decision.get("dependency", {}),
             "fixedVersionSelected": decision.get("fixedVersionSelected"),
             "manualReviewCategory": decision.get("manualReviewCategory"),
+            "statusReason": decision.get("statusReason"),
+            "rationale": decision.get("rationale"),
             "patches": [
                 {
                     "patchId": patch.get("patchId"),
@@ -239,12 +264,7 @@ def persist_outcome_analysis_agent_output(
     attempt_number: int,
     output_path: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Persist the LLM-generated Outcome Analysis Summary artifact.
-
-    This wrapper parses and structurally validates the LLM output, writes it to
-    the remediation workspace, and returns a compact artifact reference for the
-    orchestrator. It intentionally does not classify failures using Python rules.
-    """
+    """Persist the LLM-generated Outcome Analysis Summary artifact."""
     workspace = Path(workspace_root)
     outcome = _parse_json_object(llm_output)
     _validate_outcome_analysis_output(outcome)
@@ -296,13 +316,7 @@ def _has_structural_evidence(value: Any) -> bool:
 
 
 def create_outcome_analysis_summary(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
-    """Deprecated compatibility guard.
-
-    Outcome summaries must be produced by the LLM-backed Remediation Outcome
-    Analysis Agent and then persisted with persist_outcome_analysis_agent_output().
-    This function intentionally refuses deterministic failure classification so
-    the implementation remains aligned with the frozen Phase 1-6 architecture.
-    """
+    """Deprecated compatibility guard."""
     raise RuntimeError(
         "Deterministic outcome analysis is disabled. Invoke the LLM Remediation "
         "Outcome Analysis Agent and persist its structured JSON output with "
