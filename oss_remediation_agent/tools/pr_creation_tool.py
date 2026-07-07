@@ -143,6 +143,7 @@ def _validation_summary_from_verification(manifest: dict[str, Any], report: dict
         "verificationOutcome": summary.get("verificationOutcome"),
         "packageCounts": summary.get("packageCounts", {}),
         "findingCounts": summary.get("findingCounts", {}),
+        "severityCounts": severity,
     }
 
 
@@ -291,6 +292,11 @@ def _markdown(
     report_summary = (verification_report or {}).get("summary", {})
     package_counts = validation_summary.get("packageCounts") or report_summary.get("packageCounts") or {}
     finding_counts = validation_summary.get("findingCounts") or report_summary.get("findingCounts") or {}
+    severity_counts = validation_summary.get("severityCounts") or report_summary.get("severityCounts") or {}
+    baseline_severity = severity_counts.get("baseline") or {}
+    resolved_severity = severity_counts.get("resolved") or {}
+    pending_severity = severity_counts.get("pending") or {}
+    new_introduced_severity = severity_counts.get("newIntroduced") or {}
     lines = [
         "# OSS Vulnerability Remediation",
         "",
@@ -303,9 +309,22 @@ def _markdown(
     if verification_report:
         lines.extend([
             f"Verification outcome: **{report_summary.get('verificationOutcome', 'UNKNOWN')}**",
+            "",
             f"Affected packages: **{package_counts.get('affected', 0)}**",
+            f"Resolved packages: **{package_counts.get('resolved', 0)}**",
+            f"Partially resolved packages: **{package_counts.get('partiallyResolved', 0)}**",
+            f"Pending packages: **{package_counts.get('pending', 0)}**",
+            "",
+            f"Baseline findings: **{finding_counts.get('baseline', 0)}**",
             f"Resolved findings: **{finding_counts.get('resolved', 0)}**",
             f"Pending findings: **{finding_counts.get('pending', 0)}**",
+            f"New introduced findings: **{finding_counts.get('newIntroduced', 0)}**",
+            "",
+            f"Baseline severity: **{_severity_summary_text(baseline_severity)}**",
+            f"Resolved severity: **{_severity_summary_text(resolved_severity)}**",
+            f"Pending severity: **{_severity_summary_text(pending_severity)}**",
+            f"New introduced severity: **{_severity_summary_text(new_introduced_severity)}**",
+            f"New Critical/High introduced: **{_yes_no(validation_summary.get('newCriticalHighIntroduced'))}**",
             "",
             "This summary is based on `final/remediation-verification-report.json`, the deterministic verification artifact generated after validation.",
         ])
@@ -371,6 +390,26 @@ def _reviewer_notes(pr_type: str) -> str:
     if pr_type == "PARTIAL_REMEDIATION":
         return "The validated patch set was applied successfully. Any remaining Critical/High findings are listed in the manual-review section with evidence-backed reasons from the remediation verification report."
     return "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and the remediation verification report found no pending Critical or High findings."
+
+
+def _severity_summary_text(counts: dict[str, Any]) -> str:
+    critical = int(counts.get("critical") or 0)
+    high = int(counts.get("high") or 0)
+    medium = int(counts.get("medium") or 0)
+    low = int(counts.get("low") or 0)
+    unknown = int(counts.get("unknown") or 0)
+    parts = [f"Critical={critical}", f"High={high}"]
+    if medium:
+        parts.append(f"Medium={medium}")
+    if low:
+        parts.append(f"Low={low}")
+    if unknown:
+        parts.append(f"Unknown={unknown}")
+    return ", ".join(parts)
+
+
+def _yes_no(value: Any) -> str:
+    return "Yes" if bool(value) else "No"
 
 
 def _aliases(row: dict[str, Any]) -> str:
