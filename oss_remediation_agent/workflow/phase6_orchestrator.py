@@ -148,14 +148,19 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         }
         self.manifest_store.save(manifest)
 
+        verification_result = self.generate_remediation_verification_report()
+
         if mode == "DISABLED":
             manifest = self.manifest_store.load()
             manifest["status"] = "PR_CREATION_FAILED"
             manifest.setdefault("final", {})["prCreationFailure"] = "PR creation is disabled by policy."
             self.manifest_store.save(manifest)
-            return {"status": "PR_CREATION_FAILED", "reason": "PR creation is disabled by policy."}
+            return {
+                "status": "PR_CREATION_FAILED",
+                "verificationReport": verification_result.get("artifactPath"),
+                "reason": "PR creation is disabled by policy.",
+            }
 
-        verification_result = self.generate_remediation_verification_report()
         summary_result = self.generate_final_pr_summary()
 
         if mode == "SUMMARY_ONLY":
@@ -226,8 +231,56 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         return publish_result
 
     def generate_remediation_verification_report(self) -> dict[str, Any]:
-        """Generate the deterministic verification artifact before delivery artifacts."""
-        return build_remediation_verification_report(self.workspace.root)
+        """Generate the deterministic verification artifact before delivery artifacts.
+
+        Partial-remediation finalization can happen after a later manual-review
+        attempt. In that case, the latest attempt is not the validated patch
+        attempt. Prefer acceptedPatchSet.sourceAttempts so the verification
+        report is built from the validated accepted patch set evidence.
+        """
+        manifest = self.manifest_store.load()
+        return build_remediation_verification_report(
+            self.workspace.root,
+            attempt_number=self._verification_attempt_number(manifest),
+        )
+
+    @classmethod
+    def _verification_attempt_number(cls, manifest: dict[str, Any]) -> int | None:
+        accepted = manifest.get("acceptedPatchSet") or {}
+        source_attempts = accepted.get("sourceAttempts") or []
+        for candidate in reversed(source_attempts):
+            attempt_number = cls._safe_attempt_number(candidate)
+            if attempt_number is not None:
+                return attempt_number
+
+        attempt_number = cls._attempt_number_from_ref(accepted.get("validationResult"))
+        if attempt_number is not None:
+            return attempt_number
+
+        for attempt in reversed(manifest.get("attempts", []) or []):
+            status = str(attempt.get("status") or "").upper()
+            if status == "VALIDATION_SUCCEEDED" and attempt.get("validationResult"):
+                return cls._safe_attempt_number(attempt.get("attemptNumber"))
+        return None
+
+    @staticmethod
+    def _safe_attempt_number(value: Any) -> int | None:
+        try:
+            return int(value)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _attempt_number_from_ref(ref: Any) -> int | None:
+        if not ref:
+            return None
+        for part in Path(str(ref)).parts:
+            if part.startswith("attempt-"):
+                try:
+                    return int(part.removeprefix("attempt-"))
+                except Exception:
+                    return None
+        return None
 
     @staticmethod
     def _next_action(manifest: dict[str, Any]) -> str:
