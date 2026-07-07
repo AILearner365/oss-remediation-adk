@@ -1,0 +1,67 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[WARNING] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.20.0-GA during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... FAILURE [  2.410 s]
+[INFO] task-common ........................................ SKIPPED
+[INFO] task-domain ........................................ SKIPPED
+[INFO] task-service ....................................... SKIPPED
+[INFO] task-web ........................................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.678 s
+[INFO] Finished at: 2026-07-07T01:55:50Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-enforcer-plugin:3.6.2:enforce (base-oss-dependency-guardrails) on project secure-multimodule-springboot-java21: 
+[ERROR] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence failed with message:
+[ERROR] Failed while enforcing releasability.
+[ERROR] 
+[ERROR] Dependency convergence error for commons-io:commons-io:jar:2.11.0. Paths to dependency are:
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-commons-fileupload:commons-fileupload:jar:1.5:compile
+[ERROR]     +-commons-io:commons-io:jar:2.11.0:compile
+[ERROR] and
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-org.apache.struts:struts2-core:jar:2.5.12:compile
+[ERROR]     +-commons-io:commons-io:jar:2.4:compile
+[ERROR] 
+[ERROR] 
+[ERROR] Dependency convergence error for commons-fileupload:commons-fileupload:jar:1.5. Paths to dependency are:
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-commons-fileupload:commons-fileupload:jar:1.5:compile
+[ERROR] and
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-org.apache.struts:struts2-core:jar:2.5.12:compile
+[ERROR]     +-commons-fileupload:commons-fileupload:jar:1.3.3:compile
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+

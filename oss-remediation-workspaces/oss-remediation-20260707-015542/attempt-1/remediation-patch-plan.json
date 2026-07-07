@@ -1,0 +1,367 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-1",
+  "artifactReferences": {
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-1",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 15,
+    "patchDecisionCount": 3
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/pomEvidence/12"
+      ],
+      "fixedVersionSelected": "1.6.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/12"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.6.0</version>",
+          "newVersion": "1.6.0",
+          "oldText": "<version>1.5</version>",
+          "oldVersion": "1.5",
+          "patchId": "patch-1"
+        }
+      ],
+      "rationale": "The project analyzer report shows this is a direct dependency in the root POM, and the selected fixed version is the lowest compatible from the vulnerability assessment report.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/10"
+      ],
+      "fixedVersionSelected": "1.10.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/10"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.10.0</version>",
+          "newVersion": "1.10.0",
+          "oldText": "<version>1.9</version>",
+          "oldVersion": "1.9",
+          "patchId": "patch-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows this is a direct dependency in the root POM, and the selected fixed version is the lowest compatible from the vulnerability assessment report.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-2j39-qcjm-428w"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/3"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-43mq-6xmg-29vm"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/4"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-4g42-gqrg-4633"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/5"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-729q-fcgp-r5xh"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/6"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-8m5q-crqq-6pmf"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/7"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-ccp5-gg58-pxfm"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/8"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-cr6j-3jp9-rw65"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/9"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-jc35-q369-45pv"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/10"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-qcfc-hmrc-59x7"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/11"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-rg58-xhh7-mqjw"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/12"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-v8j6-6c2r-r27c"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/13"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-wp4h-pvgw-5727"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/14"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-x5x7-3v85-wpc4"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/15"
+      ],
+      "manualReviewCategory": "MANUAL_MAJOR_VERSION_OR_PLATFORM_MIGRATION",
+      "statusReason": "Upgrading Struts2 from 2.5.12 to a version that addresses all reported vulnerabilities (e.g., 6.x or 7.x) constitutes a major version migration, requiring significant code changes beyond POM-only modifications. Manual intervention is required to assess compatibility and potential breaking changes.",
+      "vulnerabilityId": "GHSA-xx7v-hqxh-cjr9"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/16",
+        "baseline/project-analyzer-report.json#/pomEvidence/11"
+      ],
+      "fixedVersionSelected": "20231013",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/11"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>20231013</version>",
+          "newVersion": "20231013",
+          "oldText": "<version>20230227</version>",
+          "oldVersion": "20230227",
+          "patchId": "patch-3"
+        }
+      ],
+      "rationale": "The project analyzer report shows this is a direct dependency in the root POM, and the selected fixed version is the lowest compatible from the vulnerability assessment report.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "aliases": [
+        "CVE-2024-47554"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-io",
+        "currentVersion": "2.11.0",
+        "ecosystem": "Maven",
+        "groupId": "commons-io",
+        "packageName": "commons-io:commons-io"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/17",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/6",
+        "baseline/project-analyzer-report.json#/pomEvidence/9"
+      ],
+      "fixedVersionSelected": "2.14.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_MANAGEMENT_OVERRIDE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/9"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-service</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n            <dependency>\n                <groupId>commons-io</groupId>\n                <artifactId>commons-io</artifactId>\n                <version>2.14.0</version>\n            </dependency>\n        </dependencies>",
+          "newVersion": "2.14.0",
+          "oldText": "                <groupId>${project.groupId}</groupId>\n                <artifactId>task-service</artifactId>\n                <version>${project.version}</version>\n            </dependency>\n        </dependencies>",
+          "oldVersion": "2.11.0",
+          "patchId": "patch-4"
+        }
+      ],
+      "rationale": "The vulnerable dependency is transitive, introduced by commons-fileupload. Since the commons-fileupload upgrade does not explicitly guarantee a fix for commons-io, and policy allows it, a direct dependencyManagement override is being applied. The selected fixed version is the lowest compatible from the vulnerability assessment report.",
+      "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260707-015542"
+}
