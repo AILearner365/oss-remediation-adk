@@ -1,0 +1,133 @@
+{
+  "artifactId": "outcome-analysis-summary-attempt-1",
+  "artifactReferences": {
+    "additionalEvidenceRequest": "attempt-1/additional-evidence-request.json",
+    "manifest": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260707-025126/manifest.json",
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "remediationPlanningContext": "attempt-1/remediation-planning-context.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "capabilityGaps": [
+    "The current workflow encountered a failure in the VULNERABILITY_ASSESSMENT stage, which needs to be addressed upstream, potentially requiring a re-evaluation or re-execution of the vulnerability assessment tool or its configuration."
+  ],
+  "createdBy": "RemediationOutcomeAnalysisAgent",
+  "errors": [],
+  "evidenceSummary": [
+    {
+      "statement": "The workflow status indicates that additional investigation has been completed.",
+      "supports": [
+        "manifest.json#/status",
+        "manifest.json#/attempts/0/status"
+      ]
+    },
+    {
+      "statement": "The Remediation Planning Agent's last decision was to request additional evidence.",
+      "supports": [
+        "manifest.json#/planning/lastDecision",
+        "attempt-1/additional-evidence-request.json#/decisionType"
+      ]
+    },
+    {
+      "statement": "The reason for the additional evidence request is the failed vulnerability assessment report.",
+      "supports": [
+        "attempt-1/additional-evidence-request.json#/reason"
+      ]
+    },
+    {
+      "statement": "The baseline vulnerability assessment report explicitly shows a 'FAILED' status.",
+      "supports": [
+        "baseline/vulnerability-assessment-report.json#/status"
+      ]
+    },
+    {
+      "statement": "The baseline vulnerability assessment report contains an empty list of vulnerabilities.",
+      "supports": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities"
+      ]
+    },
+    {
+      "statement": "The planning context provided to the Remediation Planning Agent included information indicating zero in-scope vulnerabilities.",
+      "supports": [
+        "attempt-1/remediation-planning-context.json#/vulnerabilityAssessmentSummary/totalInScopeCount"
+      ]
+    }
+  ],
+  "failureCategory": "WORKFLOW_FAILURE",
+  "newFactsLearned": [
+    {
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/status",
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities"
+      ],
+      "statement": "The vulnerability assessment report for the baseline repository indicates a 'FAILED' status and contains no vulnerabilities, which is critical input for remediation planning."
+    },
+    {
+      "evidenceReferences": [
+        "attempt-1/additional-evidence-request.json#/decisionType",
+        "attempt-1/additional-evidence-request.json#/reason"
+      ],
+      "statement": "The Remediation Planning Agent correctly identified the lack of a valid vulnerability assessment and responded by requesting additional evidence instead of attempting to generate a patch."
+    }
+  ],
+  "planningContextAssessment": {
+    "assessment": "The Remediation Planning Agent was provided with sufficient context to make the decision to request additional evidence. The `remediation-planning-context.json` included the `vulnerability-assessment-report.json` which clearly indicated a 'FAILED' status and absence of vulnerabilities. The agent accurately identified this lack of actionable vulnerability data, preventing it from proceeding with a patch plan.",
+    "planningContextAvailable": true,
+    "sufficientContext": "true",
+    "supportingEvidence": [
+      "attempt-1/remediation-planning-context.json#/artifactReferences/vulnerabilityAssessmentReport",
+      "attempt-1/remediation-planning-context.json#/vulnerabilityAssessmentSummary/totalInScopeCount",
+      "baseline/vulnerability-assessment-report.json#/status",
+      "baseline/vulnerability-assessment-report.json#/vulnerabilities"
+    ]
+  },
+  "recommendedDisposition": "MANUAL_REVIEW_REQUIRED",
+  "recommendedFocusForPlanner": [
+    "Investigate and resolve the underlying cause of the 'FAILED' VULNERABILITY_ASSESSMENT_REPORT to ensure valid vulnerability data is available for future planning iterations.",
+    "The Planning Agent should not attempt to generate a remediation plan until a successful vulnerability assessment report with identified vulnerabilities is provided."
+  ],
+  "responsibilityArea": "WORKSPACE_STATE",
+  "rootCauseAnalysis": {
+    "causedByPatchPlan": "false",
+    "confidence": "HIGH",
+    "contributingFactors": [],
+    "primaryCause": "The primary cause of the remediation workflow's inability to produce a patch plan is the failure of the initial VULNERABILITY_ASSESSMENT stage. The 'baseline/vulnerability-assessment-report.json' explicitly states a 'FAILED' status and an empty list of vulnerabilities, rendering it impossible for the Remediation Planning Agent to identify and address any in-scope vulnerabilities.",
+    "supportingEvidence": [
+      "baseline/vulnerability-assessment-report.json#/status",
+      "baseline/vulnerability-assessment-report.json#/vulnerabilities",
+      "attempt-1/additional-evidence-request.json#/reason"
+    ]
+  },
+  "schemaVersion": "1.0",
+  "status": "COMPLETED",
+  "warnings": [],
+  "whatChanged": {
+    "appliedPatchIds": [],
+    "changedFiles": [],
+    "diffArtifact": null,
+    "failedPatchIds": [],
+    "repositoryModified": false,
+    "summary": "No repository modifications occurred as the Remediation Planning Agent determined it could not generate a patch plan due to insufficient vulnerability context. Instead, an additional evidence request was recorded."
+  },
+  "whatHappened": {
+    "evidenceReferences": [
+      "manifest.json#/planning/lastDecision",
+      "attempt-1/additional-evidence-request.json#/decisionType",
+      "attempt-1/additional-evidence-request.json#/reason",
+      "baseline/vulnerability-assessment-report.json#/status",
+      "baseline/vulnerability-assessment-report.json#/vulnerabilities"
+    ],
+    "failedStage": "REMEDIATION_PLANNING",
+    "failureSummary": "The workflow progressed to the REMEDIATION_PLANNING stage. The Remediation Planning Agent, upon evaluating the provided context, found that the baseline vulnerability assessment report was in a 'FAILED' state and contained no vulnerabilities. This prevented the agent from creating a remediation patch plan, leading it to issue a request for additional investigation.",
+    "logReferences": []
+  },
+  "whatWeTried": {
+    "changeTypes": [],
+    "dependencies": [],
+    "patchPlan": "attempt-1/additional-evidence-request.json",
+    "summary": "The Remediation Planning Agent was invoked to generate a remediation plan. However, due to a 'FAILED' status in the baseline vulnerability assessment report, it could not identify any vulnerabilities to remediate. Consequently, it produced an 'ADDITIONAL_INVESTIGATION_REQUEST' artifact to signal the need for further investigation into the vulnerability assessment failure.",
+    "targetedFiles": [],
+    "vulnerabilityIds": []
+  },
+  "workflowId": "oss-remediation-mvp"
+}

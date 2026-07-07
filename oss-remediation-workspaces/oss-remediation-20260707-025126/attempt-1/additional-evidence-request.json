@@ -1,0 +1,23 @@
+{
+  "artifactId": "additional-investigation-request-attempt-1",
+  "artifactReferences": {
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "REQUEST_ADDITIONAL_EVIDENCE",
+  "errors": [],
+  "evidenceReferences": [
+    "baseline/vulnerability-assessment-report.json",
+    "baseline/project-analyzer-report.json"
+  ],
+  "expectedOutcome": "Receive a valid vulnerability assessment report containing one or more in-scope vulnerabilities with their respective details and fixed versions, enabling the creation of a remediation plan.",
+  "reason": "The vulnerability assessment report (`vulnerability-assessment-report.json`) indicates a 'FAILED' status and contains an empty list of vulnerabilities. Without a successful vulnerability assessment, no in-scope vulnerabilities can be identified or remediated.",
+  "requestedTool": "VulnerabilityAssessmentAgent",
+  "requiredArtifact": "A successful vulnerability assessment report with identified vulnerabilities.",
+  "schemaVersion": "1.0",
+  "status": "REQUESTED",
+  "warnings": [],
+  "workflowId": "oss-remediation-20260707-025126"
+}
