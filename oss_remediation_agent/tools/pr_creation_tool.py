@@ -11,15 +11,24 @@ TOOL = "PRCreationTool"
 
 def create_pr_summary(manifest_path: str, output_path: str, pr_description_path: str, workflow_id: str = "unknown") -> dict:
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8")) if Path(manifest_path).exists() else {}
+    verification_report = _verification_report(manifest)
     accepted = manifest.get("acceptedPatchSet", {})
-    remediation_summary = _remediation_summary(manifest)
-    validation_summary = _validation_summary(manifest)
-    manual_review_summary = _manual_review_summary(manifest)
-    pr_type = "FULL_REMEDIATION" if validation_summary.get("remainingCriticalHigh", 0) == 0 else "PARTIAL_REMEDIATION"
+
+    remediation_summary = _remediation_summary_from_verification(verification_report) if verification_report else _remediation_summary(manifest)
+    manual_review_summary = _manual_review_summary_from_verification(verification_report) if verification_report else _manual_review_summary(manifest)
+    validation_summary = _validation_summary_from_verification(manifest, verification_report) if verification_report else _validation_summary(manifest)
+    pr_type = _pr_type_from_verification(verification_report) if verification_report else ("FULL_REMEDIATION" if validation_summary.get("remainingCriticalHigh", 0) == 0 else "PARTIAL_REMEDIATION")
     eligible = accepted.get("status") == "VALIDATED"
-    body = _markdown(remediation_summary, validation_summary, pr_type, manual_review_summary)
+
+    body = _markdown(remediation_summary, validation_summary, pr_type, manual_review_summary, verification_report)
     Path(pr_description_path).parent.mkdir(parents=True, exist_ok=True)
     Path(pr_description_path).write_text(body, encoding="utf-8")
+
+    artifact_refs = {"manifest": manifest_path, "prDescription": pr_description_path}
+    verification_ref = (manifest.get("final") or {}).get("remediationVerificationReport")
+    if verification_ref:
+        artifact_refs["remediationVerificationReport"] = verification_ref
+
     summary = common_artifact(
         artifact_id="pr-summary-001",
         workflow_id=workflow_id or manifest.get("workflowId", "unknown"),
@@ -35,7 +44,8 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
         remediationSummary=remediation_summary,
         manualReviewSummary=manual_review_summary,
         validationSummary=validation_summary,
-        artifactReferences={"manifest": manifest_path, "prDescription": pr_description_path},
+        verificationSummary=(verification_report or {}).get("summary", {}),
+        artifactReferences=artifact_refs,
         prBodyMarkdown=body,
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +58,93 @@ def create_pr_summary(manifest_path: str, output_path: str, pr_description_path:
         manifestStatus=manifest.get("status"),
         prType=summary["prType"],
     ).to_dict()
+
+
+def _verification_report(manifest: dict[str, Any]) -> dict[str, Any]:
+    report_ref = (manifest.get("final") or {}).get("remediationVerificationReport")
+    if not report_ref:
+        return {}
+    workspace_root = Path(manifest.get("workspaceRoot", "."))
+    report_path = Path(report_ref)
+    if not report_path.is_absolute():
+        report_path = workspace_root / report_path
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _pr_type_from_verification(report: dict[str, Any]) -> str:
+    outcome = str((report.get("summary") or {}).get("verificationOutcome") or "").upper()
+    if outcome == "FULL_REMEDIATION":
+        return "FULL_REMEDIATION"
+    if outcome in {"PARTIAL_REMEDIATION", "VALIDATION_FAILED"}:
+        return "PARTIAL_REMEDIATION"
+    counts = ((report.get("summary") or {}).get("findingCounts") or {})
+    return "PARTIAL_REMEDIATION" if int(counts.get("pending") or 0) else "FULL_REMEDIATION"
+
+
+def _remediation_summary_from_verification(report: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for package in report.get("packages", []) or []:
+        for finding in package.get("findings", []) or []:
+            if finding.get("finalStatus") != "RESOLVED":
+                continue
+            rows.append({
+                "vulnerabilityId": finding.get("vulnerabilityId"),
+                "aliases": finding.get("aliases", []),
+                "severity": finding.get("severity"),
+                "dependency": package.get("packageName") or "UNKNOWN",
+                "oldVersion": finding.get("baselineVersion") or package.get("baselineVersion"),
+                "newVersion": finding.get("selectedVersion") or package.get("selectedVersion"),
+                "status": finding.get("finalStatus"),
+                "statusReason": finding.get("finalReason") or package.get("packageVerificationSummary") or "Verified as resolved by remediation validation.",
+            })
+    return rows
+
+
+def _manual_review_summary_from_verification(report: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for package in report.get("packages", []) or []:
+        for finding in package.get("findings", []) or []:
+            if finding.get("finalStatus") == "RESOLVED":
+                continue
+            attempt = (finding.get("attemptHistory") or [{}])[-1]
+            rows.append({
+                "vulnerabilityId": finding.get("vulnerabilityId"),
+                "aliases": finding.get("aliases", []),
+                "severity": finding.get("severity"),
+                "dependency": package.get("packageName") or "UNKNOWN",
+                "currentVersion": finding.get("baselineVersion") or package.get("baselineVersion"),
+                "status": finding.get("finalStatus"),
+                "manualReviewCategory": finding.get("resolutionType") or attempt.get("plannerDecision") or "MANUAL_REVIEW",
+                "reason": finding.get("finalReason") or attempt.get("plannerRationale") or package.get("packageVerificationSummary") or "Manual review required.",
+            })
+    return rows
+
+
+def _validation_summary_from_verification(manifest: dict[str, Any], report: dict[str, Any]) -> dict[str, Any]:
+    summary = report.get("summary") or {}
+    severity = summary.get("severityCounts") or {}
+    pending = severity.get("pending") or {}
+    new_introduced = severity.get("newIntroduced") or {}
+    latest_validation = _latest_validation(manifest)
+    return {
+        "baselineBuild": "SUCCESS" if manifest.get("baseline", {}).get("baselineBuildResult") else "UNKNOWN",
+        "changeScopeValidation": (latest_validation.get("changeScopeValidation") or {}).get("status") if latest_validation else "UNKNOWN",
+        "buildValidation": (latest_validation.get("buildValidation") or {}).get("status") if latest_validation else "UNKNOWN",
+        "testValidation": (latest_validation.get("testValidation") or {}).get("status") if latest_validation else "UNKNOWN",
+        "osvValidation": summary.get("validationStatus", "UNKNOWN"),
+        "remainingCriticalCount": int(pending.get("critical") or 0),
+        "remainingHighCount": int(pending.get("high") or 0),
+        "remainingCriticalHigh": int(pending.get("critical") or 0) + int(pending.get("high") or 0),
+        "newCriticalHighIntroduced": bool((new_introduced.get("critical") or 0) or (new_introduced.get("high") or 0)),
+        "verificationOutcome": summary.get("verificationOutcome"),
+        "packageCounts": summary.get("packageCounts", {}),
+        "findingCounts": summary.get("findingCounts", {}),
+        "severityCounts": severity,
+    }
 
 
 def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
@@ -67,8 +164,6 @@ def _remediation_summary(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             "status": row.get("status", "REMEDIATED"),
             "statusReason": row.get("statusReason", "Patch set validated successfully."),
         })
-
-    # Backward-compatible fallback for older manifests that only stored IDs.
     if not rows:
         for vulnerability_id in accepted.get("vulnerabilityIds", []) or []:
             rows.append({
@@ -192,7 +287,16 @@ def _markdown(
     validation_summary: dict[str, Any],
     pr_type: str,
     manual_review_summary: list[dict[str, Any]],
+    verification_report: dict[str, Any] | None = None,
 ) -> str:
+    report_summary = (verification_report or {}).get("summary", {})
+    package_counts = validation_summary.get("packageCounts") or report_summary.get("packageCounts") or {}
+    finding_counts = validation_summary.get("findingCounts") or report_summary.get("findingCounts") or {}
+    severity_counts = validation_summary.get("severityCounts") or report_summary.get("severityCounts") or {}
+    baseline_severity = severity_counts.get("baseline") or {}
+    resolved_severity = severity_counts.get("resolved") or {}
+    pending_severity = severity_counts.get("pending") or {}
+    new_introduced_severity = severity_counts.get("newIntroduced") or {}
     lines = [
         "# OSS Vulnerability Remediation",
         "",
@@ -201,16 +305,40 @@ def _markdown(
         "This PR remediates Critical/High OSS vulnerabilities detected by the automated OSS remediation workflow.",
         "",
         f"Remediation type: **{pr_type}**",
+    ]
+    if verification_report:
+        lines.extend([
+            f"Verification outcome: **{report_summary.get('verificationOutcome', 'UNKNOWN')}**",
+            "",
+            f"Affected packages: **{package_counts.get('affected', 0)}**",
+            f"Resolved packages: **{package_counts.get('resolved', 0)}**",
+            f"Partially resolved packages: **{package_counts.get('partiallyResolved', 0)}**",
+            f"Pending packages: **{package_counts.get('pending', 0)}**",
+            "",
+            f"Baseline findings: **{finding_counts.get('baseline', 0)}**",
+            f"Resolved findings: **{finding_counts.get('resolved', 0)}**",
+            f"Pending findings: **{finding_counts.get('pending', 0)}**",
+            f"New introduced findings: **{finding_counts.get('newIntroduced', 0)}**",
+            "",
+            f"Baseline severity: **{_severity_summary_text(baseline_severity)}**",
+            f"Resolved severity: **{_severity_summary_text(resolved_severity)}**",
+            f"Pending severity: **{_severity_summary_text(pending_severity)}**",
+            f"New introduced severity: **{_severity_summary_text(new_introduced_severity)}**",
+            f"New Critical/High introduced: **{_yes_no(validation_summary.get('newCriticalHighIntroduced'))}**",
+            "",
+            "This summary is based on `final/remediation-verification-report.json`, the deterministic verification artifact generated after validation.",
+        ])
+    lines.extend([
         "",
         "## Remediated Vulnerabilities",
         "",
         "| Vulnerability ID | CVE | Severity | Dependency | Old Version | New Version | Status | Reason |",
         "|---|---|---|---|---|---|---|---|",
-    ]
+    ])
     if remediation_summary:
         for row in remediation_summary:
             lines.append(
-                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {row.get('statusReason')} |"
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('oldVersion') or 'N/A'} | {row.get('newVersion') or 'N/A'} | {row.get('status')} | {_escape_table(row.get('statusReason'))} |"
             )
     else:
         lines.append("| N/A | N/A | N/A | N/A | N/A | N/A | NOT_ELIGIBLE | No validated remediation available. |")
@@ -227,7 +355,7 @@ def _markdown(
         ])
         for row in manual_review_summary:
             lines.append(
-                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('currentVersion') or 'N/A'} | {row.get('status')} | {row.get('manualReviewCategory') or 'MANUAL_REVIEW'} | {row.get('reason')} |"
+                f"| {row.get('vulnerabilityId')} | {_aliases(row)} | {row.get('severity') or 'N/A'} | {row.get('dependency')} | {row.get('currentVersion') or 'N/A'} | {row.get('status')} | {row.get('manualReviewCategory') or 'MANUAL_REVIEW'} | {_escape_table(row.get('reason'))} |"
             )
 
     lines.extend([
@@ -260,10 +388,34 @@ def _markdown(
 
 def _reviewer_notes(pr_type: str) -> str:
     if pr_type == "PARTIAL_REMEDIATION":
-        return "The validated patch set was applied successfully. Any remaining Critical/High vulnerabilities are listed in the manual-review section with reasons."
-    return "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and post-remediation OSV validation found no remaining Critical or High vulnerabilities."
+        return "The validated patch set was applied successfully. Any remaining Critical/High findings are listed in the manual-review section with evidence-backed reasons from the remediation verification report."
+    return "The patch set was generated from the validated remediation plan and applied using exact-text Maven dependency version updates. The resulting project build and tests passed, and the remediation verification report found no pending Critical or High findings."
+
+
+def _severity_summary_text(counts: dict[str, Any]) -> str:
+    critical = int(counts.get("critical") or 0)
+    high = int(counts.get("high") or 0)
+    medium = int(counts.get("medium") or 0)
+    low = int(counts.get("low") or 0)
+    unknown = int(counts.get("unknown") or 0)
+    parts = [f"Critical={critical}", f"High={high}"]
+    if medium:
+        parts.append(f"Medium={medium}")
+    if low:
+        parts.append(f"Low={low}")
+    if unknown:
+        parts.append(f"Unknown={unknown}")
+    return ", ".join(parts)
+
+
+def _yes_no(value: Any) -> str:
+    return "Yes" if bool(value) else "No"
 
 
 def _aliases(row: dict[str, Any]) -> str:
     aliases = row.get("aliases") or []
     return ", ".join(str(alias) for alias in aliases) if aliases else "N/A"
+
+
+def _escape_table(value: Any) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ")
