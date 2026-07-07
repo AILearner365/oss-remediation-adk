@@ -113,6 +113,44 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             "nextAction": self._next_action(manifest),
         }
 
+    def _enrich_progress(self, progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+        """Attach known artifact references to ADK progress events.
+
+        ADK Web stage tools pass compact progress records. Runtime summary needs
+        the method to exist and benefits when artifact references are attached,
+        but enrichment must remain best-effort and side-effect free.
+        """
+        enriched = [dict(item) for item in (progress or [])]
+        if not enriched:
+            return enriched
+
+        baseline = manifest.get("baseline") or {}
+        planning = manifest.get("planning") or {}
+        final = manifest.get("final") or {}
+        artifact_by_step: dict[str, Any] = {
+            "baseline_build": baseline.get("baselineBuildResult"),
+            "vulnerability_assessment": baseline.get("vulnerabilityAssessmentReport"),
+            "project_analysis": baseline.get("projectAnalyzerReport"),
+            "remediation_planning_agent_attempt_1": planning.get("lastDecision"),
+            "pr_summary_created": final.get("prSummary"),
+            "pull_request_delivery_stage": final.get("remediationVerificationReport"),
+            "pull_request_published": final.get("pullRequestPublication"),
+        }
+
+        for attempt in manifest.get("attempts", []) or []:
+            attempt_number = attempt.get("attemptNumber") or 1
+            artifact_by_step[f"patch_dry_run_attempt_{attempt_number}"] = attempt.get("patchDryRunResult")
+            artifact_by_step[f"patch_apply_attempt_{attempt_number}"] = attempt.get("patchApplicationProof")
+            artifact_by_step[f"validation_attempt_{attempt_number}"] = attempt.get("validationResult")
+            artifact_by_step[f"outcome_analysis_attempt_{attempt_number}"] = attempt.get("outcomeAnalysisSummary")
+            artifact_by_step[f"remediation_planning_agent_attempt_{attempt_number}"] = attempt.get("patchPlan") or planning.get("lastDecision")
+
+        for item in enriched:
+            step = item.get("step")
+            if step and not item.get("artifactPath") and artifact_by_step.get(str(step)):
+                item["artifactPath"] = artifact_by_step[str(step)]
+        return enriched
+
     def _finalize_successful_validation(self) -> dict:
         manifest = self.manifest_store.load()
         manifest["status"] = "VALIDATION_SUCCEEDED"
@@ -569,7 +607,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 if isinstance(item, dict):
                     name = item.get("name") or "Evidence"
                     path = item.get("path") or ""
-                    lines.append(f"- **{name}**: `{path}`" if path else f"- **{name}**")
+                    lines.append(f"- **{name}**: `{path}`" if path else f"- **{name}")
                 else:
                     lines.append(f"- {item}")
         else:
