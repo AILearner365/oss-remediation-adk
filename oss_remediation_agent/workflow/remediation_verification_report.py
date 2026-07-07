@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_REF = "final/remediation-verification-report.json"
+_PENDING_STATUSES = {"PENDING_MANUAL_REVIEW", "REMAINING", "UNKNOWN_VALIDATION_FAILED"}
 
 
 def build_remediation_verification_report(
@@ -14,10 +15,9 @@ def build_remediation_verification_report(
 ) -> dict[str, Any]:
     """Build the deterministic package-centric remediation verification report.
 
-    The report is intentionally fact-oriented. It derives final package/finding
-    status from persisted deterministic artifacts, especially the baseline
-    vulnerability assessment and the post-remediation OSV validation result. It
-    does not rely on the Outcome Analysis Agent to decide counts or status.
+    This builder owns the fact layer for success and partial remediation reporting.
+    It derives package/finding status from persisted deterministic artifacts and
+    never uses Outcome Analysis Agent narrative to decide final counts or state.
     """
     workspace = Path(workspace_root).resolve()
     manifest_path = workspace / "manifest.json"
@@ -43,24 +43,28 @@ def build_remediation_verification_report(
 
     validation_ref = attempt.get("validationResult")
     validation = _read_json(_resolve(workspace, validation_ref))
+    validation_status = str(validation.get("status") or "UNKNOWN").upper()
     osv_validation = validation.get("osvValidation") if isinstance(validation.get("osvValidation"), dict) else {}
-    post_osv_scan_ref = osv_validation.get("scanResultFile")
+    post_osv_scan_ref = osv_validation.get("scanResultFile") or (validation.get("artifactReferences") or {}).get("osvReport")
     remaining_findings = [item for item in osv_validation.get("remainingVulnerabilities", []) or [] if isinstance(item, dict)]
 
-    baseline_keys = {_finding_key(item) for item in baseline_findings}
-    remaining_by_key = {_finding_key(item): item for item in remaining_findings}
-    new_findings = [item for item in remaining_findings if _finding_key(item) not in baseline_keys]
+    baseline_identity_keys = {_finding_identity_key(item) for item in baseline_findings}
+    remaining_by_exact_key = {_finding_key(item): item for item in remaining_findings}
+    remaining_by_identity_key = {_finding_identity_key(item): item for item in remaining_findings}
+    new_findings = [item for item in remaining_findings if _finding_identity_key(item) not in baseline_identity_keys]
 
     package_map: dict[str, dict[str, Any]] = {}
     all_finding_rows: list[dict[str, Any]] = []
     for index, finding in enumerate(baseline_findings):
+        planner_decision = _find_planner_decision(planner_index, finding)
         row = _build_finding_row(
-            workspace=workspace,
             finding=finding,
             finding_index=index,
             attempt_number=attempt_no,
-            planner_decision=planner_index.get(_finding_key(finding)) or planner_index.get(_finding_package_key(finding)),
-            remaining_by_key=remaining_by_key,
+            planner_decision=planner_decision,
+            validation_status=validation_status,
+            remaining_by_exact_key=remaining_by_exact_key,
+            remaining_by_identity_key=remaining_by_identity_key,
             applied_patch_ids=applied_patch_ids,
             patch_plan_ref=patch_plan_ref,
             proof_ref=proof_ref,
@@ -68,22 +72,21 @@ def build_remediation_verification_report(
             post_osv_scan_ref=post_osv_scan_ref,
         )
         all_finding_rows.append(row)
-        package_name = row["packageName"]
-        package = package_map.setdefault(package_name, _new_package(row))
+        package = package_map.setdefault(row["packageName"], _new_package(row))
         package["findings"].append(_public_finding_row(row))
         _merge_package_version(package, row)
 
     for package in package_map.values():
-        _finalize_package(package)
+        _finalize_package(package, validation_status)
 
     packages = sorted(package_map.values(), key=lambda item: item.get("packageName") or "")
-    summary = _summary(packages, all_finding_rows, new_findings, validation)
+    summary = _summary(packages, all_finding_rows, new_findings, validation_status)
 
     report = {
         "schemaVersion": "1.0",
         "artifactId": "remediation-verification-report",
         "createdBy": "RemediationVerificationReportBuilder",
-        "status": "SUCCESS" if summary["validationStatus"] == "SUCCESS" else "PARTIAL",
+        "status": "SUCCESS",
         "summary": summary,
         "packages": packages,
         "artifactReferences": {
@@ -116,12 +119,13 @@ def build_remediation_verification_report(
 
 
 def _build_finding_row(
-    workspace: Path,
     finding: dict[str, Any],
     finding_index: int,
     attempt_number: int,
     planner_decision: dict[str, Any] | None,
-    remaining_by_key: dict[tuple[str, str, str], dict[str, Any]],
+    validation_status: str,
+    remaining_by_exact_key: dict[tuple[str, str, str], dict[str, Any]],
+    remaining_by_identity_key: dict[tuple[str, str], dict[str, Any]],
     applied_patch_ids: set[str],
     patch_plan_ref: Any,
     proof_ref: Any,
@@ -133,14 +137,17 @@ def _build_finding_row(
     baseline_version = str(dependency.get("currentVersion") or "UNKNOWN")
     vulnerability_id = str(finding.get("vulnerabilityId") or "UNKNOWN")
     severity = str(finding.get("severity") or "UNKNOWN").upper()
-    key = _finding_key(finding)
-    remaining = remaining_by_key.get(key)
+    exact_key = _finding_key(finding)
+    identity_key = _finding_identity_key(finding)
+    remaining = remaining_by_exact_key.get(exact_key) or remaining_by_identity_key.get(identity_key)
     decision_type = str((planner_decision or {}).get("decision") or (planner_decision or {}).get("decisionType") or "NOT_PLANNED").upper()
     selected_version = _selected_version(planner_decision)
     patch_ids = _decision_patch_ids(planner_decision)
     applied_for_decision = [patch_id for patch_id in patch_ids if patch_id in applied_patch_ids]
 
-    if remaining:
+    if validation_status != "SUCCESS" and not remaining:
+        final_status = "UNKNOWN_VALIDATION_FAILED"
+    elif remaining:
         final_status = "PENDING_MANUAL_REVIEW" if decision_type == "MANUAL_REVIEW" else "REMAINING"
     else:
         final_status = "RESOLVED"
@@ -151,14 +158,20 @@ def _build_finding_row(
         resolution_type = "INDIRECT_TRANSITIVE_RESOLUTION"
     elif final_status == "PENDING_MANUAL_REVIEW":
         resolution_type = "NOT_AUTOMATED"
+    elif final_status == "UNKNOWN_VALIDATION_FAILED":
+        resolution_type = "UNKNOWN_VALIDATION_FAILED"
     else:
         resolution_type = "UNRESOLVED_AFTER_VALIDATION"
 
-    reason = _final_reason(final_status, resolution_type, planner_decision, selected_version)
-    planner_rationale = str((planner_decision or {}).get("rationale") or (planner_decision or {}).get("statusReason") or (planner_decision or {}).get("reason") or "No planner rationale was available.")
+    planner_rationale = str(
+        (planner_decision or {}).get("rationale")
+        or (planner_decision or {}).get("statusReason")
+        or (planner_decision or {}).get("reason")
+        or "No planner rationale was available."
+    )
 
     return {
-        "findingKey": "|".join(key),
+        "findingKey": "|".join(exact_key),
         "findingIndex": finding_index,
         "vulnerabilityId": vulnerability_id,
         "aliases": finding.get("aliases") or [],
@@ -170,7 +183,7 @@ def _build_finding_row(
         "selectedVersion": selected_version,
         "finalStatus": final_status,
         "resolutionType": resolution_type,
-        "finalReason": reason,
+        "finalReason": _final_reason(final_status, resolution_type, planner_decision, selected_version),
         "attemptHistory": [
             {
                 "attemptNumber": attempt_number,
@@ -196,15 +209,28 @@ def _planner_decision_index(patch_plan: dict[str, Any]) -> dict[tuple[str, str, 
     for decision_index, decision in enumerate(patch_plan.get("vulnerabilityDecisions", []) or []):
         if not isinstance(decision, dict):
             continue
-        decision = dict(decision)
-        decision["_decisionIndex"] = decision_index
-        dependency = decision.get("dependency") if isinstance(decision.get("dependency"), dict) else {}
-        package_name = dependency.get("packageName") or _coordinate(dependency) or str(decision.get("packageName") or "UNKNOWN")
-        version = str(dependency.get("currentVersion") or dependency.get("oldVersion") or decision.get("oldVersion") or "UNKNOWN")
-        vulnerability_id = str(decision.get("vulnerabilityId") or "UNKNOWN")
-        index[(vulnerability_id, package_name, version)] = decision
-        index[("*", package_name, version)] = decision
+        normalized = dict(decision)
+        normalized["_decisionIndex"] = decision_index
+        dependency = normalized.get("dependency") if isinstance(normalized.get("dependency"), dict) else {}
+        package_name = dependency.get("packageName") or _coordinate(dependency) or str(normalized.get("packageName") or "UNKNOWN")
+        version = str(dependency.get("currentVersion") or dependency.get("oldVersion") or normalized.get("oldVersion") or "UNKNOWN")
+        vulnerability_id = str(normalized.get("vulnerabilityId") or "UNKNOWN")
+        index[(vulnerability_id, package_name, version)] = normalized
+        index[(vulnerability_id, package_name, "*")] = normalized
+        index[(vulnerability_id, "*", "*")] = normalized
     return index
+
+
+def _find_planner_decision(index: dict[tuple[str, str, str], dict[str, Any]], finding: dict[str, Any]) -> dict[str, Any] | None:
+    vulnerability_id, package_name, version = _finding_key(finding)
+    for key in (
+        (vulnerability_id, package_name, version),
+        (vulnerability_id, package_name, "*"),
+        (vulnerability_id, "*", "*"),
+    ):
+        if key in index:
+            return index[key]
+    return None
 
 
 def _new_package(row: dict[str, Any]) -> dict[str, Any]:
@@ -225,11 +251,11 @@ def _merge_package_version(package: dict[str, Any], row: dict[str, Any]) -> None
         package["selectedVersion"] = row.get("selectedVersion")
 
 
-def _finalize_package(package: dict[str, Any]) -> None:
+def _finalize_package(package: dict[str, Any], validation_status: str) -> None:
     findings = package.get("findings", []) or []
     resolved = [item for item in findings if item.get("finalStatus") == "RESOLVED"]
-    pending = [item for item in findings if item.get("finalStatus") in {"PENDING_MANUAL_REVIEW", "REMAINING"}]
-    package["overallStatus"] = _package_status(len(findings), len(resolved), len(pending))
+    pending = [item for item in findings if item.get("finalStatus") in _PENDING_STATUSES]
+    package["overallStatus"] = _package_status(len(findings), len(resolved), len(pending), validation_status)
     package["summary"] = {
         "findingCounts": {
             "baseline": len(findings),
@@ -243,7 +269,7 @@ def _finalize_package(package: dict[str, Any]) -> None:
             "pending": _severity_counts(pending),
         },
     }
-    package["packageVerificationSummary"] = _package_summary_text(package, resolved, pending)
+    package["packageVerificationSummary"] = _package_summary_text(package, resolved, pending, validation_status)
 
 
 def _public_finding_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -262,16 +288,15 @@ def _public_finding_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _summary(packages: list[dict[str, Any]], findings: list[dict[str, Any]], new_findings: list[dict[str, Any]], validation: dict[str, Any]) -> dict[str, Any]:
+def _summary(packages: list[dict[str, Any]], findings: list[dict[str, Any]], new_findings: list[dict[str, Any]], validation_status: str) -> dict[str, Any]:
     resolved_findings = [item for item in findings if item.get("finalStatus") == "RESOLVED"]
-    pending_findings = [item for item in findings if item.get("finalStatus") in {"PENDING_MANUAL_REVIEW", "REMAINING"}]
-    status_counts = {
+    pending_findings = [item for item in findings if item.get("finalStatus") in _PENDING_STATUSES]
+    package_counts = {
         "affected": len(packages),
         "resolved": sum(1 for item in packages if item.get("overallStatus") == "RESOLVED"),
         "partiallyResolved": sum(1 for item in packages if item.get("overallStatus") == "PARTIALLY_RESOLVED"),
-        "pending": sum(1 for item in packages if item.get("overallStatus") in {"PENDING_MANUAL_REVIEW", "REMAINING"}),
+        "pending": sum(1 for item in packages if item.get("overallStatus") in {"PENDING_MANUAL_REVIEW", "VALIDATION_FAILED"}),
     }
-    validation_status = str(validation.get("status") or "UNKNOWN").upper()
     verification_outcome = "FULL_REMEDIATION"
     if validation_status != "SUCCESS":
         verification_outcome = "VALIDATION_FAILED"
@@ -280,7 +305,7 @@ def _summary(packages: list[dict[str, Any]], findings: list[dict[str, Any]], new
     return {
         "verificationOutcome": verification_outcome,
         "validationStatus": validation_status,
-        "packageCounts": status_counts,
+        "packageCounts": package_counts,
         "findingCounts": {
             "baseline": len(findings),
             "resolved": len(resolved_findings),
@@ -296,7 +321,9 @@ def _summary(packages: list[dict[str, Any]], findings: list[dict[str, Any]], new
     }
 
 
-def _package_status(total: int, resolved: int, pending: int) -> str:
+def _package_status(total: int, resolved: int, pending: int, validation_status: str) -> str:
+    if validation_status != "SUCCESS" and pending:
+        return "VALIDATION_FAILED"
     if total and resolved == total:
         return "RESOLVED"
     if resolved and pending:
@@ -306,9 +333,11 @@ def _package_status(total: int, resolved: int, pending: int) -> str:
     return "UNKNOWN"
 
 
-def _package_summary_text(package: dict[str, Any], resolved: list[dict[str, Any]], pending: list[dict[str, Any]]) -> str:
+def _package_summary_text(package: dict[str, Any], resolved: list[dict[str, Any]], pending: list[dict[str, Any]], validation_status: str) -> str:
     package_name = package.get("packageName") or "package"
     selected = package.get("selectedVersion")
+    if validation_status != "SUCCESS" and pending:
+        return f"{package_name} could not be fully verified because validation did not complete successfully."
     if pending and resolved:
         return f"{package_name} is partially resolved: {len(resolved)} finding(s) resolved and {len(pending)} finding(s) still require review."
     if pending:
@@ -325,6 +354,8 @@ def _final_reason(final_status: str, resolution_type: str, decision: dict[str, A
         return f"Planner selected{version_text} and post-remediation OSV validation confirmed this finding is no longer present."
     if final_status == "RESOLVED":
         return "Post-remediation OSV validation confirmed this finding is no longer present; it was resolved indirectly by another validated dependency update."
+    if final_status == "UNKNOWN_VALIDATION_FAILED":
+        return "Validation did not complete successfully, so the workflow could not deterministically verify whether this finding was resolved."
     if reason:
         return reason
     if final_status == "PENDING_MANUAL_REVIEW":
@@ -380,9 +411,9 @@ def _finding_key(item: dict[str, Any]) -> tuple[str, str, str]:
     )
 
 
-def _finding_package_key(item: dict[str, Any]) -> tuple[str, str, str]:
-    _, package_name, version = _finding_key(item)
-    return ("*", package_name, version)
+def _finding_identity_key(item: dict[str, Any]) -> tuple[str, str]:
+    vulnerability_id, package_name, _ = _finding_key(item)
+    return vulnerability_id, package_name
 
 
 def _severity_counts(items: list[dict[str, Any]]) -> dict[str, int]:
