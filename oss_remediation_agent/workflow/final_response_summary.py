@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 _DEFAULT_NA = "Not applicable for this workflow outcome."
 
 _INTERNAL_FAILURE_LABELS = {
@@ -42,19 +41,21 @@ def build_final_response_summary(
     outcome = _latest_outcome_analysis(manifest, workspace)
     latest_attempt = _latest_attempt(manifest)
     baseline = manifest.get("baseline") or {}
-    patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or (manifest.get("planning") or {}).get("lastDecision"))
+    final = manifest.get("final") or {}
+    patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or latest_attempt.get("planningDecision") or (manifest.get("planning") or {}).get("lastDecision"))
     validation = _read_artifact(workspace, latest_attempt.get("validationResult"))
     baseline_build = _read_artifact(workspace, baseline.get("baselineBuildResult"))
     vulnerability_assessment = _read_artifact(workspace, baseline.get("vulnerabilityAssessmentReport"))
-    publication = _read_artifact(workspace, (manifest.get("final") or {}).get("pullRequestPublication"))
-    pr_summary = _read_artifact(workspace, (manifest.get("final") or {}).get("prSummary"))
+    publication = _read_artifact(workspace, final.get("pullRequestPublication"))
+    pr_summary = _read_artifact(workspace, final.get("prSummary"))
+    verification = _read_artifact(workspace, final.get("remediationVerificationReport"))
 
     if internal_status in _INTERNAL_FAILURE_LABELS:
         return _internal_failure_summary(manifest, workspace, internal_status, patch_plan, validation, outcome, fallback_message)
     if status == "PULL_REQUEST_CREATED":
-        return _pull_request_created_summary(manifest, patch_plan, vulnerability_assessment, validation, pr_summary, workspace)
+        return _pull_request_created_summary(manifest, patch_plan, vulnerability_assessment, validation, pr_summary, verification, workspace)
     if status == "VALIDATION_SUCCEEDED":
-        return _validation_succeeded_summary(manifest, validation, patch_plan, vulnerability_assessment, workspace)
+        return _validation_succeeded_summary(manifest, validation, patch_plan, vulnerability_assessment, verification, workspace)
     if status == "VALIDATION_FAILED":
         return _validation_failed_summary(manifest, outcome, validation, patch_plan, workspace, fallback_message)
     if status == "PR_CREATION_FAILED":
@@ -72,31 +73,36 @@ def _pull_request_created_summary(
     vulnerability_assessment: dict[str, Any],
     validation: dict[str, Any],
     pr_summary: dict[str, Any],
+    verification: dict[str, Any],
     workspace: Path,
 ) -> dict[str, Any]:
     final = manifest.get("final") or {}
     pull_request = final.get("pullRequest") or {}
     pr_type = str(final.get("prType") or "FULL_REMEDIATION")
     counts = _patch_plan_counts(patch_plan)
-    accepted_count = _accepted_count(manifest)
-    resolved_count = accepted_count or counts["patchDecisionCount"]
-    pending_count = counts["manualReviewCount"]
-    partial = pr_type == "PARTIAL_REMEDIATION" or pending_count > 0
-
+    verification_counts = _verification_counts(verification)
+    resolved_count = verification_counts.get("resolved") or _accepted_count(manifest) or counts["patchDecisionCount"]
+    pending_count = verification_counts.get("pending") if verification_counts else counts["manualReviewCount"]
+    partial = pr_type == "PARTIAL_REMEDIATION" or bool(pending_count)
     outcome_label = "Partial Remediation Draft PR Created" if partial else "Draft Pull Request Created"
+
     outcome_summary = _success_outcome_summary(
         resolved_count=resolved_count,
-        resolved_severity=_severity_summary(patch_plan, "PATCH", vulnerability_assessment),
-        pending_count=pending_count,
-        pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
+        resolved_severity=_verification_severity_summary(verification, "resolved") or _severity_summary(patch_plan, "PATCH", vulnerability_assessment),
+        pending_count=int(pending_count or 0),
+        pending_severity=_verification_severity_summary(verification, "pending") or _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
         delivery_label="Partial Draft PR created for validated fixes" if partial else "Draft PR created",
     )
+
+    planning_assessment = _success_planning_assessment(counts, partial)
+    if verification:
+        planning_assessment += " The final counts are derived from final/remediation-verification-report.json."
 
     return _summary_model(
         workflow_outcome=outcome_label,
         outcome_summary=outcome_summary,
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, partial),
+        planning_assessment=planning_assessment,
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Review the Draft PR and verify the validated dependency-only changes before merge. Handle pending manual-review items separately if any remain.",
         pr_status=_pr_status_created(pull_request),
@@ -108,22 +114,24 @@ def _validation_succeeded_summary(
     validation: dict[str, Any],
     patch_plan: dict[str, Any],
     vulnerability_assessment: dict[str, Any],
+    verification: dict[str, Any],
     workspace: Path,
 ) -> dict[str, Any]:
     counts = _patch_plan_counts(patch_plan)
-    resolved_count = _accepted_count(manifest) or counts["patchDecisionCount"]
-    pending_count = counts["manualReviewCount"]
+    verification_counts = _verification_counts(verification)
+    resolved_count = verification_counts.get("resolved") or _accepted_count(manifest) or counts["patchDecisionCount"]
+    pending_count = verification_counts.get("pending") if verification_counts else counts["manualReviewCount"]
     return _summary_model(
         workflow_outcome="Validation Succeeded",
         outcome_summary=_success_outcome_summary(
-            resolved_count=resolved_count,
-            resolved_severity=_severity_summary(patch_plan, "PATCH", vulnerability_assessment),
-            pending_count=pending_count,
-            pending_severity=_severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
+            resolved_count=int(resolved_count or 0),
+            resolved_severity=_verification_severity_summary(verification, "resolved") or _severity_summary(patch_plan, "PATCH", vulnerability_assessment),
+            pending_count=int(pending_count or 0),
+            pending_severity=_verification_severity_summary(verification, "pending") or _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
             delivery_label="PR handling pending or policy-controlled",
         ),
         root_cause=_DEFAULT_NA,
-        planning_assessment=_success_planning_assessment(counts, pending_count > 0),
+        planning_assessment=_success_planning_assessment(counts, bool(pending_count)),
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Proceed with PR creation policy handling or review the accepted patch set if manual approval is required.",
         pr_status="Draft PR has not been created yet; validation completed successfully and PR handling is pending or policy-controlled.",
@@ -141,8 +149,9 @@ def _validation_failed_summary(
     what_happened = outcome.get("whatHappened") if isinstance(outcome.get("whatHappened"), dict) else {}
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
     planning = outcome.get("planningContextAssessment") if isinstance(outcome.get("planningContextAssessment"), dict) else {}
-    failed_stage = what_happened.get("failedStage") or (validation.get("summary") or {}).get("failedStage") or "VALIDATION"
-    failure_summary = what_happened.get("failureSummary") or (validation.get("summary") or {}).get("failureSummary") or fallback_message or "Validation failed."
+    validation_summary = validation.get("summary") if isinstance(validation.get("summary"), dict) else {}
+    failed_stage = what_happened.get("failedStage") or validation_summary.get("failedStage") or "VALIDATION"
+    failure_summary = what_happened.get("failureSummary") or validation_summary.get("failureSummary") or fallback_message or "Validation failed."
     primary_cause = root_cause.get("primaryCause") or failure_summary
     planning_assessment = planning.get("assessment") or _planning_assessment_from_counts(patch_plan)
     next_step = _first_text(outcome.get("recommendedFocusForPlanner")) or "Review validation artifacts, update the remediation plan, and rerun validation."
@@ -173,7 +182,7 @@ def _pr_creation_failed_summary(
         workflow_outcome="PR Creation Failed",
         outcome_summary=summary,
         root_cause=str(reason),
-        planning_assessment="The remediation planning and validation artifacts should be reviewed separately from the PR publication failure; this status reflects delivery failure, not necessarily remediation logic failure.",
+        planning_assessment="Review remediation and validation artifacts separately from the PR publication failure; this status reflects delivery failure, not necessarily remediation logic failure.",
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=True),
         recommended_next_step="Review final PR publication artifacts, policy settings, branch permissions, and GitHub publishing errors, then retry PR creation if the patch set is validated.",
         pr_status=f"Draft PR was not created. Reason: {reason}",
@@ -181,7 +190,8 @@ def _pr_creation_failed_summary(
 
 
 def _baseline_build_failed_summary(manifest: dict[str, Any], baseline_build: dict[str, Any], workspace: Path, fallback_message: str) -> dict[str, Any]:
-    summary = (baseline_build.get("summary") or {}).get("failureSummary") or baseline_build.get("failureSummary") or fallback_message or "Baseline build failed before remediation could safely proceed."
+    summary = (baseline_build.get("summary") or {}).get("failureSummary") if isinstance(baseline_build.get("summary"), dict) else None
+    summary = summary or baseline_build.get("failureSummary") or fallback_message or "Baseline build failed before remediation could safely proceed."
     return _summary_model(
         workflow_outcome="Baseline Build Failed",
         outcome_summary="The repository could not produce a clean baseline build, so automated remediation was not attempted.",
@@ -210,10 +220,7 @@ def _manual_review_required_summary(
     manual_reason = _manual_review_reason(patch_plan) or fallback_message
     baseline_note = _baseline_comparison_note(outcome)
 
-    summary_lines = [
-        f"- Attempts completed: {attempt_summary['attemptCount']}",
-        "- Planner decision: Manual review required",
-    ]
+    summary_lines = [f"- Attempts completed: {attempt_summary['attemptCount']}", "- Planner decision: Manual review required"]
     if attempt_summary["validationFailedCount"]:
         summary_lines.append(f"- Validation failures before escalation: {attempt_summary['validationFailedCount']}")
     if counts["patchDecisionCount"]:
@@ -233,7 +240,6 @@ def _manual_review_required_summary(
 
     planning_assessment = planning.get("assessment") or _manual_review_planning_assessment(patch_plan, attempt_summary)
     next_step = _first_text(outcome.get("recommendedFocusForPlanner")) or "Review the manual-review decision, resolve the project or policy blocker, then rerun the workflow when automated validation can succeed."
-
     return _summary_model(
         workflow_outcome="Manual Review Required",
         outcome_summary="\n".join(summary_lines),
@@ -257,7 +263,6 @@ def _internal_failure_summary(
     label = _INTERNAL_FAILURE_LABELS.get(internal_status, internal_status.replace("_", " ").title())
     stage = _INTERNAL_FAILURE_STAGE.get(internal_status, "Workflow")
     reason = _internal_failure_reason(manifest, internal_status, validation, outcome, fallback_message)
-    outcome_summary = f"Workflow stopped during {stage}. {reason}"
     if internal_status == "FAILED_MAX_ATTEMPTS":
         attempts = _attempt_summary(manifest)
         outcome_summary = "\n".join([
@@ -266,6 +271,8 @@ def _internal_failure_summary(
             "- Delivery: No Draft PR created",
             f"- Reason: {reason}",
         ])
+    else:
+        outcome_summary = f"Workflow stopped during {stage}. {reason}"
     return _summary_model(
         workflow_outcome=label,
         outcome_summary=outcome_summary,
@@ -277,24 +284,44 @@ def _internal_failure_summary(
     )
 
 
-def _success_outcome_summary(
-    resolved_count: int,
-    resolved_severity: str,
-    pending_count: int,
-    pending_severity: str,
-    delivery_label: str,
-) -> str:
-    resolved_severity_text = resolved_severity or "severity not available"
-    pending_severity_text = pending_severity or ("none" if pending_count == 0 else "severity not available")
-    return "\n".join(
-        [
-            f"- Resolved: {resolved_count} vulnerability item(s)",
-            f"- Resolved severity: {resolved_severity_text}",
-            f"- Pending manual review: {pending_count} item(s)",
-            f"- Pending severity: {pending_severity_text}",
-            f"- Delivery: {delivery_label}",
-        ]
-    )
+def _success_outcome_summary(resolved_count: int, resolved_severity: str, pending_count: int, pending_severity: str, delivery_label: str) -> str:
+    return "\n".join([
+        f"- Resolved: {resolved_count} vulnerability item(s)",
+        f"- Resolved severity: {resolved_severity or 'severity not available'}",
+        f"- Pending manual review: {pending_count} item(s)",
+        f"- Pending severity: {pending_severity or ('none' if pending_count == 0 else 'severity not available')}",
+        f"- Delivery: {delivery_label}",
+    ])
+
+
+def _verification_counts(report: dict[str, Any]) -> dict[str, int]:
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    findings = summary.get("findingCounts") if isinstance(summary.get("findingCounts"), dict) else {}
+    if not findings:
+        return {}
+    return {
+        "resolved": _safe_int(findings.get("resolved")),
+        "pending": _safe_int(findings.get("pending")),
+        "baseline": _safe_int(findings.get("baseline")),
+        "newIntroduced": _safe_int(findings.get("newIntroduced")),
+    }
+
+
+def _verification_severity_summary(report: dict[str, Any], bucket: str) -> str:
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    severities = summary.get("severityCounts") if isinstance(summary.get("severityCounts"), dict) else {}
+    counts = severities.get(bucket) if isinstance(severities.get(bucket), dict) else {}
+    return _severity_counts_text(counts)
+
+
+def _severity_counts_text(counts: dict[str, Any]) -> str:
+    ordered = ["critical", "high", "medium", "low", "unknown"]
+    parts = []
+    for level in ordered:
+        value = _safe_int(counts.get(level))
+        if value:
+            parts.append(f"{value} {level}")
+    return ", ".join(parts)
 
 
 def _internal_failure_reason(manifest: dict[str, Any], internal_status: str, validation: dict[str, Any], outcome: dict[str, Any], fallback_message: str) -> str:
@@ -304,7 +331,7 @@ def _internal_failure_reason(manifest: dict[str, Any], internal_status: str, val
     reason = root_cause.get("primaryCause") or what_happened.get("failureSummary") or validation_summary.get("failureSummary") or (manifest.get("final") or {}).get("prCreationFailure") or fallback_message
     if reason:
         return str(reason)
-    defaults = {
+    return {
         "CHECKOUT_FAILED": "Repository checkout failed before baseline assessment could complete.",
         "SCANNING_FAILED": "OSS vulnerability assessment failed before remediation planning could complete.",
         "PROJECT_ANALYSIS_FAILED": "Maven project analysis failed before remediation planning could safely continue.",
@@ -312,12 +339,11 @@ def _internal_failure_reason(manifest: dict[str, Any], internal_status: str, val
         "PATCH_APPLICATION_FAILED": "The remediation patch plan could not be applied successfully to the attempt workspace.",
         "FAILED_MAX_ATTEMPTS": "The workflow exhausted the configured maximum remediation attempts without reaching a validated PR-ready state.",
         "PLANNING_CONSTRAINT_VIOLATION": "The planning output violated workflow constraints and could not proceed to patch application.",
-    }
-    return defaults.get(internal_status, "Workflow failed before a final PR-ready state was reached.")
+    }.get(internal_status, "Workflow failed before a final PR-ready state was reached.")
 
 
 def _internal_failure_next_step(internal_status: str) -> str:
-    next_steps = {
+    return {
         "CHECKOUT_FAILED": "Verify repository URL, branch, credentials, and checkout permissions, then rerun the workflow.",
         "SCANNING_FAILED": "Review scanner configuration and vulnerability assessment logs, then rerun assessment.",
         "PROJECT_ANALYSIS_FAILED": "Review Maven project analysis artifacts, effective POM generation, dependency tree generation, and parser errors before replanning.",
@@ -325,8 +351,7 @@ def _internal_failure_next_step(internal_status: str) -> str:
         "PATCH_APPLICATION_FAILED": "Review patch application proof, fix unmatched or unsafe patch entries, and rerun patch application.",
         "FAILED_MAX_ATTEMPTS": "Review outcome-analysis summaries across attempts, resolve recurring blockers manually, and increase attempts only after updating the planning strategy.",
         "PLANNING_CONSTRAINT_VIOLATION": "Review the planner output against allowed files and change types, then regenerate a compliant patch plan.",
-    }
-    return next_steps.get(internal_status, "Review generated artifacts, correct the failing stage, and rerun the workflow.")
+    }.get(internal_status, "Review generated artifacts, correct the failing stage, and rerun the workflow.")
 
 
 def _internal_failure_planning_assessment(internal_status: str, patch_plan: dict[str, Any]) -> str:
@@ -383,9 +408,7 @@ def _planning_assessment_from_counts(patch_plan: dict[str, Any]) -> str:
 def _manual_review_planning_assessment(patch_plan: dict[str, Any], attempt_summary: dict[str, int]) -> str:
     reason = _manual_review_reason(patch_plan)
     prefix = f"The latest planning attempt returned MANUAL_REVIEW after {attempt_summary['attemptCount']} attempt(s)."
-    if reason:
-        return f"{prefix} Planner rationale: {reason}"
-    return f"{prefix} Review the manual-review decision artifact for dependency-level rationale."
+    return f"{prefix} Planner rationale: {reason}" if reason else f"{prefix} Review the manual-review decision artifact for dependency-level rationale."
 
 
 def _manual_review_reason(patch_plan: dict[str, Any]) -> str:
@@ -409,14 +432,7 @@ def _baseline_comparison_note(outcome: dict[str, Any]) -> str:
     evidence = outcome.get("evidenceSummary") if isinstance(outcome.get("evidenceSummary"), list) else []
     new_facts = outcome.get("newFactsLearned") if isinstance(outcome.get("newFactsLearned"), list) else []
     root_cause = outcome.get("rootCauseAnalysis") if isinstance(outcome.get("rootCauseAnalysis"), dict) else {}
-    haystack = " ".join(
-        [
-            _first_text(evidence),
-            _first_text(new_facts),
-            str(root_cause.get("primaryCause") or ""),
-            " ".join(str(item) for item in root_cause.get("contributingFactors", []) or []),
-        ]
-    ).lower()
+    haystack = " ".join([_first_text(evidence), _first_text(new_facts), str(root_cause.get("primaryCause") or ""), " ".join(str(item) for item in root_cause.get("contributingFactors", []) or [])]).lower()
     if "baseline" in haystack and ("same" in haystack or "already" in haystack or "pre-existing" in haystack):
         return "same or related blocker existed before remediation"
     if "baseline" in haystack:
@@ -462,9 +478,8 @@ def _severity_summary(patch_plan: dict[str, Any], decision_type: str, vulnerabil
         if not matches:
             continue
         severity = _decision_severity(decision, severity_by_id)
-        if not severity:
-            continue
-        counts[severity] = counts.get(severity, 0) + 1
+        if severity:
+            counts[severity] = counts.get(severity, 0) + 1
     ordered = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
     return ", ".join(f"{counts[level]} {level.lower()}" for level in ordered if counts.get(level))
 
@@ -574,6 +589,7 @@ def _evidence_reviewed(manifest: dict[str, Any], workspace: Path, include_outcom
         add(f"Validation Result Attempt {attempt_number}", attempt.get("validationResult"))
         if include_outcome:
             add(f"Outcome Analysis Summary Attempt {attempt_number}", attempt.get("outcomeAnalysisSummary"))
+    add("Remediation Verification Report", final.get("remediationVerificationReport"))
     add("PR Summary", final.get("prSummary"))
     add("Pull Request Publication", final.get("pullRequestPublication"))
     return items
