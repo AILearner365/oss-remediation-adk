@@ -8,6 +8,7 @@ from oss_remediation_agent.tools.pr_publisher_tool import publish_pull_request
 from oss_remediation_agent.workflow.final_response_summary import build_final_response_summary
 from oss_remediation_agent.workflow.orchestrator import WorkflowOrchestrator
 from oss_remediation_agent.workflow.phase5_orchestrator import Phase5WorkflowOrchestrator
+from oss_remediation_agent.workflow.remediation_verification_report import build_remediation_verification_report
 
 
 class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
@@ -59,6 +60,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         ("baseline", "vulnerabilityAssessmentReport"): "Vulnerability Assessment Report",
         ("baseline", "projectAnalyzerReport"): "Project Analyzer Report",
         ("planning", "lastDecision"): "Remediation Patch Plan",
+        ("final", "remediationVerificationReport"): "Remediation Verification Report",
         ("final", "prSummary"): "PR Summary",
         ("final", "prDescription"): "PR Description",
         ("final", "pullRequestPublication"): "Pull Request Publication Result",
@@ -153,6 +155,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             self.manifest_store.save(manifest)
             return {"status": "PR_CREATION_FAILED", "reason": "PR creation is disabled by policy."}
 
+        verification_result = self.generate_remediation_verification_report()
         summary_result = self.generate_final_pr_summary()
 
         if mode == "SUMMARY_ONLY":
@@ -161,7 +164,12 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             manifest.setdefault("final", {})["prType"] = pr_type
             manifest["final"]["prCreationFailure"] = "PR creation policy is SUMMARY_ONLY."
             self.manifest_store.save(manifest)
-            return {"status": "PR_CREATION_FAILED", "artifactPath": summary_result.get("artifactPath"), "reason": "PR creation policy is SUMMARY_ONLY."}
+            return {
+                "status": "PR_CREATION_FAILED",
+                "artifactPath": summary_result.get("artifactPath"),
+                "verificationReport": verification_result.get("artifactPath"),
+                "reason": "PR creation policy is SUMMARY_ONLY.",
+            }
 
         if mode == "MANUAL_APPROVAL":
             manifest = self.manifest_store.load()
@@ -171,6 +179,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return {
                 "status": "MANUAL_REVIEW_REQUIRED",
                 "artifactPath": summary_result.get("artifactPath"),
+                "verificationReport": verification_result.get("artifactPath"),
                 "reason": "PR creation policy requires manual approval after summary generation.",
             }
 
@@ -215,6 +224,10 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             manifest["final"]["prCreationFailure"] = publish_result.get("failureCode") or "PR_CREATION_FAILED"
         self.manifest_store.save(manifest)
         return publish_result
+
+    def generate_remediation_verification_report(self) -> dict[str, Any]:
+        """Generate the deterministic verification artifact before delivery artifacts."""
+        return build_remediation_verification_report(self.workspace.root)
 
     @staticmethod
     def _next_action(manifest: dict[str, Any]) -> str:
@@ -517,48 +530,3 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             str(summary.get("prStatus") or "PR status was not available."),
         ])
         return lines
-
-    def _artifact_status(self, artifact_ref: str | None, fallback: str = "SUCCESS") -> str:
-        if not artifact_ref:
-            return fallback
-        artifact = self._read_artifact(artifact_ref)
-        return str(artifact.get("status") or fallback)
-
-    def _enrich_progress(self, progress: list[dict[str, Any]], manifest: dict[str, Any]) -> list[dict[str, Any]]:
-        enriched = list(progress)
-        seen_steps = {item.get("step") for item in enriched}
-
-        for attempt in manifest.get("attempts", []) or []:
-            attempt_number = attempt.get("attemptNumber")
-            prefix = f"attempt_{attempt_number}"
-            if attempt.get("patchDryRunResult") and f"patch_dry_run_{prefix}" not in seen_steps:
-                enriched.append({"step": f"patch_dry_run_{prefix}", "status": self._artifact_status(attempt.get("patchDryRunResult")), "artifactPath": attempt.get("patchDryRunResult")})
-            if attempt.get("patchApplicationProof") and f"patch_apply_{prefix}" not in seen_steps:
-                enriched.append({"step": f"patch_apply_{prefix}", "status": self._artifact_status(attempt.get("patchApplicationProof")), "artifactPath": attempt.get("patchApplicationProof")})
-            if attempt.get("validationResult") and f"validation_{prefix}" not in seen_steps:
-                enriched.append({"step": f"validation_{prefix}", "status": self._artifact_status(attempt.get("validationResult"), attempt.get("status", "UNKNOWN")), "artifactPath": attempt.get("validationResult")})
-            if attempt.get("outcomeAnalysisSummary") and "outcome_analysis" not in seen_steps:
-                enriched.append({"step": "outcome_analysis", "status": self._artifact_status(attempt.get("outcomeAnalysisSummary")), "artifactPath": attempt.get("outcomeAnalysisSummary")})
-
-        accepted = manifest.get("acceptedPatchSet", {})
-        if accepted.get("status") == "VALIDATED" and "accepted_patch_set_created" not in seen_steps:
-            enriched.append({
-                "step": "accepted_patch_set_created",
-                "status": "SUCCESS",
-                "patchSetId": accepted.get("patchSetId"),
-                "patchCount": len(accepted.get("patchIds", []) or []),
-            })
-
-        final = manifest.get("final", {})
-        if final.get("prSummary") and "pr_summary_created" not in seen_steps:
-            enriched.append({"step": "pr_summary_created", "status": self._artifact_status(final.get("prSummary")), "artifactPath": final.get("prSummary")})
-        if final.get("pullRequestPublication") and "pull_request_published" not in seen_steps:
-            pull_request = final.get("pullRequest") or {}
-            enriched.append({
-                "step": "pull_request_published",
-                "status": "SUCCESS" if manifest.get("status") == "PULL_REQUEST_CREATED" else manifest.get("status"),
-                "artifactPath": final.get("pullRequestPublication"),
-                "prUrl": pull_request.get("prUrl"),
-                "branchName": pull_request.get("branchName"),
-            })
-        return enriched
