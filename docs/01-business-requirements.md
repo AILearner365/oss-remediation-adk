@@ -1,10 +1,10 @@
 # Enterprise OSS Remediation Platform
 ## Business Requirements Baseline
 
-**Status:** Draft baseline  
-**Version:** 1.0  
+**Status:** Baselined  
+**Version:** 1.1  
 **Repository:** `AILearner365/oss-remediation-adk`  
-**Baseline branch:** `mvp-3-pr-summary-integration`
+**Baseline branch:** `docs/srs-requirements-foundation`
 
 ---
 
@@ -150,7 +150,66 @@ Different users may work concurrently on different repositories, different branc
 
 ---
 
-## 8. Initial Release Scope
+## 8. Business Remediation Workflow
+
+The following activity flow represents the approved business journey. It intentionally describes the user-facing remediation lifecycle without defining system components, agents, services, storage, APIs, or deployment choices.
+
+```mermaid
+flowchart TD
+    A[Start remediation] --> B{New remediation or existing workspace?}
+    B -->|New| C[Create remediation workspace]
+    B -->|Existing| D[Resume remediation workspace]
+    C --> E[Capture repository, reference branch, policy and validation context]
+    D --> E
+    E --> F[Discover vulnerability findings]
+    F --> G[Classify findings as in scope or out of scope]
+    G --> H[Analyze Maven project, dependency origins and control points]
+    H --> I[Determine remediation options]
+    I --> J{Safe option available within policy and boundary?}
+    J -->|Yes| K[Select and apply permitted remediation]
+    K --> L[Build, test and revalidate vulnerabilities]
+    L --> M{Validation and remediation outcome}
+    M -->|All in-scope findings resolved| N[Fully Remediated]
+    M -->|Safe subset resolved| O[Partially Remediated]
+    M -->|No acceptable automated outcome| P[Human Review Required]
+    J -->|No| P
+    N --> Q[Prepare review-ready branch, pull request and evidence]
+    O --> R[Prepare partial-remediation pull request, unresolved findings and risks]
+    P --> S[Present findings, attempts, rejected options, risks and next actions]
+    Q --> T[Developer or reviewer evaluates outcome]
+    R --> T
+    S --> T
+    T --> U{Questions, feedback or additional guidance?}
+    U -->|No| V[Retain workspace and current outcome]
+    U -->|Yes| W[Capture review feedback in the same workspace]
+    W --> X{Additional safe remediation possible?}
+    X -->|Yes| H
+    X -->|No| Y[Preserve current outcome and explain remaining limitations]
+    Y --> V
+```
+
+### Business stage summary
+
+| Business stage | Purpose | Information produced or retained |
+|---|---|---|
+| Start or resume | Begin a new remediation or continue prior work | Repository, reference branch, initiator, workspace selection |
+| Establish context | Define the approved operating boundary | Severity threshold, remediation policy, exclusions, validation scope |
+| Vulnerability discovery | Identify current OSS vulnerability findings | Findings, severities, affected components, provider evidence |
+| Scope classification | Decide which findings are included in the workflow | In-scope and out-of-scope findings with reasons |
+| Project analysis | Understand how vulnerable components enter and are controlled | Maven modules, dependency origins, control points, impacted modules |
+| Remediation decision | Select the safest practical option | Candidate options, selected option, rejected alternatives, risk rationale |
+| Change execution | Apply only permitted modifications | Changed files, version changes, boundary-compliance evidence |
+| Validation | Verify technical acceptability | Build, test, vulnerability revalidation, conflicts, regressions |
+| Completion | Assign the business outcome | Fully Remediated, Partially Remediated, or Human Review Required |
+| Delivery | Make the result review-ready | Branch, pull request when applicable, reports, evidence, residual risk |
+| Review and continuation | Support questions and approved follow-up work | Reviewer questions, answers, feedback, constraints, additional iterations |
+| Retention | Preserve the complete remediation record | Inputs, decisions, attempts, validations, review history, final/current outcome |
+
+The System Architecture, Detailed Design, implementation, and verification must preserve this business workflow and its completion-state behavior. Technical decomposition may add internal steps but must not remove, bypass, or redefine the approved business stages or outcomes without an approved change to this baseline.
+
+---
+
+## 9. Initial Release Scope
 
 The initial release includes:
 
@@ -174,7 +233,7 @@ The initial release includes:
 
 ---
 
-## 9. Platform Extension Direction
+## 10. Platform Extension Direction
 
 The platform must be designed to accommodate later support for:
 
@@ -192,7 +251,7 @@ These are extension directions, not initial-release commitments.
 
 ---
 
-## 10. Required Business Capabilities
+## 11. Required Business Capabilities
 
 The platform must provide the following capability groups. Detailed ownership and implementation are defined in the Capability Model and Architecture documents.
 
@@ -214,7 +273,7 @@ The platform must provide the following capability groups. Detailed ownership an
 
 ---
 
-## 11. Completion States
+## 12. Completion States
 
 Every remediation workflow must reach exactly one completion state after the applicable remediation and validation activities conclude.
 
@@ -234,7 +293,7 @@ A completion state does not close the workspace. Authorized users may continue i
 
 ---
 
-## 12. Governing Principles
+## 13. Governing Principles
 
 - Safety before automation
 - Validation before completion
@@ -250,7 +309,7 @@ A completion state does not close the workspace. Authorized users may continue i
 
 ---
 
-## 13. Technology Constraints
+## 14. Technology Constraints
 
 - The initial platform implementation uses the Agent Development Kit (ADK).
 - The platform uses a multi-agent workflow model.
@@ -259,7 +318,7 @@ A completion state does not close the workspace. Authorized users may continue i
 
 ---
 
-## 14. Assumptions and External Dependencies
+## 15. Assumptions and External Dependencies
 
 The platform assumes authorized access to the repository, reference branch, build environment, artifact repositories, vulnerability provider, validation providers, approved LLM service, and required enterprise identity and secret-management services.
 
@@ -269,7 +328,7 @@ The platform depends on the availability and correctness of GitHub, GitHub Actio
 
 ---
 
-## 15. Open Decisions
+## 16. Open Decisions
 
 The following decisions remain unresolved and must be completed before the affected capabilities are baselined for release:
 
@@ -284,12 +343,12 @@ The following decisions remain unresolved and must be completed before the affec
 
 ---
 
-## 16. Governance and Traceability
+## 17. Governance and Traceability
 
 This business requirements baseline is the authoritative source for product intent and release acceptance.
 
-Each capability, architecture component, design element, implementation item, and verification test must reference the business requirement or capability it satisfies.
+Each capability, architecture component, design element, implementation item, and verification test must reference the business requirement, business workflow stage, or capability it satisfies.
 
-Approved identifiers must remain stable. Retired identifiers must not be reused.
+Approved identifiers and the approved business workflow must remain stable. Retired identifiers must not be reused.
 
-Changes to this baseline require review when they alter business scope, boundaries, completion states, technology constraints, or governing principles.
+Changes to this baseline require review when they alter business scope, workflow stages, boundaries, completion states, technology constraints, or governing principles.
