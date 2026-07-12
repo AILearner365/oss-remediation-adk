@@ -1,0 +1,159 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-1",
+  "artifactReferences": {
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 1,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-1",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 0,
+    "patchDecisionCount": 3
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2025-48976"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/3",
+        "baseline/project-analyzer-report.json#/pomEvidence/11"
+      ],
+      "fixedVersionSelected": "1.6.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/11"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.6.0</version>",
+          "newVersion": "1.6.0",
+          "oldText": "<version>1.5</version>",
+          "oldVersion": "1.5",
+          "patchId": "patch-1"
+        }
+      ],
+      "rationale": "The project analyzer report shows commons-fileupload:commons-fileupload as a direct dependency in pom.xml. The selected fixed version 1.6.0 is the lowest compatible secure version available in the vulnerability assessment. This upgrade is also expected to implicitly remediate GHSA-78wr-2p64-hpwj (commons-io).",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/10"
+      ],
+      "fixedVersionSelected": "1.10.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/10"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>1.10.0</version>",
+          "newVersion": "1.10.0",
+          "oldText": "<version>1.9</version>",
+          "oldVersion": "1.9",
+          "patchId": "patch-2"
+        }
+      ],
+      "rationale": "The project analyzer report shows org.apache.commons:commons-text as a direct dependency in pom.xml. The selected fixed version 1.10.0 is the only fixed version available in the vulnerability assessment.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/5",
+        "baseline/project-analyzer-report.json#/pomEvidence/12"
+      ],
+      "fixedVersionSelected": "20231013",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/12"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "<version>20231013</version>",
+          "newVersion": "20231013",
+          "oldText": "<version>20230227</version>",
+          "oldVersion": "20230227",
+          "patchId": "patch-3"
+        }
+      ],
+      "rationale": "The project analyzer report shows org.json:json as a direct dependency in pom.xml. The selected fixed version 20231013 is the only fixed version available in the vulnerability assessment.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "aliases": [
+        "CVE-2024-47554"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-io",
+        "currentVersion": "2.11.0",
+        "ecosystem": "Maven",
+        "groupId": "commons-io",
+        "packageName": "commons-io:commons-io"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/3",
+        "baseline/project-analyzer-report.json#/dependencyResolutionEvidence/4"
+      ],
+      "fixedVersionSelected": "2.14.0",
+      "patches": [],
+      "rationale": "commons-io is a transitive dependency introduced by commons-fileupload. The direct dependency commons-fileupload is being upgraded to a fixed version (1.6.0) to address GHSA-vv7r-c36w-3prj. This implicit parent bump is expected to resolve the transitive commons-io vulnerability. No direct patch is applied to commons-io to follow the minimal remediation strategy.",
+      "vulnerabilityId": "GHSA-78wr-2p64-hpwj"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260712-211340"
+}
