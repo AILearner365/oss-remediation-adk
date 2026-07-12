@@ -39,16 +39,9 @@ This branch contains only:
 - requirements traceability
 - architecture decision records
 
-This branch must not contain:
+This branch must not contain product code, prototypes, generated artifacts, product CI/CD workflows, legacy implementation documents, or copied implementation from earlier branches.
 
-- product implementation code
-- experiments or prototypes
-- generated artifacts
-- product CI/CD workflows
-- legacy implementation documents
-- copied implementation from earlier branches
-
-After the applicable engineering documents are reviewed, implementation must begin on a separate development branch. The approved engineering baseline may be merged or copied into that implementation branch so code and tests remain traceable to the approved documentation.
+After the applicable engineering documents are reviewed, implementation must begin on a separate development branch. The approved baseline may be merged into that branch so code and tests remain traceable to the approved documentation.
 
 ---
 
@@ -57,8 +50,8 @@ After the applicable engineering documents are reviewed, implementation must beg
 | Order | Document | Purpose | Status |
 |---|---|---|---|
 | 1 | `01-business-requirements.md` | Business contract: goals, scope, boundaries, outcomes, and constraints | Draft baseline |
-| 2 | `02-capability-model.md` | Translate business needs into platform capabilities | Draft |
-| 3 | `03-platform-responsibility-model.md` | Group capabilities into major responsibilities before architecture | Draft |
+| 2 | `02-capability-model.md` | Translate business needs into architecture-neutral capabilities | Refined draft |
+| 3 | `03-platform-responsibility-model.md` | Assign each capability to one primary platform responsibility | Refined draft |
 | 4 | `04-system-architecture.md` | Major components, responsibility allocation, interactions, and architecture decisions | Not started |
 | 5 | `05-detailed-design.md` | ADK agents, workflows, tools, state, APIs, data models, and failure behavior | Not started |
 | 6 | `06-implementation-roadmap.md` | Incremental implementation slices, dependencies, and delivery order | Not started |
@@ -82,7 +75,7 @@ After the applicable engineering documents are reviewed, implementation must beg
 - users, workspaces, policies, validation, and completion states are defined
 - open business decisions are visible
 
-**Status:** Draft baseline created; review and approve without further structural expansion.
+**Status:** Draft baseline created; no further structural expansion planned.
 
 ### Milestone 2 — Capability Model
 
@@ -95,26 +88,27 @@ After the applicable engineering documents are reviewed, implementation must beg
 - every business need maps to a capability
 - capabilities remain architecture-neutral
 - capability boundaries are clear
+- every capability can be assigned to one primary responsibility
 - initial-release priorities are identified
 
-**Status:** Draft created; review together with the responsibility model.
+**Status:** Refined after review; ready for final joint review with the responsibility model.
 
 ### Milestone 3 — Platform Responsibility Model
 
-**Goal:** Group capabilities into major platform responsibilities and clarify responsibility boundaries, inputs, outputs, interactions, and state expectations before components are selected.
+**Goal:** Assign capabilities to major platform responsibilities and clarify authoritative ownership and boundaries before components are selected.
 
 **Deliverable:** `03-platform-responsibility-model.md`
 
 **Exit criteria:**
 
-- every approved capability is covered
-- each responsibility has a clear purpose and boundary
-- major responsibility interactions are visible
-- durable-state expectations are identified without selecting storage technology
-- shared capabilities identify primary and supporting responsibility roles
-- responsibilities are not prematurely defined as agents, services, or modules
+- every capability has exactly one primary responsibility
+- supporting responsibilities are explicit
+- CAP-13 change-content ownership is separated from source-control operations
+- CAP-18 completion-state ownership belongs to Validation and Outcome Assessment
+- responsibility purposes, authoritative ownership, interactions, and boundaries are clear
+- responsibilities are not prematurely defined as agents, services, APIs, databases, or modules
 
-**Status:** Draft created; immediate next review target.
+**Status:** Refined after review; ready for final joint review with the capability model.
 
 ### Milestone 4 — System Architecture
 
@@ -167,7 +161,7 @@ After the applicable engineering documents are reviewed, implementation must beg
 
 1. Repository intake and configuration
 2. Workspace lifecycle
-3. GitHub Actions and interactive initiation
+3. Automated and interactive initiation
 4. Vulnerability discovery
 5. Maven multi-module analysis
 6. Remediation planning and application
@@ -180,11 +174,9 @@ After the applicable engineering documents are reviewed, implementation must beg
 
 After Milestones 1 through 6 provide enough approved guidance for the first implementation slice, create a separate development branch for product code.
 
-Each implementation slice follows this chain:
+Each implementation slice follows:
 
 `Business Requirement -> Capability -> Responsibility -> Architecture -> Design -> Code -> Test Evidence`
-
-A slice is not complete until the chain is traceable and its applicable tests pass.
 
 No product implementation is committed to the engineering-baseline branch.
 
@@ -194,14 +186,7 @@ No product implementation is committed to the engineering-baseline branch.
 
 **Deliverable:** `07-traceability-matrix.md` plus automated and review evidence.
 
-Verification must identify:
-
-- satisfied requirements
-- partially satisfied requirements
-- deferred requirements
-- unmet requirements
-- evidence location
-- release decision
+Verification must identify satisfied, partially satisfied, deferred, and unmet requirements, together with evidence and the release decision.
 
 ### Milestone 9 — Platform Evolution
 
@@ -219,17 +204,20 @@ Prioritized after the initial release:
 
 ## 5. Immediate Next Step
 
-Review and finalize `02-capability-model.md` and `03-platform-responsibility-model.md` together.
+Perform the final joint review of:
 
-The review must focus on:
+- `02-capability-model.md`
+- `03-platform-responsibility-model.md`
 
-- whether every business need maps to a capability
-- whether every capability maps to at least one responsibility
-- whether responsibility boundaries are clear and non-overlapping enough for architecture
-- whether shared responsibility ownership is explicit
-- whether the model remains free of agent, service, database, API, and deployment decisions
+Confirm that:
 
-After approval, create `04-system-architecture.md` and begin architecture work on this engineering-baseline branch.
+- every business need maps to a capability
+- every capability has exactly one primary responsibility
+- supporting roles are clear
+- ownership and boundaries do not conflict
+- both documents remain implementation-neutral
+
+If the review finds no material gaps, baseline both documents and create `04-system-architecture.md`.
 
 ---
 
@@ -238,14 +226,13 @@ After approval, create `04-system-architecture.md` and begin architecture work o
 - Keep business requirements concise and stable.
 - Do not add architecture or design details to the business baseline.
 - Keep capabilities and responsibilities implementation-neutral.
+- Give each capability one primary responsibility.
 - Do not create a new document when an existing document has the correct responsibility.
-- Use stable identifiers for capabilities, responsibilities, architecture decisions, design sections, tasks, and tests.
-- Never reuse retired identifiers.
+- Use stable identifiers and never reuse retired identifiers.
 - Record significant architecture choices as ADRs.
-- Update the roadmap status whenever a milestone starts, completes, or changes materially.
-- Update traceability as implementation proceeds; do not postpone it until release.
+- Update the roadmap whenever a milestone starts, completes, or changes materially.
+- Update traceability throughout implementation rather than postponing it until release.
 - Keep the engineering-baseline branch free of product implementation and legacy artifacts.
-- Create implementation branches only after the applicable baseline content is reviewed.
 
 ---
 
@@ -253,9 +240,9 @@ After approval, create `04-system-architecture.md` and begin architecture work o
 
 - Engineering-baseline branch: established and documentation-only
 - Business baseline: drafted
-- Capability model: drafted
-- Platform responsibility model: drafted and ready for review
-- System architecture: next after capability and responsibility review
+- Capability model: refined and ready for final review
+- Platform responsibility model: simplified, ownership clarified, and ready for final review
+- System architecture: next after joint review and baseline approval
 - Detailed design: pending architecture
 - Implementation roadmap: pending detailed design
 - Implementation branch: not yet created
