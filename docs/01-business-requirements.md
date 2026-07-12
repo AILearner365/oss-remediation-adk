@@ -2,7 +2,7 @@
 ## Business Requirements Baseline
 
 **Status:** Baselined  
-**Version:** 1.3  
+**Version:** 1.4  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `docs/srs-requirements-foundation`
 
@@ -176,17 +176,18 @@ flowchart TD
     F -->|New iteration requested| I[Capture feedback, constraints or guidance]
     G --> H{Additional feedback or guidance?}
     H -->|No| Z[Retain workspace and current outcome]
-    H -->|Yes| I
-    I --> J{New remediation iteration requested?}
+    H -->|Yes| I2[Capture feedback, constraints or guidance]
+    I --> K[Refresh repository, reference branch, policy, validation and reviewer guidance]
+    I2 --> J{Start a new remediation iteration?}
     J -->|No| Z
-    J -->|Yes| K[Refresh repository, reference branch, policy, validation and reviewer guidance]
+    J -->|Yes| K
 
     C --> L[Capture repository, reference branch, policy and validation context]
     L --> M[Discover current vulnerability findings]
 
     K --> N[Load relevant retained workspace context]
     N --> M
-    M --> O[Reassess prior assumptions, failures and conclusions against refreshed facts]
+    M --> O[Assess current findings and relevant retained evidence]
     O --> P[Classify findings as in scope or out of scope]
 
     P --> Q[Analyze Maven project, dependency origins and control points]
@@ -209,7 +210,7 @@ flowchart TD
     AC --> AD
     AD --> AE{Questions, feedback or additional guidance?}
     AE -->|No| Z
-    AE -->|Yes| I
+    AE -->|Yes| I2
 ```
 
 ### Continuation rule
@@ -219,7 +220,12 @@ A new iteration must use both:
 - refreshed current context, because repository state, policy, validation configuration, vulnerability findings, and reviewer guidance may have changed
 - relevant retained workspace context, because earlier findings, decisions, failures, validations, risks, and review history remain important evidence
 
-Prior conclusions must be reassessed against refreshed facts. The platform must not blindly reuse stale conclusions or discard relevant history.
+The assessment step must work for both cases:
+
+- for a new workspace, it assesses current findings with no assumed historical context
+- for a continued workspace, it reassesses relevant retained evidence against refreshed current facts
+
+The platform must not blindly reuse stale conclusions or discard relevant history.
 
 ### Business stage summary
 
@@ -229,9 +235,9 @@ Prior conclusions must be reassessed against refreshed facts. The platform must 
 | Review existing workspace | Understand the current outcome without forcing a new iteration | Prior findings, decisions, evidence, validation results, pull-request state |
 | Capture feedback | Record questions, constraints, or reviewer guidance | Questions, answers, approved guidance, new constraints |
 | Refresh context | Establish the current non-vulnerability facts for a new iteration | Latest repository and branch state, policy, severity, exclusions, validation scope, reviewer guidance |
-| Load retained context | Retrieve relevant evidence from earlier iterations | Prior attempts, failures, selected and rejected options, validations, risks, review history |
+| Load retained context | Retrieve relevant evidence from earlier iterations when available | Prior attempts, failures, selected and rejected options, validations, risks, review history |
 | Vulnerability discovery | Establish the current vulnerability state | Current findings, severities, affected components, provider evidence |
-| Reassess retained context | Determine which prior evidence and conclusions remain relevant after refresh | Changed assumptions, still-relevant failures, invalidated conclusions, reusable evidence |
+| Assess current and retained evidence | Evaluate current findings and any relevant prior evidence | Current facts, changed assumptions, still-relevant failures, invalidated conclusions, reusable evidence |
 | Scope classification | Decide which findings are included in the iteration | In-scope and out-of-scope findings with reasons |
 | Project analysis | Understand how vulnerable components enter and are controlled | Maven modules, dependency origins, control points, impacted modules |
 | Remediation decision | Select the safest practical option | Candidate options, selected option, rejected alternatives, risk rationale |
