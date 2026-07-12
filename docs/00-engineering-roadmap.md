@@ -44,13 +44,14 @@ Implementation begins on a separate development branch after the applicable base
 | Order | Document | Authoritative responsibility | Status |
 |---|---|---|---|
 | 1 | [`01-business-requirements.md`](./01-business-requirements.md) | Product intent, boundaries, business workflow, outcomes, and open business decisions | Baselined v1.4 |
-| 2 | [`02-capability-model.md`](./02-capability-model.md) | Architecture-neutral platform capabilities | Baselined v0.4 |
+| 2 | [`02-capability-model.md`](./02-capability-model.md) | Architecture-neutral platform capabilities | Baselined v0.5 |
 | 3 | [`03-platform-responsibility-model.md`](./03-platform-responsibility-model.md) | Primary and supporting responsibility ownership | Baselined v0.4 |
 | 4 | `04-system-architecture.md` | Architectural components, boundaries, integrations, and major data flows | Next |
 | 5 | `05-detailed-design.md` | Agent, tool, state, API, data, and failure behavior | Not started |
 | 6 | `06-implementation-roadmap.md` | Incremental implementation slices and delivery order | Not started |
 | 7 | `07-traceability-matrix.md` | Requirement through implementation and verification evidence | Not started |
-| 8 | `decisions/ADR-*.md` | Significant architecture decisions and tradeoffs | As needed |
+
+Architecture Decision Records use `decisions/ADR-*.md` and are maintained outside the numbered document sequence.
 
 ---
 
@@ -66,7 +67,7 @@ The business workflow, continuation behavior, completion states, delivery policy
 ### Milestone 2 — Capability Model
 
 **Deliverable:** [`02-capability-model.md`](./02-capability-model.md)  
-**Status:** Completed and baselined as version 0.4.
+**Status:** Completed and baselined as version 0.5.
 
 ### Milestone 3 — Platform Responsibility Model
 
@@ -86,6 +87,7 @@ The business workflow, continuation behavior, completion states, delivery policy
 - every architecture component maps to approved `CAP-*` and `RESP-*` identifiers
 - component, state, evidence, integration, security, and audit ownership is explicit
 - significant tradeoffs are recorded as ADRs
+- any approved capability-ownership change is synchronized into the Platform Responsibility Model and traceability records
 - no approved business stage or completion outcome is removed or redefined
 
 ### Milestone 5 — Detailed Design
@@ -133,7 +135,8 @@ The architecture document must map workflow stages to capabilities, responsibili
 
 - Change authoritative information only in the document that owns it.
 - Use links and identifiers when another document needs that information.
-- Keep the approved workflow and stable identifiers unchanged unless an reviewed baseline change requires otherwise.
+- Keep the approved workflow and stable identifiers unchanged unless a reviewed baseline change requires otherwise.
 - Record significant architecture decisions in ADRs.
-- Update this roadmap only for document versions, milestone status, sequence, or next-step changes.
+- An ADR that changes capability ownership is incomplete until the Platform Responsibility Model and traceability records are synchronized.
+- Update this roadmap only for document versions, milestone status, sequence, branch policy, or next-step changes.
 - Keep product implementation off the engineering-baseline branch.
