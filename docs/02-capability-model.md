@@ -2,15 +2,15 @@
 ## Capability Model
 
 **Status:** Baselined  
-**Version:** 0.3
+**Version:** 0.4
 
 ---
 
 ## 1. Purpose
 
-This document translates the Business Requirements Baseline into a concise set of platform capabilities.
+This document translates the [Business Requirements Baseline](./01-business-requirements.md) into a concise set of platform capabilities.
 
-It does not define components, agents, services, APIs, storage, prompts, or implementation details. Those decisions belong in the Platform Responsibility Model, System Architecture, and Detailed Design documents.
+It does not redefine business workflow, completion states, delivery policy, components, agents, services, APIs, storage, prompts, or implementation details. The authoritative user-facing lifecycle is the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
 Each capability must trace back to the Business Requirements Baseline and later map forward to responsibilities, architecture, design, implementation, and tests.
 
@@ -96,7 +96,7 @@ Create and maintain a dedicated remediation branch while protecting the supplied
 
 ### CAP-20 Pull-Request Management
 
-Create or update a review-ready full or partial remediation pull request when safe changes exist.
+Create or update a review-ready full or partial remediation pull request for safe validated changes according to the approved delivery policy.
 
 ### CAP-21 Evidence and Decision History
 
@@ -110,9 +110,9 @@ Produce concise remediation, validation, risk, and reviewer-facing summaries.
 
 Answer reviewer questions from retained evidence and explain what changed, why it changed, and why alternatives were rejected.
 
-### CAP-24 Feedback-Driven Continuation
+### CAP-24 Workspace Review and Feedback-Driven Continuation
 
-Accept authorized reviewer guidance, revise remediation when permitted, rerun validation, and update the same workspace and related pull request.
+Support review-only continuation and authorized feedback-driven iterations in the same workspace, using refreshed current context and relevant retained evidence when a new iteration is requested.
 
 ### CAP-25 Identity and Authorization
 
@@ -148,16 +148,11 @@ CAP-01 through CAP-24, plus the initial-release portions of CAP-25 through CAP-3
 
 ### Initial implementation constraints
 
-- GitHub and GitHub Actions
-- ADK-supported interactive entry point
-- Java Maven Spring Boot multi-module repositories
-- dependency, plugin, parent, BOM, and dependency-management remediation
-- no Java source-code modifications
-- default Critical and High severity scope, configurable through Low
+The authoritative initial-release scope and constraints are maintained in the [Business Requirements Baseline](./01-business-requirements.md#9-initial-release-scope). This capability model does not restate or redefine them.
 
 ### Extension-oriented capabilities
 
-CAP-07, CAP-17, CAP-29, and CAP-30 must be designed so later providers and remediation types can be added, even when the initial release implements only a limited set.
+CAP-07, CAP-17, CAP-29, and CAP-30 must support the extension direction defined in the [Business Requirements Baseline](./01-business-requirements.md#10-platform-extension-direction).
 
 ---
 
@@ -165,7 +160,7 @@ CAP-07, CAP-17, CAP-29, and CAP-30 must be designed so later providers and remed
 
 Every capability has exactly one primary platform responsibility. Other responsibilities may support the capability without duplicating its authoritative state or decision ownership.
 
-The Platform Responsibility Model records:
+The [Platform Responsibility Model](./03-platform-responsibility-model.md) records:
 
 - primary responsibility
 - supporting responsibilities
@@ -179,7 +174,7 @@ Architecture must preserve that ownership unless an approved Architecture Decisi
 
 The detailed traceability matrix will map each capability to:
 
-- business requirement or business-goal source
+- business requirement or business-workflow source
 - primary and supporting platform responsibilities
 - architecture component or decision
 - detailed design section
@@ -197,5 +192,5 @@ The capability model is approved for architecture because:
 1. Every agreed business need maps to at least one capability.
 2. Capabilities remain free of architecture and implementation decisions.
 3. Capability boundaries support one primary responsibility.
-4. Initial-release and extension expectations are distinguishable.
+4. Initial-release and extension expectations are referenced from the Business Requirements Baseline.
 5. Unresolved business decisions remain explicitly tracked in the Business Requirements Baseline.
