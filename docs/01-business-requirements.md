@@ -2,7 +2,7 @@
 ## Business Requirements Baseline
 
 **Status:** Baselined  
-**Version:** 1.1  
+**Version:** 1.2  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `docs/srs-requirements-foundation`
 
@@ -114,6 +114,14 @@ A persistent record of one remediation workflow for a repository and reference b
 
 One execution or revision of remediation activity inside a workspace.
 
+### Current context
+
+The repository, reference branch, policy, validation, vulnerability, dependency, and reviewer-guidance information that is current for a remediation iteration.
+
+### Retained workspace context
+
+The historical findings, decisions, attempts, failures, validations, risks, pull-request state, review discussions, and other evidence retained from earlier iterations.
+
 ### Review-ready
 
 A result containing enough implementation detail, evidence, validation results, decision history, rejected alternatives, residual-risk information, and reviewer guidance to support technical evaluation without hidden workflow knowledge.
@@ -136,11 +144,13 @@ An authorized user may reopen a workspace, including months later, to:
 
 - review prior findings and decisions
 - inspect evidence and validation outcomes
-- ask questions
+- ask questions without starting a new remediation iteration
 - provide constraints or reviewer guidance
 - request another remediation iteration
 - update an existing pull request
 - create a pull request when a safe remediation later becomes available
+
+When another remediation iteration is requested, the platform must refresh the current context, retain relevant historical evidence, and reassess prior conclusions against the refreshed facts before continuing.
 
 ### Collaboration
 
@@ -159,51 +169,73 @@ flowchart TD
     A[Start remediation] --> B{New remediation or existing workspace?}
     B -->|New| C[Create remediation workspace]
     B -->|Existing| D[Resume remediation workspace]
-    C --> E[Capture repository, reference branch, policy and validation context]
-    D --> E
-    E --> F[Discover vulnerability findings]
-    F --> G[Classify findings as in scope or out of scope]
-    G --> H[Analyze Maven project, dependency origins and control points]
-    H --> I[Determine remediation options]
-    I --> J{Safe option available within policy and boundary?}
-    J -->|Yes| K[Select and apply permitted remediation]
-    K --> L[Build, test and revalidate vulnerabilities]
-    L --> M{Validation and remediation outcome}
-    M -->|All in-scope findings resolved| N[Fully Remediated]
-    M -->|Safe subset resolved| O[Partially Remediated]
-    M -->|No acceptable automated outcome| P[Human Review Required]
-    J -->|No| P
-    N --> Q[Prepare review-ready branch, pull request and evidence]
-    O --> R[Prepare partial-remediation pull request, unresolved findings and risks]
-    P --> S[Present findings, attempts, rejected options, risks and next actions]
-    Q --> T[Developer or reviewer evaluates outcome]
-    R --> T
-    S --> T
-    T --> U{Questions, feedback or additional guidance?}
-    U -->|No| V[Retain workspace and current outcome]
-    U -->|Yes| W[Capture review feedback in the same workspace]
-    W --> X{Additional safe remediation possible?}
-    X -->|Yes| H
-    X -->|No| Y[Preserve current outcome and explain remaining limitations]
-    Y --> V
+
+    D --> E[Review current outcome, evidence and history]
+    E --> F{Review only or new iteration requested?}
+    F -->|Review only| G[Answer questions and present retained evidence]
+    G --> H{Additional feedback or guidance?}
+    H -->|No| Z[Retain workspace and current outcome]
+    H -->|Yes| I[Capture feedback, constraints or guidance]
+    I --> J{New remediation iteration requested?}
+    J -->|No| Z
+    J -->|Yes| K[Refresh current repository, policy, validation and vulnerability context]
+
+    C --> L[Capture repository, reference branch, policy and validation context]
+    L --> M[Discover current vulnerability findings]
+    K --> N[Load relevant retained workspace context]
+    N --> O[Reassess prior assumptions, failures and conclusions against refreshed facts]
+    O --> M
+
+    M --> P[Classify findings as in scope or out of scope]
+    P --> Q[Analyze Maven project, dependency origins and control points]
+    Q --> R[Determine remediation options]
+    R --> S{Safe option available within policy and boundary?}
+    S -->|Yes| T[Select and apply permitted remediation]
+    T --> U[Build, test and revalidate vulnerabilities]
+    U --> V{Validation and remediation outcome}
+    V -->|All in-scope findings resolved| W[Fully Remediated]
+    V -->|Safe subset resolved| X[Partially Remediated]
+    V -->|No acceptable automated outcome| Y[Human Review Required]
+    S -->|No| Y
+
+    W --> AA[Create or update review-ready branch, pull request and evidence]
+    X --> AB[Create or update partial-remediation pull request, unresolved findings and risks]
+    Y --> AC[Present findings, attempts, rejected options, risks and next actions]
+
+    AA --> AD[Developer or reviewer evaluates outcome]
+    AB --> AD
+    AC --> AD
+    AD --> AE{Questions, feedback or additional guidance?}
+    AE -->|No| Z
+    AE -->|Yes| I
 ```
+
+### Continuation rule
+
+A new iteration must use both:
+
+- refreshed current context, because repository state, policy, validation configuration, vulnerability findings, and reviewer guidance may have changed
+- relevant retained workspace context, because earlier findings, decisions, failures, validations, risks, and review history remain important evidence
+
+Prior conclusions must be reassessed against refreshed facts. The platform must not blindly reuse stale conclusions or discard relevant history.
 
 ### Business stage summary
 
 | Business stage | Purpose | Information produced or retained |
 |---|---|---|
-| Start or resume | Begin a new remediation or continue prior work | Repository, reference branch, initiator, workspace selection |
-| Establish context | Define the approved operating boundary | Severity threshold, remediation policy, exclusions, validation scope |
-| Vulnerability discovery | Identify current OSS vulnerability findings | Findings, severities, affected components, provider evidence |
-| Scope classification | Decide which findings are included in the workflow | In-scope and out-of-scope findings with reasons |
+| Start or resume | Begin a new remediation or access prior work | Repository, reference branch, initiator, workspace selection |
+| Review existing workspace | Understand the current outcome without forcing a new iteration | Prior findings, decisions, evidence, validation results, pull-request state |
+| Capture feedback | Record questions, constraints, or reviewer guidance | Questions, answers, approved guidance, new constraints |
+| Refresh context | Establish the current facts for a new iteration | Latest repository state, policy, severity, exclusions, validation scope, vulnerability findings |
+| Reassess retained context | Determine which prior evidence and conclusions remain relevant | Prior attempts, failures, selected and rejected options, risks, changed assumptions |
+| Scope classification | Decide which findings are included in the iteration | In-scope and out-of-scope findings with reasons |
 | Project analysis | Understand how vulnerable components enter and are controlled | Maven modules, dependency origins, control points, impacted modules |
 | Remediation decision | Select the safest practical option | Candidate options, selected option, rejected alternatives, risk rationale |
 | Change execution | Apply only permitted modifications | Changed files, version changes, boundary-compliance evidence |
 | Validation | Verify technical acceptability | Build, test, vulnerability revalidation, conflicts, regressions |
 | Completion | Assign the business outcome | Fully Remediated, Partially Remediated, or Human Review Required |
-| Delivery | Make the result review-ready | Branch, pull request when applicable, reports, evidence, residual risk |
-| Review and continuation | Support questions and approved follow-up work | Reviewer questions, answers, feedback, constraints, additional iterations |
-| Retention | Preserve the complete remediation record | Inputs, decisions, attempts, validations, review history, final/current outcome |
+| Delivery | Make safe validated changes review-ready | Branch, pull request, reports, evidence, residual risk |
+| Retention | Preserve the complete remediation record | Inputs, decisions, attempts, validations, review history, current outcome |
 
 The System Architecture, Detailed Design, implementation, and verification must preserve this business workflow and its completion-state behavior. Technical decomposition may add internal steps but must not remove, bypass, or redefine the approved business stages or outcomes without an approved change to this baseline.
 
@@ -227,7 +259,7 @@ The initial release includes:
 - no Java source-code changes
 - persistent remediation workspaces
 - full, partial, and human-review-required outcomes
-- remediation branch and pull-request creation when safe changes exist
+- remediation branch and pull-request creation or update when safe validated changes exist, unless automated delivery is explicitly disabled by policy
 - interactive review and post-review continuation
 - decision, evidence, validation, and review-history retention
 
@@ -246,8 +278,20 @@ The platform must be designed to accommodate later support for:
 - major Java, Spring Boot, or framework upgrades
 - additional build systems and languages
 - broader coordination across multiple repositories
+- additional workspace evidence types, reviewer inputs, provider metadata, validation results, and remediation strategies without fundamental redesign
 
 These are extension directions, not initial-release commitments.
+
+### Future data and product-improvement requirements
+
+The platform must distinguish between:
+
+- workspace-specific evidence used to understand and continue one remediation
+- aggregated operational insights used to guide future product improvement
+
+Workspace-specific evidence may expand over time as new providers, validations, remediation types, and reviewer inputs are introduced.
+
+Aggregated operational insights may include recurring failure patterns, unsupported project structures, reviewer corrections, provider reliability, strategy success rates, and iteration patterns. Such insights must not silently change active remediation policy, completion rules, or repository-specific decisions, and must remain subject to security, privacy, authorization, and retention requirements.
 
 ---
 
@@ -275,21 +319,21 @@ The platform must provide the following capability groups. Detailed ownership an
 
 ## 12. Completion States
 
-Every remediation workflow must reach exactly one completion state after the applicable remediation and validation activities conclude.
+Every remediation iteration must reach exactly one completion state after the applicable remediation and validation activities conclude. A completion state does not close the workspace.
 
 ### Fully Remediated
 
-All in-scope vulnerability findings are resolved and all required validations pass. A review-ready pull request may be produced.
+All in-scope vulnerability findings are resolved and all required validations pass. When safe validated changes exist, the platform must create or update the remediation branch and review-ready pull request unless automated delivery is explicitly disabled by policy.
 
 ### Partially Remediated
 
-A safe subset of findings is resolved. All applied changes pass their required validations. Remaining findings are documented and remain unresolved because they exceed the permitted remediation boundary or cannot be addressed safely under current constraints. A review-ready pull request may be produced and must be identified as partial remediation.
+A safe subset of findings is resolved. All applied changes pass their required validations. Remaining findings are documented and remain unresolved because they exceed the permitted remediation boundary or cannot be addressed safely under current constraints. When safe validated changes exist, the platform must create or update a pull request clearly identified as partial remediation, including unresolved findings, reasons, risks, and recommended next actions, unless automated delivery is explicitly disabled by policy.
 
 ### Human Review Required
 
-The platform cannot safely produce an automated remediation under the current inputs, policies, evidence, validation results, or remediation boundary. The workspace must retain findings, attempts, rejected alternatives, validation results, risks, and recommended next actions. A pull request is not required when no safe change exists.
+The platform cannot safely produce an automated remediation under the current inputs, policies, evidence, validation results, or remediation boundary. The workspace must retain findings, attempts, rejected alternatives, validation results, risks, and recommended next actions. A pull request is not required when no safe validated change exists.
 
-A completion state does not close the workspace. Authorized users may continue it through review feedback and additional iterations.
+Authorized users may continue the workspace through questions, feedback, updated constraints, refreshed context, and additional iterations.
 
 ---
 
@@ -300,6 +344,8 @@ A completion state does not close the workspace. Authorized users may continue i
 - Evidence before recommendation
 - Traceability by default
 - Reviewability by default
+- Refresh current facts before a new iteration
+- Retain and reassess relevant historical evidence
 - Transparency of failures, rejected options, assumptions, limitations, and residual risk
 - Configurability over hard-coding
 - Deterministic tools and evidence where practical
@@ -340,6 +386,8 @@ The following decisions remain unresolved and must be completed before the affec
 - maximum supported repository and Maven reactor size
 - maximum remediation execution duration
 - branch commit-history policy across review iterations
+- policy for disabling automated branch or pull-request delivery
+- permitted aggregation and retention rules for operational-improvement data
 
 ---
 
@@ -351,4 +399,4 @@ Each capability, architecture component, design element, implementation item, an
 
 Approved identifiers and the approved business workflow must remain stable. Retired identifiers must not be reused.
 
-Changes to this baseline require review when they alter business scope, workflow stages, boundaries, completion states, technology constraints, or governing principles.
+Changes to this baseline require review when they alter business scope, workflow stages, continuation behavior, boundaries, completion states, delivery behavior, technology constraints, or governing principles.
