@@ -2,7 +2,7 @@
 ## Business Requirements Baseline
 
 **Status:** Baselined  
-**Version:** 1.4  
+**Version:** 1.5  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `docs/srs-requirements-foundation`
 
@@ -165,6 +165,7 @@ Different users may work concurrently on different repositories, different branc
 The following activity flow represents the approved business journey. It intentionally describes the user-facing remediation lifecycle without defining system components, agents, services, storage, APIs, or deployment choices.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827","edgeLabelBackground":"#ffffff"}}}%%
 flowchart TD
     A[Start remediation] --> B{New remediation or existing workspace?}
     B -->|New| C[Create remediation workspace]
