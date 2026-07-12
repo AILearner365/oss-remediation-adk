@@ -2,7 +2,7 @@
 ## Capability Model
 
 **Status:** Draft  
-**Version:** 0.1
+**Version:** 0.2
 
 ---
 
@@ -10,9 +10,9 @@
 
 This document translates the approved business requirements into a concise set of platform capabilities.
 
-It does not define components, agents, services, APIs, storage, prompts, or implementation details. Those decisions belong in the Architecture and Detailed Design documents.
+It does not define components, agents, services, APIs, storage, prompts, or implementation details. Those decisions belong in the Platform Responsibility Model, System Architecture, and Detailed Design documents.
 
-Each capability must trace back to the Business Requirements Baseline and later map forward to architecture, design, implementation, and tests.
+Each capability must trace back to the Business Requirements Baseline and later map forward to responsibilities, architecture, design, implementation, and tests.
 
 ---
 
@@ -40,7 +40,7 @@ Allow authorized shared access while preventing conflicting active updates and u
 
 ### CAP-06 Workflow Initiation
 
-Start remediation through GitHub Actions or an ADK-supported interactive interface and continue an existing workspace.
+Start remediation through an automated CI/CD entry point or an authorized interactive entry point, and continue an existing workspace.
 
 ### CAP-07 Vulnerability Discovery
 
@@ -68,11 +68,11 @@ Select the safest practical remediation using compatibility, policy, risk, and v
 
 ### CAP-13 Remediation Application
 
-Apply permitted changes without modifying the reference branch directly.
+Apply approved and permitted project-file changes while preserving the supplied reference branch.
 
 ### CAP-14 Failure Analysis and Iteration
 
-Analyze unsuccessful attempts, retain the failure context, avoid repeating known failed approaches, and continue toward the safest achievable outcome.
+Analyze unsuccessful attempts, retain failure context, avoid repeating known failed approaches, and continue toward the safest achievable outcome.
 
 ### CAP-15 Maven Build Validation
 
@@ -144,7 +144,7 @@ Aggregate remediation outcomes, unsupported scenarios, failures, reviewer feedba
 
 ### Required for the initial release
 
-CAP-01 through CAP-24, plus the initial GitHub-focused portions of CAP-25 through CAP-30.
+CAP-01 through CAP-24, plus the initial-release portions of CAP-25 through CAP-30.
 
 ### Initial implementation constraints
 
@@ -161,11 +161,26 @@ CAP-07, CAP-17, CAP-29, and CAP-30 must be designed so later providers and remed
 
 ---
 
-## 4. Capability-to-Requirement Traceability
+## 4. Capability Ownership Rule
+
+Every capability has exactly one primary platform responsibility. Other responsibilities may support the capability without duplicating its authoritative state or decision ownership.
+
+The Platform Responsibility Model records:
+
+- primary responsibility
+- supporting responsibilities
+- authoritative state or decision owned
+
+Architecture must preserve that ownership unless an approved Architecture Decision Record changes it.
+
+---
+
+## 5. Capability-to-Requirement Traceability
 
 The detailed traceability matrix will map each capability to:
 
 - business requirement or business-goal source
+- primary and supporting platform responsibilities
 - architecture component or decision
 - detailed design section
 - implementation issue or task
@@ -175,12 +190,12 @@ Capability identifiers are stable and must not be renumbered after approval.
 
 ---
 
-## 5. Review Questions Before Architecture
+## 6. Review Questions Before Architecture
 
 The capability model is ready for architecture when reviewers can answer yes to the following:
 
 1. Does every agreed business need map to at least one capability?
 2. Is each capability stated without prescribing architecture or implementation?
-3. Are capability boundaries clear enough to assign architectural responsibility?
+3. Are capability boundaries clear enough to assign one primary responsibility?
 4. Are initial-release and extension expectations distinguishable?
 5. Are unresolved business decisions explicitly tracked rather than silently assumed?
