@@ -77,10 +77,14 @@ After the applicable engineering documents are reviewed, implementation must beg
 - initial release scope and extension direction are distinguishable
 - users, workspaces, policies, validation, and completion states are defined
 - the complete user-facing remediation workflow is visible in one activity diagram
+- review-only workspace access is separated from a new remediation iteration
+- a new iteration refreshes current context and reassesses retained workspace evidence
+- branch and pull-request delivery behavior is consistent with the completion states
+- future workspace evidence and operational-improvement data are distinguished
 - each business stage identifies the information produced or retained
 - open business decisions are visible
 
-**Status:** Completed and baselined as version 1.1.
+**Status:** Completed and baselined as version 1.2.
 
 ### Milestone 2 — Capability Model
 
@@ -129,9 +133,15 @@ After the applicable engineering documents are reviewed, implementation must beg
 - ADK and multi-agent orchestration at a high level
 - deterministic tools and service boundaries
 - workspace and execution-state ownership
+- review-only workspace access versus new-iteration execution
+- current-context refresh and retained-context loading
+- relevance assessment of prior findings, failures, decisions, and validations against refreshed facts
 - GitHub and GitHub Actions integration
 - vulnerability and validation provider boundaries
-- security and audit boundaries
+- branch and pull-request creation or update when safe validated changes exist
+- extensible workspace evidence without fundamental redesign
+- separation of workspace-specific evidence from aggregated operational-improvement data
+- security, privacy, authorization, retention, and audit boundaries
 - major data flows
 - key architecture decisions and tradeoffs
 - explicit mapping from the Business Remediation Workflow to architectural components and interactions
@@ -140,6 +150,8 @@ After the applicable engineering documents are reviewed, implementation must beg
 
 - every architecture component maps to one or more approved responsibilities and capabilities
 - every business workflow stage maps to one or more architecture components
+- architecture distinguishes refreshed current facts from retained historical evidence
+- architecture supports future evidence types and provider data without redefining the workspace lifecycle
 - no business workflow stage or completion outcome is removed, bypassed, or redefined
 
 **Status:** Immediate next milestone.
@@ -155,10 +167,15 @@ After the applicable engineering documents are reviewed, implementation must beg
 - agent responsibilities and boundaries
 - deterministic tools versus LLM decisions
 - workflow and state transitions
+- review-only and new-iteration transitions
+- current-context refresh behavior
+- retained-context selection and reassessment behavior
 - remediation planning and iteration behavior
 - provider and tool contracts
-- workspace data model
+- extensible workspace data model
+- separation of workspace evidence and aggregated operational data
 - validation and completion logic
+- branch and pull-request delivery rules
 - review-continuation behavior
 - error and recovery behavior
 
@@ -173,15 +190,16 @@ After the applicable engineering documents are reviewed, implementation must beg
 **Expected slices:**
 
 1. Repository intake and configuration
-2. Workspace lifecycle
+2. Workspace lifecycle and review-only access
 3. Automated and interactive initiation
-4. Vulnerability discovery and scope classification
-5. Maven multi-module analysis
-6. Remediation planning and application
-7. Validation and completion-state determination
-8. Branch and pull-request delivery
-9. Interactive review and continuation
-10. Security, auditability, resilience, and operational insights
+4. Current-context refresh and retained-context loading
+5. Vulnerability discovery and scope classification
+6. Maven multi-module analysis
+7. Remediation planning and application
+8. Validation and completion-state determination
+9. Branch and pull-request delivery
+10. Interactive review and continuation
+11. Security, auditability, resilience, extensibility, and operational insights
 
 ### Milestone 7 — Implementation Branch Creation and Incremental Delivery
 
@@ -199,7 +217,13 @@ No product implementation is committed to the engineering-baseline branch.
 
 **Deliverable:** `07-traceability-matrix.md` plus automated and review evidence.
 
-Verification must identify satisfied, partially satisfied, deferred, and unmet requirements, together with evidence and the release decision. It must also confirm that each approved business workflow stage and completion outcome is represented in the delivered implementation.
+Verification must identify satisfied, partially satisfied, deferred, and unmet requirements, together with evidence and the release decision. It must also confirm that:
+
+- each approved business workflow stage and completion outcome is represented
+- review-only access does not trigger an unintended remediation iteration
+- new iterations refresh current facts and use relevant retained history
+- stale prior conclusions are not reused without reassessment
+- safe validated changes produce or update the required branch and pull request unless policy disables automated delivery
 
 ### Milestone 9 — Platform Evolution
 
@@ -212,6 +236,7 @@ Prioritized after the initial release:
 - source-code remediation
 - major Java and Spring Boot upgrades
 - other build systems and languages
+- additional workspace evidence and operational-insight types
 
 ---
 
@@ -229,9 +254,15 @@ The architecture work must determine:
 - which responsibilities use ADK agents, deterministic tools, services, or combinations
 - orchestration and major component interactions
 - workspace, execution-state, evidence, and audit ownership
+- how the platform distinguishes review-only access from a new iteration
+- how current repository, policy, validation, and vulnerability context is refreshed
+- how relevant prior findings, attempts, failures, decisions, validations, risks, and reviewer guidance are loaded and reassessed
+- how safe validated changes create or update the remediation branch and pull request
+- how workspace evidence remains extensible for future providers, validations, and remediation types
+- how workspace-specific evidence is separated from aggregated operational-improvement data
 - GitHub and GitHub Actions integration boundaries
 - vulnerability-provider and validation-provider boundaries
-- security and authorization boundaries
+- security, privacy, authorization, retention, and audit boundaries
 - significant decisions that require ADRs
 
 The System Architecture shall preserve the approved Business Remediation Workflow. Technical decomposition may add internal steps, but it must not remove, bypass, or redefine an approved business stage or completion outcome without an approved change to the Business Requirements Baseline.
@@ -258,7 +289,7 @@ Architecture decisions must remain traceable to the applicable business workflow
 ## 7. Current Status Summary
 
 - Engineering-baseline branch: established and documentation-only
-- Business baseline and user-facing remediation workflow: baselined
+- Business baseline and user-facing remediation workflow: baselined as version 1.2
 - Capability model: baselined
 - Platform responsibility model: baselined
 - System architecture: immediate next step
