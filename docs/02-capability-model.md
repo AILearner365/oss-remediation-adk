@@ -1,14 +1,14 @@
 # Enterprise OSS Remediation Platform
 ## Capability Model
 
-**Status:** Draft  
-**Version:** 0.2
+**Status:** Baselined  
+**Version:** 0.3
 
 ---
 
 ## 1. Purpose
 
-This document translates the approved business requirements into a concise set of platform capabilities.
+This document translates the Business Requirements Baseline into a concise set of platform capabilities.
 
 It does not define components, agents, services, APIs, storage, prompts, or implementation details. Those decisions belong in the Platform Responsibility Model, System Architecture, and Detailed Design documents.
 
@@ -18,9 +18,9 @@ Each capability must trace back to the Business Requirements Baseline and later 
 
 ## 2. Capability Map
 
-### CAP-01 Repository Intake
+### CAP-01 Repository and Branch Intake
 
-Accept and validate repository, reference-branch, severity, policy, and validation inputs required to start remediation.
+Accept and validate the repository and reference branch required to establish the remediation baseline.
 
 ### CAP-02 Remediation Policy Management
 
@@ -48,7 +48,7 @@ Obtain current vulnerability findings through a configured provider or supported
 
 ### CAP-08 Severity and Scope Filtering
 
-Determine which findings are in scope according to severity, policy, exclusions, and remediation boundary.
+Apply the effective severity threshold, policy, exclusions, and remediation boundary to classify vulnerability findings as in scope or out of scope.
 
 ### CAP-09 Maven Multi-Module Analysis
 
@@ -190,12 +190,12 @@ Capability identifiers are stable and must not be renumbered after approval.
 
 ---
 
-## 6. Review Questions Before Architecture
+## 6. Architecture Entry Confirmation
 
-The capability model is ready for architecture when reviewers can answer yes to the following:
+The capability model is approved for architecture because:
 
-1. Does every agreed business need map to at least one capability?
-2. Is each capability stated without prescribing architecture or implementation?
-3. Are capability boundaries clear enough to assign one primary responsibility?
-4. Are initial-release and extension expectations distinguishable?
-5. Are unresolved business decisions explicitly tracked rather than silently assumed?
+1. Every agreed business need maps to at least one capability.
+2. Capabilities remain free of architecture and implementation decisions.
+3. Capability boundaries support one primary responsibility.
+4. Initial-release and extension expectations are distinguishable.
+5. Unresolved business decisions remain explicitly tracked in the Business Requirements Baseline.
