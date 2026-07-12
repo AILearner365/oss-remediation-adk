@@ -21,9 +21,10 @@ Implementation work must occur on a separate development branch created from an 
 
 ## Start here
 
-1. [`docs/00-engineering-roadmap.md`](./docs/00-engineering-roadmap.md)
-2. [`docs/01-business-requirements.md`](./docs/01-business-requirements.md)
-3. [`docs/02-capability-model.md`](./docs/02-capability-model.md)
-4. [`docs/03-platform-responsibility-model.md`](./docs/03-platform-responsibility-model.md)
-5. [`docs/README.md`](./docs/README.md)
-6. [`decisions/README.md`](./decisions/README.md)
+1. [`docs/00-engineering-roadmap.md`](./docs/00-engineering-roadmap.md) — sequence, versions, milestone status, and next step
+2. [`docs/01-business-requirements.md`](./docs/01-business-requirements.md) — authoritative business baseline
+3. [Approved Business Remediation Workflow](./docs/01-business-requirements.md#8-business-remediation-workflow) — authoritative user-facing lifecycle
+4. [`docs/02-capability-model.md`](./docs/02-capability-model.md) — architecture-neutral capabilities
+5. [`docs/03-platform-responsibility-model.md`](./docs/03-platform-responsibility-model.md) — capability ownership
+6. [`docs/README.md`](./docs/README.md) — documentation responsibilities and navigation
+7. [`decisions/README.md`](./decisions/README.md) — Architecture Decision Record guidance
