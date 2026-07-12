@@ -1,0 +1,383 @@
+{
+  "artifactId": "remediation-patch-plan-attempt-3",
+  "artifactReferences": {
+    "projectAnalyzerReport": "baseline/project-analyzer-report.json",
+    "vulnerabilityAssessmentReport": "baseline/vulnerability-assessment-report.json"
+  },
+  "attemptNumber": 3,
+  "constraints": {
+    "allowedFiles": [
+      "**/pom.xml"
+    ],
+    "patchingMode": "EXACT_TEXT_ONLY",
+    "requiresValidation": true
+  },
+  "createdBy": "RemediationPlanningAgent",
+  "decisionType": "PATCH_PLAN",
+  "errors": [],
+  "planId": "plan-attempt-3",
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "additionalEvidenceRequested": false,
+    "manualReviewDecisionCount": 15,
+    "patchDecisionCount": 2
+  },
+  "vulnerabilityDecisions": [
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+        "baseline/project-analyzer-report.json#/pomEvidence/10"
+      ],
+      "fixedVersionSelected": "1.10.0",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/10"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "            <groupId>org.apache.commons</groupId>\n            <artifactId>commons-text</artifactId>\n            <version>1.10.0</version>",
+          "newVersion": "1.10.0",
+          "oldText": "            <groupId>org.apache.commons</groupId>\n            <artifactId>commons-text</artifactId>\n            <version>1.9</version>",
+          "oldVersion": "1.9",
+          "patchId": "patch-GHSA-599f-7c49-w659"
+        }
+      ],
+      "rationale": "The vulnerability is against a direct dependency. The selected fixed version '1.10.0' is the lowest compatible secure version available in the vulnerability assessment report's fixedVersions list. Project Analyzer evidence confirms this is a direct dependency in the root POM. This patch is independent of the issues that caused the previous validation failures.",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "decision": "PATCH",
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/16",
+        "baseline/project-analyzer-report.json#/pomEvidence/11"
+      ],
+      "fixedVersionSelected": "20231013",
+      "patches": [
+        {
+          "changeType": "DEPENDENCY_VERSION_VALUE",
+          "evidenceReferences": [
+            "baseline/project-analyzer-report.json#/pomEvidence/11"
+          ],
+          "expectedOccurrences": 1,
+          "file": "pom.xml",
+          "newText": "            <groupId>org.json</groupId>\n            <artifactId>json</artifactId>\n            <version>20231013</version>",
+          "newVersion": "20231013",
+          "oldText": "            <groupId>org.json</groupId>\n            <artifactId>json</artifactId>\n            <version>20230227</version>",
+          "oldVersion": "20230227",
+          "patchId": "patch-GHSA-4jq9-2xhw-jpx7"
+        }
+      ],
+      "rationale": "The vulnerability is against a direct dependency. The selected fixed version '20231013' is the lowest compatible secure version available in the vulnerability assessment report's fixedVersions list. Project Analyzer evidence confirms this is a direct dependency in the root POM. This patch is independent of the issues that caused the previous validation failures.",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "commons-fileupload",
+        "currentVersion": "1.5",
+        "ecosystem": "Maven",
+        "groupId": "commons-fileupload",
+        "packageName": "commons-fileupload:commons-fileupload"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/2"
+      ],
+      "manualReviewCategory": "MANUAL_DEPENDENCY_MANAGEMENT_RISK",
+      "statusReason": "Remediation for commons-fileupload version 1.5 (GHSA-vv7r-c36w-3prj) was previously attempted, but contributed to dependency convergence conflicts that also involved transitive dependencies from the banned struts2-core. To prevent re-introducing these conflicts, this dependency is deferred for manual review, pending resolution of the underlying struts2-core ban and associated transitive dependency issues.",
+      "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-2j39-qcjm-428w"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/3",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-43mq-6xmg-29vm"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/4",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-4g42-gqrg-4633"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/5",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-729q-fcgp-r5xh"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/6",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-8m5q-crqq-6pmf"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/7",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-ccp5-gg58-pxfm"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/8",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-cr6j-3jp9-rw65"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/9",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-jc35-q369-45pv"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/10",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-qcfc-hmrc-59x7"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/11",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-rg58-xhh7-mqjw"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/12",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-v8j6-6c2r-r27c"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/13",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-wp4h-pvgw-5727"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/14",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-x5x7-3v85-wpc4"
+    },
+    {
+      "decision": "MANUAL_REVIEW",
+      "dependency": {
+        "artifactId": "struts2-core",
+        "currentVersion": "2.5.12",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.struts",
+        "packageName": "org.apache.struts:struts2-core"
+      },
+      "evidenceReferences": [
+        "baseline/vulnerability-assessment-report.json#/vulnerabilities/15",
+        "artifactReferences.baselineBuildResult#/logExcerpt",
+        "artifactReferences.previousValidationResult#/logExcerpts/0",
+        "artifactReferences.previousOutcomeAnalysisSummary#/newFactsLearned/1"
+      ],
+      "manualReviewCategory": "MANUAL_POLICY_DISALLOWED_CHANGE",
+      "statusReason": "The Maven Enforcer Plugin explicitly bans the 'org.apache.struts:struts2-core' dependency, as noted in the baseline and previous validation build failures. Automated version upgrades cannot resolve a banned dependency issue, which requires a policy change or manual architectural review. All related vulnerabilities are therefore deferred for manual review.",
+      "vulnerabilityId": "GHSA-xx7v-hqxh-cjr9"
+    }
+  ],
+  "warnings": [],
+  "workflowId": "oss-remediation-20260712-213154"
+}
