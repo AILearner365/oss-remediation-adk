@@ -2,7 +2,7 @@
 ## Software Requirements Specification (SRS)
 
 **Status:** Draft  
-**Version:** 0.2  
+**Version:** 0.3  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `mvp-3-pr-summary-integration`  
 **Document branch:** `docs/srs-requirements-foundation`
@@ -31,7 +31,7 @@ Once approved, this SRS shall be used to:
 
 This document establishes the business, product, functional, non-functional, operational, security, verification, and traceability requirements for the Enterprise OSS Remediation Platform.
 
-The current draft contains the approved working foundation for:
+This specification defines the foundation for:
 
 - business context
 - problem statement
@@ -45,6 +45,9 @@ The current draft contains the approved working foundation for:
 - platform evolution scope
 - success definition
 - guiding principles
+- assumptions
+- business dependencies
+- technology constraints
 
 Sections or requirements that are not yet complete shall be explicitly marked as **Draft** or **TBD**. Detailed requirements shall use uniquely identified, atomic, testable, and traceable statements.
 
@@ -425,53 +428,88 @@ The completion state does not end the lifecycle of the workspace. Authorized use
 
 ## 14. Guiding Principles
 
-All requirements, architecture decisions, designs, implementations, and verification activities must remain consistent with the following principles.
+The following principles guide all requirements, architecture decisions, designs, implementations, and verification activities.
 
 ### 14.1 Safety Before Automation
 
-The platform must not apply changes that violate configured policies or introduce unacceptable risk merely to maximize vulnerability reduction.
+The platform prioritizes safe remediation over maximizing vulnerability reduction through changes that exceed configured policies or acceptable risk.
 
 ### 14.2 Validation Before Completion
 
-The platform must not report a successful or partial remediation without completing the validation scope applicable to the changes being delivered.
+A remediation outcome is not considered complete until the applicable validation scope has been executed and its results are available.
 
 ### 14.3 Evidence Before Recommendation
 
-Remediation decisions and recommendations must be supported by repository, dependency, vulnerability, build, test, policy, or validation evidence.
+Recommendations are grounded in repository, dependency, vulnerability, build, test, policy, and validation evidence.
 
 ### 14.4 Traceability by Default
 
-Significant decisions must remain traceable from the original finding through remediation, validation, review, and final outcome.
+Significant decisions remain traceable from the original finding through remediation, validation, review, and final outcome.
 
 ### 14.5 Reviewability by Default
 
-The platform must produce outcomes that a developer or reviewer can understand, question, and evaluate without relying on hidden reasoning or unavailable execution context.
+Remediation outcomes are understandable, question-ready, and evaluable without reliance on hidden reasoning or unavailable execution context.
 
 ### 14.6 Transparency
 
-The platform must not hide failed validations, rejected options, remaining vulnerabilities, assumptions, limitations, or residual risks.
+Failures, rejected options, remaining vulnerabilities, assumptions, limitations, and residual risks remain visible to authorized users.
 
 ### 14.7 Configurability Over Hard-Coding
 
-Enterprise policies, remediation boundaries, severity scope, and validation scope should be configurable rather than permanently embedded in platform behavior.
+Enterprise policies, remediation boundaries, severity scope, and validation scope are treated as configurable platform concerns rather than fixed product behavior.
 
 ### 14.8 Deterministic Where Practical
 
-The platform should prefer deterministic repository analysis, dependency resolution, scanning, building, testing, and validation wherever practical.
+Deterministic repository analysis, dependency resolution, scanning, building, testing, and validation are preferred wherever practical.
 
-LLM reasoning should be used where contextual interpretation, comparison, explanation, or engineering judgment is required.
+LLM reasoning supports contextual interpretation, comparison, explanation, and engineering judgment where deterministic methods are insufficient.
 
 ### 14.9 Human Collaboration When Needed
 
-When safe automated progress is not possible, the platform must support human review and later continuation rather than forcing an unsafe result.
+Human review and later continuation are supported when safe automated progress is not available.
 
 ### 14.10 Extensibility Without Fundamental Redesign
 
-The platform should accommodate new source-control systems, CI/CD systems, vulnerability providers, validation providers, remediation boundaries, build systems, and languages without requiring a fundamental redesign of the product model.
+The platform is intended to accommodate new source-control systems, CI/CD systems, vulnerability providers, validation providers, remediation boundaries, build systems, and languages without fundamental redesign of the product model.
 
 ---
 
-## 15. Technology and Implementation Constraints
+## 15. Assumptions
+
+The specification currently assumes:
+
+- the repository URL and reference branch identify an accessible and authorized repository state
+- the supplied reference branch represents the intended remediation baseline
+- the repository contains a valid Maven multi-module project structure
+- the Maven build can be invoked in an available build environment
+- required source-control, CI/CD, vulnerability-provider, validation-provider, and LLM credentials are available through approved enterprise mechanisms
+- required network access to configured repositories, artifact sources, vulnerability providers, and validation systems is available
+- repository-specific build prerequisites that cannot be discovered automatically are documented or configured by the owning team
+- the owning team provides valid remediation policies and custom validation configuration when defaults are insufficient
+- external systems return sufficiently accurate and timely information for the platform to use as evidence
+
+If an assumption is not satisfied, the affected workflow may require configuration correction, retry, or human review rather than being treated as a successful remediation.
+
+---
+
+## 16. Business Dependencies
+
+The platform's ability to execute and verify remediation depends on the availability and authorized use of:
+
+- the source-control system hosting the repository
+- the CI/CD platform used to initiate or execute remediation
+- the Maven build environment and configured artifact repositories
+- vulnerability providers used for discovery and post-remediation verification
+- validation providers used for repository-specific or organization-specific checks
+- approved LLM services used for contextual reasoning and interactive support
+- enterprise identity, authorization, secret-management, network, and audit services
+- repository-owner participation when configuration, policy, or human review is required
+
+The platform does not control the correctness, availability, latency, or service limits of these external dependencies. Related functional and non-functional requirements shall define expected handling of dependency failures.
+
+---
+
+## 17. Technology Constraints
 
 The following technology constraints apply to the current platform direction:
 
@@ -484,20 +522,16 @@ These constraints identify mandated technology choices without prescribing the d
 
 ---
 
-## 16. Open Items and TBDs
+## 18. Open Items and TBDs
 
-The following items remain unresolved and must be completed before their related requirements are approved as part of a release baseline:
+The following unresolved business and operational decisions must be completed before their related requirements are approved as part of a release baseline:
 
 - exact duplicate-workspace behavior: block, warn, queue, or resume
 - final role and permission model
-- organization-specific retention duration
+- organization-specific workspace and audit retention duration
 - numerical availability target
 - supported concurrent active workspaces
 - maximum supported repository and Maven reactor size
 - maximum remediation execution duration
 - recovery-time and recovery-point objectives
 - branch commit-history policy across review iterations
-- detailed functional requirement identifiers and acceptance conditions
-- detailed non-functional, operational, security, and audit requirements
-- deliverable definitions and verification methods
-- requirements traceability mappings to architecture, design, implementation, and tests
