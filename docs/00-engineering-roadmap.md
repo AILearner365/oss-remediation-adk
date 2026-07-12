@@ -15,7 +15,7 @@ Each document has one authoritative responsibility:
 - business behavior and outcomes: [Business Requirements Baseline](./01-business-requirements.md)
 - platform capabilities: [Capability Model](./02-capability-model.md)
 - capability ownership: [Platform Responsibility Model](./03-platform-responsibility-model.md)
-- architecture components and interactions: `04-system-architecture.md`
+- architecture components and interactions: [System Architecture](./04-system-architecture.md)
 - detailed behavior and contracts: `05-detailed-design.md`
 - delivery order: `06-implementation-roadmap.md`
 - verification evidence: `07-traceability-matrix.md`
@@ -46,7 +46,7 @@ Implementation begins on a separate development branch after the applicable base
 | 1 | [`01-business-requirements.md`](./01-business-requirements.md) | Product intent, boundaries, business workflow, outcomes, and open business decisions | Baselined v1.4 |
 | 2 | [`02-capability-model.md`](./02-capability-model.md) | Architecture-neutral platform capabilities | Baselined v0.5 |
 | 3 | [`03-platform-responsibility-model.md`](./03-platform-responsibility-model.md) | Primary and supporting responsibility ownership | Baselined v0.4 |
-| 4 | `04-system-architecture.md` | Architectural components, boundaries, integrations, and major data flows | Next |
+| 4 | [`04-system-architecture.md`](./04-system-architecture.md) | Architectural components, boundaries, integrations, state ownership, and major data flows | Draft v0.1 — review in progress |
 | 5 | `05-detailed-design.md` | Agent, tool, state, API, data, and failure behavior | Not started |
 | 6 | `06-implementation-roadmap.md` | Incremental implementation slices and delivery order | Not started |
 | 7 | `07-traceability-matrix.md` | Requirement through implementation and verification evidence | Not started |
@@ -76,8 +76,8 @@ The business workflow, continuation behavior, completion states, delivery policy
 
 ### Milestone 4 — System Architecture
 
-**Deliverable:** `04-system-architecture.md`  
-**Status:** Immediate next milestone.
+**Deliverable:** [`04-system-architecture.md`](./04-system-architecture.md)  
+**Status:** Draft version 0.1 created; architecture review is the immediate next step.
 
 **Purpose:** Define the architectural components that fulfill the approved platform responsibilities while preserving the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
@@ -86,14 +86,15 @@ The business workflow, continuation behavior, completion states, delivery policy
 - every business-workflow stage maps to one or more architecture components
 - every architecture component maps to approved `CAP-*` and `RESP-*` identifiers
 - component, state, evidence, integration, security, and audit ownership is explicit
-- significant tradeoffs are recorded as ADRs
+- ADK/LLM reasoning and deterministic execution boundaries are clear
+- significant tradeoffs are assigned to ADRs
 - any approved capability-ownership change is synchronized into the Platform Responsibility Model and traceability records
 - no approved business stage or completion outcome is removed or redefined
 
 ### Milestone 5 — Detailed Design
 
 **Deliverable:** `05-detailed-design.md`  
-**Status:** Pending architecture.
+**Status:** Pending architecture approval.
 
 ### Milestone 6 — Implementation Roadmap
 
@@ -121,13 +122,15 @@ Future scope is maintained in the [Platform Extension Direction](./01-business-r
 
 ## 5. Immediate Next Step
 
-Create `04-system-architecture.md` using:
+Review [`04-system-architecture.md`](./04-system-architecture.md) against:
 
 1. the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
 2. the [Capability Model](./02-capability-model.md)
 3. the [Platform Responsibility Model](./03-platform-responsibility-model.md)
 
-The architecture document must map workflow stages to capabilities, responsibilities, and architectural components. It must reference the business baseline for behavior and outcomes rather than restating or redefining them.
+The review must confirm workflow coverage, responsibility preservation, component boundaries, state and evidence ownership, integration boundaries, and the separation between LLM-assisted reasoning and deterministic execution.
+
+After approval, baseline the architecture and begin `05-detailed-design.md` together with the ADRs required before implementation.
 
 ---
 
