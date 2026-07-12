@@ -2,7 +2,7 @@
 ## Capability Model
 
 **Status:** Baselined  
-**Version:** 0.4
+**Version:** 0.5
 
 ---
 
@@ -160,13 +160,21 @@ CAP-07, CAP-17, CAP-29, and CAP-30 must support the extension direction defined 
 
 Every capability has exactly one primary platform responsibility. Other responsibilities may support the capability without duplicating its authoritative state or decision ownership.
 
-The [Platform Responsibility Model](./03-platform-responsibility-model.md) records:
+The [Platform Responsibility Model](./03-platform-responsibility-model.md) is authoritative for:
 
 - primary responsibility
 - supporting responsibilities
 - authoritative state or decision owned
 
-Architecture must preserve that ownership unless an approved Architecture Decision Record changes it.
+Architecture must preserve the ownership defined in the Platform Responsibility Model.
+
+Any approved ownership change must:
+
+1. be explained in an Architecture Decision Record
+2. be synchronized into the Platform Responsibility Model
+3. update the applicable traceability records
+
+An ADR does not independently override the authoritative ownership model.
 
 ---
 
