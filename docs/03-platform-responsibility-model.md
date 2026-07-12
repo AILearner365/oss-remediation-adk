@@ -1,8 +1,8 @@
 # Enterprise OSS Remediation Platform
 ## Platform Responsibility Model
 
-**Status:** Draft  
-**Version:** 0.2
+**Status:** Baselined  
+**Version:** 0.3
 
 ---
 
@@ -103,14 +103,14 @@ Every capability has exactly one primary responsibility. Supporting responsibili
 
 **Purpose:** Resolve what the platform may evaluate, change, validate, accept, defer, or escalate.
 
-**Primary capabilities:** CAP-02, CAP-03, CAP-08  
-**Supporting capabilities:** none
+**Primary capabilities:** CAP-02, CAP-03  
+**Supporting capabilities:** CAP-08
 
-**Authoritative ownership:** effective remediation policy, validation scope, and permitted change boundary for each iteration.
+**Authoritative ownership:** effective remediation policy, severity threshold, validation scope, exclusions, and permitted change boundary for each iteration.
 
-**Major interactions:** constrains RESP-05 through RESP-09 and provides policy evidence to RESP-10.
+**Major interactions:** supplies governing rules to RESP-05 and constrains RESP-06 through RESP-09; provides policy evidence to RESP-10.
 
-**Boundary:** policy is snapshotted for each iteration and cannot be silently altered by validation or product-insight processing.
+**Boundary:** defines the rules used for classification but does not own the resulting in-scope or out-of-scope vulnerability classification.
 
 ---
 
@@ -133,14 +133,14 @@ Every capability has exactly one primary responsibility. Supporting responsibili
 
 **Purpose:** Obtain current findings, normalize them, apply effective scope, and evaluate post-change vulnerability status.
 
-**Primary capabilities:** CAP-07, CAP-16  
-**Supporting capabilities:** CAP-08
+**Primary capabilities:** CAP-07, CAP-08, CAP-16  
+**Supporting capabilities:** none
 
-**Authoritative ownership:** normalized vulnerability findings and pre-change/post-change vulnerability comparison.
+**Authoritative ownership:** normalized vulnerability findings, in-scope and out-of-scope classification, and pre-change/post-change vulnerability comparison.
 
-**Major interactions:** receives scope from RESP-03; supplies findings to RESP-06, RESP-07, RESP-09, and RESP-10.
+**Major interactions:** receives governing rules from RESP-03; supplies classified findings to RESP-06, RESP-07, RESP-09, and RESP-10.
 
-**Boundary:** provider responses and limitations remain visible; vulnerability results do not independently authorize repository changes.
+**Boundary:** applies approved policy rules to findings but does not define or change those rules.
 
 ---
 
@@ -260,7 +260,7 @@ Every capability has exactly one primary responsibility. Supporting responsibili
 | CAP-05 | RESP-04 | RESP-01, RESP-11 |
 | CAP-06 | RESP-01 | RESP-02, RESP-04, RESP-11, RESP-12 |
 | CAP-07 | RESP-05 | RESP-02, RESP-11, RESP-12 |
-| CAP-08 | RESP-03 | RESP-05, RESP-07 |
+| CAP-08 | RESP-05 | RESP-03, RESP-07 |
 | CAP-09 | RESP-06 | RESP-02 |
 | CAP-10 | RESP-06 | RESP-05 |
 | CAP-11 | RESP-07 | RESP-06 |
@@ -329,36 +329,35 @@ RESP-11 applies security, authorization, and audit controls across the full life
 
 1. Workflow coordination does not replace deterministic repository, scan, build, or test evidence.
 2. RESP-08 creates remediation file changes; RESP-02 owns branch, commit, push, and pull-request operations.
-3. RESP-09 alone owns completion-state determination; RESP-01 consumes the result.
-4. Change execution does not approve its own result.
-5. Validation cannot independently change remediation policy.
-6. Source control remains authoritative for repository and pull-request state.
-7. Workspace management owns persistent remediation context but does not invent missing technical evidence.
-8. Review support explains decisions from retained evidence and does not create unsupported rationale.
-9. Security and authorization apply across all responsibilities.
-10. Product insight collection does not silently change approved runtime policy or remediation behavior.
+3. RESP-03 defines the effective scope rules; RESP-05 applies them and owns finding classification.
+4. RESP-09 alone owns completion-state determination; RESP-01 consumes the result.
+5. Change execution does not approve its own result.
+6. Validation cannot independently change remediation policy.
+7. Source control remains authoritative for repository and pull-request state.
+8. Workspace management owns persistent remediation context but does not invent missing technical evidence.
+9. Review support explains decisions from retained evidence and does not create unsupported rationale.
+10. Security and authorization apply across all responsibilities.
+11. Product insight collection does not silently change approved runtime policy or remediation behavior.
 
 ---
 
-## 8. Architecture Entry Criteria
+## 8. Architecture Entry Confirmation
 
-Architecture work may begin when reviewers confirm that:
+The responsibility model is approved for architecture because:
 
-1. Every approved capability has one primary responsibility.
+1. Every approved capability has exactly one primary responsibility.
 2. Supporting responsibility roles are explicit.
 3. Each responsibility has a clear purpose, authoritative ownership, and boundary.
 4. Major interactions are sufficient to identify architectural component relationships.
-5. Durable-state expectations are visible without prescribing storage technology.
+5. State ownership is visible without prescribing storage technology.
 6. No responsibility is prematurely defined as an agent, service, database, API, or implementation module.
 7. The model supports the initial GitHub-focused release and the agreed extension direction.
 
 ---
 
-## 9. Immediate Follow-Up
+## 9. Next Step
 
-Review this model together with `02-capability-model.md`.
-
-After approval, create `04-system-architecture.md` and decide:
+Create `04-system-architecture.md` and decide:
 
 - which architectural components fulfill each responsibility
 - which responsibilities use ADK agents versus deterministic tools or services
