@@ -7,6 +7,4 @@ from typing import Any
 from oss_remediation_agent.agents import LLMInvocationError
 from oss_remediation_agent.agents.remediation_outcome_analysis_agent import (
     build_outcome_analysis_context,
-    persist_outcome_analysis_agent_output,
-)
-from oss_remediation_agent.workflow.phase6_orchestrator import Phase6
+    persist_outcome_analysis
