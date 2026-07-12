@@ -1,0 +1,57 @@
+{
+  "artifactId": "validation-result-attempt-1",
+  "artifactReferences": {
+    "buildLog": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/build.log",
+    "osvReport": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json",
+    "testLog": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/test.log"
+  },
+  "attemptNumber": 1,
+  "buildValidation": {
+    "command": "mvn clean install",
+    "exitCode": 0,
+    "logFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/build.log",
+    "status": "SUCCESS"
+  },
+  "changeScopeValidation": {
+    "changedFiles": [
+      "pom.xml",
+      "task-common/pom.xml"
+    ],
+    "failureSummary": null,
+    "noJdkVersionChange": true,
+    "noPluginBuildLogicChange": true,
+    "noPomFormattingRewrite": true,
+    "noSourceCodeChanges": true,
+    "noSuppressionOrIgnoreAdded": true,
+    "onlyIntendedDependencyVersionChanges": true,
+    "onlyPomFilesChanged": true,
+    "status": "SUCCESS"
+  },
+  "createdAt": "2026-07-12T21:25:08Z",
+  "createdBy": "ValidationTool",
+  "errors": [],
+  "osvValidation": {
+    "newCriticalHighIntroduced": false,
+    "remainingCriticalCount": 0,
+    "remainingHighCount": 0,
+    "remainingVulnerabilities": [],
+    "scanResultFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json",
+    "status": "SUCCESS"
+  },
+  "patchApplicationProof": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/patch-application-proof.json",
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "failedStage": null,
+    "failureSummary": null
+  },
+  "testValidation": {
+    "command": "mvn test",
+    "exitCode": 0,
+    "logFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/test.log",
+    "status": "SUCCESS"
+  },
+  "warnings": [],
+  "workflowId": "oss-remediation-mvp"
+}

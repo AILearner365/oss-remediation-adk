@@ -1,0 +1,282 @@
+{
+  "artifactId": "remediation-verification-report",
+  "artifactReferences": {
+    "baselineAssessment": "baseline/vulnerability-assessment-report.json",
+    "latestPatchApplicationProof": "attempt-1/patch-application-proof.json",
+    "latestPatchPlan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/remediation-patch-plan.json",
+    "latestPostOsvScan": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json",
+    "latestValidationResult": "attempt-1/validation-result.json",
+    "manifest": "manifest.json"
+  },
+  "createdBy": "RemediationVerificationReportBuilder",
+  "packages": [
+    {
+      "baselineVersion": "1.5",
+      "ecosystem": "Maven",
+      "findings": [
+        {
+          "aliases": [
+            "CVE-2025-48976"
+          ],
+          "attemptHistory": [
+            {
+              "attemptNumber": 1,
+              "evidence": {
+                "patchApplicationProofRef": "attempt-1/patch-application-proof.json",
+                "plannerDecisionRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/remediation-patch-plan.json#/vulnerabilityDecisions/0",
+                "validationRef": "attempt-1/validation-result.json"
+              },
+              "plannerDecision": "PATCH",
+              "plannerRationale": "The project analyzer report shows commons-fileupload:commons-fileupload as a direct dependency in the root pom.xml. The lowest compatible fixed version 1.6.0 from the vulnerability assessment report will be applied.",
+              "validationStatusAfterAttempt": "RESOLVED"
+            }
+          ],
+          "baselineVersion": "1.5",
+          "evidence": {
+            "assessmentRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/0",
+            "postOsvScanRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json"
+          },
+          "finalReason": "Planner selected version 1.6.0 and post-remediation OSV validation confirmed this finding is no longer present.",
+          "finalStatus": "RESOLVED",
+          "fixedVersions": [
+            "1.6.0",
+            "2.0.0-M4"
+          ],
+          "resolutionType": "DIRECT_PACKAGE_UPGRADE",
+          "selectedVersion": "1.6.0",
+          "severity": "HIGH",
+          "vulnerabilityId": "GHSA-vv7r-c36w-3prj"
+        }
+      ],
+      "overallStatus": "RESOLVED",
+      "packageName": "commons-fileupload:commons-fileupload",
+      "packageVerificationSummary": "Selected version 1.6.0 resolved all in-scope findings for this package.",
+      "selectedVersion": "1.6.0",
+      "summary": {
+        "findingCounts": {
+          "baseline": 1,
+          "newIntroduced": 0,
+          "pending": 0,
+          "resolved": 1
+        },
+        "severityCounts": {
+          "baseline": {
+            "critical": 0,
+            "high": 1,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "pending": {
+            "critical": 0,
+            "high": 0,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "resolved": {
+            "critical": 0,
+            "high": 1,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          }
+        }
+      }
+    },
+    {
+      "baselineVersion": "1.9",
+      "ecosystem": "Maven",
+      "findings": [
+        {
+          "aliases": [
+            "CVE-2022-42889"
+          ],
+          "attemptHistory": [
+            {
+              "attemptNumber": 1,
+              "evidence": {
+                "patchApplicationProofRef": "attempt-1/patch-application-proof.json",
+                "plannerDecisionRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/remediation-patch-plan.json#/vulnerabilityDecisions/1",
+                "validationRef": "attempt-1/validation-result.json"
+              },
+              "plannerDecision": "PATCH",
+              "plannerRationale": "The project analyzer report shows org.apache.commons:commons-text as a direct dependency in both the root pom.xml and task-common/pom.xml. The lowest compatible fixed version 1.10.0 from the vulnerability assessment report will be applied to both declarations.",
+              "validationStatusAfterAttempt": "RESOLVED"
+            }
+          ],
+          "baselineVersion": "1.9",
+          "evidence": {
+            "assessmentRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/1",
+            "postOsvScanRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json"
+          },
+          "finalReason": "Planner selected version 1.10.0 and post-remediation OSV validation confirmed this finding is no longer present.",
+          "finalStatus": "RESOLVED",
+          "fixedVersions": [
+            "1.10.0"
+          ],
+          "resolutionType": "DIRECT_PACKAGE_UPGRADE",
+          "selectedVersion": "1.10.0",
+          "severity": "CRITICAL",
+          "vulnerabilityId": "GHSA-599f-7c49-w659"
+        }
+      ],
+      "overallStatus": "RESOLVED",
+      "packageName": "org.apache.commons:commons-text",
+      "packageVerificationSummary": "Selected version 1.10.0 resolved all in-scope findings for this package.",
+      "selectedVersion": "1.10.0",
+      "summary": {
+        "findingCounts": {
+          "baseline": 1,
+          "newIntroduced": 0,
+          "pending": 0,
+          "resolved": 1
+        },
+        "severityCounts": {
+          "baseline": {
+            "critical": 1,
+            "high": 0,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "pending": {
+            "critical": 0,
+            "high": 0,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "resolved": {
+            "critical": 1,
+            "high": 0,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          }
+        }
+      }
+    },
+    {
+      "baselineVersion": "20230227",
+      "ecosystem": "Maven",
+      "findings": [
+        {
+          "aliases": [
+            "CVE-2023-5072"
+          ],
+          "attemptHistory": [
+            {
+              "attemptNumber": 1,
+              "evidence": {
+                "patchApplicationProofRef": "attempt-1/patch-application-proof.json",
+                "plannerDecisionRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/remediation-patch-plan.json#/vulnerabilityDecisions/2",
+                "validationRef": "attempt-1/validation-result.json"
+              },
+              "plannerDecision": "PATCH",
+              "plannerRationale": "The project analyzer report shows org.json:json as a direct dependency in the root pom.xml. The lowest compatible fixed version 20231013 from the vulnerability assessment report will be applied.",
+              "validationStatusAfterAttempt": "RESOLVED"
+            }
+          ],
+          "baselineVersion": "20230227",
+          "evidence": {
+            "assessmentRef": "baseline/vulnerability-assessment-report.json#/vulnerabilities/2",
+            "postOsvScanRef": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-212314/attempt-1/osv-report.json"
+          },
+          "finalReason": "Planner selected version 20231013 and post-remediation OSV validation confirmed this finding is no longer present.",
+          "finalStatus": "RESOLVED",
+          "fixedVersions": [
+            "20231013"
+          ],
+          "resolutionType": "DIRECT_PACKAGE_UPGRADE",
+          "selectedVersion": "20231013",
+          "severity": "HIGH",
+          "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+        }
+      ],
+      "overallStatus": "RESOLVED",
+      "packageName": "org.json:json",
+      "packageVerificationSummary": "Selected version 20231013 resolved all in-scope findings for this package.",
+      "selectedVersion": "20231013",
+      "summary": {
+        "findingCounts": {
+          "baseline": 1,
+          "newIntroduced": 0,
+          "pending": 0,
+          "resolved": 1
+        },
+        "severityCounts": {
+          "baseline": {
+            "critical": 0,
+            "high": 1,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "pending": {
+            "critical": 0,
+            "high": 0,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          },
+          "resolved": {
+            "critical": 0,
+            "high": 1,
+            "low": 0,
+            "medium": 0,
+            "unknown": 0
+          }
+        }
+      }
+    }
+  ],
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "summary": {
+    "findingCounts": {
+      "baseline": 3,
+      "newIntroduced": 0,
+      "pending": 0,
+      "resolved": 3
+    },
+    "packageCounts": {
+      "affected": 3,
+      "partiallyResolved": 0,
+      "pending": 0,
+      "resolved": 3
+    },
+    "severityCounts": {
+      "baseline": {
+        "critical": 1,
+        "high": 2,
+        "low": 0,
+        "medium": 0,
+        "unknown": 0
+      },
+      "newIntroduced": {
+        "critical": 0,
+        "high": 0,
+        "low": 0,
+        "medium": 0,
+        "unknown": 0
+      },
+      "pending": {
+        "critical": 0,
+        "high": 0,
+        "low": 0,
+        "medium": 0,
+        "unknown": 0
+      },
+      "resolved": {
+        "critical": 1,
+        "high": 2,
+        "low": 0,
+        "medium": 0,
+        "unknown": 0
+      }
+    },
+    "validationStatus": "SUCCESS",
+    "verificationOutcome": "FULL_REMEDIATION"
+  }
+}
