@@ -23,7 +23,34 @@ Each document must add new information and must not duplicate earlier documents 
 
 ---
 
-## 2. Authoritative Document Set
+## 2. Engineering Baseline Branch Policy
+
+The `docs/srs-requirements-foundation` branch is the clean engineering baseline for the new platform direction.
+
+This branch contains only:
+
+- business requirements
+- capability definitions
+- system architecture
+- detailed design
+- implementation planning
+- requirements traceability
+- architecture decision records
+
+This branch must not contain:
+
+- product implementation code
+- experiments or prototypes
+- generated artifacts
+- product CI/CD workflows
+- legacy implementation documents
+- copied implementation from earlier branches
+
+After the applicable engineering documents are reviewed, implementation must begin on a separate development branch. The approved engineering baseline may be merged or copied into that implementation branch so code and tests remain traceable to the approved documentation.
+
+---
+
+## 3. Authoritative Document Set
 
 | Order | Document | Purpose | Status |
 |---|---|---|---|
@@ -37,7 +64,7 @@ Each document must add new information and must not duplicate earlier documents 
 
 ---
 
-## 3. Overall Engineering Milestones
+## 4. Overall Engineering Milestones
 
 ### Milestone 1 — Business Baseline
 
@@ -128,13 +155,17 @@ Each document must add new information and must not duplicate earlier documents 
 9. Interactive review and continuation
 10. Security, auditability, and operational insights
 
-### Milestone 6 — Incremental Implementation
+### Milestone 6 — Implementation Branch Creation and Incremental Delivery
 
-Each slice follows this chain:
+After Milestones 1 through 5 provide enough approved guidance for the first implementation slice, create a separate development branch for product code.
+
+Each implementation slice follows this chain:
 
 `Business Requirement -> Capability -> Architecture -> Design -> Code -> Test Evidence`
 
 A slice is not complete until the chain is traceable and its applicable tests pass.
+
+No product implementation is committed to the engineering-baseline branch.
 
 ### Milestone 7 — Verification and Release Acceptance
 
@@ -165,17 +196,17 @@ Prioritized after the initial release:
 
 ---
 
-## 4. Immediate Next Step
+## 5. Immediate Next Step
 
 Review and finalize `02-capability-model.md`.
 
 The review should focus only on whether the capability list completely and accurately represents the business baseline. It should not introduce agents, services, databases, APIs, or other design decisions.
 
-After capability approval, create `03-system-architecture.md` and begin architecture work.
+After capability approval, create `03-system-architecture.md` and begin architecture work on this engineering-baseline branch.
 
 ---
 
-## 5. Change-Control Rules
+## 6. Change-Control Rules
 
 - Keep business requirements concise and stable.
 - Do not add architecture or design details to the business baseline.
@@ -185,15 +216,19 @@ After capability approval, create `03-system-architecture.md` and begin architec
 - Record significant architecture choices as ADRs.
 - Update the roadmap status whenever a milestone starts, completes, or changes materially.
 - Update traceability as implementation proceeds; do not postpone it until release.
+- Keep the engineering-baseline branch free of product implementation and legacy artifacts.
+- Create implementation branches only after the applicable baseline content is reviewed.
 
 ---
 
-## 6. Current Status Summary
+## 7. Current Status Summary
 
+- Engineering-baseline branch: established and documentation-only
 - Business baseline: drafted
 - Capability model: drafted
 - System architecture: next after capability review
 - Detailed design: pending architecture
 - Implementation roadmap: pending detailed design
-- Implementation: not started under the new baseline
+- Implementation branch: not yet created
+- Product implementation: not started under the new baseline
 - Traceability and verification: framework defined, detailed mapping pending
