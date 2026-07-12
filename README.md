@@ -2,7 +2,7 @@
 
 This branch is the clean engineering baseline for the new platform direction.
 
-It intentionally contains only requirements, capability, architecture, design, roadmap, traceability, and architecture-decision documentation.
+It intentionally contains only business requirements, capability definitions, platform responsibilities, architecture, detailed design, implementation planning, traceability, and architecture-decision records.
 
 ## Branch policy
 
@@ -15,7 +15,7 @@ This branch must not contain:
 - legacy implementation documents
 - copied code from earlier branches
 
-Implementation begins only after the applicable business requirements, capability model, architecture, and detailed design are reviewed.
+Implementation begins only after the applicable business requirements, capability model, platform responsibility model, architecture, and detailed design are reviewed.
 
 Implementation work must occur on a separate development branch created from an approved engineering baseline or on a branch where the approved baseline documents have been merged.
 
@@ -24,4 +24,6 @@ Implementation work must occur on a separate development branch created from an 
 1. [`docs/00-engineering-roadmap.md`](./docs/00-engineering-roadmap.md)
 2. [`docs/01-business-requirements.md`](./docs/01-business-requirements.md)
 3. [`docs/02-capability-model.md`](./docs/02-capability-model.md)
-4. [`docs/README.md`](./docs/README.md)
+4. [`docs/03-platform-responsibility-model.md`](./docs/03-platform-responsibility-model.md)
+5. [`docs/README.md`](./docs/README.md)
+6. [`decisions/README.md`](./decisions/README.md)
