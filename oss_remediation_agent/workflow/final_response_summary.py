@@ -81,16 +81,24 @@ def _pull_request_created_summary(
     pr_type = str(final.get("prType") or "FULL_REMEDIATION")
     counts = _patch_plan_counts(patch_plan)
     verification_counts = _verification_counts(verification)
-    resolved_count = verification_counts.get("resolved") or _accepted_count(manifest) or counts["patchDecisionCount"]
-    pending_count = verification_counts.get("pending") if verification_counts else counts["manualReviewCount"]
+    if verification_counts:
+        resolved_count = verification_counts["resolved"]
+        pending_count = verification_counts["pending"]
+        resolved_severity = _verification_severity_summary(verification, "resolved")
+        pending_severity = _verification_severity_summary(verification, "pending")
+    else:
+        resolved_count = _accepted_count(manifest) or counts["patchDecisionCount"]
+        pending_count = counts["manualReviewCount"]
+        resolved_severity = _severity_summary(patch_plan, "PATCH", vulnerability_assessment)
+        pending_severity = _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment)
     partial = pr_type == "PARTIAL_REMEDIATION" or bool(pending_count)
     outcome_label = "Partial Remediation Draft PR Created" if partial else "Draft Pull Request Created"
 
     outcome_summary = _success_outcome_summary(
         resolved_count=resolved_count,
-        resolved_severity=_verification_severity_summary(verification, "resolved") or _severity_summary(patch_plan, "PATCH", vulnerability_assessment),
+        resolved_severity=resolved_severity,
         pending_count=int(pending_count or 0),
-        pending_severity=_verification_severity_summary(verification, "pending") or _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
+        pending_severity=pending_severity,
         delivery_label="Partial Draft PR created for validated fixes" if partial else "Draft PR created",
     )
 
@@ -119,15 +127,23 @@ def _validation_succeeded_summary(
 ) -> dict[str, Any]:
     counts = _patch_plan_counts(patch_plan)
     verification_counts = _verification_counts(verification)
-    resolved_count = verification_counts.get("resolved") or _accepted_count(manifest) or counts["patchDecisionCount"]
-    pending_count = verification_counts.get("pending") if verification_counts else counts["manualReviewCount"]
+    if verification_counts:
+        resolved_count = verification_counts["resolved"]
+        pending_count = verification_counts["pending"]
+        resolved_severity = _verification_severity_summary(verification, "resolved")
+        pending_severity = _verification_severity_summary(verification, "pending")
+    else:
+        resolved_count = _accepted_count(manifest) or counts["patchDecisionCount"]
+        pending_count = counts["manualReviewCount"]
+        resolved_severity = _severity_summary(patch_plan, "PATCH", vulnerability_assessment)
+        pending_severity = _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment)
     return _summary_model(
         workflow_outcome="Validation Succeeded",
         outcome_summary=_success_outcome_summary(
             resolved_count=int(resolved_count or 0),
-            resolved_severity=_verification_severity_summary(verification, "resolved") or _severity_summary(patch_plan, "PATCH", vulnerability_assessment),
+            resolved_severity=resolved_severity,
             pending_count=int(pending_count or 0),
-            pending_severity=_verification_severity_summary(verification, "pending") or _severity_summary(patch_plan, "MANUAL_REVIEW", vulnerability_assessment),
+            pending_severity=pending_severity,
             delivery_label="PR handling pending or policy-controlled",
         ),
         root_cause=_DEFAULT_NA,
