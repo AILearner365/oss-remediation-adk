@@ -2,241 +2,118 @@
 ## Engineering Roadmap and Documentation Tracker
 
 **Status:** Active  
-**Purpose:** Preserve the agreed sequence of work and prevent requirements, capabilities, responsibilities, architecture, design, implementation, and verification from drifting apart.
+**Purpose:** Maintain document order, ownership, milestone status, and the immediate next engineering step without repeating requirements owned by other documents.
 
 ---
 
-## 1. Delivery Principle
+## 1. Documentation Rule
 
-Documentation is an engineering tool, not the end product.
+Documentation is an engineering reference, not the end product.
 
-The project maintains only the minimum concise artifacts needed to answer:
+Each document has one authoritative responsibility:
 
-- What are we building?
-- What is the approved business workflow?
-- Which platform capabilities are required?
-- Which major responsibilities fulfill those capabilities?
-- How will those responsibilities be structured architecturally?
-- How will each component work?
-- What will be implemented next?
-- How will we prove the delivered product satisfies the business requirements?
+- business behavior and outcomes: [Business Requirements Baseline](./01-business-requirements.md)
+- platform capabilities: [Capability Model](./02-capability-model.md)
+- capability ownership: [Platform Responsibility Model](./03-platform-responsibility-model.md)
+- architecture components and interactions: `04-system-architecture.md`
+- detailed behavior and contracts: `05-detailed-design.md`
+- delivery order: `06-implementation-roadmap.md`
+- verification evidence: `07-traceability-matrix.md`
+- significant architecture decisions: `decisions/ADR-*.md`
 
-Each document must add new information and must not duplicate earlier documents unnecessarily.
+Documents must link to the authoritative source instead of restating its content.
 
-The main business flow should remain visible and easy to reference. Supporting detail may exist underneath it, but future architecture, design, implementation, and verification must be traceable back to the approved Business Remediation Workflow in `01-business-requirements.md`.
+The approved user-facing lifecycle is maintained only in the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
 ---
 
 ## 2. Engineering Baseline Branch Policy
 
-The `docs/srs-requirements-foundation` branch is the clean engineering baseline for the new platform direction.
+The `docs/srs-requirements-foundation` branch is the clean engineering baseline.
 
-This branch contains only:
+It may contain requirements, capabilities, responsibility ownership, architecture, design, implementation planning, traceability, and Architecture Decision Records.
 
-- business requirements and approved business workflow
-- capability definitions
-- platform responsibility definitions
-- system architecture
-- detailed design
-- implementation planning
-- requirements traceability
-- architecture decision records
+It must not contain product code, prototypes, generated artifacts, product CI/CD workflows, legacy implementation documents, or copied implementation from earlier branches.
 
-This branch must not contain product code, prototypes, generated artifacts, product CI/CD workflows, legacy implementation documents, or copied implementation from earlier branches.
-
-After the applicable engineering documents are reviewed, implementation must begin on a separate development branch. The approved baseline may be merged into that branch so code and tests remain traceable to the approved documentation.
+Implementation begins on a separate development branch after the applicable baseline documents are reviewed.
 
 ---
 
 ## 3. Authoritative Document Set
 
-| Order | Document | Purpose | Status |
+| Order | Document | Authoritative responsibility | Status |
 |---|---|---|---|
-| 1 | `01-business-requirements.md` | Business contract and approved user-facing remediation workflow | Baselined |
-| 2 | `02-capability-model.md` | Translate business needs into architecture-neutral capabilities | Baselined |
-| 3 | `03-platform-responsibility-model.md` | Assign each capability to one primary platform responsibility | Baselined |
-| 4 | `04-system-architecture.md` | Major components, responsibility allocation, interactions, and architecture decisions | Next |
-| 5 | `05-detailed-design.md` | ADK agents, workflows, tools, state, APIs, data models, and failure behavior | Not started |
-| 6 | `06-implementation-roadmap.md` | Incremental implementation slices, dependencies, and delivery order | Not started |
-| 7 | `07-traceability-matrix.md` | Business workflow and requirement through code and test evidence | Not started |
+| 1 | [`01-business-requirements.md`](./01-business-requirements.md) | Product intent, boundaries, business workflow, outcomes, and open business decisions | Baselined v1.4 |
+| 2 | [`02-capability-model.md`](./02-capability-model.md) | Architecture-neutral platform capabilities | Baselined v0.4 |
+| 3 | [`03-platform-responsibility-model.md`](./03-platform-responsibility-model.md) | Primary and supporting responsibility ownership | Baselined v0.4 |
+| 4 | `04-system-architecture.md` | Architectural components, boundaries, integrations, and major data flows | Next |
+| 5 | `05-detailed-design.md` | Agent, tool, state, API, data, and failure behavior | Not started |
+| 6 | `06-implementation-roadmap.md` | Incremental implementation slices and delivery order | Not started |
+| 7 | `07-traceability-matrix.md` | Requirement through implementation and verification evidence | Not started |
 | 8 | `decisions/ADR-*.md` | Significant architecture decisions and tradeoffs | As needed |
 
 ---
 
-## 4. Overall Engineering Milestones
+## 4. Milestone Status
 
 ### Milestone 1 — Business Baseline
 
-**Goal:** Establish the product contract and approved business workflow without prescribing the solution.
+**Deliverable:** [`01-business-requirements.md`](./01-business-requirements.md)  
+**Status:** Completed and baselined as version 1.4.
 
-**Deliverable:** `01-business-requirements.md`
-
-**Exit criteria:**
-
-- problem and business goals are clear
-- initial release scope and extension direction are distinguishable
-- users, workspaces, policies, validation, and completion states are defined
-- the complete user-facing remediation workflow is visible in one activity diagram
-- review-only workspace access is separated from a new remediation iteration
-- a new iteration refreshes current context and reassesses retained workspace evidence
-- branch and pull-request delivery behavior is consistent with the completion states
-- future workspace evidence and operational-improvement data are distinguished
-- each business stage identifies the information produced or retained
-- open business decisions are visible
-
-**Status:** Completed and baselined as version 1.2.
+The business workflow, continuation behavior, completion states, delivery policy, scope, and open business decisions are maintained in that document and are not repeated here.
 
 ### Milestone 2 — Capability Model
 
-**Goal:** Translate business needs into a manageable set of architecture-neutral platform capabilities.
-
-**Deliverable:** `02-capability-model.md`
-
-**Exit criteria:**
-
-- every business need maps to a capability
-- capabilities remain architecture-neutral
-- capability boundaries are clear
-- every capability has one primary responsibility
-- initial-release priorities are identified
-
-**Status:** Completed and baselined as version 0.3.
+**Deliverable:** [`02-capability-model.md`](./02-capability-model.md)  
+**Status:** Completed and baselined as version 0.4.
 
 ### Milestone 3 — Platform Responsibility Model
 
-**Goal:** Assign capabilities to major platform responsibilities and clarify authoritative ownership and boundaries before components are selected.
-
-**Deliverable:** `03-platform-responsibility-model.md`
-
-**Exit criteria:**
-
-- every capability has exactly one primary responsibility
-- supporting responsibilities are explicit
-- RESP-03 defines scope rules and RESP-05 owns finding classification
-- CAP-13 change-content ownership is separated from source-control operations
-- CAP-18 completion-state ownership belongs to Validation and Outcome Assessment
-- responsibility purposes, authoritative ownership, interactions, and boundaries are clear
-- responsibilities are not prematurely defined as agents, services, APIs, databases, or modules
-
-**Status:** Completed and baselined as version 0.3.
+**Deliverable:** [`03-platform-responsibility-model.md`](./03-platform-responsibility-model.md)  
+**Status:** Completed and baselined as version 0.4.
 
 ### Milestone 4 — System Architecture
 
-**Goal:** Define which architectural components fulfill the approved platform responsibilities and how those components interact while preserving the approved business workflow.
+**Deliverable:** `04-system-architecture.md`  
+**Status:** Immediate next milestone.
 
-**Deliverable:** `04-system-architecture.md`
-
-**Must cover:**
-
-- system context and boundaries
-- component allocation for each responsibility
-- ADK and multi-agent orchestration at a high level
-- deterministic tools and service boundaries
-- workspace and execution-state ownership
-- review-only workspace access versus new-iteration execution
-- current-context refresh and retained-context loading
-- relevance assessment of prior findings, failures, decisions, and validations against refreshed facts
-- GitHub and GitHub Actions integration
-- vulnerability and validation provider boundaries
-- branch and pull-request creation or update when safe validated changes exist
-- extensible workspace evidence without fundamental redesign
-- separation of workspace-specific evidence from aggregated operational-improvement data
-- security, privacy, authorization, retention, and audit boundaries
-- major data flows
-- key architecture decisions and tradeoffs
-- explicit mapping from the Business Remediation Workflow to architectural components and interactions
+**Purpose:** Define the architectural components that fulfill the approved platform responsibilities while preserving the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
 **Exit criteria:**
 
-- every architecture component maps to one or more approved responsibilities and capabilities
-- every business workflow stage maps to one or more architecture components
-- architecture distinguishes refreshed current facts from retained historical evidence
-- architecture supports future evidence types and provider data without redefining the workspace lifecycle
-- no business workflow stage or completion outcome is removed, bypassed, or redefined
-
-**Status:** Immediate next milestone.
+- every business-workflow stage maps to one or more architecture components
+- every architecture component maps to approved `CAP-*` and `RESP-*` identifiers
+- component, state, evidence, integration, security, and audit ownership is explicit
+- significant tradeoffs are recorded as ADRs
+- no approved business stage or completion outcome is removed or redefined
 
 ### Milestone 5 — Detailed Design
 
-**Goal:** Define how each architecture component behaves and interacts.
-
-**Deliverable:** `05-detailed-design.md`
-
-**Must cover:**
-
-- agent responsibilities and boundaries
-- deterministic tools versus LLM decisions
-- workflow and state transitions
-- review-only and new-iteration transitions
-- current-context refresh behavior
-- retained-context selection and reassessment behavior
-- remediation planning and iteration behavior
-- provider and tool contracts
-- extensible workspace data model
-- separation of workspace evidence and aggregated operational data
-- validation and completion logic
-- branch and pull-request delivery rules
-- review-continuation behavior
-- error and recovery behavior
-
-**Exit criteria:** Each design section maps to architecture, responsibility, capability, and applicable business workflow stages.
+**Deliverable:** `05-detailed-design.md`  
+**Status:** Pending architecture.
 
 ### Milestone 6 — Implementation Roadmap
 
-**Goal:** Break the design into small, independently verifiable implementation slices.
+**Deliverable:** `06-implementation-roadmap.md`  
+**Status:** Pending detailed design.
 
-**Deliverable:** `06-implementation-roadmap.md`
+### Milestone 7 — Incremental Implementation
 
-**Expected slices:**
+**Status:** Not started.
 
-1. Repository intake and configuration
-2. Workspace lifecycle and review-only access
-3. Automated and interactive initiation
-4. Current-context refresh and retained-context loading
-5. Vulnerability discovery and scope classification
-6. Maven multi-module analysis
-7. Remediation planning and application
-8. Validation and completion-state determination
-9. Branch and pull-request delivery
-10. Interactive review and continuation
-11. Security, auditability, resilience, extensibility, and operational insights
+Implementation must occur on a separate development branch and follow:
 
-### Milestone 7 — Implementation Branch Creation and Incremental Delivery
-
-After Milestones 1 through 6 provide enough approved guidance for the first implementation slice, create a separate development branch for product code.
-
-Each implementation slice follows:
-
-`Business Workflow / Requirement -> Capability -> Responsibility -> Architecture -> Design -> Code -> Test Evidence`
-
-No product implementation is committed to the engineering-baseline branch.
+`Business Requirement / Workflow -> Capability -> Responsibility -> Architecture -> Design -> Code -> Test Evidence`
 
 ### Milestone 8 — Verification and Release Acceptance
 
-**Goal:** Prove that the delivered platform satisfies the approved business baseline and release scope.
-
-**Deliverable:** `07-traceability-matrix.md` plus automated and review evidence.
-
-Verification must identify satisfied, partially satisfied, deferred, and unmet requirements, together with evidence and the release decision. It must also confirm that:
-
-- each approved business workflow stage and completion outcome is represented
-- review-only access does not trigger an unintended remediation iteration
-- new iterations refresh current facts and use relevant retained history
-- stale prior conclusions are not reused without reassessment
-- safe validated changes produce or update the required branch and pull request unless policy disables automated delivery
+**Deliverable:** `07-traceability-matrix.md` plus automated and review evidence.  
+**Status:** Not started.
 
 ### Milestone 9 — Platform Evolution
 
-Prioritized after the initial release:
-
-- additional vulnerability providers
-- custom validation providers
-- Bitbucket integration
-- TeamCity integration
-- source-code remediation
-- major Java and Spring Boot upgrades
-- other build systems and languages
-- additional workspace evidence and operational-insight types
+Future scope is maintained in the [Platform Extension Direction](./01-business-requirements.md#10-platform-extension-direction), not duplicated in this roadmap.
 
 ---
 
@@ -244,57 +121,19 @@ Prioritized after the initial release:
 
 Create `04-system-architecture.md` using:
 
-- the approved Business Remediation Workflow in `01-business-requirements.md`
-- the baselined Capability Model
-- the baselined Platform Responsibility Model
+1. the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
+2. the [Capability Model](./02-capability-model.md)
+3. the [Platform Responsibility Model](./03-platform-responsibility-model.md)
 
-The architecture work must determine:
-
-- which components fulfill each platform responsibility
-- which responsibilities use ADK agents, deterministic tools, services, or combinations
-- orchestration and major component interactions
-- workspace, execution-state, evidence, and audit ownership
-- how the platform distinguishes review-only access from a new iteration
-- how current repository, policy, validation, and vulnerability context is refreshed
-- how relevant prior findings, attempts, failures, decisions, validations, risks, and reviewer guidance are loaded and reassessed
-- how safe validated changes create or update the remediation branch and pull request
-- how workspace evidence remains extensible for future providers, validations, and remediation types
-- how workspace-specific evidence is separated from aggregated operational-improvement data
-- GitHub and GitHub Actions integration boundaries
-- vulnerability-provider and validation-provider boundaries
-- security, privacy, authorization, retention, and audit boundaries
-- significant decisions that require ADRs
-
-The System Architecture shall preserve the approved Business Remediation Workflow. Technical decomposition may add internal steps, but it must not remove, bypass, or redefine an approved business stage or completion outcome without an approved change to the Business Requirements Baseline.
-
-Architecture decisions must remain traceable to the applicable business workflow stages, `CAP-*`, and `RESP-*` identifiers.
+The architecture document must map workflow stages to capabilities, responsibilities, and architectural components. It must reference the business baseline for behavior and outcomes rather than restating or redefining them.
 
 ---
 
 ## 6. Change-Control Rules
 
-- Keep business requirements concise and stable.
-- Keep the main business workflow easy to locate and understand.
-- Treat the baselined business workflow, capability identifiers, and responsibility identifiers as stable.
-- Do not renumber or reuse retired identifiers.
-- Do not add architecture or implementation details back into the business, capability, or responsibility baselines.
-- Record material architecture ownership changes through an ADR and update traceability.
-- Do not create a new document when an existing document has the correct responsibility.
-- Update the roadmap whenever a milestone starts, completes, or changes materially.
-- Update traceability throughout implementation rather than postponing it until release.
-- Keep the engineering-baseline branch free of product implementation and legacy artifacts.
-
----
-
-## 7. Current Status Summary
-
-- Engineering-baseline branch: established and documentation-only
-- Business baseline and user-facing remediation workflow: baselined as version 1.2
-- Capability model: baselined
-- Platform responsibility model: baselined
-- System architecture: immediate next step
-- Detailed design: pending architecture
-- Implementation roadmap: pending detailed design
-- Implementation branch: not yet created
-- Product implementation: not started under the new baseline
-- Traceability and verification: framework defined, detailed mapping pending
+- Change authoritative information only in the document that owns it.
+- Use links and identifiers when another document needs that information.
+- Keep the approved workflow and stable identifiers unchanged unless an reviewed baseline change requires otherwise.
+- Record significant architecture decisions in ADRs.
+- Update this roadmap only for document versions, milestone status, sequence, or next-step changes.
+- Keep product implementation off the engineering-baseline branch.
