@@ -2,7 +2,7 @@
 ## Business Requirements Baseline
 
 **Status:** Baselined  
-**Version:** 1.2  
+**Version:** 1.3  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `docs/srs-requirements-foundation`
 
@@ -173,20 +173,22 @@ flowchart TD
     D --> E[Review current outcome, evidence and history]
     E --> F{Review only or new iteration requested?}
     F -->|Review only| G[Answer questions and present retained evidence]
+    F -->|New iteration requested| I[Capture feedback, constraints or guidance]
     G --> H{Additional feedback or guidance?}
     H -->|No| Z[Retain workspace and current outcome]
-    H -->|Yes| I[Capture feedback, constraints or guidance]
+    H -->|Yes| I
     I --> J{New remediation iteration requested?}
     J -->|No| Z
-    J -->|Yes| K[Refresh current repository, policy, validation and vulnerability context]
+    J -->|Yes| K[Refresh repository, reference branch, policy, validation and reviewer guidance]
 
     C --> L[Capture repository, reference branch, policy and validation context]
     L --> M[Discover current vulnerability findings]
-    K --> N[Load relevant retained workspace context]
-    N --> O[Reassess prior assumptions, failures and conclusions against refreshed facts]
-    O --> M
 
-    M --> P[Classify findings as in scope or out of scope]
+    K --> N[Load relevant retained workspace context]
+    N --> M
+    M --> O[Reassess prior assumptions, failures and conclusions against refreshed facts]
+    O --> P[Classify findings as in scope or out of scope]
+
     P --> Q[Analyze Maven project, dependency origins and control points]
     Q --> R[Determine remediation options]
     R --> S{Safe option available within policy and boundary?}
@@ -198,8 +200,8 @@ flowchart TD
     V -->|No acceptable automated outcome| Y[Human Review Required]
     S -->|No| Y
 
-    W --> AA[Create or update review-ready branch, pull request and evidence]
-    X --> AB[Create or update partial-remediation pull request, unresolved findings and risks]
+    W --> AA[Deliver fully remediated outcome according to policy]
+    X --> AB[Deliver partial remediation according to policy]
     Y --> AC[Present findings, attempts, rejected options, risks and next actions]
 
     AA --> AD[Developer or reviewer evaluates outcome]
@@ -226,15 +228,17 @@ Prior conclusions must be reassessed against refreshed facts. The platform must 
 | Start or resume | Begin a new remediation or access prior work | Repository, reference branch, initiator, workspace selection |
 | Review existing workspace | Understand the current outcome without forcing a new iteration | Prior findings, decisions, evidence, validation results, pull-request state |
 | Capture feedback | Record questions, constraints, or reviewer guidance | Questions, answers, approved guidance, new constraints |
-| Refresh context | Establish the current facts for a new iteration | Latest repository state, policy, severity, exclusions, validation scope, vulnerability findings |
-| Reassess retained context | Determine which prior evidence and conclusions remain relevant | Prior attempts, failures, selected and rejected options, risks, changed assumptions |
+| Refresh context | Establish the current non-vulnerability facts for a new iteration | Latest repository and branch state, policy, severity, exclusions, validation scope, reviewer guidance |
+| Load retained context | Retrieve relevant evidence from earlier iterations | Prior attempts, failures, selected and rejected options, validations, risks, review history |
+| Vulnerability discovery | Establish the current vulnerability state | Current findings, severities, affected components, provider evidence |
+| Reassess retained context | Determine which prior evidence and conclusions remain relevant after refresh | Changed assumptions, still-relevant failures, invalidated conclusions, reusable evidence |
 | Scope classification | Decide which findings are included in the iteration | In-scope and out-of-scope findings with reasons |
 | Project analysis | Understand how vulnerable components enter and are controlled | Maven modules, dependency origins, control points, impacted modules |
 | Remediation decision | Select the safest practical option | Candidate options, selected option, rejected alternatives, risk rationale |
 | Change execution | Apply only permitted modifications | Changed files, version changes, boundary-compliance evidence |
 | Validation | Verify technical acceptability | Build, test, vulnerability revalidation, conflicts, regressions |
 | Completion | Assign the business outcome | Fully Remediated, Partially Remediated, or Human Review Required |
-| Delivery | Make safe validated changes review-ready | Branch, pull request, reports, evidence, residual risk |
+| Delivery | Deliver the outcome according to policy | Branch and pull request when required, reports, evidence, unresolved findings, residual risk |
 | Retention | Preserve the complete remediation record | Inputs, decisions, attempts, validations, review history, current outcome |
 
 The System Architecture, Detailed Design, implementation, and verification must preserve this business workflow and its completion-state behavior. Technical decomposition may add internal steps but must not remove, bypass, or redefine the approved business stages or outcomes without an approved change to this baseline.
