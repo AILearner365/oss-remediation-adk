@@ -2,7 +2,7 @@
 ## Software Requirements Specification (SRS)
 
 **Status:** Draft  
-**Version:** 0.3  
+**Version:** 0.4  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `mvp-3-pr-summary-integration`  
 **Document branch:** `docs/srs-requirements-foundation`
@@ -50,6 +50,12 @@ This specification defines the foundation for:
 - technology constraints
 
 Sections or requirements that are not yet complete shall be explicitly marked as **Draft** or **TBD**. Detailed requirements shall use uniquely identified, atomic, testable, and traceable statements.
+
+### 1.3 Specification Boundary
+
+This specification intentionally defines **what** the platform shall provide rather than **how** it shall be implemented.
+
+Architecture, agent responsibilities, orchestration, prompt engineering, persistence, state management, integration design, deployment topology, and component-level implementation decisions shall be documented in the Architecture and Detailed Design documents and traced back to the requirements defined here.
 
 ---
 
@@ -168,19 +174,37 @@ A configurable rule or boundary that governs what the platform may consider, mod
 
 Policies may include permitted upgrade ranges, blocked versions, allowed remediation types, accepted risk levels, excluded dependencies, and organization-specific governance rules.
 
-### 7.8 Validation Scope
+### 7.8 Remediation Policy
+
+The consolidated set of repository-level or execution-level policies that governs a remediation workflow.
+
+A remediation policy may include:
+
+- severity threshold
+- permitted remediation strategies
+- permitted version-upgrade ranges
+- preferred or blocked versions
+- dependency exclusions
+- accepted risk levels
+- remediation boundary
+- validation scope
+- organization-specific governance rules
+
+The remediation policy provides the approved operating boundary within which the platform evaluates and applies remediation.
+
+### 7.9 Validation Scope
 
 The complete set of verification activities required to evaluate whether a remediation is acceptable.
 
 The validation scope may include Maven dependency resolution, reactor build execution, compilation, unit tests, configured integration tests, vulnerability re-scanning, dependency-conflict checks, scope-compliance checks, and repository-specific custom validations.
 
-### 7.9 Remediation Boundary
+### 7.10 Remediation Boundary
 
 The configured limit on the types of changes the platform is permitted to make for a repository or execution.
 
 For the initial release, Java source-code changes and upgrades that require source-code changes are outside the default remediation boundary.
 
-### 7.10 Remediation Workspace
+### 7.11 Remediation Workspace
 
 A persistent record of one remediation workflow for a specific repository and reference branch.
 
@@ -201,11 +225,11 @@ A workspace retains the context needed to understand and continue that remediati
 
 A repository may have multiple remediation workspaces over time. Separate branches may have separate active workspaces.
 
-### 7.11 Remediation Iteration
+### 7.12 Remediation Iteration
 
 One execution or revision of remediation activity within a remediation workspace.
 
-### 7.12 Completion State
+### 7.13 Completion State
 
 The single defined outcome assigned to a remediation workflow after the platform has completed the applicable analysis, remediation, validation, and decision activities.
 
@@ -215,19 +239,19 @@ The defined completion states are:
 - Partially Remediated
 - Human Review Required
 
-### 7.13 Review-Ready
+### 7.14 Review-Ready
 
 A remediation is review-ready when it contains sufficient implementation detail, evidence, validation results, decision history, rationale, rejected alternatives, residual-risk information, and reviewer guidance for technical evaluation without relying on hidden workflow knowledge.
 
-### 7.14 Reviewer Feedback
+### 7.15 Reviewer Feedback
 
 Questions, comments, constraints, recommendations, approvals, or requested changes provided after an initial remediation outcome has been produced.
 
-### 7.15 Vulnerability Provider
+### 7.16 Vulnerability Provider
 
 An external or integrated capability that identifies OSS vulnerability findings and may be used both for initial discovery and post-remediation verification.
 
-### 7.16 Validation Provider
+### 7.17 Validation Provider
 
 An external or integrated capability that performs a configured verification activity required by the validation scope.
 
@@ -513,8 +537,8 @@ The platform does not control the correctness, availability, latency, or service
 
 The following technology constraints apply to the current platform direction:
 
-- the initial implementation uses the Agent Development Kit (ADK)
-- the solution uses a multi-agent workflow model
+- the initial platform implementation is constrained to use the Agent Development Kit (ADK) as the agent-development framework
+- the solution is constrained to use a multi-agent workflow model
 - LLM capabilities are used for contextual reasoning, planning, explanation, and interactive review support
 - deterministic tools and verifiable evidence remain authoritative for repository state, dependency resolution, vulnerability findings, builds, tests, and validation outcomes
 
