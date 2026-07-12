@@ -14,6 +14,7 @@ This directory belongs to the documentation-only engineering-baseline branch. Th
    - [Approved Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
 2. [Capability Model](./02-capability-model.md)
 3. [Platform Responsibility Model](./03-platform-responsibility-model.md)
+4. [System Architecture](./04-system-architecture.md) — draft under review
 
 Supporting navigation and governance:
 
@@ -22,7 +23,6 @@ Supporting navigation and governance:
 
 ## Planned engineering documents
 
-4. `04-system-architecture.md` — architectural components, boundaries, integrations, and major data flows
 5. `05-detailed-design.md` — ADK agents, workflows, tools, state, APIs, data models, and failure behavior
 6. `06-implementation-roadmap.md` — incremental implementation slices and delivery order
 7. `07-traceability-matrix.md` — business requirement through implementation and test evidence
