@@ -50,9 +50,9 @@ After the applicable engineering documents are reviewed, implementation must beg
 | Order | Document | Purpose | Status |
 |---|---|---|---|
 | 1 | `01-business-requirements.md` | Business contract: goals, scope, boundaries, outcomes, and constraints | Draft baseline |
-| 2 | `02-capability-model.md` | Translate business needs into architecture-neutral capabilities | Refined draft |
-| 3 | `03-platform-responsibility-model.md` | Assign each capability to one primary platform responsibility | Refined draft |
-| 4 | `04-system-architecture.md` | Major components, responsibility allocation, interactions, and architecture decisions | Not started |
+| 2 | `02-capability-model.md` | Translate business needs into architecture-neutral capabilities | Baselined |
+| 3 | `03-platform-responsibility-model.md` | Assign each capability to one primary platform responsibility | Baselined |
+| 4 | `04-system-architecture.md` | Major components, responsibility allocation, interactions, and architecture decisions | Next |
 | 5 | `05-detailed-design.md` | ADK agents, workflows, tools, state, APIs, data models, and failure behavior | Not started |
 | 6 | `06-implementation-roadmap.md` | Incremental implementation slices, dependencies, and delivery order | Not started |
 | 7 | `07-traceability-matrix.md` | Requirement-to-capability-to-responsibility-to-architecture-to-code-to-test evidence | Not started |
@@ -88,10 +88,10 @@ After the applicable engineering documents are reviewed, implementation must beg
 - every business need maps to a capability
 - capabilities remain architecture-neutral
 - capability boundaries are clear
-- every capability can be assigned to one primary responsibility
+- every capability has one primary responsibility
 - initial-release priorities are identified
 
-**Status:** Refined after review; ready for final joint review with the responsibility model.
+**Status:** Completed and baselined as version 0.3.
 
 ### Milestone 3 — Platform Responsibility Model
 
@@ -103,12 +103,13 @@ After the applicable engineering documents are reviewed, implementation must beg
 
 - every capability has exactly one primary responsibility
 - supporting responsibilities are explicit
+- RESP-03 defines scope rules and RESP-05 owns finding classification
 - CAP-13 change-content ownership is separated from source-control operations
 - CAP-18 completion-state ownership belongs to Validation and Outcome Assessment
 - responsibility purposes, authoritative ownership, interactions, and boundaries are clear
 - responsibilities are not prematurely defined as agents, services, APIs, databases, or modules
 
-**Status:** Refined after review; ready for final joint review with the capability model.
+**Status:** Completed and baselined as version 0.3.
 
 ### Milestone 4 — System Architecture
 
@@ -130,6 +131,8 @@ After the applicable engineering documents are reviewed, implementation must beg
 - key architecture decisions and tradeoffs
 
 **Exit criteria:** Every architecture component maps to one or more approved responsibilities and capabilities.
+
+**Status:** Immediate next milestone.
 
 ### Milestone 5 — Detailed Design
 
@@ -204,32 +207,31 @@ Prioritized after the initial release:
 
 ## 5. Immediate Next Step
 
-Perform the final joint review of:
+Create `04-system-architecture.md` using the baselined Capability Model and Platform Responsibility Model.
 
-- `02-capability-model.md`
-- `03-platform-responsibility-model.md`
+The architecture work must determine:
 
-Confirm that:
+- which components fulfill each platform responsibility
+- which responsibilities use ADK agents, deterministic tools, services, or combinations
+- orchestration and major component interactions
+- workspace, execution-state, evidence, and audit ownership
+- GitHub and GitHub Actions integration boundaries
+- vulnerability-provider and validation-provider boundaries
+- security and authorization boundaries
+- significant decisions that require ADRs
 
-- every business need maps to a capability
-- every capability has exactly one primary responsibility
-- supporting roles are clear
-- ownership and boundaries do not conflict
-- both documents remain implementation-neutral
-
-If the review finds no material gaps, baseline both documents and create `04-system-architecture.md`.
+Architecture decisions must remain traceable to the applicable `CAP-*` and `RESP-*` identifiers.
 
 ---
 
 ## 6. Change-Control Rules
 
 - Keep business requirements concise and stable.
-- Do not add architecture or design details to the business baseline.
-- Keep capabilities and responsibilities implementation-neutral.
-- Give each capability one primary responsibility.
+- Treat the baselined capability and responsibility identifiers as stable.
+- Do not renumber or reuse retired identifiers.
+- Do not add architecture or implementation details back into the business, capability, or responsibility baselines.
+- Record material architecture ownership changes through an ADR and update traceability.
 - Do not create a new document when an existing document has the correct responsibility.
-- Use stable identifiers and never reuse retired identifiers.
-- Record significant architecture choices as ADRs.
 - Update the roadmap whenever a milestone starts, completes, or changes materially.
 - Update traceability throughout implementation rather than postponing it until release.
 - Keep the engineering-baseline branch free of product implementation and legacy artifacts.
@@ -239,10 +241,10 @@ If the review finds no material gaps, baseline both documents and create `04-sys
 ## 7. Current Status Summary
 
 - Engineering-baseline branch: established and documentation-only
-- Business baseline: drafted
-- Capability model: refined and ready for final review
-- Platform responsibility model: simplified, ownership clarified, and ready for final review
-- System architecture: next after joint review and baseline approval
+- Business baseline: drafted and structurally stable
+- Capability model: baselined
+- Platform responsibility model: baselined
+- System architecture: immediate next step
 - Detailed design: pending architecture
 - Implementation roadmap: pending detailed design
 - Implementation branch: not yet created
