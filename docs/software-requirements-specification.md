@@ -1,7 +1,8 @@
 # Enterprise OSS Remediation Platform
 ## Software Requirements Specification (SRS)
 
-**Status:** Phase 1 Draft — Foundation  
+**Status:** Draft  
+**Version:** 0.2  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `mvp-3-pr-summary-integration`  
 **Document branch:** `docs/srs-requirements-foundation`
@@ -28,7 +29,9 @@ Once approved, this SRS shall be used to:
 
 ### 1.2 Document Scope
 
-Phase 1 establishes the stable business and product foundation for the SRS. It covers:
+This document establishes the business, product, functional, non-functional, operational, security, verification, and traceability requirements for the Enterprise OSS Remediation Platform.
+
+The current draft contains the approved working foundation for:
 
 - business context
 - problem statement
@@ -43,7 +46,7 @@ Phase 1 establishes the stable business and product foundation for the SRS. It c
 - success definition
 - guiding principles
 
-Detailed functional and non-functional requirements will be added in later phases using uniquely identified, atomic, testable, and traceable requirement statements.
+Sections or requirements that are not yet complete shall be explicitly marked as **Draft** or **TBD**. Detailed requirements shall use uniquely identified, atomic, testable, and traceable statements.
 
 ---
 
@@ -303,7 +306,7 @@ Different users may work concurrently on:
 - different branches of the same repository
 - different remediation workspaces
 
-Duplicate active remediation for the same repository and reference branch must be controlled. The exact behavior will be defined in a later requirement phase.
+Duplicate active remediation for the same repository and reference branch must be controlled. The exact duplicate-workspace handling behavior remains **TBD** and must be resolved before the related requirement is baselined.
 
 ---
 
@@ -422,7 +425,7 @@ The completion state does not end the lifecycle of the workspace. Authorized use
 
 ## 14. Guiding Principles
 
-All later requirements, architecture decisions, designs, implementations, and verification activities must remain consistent with the following principles.
+All requirements, architecture decisions, designs, implementations, and verification activities must remain consistent with the following principles.
 
 ### 14.1 Safety Before Automation
 
@@ -468,48 +471,33 @@ The platform should accommodate new source-control systems, CI/CD systems, vulne
 
 ---
 
-## 15. Phase 1 Review Status
+## 15. Technology and Implementation Constraints
 
-Phase 1 establishes the business and product foundation of the SRS.
+The following technology constraints apply to the current platform direction:
 
-The following areas are ready for review and approval:
+- the initial implementation uses the Agent Development Kit (ADK)
+- the solution uses a multi-agent workflow model
+- LLM capabilities are used for contextual reasoning, planning, explanation, and interactive review support
+- deterministic tools and verifiable evidence remain authoritative for repository state, dependency resolution, vulnerability findings, builds, tests, and validation outcomes
 
-- business context
-- problem statement
-- product vision
-- business goals
-- users and stakeholders
-- business concepts and definitions
-- external systems and system context
-- system scope
-- initial release scope
-- platform evolution scope
-- success definition
-- guiding principles
-
-Detailed functional requirements, non-functional requirements, completion-state acceptance rules, deliverables, verification methods, and traceability mappings will be authored in subsequent phases.
+These constraints identify mandated technology choices without prescribing the detailed architecture or agent design.
 
 ---
 
-## 16. Next Phase
+## 16. Open Items and TBDs
 
-Phase 2 will define uniquely identified and verifiable functional requirements for:
+The following items remain unresolved and must be completed before their related requirements are approved as part of a release baseline:
 
-1. repository and reference-branch inputs
-2. remediation workspace lifecycle
-3. GitHub Actions execution
-4. interactive initiation and continuation
-5. vulnerability discovery and findings ingestion
-6. severity and policy configuration
-7. Maven multi-module analysis
-8. remediation determination and execution
-9. validation and post-remediation verification
-10. internal remediation improvement before completion
-11. completion-state determination
-12. remediation branch and pull-request lifecycle
-13. reviewer questions, feedback, and post-review updates
-14. evidence, decision history, and rejected alternatives
-15. auditability and retention
-16. roles and access control
-17. operational data collection and product evolution
-18. platform extension points
+- exact duplicate-workspace behavior: block, warn, queue, or resume
+- final role and permission model
+- organization-specific retention duration
+- numerical availability target
+- supported concurrent active workspaces
+- maximum supported repository and Maven reactor size
+- maximum remediation execution duration
+- recovery-time and recovery-point objectives
+- branch commit-history policy across review iterations
+- detailed functional requirement identifiers and acceptance conditions
+- detailed non-functional, operational, security, and audit requirements
+- deliverable definitions and verification methods
+- requirements traceability mappings to architecture, design, implementation, and tests
