@@ -1,0 +1,18 @@
+{
+  "artifactId": "baseline-build-result-001",
+  "artifactReferences": {
+    "buildLog": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/baseline-build.log"
+  },
+  "command": "mvn clean install",
+  "createdAt": "2026-07-12T20:11:03Z",
+  "createdBy": "BaselineBuildTool",
+  "errors": [],
+  "exitCode": 0,
+  "logExcerpt": "parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.\n[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original\n[INFO] \n[INFO] --- install:3.1.4:install (default-install) @ task-web ---\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/repository/task-web/pom.xml to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom\n[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar\n[INFO] ------------------------------------------------------------------------\n[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:\n[INFO] \n[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.902 s]\n[INFO] task-common ........................................ SUCCESS [  4.151 s]\n[INFO] task-domain ........................................ SUCCESS [  0.619 s]\n[INFO] task-service ....................................... SUCCESS [  5.368 s]\n[INFO] task-web ........................................... SUCCESS [ 15.213 s]\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  28.434 s\n[INFO] Finished at: 2026-07-12T20:11:03Z\n[INFO] ------------------------------------------------------------------------\n",
+  "logFile": "/home/kavya_parivarababu/oss-remediation-adk/oss-remediation-workspaces/oss-remediation-20260712-201030/baseline/baseline-build.log",
+  "policy": {},
+  "schemaVersion": "1.0",
+  "status": "SUCCESS",
+  "warnings": [],
+  "workflowId": "oss-remediation-mvp"
+}
