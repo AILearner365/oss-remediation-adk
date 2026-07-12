@@ -2,7 +2,7 @@
 ## Platform Responsibility Model
 
 **Status:** Baselined  
-**Version:** 0.3
+**Version:** 0.4
 
 ---
 
@@ -19,14 +19,16 @@ It defines:
 - major interactions
 - essential boundary rules
 
-It does not decide whether a responsibility is implemented by an ADK agent, multiple agents, a deterministic tool, a service, a library, or another architectural component.
+It does not redefine the business lifecycle or decide whether a responsibility is implemented by an ADK agent, multiple agents, a deterministic tool, a service, a library, or another architectural component.
+
+The authoritative user-facing lifecycle is the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow). This document defines responsibility ownership for the capabilities required to support that workflow.
 
 ---
 
 ## 2. Traceability Flow
 
 ```text
-Business Requirements
+Business Requirements and Workflow
         |
         v
 Platform Capabilities
@@ -286,42 +288,13 @@ Every capability has exactly one primary responsibility. Supporting responsibili
 
 ---
 
-## 6. High-Level Interaction Flow
+## 6. Workflow Reference and Architecture Mapping
 
-```text
-RESP-01 Workflow Control
-   |
-   +--> RESP-04 Workspace Context
-   +--> RESP-03 Policy and Validation Scope
-   +--> RESP-02 Repository Baseline
-   |
-   v
-RESP-05 Vulnerability Intelligence
-   |
-   v
-RESP-06 Maven and Dependency Analysis
-   |
-   v
-RESP-07 Remediation Decision
-   |
-   v
-RESP-08 Project-File Changes
-   |
-   v
-RESP-09 Validation and Completion State
-   |
-   +--> failure evidence returns to RESP-01 and RESP-07
-   |
-   v
-RESP-02 Branch, Commit, and Pull Request
-   |
-   v
-RESP-10 Reporting and Review Support
-   |
-   +--> approved feedback may return to RESP-01 and RESP-07
-```
+The authoritative user-facing lifecycle, including review-only access, new-iteration behavior, context refresh, retained-evidence assessment, completion states, and delivery policy, is defined only in the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
-RESP-11 applies security, authorization, and audit controls across the full lifecycle. RESP-12 receives operational signals and supports recovery and future extension.
+This responsibility model does not maintain a second lifecycle diagram. The System Architecture must map each business-workflow stage to the responsible `RESP-*` ownership and the architectural components that fulfill it.
+
+RESP-11 applies security, authorization, and audit controls across the lifecycle. RESP-12 supports recovery, extension, and product insight without redefining the approved business workflow.
 
 ---
 
@@ -348,7 +321,7 @@ The responsibility model is approved for architecture because:
 1. Every approved capability has exactly one primary responsibility.
 2. Supporting responsibility roles are explicit.
 3. Each responsibility has a clear purpose, authoritative ownership, and boundary.
-4. Major interactions are sufficient to identify architectural component relationships.
+4. Responsibility ownership can be mapped to the authoritative Business Remediation Workflow.
 5. State ownership is visible without prescribing storage technology.
 6. No responsibility is prematurely defined as an agent, service, database, API, or implementation module.
 7. The model supports the initial GitHub-focused release and the agreed extension direction.
@@ -357,10 +330,10 @@ The responsibility model is approved for architecture because:
 
 ## 9. Next Step
 
-Create `04-system-architecture.md` and decide:
+Create `04-system-architecture.md` using:
 
-- which architectural components fulfill each responsibility
-- which responsibilities use ADK agents versus deterministic tools or services
-- how workspace state and evidence are stored and owned
-- how GitHub, vulnerability, validation, LLM, identity, and audit integrations are structured
-- which decisions require Architecture Decision Records
+- the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
+- the [Capability Model](./02-capability-model.md)
+- this responsibility ownership model
+
+Architecture must determine which components fulfill each responsibility and record significant decisions through Architecture Decision Records.
