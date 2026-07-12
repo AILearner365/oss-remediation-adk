@@ -6,28 +6,28 @@ The documentation is intentionally lean. Each document owns one type of informat
 
 ## Branch responsibility
 
-The `docs/srs-requirements-foundation` branch is the clean engineering-baseline branch.
+This directory belongs to the documentation-only engineering-baseline branch. The authoritative rules for permitted and prohibited branch content are maintained in the [Engineering Baseline Branch Policy](./00-engineering-roadmap.md#2-engineering-baseline-branch-policy).
 
-It contains only requirements, capability, responsibility, architecture, detailed-design, roadmap, traceability, and Architecture Decision Record documentation. Product implementation, prototypes, generated artifacts, and legacy implementation material must not be added to this branch.
+## Current authoritative documents
 
-Implementation must occur on a separate development branch after the applicable engineering baseline has been reviewed.
+1. [Business Requirements Baseline](./01-business-requirements.md)
+   - [Approved Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
+2. [Capability Model](./02-capability-model.md)
+3. [Platform Responsibility Model](./03-platform-responsibility-model.md)
 
-## Start here
+Supporting navigation and governance:
 
-1. [Engineering Roadmap and Documentation Tracker](./00-engineering-roadmap.md)
-2. [Business Requirements Baseline](./01-business-requirements.md)
-3. [Approved Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
-4. [Capability Model](./02-capability-model.md)
-5. [Platform Responsibility Model](./03-platform-responsibility-model.md)
-6. [Architecture Decision Record Guidance](../decisions/README.md)
+- [Engineering Roadmap and Documentation Tracker](./00-engineering-roadmap.md)
+- [Architecture Decision Record Guidance](../decisions/README.md)
 
 ## Planned engineering documents
 
-7. `04-system-architecture.md` — architectural components, boundaries, integrations, and major data flows
-8. `05-detailed-design.md` — ADK agents, workflows, tools, state, APIs, data models, and failure behavior
-9. `06-implementation-roadmap.md` — incremental implementation slices and delivery order
-10. `07-traceability-matrix.md` — business requirement through implementation and test evidence
-11. `decisions/ADR-*.md` — significant architecture decisions and tradeoffs
+4. `04-system-architecture.md` — architectural components, boundaries, integrations, and major data flows
+5. `05-detailed-design.md` — ADK agents, workflows, tools, state, APIs, data models, and failure behavior
+6. `06-implementation-roadmap.md` — incremental implementation slices and delivery order
+7. `07-traceability-matrix.md` — business requirement through implementation and test evidence
+
+Architecture Decision Records use `decisions/ADR-*.md` and are not part of the numbered document sequence.
 
 ## Document ownership
 
@@ -41,7 +41,7 @@ Implementation must occur on a separate development branch after the applicable 
 | Implementation Roadmap | Delivery slices and implementation order |
 | Traceability Matrix | Requirement-to-code-to-test evidence |
 | ADRs | Significant architecture decisions, rationale, and consequences |
-| Engineering Roadmap | Document sequence, versions, milestone status, and immediate next step |
+| Engineering Roadmap | Document sequence, versions, branch policy, milestone status, and immediate next step |
 
 ## Governance
 
@@ -54,4 +54,4 @@ Implementation must occur on a separate development branch after the applicable 
 - Verification and release acceptance must trace delivered evidence back to the business baseline.
 - Stable identifiers must not be reused after approval.
 - Significant architecture choices must be recorded as ADRs.
-- No product implementation is permitted on this engineering-baseline branch.
+- An ADR that changes capability ownership is not complete until the Platform Responsibility Model and traceability records are synchronized.
