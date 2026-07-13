@@ -23,15 +23,33 @@ These are the supported onboarding steps for team members. Run every command fro
 
 ## Prerequisites
 
-You need:
+Install or configure the following on the machine that will run the ADK workflow:
 
-- access to a Google Cloud project with Vertex AI enabled,
-- permission to create Application Default Credentials,
-- GitHub access to the target repository,
-- write permission if the workflow must push a remediation branch and create a Draft PR,
-- a JDK and Maven version compatible with the target project.
+| Tool or access | Why it is needed | Requirement / verification |
+|---|---|---|
+| Google Cloud project | Hosts the Vertex AI model access used by the ADK agents | A project ID must be available and selected with `gcloud config set project YOUR_PROJECT_ID` |
+| Vertex AI API | Allows the workflow to invoke Gemini through Vertex AI | Enable `aiplatform.googleapis.com` in the selected project |
+| Google Cloud CLI (`gcloud`) | Selects the project, enables APIs, and creates Application Default Credentials | Verify with `gcloud --version` |
+| Application Default Credentials | Authenticates the ADK workflow to Google Cloud and Vertex AI | Run `gcloud auth application-default login` and verify that an access token can be created |
+| Python 3.10+ | Runs the Google ADK agent application and workflow code | Verify with `python3 --version` |
+| `pip` | Installs the Python packages listed in `requirements.txt` | Verify with `python3 -m pip --version` |
+| Python virtual environment | Isolates the project dependencies from the system Python installation | The setup script creates and uses `.venv` |
+| Google ADK and project Python dependencies | Provide the agent runtime, model integration, and workflow libraries | Installed by `bash scripts/setup-local.sh` from `requirements.txt` |
+| Git | Clones the ADK and target repositories, creates remediation branches, commits changes, and pushes them | Verify with `git --version` |
+| GitHub account and repository access | Allows the workflow to read the target repository | The authenticated identity must have access to the requested repository and branch |
+| GitHub write permission | Allows the workflow to push the remediation branch and create a Draft Pull Request | Required when automatic PR creation is enabled |
+| GitHub CLI (`gh`) | Creates the Draft Pull Request after validation succeeds | Verify with `gh --version`, then authenticate with `gh auth login` |
+| JDK | Builds and tests the target Java Spring Boot Maven project | Use a JDK version compatible with the target repository; verify with `java -version` and ensure `JAVA_HOME` is correct |
+| Maven | Runs the baseline build, dependency analysis, remediation build, and tests | Use a Maven version compatible with the target repository; verify with `mvn -version` |
+| Maven repository configuration | Resolves dependencies from Maven Central or private artifact repositories | Configure `~/.m2/settings.xml`, mirrors, profiles, proxies, and credentials when the target project requires them |
+| OSV Scanner v2 | Scans the resolved Maven dependencies for Critical and High OSS vulnerabilities before and after remediation | The `osv-scanner` executable must be available on `PATH`; verify with `osv-scanner --version` |
+| Go toolchain (conditional) | Installs OSV Scanner in Cloud Shell when it is not already available | Needed only for the documented `go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest` command |
+| Network access | Downloads Maven artifacts, Python packages, Go modules, Git repositories, OSV data, and calls Google/GitHub services | Outbound access must permit the required Google Cloud, GitHub, Maven, PyPI, Go, and OSV endpoints |
+| Filesystem write access | Creates `.venv`, cloned repositories, timestamped workspaces, logs, patches, validation artifacts, and temporary branches | The user running ADK must be able to write under the repository and workspace directories |
+| Available disk space | Stores the target repository, Maven cache, build outputs, OSV reports, and workflow artifacts | Ensure sufficient space is available before running large multi-module repositories |
+| Local port | Serves ADK Web in Cloud Shell | Port `8000` must be available, or set another value through `ADK_PORT` |
 
-Cloud Shell normally includes Python, Git, Java, Maven, Google Cloud CLI, GitHub CLI, and Go. The setup script installs the Python packages used by this project. OSV Scanner must also be available on `PATH`.
+Google Cloud Shell normally includes Python, Git, Java, Maven, Google Cloud CLI, GitHub CLI, and Go. The setup script installs the Python packages used by this project. OSV Scanner must also be available on `PATH`.
 
 ## 1. Select the Google Cloud project
 
