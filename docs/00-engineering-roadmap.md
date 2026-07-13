@@ -43,10 +43,10 @@ Implementation begins on a separate development branch after the applicable base
 
 | Order | Document | Authoritative responsibility | Status |
 |---|---|---|---|
-| 1 | [`01-business-requirements.md`](./01-business-requirements.md) | Product intent, boundaries, business workflow, outcomes, and open business decisions | Baselined v1.4 |
+| 1 | [`01-business-requirements.md`](./01-business-requirements.md) | Product intent, boundaries, business workflow, outcomes, and open business decisions | Baselined v1.5 |
 | 2 | [`02-capability-model.md`](./02-capability-model.md) | Architecture-neutral platform capabilities | Baselined v0.5 |
 | 3 | [`03-platform-responsibility-model.md`](./03-platform-responsibility-model.md) | Primary and supporting responsibility ownership | Baselined v0.4 |
-| 4 | [`04-system-architecture.md`](./04-system-architecture.md) | Architectural components, boundaries, integrations, state ownership, and major data flows | Draft v0.1 — review in progress |
+| 4 | [`04-system-architecture.md`](./04-system-architecture.md) | Architectural components, boundaries, integrations, state ownership, and major data flows | Draft v0.3 — review in progress |
 | 5 | `05-detailed-design.md` | Agent, tool, state, API, data, and failure behavior | Not started |
 | 6 | `06-implementation-roadmap.md` | Incremental implementation slices and delivery order | Not started |
 | 7 | `07-traceability-matrix.md` | Requirement through implementation and verification evidence | Not started |
@@ -60,7 +60,7 @@ Architecture Decision Records use `decisions/ADR-*.md` and are maintained outsid
 ### Milestone 1 — Business Baseline
 
 **Deliverable:** [`01-business-requirements.md`](./01-business-requirements.md)  
-**Status:** Completed and baselined as version 1.4.
+**Status:** Completed and baselined as version 1.5.
 
 The business workflow, continuation behavior, completion states, delivery policy, scope, and open business decisions are maintained in that document and are not repeated here.
 
@@ -77,7 +77,7 @@ The business workflow, continuation behavior, completion states, delivery policy
 ### Milestone 4 — System Architecture
 
 **Deliverable:** [`04-system-architecture.md`](./04-system-architecture.md)  
-**Status:** Draft version 0.1 created; architecture review is the immediate next step.
+**Status:** Draft version 0.3 created; architecture review is the immediate next step.
 
 **Purpose:** Define the architectural components that fulfill the approved platform responsibilities while preserving the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow).
 
@@ -85,6 +85,8 @@ The business workflow, continuation behavior, completion states, delivery policy
 
 - every business-workflow stage maps to one or more architecture components
 - every architecture component maps to approved `CAP-*` and `RESP-*` identifiers
+- every stage transition is mediated by the Workflow Orchestrator
+- no-safe-plan and failure-informed revision paths are represented
 - component, state, evidence, integration, security, and audit ownership is explicit
 - ADK/LLM reasoning and deterministic execution boundaries are clear
 - significant tradeoffs are assigned to ADRs
@@ -128,7 +130,7 @@ Review [`04-system-architecture.md`](./04-system-architecture.md) against:
 2. the [Capability Model](./02-capability-model.md)
 3. the [Platform Responsibility Model](./03-platform-responsibility-model.md)
 
-The review must confirm workflow coverage, responsibility preservation, component boundaries, state and evidence ownership, integration boundaries, and the separation between LLM-assisted reasoning and deterministic execution.
+The review must confirm workflow coverage, responsibility preservation, Orchestrator-mediated stage control, no-safe-plan handling, failure-informed plan revision, component boundaries, state and evidence ownership, integration boundaries, and the separation between LLM-assisted reasoning and deterministic execution.
 
 After approval, baseline the architecture and begin `05-detailed-design.md` together with the ADRs required before implementation.
 
