@@ -32,7 +32,7 @@ Run every command from Google Cloud Shell unless the step says otherwise.
 | JDK 21 | Builds Java Spring Boot Maven projects |
 | Maven | Runs `mvn clean install`, `mvn test`, and dependency analysis |
 | OSV Scanner | Scans Maven dependencies for OSS vulnerabilities |
-| GitHub CLI | Creates pull requests from Agent 3 |
+| GitHub CLI | Creates pull requests |
 
 OSV Scanner must be installed on the runtime machine and available on `PATH` as `osv-scanner`.
 
