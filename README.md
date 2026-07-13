@@ -67,7 +67,7 @@ gcloud auth application-default login
 ```
 
 
-## 2. Clone this repository and checkout the customer-demo branch
+## 2. Clone this repository and checkout the main branch
 
 ```bash
 cd ~
