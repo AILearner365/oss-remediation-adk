@@ -2,6 +2,54 @@
 
 This repository contains an ADK-based OSS vulnerability remediation workflow for Java Spring Boot Maven applications.
 
+## Local Setup Prerequisites
+
+Install and configure the following prerequisites on the machine that will run the ADK workflow.
+
+| Prerequisite | Requirement | Why it is needed | Required when |
+|---|---|---|---|
+| Python | Python 3.10 or later | Runs the ADK agent application and workflow orchestration code. | Always |
+| `pip` | A version compatible with the installed Python runtime | Installs Google ADK and the Python dependencies used by the project. | Always |
+| Python virtual environment | `venv`, Conda, or an equivalent isolated environment | Keeps the workflow dependencies isolated from the system Python installation. | Strongly recommended |
+| Google ADK | Installed in the active Python environment | Provides the agent runtime used by `oss_remediation_agent/agent.py`. | Always |
+| Gemini authentication | A valid Gemini API key or supported Google Cloud/Vertex AI credentials | Allows the Planning and Outcome Analysis agents to invoke the configured Gemini model. | When using live LLM invocation |
+| Git | A recent Git client available on `PATH` | Clones target repositories, checks out the baseline commit, creates remediation branches, commits changes, and pushes branches. | Always |
+| Git credentials | Credentials with read access to the target repository and push access when publishing a PR | Allows checkout of private repositories and publication of remediation branches. | Private repositories and automatic PR publication |
+| JDK | A JDK version compatible with the target Maven project, commonly JDK 17 or JDK 21 | Compiles and tests the Java Spring Boot Maven application. | Always |
+| `JAVA_HOME` | Set to the selected JDK installation when required by the local environment | Ensures Maven and validation commands use the intended Java runtime. | Environments that do not resolve Java automatically |
+| Apache Maven | A Maven version compatible with the target project, available as `mvn` on `PATH` | Runs baseline builds, `mvn clean install`, `mvn test`, effective-POM generation, and dependency-tree analysis. | Always |
+| Maven repository access | Network and credentials for Maven Central and any configured private artifact repositories | Resolves project dependencies, plugins, parent POMs, and BOMs during analysis and validation. | Always; credentials are conditional for private repositories |
+| OSV-Scanner | OSV-Scanner CLI available on `PATH` | Scans the resolved project dependencies before and after remediation for in-scope OSS vulnerabilities. | Always |
+| GitHub CLI | GitHub CLI (`gh`) available on `PATH` | Creates the final draft pull request after the validated patch branch is pushed. | `AUTO` PR creation mode |
+| GitHub CLI authentication | An authenticated `gh` session with permission to create branches and pull requests | Enables automated pull-request publication. Verify with `gh auth status`. | `AUTO` PR creation mode |
+| Internet/network access | Access to GitHub, the configured Git remote, Maven repositories, OSV services/data, and the configured Gemini endpoint | Supports repository operations, dependency resolution, vulnerability scanning, and LLM invocation. | Always, unless every dependency and service is available locally |
+| Filesystem permissions | Read/write permission for the repository checkout and `oss-remediation-workspaces` directory | Persists manifests, analyzer reports, patch plans, diffs, validation logs, and final PR artifacts. | Always |
+| Disk space | Enough space for repository clones, Maven caches, build outputs, and remediation workspaces | Each attempt creates an isolated repository workspace and validation artifacts. | Always |
+
+### Authentication notes
+
+- Configure the Gemini authentication method expected by your ADK environment before starting the agent. Do not commit API keys or service-account secrets to the repository.
+- Run `git ls-remote <repository-url>` to confirm repository read access.
+- When automatic PR publication is enabled, run `gh auth status` and confirm the authenticated account can push branches and create pull requests in the target repository.
+- Configure Maven `settings.xml` when the target project uses private artifact repositories, mirrors, proxies, or repository credentials.
+
+### Command availability check
+
+Run these commands from the same terminal or virtual environment that will start the ADK workflow:
+
+```bash
+python --version
+pip --version
+git --version
+java -version
+mvn --version
+osv-scanner --version
+gh --version
+gh auth status
+```
+
+The exact JDK and Maven versions must follow the target application's build requirements. The workflow should not silently replace the target project's required Java or Maven toolchain.
+
 ## Architecture Documentation
 
 The finalized architecture, artifact contracts, deterministic tool APIs, AI agent specifications, workflow orchestration, and implementation plan are documented here:
