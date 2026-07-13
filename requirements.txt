@@ -1,3 +1,7 @@
+# Python dependencies required by the OSS Remediation ADK application.
+# External command-line tools such as Java, Maven, Git, GitHub CLI,
+# Google Cloud CLI, and OSV Scanner are installed separately.
+
 google-adk
 google-cloud-aiplatform
 google-genai
