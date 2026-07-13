@@ -14,16 +14,17 @@ This directory belongs to the documentation-only engineering-baseline branch. Th
    - [Approved Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow)
 2. [Capability Model](./02-capability-model.md)
 3. [Platform Responsibility Model](./03-platform-responsibility-model.md)
-4. [System Architecture](./04-system-architecture.md) — draft under review
+4. [System Architecture](./04-system-architecture.md) — baselined
 
 Supporting navigation and governance:
 
+- [Engineering Principles](./engineering-principles.md)
 - [Engineering Roadmap and Documentation Tracker](./00-engineering-roadmap.md)
 - [Architecture Decision Record Guidance](../decisions/README.md)
 
 ## Planned engineering documents
 
-5. `05-detailed-design.md` — ADK agents, workflows, tools, state, APIs, data models, and failure behavior
+5. `05-detailed-design.md` — immediate next document; ADK agents, workflows, tools, state, APIs, data models, and failure behavior
 6. `06-implementation-roadmap.md` — incremental implementation slices and delivery order
 7. `07-traceability-matrix.md` — business requirement through implementation and test evidence
 
@@ -37,6 +38,7 @@ Architecture Decision Records use `decisions/ADR-*.md` and are not part of the n
 | Capability Model | Architecture-neutral capabilities |
 | Platform Responsibility Model | Primary and supporting capability ownership |
 | System Architecture | Architectural components, boundaries, integrations, state ownership, and major interactions |
+| Engineering Principles | Cross-cutting implementation and review guidance without redefining authoritative documents |
 | Detailed Design | Agent, tool, API, state, data, and failure behavior |
 | Implementation Roadmap | Delivery slices and implementation order |
 | Traceability Matrix | Requirement-to-code-to-test evidence |
@@ -52,8 +54,8 @@ Mermaid diagrams must remain readable in both GitHub light mode and dark mode.
 - Do not force a white diagram background.
 - Keep edge-label backgrounds dark and edge-label text light.
 - Use the same palette across flowcharts, state diagrams, and sequence diagrams.
-- Split diagrams when their size makes labels difficult to read at normal browser zoom.
-- Do not create a second diagram that redefines behavior already owned by an authoritative diagram.
+- Keep the Business Remediation Workflow as one authoritative diagram; do not create separate diagrams that redefine it.
+- Split other diagrams only when their size makes labels difficult to read at normal browser zoom.
 
 The dark canvas is intentional: it provides stable contrast whether the surrounding GitHub page is using a light or dark theme.
 
