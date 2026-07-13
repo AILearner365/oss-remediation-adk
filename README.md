@@ -36,6 +36,9 @@ Run every command from Google Cloud Shell unless the step says otherwise.
 
 OSV Scanner must be installed on the runtime machine and available on `PATH` as `osv-scanner`.
 
+---
+
+## Local Setup Instructions
 
 ## 1. Select the Google Cloud project
 
