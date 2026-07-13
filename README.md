@@ -108,8 +108,6 @@ Open `.env` in Cloud Shell Editor and update the project value:
 GOOGLE_GENAI_USE_ENTERPRISE=1
 GOOGLE_CLOUD_PROJECT=deutschebank-aipocs
 GOOGLE_CLOUD_LOCATION=us-central1
-ADK_HOST=0.0.0.0
-ADK_PORT=8000
 ```
 
 Use `GOOGLE_GENAI_USE_ENTERPRISE=1` only when required by your organization. Do not commit `.env`.
