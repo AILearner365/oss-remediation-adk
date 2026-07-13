@@ -21,7 +21,7 @@ The automated path does not modify Java source code, test source code, JDK versi
 
 Run every command from Google Cloud Shell unless the step says otherwise.
 
-## Prerequisites
+## Local Setup Prerequisites
 
 |Install these tools on the machine that will run the ADK workflow:
 
