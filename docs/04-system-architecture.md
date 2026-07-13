@@ -2,7 +2,7 @@
 ## System Architecture
 
 **Status:** Draft for review  
-**Version:** 0.2
+**Version:** 0.3
 
 ---
 
@@ -42,25 +42,26 @@ It does not redefine business behavior, platform capabilities, or responsibility
 
 The following rules must remain true in every implementation:
 
-1. Only the **Workflow Orchestrator** may start, resume, advance, pause, or terminate a remediation iteration.
-2. Only the **Validation and Outcome Engine** may assign the technical completion state.
-3. The **Change Executor** may apply an approved change but may not approve or validate its own result.
-4. The **Remediation Planner** may propose and select plans but may not directly modify repository files or source-control state.
-5. The **Source-Control Gateway** owns repository, branch, commit, push, and pull-request operations but not remediation semantics.
-6. The **Workspace Manager** preserves context and evidence references but does not invent technical evidence.
-7. The **Evidence and Reporting Service** reads authoritative evidence and produces explanations; it does not change workflow or repository state.
-8. Review-only access must not create a new iteration unless an authorized user explicitly requests one.
-9. A continued iteration must refresh current facts before reusing prior conclusions.
-10. Fully or Partially Remediated cannot be reported without the required validation evidence.
-11. Provider-specific behavior must remain behind architectural gateways or ports.
-12. An ADR cannot silently override business behavior, capability ownership, or responsibility ownership.
+1. Only the **Workflow Orchestrator** may start, resume, advance, pause, retry, revise, or terminate a remediation iteration.
+2. Stage components return results to the Orchestrator and must not directly start the next workflow stage.
+3. Only the **Validation and Outcome Engine** may assign the technical completion state.
+4. The **Change Executor** may apply an approved change but may not approve or validate its own result.
+5. The **Remediation Planner** may propose and select plans but may not directly modify repository files or source-control state.
+6. The **Source-Control Gateway** owns repository, branch, commit, push, and pull-request operations but not remediation semantics.
+7. The **Workspace Manager** preserves context and evidence references but does not invent technical evidence.
+8. The **Evidence and Reporting Service** reads authoritative evidence and produces explanations; it does not change workflow or repository state.
+9. Review-only access must not create a new iteration unless an authorized user explicitly requests one.
+10. A continued iteration must refresh current facts before reusing prior conclusions.
+11. Fully or Partially Remediated cannot be reported without the required validation evidence.
+12. Provider-specific behavior must remain behind architectural gateways or ports.
+13. An ADR cannot silently override business behavior, capability ownership, or responsibility ownership.
 
 ---
 
 ## 4. System Context
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827","edgeLabelBackground":"#ffffff"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","secondaryColor":"#243447","secondaryTextColor":"#f8fafc","secondaryBorderColor":"#a7f3d0","tertiaryColor":"#312e81","tertiaryTextColor":"#f8fafc","tertiaryBorderColor":"#c4b5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","edgeLabelBackground":"#0f172a","edgeLabelTextColor":"#f8fafc"}}}%%
 flowchart LR
     CI[GitHub Actions] --> EP[Platform Entry Layer]
     USER[Developer / Reviewer] --> EP
@@ -83,7 +84,7 @@ External systems remain authoritative for source control, CI/CD execution, vulne
 ## 5. Logical Component Model
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827","edgeLabelBackground":"#ffffff"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","secondaryColor":"#243447","secondaryTextColor":"#f8fafc","secondaryBorderColor":"#a7f3d0","tertiaryColor":"#312e81","tertiaryTextColor":"#f8fafc","tertiaryBorderColor":"#c4b5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","edgeLabelBackground":"#0f172a","edgeLabelTextColor":"#f8fafc"}}}%%
 flowchart TB
     subgraph Entry[Entry and Interaction]
         EA[Entry Adapters]
@@ -117,26 +118,22 @@ flowchart TB
     EA --> WO
     RI --> WO
     WO <--> WS
-    WO --> PR
-    WO --> SC
-    WO --> VI
-    PR --> VI
-    VI --> MA
-    MA --> RP
-    PR --> RP
-    RP --> CE
-    CE --> VE
-    VI --> VE
-    PR --> VE
-    VE --> WO
-    WO --> SC
-    WS <--> ER
-    RI <--> ER
+    WO <--> PR
+    WO <--> SC
+    WO <--> VI
+    WO <--> MA
+    WO <--> RP
+    WO <--> CE
+    WO <--> VE
+    WO <--> ER
+    ER --> RI
     SA -. cross-cutting .-> Control
     SA -. cross-cutting .-> Analysis
     SA -. cross-cutting .-> Remediation
     OI -. recovery and extension .-> WO
 ```
+
+Stage components exchange evidence through Orchestrator-controlled calls or authoritative evidence references. They do not advance the workflow by invoking the next stage directly.
 
 ---
 
@@ -146,13 +143,13 @@ flowchart TB
 |---|---|---|---|
 | Entry Adapters | Normalize CI/CD and interactive requests into platform commands | RESP-01; supports RESP-02, RESP-11 | CAP-01, CAP-06, CAP-25 |
 | Review Interface | Present evidence, accept questions and feedback, and distinguish review-only from new iteration | RESP-10; supports RESP-01, RESP-04 | CAP-22, CAP-23, CAP-24 |
-| Workflow Orchestrator | Coordinate stages, iterations, retries, continuation, and termination | RESP-01 | CAP-06, CAP-14, CAP-24 |
+| Workflow Orchestrator | Coordinate stages, iterations, retries, revision, continuation, and termination | RESP-01 | CAP-06, CAP-14, CAP-24 |
 | Policy and Validation Resolver | Resolve effective policy, scope, boundaries, delivery policy, and validation configuration | RESP-03 | CAP-02, CAP-03; supports CAP-08 |
 | Workspace Manager | Own workspace identity, lifecycle, iteration history, collaboration control, and evidence references | RESP-04 | CAP-04, CAP-05, CAP-21 |
 | Source-Control Gateway | Read repository state and manage branch, commit, push, and pull-request operations | RESP-02 | CAP-01, CAP-19, CAP-20 |
 | Vulnerability Intelligence | Obtain, normalize, classify, and re-evaluate vulnerability findings | RESP-05 | CAP-07, CAP-08, CAP-16 |
 | Maven Analysis Engine | Produce deterministic reactor, effective-model, origin, and control-point evidence | RESP-06 | CAP-09, CAP-10 |
-| Remediation Planner | Determine, compare, select, and explain remediation options | RESP-07 | CAP-11, CAP-12; supports CAP-14 |
+| Remediation Planner | Determine, compare, select, revise, and explain remediation options | RESP-07 | CAP-11, CAP-12; supports CAP-14 |
 | Change Executor | Convert an approved plan into permitted project-file changes | RESP-08 | CAP-13 |
 | Validation and Outcome Engine | Execute validation and assign exactly one completion state | RESP-09 | CAP-15, CAP-17, CAP-18; consumes CAP-16 |
 | Evidence and Reporting Service | Produce reviewer-facing reports and evidence-grounded explanations | RESP-10; supports RESP-04 | CAP-22, CAP-23 |
@@ -165,31 +162,30 @@ A component may support a capability owned elsewhere but must not assume that ca
 
 ## 7. Component Dependency Rules
 
-### Allowed dependency direction
+### Allowed control dependency direction
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827","edgeLabelBackground":"#ffffff"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","secondaryColor":"#243447","secondaryTextColor":"#f8fafc","secondaryBorderColor":"#a7f3d0","tertiaryColor":"#312e81","tertiaryTextColor":"#f8fafc","tertiaryBorderColor":"#c4b5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","edgeLabelBackground":"#0f172a","edgeLabelTextColor":"#f8fafc"}}}%%
 flowchart LR
     Entry[Entry / Review] --> Orchestrator[Workflow Orchestrator]
-    Orchestrator --> Policy[Policy Resolver]
-    Orchestrator --> Workspace[Workspace Manager]
-    Orchestrator --> Source[Source-Control Gateway]
-    Orchestrator --> Vulnerability[Vulnerability Intelligence]
-    Vulnerability --> Maven[Maven Analysis Engine]
-    Maven --> Planner[Remediation Planner]
-    Policy --> Planner
-    Planner --> Executor[Change Executor]
-    Executor --> Validator[Validation and Outcome Engine]
-    Vulnerability --> Validator
-    Validator --> Orchestrator
-    Workspace --> Reporting[Evidence and Reporting]
+    Orchestrator <--> Policy[Policy Resolver]
+    Orchestrator <--> Workspace[Workspace Manager]
+    Orchestrator <--> Source[Source-Control Gateway]
+    Orchestrator <--> Vulnerability[Vulnerability Intelligence]
+    Orchestrator <--> Maven[Maven Analysis Engine]
+    Orchestrator <--> Planner[Remediation Planner]
+    Orchestrator <--> Executor[Change Executor]
+    Orchestrator <--> Validator[Validation and Outcome Engine]
+    Orchestrator <--> Reporting[Evidence and Reporting]
     Reporting --> Review[Review Interface]
 ```
 
-### Prohibited direct dependencies
+### Dependency rules
 
+- Orchestrator invokes each workflow stage and receives its result before deciding the next action.
+- Components may return evidence directly or return an authoritative evidence reference.
 - Planner must not call GitHub or modify files directly.
-- Change Executor must not determine completion state.
+- Change Executor must not invoke Validation directly or determine completion state.
 - Validation must not change policy or remediation plans.
 - Reporting must not invoke Maven, scanners, or repository mutation operations.
 - Workspace Manager must not invoke LLMs or deterministic analysis tools to create evidence.
@@ -220,12 +216,14 @@ Deterministic execution is required for repository state, Maven analysis, vulner
 ## 9. Workspace State Model
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","secondaryColor":"#243447","secondaryTextColor":"#f8fafc","secondaryBorderColor":"#a7f3d0","tertiaryColor":"#312e81","tertiaryTextColor":"#f8fafc","tertiaryBorderColor":"#c4b5fd","lineColor":"#cbd5e1","textColor":"#f8fafc"}}}%%
 stateDiagram-v2
     [*] --> Created
     Created --> Running: iteration starts
     Running --> WaitingExternal: recoverable external wait
     WaitingExternal --> Running: dependency available
+    Running --> Revising: validation or plan failure
+    Revising --> Running: revised plan approved
     Running --> OutcomeRecorded: completion state assigned
     OutcomeRecorded --> UnderReview: outcome presented
     UnderReview --> Retained: no new iteration requested
@@ -240,11 +238,12 @@ stateDiagram-v2
 
 - `Created` exists before any technical execution begins.
 - `Running` represents an active iteration, not the whole workspace lifetime.
-- `WaitingExternal` and `Paused` are not completion states.
+- `WaitingExternal`, `Paused`, and `Revising` are not completion states.
+- `Revising` preserves the failed plan and failure evidence before another plan is selected.
 - `OutcomeRecorded` requires exactly one business completion state from the Validation and Outcome Engine.
 - `UnderReview` supports questions without creating a new iteration.
 - `IterationRequested` is entered only through an authorized explicit request.
-- A workspace may cycle through multiple iterations while retaining previous evidence.
+- A workspace may cycle through multiple attempts and iterations while retaining previous evidence.
 
 Exact enums, persistence fields, timeouts, and transition APIs belong to Detailed Design.
 
@@ -255,15 +254,15 @@ Exact enums, persistence fields, timeouts, and transition APIs belong to Detaile
 | Component | Reads | Writes / owns | Must not own |
 |---|---|---|---|
 | Entry Adapters | User or CI request, identity context | Normalized command | Workflow state, evidence |
-| Workflow Orchestrator | Commands, policy result, tool outcomes, workspace state | Iteration progression and coordination state | Completion decision, repository truth |
+| Workflow Orchestrator | Commands, policy result, component outcomes, workspace state | Iteration progression and coordination state | Completion decision, repository truth |
 | Policy Resolver | Defaults, repository policy, execution overrides | Effective policy and validation scope | Finding classification |
 | Workspace Manager | Commands and evidence references | Workspace lifecycle, iteration history, collaboration state | Technical evidence generation |
 | Source-Control Gateway | Provider repository state | Branch, commit, push, PR operations | Remediation decision |
 | Vulnerability Intelligence | Provider results and effective scope rules | Normalized findings and classification | Policy definition |
 | Maven Analysis Engine | Repository snapshot, in-scope findings | Maven structure and origin evidence | Remediation selection |
-| Remediation Planner | Policy, findings, Maven evidence, failure history | Candidate plans, selected plan, rationale | File mutation, completion state |
-| Change Executor | Approved plan and repository snapshot | Applied project-file change set | Validation approval |
-| Validation and Outcome Engine | Changed state, validation configuration, re-scan evidence | Validation results and completion state | Policy or plan changes |
+| Remediation Planner | Policy, findings, Maven evidence, failed plans, failure evidence | Candidate plans, selected plan, revised plan, rationale | File mutation, completion state |
+| Change Executor | Approved plan and repository snapshot | Applied project-file change set | Validation approval, next-stage control |
+| Validation and Outcome Engine | Changed or unchanged state, validation configuration, re-scan evidence | Validation results and completion state | Policy or plan changes |
 | Evidence and Reporting | Authoritative evidence references | Reports and explanations | Workflow or repository state |
 | Review Interface | Reports, workspace state | Questions, feedback, iteration request | Direct workflow execution |
 | Security and Audit | Identity, action context, security events | Authorization decisions and audit records | Business completion state |
@@ -273,10 +272,10 @@ Exact enums, persistence fields, timeouts, and transition APIs belong to Detaile
 
 ## 11. Major Runtime Flows
 
-### 11.1 New remediation
+### 11.1 New remediation and no-safe-plan outcome
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","lineColor":"#334155","textColor":"#111827","actorBkg":"#dbeafe","actorBorder":"#1d4ed8","actorTextColor":"#111827","signalColor":"#334155","signalTextColor":"#111827","labelBoxBkgColor":"#ffffff","labelTextColor":"#111827","noteBkgColor":"#fef3c7","noteTextColor":"#111827"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","actorBkg":"#1e293b","actorBorder":"#93c5fd","actorTextColor":"#f8fafc","signalColor":"#cbd5e1","signalTextColor":"#f8fafc","labelBoxBkgColor":"#0f172a","labelTextColor":"#f8fafc","noteBkgColor":"#312e81","noteTextColor":"#f8fafc","activationBkgColor":"#243447","activationBorderColor":"#a7f3d0"}}}%%
 sequenceDiagram
     actor Initiator
     participant Entry
@@ -294,24 +293,40 @@ sequenceDiagram
     Initiator->>Entry: Start remediation
     Entry->>Orchestrator: Normalized request
     Orchestrator->>Workspace: Create workspace and iteration
+    Workspace-->>Orchestrator: Workspace reference
     Orchestrator->>Policy: Resolve effective rules
+    Policy-->>Orchestrator: Effective policy and validation scope
     Orchestrator->>Source: Establish repository baseline
+    Source-->>Orchestrator: Repository snapshot reference
     Orchestrator->>Vulnerability: Discover and classify findings
-    Vulnerability->>Maven: Supply in-scope findings
-    Maven->>Planner: Supply project and control-point evidence
-    Planner->>Change: Submit approved remediation plan
-    Change->>Validation: Supply changed project state
-    Validation->>Vulnerability: Request post-change revalidation
-    Validation->>Orchestrator: Return completion state and evidence
-    Orchestrator->>Source: Deliver according to policy
+    Vulnerability-->>Orchestrator: Current classified findings
+    Orchestrator->>Maven: Analyze project and control points
+    Maven-->>Orchestrator: Maven analysis evidence
+    Orchestrator->>Planner: Determine safest remediation option
+    Planner-->>Orchestrator: Plan decision and rationale
+
+    alt Safe plan available
+        Orchestrator->>Change: Apply approved plan
+        Change-->>Orchestrator: Changed project state
+        Orchestrator->>Validation: Validate changed state
+        Validation->>Vulnerability: Request post-change revalidation
+        Vulnerability-->>Validation: Revalidation evidence
+        Validation-->>Orchestrator: Completion state and validation evidence
+        Orchestrator->>Source: Deliver according to policy
+    else No safe plan available
+        Orchestrator->>Validation: Assess no-change outcome with plan evidence
+        Validation-->>Orchestrator: Human Review Required
+    end
+
     Orchestrator->>Reporting: Produce review-ready outcome
-    Reporting->>Workspace: Retain report and evidence references
+    Reporting-->>Orchestrator: Report reference
+    Orchestrator->>Workspace: Retain outcome and evidence references
 ```
 
 ### 11.2 Review-only access
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","lineColor":"#334155","textColor":"#111827","actorBkg":"#dbeafe","actorBorder":"#1d4ed8","actorTextColor":"#111827","signalColor":"#334155","signalTextColor":"#111827","labelBoxBkgColor":"#ffffff","labelTextColor":"#111827"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","actorBkg":"#1e293b","actorBorder":"#93c5fd","actorTextColor":"#f8fafc","signalColor":"#cbd5e1","signalTextColor":"#f8fafc","labelBoxBkgColor":"#0f172a","labelTextColor":"#f8fafc"}}}%%
 sequenceDiagram
     actor Reviewer
     participant Review
@@ -320,15 +335,16 @@ sequenceDiagram
 
     Reviewer->>Review: Open workspace or ask question
     Review->>Workspace: Read outcome and retained evidence
-    Workspace->>Reporting: Resolve evidence references
-    Reporting->>Review: Return evidence-grounded answer
-    Review->>Reviewer: Present answer without starting iteration
+    Workspace-->>Review: Evidence references and current outcome
+    Review->>Reporting: Request evidence-grounded answer
+    Reporting-->>Review: Answer or summary
+    Review-->>Reviewer: Present answer without starting iteration
 ```
 
 ### 11.3 Feedback-driven iteration
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","lineColor":"#334155","textColor":"#111827","actorBkg":"#dbeafe","actorBorder":"#1d4ed8","actorTextColor":"#111827","signalColor":"#334155","signalTextColor":"#111827","labelBoxBkgColor":"#ffffff","labelTextColor":"#111827","noteBkgColor":"#fef3c7","noteTextColor":"#111827"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","actorBkg":"#1e293b","actorBorder":"#93c5fd","actorTextColor":"#f8fafc","signalColor":"#cbd5e1","signalTextColor":"#f8fafc","labelBoxBkgColor":"#0f172a","labelTextColor":"#f8fafc","noteBkgColor":"#312e81","noteTextColor":"#f8fafc"}}}%%
 sequenceDiagram
     actor Reviewer
     participant Review
@@ -342,12 +358,44 @@ sequenceDiagram
     Review->>Workspace: Retain approved feedback
     Review->>Orchestrator: Request continuation iteration
     Orchestrator->>Source: Refresh repository and branch state
+    Source-->>Orchestrator: Current repository snapshot
     Orchestrator->>Policy: Refresh policy and validation scope
+    Policy-->>Orchestrator: Current policy context
     Orchestrator->>Workspace: Load relevant prior evidence
+    Workspace-->>Orchestrator: Retained evidence references
     Orchestrator->>Vulnerability: Obtain current findings
+    Vulnerability-->>Orchestrator: Current vulnerability evidence
     Orchestrator->>Workspace: Record refreshed context
-    Note over Orchestrator,Vulnerability: Continue through analysis, planning, change, validation, and delivery
+    Note over Orchestrator,Vulnerability: Orchestrator continues through analysis, planning, change, validation, and delivery
 ```
+
+### 11.4 Failure-informed plan revision
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","actorBkg":"#1e293b","actorBorder":"#93c5fd","actorTextColor":"#f8fafc","signalColor":"#cbd5e1","signalTextColor":"#f8fafc","labelBoxBkgColor":"#0f172a","labelTextColor":"#f8fafc","noteBkgColor":"#312e81","noteTextColor":"#f8fafc"}}}%%
+sequenceDiagram
+    participant Orchestrator
+    participant Workspace
+    participant Planner
+    participant Change
+    participant Validation
+
+    Validation-->>Orchestrator: Validation failure and evidence
+    Orchestrator->>Workspace: Retain failed plan and failure evidence
+    Orchestrator->>Planner: Revise using prior plan and failure evidence
+    Planner-->>Orchestrator: Different safe candidate or no safe option
+
+    alt Revised safe plan available
+        Orchestrator->>Change: Apply revised plan
+        Change-->>Orchestrator: Revised changed state
+        Orchestrator->>Validation: Re-run required validation
+    else No further safe plan available
+        Orchestrator->>Validation: Assess Human Review Required outcome
+        Validation-->>Orchestrator: Completion state and evidence
+    end
+```
+
+The Planner must not repeat a failed strategy unless current facts, policy, or evidence have materially changed and the rationale for reconsideration is retained.
 
 ---
 
@@ -377,7 +425,7 @@ Future Bitbucket, TeamCity, vulnerability, and validation integrations must impl
 | Workspace lifecycle, iteration history, and evidence references | Workspace Manager |
 | Normalized findings and classification | Vulnerability Intelligence |
 | Maven project, origin, and control-point evidence | Maven Analysis Engine |
-| Candidate plans, selected plan, rejected alternatives, and rationale | Remediation Planner |
+| Candidate plans, selected plan, revised plans, rejected alternatives, and rationale | Remediation Planner |
 | Applied project-file changes | Change Executor |
 | Build, test, custom validation, and completion state | Validation and Outcome Engine |
 | Reports and evidence-grounded explanations | Evidence and Reporting Service |
@@ -412,16 +460,16 @@ Recovery must preserve completed evidence, identify the failed stage, and resume
 | Review existing workspace | Review Interface, Workspace Manager, Reporting | RESP-10, RESP-04 |
 | Capture feedback | Review Interface, Workspace Manager, Orchestrator | RESP-10, RESP-04, RESP-01 |
 | Refresh context | Orchestrator, Source-Control Gateway, Policy Resolver | RESP-01, RESP-02, RESP-03 |
-| Load retained context | Workspace Manager | RESP-04 |
-| Vulnerability discovery | Vulnerability Intelligence | RESP-05 |
+| Load retained context | Workspace Manager, coordinated by Orchestrator | RESP-04, RESP-01 |
+| Vulnerability discovery | Vulnerability Intelligence, coordinated by Orchestrator | RESP-05, RESP-01 |
 | Assess current and retained evidence | Orchestrator, Vulnerability Intelligence, Maven Analysis, Planner | RESP-01, RESP-05, RESP-06, RESP-07 |
-| Scope classification | Policy Resolver, Vulnerability Intelligence | RESP-03, RESP-05 |
-| Project analysis | Maven Analysis Engine | RESP-06 |
-| Remediation decision | Remediation Planner | RESP-07 |
-| Change execution | Change Executor; Source-Control Gateway supports | RESP-08; RESP-02 supporting |
-| Validation | Validation Engine; Vulnerability Intelligence supports | RESP-09; RESP-05 supporting |
+| Scope classification | Vulnerability Intelligence using Policy Resolver output | RESP-05; RESP-03 supporting |
+| Project analysis | Maven Analysis Engine, coordinated by Orchestrator | RESP-06, RESP-01 |
+| Remediation decision | Remediation Planner, coordinated by Orchestrator | RESP-07, RESP-01 |
+| Change execution | Change Executor, coordinated by Orchestrator; Source-Control Gateway supports | RESP-08; RESP-01 and RESP-02 supporting |
+| Validation | Validation Engine, coordinated by Orchestrator; Vulnerability Intelligence supports | RESP-09; RESP-01 and RESP-05 supporting |
 | Completion | Validation Engine; Orchestrator consumes | RESP-09; RESP-01 supporting |
-| Delivery | Source-Control Gateway, Reporting | RESP-02, RESP-10 |
+| Delivery | Source-Control Gateway and Reporting, coordinated by Orchestrator | RESP-02, RESP-10; RESP-01 supporting |
 | Retention | Workspace Manager, Security and Audit | RESP-04, RESP-11 |
 
 ---
@@ -449,13 +497,13 @@ The architecture is ready for baselining when reviewers confirm that:
 
 1. every workflow stage maps to components
 2. every component maps to approved capabilities and responsibilities
-3. dependency direction and prohibited calls are clear
-4. architectural invariants are testable
-5. workspace state transitions support review-only and repeated iterations
-6. state and evidence ownership are unambiguous
-7. LLM reasoning is bounded by deterministic evidence and policy
-8. change execution cannot approve itself
-9. external provider boundaries remain replaceable
+3. every stage transition is Orchestrator-mediated
+4. no-safe-plan and failure-revision paths are represented
+5. dependency direction and prohibited calls are clear
+6. architectural invariants are testable
+7. workspace states support review-only, retries, revision, and repeated iterations
+8. state and evidence ownership are unambiguous
+9. LLM reasoning is bounded by deterministic evidence and policy
 10. unresolved decisions are assigned to ADRs or Detailed Design
 
 ---
