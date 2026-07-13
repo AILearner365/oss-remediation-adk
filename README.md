@@ -1,44 +1,47 @@
 # OSS Remediation ADK
 
-A Google ADK-based workflow that scans Java Spring Boot Maven repositories for Critical and High OSS vulnerabilities, plans dependency-only fixes, validates the changes, and creates a Draft GitHub Pull Request when validation succeeds.
+A Google ADK workflow for Java Spring Boot Maven repositories. It scans Critical and High OSS vulnerabilities, analyzes Maven dependency ownership, creates dependency-only remediation plans, validates the changes, and creates a Draft GitHub Pull Request when validation succeeds.
 
 ## What the workflow does
 
-1. Clones the target repository and checks the reference branch.
+1. Clones the target repository and checks out the requested reference branch.
 2. Runs a baseline Maven build.
 3. Runs OSV Scanner and creates a vulnerability assessment report.
-4. Analyzes the Maven project structure and dependency ownership.
+4. Analyzes Maven modules, parent POMs, `dependencyManagement`, properties, and dependency paths.
 5. Uses the remediation planning agent to create a safe patch plan.
 6. Applies only allowed `pom.xml` dependency-version changes.
-7. Runs build, tests, and OSV validation.
+7. Runs patch dry run, build, tests, and OSV validation.
 8. Creates a Draft Pull Request when the validated patch set is safe.
 
-## Supported project type
-
-- Java Spring Boot applications
-- Maven single-module or multi-module repositories
-- Direct and transitive Maven dependencies
-- `dependencyManagement` and Maven properties
-
-The automated path does not modify Java source code, test source code, JDK versions, Maven plugin logic, suppressions, or ignore rules.
+The automated path does not modify Java source code, test source code, JDK versions, Maven plugin logic, suppression files, or ignore rules.
 
 ---
 
-# Quick setup in Google Cloud Shell
+# Recommended setup: Google Cloud Shell Editor
 
-These instructions are the recommended path for team members using Cloud Shell Editor.
+These are the supported onboarding steps for team members. Run every command from Google Cloud Shell unless the step says otherwise.
 
-## 1. Open Cloud Shell
+## Prerequisites
 
-Open Google Cloud Shell and make sure the correct Google Cloud project is selected.
+You need:
 
-Verify:
+- access to a Google Cloud project with Vertex AI enabled,
+- permission to create Application Default Credentials,
+- GitHub access to the target repository,
+- write permission if the workflow must push a remediation branch and create a Draft PR,
+- a JDK and Maven version compatible with the target project.
+
+Cloud Shell normally includes Python, Git, Java, Maven, Google Cloud CLI, GitHub CLI, and Go. The setup script installs the Python packages used by this project. OSV Scanner must also be available on `PATH`.
+
+## 1. Select the Google Cloud project
+
+Check the active project:
 
 ```bash
 gcloud config get-value project
 ```
 
-Set the project if needed:
+Set it when needed:
 
 ```bash
 gcloud config set project YOUR_PROJECT_ID
@@ -56,13 +59,14 @@ Create Application Default Credentials:
 gcloud auth application-default login
 ```
 
-Verify authentication:
+Verify the credentials:
 
 ```bash
-gcloud auth application-default print-access-token >/dev/null && echo "Google authentication is ready"
+gcloud auth application-default print-access-token >/dev/null \
+  && echo "Google authentication is ready"
 ```
 
-## 2. Clone this repository and checkout the demo branch
+## 2. Clone this repository and checkout the customer-demo branch
 
 ```bash
 cd ~
@@ -77,31 +81,42 @@ Confirm the branch:
 git branch --show-current
 ```
 
-Expected:
+Expected output:
 
 ```text
 oss-remediation-adk-customer-demo
 ```
 
-## 3. Run the setup script
+If the repository already exists locally, update it instead:
+
+```bash
+cd ~/oss-remediation-adk
+git fetch origin
+git checkout oss-remediation-adk-customer-demo
+git pull --ff-only origin oss-remediation-adk-customer-demo
+```
+
+## 3. Run the project setup script
 
 ```bash
 chmod +x scripts/*.sh
 bash scripts/setup-local.sh
 ```
 
-The setup script:
+The script is safe to run again. It:
 
-- creates `.venv`,
-- installs Python dependencies from `requirements.txt`,
-- creates `.env` from `.env.example` when missing,
-- runs prerequisite checks.
+- creates `.venv` when it does not exist,
+- activates the virtual environment,
+- upgrades `pip`,
+- installs `requirements.txt`,
+- creates `.env` from `.env.example` when needed.
 
 ## 4. Configure `.env`
 
-Open `.env` and update the project value:
+Open `.env` in Cloud Shell Editor and update the project value:
 
 ```dotenv
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
 GOOGLE_GENAI_USE_ENTERPRISE=1
 GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
 GOOGLE_CLOUD_LOCATION=us-central1
@@ -109,38 +124,59 @@ ADK_HOST=0.0.0.0
 ADK_PORT=8000
 ```
 
-Do not commit `.env`.
+Use `GOOGLE_GENAI_USE_ENTERPRISE=1` only when required by your organization. Do not commit `.env`.
 
-## 5. Authenticate GitHub CLI
+## 5. Install OSV Scanner when missing
 
-The workflow needs GitHub access to clone repositories, push a remediation branch, and create a Draft Pull Request.
+Check first:
+
+```bash
+osv-scanner --version
+```
+
+If the command is missing, Cloud Shell users can install the current OSV Scanner v2 with Go:
+
+```bash
+go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
+export PATH="$PATH:$HOME/go/bin"
+osv-scanner --version
+```
+
+To keep the Go binary available in future Cloud Shell sessions:
+
+```bash
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+The workflow expects the `osv-scanner` executable to be available in the same terminal used to start ADK.
+
+## 6. Authenticate GitHub CLI
 
 ```bash
 gh auth login
 gh auth status
 ```
 
-The authenticated user must have write access to the target repository.
+The authenticated GitHub identity must be able to:
 
-## 6. Verify the environment
+- clone the target repository,
+- create and push a remediation branch,
+- create a Draft Pull Request.
+
+For a private target repository, verify access before running the workflow:
+
+```bash
+gh repo view OWNER/REPOSITORY
+```
+
+## 7. Run the prerequisite check
 
 ```bash
 bash scripts/check-prereqs.sh
 ```
 
-The script checks:
-
-- Python 3.11+
-- Git
-- Java and `javac`
-- Maven
-- OSV Scanner
-- GitHub CLI authentication
-- Google Application Default Credentials
-- `.env`
-- ADK installation
-
-Resolve any reported `MISSING` item before starting the workflow.
+Resolve every `MISSING` item before starting ADK. Review any `WARNING`, especially authentication or `.env` warnings.
 
 ---
 
@@ -154,15 +190,16 @@ Start ADK Web:
 bash scripts/run-adk-web.sh
 ```
 
-Then open Cloud Shell **Web Preview** for port `8000`.
+Keep the terminal running. In Cloud Shell, select **Web Preview** and open port `8000`.
 
-Select the `oss_remediation_agent` application and enter a prompt such as:
+In ADK Web:
+
+1. Select `oss_remediation_agent`.
+2. Enter a request such as:
 
 ```text
 Run the OSS remediation workflow for repository https://github.com/AILearner365/maven-multimodule-app using reference branch master.
 ```
-
-Keep the terminal running while using ADK Web.
 
 ## Option B: ADK CLI
 
@@ -179,46 +216,9 @@ reference branch: master
 
 ---
 
-# Required tools
+# What a successful run produces
 
-Cloud Shell already includes several tools, but verify all of the following:
-
-| Tool | Purpose |
-|---|---|
-| Python 3.11 or 3.12 | Runs Google ADK |
-| Git | Clones repositories and manages branches |
-| JDK | Builds the target Maven project |
-| Maven | Runs build, tests, and dependency analysis |
-| OSV Scanner | Detects OSS vulnerabilities |
-| GitHub CLI | Pushes branches and creates Draft PRs |
-| Google Cloud CLI | Authenticates Vertex AI |
-
-Verify manually:
-
-```bash
-python3 --version
-git --version
-java -version
-javac -version
-mvn -version
-osv-scanner --version
-gh --version
-adk --help
-```
-
-If OSV Scanner is missing, install it using the official OSV Scanner installation instructions for your environment, then confirm:
-
-```bash
-osv-scanner --version
-```
-
-The `osv-scanner` executable must be available on `PATH` in the same terminal used to run ADK.
-
----
-
-# Generated output
-
-Each workflow run creates a timestamped workspace:
+Each execution creates a timestamped workspace:
 
 ```text
 oss-remediation-workspaces/oss-remediation-YYYYMMDD-HHMMSS/
@@ -244,13 +244,9 @@ final/
   pull-request-publication.json
 ```
 
-`manifest.json` is the workflow index and records stage status, artifact paths, attempts, accepted patches, and Pull Request details.
+`manifest.json` is the workflow index. It records stage status, artifact paths, attempts, accepted patches, final status, and Pull Request details.
 
----
-
-# Expected successful result
-
-A successful run should show:
+A successful happy-path run should show:
 
 - baseline build succeeded,
 - vulnerability assessment succeeded,
@@ -261,66 +257,74 @@ A successful run should show:
 - accepted patch set was created,
 - Draft Pull Request was created.
 
-The final response includes the workspace path and Draft Pull Request URL.
+---
+
+# Before running against a new target repository
+
+The workflow intentionally stops when the target project does not build before remediation. Confirm the target repository can build in Cloud Shell with its required JDK, Maven profile, private repository credentials, and `settings.xml` configuration.
+
+Example:
+
+```bash
+git clone TARGET_REPOSITORY_URL /tmp/target-project
+cd /tmp/target-project
+mvn clean install
+```
+
+Return to the ADK repository before starting the workflow:
+
+```bash
+cd ~/oss-remediation-adk
+```
 
 ---
 
-# Common troubleshooting
+# Troubleshooting
 
 ## `adk: command not found`
 
-Activate the virtual environment:
-
 ```bash
+cd ~/oss-remediation-adk
 source .venv/bin/activate
-```
-
-Then verify:
-
-```bash
 python -m pip show google-adk
 adk --help
 ```
 
-## `osv-scanner: command not found`
-
-Install OSV Scanner and ensure it is available on `PATH`:
+If the package is missing, rerun:
 
 ```bash
+bash scripts/setup-local.sh
+```
+
+## `osv-scanner: command not found`
+
+```bash
+export PATH="$PATH:$HOME/go/bin"
 osv-scanner --version
 ```
 
-## GitHub authentication failure
+If it is still missing, repeat the OSV Scanner installation step above.
+
+## GitHub authentication fails
 
 ```bash
 gh auth login
 gh auth status
-```
-
-Also confirm repository access:
-
-```bash
 gh repo view OWNER/REPOSITORY
 ```
 
-## Google authentication failure
+## Google authentication fails
 
 ```bash
 gcloud auth application-default login
 gcloud auth application-default print-access-token
 ```
 
-Confirm that `.env` contains the correct Google Cloud project and location.
+Also confirm the project and location in `.env`.
 
 ## Baseline Maven build fails
 
-The workflow intentionally stops when the target repository does not build before remediation. Clone the target repository manually and run its normal Maven build first:
-
-```bash
-mvn clean install
-```
-
-Resolve project-specific JDK, Maven profile, `settings.xml`, or private artifact-repository requirements before rerunning the agent.
+The workflow does not remediate a repository with a broken baseline. Manually run the target project's normal build and resolve JDK, Maven profile, `settings.xml`, or private artifact-repository issues first.
 
 ## Port 8000 is already in use
 
@@ -328,27 +332,16 @@ Resolve project-specific JDK, Maven profile, `settings.xml`, or private artifact
 ADK_PORT=8001 bash scripts/run-adk-web.sh
 ```
 
-Open the Cloud Shell Web Preview for the same port.
+Then open Web Preview for port `8001`.
 
 ---
 
-# Developer validation
-
-Activate the environment:
+# Developer verification
 
 ```bash
+cd ~/oss-remediation-adk
 source .venv/bin/activate
-```
-
-Compile the Python package:
-
-```bash
 python -m compileall -q oss_remediation_agent
-```
-
-Run tests:
-
-```bash
 python -m unittest discover -s tests
 ```
 
@@ -358,5 +351,5 @@ python -m unittest discover -s tests
 
 - Never commit `.env`, API keys, tokens, or Maven credentials.
 - Use `~/.m2/settings.xml` for private Maven repository credentials.
-- The workflow creates Draft Pull Requests for human review; it does not merge them automatically.
+- The workflow creates Draft Pull Requests; it does not merge them automatically.
 - Review the generated PR and validation artifacts before marking the PR ready for review.
