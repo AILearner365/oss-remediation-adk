@@ -43,6 +43,20 @@ Architecture Decision Records use `decisions/ADR-*.md` and are not part of the n
 | ADRs | Significant architecture decisions, rationale, and consequences |
 | Engineering Roadmap | Document sequence, versions, branch policy, milestone status, and immediate next step |
 
+## Diagram convention
+
+Mermaid diagrams must remain readable in both GitHub light mode and dark mode.
+
+- Use the approved dark-canvas, high-contrast Mermaid initialization block used in the Business Workflow and System Architecture.
+- Use dark node fills, white text, strong borders, and light connecting lines.
+- Do not force a white diagram background.
+- Keep edge-label backgrounds dark and edge-label text light.
+- Use the same palette across flowcharts, state diagrams, and sequence diagrams.
+- Split diagrams when their size makes labels difficult to read at normal browser zoom.
+- Do not create a second diagram that redefines behavior already owned by an authoritative diagram.
+
+The dark canvas is intentional: it provides stable contrast whether the surrounding GitHub page is using a light or dark theme.
+
 ## Governance
 
 - Change information only in the document that owns it.
