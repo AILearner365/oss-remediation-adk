@@ -242,6 +242,29 @@ A successful happy-path run should show:
 
 ---
 
+## Required Runtime Tools Are External
+
+This repository does not download or bundle these binaries:
+
+- `git`
+- `java`
+- `mvn`
+- `osv-scanner`
+- `gh`
+
+They are treated as deterministic runtime tools and must be installed on the local machine, CI runner, or server/container where the agent runs.
+
+Recommended production runtime image should include:
+
+- Python 3.10+
+- Java/JDK
+- Maven
+- Git
+- OSV Scanner
+- GitHub CLI
+
+---
+
 # Troubleshooting
 
 ## `adk: command not found`
