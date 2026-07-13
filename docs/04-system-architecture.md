@@ -1,7 +1,7 @@
 # Enterprise OSS Remediation Platform
 ## System Architecture
 
-**Status:** Draft for review  
+**Status:** Baselined  
 **Version:** 0.4
 
 ---
@@ -496,7 +496,7 @@ An ADR does not override the Business Requirements, Capability Model, or Respons
 
 ## 18. Architecture Review Criteria
 
-The architecture is ready for baselining when reviewers confirm that:
+The architecture was baselined after confirming that:
 
 1. every workflow stage maps to components
 2. every component maps to approved capabilities and responsibilities
@@ -513,6 +513,6 @@ The architecture is ready for baselining when reviewers confirm that:
 
 ## 19. Next Step
 
-Review this architecture against the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow), [Capability Model](./02-capability-model.md), and [Platform Responsibility Model](./03-platform-responsibility-model.md).
+Create `05-detailed-design.md` using this architecture together with the [Business Remediation Workflow](./01-business-requirements.md#8-business-remediation-workflow), [Capability Model](./02-capability-model.md), [Platform Responsibility Model](./03-platform-responsibility-model.md), and [Engineering Principles](./engineering-principles.md).
 
-After approval, create `05-detailed-design.md` and the ADRs required before implementation.
+Create or sequence the ADRs required to settle design-blocking decisions before implementation.
