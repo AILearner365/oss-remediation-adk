@@ -18,7 +18,7 @@ This directory belongs to the documentation-only engineering-baseline branch. Th
 
 Supporting navigation and governance:
 
-- [Engineering Principles](./engineering-principles.md)
+- [Engineering Principles Reference Checklist](./engineering-principles.md)
 - [Engineering Roadmap and Documentation Tracker](./00-engineering-roadmap.md)
 - [Architecture Decision Record Guidance](../decisions/README.md)
 
@@ -38,7 +38,7 @@ Architecture Decision Records use `decisions/ADR-*.md` and are not part of the n
 | Capability Model | Architecture-neutral capabilities |
 | Platform Responsibility Model | Primary and supporting capability ownership |
 | System Architecture | Architectural components, boundaries, integrations, state ownership, and major interactions |
-| Engineering Principles | Cross-cutting implementation and review guidance without redefining authoritative documents |
+| Engineering Principles | Cross-cutting review checklist that links to authoritative sources; it does not redefine their rules |
 | Detailed Design | Agent, tool, API, state, data, and failure behavior |
 | Implementation Roadmap | Delivery slices and implementation order |
 | Traceability Matrix | Requirement-to-code-to-test evidence |
