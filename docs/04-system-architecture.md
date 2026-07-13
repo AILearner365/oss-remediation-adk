@@ -2,7 +2,7 @@
 ## System Architecture
 
 **Status:** Draft for review  
-**Version:** 0.3
+**Version:** 0.4
 
 ---
 
@@ -186,6 +186,7 @@ flowchart LR
 - Components may return evidence directly or return an authoritative evidence reference.
 - Planner must not call GitHub or modify files directly.
 - Change Executor must not invoke Validation directly or determine completion state.
+- Validation must not invoke Vulnerability Intelligence directly; it requests revalidation through the Orchestrator.
 - Validation must not change policy or remediation plans.
 - Reporting must not invoke Maven, scanners, or repository mutation operations.
 - Workspace Manager must not invoke LLMs or deterministic analysis tools to create evidence.
@@ -262,7 +263,7 @@ Exact enums, persistence fields, timeouts, and transition APIs belong to Detaile
 | Maven Analysis Engine | Repository snapshot, in-scope findings | Maven structure and origin evidence | Remediation selection |
 | Remediation Planner | Policy, findings, Maven evidence, failed plans, failure evidence | Candidate plans, selected plan, revised plan, rationale | File mutation, completion state |
 | Change Executor | Approved plan and repository snapshot | Applied project-file change set | Validation approval, next-stage control |
-| Validation and Outcome Engine | Changed or unchanged state, validation configuration, re-scan evidence | Validation results and completion state | Policy or plan changes |
+| Validation and Outcome Engine | Changed or unchanged state, validation configuration, revalidation evidence | Validation results and completion state | Policy or plan changes, direct provider orchestration |
 | Evidence and Reporting | Authoritative evidence references | Reports and explanations | Workflow or repository state |
 | Review Interface | Reports, workspace state | Questions, feedback, iteration request | Direct workflow execution |
 | Security and Audit | Identity, action context, security events | Authorization decisions and audit records | Business completion state |
@@ -308,9 +309,11 @@ sequenceDiagram
     alt Safe plan available
         Orchestrator->>Change: Apply approved plan
         Change-->>Orchestrator: Changed project state
-        Orchestrator->>Validation: Validate changed state
-        Validation->>Vulnerability: Request post-change revalidation
-        Vulnerability-->>Validation: Revalidation evidence
+        Orchestrator->>Validation: Run build, tests, and configured validations
+        Validation-->>Orchestrator: Non-vulnerability validation evidence
+        Orchestrator->>Vulnerability: Revalidate changed state
+        Vulnerability-->>Orchestrator: Post-change vulnerability evidence
+        Orchestrator->>Validation: Supply revalidation evidence and determine outcome
         Validation-->>Orchestrator: Completion state and validation evidence
         Orchestrator->>Source: Deliver according to policy
     else No safe plan available
@@ -467,7 +470,7 @@ Recovery must preserve completed evidence, identify the failed stage, and resume
 | Project analysis | Maven Analysis Engine, coordinated by Orchestrator | RESP-06, RESP-01 |
 | Remediation decision | Remediation Planner, coordinated by Orchestrator | RESP-07, RESP-01 |
 | Change execution | Change Executor, coordinated by Orchestrator; Source-Control Gateway supports | RESP-08; RESP-01 and RESP-02 supporting |
-| Validation | Validation Engine, coordinated by Orchestrator; Vulnerability Intelligence supports | RESP-09; RESP-01 and RESP-05 supporting |
+| Validation | Validation Engine, coordinated by Orchestrator; Vulnerability Intelligence supplies revalidation evidence through the Orchestrator | RESP-09; RESP-01 and RESP-05 supporting |
 | Completion | Validation Engine; Orchestrator consumes | RESP-09; RESP-01 supporting |
 | Delivery | Source-Control Gateway and Reporting, coordinated by Orchestrator | RESP-02, RESP-10; RESP-01 supporting |
 | Retention | Workspace Manager, Security and Audit | RESP-04, RESP-11 |
@@ -497,7 +500,7 @@ The architecture is ready for baselining when reviewers confirm that:
 
 1. every workflow stage maps to components
 2. every component maps to approved capabilities and responsibilities
-3. every stage transition is Orchestrator-mediated
+3. every stage transition, including vulnerability revalidation, is Orchestrator-mediated
 4. no-safe-plan and failure-revision paths are represented
 5. dependency direction and prohibited calls are clear
 6. architectural invariants are testable
