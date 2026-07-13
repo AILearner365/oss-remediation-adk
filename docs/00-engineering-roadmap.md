@@ -16,7 +16,7 @@ Each document has one authoritative responsibility:
 - platform capabilities: [Capability Model](./02-capability-model.md)
 - capability ownership: [Platform Responsibility Model](./03-platform-responsibility-model.md)
 - architecture components and interactions: [System Architecture](./04-system-architecture.md)
-- cross-cutting delivery guidance: [Engineering Principles](./engineering-principles.md)
+- cross-cutting review checklist: [Engineering Principles Reference Checklist](./engineering-principles.md)
 - detailed behavior and contracts: `05-detailed-design.md`
 - delivery order: `06-implementation-roadmap.md`
 - verification evidence: `07-traceability-matrix.md`
@@ -54,7 +54,7 @@ Implementation begins on a separate development branch after the applicable base
 
 Supporting governance documents outside the numbered sequence:
 
-- [`engineering-principles.md`](./engineering-principles.md) — baselined v1.0
+- [`engineering-principles.md`](./engineering-principles.md) — baselined checklist v1.1
 - `decisions/ADR-*.md` — created as significant decisions are resolved
 
 ---
@@ -83,12 +83,12 @@ Supporting governance documents outside the numbered sequence:
 
 The architecture preserves the approved workflow, responsibility ownership, centralized orchestration, no-safe-plan handling, failure-informed revision, explicit state ownership, and bounded LLM usage.
 
-### Supporting Baseline — Engineering Principles
+### Supporting Baseline — Engineering Principles Reference Checklist
 
 **Deliverable:** [`engineering-principles.md`](./engineering-principles.md)  
-**Status:** Completed and baselined as version 1.0.
+**Status:** Completed and baselined as version 1.1.
 
-The principles provide a concise cross-cutting review reference without redefining authoritative requirements or architecture.
+The checklist provides concise review questions and links to authoritative requirements and architecture without redefining their rules.
 
 ### Milestone 5 — Detailed Design
 
@@ -139,7 +139,7 @@ Create `05-detailed-design.md` using:
 2. the [Capability Model](./02-capability-model.md)
 3. the [Platform Responsibility Model](./03-platform-responsibility-model.md)
 4. the [System Architecture](./04-system-architecture.md)
-5. the [Engineering Principles](./engineering-principles.md)
+5. the [Engineering Principles Reference Checklist](./engineering-principles.md)
 
 Create the ADRs required to settle design-blocking decisions before implementation. Detailed Design must reference authoritative sources rather than restating or redefining their content.
 
