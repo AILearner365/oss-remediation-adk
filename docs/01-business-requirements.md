@@ -165,7 +165,7 @@ Different users may work concurrently on different repositories, different branc
 The following activity flow represents the approved business journey. It intentionally describes the user-facing remediation lifecycle without defining system components, agents, services, storage, APIs, or deployment choices.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryColor":"#dbeafe","primaryTextColor":"#111827","primaryBorderColor":"#1d4ed8","secondaryColor":"#dcfce7","secondaryTextColor":"#111827","tertiaryColor":"#fef3c7","tertiaryTextColor":"#111827","lineColor":"#334155","textColor":"#111827","edgeLabelBackground":"#ffffff"}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#1e293b","primaryTextColor":"#f8fafc","primaryBorderColor":"#93c5fd","secondaryColor":"#243447","secondaryTextColor":"#f8fafc","secondaryBorderColor":"#a7f3d0","tertiaryColor":"#312e81","tertiaryTextColor":"#f8fafc","tertiaryBorderColor":"#c4b5fd","lineColor":"#cbd5e1","textColor":"#f8fafc","edgeLabelBackground":"#0f172a","edgeLabelTextColor":"#f8fafc"}}}%%
 flowchart TD
     A[Start remediation] --> B{New remediation or existing workspace?}
     B -->|New| C[Create remediation workspace]
