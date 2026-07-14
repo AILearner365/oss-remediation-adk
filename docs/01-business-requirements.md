@@ -2,7 +2,7 @@
 ## Business Requirements Baseline
 
 **Status:** Baselined  
-**Version:** 1.5  
+**Version:** 1.6  
 **Repository:** `AILearner365/oss-remediation-adk`  
 **Baseline branch:** `docs/srs-requirements-foundation`
 
@@ -192,19 +192,29 @@ flowchart TD
     O --> P[Classify findings as in scope or out of scope]
 
     P --> Q[Analyze Maven project, dependency origins and control points]
-    Q --> R[Determine remediation options]
-    R --> S{Safe option available within policy and boundary?}
-    S -->|Yes| T[Select and apply permitted remediation]
-    T --> U[Build, test and revalidate vulnerabilities]
-    U --> V{Validation and remediation outcome}
-    V -->|All in-scope findings resolved| W[Fully Remediated]
-    V -->|Safe subset resolved| X[Partially Remediated]
-    V -->|No acceptable automated outcome| Y[Human Review Required]
-    S -->|No| Y
+    Q --> R[Generate remediation candidates]
+    R --> S[Evaluate and compare candidates]
+    S --> T{Viable untried candidate available within policy and boundary?}
+    T -->|Yes| U[Select safest viable candidate]
+    U --> V[Apply permitted remediation]
+    V --> W[Build, test and revalidate vulnerabilities]
+    W --> X{Candidate passes required validation?}
 
-    W --> AA[Deliver fully remediated outcome according to policy]
-    X --> AB[Deliver partial remediation according to policy]
-    Y --> AC[Present findings, attempts, rejected options, risks and next actions]
+    X -->|No| Y[Record failed candidate, validation evidence and changed assumptions]
+    Y --> YA{Revision or another safe candidate remains?}
+    YA -->|Yes| S
+    YA -->|No| HR[Human Review Required]
+    T -->|No| HR
+
+    X -->|Yes| Z1{All in-scope findings resolved?}
+    Z1 -->|Yes| FR[Fully Remediated]
+    Z1 -->|No| Z2{Additional viable candidate can safely address remaining findings?}
+    Z2 -->|Yes| S
+    Z2 -->|No| PR[Partially Remediated]
+
+    FR --> AA[Deliver fully remediated outcome according to policy]
+    PR --> AB[Deliver partial remediation according to policy]
+    HR --> AC[Present findings, attempts, rejected options, risks and next actions]
 
     AA --> AD[Developer or reviewer evaluates outcome]
     AB --> AD
@@ -228,6 +238,20 @@ The assessment step must work for both cases:
 
 The platform must not blindly reuse stale conclusions or discard relevant history.
 
+### Failure-informed revision rule
+
+A candidate that is permitted by policy and appears viable before execution is not considered a safe validated remediation until all required validations pass.
+
+When an attempted candidate fails or produces an unacceptable result, the platform must:
+
+- retain the candidate, changes, validation results, failure reasons, and affected assumptions as evidence
+- avoid repeating the same failed candidate unless relevant context or assumptions have changed
+- reassess and compare the remaining candidates using the new evidence
+- revise the candidate or select another viable candidate when safe progress remains possible
+- stop automated attempts and require human review when no safe viable candidate remains or continuing would violate policy, remediation boundary, or retry controls
+
+A Partially Remediated outcome may be assigned only after all applied changes pass their required validations and no additional viable candidate can safely address the remaining in-scope findings under the current constraints.
+
 ### Business stage summary
 
 | Business stage | Purpose | Information produced or retained |
@@ -241,10 +265,11 @@ The platform must not blindly reuse stale conclusions or discard relevant histor
 | Assess current and retained evidence | Evaluate current findings and any relevant prior evidence | Current facts, changed assumptions, still-relevant failures, invalidated conclusions, reusable evidence |
 | Scope classification | Decide which findings are included in the iteration | In-scope and out-of-scope findings with reasons |
 | Project analysis | Understand how vulnerable components enter and are controlled | Maven modules, dependency origins, control points, impacted modules |
-| Remediation decision | Select the safest practical option | Candidate options, selected option, rejected alternatives, risk rationale |
+| Candidate generation and comparison | Generate, evaluate, compare, and rank viable remediation candidates | Candidate options, policy and boundary checks, risk comparison, selected candidate, rejected alternatives |
 | Change execution | Apply only permitted modifications | Changed files, version changes, boundary-compliance evidence |
 | Validation | Verify technical acceptability | Build, test, vulnerability revalidation, conflicts, regressions |
-| Completion | Assign the business outcome | Fully Remediated, Partially Remediated, or Human Review Required |
+| Failure-informed revision | Learn from an unsuccessful candidate and determine whether safe automated progress remains possible | Failed candidate, failure evidence, changed assumptions, revised ranking, retry or stop decision |
+| Completion | Assign the business outcome only after applicable attempts and validations conclude | Fully Remediated, Partially Remediated, or Human Review Required |
 | Delivery | Deliver the outcome according to policy | Branch and pull request when required, reports, evidence, unresolved findings, residual risk |
 | Retention | Preserve the complete remediation record | Inputs, decisions, attempts, validations, review history, current outcome |
 
