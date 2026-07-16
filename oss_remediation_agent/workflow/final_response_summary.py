@@ -459,7 +459,7 @@ def _internal_failure_next_step(internal_status: str) -> str:
 
 def _internal_failure_planning_assessment(internal_status: str, patch_plan: dict[str, Any]) -> str:
     if internal_status in {"CHECKOUT_FAILED", "SCANNING_FAILED", "PROJECT_ANALYSIS_FAILED"}:
-        return "Not applicable; the workflow failed before remediation planning could safely complete."
+        return "Not applicable"
     if internal_status == "PLANNING_CONSTRAINT_VIOLATION":
         return "The generated plan must be corrected because it violated workflow constraints such as allowed files, change types, or automation scope."
     return _planning_assessment_from_counts(patch_plan)
