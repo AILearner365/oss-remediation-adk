@@ -50,7 +50,8 @@ def run_repository_preparation_stage(
     result = orchestrator.checkout_and_baseline(repository_url, reference_branch)
     progress = _progress_from_manifest(orchestrator.manifest_store.load(), orchestrator.workspace.root)
     if not progress:
-        progress = [{"step": "baseline_build", "status": result.get("status")}]
+        failed_step = "repository_checkout" if result.get("failureCode") == "CHECKOUT_FAILED" else "baseline_build"
+        progress = [{"step": failed_step, "status": result.get("status")}]
     if result.get("status") != "SUCCESS":
         message = (
             "Workflow stopped because the repository checkout failed."
