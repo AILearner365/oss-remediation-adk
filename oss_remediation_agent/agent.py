@@ -577,15 +577,20 @@ def _final_summary_message(manifest: dict[str, Any]) -> str:
 
 
 def _capture_repository_preparation_status(
-    tool: Any,
-    args: dict[str, Any],
-    context: Any,
-    tool_response: dict[str, Any],
+    tool: Any = None,
+    args: dict[str, Any] | None = None,
+    context: Any = None,
+    tool_context: Any = None,
+    tool_response: dict[str, Any] | None = None,
+    **_kwargs: Any,
 ) -> None:
-    """Persist the Stage 1 outcome for deterministic workflow routing."""
+    """Persist Stage 1 outcome across ADK callback signature variants."""
     del tool, args
-    context.state[_BASELINE_FAILURE_STATE_KEY] = tool_response.get("status") != "SUCCESS"
-    context.state[_REPOSITORY_PREPARATION_RESULT_STATE_KEY] = tool_response
+    active_context = tool_context or context
+    if active_context is None or not isinstance(tool_response, dict):
+        return None
+    active_context.state[_BASELINE_FAILURE_STATE_KEY] = tool_response.get("status") != "SUCCESS"
+    active_context.state[_REPOSITORY_PREPARATION_RESULT_STATE_KEY] = tool_response
 
 
 def _route_after_repository_preparation(ctx: Any) -> None:
