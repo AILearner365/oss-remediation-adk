@@ -463,6 +463,7 @@ def _infer_artifact_type(path: str) -> str:
     mapping = {
         "manifest.json": "MANIFEST",
         "baseline-build-result.json": "BASELINE_BUILD_RESULT",
+        "spring-boot-run-result.json": "BASELINE_SPRING_BOOT_RUN_RESULT",
         "vulnerability-assessment-report.json": "VULNERABILITY_ASSESSMENT_REPORT",
         "project-analyzer-report.json": "PROJECT_ANALYZER_REPORT",
         "remediation-planning-context.json": "REMEDIATION_PLANNING_CONTEXT",

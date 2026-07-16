@@ -11,7 +11,7 @@ from oss_remediation_agent.agents.remediation_outcome_analysis_agent import (
 )
 from oss_remediation_agent.agents.remediation_planning_agent import build_planning_context, persist_planning_agent_output
 from oss_remediation_agent.policies import RemediationPolicy
-from oss_remediation_agent.tools.baseline_build_tool import run_baseline_build
+from oss_remediation_agent.tools.baseline_build_tool import run_baseline_build, run_baseline_spring_boot
 from oss_remediation_agent.tools.generic_patch_apply_tool import apply as apply_patch_plan
 from oss_remediation_agent.tools.generic_patch_apply_tool import dry_run as dry_run_patch_plan
 from oss_remediation_agent.tools.osv_scanner_tool import generate_vulnerability_assessment
@@ -62,7 +62,7 @@ class WorkflowOrchestrator:
         baseline = self.checkout_and_baseline(repository_url, reference_branch)
         self._record(progress, "checkout_and_baseline", baseline)
         if baseline.get("status") != "SUCCESS":
-            return self.runtime_summary(progress, "Workflow stopped because baseline build did not pass.")
+            return self.runtime_summary(progress, "Workflow stopped because repository preparation did not pass.")
 
         assessment = self.run_assessment()
         self._record(progress, "vulnerability_assessment", assessment)
@@ -168,13 +168,25 @@ class WorkflowOrchestrator:
             output_path=str(self.workspace.root / "baseline" / "baseline-build-result.json"),
             log_file=str(self.workspace.root / "baseline" / "baseline-build.log"),
         )
-        manifest["status"] = "BASELINE_BUILD_PASSED" if baseline["status"] == "SUCCESS" else "BASELINE_BUILD_FAILED"
         manifest["baseline"] = {
             "repositoryPath": repository_path,
             "baselineBuildResult": "baseline/baseline-build-result.json",
         }
+        if baseline["status"] != "SUCCESS":
+            manifest["status"] = "BASELINE_BUILD_FAILED"
+            self.manifest_store.save(manifest)
+            return baseline
+
+        spring_boot = run_baseline_spring_boot(
+            repository_path,
+            workflow_id=manifest["workflowId"],
+            output_path=str(self.workspace.root / "baseline" / "spring-boot-run-result.json"),
+            log_file=str(self.workspace.root / "baseline" / "spring-boot-run.log"),
+        )
+        manifest["baseline"]["springBootRunResult"] = "baseline/spring-boot-run-result.json"
+        manifest["status"] = "BASELINE_BUILD_PASSED" if spring_boot["status"] == "SUCCESS" else "BASELINE_SPRING_BOOT_RUN_FAILED"
         self.manifest_store.save(manifest)
-        return baseline
+        return spring_boot
 
     def run_assessment(self) -> dict:
         manifest = self.manifest_store.load()
@@ -845,6 +857,8 @@ class WorkflowOrchestrator:
             return "Review the final PR summary artifact before creating a pull request."
         if status == "BASELINE_BUILD_FAILED":
             return "Fix the repository baseline before attempting remediation."
+        if status == "BASELINE_SPRING_BOOT_RUN_FAILED":
+            return "Fix the Spring Boot startup failure before attempting remediation."
         if status == "FAILED_MAX_ATTEMPTS":
             return "Review outcome-analysis artifacts and decide whether manual remediation is required."
         if status == "MANUAL_REVIEW_REQUIRED":

@@ -15,7 +15,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     """Policy-aware Phase 6 finalization for PR summary and publication."""
 
     WORKFLOW_STAGES: list[dict[str, Any]] = [
-        {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build"]},
+        {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build", "Spring Boot Startup"]},
         {"name": "Assessment", "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"]},
         {"name": "Remediation", "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"]},
         {"name": "Validation", "steps": ["Validation", "Accepted Patch Set"]},
@@ -38,6 +38,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         "FAILED",
         "CHECKOUT_FAILED",
         "BASELINE_BUILD_FAILED",
+        "BASELINE_SPRING_BOOT_RUN_FAILED",
         "SCANNING_FAILED",
         "PROJECT_ANALYSIS_FAILED",
         "PATCH_DRY_RUN_FAILED",
@@ -52,11 +53,13 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         "PR_CREATION_FAILED",
         "VALIDATION_FAILED",
         "BASELINE_BUILD_FAILED",
+        "BASELINE_SPRING_BOOT_RUN_FAILED",
         "MANUAL_REVIEW_REQUIRED",
     }
 
     ARTIFACT_LABELS: dict[tuple[str, str], str] = {
         ("baseline", "baselineBuildResult"): "Baseline Build Result",
+        ("baseline", "springBootRunResult"): "Spring Boot Startup Result",
         ("baseline", "vulnerabilityAssessmentReport"): "Vulnerability Assessment Report",
         ("baseline", "projectAnalyzerReport"): "Project Analyzer Report",
         ("planning", "lastDecision"): "Latest Planning Decision",
@@ -423,11 +426,13 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     @staticmethod
     def _display_steps_for_internal_step(internal_step: str) -> list[str]:
         if internal_step == "checkout_and_baseline":
-            return ["Repository Checkout", "Baseline Build"]
+            return ["Repository Checkout", "Baseline Build", "Spring Boot Startup"]
         if internal_step == "repository_checkout":
             return ["Repository Checkout"]
         if internal_step == "baseline_build":
             return ["Baseline Build"]
+        if internal_step == "spring_boot_run":
+            return ["Spring Boot Startup"]
         if internal_step == "vulnerability_assessment":
             return ["OSS Vulnerability Assessment"]
         if internal_step == "project_analysis":
@@ -505,6 +510,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             "PR_CREATION_FAILED": "PR Creation Failed",
             "VALIDATION_FAILED": "Validation Failed",
             "BASELINE_BUILD_FAILED": "Baseline Build Failed",
+            "BASELINE_SPRING_BOOT_RUN_FAILED": "Spring Boot Startup Failed",
             "MANUAL_REVIEW_REQUIRED": "Manual Review Required",
         }
         return labels.get(display_status, display_status.replace("_", " ").title())

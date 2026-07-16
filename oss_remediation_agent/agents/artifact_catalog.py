@@ -37,6 +37,12 @@ def build_artifact_catalog(workspace_root: str | Path, manifest: dict[str, Any],
             "BaselineBuildTool",
             ["build status", "command", "exit code", "log reference", "failure summary"],
         ),
+        "springBootRunResult": (
+            "BASELINE_SPRING_BOOT_RUN_RESULT",
+            "Spring Boot startup smoke-check result before remediation.",
+            "BaselineBuildTool",
+            ["startup status", "command", "exit code", "startup window", "log reference", "failure summary"],
+        ),
         "vulnerabilityAssessmentReport": (
             "VULNERABILITY_ASSESSMENT_REPORT",
             "OSV vulnerability assessment for the baseline repository.",
@@ -104,6 +110,9 @@ def select_relevant_artifacts(catalog: dict[str, Any], manifest: dict[str, Any],
 
     if status == "BASELINE_BUILD_FAILED":
         add(catalog.get("baseline", []), "BASELINE_BUILD_RESULT")
+        return selected
+    if status == "BASELINE_SPRING_BOOT_RUN_FAILED":
+        add(catalog.get("baseline", []), "BASELINE_BUILD_RESULT", "BASELINE_SPRING_BOOT_RUN_RESULT")
         return selected
 
     add(catalog.get("baseline", []), "VULNERABILITY_ASSESSMENT_REPORT", "PROJECT_ANALYZER_REPORT")

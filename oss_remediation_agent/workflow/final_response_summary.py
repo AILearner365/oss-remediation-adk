@@ -45,6 +45,7 @@ def build_final_response_summary(
     patch_plan = _read_artifact(workspace, latest_attempt.get("patchPlan") or latest_attempt.get("planningDecision") or (manifest.get("planning") or {}).get("lastDecision"))
     validation = _read_artifact(workspace, latest_attempt.get("validationResult"))
     baseline_build = _read_artifact(workspace, baseline.get("baselineBuildResult"))
+    spring_boot_run = _read_artifact(workspace, baseline.get("springBootRunResult"))
     vulnerability_assessment = _read_artifact(workspace, baseline.get("vulnerabilityAssessmentReport"))
     publication = _read_artifact(workspace, final.get("pullRequestPublication"))
     pr_summary = _read_artifact(workspace, final.get("prSummary"))
@@ -62,6 +63,8 @@ def build_final_response_summary(
         return _pr_creation_failed_summary(manifest, publication, validation, pr_summary, workspace, fallback_message)
     if status == "BASELINE_BUILD_FAILED":
         return _baseline_build_failed_summary(manifest, baseline_build, workspace, fallback_message)
+    if status == "BASELINE_SPRING_BOOT_RUN_FAILED":
+        return _baseline_spring_boot_run_failed_summary(manifest, spring_boot_run, workspace, fallback_message)
     if status == "MANUAL_REVIEW_REQUIRED":
         return _manual_review_required_summary(manifest, outcome, patch_plan, pr_summary, workspace, fallback_message)
     return _generic_summary(manifest, workspace, display_status, fallback_message)
@@ -245,6 +248,45 @@ def _baseline_build_failure_reason(baseline_build: dict[str, Any], fallback_mess
     if exit_code is not None:
         return f"Baseline Maven build exited with code {exit_code}."
     return fallback_message or "Baseline build failed before remediation could safely proceed."
+
+
+def _baseline_spring_boot_run_failed_summary(
+    manifest: dict[str, Any],
+    spring_boot_run: dict[str, Any],
+    workspace: Path,
+    fallback_message: str,
+) -> dict[str, Any]:
+    reason = _spring_boot_run_failure_reason(spring_boot_run, fallback_message)
+    return _summary_model(
+        workflow_outcome="Spring Boot Startup Failed",
+        outcome_summary=(
+            "The Maven baseline build passed, but `mvn spring-boot:run` did not remain running during the POC startup window, "
+            "so automated remediation was not attempted. "
+            f"Failure reason: {reason}"
+        ),
+        root_cause=reason,
+        planning_assessment="Not applicable; remediation planning requires a runnable baseline and was not the cause of this failure.",
+        evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
+        recommended_next_step="Fix the Spring Boot startup failure first, then rerun the OSS remediation workflow from a clean baseline.",
+        pr_status="Draft PR was not created because remediation cannot proceed without a successful baseline startup check.",
+    )
+
+
+def _spring_boot_run_failure_reason(spring_boot_run: dict[str, Any], fallback_message: str) -> str:
+    """Return a compact, artifact-backed reason for a failed startup check."""
+    explicit_reason = spring_boot_run.get("failureSummary") or spring_boot_run.get("failureCode")
+    if explicit_reason:
+        return str(explicit_reason)
+
+    excerpt = str(spring_boot_run.get("logExcerpt") or "")
+    error_lines = [line.strip() for line in excerpt.splitlines() if "[ERROR]" in line and "[Help" not in line]
+    if error_lines:
+        return " ".join(error_lines[:3])
+
+    exit_code = spring_boot_run.get("exitCode")
+    if exit_code is not None:
+        return f"`mvn spring-boot:run` exited with code {exit_code} before the startup window completed."
+    return fallback_message or "`mvn spring-boot:run` did not complete the baseline startup check."
 
 
 def _manual_review_required_summary(
@@ -620,6 +662,7 @@ def _evidence_reviewed(manifest: dict[str, Any], workspace: Path, include_outcom
     planning = manifest.get("planning") or {}
     final = manifest.get("final") or {}
     add("Baseline Build Result", baseline.get("baselineBuildResult"))
+    add("Spring Boot Startup Result", baseline.get("springBootRunResult"))
     add("Vulnerability Assessment Report", baseline.get("vulnerabilityAssessmentReport"))
     add("Project Analyzer Report", baseline.get("projectAnalyzerReport"))
     add("Planning Context", planning.get("context"))

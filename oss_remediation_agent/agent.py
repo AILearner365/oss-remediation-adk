@@ -27,7 +27,7 @@ def run_oss_remediation_workflow(
     """Run the full workflow through the deterministic, failure-gated orchestrator.
 
     This direct entry point remains available for non-ADK callers. The
-    orchestrator stops before assessment when the baseline build fails.
+    orchestrator stops before assessment when repository preparation fails.
     """
     workspace = workspace_root or _default_workspace_root()
     orchestrator = _orchestrator(workspace, policy_path)
@@ -44,7 +44,7 @@ def run_repository_preparation_stage(
     workspace_root: str | None = None,
     policy_path: str | None = None,
 ) -> dict[str, Any]:
-    """Stage 1: checkout the repository and capture the baseline build."""
+    """Stage 1: checkout, build, and startup-check the baseline repository."""
     workspace = workspace_root or _default_workspace_root()
     orchestrator = _orchestrator(workspace, policy_path)
     result = orchestrator.checkout_and_baseline(repository_url, reference_branch)
@@ -55,7 +55,11 @@ def run_repository_preparation_stage(
         message = (
             "Workflow stopped because the repository checkout failed."
             if result.get("failureCode") == "CHECKOUT_FAILED"
-            else "Workflow stopped because the baseline build did not pass."
+            else (
+                "Workflow stopped because Spring Boot did not remain running during the baseline startup check."
+                if str(result.get("failureCode") or "").startswith("SPRING_BOOT_RUN")
+                else "Workflow stopped because the baseline build did not pass."
+            )
         )
         summary = orchestrator.runtime_summary(progress, message)
         summary["stageResult"] = result
@@ -405,6 +409,9 @@ def _progress_from_manifest(manifest: dict[str, Any], workspace_root: str | Path
     if baseline.get("baselineBuildResult"):
         progress.append(_artifact_progress("baseline_build", workspace, baseline.get("baselineBuildResult")))
 
+    if baseline.get("springBootRunResult"):
+        progress.append(_artifact_progress("spring_boot_run", workspace, baseline.get("springBootRunResult")))
+
     if baseline.get("vulnerabilityAssessmentReport"):
         progress.append(_artifact_progress("vulnerability_assessment", workspace, baseline.get("vulnerabilityAssessmentReport")))
 
@@ -555,6 +562,8 @@ def _user_facing_status(manifest: dict[str, Any]) -> str:
         return "PR_CREATION_FAILED"
     if status == "BASELINE_BUILD_FAILED":
         return "BASELINE_BUILD_FAILED"
+    if status == "BASELINE_SPRING_BOOT_RUN_FAILED":
+        return "BASELINE_SPRING_BOOT_RUN_FAILED"
     if status in {"VALIDATION_FAILED", "PATCH_DRY_RUN_FAILED", "PATCH_APPLICATION_FAILED"}:
         return "VALIDATION_FAILED"
     if status in {"MANUAL_REVIEW_REQUIRED", "OUTCOME_ANALYSIS_COMPLETE", "FAILED_MAX_ATTEMPTS", "PLANNING_CONSTRAINT_VIOLATION"}:
@@ -570,6 +579,8 @@ def _final_summary_message(manifest: dict[str, Any]) -> str:
         return "Validation completed, but Draft PR creation failed. Review final delivery artifacts."
     if status == "BASELINE_BUILD_FAILED":
         return "Baseline build failed. Automated remediation should not continue until the baseline build issue is reviewed."
+    if status == "BASELINE_SPRING_BOOT_RUN_FAILED":
+        return "Spring Boot startup check failed. Automated remediation should not continue until the baseline startup issue is reviewed."
     if status == "VALIDATION_FAILED":
         return "Validation failed after remediation attempt. No Draft PR was created because no validated accepted patch set is available."
     if status == "MANUAL_REVIEW_REQUIRED":
@@ -623,7 +634,7 @@ def _baseline_failure_response(ctx: Any) -> types.Content:
 repository_preparation_agent = LlmAgent(
     name="repository_preparation_agent",
     model="gemini-2.5-flash",
-    description="Executes repository checkout and baseline build preparation.",
+    description="Executes repository checkout, baseline build, and Spring Boot startup preparation.",
     instruction=(
         "Run Stage 1. Call run_repository_preparation_stage using the repository URL and reference branch from the user request. "
         "Return the tool result only."
