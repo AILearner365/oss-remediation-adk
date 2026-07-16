@@ -206,17 +206,45 @@ def _pr_creation_failed_summary(
 
 
 def _baseline_build_failed_summary(manifest: dict[str, Any], baseline_build: dict[str, Any], workspace: Path, fallback_message: str) -> dict[str, Any]:
-    summary = (baseline_build.get("summary") or {}).get("failureSummary") if isinstance(baseline_build.get("summary"), dict) else None
-    summary = summary or baseline_build.get("failureSummary") or fallback_message or "Baseline build failed before remediation could safely proceed."
+    reason = _baseline_build_failure_reason(baseline_build, fallback_message)
     return _summary_model(
         workflow_outcome="Baseline Build Failed",
-        outcome_summary="The repository could not produce a clean baseline build, so automated remediation was not attempted.",
-        root_cause=str(summary),
+        outcome_summary=(
+            "The repository could not produce a clean baseline build, so automated remediation was not attempted. "
+            f"Failure reason: {reason}"
+        ),
+        root_cause=reason,
         planning_assessment="Not applicable; remediation planning requires a stable baseline and was not the cause of this failure.",
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Fix the baseline build failure first, then rerun the OSS remediation workflow from a clean baseline.",
         pr_status="Draft PR was not created because remediation cannot proceed without a successful baseline build.",
     )
+
+
+def _baseline_build_failure_reason(baseline_build: dict[str, Any], fallback_message: str) -> str:
+    """Return a compact, artifact-backed reason for a failed baseline build."""
+    summary = baseline_build.get("summary") if isinstance(baseline_build.get("summary"), dict) else {}
+    explicit_reason = summary.get("failureSummary") or baseline_build.get("failureSummary")
+    if explicit_reason:
+        return str(explicit_reason)
+
+    excerpt = str(baseline_build.get("logExcerpt") or "")
+    actionable_lines = [
+        line.strip()
+        for line in excerpt.splitlines()
+        if "Failed to execute goal" in line or ("Rule " in line and " failed" in line)
+    ]
+    if actionable_lines:
+        return " ".join(actionable_lines[:3])
+
+    error_lines = [line.strip() for line in excerpt.splitlines() if "[ERROR]" in line and "[Help" not in line]
+    if error_lines:
+        return " ".join(error_lines[:3])
+
+    exit_code = baseline_build.get("exitCode")
+    if exit_code is not None:
+        return f"Baseline Maven build exited with code {exit_code}."
+    return fallback_message or "Baseline build failed before remediation could safely proceed."
 
 
 def _manual_review_required_summary(

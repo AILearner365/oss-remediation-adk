@@ -6,10 +6,14 @@ from pathlib import Path
 from typing import Any
 
 from google.adk.agents.llm_agent import LlmAgent
-from google.adk.agents.sequential_agent import SequentialAgent
+from google.adk.workflow import FunctionNode, START, Workflow
 
 from oss_remediation_agent.policies import RemediationPolicy
 from oss_remediation_agent.workflow.phase6_patch_progress_orchestrator import Phase6PatchProgressOrchestrator
+
+
+_BASELINE_FAILURE_STATE_KEY = "oss_remediation_baseline_build_failed"
+_REPOSITORY_PREPARATION_RESULT_STATE_KEY = "oss_remediation_repository_preparation_result"
 
 
 def run_oss_remediation_workflow(
@@ -19,11 +23,10 @@ def run_oss_remediation_workflow(
     planning_agent_output: str | dict[str, Any] | None = None,
     policy_path: str | None = None,
 ) -> dict[str, Any]:
-    """Run the full OSS remediation workflow through the deterministic orchestrator.
+    """Run the full workflow through the deterministic, failure-gated orchestrator.
 
-    This compatibility tool remains available for non-ADK-Web callers and tests.
-    ADK Web uses the staged subagent tools below so the event graph shows
-    meaningful stage-level execution.
+    This direct entry point remains available for non-ADK callers. The
+    orchestrator stops before assessment when the baseline build fails.
     """
     workspace = workspace_root or _default_workspace_root()
     orchestrator = _orchestrator(workspace, policy_path)
@@ -47,6 +50,15 @@ def run_repository_preparation_stage(
     progress = _progress_from_manifest(orchestrator.manifest_store.load(), orchestrator.workspace.root)
     if not progress:
         progress = [{"step": "baseline_build", "status": result.get("status")}]
+    if result.get("status") != "SUCCESS":
+        message = (
+            "Workflow stopped because the repository checkout failed."
+            if result.get("failureCode") == "CHECKOUT_FAILED"
+            else "Workflow stopped because the baseline build did not pass."
+        )
+        summary = orchestrator.runtime_summary(progress, message)
+        summary["stageResult"] = result
+        return summary
     return _stage_result(
         stage="Repository Preparation",
         workspace_root=workspace,
@@ -564,6 +576,32 @@ def _final_summary_message(manifest: dict[str, Any]) -> str:
     return "Workflow completed with a non-PR terminal status. Review workspace artifacts for details."
 
 
+def _capture_repository_preparation_status(
+    _tool: Any,
+    _tool_args: dict[str, Any],
+    context: Any,
+    tool_response: dict[str, Any],
+) -> None:
+    """Persist the Stage 1 outcome for deterministic workflow routing."""
+    context.state[_BASELINE_FAILURE_STATE_KEY] = tool_response.get("status") != "SUCCESS"
+    context.state[_REPOSITORY_PREPARATION_RESULT_STATE_KEY] = tool_response
+
+
+def _route_after_repository_preparation(ctx: Any) -> None:
+    """Choose the only valid branch after repository preparation."""
+    ctx.route = "baseline_failed" if ctx.state.get(_BASELINE_FAILURE_STATE_KEY) else "continue"
+
+
+def _baseline_failure_response(ctx: Any) -> str:
+    """Return the already formatted terminal response without invoking later stages."""
+    result = ctx.state.get(_REPOSITORY_PREPARATION_RESULT_STATE_KEY, {})
+    if isinstance(result, dict):
+        response = result.get("adkWebResponse")
+        if response:
+            return str(response)
+    return "## OSS Remediation Workflow\n\n**Final Status:** Baseline Build Failed\n\nThe baseline build failed, so automated remediation was not attempted."
+
+
 repository_preparation_agent = LlmAgent(
     name="repository_preparation_agent",
     model="gemini-2.5-flash",
@@ -573,6 +611,7 @@ repository_preparation_agent = LlmAgent(
         "Return the tool result only."
     ),
     tools=[run_repository_preparation_stage],
+    after_tool_callback=_capture_repository_preparation_status,
     output_key="repository_preparation_result",
 )
 
@@ -663,22 +702,40 @@ pull_request_delivery_agent = LlmAgent(
 )
 
 
-root_agent = SequentialAgent(
+baseline_status_gate = FunctionNode(
+    name="baseline_status_gate",
+    func=_route_after_repository_preparation,
+)
+
+baseline_failure_response = FunctionNode(
+    name="baseline_failure_response",
+    func=_baseline_failure_response,
+)
+
+
+root_agent = Workflow(
     name="oss_remediation_agent",
     description=(
-        "Executes the OSS remediation workflow through deterministic staged ADK subagents. "
-        "The subagents run in fixed order: repository preparation, vulnerability assessment, "
-        "project analysis, remediation planning, patch validation, outcome analysis, bounded replanning loop, "
-        "and pull request delivery."
+        "Executes the OSS remediation workflow through staged ADK agents. A failed repository preparation "
+        "stage takes a terminal branch and prevents all later remediation stages."
     ),
-    sub_agents=[
-        repository_preparation_agent,
-        vulnerability_assessment_agent,
-        project_analyzer_agent,
-        remediation_planning_agent,
-        patch_validation_agent,
-        outcome_analysis_agent,
-        replanning_loop_agent,
-        pull_request_delivery_agent,
+    edges=[
+        (START, repository_preparation_agent, baseline_status_gate),
+        (
+            baseline_status_gate,
+            {
+                "continue": vulnerability_assessment_agent,
+                "baseline_failed": baseline_failure_response,
+            },
+        ),
+        (
+            vulnerability_assessment_agent,
+            project_analyzer_agent,
+            remediation_planning_agent,
+            patch_validation_agent,
+            outcome_analysis_agent,
+            replanning_loop_agent,
+            pull_request_delivery_agent,
+        ),
     ],
 )
