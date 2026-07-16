@@ -15,7 +15,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
     """Policy-aware Phase 6 finalization for PR summary and publication."""
 
     WORKFLOW_STAGES: list[dict[str, Any]] = [
-        {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build", "Spring Boot Startup"]},
+        {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build", "Application Startup"]},
         {"name": "Assessment", "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"]},
         {"name": "Remediation", "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"]},
         {"name": "Validation", "steps": ["Validation", "Accepted Patch Set"]},
