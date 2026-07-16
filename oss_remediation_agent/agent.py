@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from google.genai import types
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.workflow import FunctionNode, START, Workflow
 
@@ -602,18 +603,21 @@ def _route_after_repository_preparation(ctx: Any) -> None:
     ctx.route = "continue" if result.get("status") == "SUCCESS" else "baseline_failed"
 
 
-def _baseline_failure_response(ctx: Any) -> str:
-    """Return the already formatted terminal response without invoking later stages."""
+def _baseline_failure_response(ctx: Any) -> types.Content:
+    """Return a renderable terminal response without invoking later stages."""
     result = ctx.state.get(_REPOSITORY_PREPARATION_RESULT_STATE_KEY, {})
+    response: str | None = None
     if isinstance(result, dict):
-        response = result.get("adkWebResponse")
-        if response:
-            return str(response)
-    return (
-        "## OSS Remediation Workflow\n\n"
-        "**Final Status:** Repository Preparation Failed\n\n"
-        "Repository preparation did not return a usable result, so automated remediation was not attempted."
-    )
+        value = result.get("adkWebResponse")
+        if value:
+            response = str(value)
+    if not response:
+        response = (
+            "## OSS Remediation Workflow\n\n"
+            "**Final Status:** Repository Preparation Failed\n\n"
+            "Repository preparation did not return a usable result, so automated remediation was not attempted."
+        )
+    return types.Content(role="model", parts=[types.Part.from_text(text=response)])
 
 
 repository_preparation_agent = LlmAgent(
