@@ -115,6 +115,7 @@ def run_baseline_spring_boot(
 
     Path(log_file).parent.mkdir(parents=True, exist_ok=True)
     Path(log_file).write_text(stdout, encoding="utf-8")
+    failure_summary = _maven_failure_summary(stdout) if status != "SUCCESS" else None
     artifact = common_artifact(
         artifact_id="baseline-spring-boot-run-result-001",
         workflow_id=workflow_id,
@@ -127,6 +128,7 @@ def run_baseline_spring_boot(
         logFile=log_file,
         logExcerpt=stdout[-2000:],
         artifactReferences={"springBootRunLog": log_file},
+        failureSummary=failure_summary,
         errors=[] if status == "SUCCESS" else [failure_code or "SPRING_BOOT_RUN_FAILED"],
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -138,7 +140,12 @@ def run_baseline_spring_boot(
         status=status,
         artifact_path=output_path,
         failure_code=failure_code,
-        payload={"exitCode": exit_code, "logFile": log_file, "startupWindowSeconds": startup_window_seconds},
+        payload={
+            "exitCode": exit_code,
+            "logFile": log_file,
+            "startupWindowSeconds": startup_window_seconds,
+            "failureSummary": failure_summary,
+        },
         errors=[] if status == "SUCCESS" else [failure_code or "SPRING_BOOT_RUN_FAILED"],
     ).to_dict()
 
@@ -166,3 +173,15 @@ def _as_text(value: str | bytes | None) -> str:
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
     return value or ""
+
+
+def _maven_failure_summary(log_output: str) -> str | None:
+    """Extract Maven's actionable error and omit its non-actionable help suffix."""
+    for line in log_output.splitlines():
+        normalized = line.strip()
+        if "Failed to execute goal" not in normalized:
+            continue
+        if normalized.startswith("[ERROR]"):
+            normalized = normalized[len("[ERROR]"):].strip()
+        return normalized.split(" -> [Help", 1)[0].strip()
+    return None

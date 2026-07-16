@@ -274,18 +274,35 @@ def _baseline_spring_boot_run_failed_summary(
 
 def _spring_boot_run_failure_reason(spring_boot_run: dict[str, Any], fallback_message: str) -> str:
     """Return a compact, artifact-backed reason for a failed startup check."""
-    explicit_reason = spring_boot_run.get("failureSummary") or spring_boot_run.get("failureCode")
+    explicit_reason = spring_boot_run.get("failureSummary")
     if explicit_reason:
         return str(explicit_reason)
 
     excerpt = str(spring_boot_run.get("logExcerpt") or "")
+    for line in excerpt.splitlines():
+        normalized = line.strip()
+        if "Failed to execute goal" not in normalized:
+            continue
+        if normalized.startswith("[ERROR]"):
+            normalized = normalized[len("[ERROR]"):].strip()
+        return normalized.split(" -> [Help", 1)[0].strip()
+
     error_lines = [line.strip() for line in excerpt.splitlines() if "[ERROR]" in line and "[Help" not in line]
+    actionable_error_lines = [
+        line for line in error_lines
+        if "To see the full stack trace" not in line and "Re-run Maven using" not in line and "For more information" not in line
+    ]
+    if actionable_error_lines:
+        return " ".join(actionable_error_lines[:3])
     if error_lines:
         return " ".join(error_lines[:3])
 
     exit_code = spring_boot_run.get("exitCode")
     if exit_code is not None:
         return f"`mvn spring-boot:run` exited with code {exit_code} before the startup window completed."
+    failure_code = spring_boot_run.get("failureCode")
+    if failure_code:
+        return str(failure_code)
     return fallback_message or "`mvn spring-boot:run` did not complete the baseline startup check."
 
 
