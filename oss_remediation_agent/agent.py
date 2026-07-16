@@ -577,19 +577,24 @@ def _final_summary_message(manifest: dict[str, Any]) -> str:
 
 
 def _capture_repository_preparation_status(
-    _tool: Any,
-    _tool_args: dict[str, Any],
+    tool: Any,
+    args: dict[str, Any],
     context: Any,
     tool_response: dict[str, Any],
 ) -> None:
     """Persist the Stage 1 outcome for deterministic workflow routing."""
+    del tool, args
     context.state[_BASELINE_FAILURE_STATE_KEY] = tool_response.get("status") != "SUCCESS"
     context.state[_REPOSITORY_PREPARATION_RESULT_STATE_KEY] = tool_response
 
 
 def _route_after_repository_preparation(ctx: Any) -> None:
     """Choose the only valid branch after repository preparation."""
-    ctx.route = "baseline_failed" if ctx.state.get(_BASELINE_FAILURE_STATE_KEY) else "continue"
+    result = ctx.state.get(_REPOSITORY_PREPARATION_RESULT_STATE_KEY)
+    if not isinstance(result, dict):
+        ctx.route = "baseline_failed"
+        return
+    ctx.route = "continue" if result.get("status") == "SUCCESS" else "baseline_failed"
 
 
 def _baseline_failure_response(ctx: Any) -> str:
@@ -599,7 +604,11 @@ def _baseline_failure_response(ctx: Any) -> str:
         response = result.get("adkWebResponse")
         if response:
             return str(response)
-    return "## OSS Remediation Workflow\n\n**Final Status:** Baseline Build Failed\n\nThe baseline build failed, so automated remediation was not attempted."
+    return (
+        "## OSS Remediation Workflow\n\n"
+        "**Final Status:** Repository Preparation Failed\n\n"
+        "Repository preparation did not return a usable result, so automated remediation was not attempted."
+    )
 
 
 repository_preparation_agent = LlmAgent(
