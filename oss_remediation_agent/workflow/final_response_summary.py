@@ -217,7 +217,7 @@ def _baseline_build_failed_summary(manifest: dict[str, Any], baseline_build: dic
             f"Failure reason: {reason}"
         ),
         root_cause=reason,
-        planning_assessment="Not applicable; remediation planning requires a stable baseline and was not the cause of this failure.",
+        planning_assessment="Not applicable",
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Fix the baseline build failure first, then rerun the OSS remediation workflow from a clean baseline.",
         pr_status="Draft PR was not created because remediation cannot proceed without a successful baseline build.",
@@ -258,14 +258,14 @@ def _baseline_spring_boot_run_failed_summary(
 ) -> dict[str, Any]:
     reason = _spring_boot_run_failure_reason(spring_boot_run, fallback_message)
     return _summary_model(
-        workflow_outcome="Spring Boot Startup Failed",
+        workflow_outcome="Application Startup Failed",
         outcome_summary=(
             "The Maven baseline build passed, but `mvn spring-boot:run` did not remain running during the startup window, "
             "so automated remediation was not attempted. "
             f"Failure reason: {reason}"
         ),
         root_cause=reason,
-        planning_assessment="Not applicable; remediation planning requires a stable baseline and was not the cause of this failure.",
+        planning_assessment="Not applicable",
         evidence_reviewed=_evidence_reviewed(manifest, workspace, include_outcome=False),
         recommended_next_step="Fix the Spring Boot startup failure first, then rerun the OSS remediation workflow from a clean baseline.",
         pr_status="Draft PR was not created because remediation cannot proceed without a successful baseline startup check.",

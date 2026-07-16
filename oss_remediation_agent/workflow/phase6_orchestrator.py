@@ -510,7 +510,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             "PR_CREATION_FAILED": "PR Creation Failed",
             "VALIDATION_FAILED": "Validation Failed",
             "BASELINE_BUILD_FAILED": "Baseline Build Failed",
-            "BASELINE_SPRING_BOOT_RUN_FAILED": "Spring Boot Startup Failed",
+            "BASELINE_SPRING_BOOT_RUN_FAILED": "Application Startup Failed",
             "MANUAL_REVIEW_REQUIRED": "Manual Review Required",
         }
         return labels.get(display_status, display_status.replace("_", " ").title())
