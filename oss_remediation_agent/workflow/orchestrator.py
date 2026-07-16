@@ -605,6 +605,9 @@ class WorkflowOrchestrator:
         manifest = self.manifest_store.load()
         attempt_entry = self._attempt_entry(manifest, attempt_number)
         attempt_entry["validationResult"] = f"attempt-{attempt_number}/validation-result.json"
+        startup_result = (validation.get("payload") or {}).get("springBootRunResult")
+        if startup_result:
+            attempt_entry["springBootRunResult"] = self._relative_ref(str(startup_result))
         attempt_entry["status"] = "VALIDATION_SUCCEEDED" if validation["status"] == "SUCCESS" else "VALIDATION_FAILED"
         if validation["status"] == "SUCCESS":
             manifest["acceptedPatchSet"] = self._accepted_patch_set(attempt_number, patch_plan_path, proof_path, f"attempt-{attempt_number}/validation-result.json")

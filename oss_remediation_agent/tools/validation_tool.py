@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from oss_remediation_agent.contracts import ToolResult, common_artifact
+from oss_remediation_agent.tools.baseline_build_tool import run_spring_boot_startup_check
 from oss_remediation_agent.tools.osv_scanner_tool import validate_post_remediation
 from oss_remediation_agent.utils import run_command
 
@@ -23,10 +24,12 @@ def validate_attempt(
     severity_scope: list[str] | None = None,
     baseline_assessment_path: str | None = None,
 ) -> dict:
-    commands = commands or {
+    default_commands = {
         "build": ["mvn", "clean", "install"],
+        "startup": ["mvn", "spring-boot:run"],
         "test": ["mvn", "test"],
     }
+    commands = {**default_commands, **(commands or {})}
     severity_scope = severity_scope or ["CRITICAL", "HIGH"]
     proof = json.loads(Path(patch_application_proof_path).read_text(encoding="utf-8"))
     changed_files = proof.get("filesChanged", [])
@@ -53,12 +56,54 @@ def validate_attempt(
         _write(output_path, artifact)
         return ToolResult(tool_name=TOOL, tool_version="1.0.0", operation="validate_attempt", status="FAILED", artifact_path=output_path, failure_code="BUILD_FAILURE", payload={"buildLog": build_log}).to_dict()
 
+    startup_result_path = str(Path(artifact_output_dir) / "spring-boot-run-result.json")
+    startup_log = str(Path(artifact_output_dir) / "spring-boot-run.log")
+    startup = run_spring_boot_startup_check(
+        repository_path=repository_path,
+        command=commands["startup"],
+        output_path=startup_result_path,
+        log_file=startup_log,
+        workflow_id=workflow_id,
+        artifact_id=f"validation-spring-boot-run-result-attempt-{attempt_number}",
+        tool_name=TOOL,
+        operation="validate_spring_boot_startup",
+    )
+    if startup["status"] != "SUCCESS":
+        startup_reason = str(startup.get("payload", {}).get("failureSummary") or "Maven Spring Boot startup validation failed")
+        artifact = _artifact(
+            attempt_number,
+            workflow_id,
+            "FAILED",
+            patch_application_proof_path,
+            scope,
+            failed_stage="APPLICATION_STARTUP_VALIDATION",
+            failure=startup_reason,
+            build_log=build_log,
+            build_exit=0,
+            startup=startup,
+        )
+        _write(output_path, artifact)
+        return ToolResult(
+            tool_name=TOOL,
+            tool_version="1.0.0",
+            operation="validate_attempt",
+            status="FAILED",
+            artifact_path=output_path,
+            failure_code="SPRING_BOOT_RUN_FAILURE",
+            payload={
+                "buildLog": build_log,
+                "springBootRunResult": startup_result_path,
+                "springBootRunLog": startup_log,
+                "failureSummary": startup_reason,
+            },
+        ).to_dict()
+
     test_log = str(Path(artifact_output_dir) / "test.log")
     test = _run_and_log(commands["test"], repository_path, test_log)
     if test["exitCode"] != 0:
-        artifact = _artifact(attempt_number, workflow_id, "FAILED", patch_application_proof_path, scope, failed_stage="TEST_VALIDATION", failure="Maven tests failed", build_log=build_log, build_exit=0, test_log=test_log, test_exit=test["exitCode"])
+        artifact = _artifact(attempt_number, workflow_id, "FAILED", patch_application_proof_path, scope, failed_stage="TEST_VALIDATION", failure="Maven tests failed", build_log=build_log, build_exit=0, startup=startup, test_log=test_log, test_exit=test["exitCode"])
         _write(output_path, artifact)
-        return ToolResult(tool_name=TOOL, tool_version="1.0.0", operation="validate_attempt", status="FAILED", artifact_path=output_path, failure_code="TEST_FAILURE", payload={"testLog": test_log}).to_dict()
+        return ToolResult(tool_name=TOOL, tool_version="1.0.0", operation="validate_attempt", status="FAILED", artifact_path=output_path, failure_code="TEST_FAILURE", payload={"testLog": test_log, "springBootRunResult": startup_result_path, "springBootRunLog": startup_log}).to_dict()
 
     osv_report = str(Path(artifact_output_dir) / "osv-report.json")
     osv = validate_post_remediation(repository_path, osv_report, severity_scope)
@@ -85,6 +130,7 @@ def validate_attempt(
         failure=failure,
         build_log=build_log,
         build_exit=0,
+        startup=startup,
         test_log=test_log,
         test_exit=0,
         osv_report=osv_report,
@@ -105,6 +151,9 @@ def validate_attempt(
         payload={
             "changeScopeValidation": scope["status"],
             "buildValidation": "SUCCESS",
+            "applicationStartupValidation": "SUCCESS",
+            "springBootRunResult": startup_result_path,
+            "springBootRunLog": startup_log,
             "testValidation": "SUCCESS",
             "osvValidation": osv_status,
             "remainingCriticalCount": remaining_critical,
@@ -193,12 +242,18 @@ def _run_and_log(command: list[str], cwd: str, log_file: str) -> dict:
     return result
 
 
-def _artifact(attempt_number, workflow_id, status, proof_path, scope, failed_stage=None, failure=None, build_log=None, build_exit=None, test_log=None, test_exit=None, osv_report=None, remaining_critical=None, remaining_high=None, remaining_vulnerabilities=None, new_introduced=False, osv_status="NOT_RUN"):
+def _artifact(attempt_number, workflow_id, status, proof_path, scope, failed_stage=None, failure=None, build_log=None, build_exit=None, startup=None, test_log=None, test_exit=None, osv_report=None, remaining_critical=None, remaining_high=None, remaining_vulnerabilities=None, new_introduced=False, osv_status="NOT_RUN"):
     refs = {}
     if build_log:
         refs["buildLog"] = build_log
     if test_log:
         refs["testLog"] = test_log
+    startup_validation = _startup_validation(startup)
+    startup_payload = startup.get("payload", {}) if isinstance(startup, dict) else {}
+    if startup_payload.get("logFile"):
+        refs["springBootRunLog"] = startup_payload["logFile"]
+    if isinstance(startup, dict) and startup.get("artifactPath"):
+        refs["springBootRunResult"] = startup["artifactPath"]
     if osv_report:
         refs["osvReport"] = osv_report
     return common_artifact(
@@ -210,6 +265,7 @@ def _artifact(attempt_number, workflow_id, status, proof_path, scope, failed_sta
         patchApplicationProof=proof_path,
         changeScopeValidation=scope,
         buildValidation={"status": "SUCCESS" if build_exit == 0 else ("FAILED" if build_exit is not None else "NOT_RUN"), "command": "mvn clean install", "exitCode": build_exit, "logFile": build_log},
+        applicationStartupValidation=startup_validation,
         testValidation={"status": "SUCCESS" if test_exit == 0 else ("FAILED" if test_exit is not None else "NOT_RUN"), "command": "mvn test", "exitCode": test_exit, "logFile": test_log},
         osvValidation={"status": osv_status, "scanResultFile": osv_report, "remainingCriticalCount": remaining_critical, "remainingHighCount": remaining_high, "newCriticalHighIntroduced": new_introduced, "remainingVulnerabilities": remaining_vulnerabilities or []},
         summary={"failedStage": failed_stage, "failureSummary": failure},
@@ -217,6 +273,20 @@ def _artifact(attempt_number, workflow_id, status, proof_path, scope, failed_sta
         errors=[] if status == "SUCCESS" else [failure or "validation failed"],
         warnings=[],
     )
+
+
+def _startup_validation(startup: dict | None) -> dict[str, Any]:
+    if not isinstance(startup, dict):
+        return {"status": "NOT_RUN", "command": "mvn spring-boot:run", "exitCode": None, "logFile": None}
+    payload = startup.get("payload") if isinstance(startup.get("payload"), dict) else {}
+    return {
+        "status": startup.get("status", "UNKNOWN"),
+        "command": "mvn spring-boot:run",
+        "exitCode": payload.get("exitCode"),
+        "logFile": payload.get("logFile"),
+        "startupWindowSeconds": payload.get("startupWindowSeconds"),
+        "failureSummary": payload.get("failureSummary"),
+    }
 
 
 def _write(path: str, data: dict) -> None:

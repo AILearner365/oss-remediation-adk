@@ -443,6 +443,8 @@ def _attempt_progress_from_attempt(workspace: Path, attempt: dict[str, Any], att
         progress.append(_artifact_progress(f"patch_dry_run_attempt_{attempt_number}", workspace, attempt.get("patchDryRunResult")))
     if attempt.get("patchApplicationProof"):
         progress.append(_artifact_progress(f"patch_apply_attempt_{attempt_number}", workspace, attempt.get("patchApplicationProof")))
+    if attempt.get("springBootRunResult"):
+        progress.append(_artifact_progress(f"application_startup_validation_attempt_{attempt_number}", workspace, attempt.get("springBootRunResult")))
     if attempt.get("validationResult"):
         progress.append(_artifact_progress(f"validation_attempt_{attempt_number}", workspace, attempt.get("validationResult")))
     if attempt.get("outcomeAnalysisSummary"):

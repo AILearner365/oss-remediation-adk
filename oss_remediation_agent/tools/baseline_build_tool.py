@@ -49,15 +49,18 @@ def run_baseline_build(
     ).to_dict()
 
 
-def run_baseline_spring_boot(
+def run_spring_boot_startup_check(
     repository_path: str,
     command: list[str] | None = None,
-    output_path: str = "baseline/spring-boot-run-result.json",
-    log_file: str = "baseline/spring-boot-run.log",
+    output_path: str = "spring-boot-run-result.json",
+    log_file: str = "spring-boot-run.log",
     workflow_id: str = "unknown",
     startup_window_seconds: int = SPRING_BOOT_RUN_STARTUP_WINDOW_SECONDS,
+    artifact_id: str = "spring-boot-run-result-001",
+    tool_name: str = TOOL,
+    operation: str = "run_spring_boot_startup_check",
 ) -> dict:
-    """Perform the POC Spring Boot startup smoke check.
+    """Run the shared POC Spring Boot startup smoke check.
 
     A successful ``mvn spring-boot:run`` process stays alive. For this initial
     POC, the check passes when it remains alive for the fixed startup window;
@@ -117,9 +120,9 @@ def run_baseline_spring_boot(
     Path(log_file).write_text(stdout, encoding="utf-8")
     failure_summary = _maven_failure_summary(stdout) if status != "SUCCESS" else None
     artifact = common_artifact(
-        artifact_id="baseline-spring-boot-run-result-001",
+        artifact_id=artifact_id,
         workflow_id=workflow_id,
-        created_by=TOOL,
+        created_by=tool_name,
         status=status,
         command=" ".join(command),
         exitCode=exit_code,
@@ -134,9 +137,9 @@ def run_baseline_spring_boot(
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return ToolResult(
-        tool_name=TOOL,
+        tool_name=tool_name,
         tool_version="1.0.0",
-        operation="run_baseline_spring_boot",
+        operation=operation,
         status=status,
         artifact_path=output_path,
         failure_code=failure_code,
@@ -148,6 +151,27 @@ def run_baseline_spring_boot(
         },
         errors=[] if status == "SUCCESS" else [failure_code or "SPRING_BOOT_RUN_FAILED"],
     ).to_dict()
+
+
+def run_baseline_spring_boot(
+    repository_path: str,
+    command: list[str] | None = None,
+    output_path: str = "baseline/spring-boot-run-result.json",
+    log_file: str = "baseline/spring-boot-run.log",
+    workflow_id: str = "unknown",
+    startup_window_seconds: int = SPRING_BOOT_RUN_STARTUP_WINDOW_SECONDS,
+) -> dict:
+    """Run the shared POC startup check for Stage 1 baseline preparation."""
+    return run_spring_boot_startup_check(
+        repository_path=repository_path,
+        command=command,
+        output_path=output_path,
+        log_file=log_file,
+        workflow_id=workflow_id,
+        startup_window_seconds=startup_window_seconds,
+        artifact_id="baseline-spring-boot-run-result-001",
+        operation="run_baseline_spring_boot",
+    )
 
 
 def _terminate_process(process: subprocess.Popen[str] | None) -> None:

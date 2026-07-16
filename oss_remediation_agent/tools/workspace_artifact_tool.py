@@ -460,6 +460,8 @@ def _manual_review_items(payload: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _infer_artifact_type(path: str) -> str:
     name = Path(path).name
+    if name == "spring-boot-run-result.json" and any(part.startswith("attempt-") for part in Path(path).parts):
+        return "APPLICATION_STARTUP_VALIDATION_RESULT"
     mapping = {
         "manifest.json": "MANIFEST",
         "baseline-build-result.json": "BASELINE_BUILD_RESULT",

@@ -123,9 +123,9 @@ def select_relevant_artifacts(catalog: dict[str, Any], manifest: dict[str, Any],
     elif "PATCH_APPLICATION" in status:
         add(catalog.get("currentAttempt", []), "PATCH_DRY_RUN_RESULT", "PATCH_APPLICATION_PROOF")
     elif "VALIDATION" in status or "OUTCOME_ANALYSIS" in status or status == "FAILED_MAX_ATTEMPTS":
-        add(catalog.get("currentAttempt", []), "PATCH_DRY_RUN_RESULT", "PATCH_APPLICATION_PROOF", "VALIDATION_RESULT")
+        add(catalog.get("currentAttempt", []), "PATCH_DRY_RUN_RESULT", "PATCH_APPLICATION_PROOF", "APPLICATION_STARTUP_VALIDATION_RESULT", "VALIDATION_RESULT")
     else:
-        add(catalog.get("currentAttempt", []), "PATCH_DRY_RUN_RESULT", "PATCH_APPLICATION_PROOF", "VALIDATION_RESULT", "OUTCOME_ANALYSIS_SUMMARY")
+        add(catalog.get("currentAttempt", []), "PATCH_DRY_RUN_RESULT", "PATCH_APPLICATION_PROOF", "APPLICATION_STARTUP_VALIDATION_RESULT", "VALIDATION_RESULT", "OUTCOME_ANALYSIS_SUMMARY")
 
     for previous in catalog.get("previousAttempts", [])[-2:]:
         add(previous.get("artifacts", []), "REMEDIATION_PATCH_PLAN", "VALIDATION_RESULT", "OUTCOME_ANALYSIS_SUMMARY")
@@ -155,7 +155,8 @@ def _attempt_artifacts(workspace: Path, attempt: dict[str, Any], attempt_number:
         "patchPlan": ("REMEDIATION_PATCH_PLAN", "REMEDIATION_PLANNING", "Planner decision and patch instructions for this attempt.", "RemediationPlanningAgent", ["vulnerability decisions", "patches", "manual review decisions", "selected versions", "rationale"]),
         "patchDryRunResult": ("PATCH_DRY_RUN_RESULT", "PATCH_DRY_RUN", "Dry-run result for exact patch instructions.", "PatchApplyTool", ["patch results", "occurrence checks", "errors", "warnings"]),
         "patchApplicationProof": ("PATCH_APPLICATION_PROOF", "PATCH_APPLICATION", "Proof of repository modifications made by the patch tool.", "PatchApplyTool", ["applied patches", "changed files", "patch results", "errors", "warnings"]),
-        "validationResult": ("VALIDATION_RESULT", "VALIDATION", "Validation of scope, build, tests, and vulnerability state after patch application.", "ValidationTool", ["validation status", "failed stage", "build result", "test result", "OSV validation", "log references"]),
+        "validationResult": ("VALIDATION_RESULT", "VALIDATION", "Validation of scope, build, startup, tests, and vulnerability state after patch application.", "ValidationTool", ["validation status", "failed stage", "build result", "startup result", "test result", "OSV validation", "log references"]),
+        "springBootRunResult": ("APPLICATION_STARTUP_VALIDATION_RESULT", "VALIDATION", "Spring Boot startup smoke-check result after patch application.", "ValidationTool", ["startup status", "command", "exit code", "startup window", "log reference", "failure summary"]),
         "outcomeAnalysisContext": ("OUTCOME_ANALYSIS_CONTEXT", "OUTCOME_ANALYSIS", "Context provided to the Outcome Analysis Agent.", "WorkflowOrchestrator", ["artifact catalog", "selected artifacts", "compact evidence"]),
         "outcomeAnalysisSummary": ("OUTCOME_ANALYSIS_SUMMARY", "OUTCOME_ANALYSIS", "Evidence-backed failure analysis and disposition.", "RemediationOutcomeAnalysisAgent", ["what failed", "cause", "evidence references", "recommended disposition", "planner focus"]),
     }
@@ -194,7 +195,7 @@ def _compact_by_type(artifact_type: str, payload: dict[str, Any]) -> dict[str, A
     if artifact_type == "REMEDIATION_PATCH_PLAN":
         return {"status": payload.get("status"), "decisionType": payload.get("decisionType"), "summary": payload.get("summary", {}), "vulnerabilityDecisions": payload.get("vulnerabilityDecisions", [])}
     if artifact_type == "VALIDATION_RESULT":
-        return {"status": payload.get("status"), "summary": payload.get("summary", {}), "failedStage": payload.get("failedStage"), "failureSummary": payload.get("failureSummary"), "buildResult": payload.get("buildResult", {}), "testResult": payload.get("testResult", {}), "osvValidation": payload.get("osvValidation", {}), "errors": payload.get("errors", []), "warnings": payload.get("warnings", [])}
+        return {"status": payload.get("status"), "summary": payload.get("summary", {}), "failedStage": payload.get("failedStage"), "failureSummary": payload.get("failureSummary"), "buildValidation": payload.get("buildValidation", {}), "applicationStartupValidation": payload.get("applicationStartupValidation", {}), "testValidation": payload.get("testValidation", {}), "osvValidation": payload.get("osvValidation", {}), "errors": payload.get("errors", []), "warnings": payload.get("warnings", [])}
     if artifact_type == "REMEDIATION_PLANNING_CONTEXT":
         evidence = payload.get("evidence") or {}
         project = evidence.get("projectAnalyzer") or {}

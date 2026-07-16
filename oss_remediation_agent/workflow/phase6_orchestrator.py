@@ -18,7 +18,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
         {"name": "Repository Preparation", "steps": ["Repository Checkout", "Baseline Build", "Spring Boot Startup"]},
         {"name": "Assessment", "steps": ["OSS Vulnerability Assessment", "Maven Project Analysis"]},
         {"name": "Remediation", "steps": ["Remediation Planning", "Patch Dry Run", "Dependency Patch Application"]},
-        {"name": "Validation", "steps": ["Validation", "Accepted Patch Set"]},
+        {"name": "Validation", "steps": ["Validation", "Application Startup Validation", "Accepted Patch Set"]},
         {"name": "Outcome Analysis", "steps": ["Failure Analysis"]},
         {"name": "Delivery", "steps": ["Remediation Verification Report", "PR Summary", "Draft Pull Request"]},
     ]
@@ -354,6 +354,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 "Patch Dry Run",
                 "Dependency Patch Application",
                 "Validation",
+                "Application Startup Validation",
                 "Failure Analysis",
                 "Manual Review Decision",
                 "Accepted Patch Set",
@@ -393,6 +394,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return [("Dependency Patch Application", status)]
         if internal_step.startswith("validation"):
             return [("Validation", status)]
+        if internal_step.startswith("application_startup_validation"):
+            return [("Application Startup Validation", status)]
         if internal_step.startswith("outcome_analysis"):
             return [("Failure Analysis", status)]
         if internal_step == "accepted_patch_set_created":
@@ -445,6 +448,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
             return ["Dependency Patch Application"]
         if internal_step.startswith("validation"):
             return ["Validation"]
+        if internal_step.startswith("application_startup_validation"):
+            return ["Application Startup Validation"]
         if internal_step == "accepted_patch_set_created":
             return ["Accepted Patch Set"]
         if internal_step.startswith("outcome_analysis"):
@@ -594,6 +599,7 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 ("planningDecision", f"Planning Decision Attempt {attempt_number}"),
                 ("patchDryRunResult", f"Patch Dry Run Result Attempt {attempt_number}"),
                 ("patchApplicationProof", f"Patch Application Proof Attempt {attempt_number}"),
+                ("springBootRunResult", f"Application Startup Result Attempt {attempt_number}"),
                 ("validationResult", f"Validation Result Attempt {attempt_number}"),
                 ("outcomeAnalysisSummary", f"Outcome Analysis Summary Attempt {attempt_number}"),
             ):
@@ -723,6 +729,8 @@ class Phase6WorkflowOrchestrator(Phase5WorkflowOrchestrator):
                 enriched.append({"step": f"patch_dry_run_{prefix}", "status": self._artifact_status(attempt.get("patchDryRunResult")), "artifactPath": attempt.get("patchDryRunResult")})
             if attempt.get("patchApplicationProof") and f"patch_apply_{prefix}" not in seen_steps:
                 enriched.append({"step": f"patch_apply_{prefix}", "status": self._artifact_status(attempt.get("patchApplicationProof")), "artifactPath": attempt.get("patchApplicationProof")})
+            if attempt.get("springBootRunResult") and f"application_startup_validation_{prefix}" not in seen_steps:
+                enriched.append({"step": f"application_startup_validation_{prefix}", "status": self._artifact_status(attempt.get("springBootRunResult")), "artifactPath": attempt.get("springBootRunResult")})
             if attempt.get("validationResult") and f"validation_{prefix}" not in seen_steps:
                 enriched.append({"step": f"validation_{prefix}", "status": self._artifact_status(attempt.get("validationResult"), attempt.get("status", "UNKNOWN")), "artifactPath": attempt.get("validationResult")})
             if attempt.get("outcomeAnalysisSummary") and f"outcome_analysis_{prefix}" not in seen_steps:
