@@ -260,7 +260,7 @@ def _baseline_spring_boot_run_failed_summary(
     return _summary_model(
         workflow_outcome="Spring Boot Startup Failed",
         outcome_summary=(
-            "The Maven baseline build passed, but `mvn spring-boot:run` did not remain running during the POC startup window, "
+            "The Maven baseline build passed, but `mvn spring-boot:run` did not remain running during the startup window, "
             "so automated remediation was not attempted. "
             f"Failure reason: {reason}"
         ),
