@@ -449,7 +449,7 @@ The proposal must cover the following checklist. Mark each item only after it ha
 - [x] Required autonomous developer capabilities identified from the remediation objective
 - [x] Relevant implementation/integration options available in the actual environment investigated
 - [x] Proposed capability/tool/integration approach documented with rationale
-- [x] Proposed approach demonstrated to support repository inspection, modification, execution, build/test/scan, and iterative diagnosis as required
+- [x] Proposed approach shown in design to cover repository inspection, modification, execution, build/test/scan, and iterative diagnosis; runtime demonstration remains an implementation verification item
 - [x] Permissions, security boundaries, credentials, network behavior, and operational limitations documented
 - [x] Tooling choices reviewed for unnecessary restrictions on autonomous engineering behavior
 - [x] Trusted/local/vendor integrations considered where relevant without treating any example as mandatory
