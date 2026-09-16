@@ -446,13 +446,13 @@ The proposal must cover the following checklist. Mark each item only after it ha
 
 ### Developer capability design
 
-- [ ] Required autonomous developer capabilities identified from the remediation objective
-- [ ] Relevant implementation/integration options available in the actual environment investigated
-- [ ] Proposed capability/tool/integration approach documented with rationale
-- [ ] Proposed approach demonstrated to support repository inspection, modification, execution, build/test/scan, and iterative diagnosis as required
-- [ ] Permissions, security boundaries, credentials, network behavior, and operational limitations documented
-- [ ] Tooling choices reviewed for unnecessary restrictions on autonomous engineering behavior
-- [ ] Trusted/local/vendor integrations considered where relevant without treating any example as mandatory
+- [x] Required autonomous developer capabilities identified from the remediation objective
+- [x] Relevant implementation/integration options available in the actual environment investigated
+- [x] Proposed capability/tool/integration approach documented with rationale
+- [x] Proposed approach demonstrated to support repository inspection, modification, execution, build/test/scan, and iterative diagnosis as required
+- [x] Permissions, security boundaries, credentials, network behavior, and operational limitations documented
+- [x] Tooling choices reviewed for unnecessary restrictions on autonomous engineering behavior
+- [x] Trusted/local/vendor integrations considered where relevant without treating any example as mandatory
 
 ### Autonomous lifecycle and verification
 
