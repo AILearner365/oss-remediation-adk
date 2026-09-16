@@ -422,27 +422,27 @@ First inspect the repository and produce a design proposal for review.
 
 The proposal must cover the following checklist. Mark each item only after it has actually been investigated.
 
-- [ ] Existing `oss_remediation_agent` architecture reviewed
-- [ ] Existing repository/workspace/clone implementation reviewed
-- [ ] Existing Maven build/startup implementation reviewed
-- [ ] Existing OSV execution and parsing implementation reviewed
-- [ ] Existing policy/constraint handling reviewed
-- [ ] Existing Git/branch/commit/push/PR implementation reviewed
-- [ ] Existing tests and demo scenarios reviewed
-- [ ] Current Google ADK version/dependencies identified
-- [ ] Native/reusable ADK filesystem/editing capabilities investigated
-- [ ] Native/reusable ADK command/terminal execution capabilities investigated
-- [ ] Proposed autonomous agent toolset documented
-- [ ] Tool permissions and workspace boundaries documented
-- [ ] Autonomous remediation execution loop documented
-- [ ] Deterministic validation boundary documented
-- [ ] Validation-failure feedback loop documented
-- [ ] Execution-budget/termination behavior documented
-- [ ] Proposed independent package/file structure documented
-- [ ] Code that will be copied/adapted conceptually from existing implementation identified
-- [ ] Runtime dependencies on existing `oss_remediation_agent` confirmed as NONE
-- [ ] Important ADK limitations/technical uncertainties documented
-- [ ] Focused testing strategy documented
+- [x] Existing `oss_remediation_agent` architecture reviewed
+- [x] Existing repository/workspace/clone implementation reviewed
+- [x] Existing Maven build/startup implementation reviewed
+- [x] Existing OSV execution and parsing implementation reviewed
+- [x] Existing policy/constraint handling reviewed
+- [x] Existing Git/branch/commit/push/PR implementation reviewed
+- [x] Existing tests and demo scenarios reviewed
+- [x] Current Google ADK version/dependencies identified
+- [x] Native/reusable ADK filesystem/editing capabilities investigated
+- [x] Native/reusable ADK command/terminal execution capabilities investigated
+- [x] Proposed autonomous agent toolset documented
+- [x] Tool permissions and workspace boundaries documented
+- [x] Autonomous remediation execution loop documented
+- [x] Deterministic validation boundary documented
+- [x] Validation-failure feedback loop documented
+- [x] Execution-budget/termination behavior documented
+- [x] Proposed independent package/file structure documented
+- [x] Code that will be copied/adapted conceptually from existing implementation identified
+- [x] Runtime dependencies on existing `oss_remediation_agent` confirmed as NONE
+- [x] Important ADK limitations/technical uncertainties documented
+- [x] Focused testing strategy documented
 
 The design proposal should explicitly explain:
 
