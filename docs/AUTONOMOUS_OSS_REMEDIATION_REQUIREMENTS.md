@@ -12,6 +12,12 @@ The purpose of the experiment is to compare the existing highly prescribed plann
 
 > AI controls **how** to solve the engineering problem. Deterministic code controls **where** it may operate, **what** constraints it must respect, **whether** the result actually passes validation, and **whether** it is eligible for PR delivery.
 
+A second design principle applies to the developer-tool layer:
+
+> Define the capabilities the autonomous agent needs and the boundaries it must respect. Do not preselect the implementation mechanism before the available options have been investigated.
+
+Examples discussed during design conversations — such as ADK-native tools, custom Python function tools, local tool providers, MCP servers, GitHub integrations, or other trusted vendor integrations — are **examples for investigation, not architectural preferences or mandatory choices**.
+
 ---
 
 ## 2. Existing Implementation as Reference
@@ -66,7 +72,7 @@ User Request
 2. Baseline / Assessment        deterministic
      |
      v
-3. Autonomous Remediation       one primary LLM agent + developer tools
+3. Autonomous Remediation       one primary LLM agent + developer capabilities
      |
      v
 4. Independent Validation       deterministic
@@ -145,12 +151,12 @@ Implement one capable Google ADK LLM agent responsible for investigating and rem
 
 The agent should receive:
 
-- workspace/repository location
+- workspace/repository context
 - baseline vulnerability findings
 - requested remediation scope
 - user constraints
 - completion criteria
-- available developer tools
+- available developer capabilities/tools
 - validation feedback from previous attempts
 
 ### 8.1 Engineering freedom
@@ -209,48 +215,48 @@ Do not encode vulnerability-specific remediation recipes into the prompt.
 
 ---
 
-## 9. Developer Tool Capabilities
+## 9. Developer Capabilities and Tooling Selection
 
-Before implementing custom tools, inspect the Google ADK version/dependencies used by this repository and determine the cleanest supported reusable/native capabilities.
+The requirement is **capability-based**, not tool-implementation-based.
 
-The agent needs capabilities equivalent to:
+The autonomous agent needs sufficient developer capabilities to investigate and remediate a real repository. At minimum, the selected approach must enable the equivalent of:
 
-### File/workspace operations
+### Repository/workspace investigation and modification
 
-- list files/directories
+- discover files/directories and project structure
 - read files
 - search files/content
-- create files
-- edit files
-- apply patches or equivalent safe modifications
+- create files when useful
+- edit or patch files safely
+- inspect resulting changes/diffs
 
-### Command execution
+### Developer execution and observation
 
-- execute commands inside the designated workspace
-- capture stdout
-- capture stderr
-- capture exit code
-- enforce command timeout
-- preserve sufficient output for diagnosis
+- execute the build/test/dependency-analysis commands needed for the repository
+- use available developer binaries and project tooling where appropriate
+- capture stdout, stderr, exit status, timeout/failure information, and enough output for diagnosis
+- create and execute workspace-local scripts or temporary helpers when appropriate
+- observe failures and continue iterating
 
-A controlled general command-execution capability is preferred over separate Maven/Java/Python/Git tools unless there is a concrete technical or security reason to separate them.
+### Repository and integration operations where applicable
 
-Through command execution the agent may use available developer binaries such as:
+- inspect Git state/history needed for engineering work
+- obtain dependency/build/security evidence needed to reason about remediation
+- interact with approved external services only when the design determines that such access is useful and appropriately bounded
 
-- Maven
-- Java
-- Git
-- Python
-- grep/find or platform equivalents
-- curl
-- jq
-- other appropriate existing utilities
+Before implementation, inspect the actual Google ADK version, repository environment, installed/available tools, and approved integrations. Investigate reasonable implementation options and propose the approach that best supports autonomous remediation while remaining maintainable and appropriately bounded.
+
+Possible mechanisms may include ADK-provided capabilities, callable/custom tools, local tool providers, trusted vendor integrations, MCP-based integrations, command execution, or combinations of these. **This list is illustrative only. It does not express a preference and does not require every category to be evaluated when it is irrelevant.**
+
+Do not create separate Maven/Java/Python/Git abstractions merely because they are easy to enumerate. Likewise, do not force all capabilities through one general terminal tool if a different approach is clearly better. The design should choose the smallest coherent capability set that gives the agent enough freedom to work effectively.
+
+The selected tooling should not unnecessarily constrain the agent's ability to inspect, modify, build, test, scan, observe failures, and adapt.
 
 ---
 
-## 10. Tool and Plugin Flexibility
+## 10. Tool, Plugin, and Integration Flexibility
 
-Within its workspace, the autonomous agent may:
+Within the approved execution boundary, the autonomous agent may:
 
 - invoke Maven plugins
 - create temporary scripts
@@ -258,8 +264,11 @@ Within its workspace, the autonomous agent may:
 - use lightweight project/workspace-scoped tools when useful
 - inspect generated dependency/build information
 - perform iterative engineering experiments
+- use approved local or trusted-provider integrations when they materially improve the workflow
 
-Do not preselect OpenRewrite, versions-maven-plugin, or any other remediation mechanism as mandatory. The agent may discover/use such mechanisms when appropriate.
+Do not preselect OpenRewrite, versions-maven-plugin, MCP, a filesystem provider, a GitHub provider, or any other implementation mechanism as mandatory. Equally, do not exclude such a mechanism solely because of its category. The design should justify the actual choice based on capability, safety, maintainability, environment support, and usefulness to this POC.
+
+Trusted/vendor-supported integrations may be considered where appropriate. Arbitrary or untrusted third-party integrations should not be introduced casually into the remediation runtime.
 
 The agent must not autonomously:
 
@@ -267,12 +276,14 @@ The agent must not autonomously:
 - modify system-wide security configuration
 - alter credentials
 - globally replace the machine JDK
-- modify unrelated repositories/directories
+- modify unrelated repositories/directories without an explicit justified requirement
 - modify Jenkins/system configuration
 - install arbitrary system services/daemons
 - make unrestricted machine-wide changes
 
-If runtime installation is supported, prefer workspace-local/temporary installation and explicit policy enforcement.
+The exact filesystem, command, network, GitHub, and integration boundaries are a **design decision to be proposed and reviewed**, not predetermined here beyond these safety principles.
+
+If runtime installation is supported, prefer temporary/project-scoped installation unless the approved design clearly requires otherwise.
 
 ---
 
@@ -329,7 +340,7 @@ The same workspace should normally be retained so the agent can continue investi
 Support configurable execution/resource boundaries such as:
 
 - maximum remediation/validation cycles
-- command timeout
+- command/tool timeout where applicable
 - overall reasonable execution budget
 
 These are resource/safety limits, not predefined remediation strategies.
@@ -348,7 +359,7 @@ Then perform deterministic Git/PR operations such as:
 - push
 - create Draft PR
 
-Study and independently adapt useful Git/PR patterns from the existing implementation.
+Study and independently adapt useful Git/PR patterns from the existing implementation. The implementation may use an appropriate approved Git/GitHub mechanism; this requirements document does not prescribe CLI, API, MCP, or another integration.
 
 The LLM may generate the PR explanation, including vulnerabilities addressed, dependency changes, rationale, validation performed, and validation results. Git mechanics and the decision that remediation passed remain deterministic.
 
@@ -401,7 +412,6 @@ Never fabricate successful remediation.
 
 Do not introduce unless an unavoidable technical requirement is discovered and justified:
 
-- MCP
 - OpenHands
 - SWE-agent
 - LangChain
@@ -409,8 +419,9 @@ Do not introduce unless an unavoidable technical requirement is discovered and j
 - long-term learning/memory
 - multiple specialist remediation agents
 - vulnerability-specific hard-coded strategies
+- a large general-purpose tool platform that is not needed for the POC
 
-Prefer a focused POC over a new platform.
+The goal is a focused autonomous-remediation POC, not commitment to or rejection of a particular tool protocol.
 
 ---
 
@@ -418,9 +429,11 @@ Prefer a focused POC over a new platform.
 
 **Do not begin implementation immediately.**
 
-First inspect the repository and produce a design proposal for review.
+First inspect the repository and produce or revise a design proposal for review.
 
 The proposal must cover the following checklist. Mark each item only after it has actually been investigated.
+
+### Existing system and environment
 
 - [x] Existing `oss_remediation_agent` architecture reviewed
 - [x] Existing repository/workspace/clone implementation reviewed
@@ -430,10 +443,19 @@ The proposal must cover the following checklist. Mark each item only after it ha
 - [x] Existing Git/branch/commit/push/PR implementation reviewed
 - [x] Existing tests and demo scenarios reviewed
 - [x] Current Google ADK version/dependencies identified
-- [x] Native/reusable ADK filesystem/editing capabilities investigated
-- [x] Native/reusable ADK command/terminal execution capabilities investigated
-- [x] Proposed autonomous agent toolset documented
-- [x] Tool permissions and workspace boundaries documented
+
+### Developer capability design
+
+- [ ] Required autonomous developer capabilities identified from the remediation objective
+- [ ] Relevant implementation/integration options available in the actual environment investigated
+- [ ] Proposed capability/tool/integration approach documented with rationale
+- [ ] Proposed approach demonstrated to support repository inspection, modification, execution, build/test/scan, and iterative diagnosis as required
+- [ ] Permissions, security boundaries, credentials, network behavior, and operational limitations documented
+- [ ] Tooling choices reviewed for unnecessary restrictions on autonomous engineering behavior
+- [ ] Trusted/local/vendor integrations considered where relevant without treating any example as mandatory
+
+### Autonomous lifecycle and verification
+
 - [x] Autonomous remediation execution loop documented
 - [x] Deterministic validation boundary documented
 - [x] Validation-failure feedback loop documented
@@ -448,13 +470,14 @@ The design proposal should explicitly explain:
 
 1. what remains deterministic
 2. what is delegated to the autonomous LLM
-3. exactly what tools the LLM receives
-4. how those tools are constrained
-5. how the LLM continues working after validation failure
-6. how success is independently established
-7. how the implementation remains independent from the existing agent
+3. what developer capabilities the LLM receives and the chosen implementation/integration approach
+4. why that approach was selected over materially relevant alternatives
+5. how permissions and operational boundaries are enforced without unnecessarily reducing autonomy
+6. how the LLM continues working after validation failure
+7. how success is independently established
+8. how the implementation remains independent from the existing agent
 
-**STOP after producing the proposal. Do not modify implementation files until the proposal has been reviewed/approved.**
+**STOP after producing or revising the proposal. Do not modify implementation files until the proposal has been reviewed/approved.**
 
 ---
 
@@ -482,16 +505,17 @@ Once the design proposal is approved, implement against this checklist. Keep thi
 ## Autonomous engineering agent
 
 - [ ] One primary ADK remediation LLM agent implemented
-- [ ] Repository/file reading capability available
-- [ ] Repository search capability available
+- [ ] Repository inspection/reading capability available
+- [ ] Repository search/discovery capability available
 - [ ] File creation/editing/patch capability available
-- [ ] Controlled command execution available
-- [ ] stdout/stderr/exit-code handling available
-- [ ] Command timeout enforced
-- [ ] Workspace boundaries enforced
-- [ ] Tool/plugin flexibility supported within policy
+- [ ] Required developer command/execution capability available
+- [ ] stdout/stderr/exit/failure evidence available where applicable
+- [ ] Timeout/resource boundaries enforced where applicable
+- [ ] Approved workspace/integration boundaries enforced
+- [ ] Tool/plugin/integration flexibility supported within policy
 - [ ] No rigid patch-plan interpreter required
 - [ ] No vulnerability-specific remediation strategy hard-coded
+- [ ] Selected tool/integration mechanism matches the approved design rather than an unreviewed assumption
 
 ## Validation and iteration
 
@@ -505,7 +529,7 @@ Once the design proposal is approved, implement against this checklist. Keep thi
 - [ ] Structured validation feedback implemented
 - [ ] Failed validation returns evidence to the same autonomous agent/workspace
 - [ ] Maximum remediation/validation cycles enforced
-- [ ] Command/runtime budget behavior implemented
+- [ ] Command/tool/runtime budget behavior implemented
 - [ ] Truthful incomplete/manual-review outcome implemented
 
 ## Delivery
@@ -524,8 +548,7 @@ Once the design proposal is approved, implement against this checklist. Keep thi
 - [ ] Validation cycles traceable
 - [ ] Final build/scan/constraint evidence retained
 - [ ] Unit/focused tests added
-- [ ] Workspace isolation tested
-- [ ] Command boundary behavior tested
+- [ ] Workspace/integration boundary behavior tested
 - [ ] Validation failure feedback loop tested
 - [ ] Execution budget exhaustion tested
 - [ ] Delivery gating tested
@@ -548,9 +571,10 @@ For every checklist item above:
 5. identify deviations from the approved design
 6. identify any new hard-coded remediation behavior that accidentally reduced autonomy
 7. identify any place where the LLM is trusted to declare success instead of deterministic validation
-8. identify any tool capability that exceeds the intended workspace/security boundary
-9. run the relevant tests
-10. summarize remaining gaps before declaring the POC complete
+8. identify any tool/integration capability that exceeds the approved boundary
+9. identify any tool/integration choice that unnecessarily reduced the agent's useful engineering autonomy
+10. run the relevant tests
+11. summarize remaining gaps before declaring the POC complete
 
 The final review should answer:
 
@@ -561,7 +585,8 @@ The final review should answer:
 - Does failed validation feed concrete evidence back into continued autonomous work?
 - Are user constraints enforced independently?
 - Is PR delivery impossible until validation passes?
-- Are execution/tool boundaries appropriately constrained?
+- Are execution/tool/integration boundaries appropriately constrained without being unnecessarily restrictive?
 - Did the implementation avoid embedding detailed Maven vulnerability remediation recipes?
+- Was the selected developer-tool approach justified by the actual environment rather than by examples mentioned in requirements discussions?
 
 **The POC is not considered complete merely because all boxes were manually checked. Checklist status must reflect actual implementation and verification evidence.**
