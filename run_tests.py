@@ -38,7 +38,7 @@ def run_check(check: Check) -> bool:
 
 def main() -> int:
     checks = [
-        Check("Python compilation", [sys.executable, "-m", "compileall", "-q", "oss_remediation_agent"]),
+        Check("Python compilation", [sys.executable, "-m", "compileall", "-q", "oss_remediation_agent", "autonomous_oss_remediation_agent"]),
         Check("Unit tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/unit", "-p", "test_*.py", "-v"]),
         Check("Integration tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/integration", "-p", "test_*.py", "-v"]),
         Check("End-to-end tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests/e2e", "-p", "test_*.py", "-v"]),

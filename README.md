@@ -2,6 +2,10 @@
 
 This repository contains an ADK-based OSS vulnerability remediation workflow for Java Spring Boot Maven applications.
 
+## Autonomous Remediation POC
+
+The approved independent single-agent POC is implemented in `autonomous_oss_remediation_agent`. Its operating instructions and fail-closed deployment requirements are in `autonomous_oss_remediation_agent/README.md`; implementation evidence and remaining deployment prerequisites are in `docs/AUTONOMOUS_OSS_REMEDIATION_IMPLEMENTATION_REVIEW.md`.
+
 ## Architecture Documentation
 
 The finalized architecture, artifact contracts, deterministic tool APIs, AI agent specifications, workflow orchestration, and implementation plan are documented here:

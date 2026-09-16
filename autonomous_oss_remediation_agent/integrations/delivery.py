@@ -1,0 +1,341 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import stat
+import tempfile
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable, Protocol
+from urllib.parse import urlparse
+
+from ..capabilities.execution import ProcessRunner
+from ..config import DeliveryConfig, RemediationRequest
+from ..models import DeliveryPreflight, DeliveryResult, RepositoryBaseline, ValidationReport
+from ..workspace import RunWorkspace, TraceStore, sha256_file
+
+
+@dataclass(frozen=True)
+class DeliveryCredential:
+    token: str
+    username: str = "x-access-token"
+
+
+class DeliveryCredentialProvider(Protocol):
+    def isolation_status(self) -> tuple[bool, str]: ...
+
+    def resolve(self) -> DeliveryCredential: ...
+
+
+class CallableCredentialProvider:
+    def __init__(
+        self,
+        resolver: Callable[[], DeliveryCredential],
+        *,
+        isolated_from_agent: bool,
+        description: str,
+    ):
+        self._resolver = resolver
+        self._isolated = isolated_from_agent
+        self._description = description
+
+    def isolation_status(self) -> tuple[bool, str]:
+        return self._isolated, self._description
+
+    def resolve(self) -> DeliveryCredential:
+        if not self._isolated:
+            raise RuntimeError("Credential provider is accessible to the remediation identity")
+        return self._resolver()
+
+
+@dataclass(frozen=True)
+class DeliveryContext:
+    request: RemediationRequest
+    workspace: RunWorkspace
+    baseline: RepositoryBaseline
+    validation: ValidationReport
+    agent_summary: str
+
+
+class DeliveryAdapter(Protocol):
+    name: str
+
+    def preflight(self, request: RemediationRequest) -> DeliveryPreflight: ...
+
+    def deliver(self, context: DeliveryContext) -> DeliveryResult: ...
+
+
+class ManualDeliveryAdapter:
+    name = "manual"
+
+    def preflight(self, request: RemediationRequest) -> DeliveryPreflight:
+        return DeliveryPreflight(False, self.name, "Automated delivery is not configured")
+
+    def deliver(self, context: DeliveryContext) -> DeliveryResult:
+        return DeliveryResult(
+            False,
+            "VALIDATED_MANUAL_DELIVERY_REQUIRED",
+            reason="Automated delivery is disabled; validated artifacts are retained for manual delivery",
+        )
+
+
+class GitHubRestDeliveryAdapter:
+    name = "git+github-rest"
+
+    def __init__(
+        self,
+        config: DeliveryConfig,
+        credential_provider: DeliveryCredentialProvider,
+        process_runner: ProcessRunner,
+        trace: TraceStore,
+        http_post: Callable[..., Any] | None = None,
+    ):
+        self.config = config
+        self.credential_provider = credential_provider
+        self.process_runner = process_runner
+        self.trace = trace
+        self.http_post = http_post
+
+    def preflight(self, request: RemediationRequest) -> DeliveryPreflight:
+        if request.delivery.mode != "auto":
+            return DeliveryPreflight(False, self.name, "Request selected validation-only/manual delivery mode")
+        isolated, reason = self.credential_provider.isolation_status()
+        if not isolated:
+            return DeliveryPreflight(False, self.name, f"Credential isolation unavailable: {reason}")
+        if not _github_repository_name(request.repository_url):
+            return DeliveryPreflight(False, self.name, "Repository URL is not a supported GitHub remote")
+        return DeliveryPreflight(True, self.name, "Adapter and isolated credential provider are configured")
+
+    def deliver(self, context: DeliveryContext) -> DeliveryResult:
+        preflight = self.preflight(context.request)
+        if not preflight.eligible:
+            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", reason=preflight.reason)
+        actual_digest = digest_changed_paths(context.workspace.repository, context.validation.changed_files)
+        if actual_digest != context.validation.tree_digest:
+            return DeliveryResult(False, "DELIVERY_ABORTED", reason="Validated tree digest changed before delivery")
+        if not context.validation.passed:
+            return DeliveryResult(False, "DELIVERY_ABORTED", reason="Deterministic validation did not pass")
+        if not context.validation.delivery_eligible:
+            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", reason="Validation passed but request constraints prohibit automated delivery")
+        branch = _branch_name(self.config.branch_prefix, context.baseline.reference, context.baseline.commit)
+        commands = []
+        for command in (
+            ["git", "reset", "--mixed", context.baseline.commit],
+            ["git", "checkout", "-b", branch],
+            ["git", "add", "-A", "--", *context.validation.changed_files],
+            [
+                "git",
+                "-c",
+                "user.name=Autonomous OSS Remediation",
+                "-c",
+                "user.email=oss-remediation@localhost",
+                "commit",
+                "--no-verify",
+                "-m",
+                "Remediate OSS vulnerabilities",
+            ],
+        ):
+            result = self.process_runner.run_argv(
+                command,
+                cwd=context.workspace.repository,
+                source="delivery_git",
+            )
+            commands.append(result.to_dict())
+            if not result.succeeded:
+                return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, reason=result.stderr, evidence={"commands": commands})
+        commit_result = self.process_runner.run_argv(
+            ["git", "rev-parse", "HEAD"],
+            cwd=context.workspace.repository,
+            source="delivery_git",
+        )
+        commit = commit_result.stdout.strip() if commit_result.succeeded else None
+        isolated, reason = self.credential_provider.isolation_status()
+        if not isolated:
+            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, commit=commit, reason=f"Credential isolation lost: {reason}")
+        try:
+            credential = self.credential_provider.resolve()
+        except Exception as exc:
+            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, commit=commit, reason=f"Credential resolution failed closed: {exc}")
+        push_result = self._push(context.workspace, context.baseline.remote_url, branch, credential)
+        commands.append(push_result.to_dict())
+        if not push_result.succeeded:
+            return DeliveryResult(
+                False,
+                "VALIDATED_MANUAL_DELIVERY_REQUIRED",
+                branch=branch,
+                commit=commit,
+                reason="Validated commit was created but push failed",
+                evidence={"commands": commands},
+            )
+        repository_name = _github_repository_name(context.request.repository_url)
+        title = "Remediate OSS vulnerabilities"
+        body = build_pull_request_body(context)
+        response = self._create_pull_request(repository_name or "", branch, context.baseline.reference, title, body, credential)
+        if not response["succeeded"]:
+            return DeliveryResult(
+                False,
+                "VALIDATED_MANUAL_DELIVERY_REQUIRED",
+                branch=branch,
+                commit=commit,
+                reason=response["error"],
+                evidence={"commands": commands, "github": response["evidence"]},
+            )
+        result = DeliveryResult(
+            True,
+            "SUCCESS",
+            branch=branch,
+            commit=commit,
+            pull_request_url=response["url"],
+            evidence={"commands": commands, "github": response["evidence"]},
+        )
+        self.trace.write_json("delivery/result.json", result.to_dict())
+        return result
+
+    def _push(self, workspace: RunWorkspace, remote_url: str, branch: str, credential: DeliveryCredential):
+        delivery_home = workspace.temp / "delivery-home"
+        delivery_home.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="delivery-askpass-", dir=workspace.temp) as directory:
+            askpass = Path(directory) / ("askpass.cmd" if os.name == "nt" else "askpass.sh")
+            if os.name == "nt":
+                askpass.write_text(
+                    "@echo off\r\n"
+                    "echo %~1 | findstr /I \"Username\" >nul && (echo %GIT_ASKPASS_USERNAME% & exit /b 0)\r\n"
+                    "echo %GIT_ASKPASS_SECRET%\r\n",
+                    encoding="utf-8",
+                )
+            else:
+                askpass.write_text(
+                    "#!/bin/sh\n"
+                    "case \"$1\" in *Username*) printf '%s\\n' \"$GIT_ASKPASS_USERNAME\" ;; "
+                    "*) printf '%s\\n' \"$GIT_ASKPASS_SECRET\" ;; esac\n",
+                    encoding="utf-8",
+                )
+                askpass.chmod(askpass.stat().st_mode | stat.S_IXUSR)
+            environment = os.environ.copy()
+            environment.update(
+                {
+                    "HOME": str(delivery_home),
+                    "USERPROFILE": str(delivery_home),
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_CONFIG_GLOBAL": "NUL" if os.name == "nt" else "/dev/null",
+                    "GIT_ASKPASS": str(askpass),
+                    "GIT_TERMINAL_PROMPT": "0",
+                    "GIT_ASKPASS_USERNAME": credential.username,
+                    "GIT_ASKPASS_SECRET": credential.token,
+                }
+            )
+            return self.process_runner.run_argv(
+                [
+                    "git",
+                    "-c",
+                    "credential.helper=",
+                    "-c",
+                    f"core.hooksPath={'NUL' if os.name == 'nt' else '/dev/null'}",
+                    "push",
+                    "--no-verify",
+                    remote_url,
+                    branch,
+                ],
+                cwd=workspace.repository,
+                environment=environment,
+                source="delivery_push",
+            )
+
+    def _create_pull_request(
+        self,
+        repository_name: str,
+        branch: str,
+        base: str,
+        title: str,
+        body: str,
+        credential: DeliveryCredential,
+    ) -> dict[str, Any]:
+        post = self.http_post
+        if post is None:
+            import requests
+
+            post = requests.post
+        url = f"{self.config.github_api_base.rstrip('/')}/repos/{repository_name}/pulls"
+        try:
+            response = post(
+                url,
+                headers={
+                    "Authorization": f"Bearer {credential.token}",
+                    "Accept": "application/vnd.github+json",
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+                json={"title": title, "body": body, "head": branch, "base": base, "draft": self.config.draft},
+                timeout=60,
+            )
+            status_code = int(getattr(response, "status_code", 0))
+            payload = response.json() if hasattr(response, "json") else {}
+        except Exception as exc:
+            return {"succeeded": False, "error": f"GitHub PR request failed: {exc}", "evidence": {}}
+        evidence = {"statusCode": status_code, "response": _redacted_response(payload)}
+        if status_code not in (200, 201):
+            return {"succeeded": False, "error": f"GitHub PR creation failed with HTTP {status_code}", "evidence": evidence}
+        return {"succeeded": True, "url": payload.get("html_url"), "evidence": evidence}
+
+
+def build_pull_request_body(context: DeliveryContext) -> str:
+    findings = "\n".join(
+        f"- {finding.vulnerability_id} in `{finding.coordinate}` ({finding.severity})"
+        for finding in context.baseline.target_findings
+    ) or "- No explicit target finding IDs were selected."
+    checks = "\n".join(
+        f"- {'PASS' if check.passed else 'FAIL'}: {check.name} - {check.message}"
+        for check in context.validation.checks
+    )
+    changed = "\n".join(f"- `{path}`" for path in context.validation.changed_files) or "- No changed paths recorded."
+    return (
+        "## OSS Remediation\n\n"
+        f"### Findings addressed\n{findings}\n\n"
+        f"### Changed files\n{changed}\n\n"
+        f"### Deterministic validation\n{checks}\n\n"
+        f"### Agent rationale\n{context.agent_summary or 'No agent summary was provided.'}\n"
+    )
+
+
+def digest_changed_paths(repository: Path, changed_files: tuple[str, ...]) -> str:
+    digest = hashlib.sha256()
+    for relative in sorted(changed_files):
+        digest.update(relative.encode("utf-8"))
+        path = repository / relative
+        if path.is_symlink():
+            digest.update(b"<symlink>")
+            digest.update(str(path.readlink()).encode("utf-8"))
+        elif path.is_file():
+            digest.update(f"<mode:{path.stat().st_mode & 0o777:o}>".encode("ascii"))
+            digest.update(sha256_file(path).encode("ascii"))
+        else:
+            digest.update(b"<deleted>")
+    return digest.hexdigest()
+
+
+def _github_repository_name(repository_url: str) -> str | None:
+    value = repository_url.strip()
+    if value.startswith("git@github.com:"):
+        name = value.split(":", 1)[1]
+    else:
+        parsed = urlparse(value)
+        if parsed.hostname not in {"github.com", "www.github.com"}:
+            return None
+        name = parsed.path.lstrip("/")
+    if name.endswith(".git"):
+        name = name[:-4]
+    return name if re.fullmatch(r"[^/]+/[^/]+", name) else None
+
+
+def _branch_name(prefix: str, reference: str, commit: str) -> str:
+    safe_reference = re.sub(r"[^A-Za-z0-9._-]+", "-", reference).strip("-") or "branch"
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{prefix}-{safe_reference}-{commit[:7]}-{timestamp}"
+
+
+def _redacted_response(payload: Any) -> Any:
+    if not isinstance(payload, dict):
+        return {}
+    return {key: payload.get(key) for key in ("html_url", "number", "state", "draft", "message") if key in payload}

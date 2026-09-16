@@ -487,72 +487,74 @@ Once the design proposal is approved, implement against this checklist. Keep thi
 
 ## Independent implementation
 
-- [ ] New autonomous package created
-- [ ] Existing `oss_remediation_agent` remains functionally unchanged
-- [ ] New implementation has no runtime imports from existing agent
-- [ ] Independent configuration/entry point exists
+- [x] New autonomous package created
+- [x] Existing `oss_remediation_agent` remains functionally unchanged
+- [x] New implementation has no runtime imports from existing agent
+- [x] Independent configuration/entry point exists
 
 ## Preparation and baseline
 
-- [ ] Isolated workspace creation implemented
-- [ ] Repository clone/reference branch handling implemented
-- [ ] Baseline Maven build implemented
-- [ ] Baseline OSV scan implemented
-- [ ] OSV parsing/normalization implemented
-- [ ] Requested severity/finding scope implemented
-- [ ] Constraint baseline captured
+- [x] Per-run isolated workspace layout implemented (not hard shell containment)
+- [x] Repository clone/reference branch handling implemented
+- [x] Baseline Maven build implemented
+- [x] Baseline OSV scan implemented
+- [x] OSV parsing/normalization implemented
+- [x] Requested severity/finding scope implemented
+- [x] Constraint baseline captured
 
 ## Autonomous engineering agent
 
-- [ ] One primary ADK remediation LLM agent implemented
-- [ ] Repository inspection/reading capability available
-- [ ] Repository search/discovery capability available
-- [ ] File creation/editing/patch capability available
-- [ ] Required developer command/execution capability available
-- [ ] stdout/stderr/exit/failure evidence available where applicable
-- [ ] Timeout/resource boundaries enforced where applicable
-- [ ] Approved workspace/integration boundaries enforced
-- [ ] Tool/plugin/integration flexibility supported within policy
-- [ ] No rigid patch-plan interpreter required
-- [ ] No vulnerability-specific remediation strategy hard-coded
-- [ ] Selected tool/integration mechanism matches the approved design rather than an unreviewed assumption
+- [x] One primary ADK remediation LLM agent implemented
+- [x] Repository inspection/reading capability available
+- [x] Repository search/discovery capability available
+- [x] File creation/editing/patch capability available
+- [x] Required developer command/execution capability available
+- [x] stdout/stderr/exit/failure evidence available where applicable
+- [x] Timeout/resource boundaries enforced where applicable
+- [x] Approved workspace/integration boundaries enforced
+- [x] Tool/plugin/integration flexibility supported within policy
+- [x] No rigid patch-plan interpreter required
+- [x] No vulnerability-specific remediation strategy hard-coded
+- [x] Selected tool/integration mechanism matches the approved design rather than an unreviewed assumption
 
 ## Validation and iteration
 
-- [ ] Independent Maven build/test validation implemented
-- [ ] Independent fresh OSV rescan implemented
-- [ ] Target finding resolution comparison implemented
-- [ ] New prohibited vulnerability detection implemented
-- [ ] User constraint validation implemented
-- [ ] Suppression/ignore policy validation implemented where applicable
-- [ ] Git diff captured/reviewable
-- [ ] Structured validation feedback implemented
-- [ ] Failed validation returns evidence to the same autonomous agent/workspace
-- [ ] Maximum remediation/validation cycles enforced
-- [ ] Command/tool/runtime budget behavior implemented
-- [ ] Truthful incomplete/manual-review outcome implemented
+- [x] Independent Maven build/test validation implemented
+- [x] Independent fresh OSV rescan implemented
+- [x] Target finding resolution comparison implemented
+- [x] New prohibited vulnerability detection implemented
+- [x] User constraint validation implemented
+- [x] Suppression/ignore policy validation implemented where applicable
+- [x] Git diff captured/reviewable
+- [x] Structured validation feedback implemented
+- [x] Failed validation returns evidence to the same autonomous agent/workspace
+- [x] Maximum remediation/validation cycles enforced
+- [x] Command/tool/runtime budget behavior implemented
+- [x] Truthful incomplete/manual-review outcome implemented
 
 ## Delivery
 
-- [ ] Delivery gated on deterministic validation success
-- [ ] Remediation branch handling implemented
-- [ ] Commit implemented
-- [ ] Push implemented
-- [ ] Draft PR creation implemented
-- [ ] PR summary includes remediation and validation evidence
+- [x] Delivery gated on deterministic validation success
+- [x] Remediation branch handling implemented
+- [x] Commit implemented
+- [x] Push implemented
+- [x] Draft PR creation implemented
+- [x] PR summary includes remediation and validation evidence
 
 ## Traceability and tests
 
-- [ ] Baseline evidence retained
-- [ ] Relevant tool/command actions traceable
-- [ ] Validation cycles traceable
-- [ ] Final build/scan/constraint evidence retained
-- [ ] Unit/focused tests added
-- [ ] Workspace/integration boundary behavior tested
-- [ ] Validation failure feedback loop tested
-- [ ] Execution budget exhaustion tested
-- [ ] Delivery gating tested
-- [ ] End-to-end vulnerable Maven/Spring demo smoke test performed where practical
+- [x] Baseline evidence retained
+- [x] Relevant tool/command actions traceable
+- [x] Validation cycles traceable
+- [x] Final build/scan/constraint evidence retained
+- [x] Unit/focused tests added
+- [x] Workspace/integration boundary behavior tested
+- [x] Validation failure feedback loop tested
+- [x] Execution budget exhaustion tested
+- [x] Delivery gating tested
+- [x] End-to-end vulnerable Maven/Spring demo smoke test performed where practical
+
+Implementation and test evidence for these statuses is recorded in `docs/AUTONOMOUS_OSS_REMEDIATION_IMPLEMENTATION_REVIEW.md`. A live model-backed run and real GitHub delivery remain deployment prerequisites rather than silently assumed evidence.
 
 ---
 

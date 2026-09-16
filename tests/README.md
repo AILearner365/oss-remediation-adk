@@ -39,11 +39,20 @@ make test
 Run checks individually:
 
 ```bash
-python -m compileall -q oss_remediation_agent
+python -m compileall -q oss_remediation_agent autonomous_oss_remediation_agent
 python -m unittest discover -s tests/unit -p "test_*.py" -v
 python -m unittest discover -s tests/integration -p "test_*.py" -v
 python -m unittest discover -s tests/e2e -p "test_*.py" -v
 ```
+
+Run the independent autonomous POC coverage without the legacy workflow suites:
+
+```bash
+python -m unittest tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_validation_delivery -v
+python -m unittest tests.integration.test_autonomous_orchestrator -v
+```
+
+The real Maven/OSV autonomous smoke profile is opt-in through `RUN_AUTONOMOUS_REAL_E2E=1` and `AUTONOMOUS_OSV_SCANNER=<absolute executable path>`.
 
 Make targets:
 
