@@ -21,6 +21,8 @@ from .models import (
     Outcome,
     RepositoryBaseline,
     RunResult,
+    ScanFailureKind,
+    ScanReport,
     ValidationReport,
 )
 from .prompt import initial_message, validation_feedback
@@ -30,6 +32,19 @@ from .workspace import RunWorkspace, TraceStore
 AgentSessionFactory = Callable[[DeveloperCapabilitySet, str], AgentSession]
 ScannerFactory = Callable[[ScannerConfig, RunWorkspace, ProcessRunner, TraceStore], VulnerabilityScanner]
 DeliveryAdapterFactory = Callable[[RunWorkspace, ProcessRunner, TraceStore], DeliveryAdapter]
+
+
+_SCANNER_INFRASTRUCTURE_FAILURES = frozenset(
+    {
+        ScanFailureKind.AUTHENTICATION,
+        ScanFailureKind.AUTHORIZATION,
+        ScanFailureKind.NETWORK,
+        ScanFailureKind.TIMEOUT,
+        ScanFailureKind.CONFIGURATION,
+        ScanFailureKind.INVALID_RESPONSE,
+        ScanFailureKind.BACKEND,
+    }
+)
 
 
 class AutonomousRemediationOrchestrator:
@@ -156,6 +171,23 @@ class AutonomousRemediationOrchestrator:
                 summaries.append(turn.text)
                 trace.write_json(f"agent/cycle-{cycle}.json", {"summary": turn.text})
                 last_validation = validator.validate(cycle, baseline)
+                if _is_scanner_infrastructure_failure(last_validation.scan):
+                    await agent_session.close()
+                    agent_closed = True
+                    scan = last_validation.scan
+                    return self._finish(
+                        trace,
+                        RunResult(
+                            Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED,
+                            "VALIDATION_SCANNER_FAILURE: "
+                            f"{scan.effective_outcome.value}: {scan.error}",
+                            str(workspace.root),
+                            baseline=baseline,
+                            validation=last_validation,
+                            cycles_completed=cycle,
+                            agent_summaries=tuple(summaries),
+                        ),
+                    )
                 if last_validation.passed:
                     await agent_session.close()
                     agent_closed = True
@@ -274,3 +306,11 @@ class AutonomousRemediationOrchestrator:
         trace.write_json("final-result.json", result.to_dict())
         trace.append_event("run_finished", outcome=result.outcome.value, reason=result.reason)
         return result
+
+
+def _is_scanner_infrastructure_failure(report: ScanReport | None) -> bool:
+    return bool(
+        report
+        and not report.succeeded
+        and report.failure_kind in _SCANNER_INFRASTRUCTURE_FAILURES
+    )

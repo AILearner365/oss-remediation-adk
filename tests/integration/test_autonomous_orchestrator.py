@@ -21,6 +21,8 @@ from autonomous_oss_remediation_agent.models import (
     DeliveryPreflight,
     DeliveryResult,
     Outcome,
+    ScanFailureKind,
+    ScanOutcome,
     ScanReport,
     ScannerHandle,
     VulnerabilityFinding,
@@ -90,6 +92,44 @@ class _RetryingFixtureScanner(OsvScanner):
                 stderr="HTTP 429 Too Many Requests",
             )
         return CommandResult([handle.executable], str(repository), 0, stdout='{"results": []}')
+
+
+class _InfrastructureFailingScanner(_FixtureScanner):
+    def scan(self, repository, severity_scope, label):
+        if label == "baseline":
+            return super().scan(repository, severity_scope, label)
+        raw = self.workspace.artifacts / "scans" / f"{label}.json"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        raw.write_text("{}", encoding="utf-8")
+        return ScanReport(
+            False,
+            (),
+            CommandResult(["xray"], str(repository), 0, stdout="{}"),
+            str(raw),
+            error="TIMEOUT: XRAY_POLL_TIMEOUT",
+            outcome=ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE,
+            backend="xray",
+            failure_kind=ScanFailureKind.TIMEOUT,
+        )
+
+
+class _BaselineInfrastructureFailingScanner(_InfrastructureFailingScanner):
+    def scan(self, repository, severity_scope, label):
+        if label != "baseline":
+            return super().scan(repository, severity_scope, label)
+        raw = self.workspace.artifacts / "scans" / f"{label}.json"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        raw.write_text("{}", encoding="utf-8")
+        return ScanReport(
+            False,
+            (),
+            CommandResult(["xray"], str(repository), 0, stdout="{}"),
+            str(raw),
+            error="BACKEND: XRAY_BACKEND_UNAVAILABLE",
+            outcome=ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE,
+            backend="xray",
+            failure_kind=ScanFailureKind.BACKEND,
+        )
 
 
 class _ScriptedAgentSession:
@@ -233,6 +273,39 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             [("baseline", 1), ("validation-cycle-1", 1), ("validation-cycle-1", 2)],
             scanners[0].execution_labels,
         )
+
+    def test_exhausted_scanner_failure_does_not_start_another_agent_cycle(self):
+        sessions = []
+
+        def agent_factory(capabilities, model):
+            session = _ScriptedAgentSession(capabilities, [("1.0", "2.0")])
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=agent_factory,
+            scanner_factory=_InfrastructureFailingScanner,
+        ).run()
+
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertIn("VALIDATION_SCANNER_FAILURE", result.reason)
+        self.assertEqual(1, result.cycles_completed)
+        self.assertEqual(1, len(sessions[0].messages))
+        self.assertTrue(sessions[0].closed)
+        self.assertEqual(ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, result.validation.scan.effective_outcome)
+
+    def test_baseline_scanner_failure_stops_before_agent_creation(self):
+        invoked = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: invoked.append(True),
+            scanner_factory=_BaselineInfrastructureFailingScanner,
+        ).run()
+
+        self.assertEqual(Outcome.BASELINE_FAILURE, result.outcome)
+        self.assertIn("INCOMPLETE_RETRYABLE_FAILURE", result.reason)
+        self.assertEqual([], invoked)
 
     def test_cycle_budget_exhaustion_is_truthful(self):
         request = self._request(max_cycles=1)

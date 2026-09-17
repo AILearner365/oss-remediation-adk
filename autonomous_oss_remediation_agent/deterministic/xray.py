@@ -27,6 +27,10 @@ class _XrayFailure:
     retryable: bool = False
 
 
+_SUBMIT_MAX_ATTEMPTS = 2
+_MAX_MALFORMED_POLL_RETRIES = 1
+
+
 class XrayScanner:
     backend = "xray"
 
@@ -99,35 +103,88 @@ class XrayScanner:
             )
         attempts: list[dict[str, Any]] = []
         headers, secrets = self._authorization()
-        try:
-            submit_response = self._request(
-                "POST",
-                f"{config.url.rstrip('/')}/api/v1/scan/graph",
-                headers,
-                graph,
-            )
-        except requests.Timeout:
-            return self._http_failure(
-                label,
-                command_result,
-                raw_path,
-                base_evidence,
-                attempts,
-                _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_REQUEST_TIMEOUT", True),
-            )
-        except requests.RequestException:
-            return self._http_failure(
-                label,
-                command_result,
-                raw_path,
-                base_evidence,
-                attempts,
-                _XrayFailure(ScanFailureKind.NETWORK, "XRAY_NETWORK_FAILURE", True),
-            )
-        attempts.append({"phase": "submit", "httpStatus": submit_response.status_code})
+        submit_response = None
+        for submit_attempt in range(1, _SUBMIT_MAX_ATTEMPTS + 1):
+            try:
+                submit_response = self._request(
+                    "POST",
+                    f"{config.url.rstrip('/')}/api/v1/scan/graph",
+                    headers,
+                    graph,
+                )
+            except requests.ConnectTimeout:
+                retry_scheduled = submit_attempt < _SUBMIT_MAX_ATTEMPTS
+                attempts.append(
+                    {
+                        "phase": "submit",
+                        "attemptNumber": submit_attempt,
+                        "failure": "CONNECT_TIMEOUT",
+                        "retryScheduled": retry_scheduled,
+                    }
+                )
+                if retry_scheduled:
+                    self.sleep(config.poll_interval_seconds)
+                    continue
+                return self._http_failure(
+                    label,
+                    command_result,
+                    raw_path,
+                    base_evidence,
+                    attempts,
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_CONNECT_TIMEOUT", True),
+                )
+            except requests.Timeout:
+                attempts.append(
+                    {
+                        "phase": "submit",
+                        "attemptNumber": submit_attempt,
+                        "failure": "TIMEOUT",
+                        "retryScheduled": False,
+                    }
+                )
+                return self._http_failure(
+                    label,
+                    command_result,
+                    raw_path,
+                    base_evidence,
+                    attempts,
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_SUBMISSION_OUTCOME_UNKNOWN"),
+                )
+            except requests.RequestException:
+                attempts.append(
+                    {
+                        "phase": "submit",
+                        "attemptNumber": submit_attempt,
+                        "failure": "NETWORK",
+                        "retryScheduled": False,
+                    }
+                )
+                return self._http_failure(
+                    label,
+                    command_result,
+                    raw_path,
+                    base_evidence,
+                    attempts,
+                    _XrayFailure(ScanFailureKind.NETWORK, "XRAY_SUBMISSION_OUTCOME_UNKNOWN"),
+                )
+            break
+        if submit_response is None:
+            raise AssertionError("Xray submission did not produce a response")
+        attempts.append(
+            {
+                "phase": "submit",
+                "attemptNumber": submit_attempt,
+                "httpStatus": submit_response.status_code,
+            }
+        )
         submit_failure = _http_failure(submit_response.status_code)
         if submit_failure:
             raw_path.write_text(_redact(_response_text(submit_response), secrets), encoding="utf-8")
+            if submit_failure.retryable:
+                submit_failure = _XrayFailure(
+                    submit_failure.kind,
+                    "XRAY_SUBMISSION_OUTCOME_UNKNOWN",
+                )
             return self._http_failure(
                 label,
                 command_result,
@@ -156,38 +213,84 @@ class XrayScanner:
                 raw_path,
                 base_evidence,
                 attempts,
-                _XrayFailure(ScanFailureKind.INVALID_RESPONSE, "XRAY_MISSING_SCAN_ID"),
+                _XrayFailure(ScanFailureKind.INVALID_RESPONSE, "XRAY_SUBMISSION_OUTCOME_UNKNOWN"),
             )
         evidence = {**base_evidence, "scanId": scan_id}
         deadline = self.monotonic() + config.poll_timeout_seconds
+        malformed_poll_retries = 0
         while True:
+            remaining = deadline - self.monotonic()
+            if remaining <= 0:
+                return self._http_failure(
+                    label,
+                    command_result,
+                    raw_path,
+                    evidence,
+                    attempts,
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
+                )
             try:
                 response = self._request(
                     "GET",
                     f"{config.url.rstrip('/')}/api/v1/scan/graph/{scan_id}?include_vulnerabilities=true",
                     headers,
+                    timeout_seconds=remaining,
                 )
             except requests.Timeout:
+                attempts.append(
+                    {
+                        "phase": "poll",
+                        "failure": "TIMEOUT",
+                        "retryScheduled": False,
+                    }
+                )
+                if self._wait_for_poll_retry(deadline):
+                    attempts[-1]["retryScheduled"] = True
+                    continue
                 return self._http_failure(
                     label,
                     command_result,
                     raw_path,
                     evidence,
                     attempts,
-                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_REQUEST_TIMEOUT", True),
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
                 )
             except requests.RequestException:
+                attempts.append(
+                    {
+                        "phase": "poll",
+                        "failure": "NETWORK",
+                        "retryScheduled": False,
+                    }
+                )
+                if self._wait_for_poll_retry(deadline):
+                    attempts[-1]["retryScheduled"] = True
+                    continue
                 return self._http_failure(
                     label,
                     command_result,
                     raw_path,
                     evidence,
                     attempts,
-                    _XrayFailure(ScanFailureKind.NETWORK, "XRAY_NETWORK_FAILURE", True),
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
                 )
             attempts.append({"phase": "poll", "httpStatus": response.status_code})
             poll_failure = _http_failure(response.status_code)
             if poll_failure:
+                if poll_failure.retryable:
+                    attempts[-1]["failure"] = poll_failure.code
+                    attempts[-1]["retryScheduled"] = False
+                    if self._wait_for_poll_retry(deadline, response):
+                        attempts[-1]["retryScheduled"] = True
+                        continue
+                    return self._http_failure(
+                        label,
+                        command_result,
+                        raw_path,
+                        evidence,
+                        attempts,
+                        _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
+                    )
                 raw_path.write_text(_redact(_response_text(response), secrets), encoding="utf-8")
                 return self._http_failure(
                     label,
@@ -200,8 +303,26 @@ class XrayScanner:
             payload = _response_json(response) if response.status_code != 202 else None
             status = str(payload.get("status") or "").strip().lower() if isinstance(payload, dict) else ""
             if response.status_code == 202 or status in {"pending", "in_progress", "in progress"}:
-                remaining = deadline - self.monotonic()
-                if remaining <= 0:
+                attempts[-1]["retryScheduled"] = False
+                if self._wait_for_poll_retry(deadline, response):
+                    attempts[-1]["retryScheduled"] = True
+                    continue
+                return self._http_failure(
+                    label,
+                    command_result,
+                    raw_path,
+                    evidence,
+                    attempts,
+                    _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
+                )
+            if response.status_code == 200 and payload is None:
+                attempts[-1]["failure"] = "INVALID_JSON"
+                retry_scheduled = malformed_poll_retries < _MAX_MALFORMED_POLL_RETRIES
+                attempts[-1]["retryScheduled"] = retry_scheduled
+                if retry_scheduled:
+                    malformed_poll_retries += 1
+                    if self._wait_for_poll_retry(deadline):
+                        continue
                     return self._http_failure(
                         label,
                         command_result,
@@ -210,8 +331,6 @@ class XrayScanner:
                         attempts,
                         _XrayFailure(ScanFailureKind.TIMEOUT, "XRAY_POLL_TIMEOUT", True),
                     )
-                self.sleep(min(config.poll_interval_seconds, remaining))
-                continue
             raw_path.write_text(_redact(_response_text(response), secrets), encoding="utf-8")
             if response.status_code != 200 or not isinstance(payload, dict):
                 return self._http_failure(
@@ -291,20 +410,37 @@ class XrayScanner:
         url: str,
         authorization: dict[str, str],
         payload: dict[str, Any] | None = None,
+        timeout_seconds: float | None = None,
     ):
         config = self._verified_config()
         headers = {**authorization, "Accept": "application/json"}
         if payload is not None:
             headers["Content-Type"] = "application/json"
         verify: bool | str = str(Path(config.ca_bundle).expanduser()) if config.ca_bundle else config.verify_tls
+        connect_timeout = config.connect_timeout_seconds
+        read_timeout = config.read_timeout_seconds
+        if timeout_seconds is not None:
+            connect_timeout = max(0.001, min(connect_timeout, timeout_seconds))
+            read_timeout = max(0.001, min(read_timeout, timeout_seconds))
         return self.session.request(
             method,
             url,
             headers=headers,
             json=payload,
-            timeout=(config.connect_timeout_seconds, config.read_timeout_seconds),
+            timeout=(connect_timeout, read_timeout),
             verify=verify,
         )
+
+    def _wait_for_poll_retry(self, deadline: float, response: Any | None = None) -> bool:
+        remaining = deadline - self.monotonic()
+        if remaining <= 0:
+            return False
+        delay = self._verified_config().poll_interval_seconds
+        retry_after = _retry_after_seconds(response)
+        if retry_after is not None:
+            delay = max(delay, retry_after)
+        self.sleep(min(delay, remaining))
+        return True
 
     def _resolve_graph(
         self,
@@ -610,6 +746,18 @@ def _http_failure(status_code: int) -> _XrayFailure | None:
     if status_code >= 400:
         return _XrayFailure(ScanFailureKind.BACKEND, "XRAY_REQUEST_REJECTED")
     return None
+
+
+def _retry_after_seconds(response: Any | None) -> float | None:
+    headers = getattr(response, "headers", None)
+    if not headers:
+        return None
+    value = headers.get("Retry-After")
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return None
+    return seconds if seconds >= 0 else None
 
 
 def _response_text(response: Any) -> str:
