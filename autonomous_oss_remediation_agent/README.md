@@ -27,10 +27,10 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
 
 ```json
 {
-  "repositoryUrl": "https://github.com/example/project.git",
-  "referenceBranch": "main",
+  "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app",
+  "referenceBranch": "main-runrunning",
   "workspaceParent": "autonomous-oss-remediation-workspaces",
-  "vulnerabilityIds": ["CVE-2021-44228"],
+  "vulnerabilityIds": [],
   "severityScope": ["CRITICAL", "HIGH"],
   "buildCommands": ["mvn clean verify"],
   "model": "gemini-2.5-flash",
@@ -51,9 +51,9 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
   },
   "scanner": {
     "mode": "configured",
-    "executable": "C:/approved-tools/osv-scanner.exe",
+    "executable": "/home/kavya_parivarababu/bin/osv-scanner",
     "version": "2.6.0",
-    "sha256": "approved-executable-sha256"
+    "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
   },
   "constraints": {
     "prohibit_suppressions": true,
@@ -63,13 +63,17 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
         "allow_minor": true,
         "allow_major": false,
         "allow_downgrade": false,
-        "approved_versions": ["4.0.7"],
+        "approved_versions": [],
         "required_version": null
       }
     }
   },
   "delivery": {
-    "mode": "manual"
+    "mode": "auto",
+    "adapter": "github-rest",
+    "branch_prefix": "autonomous-oss-remediation",
+    "draft": true,
+    "github_api_base": "https://api.github.com"
   }
 }
 ```
@@ -78,8 +82,11 @@ Install the independent dependencies and run:
 
 ```text
 python -m pip install -r autonomous_oss_remediation_agent/requirements.txt
+export GH_TOKEN="<short-lived-token-with-repository-write-access>"
 python -m autonomous_oss_remediation_agent.cli request.json --output result.json
 ```
+
+In PowerShell, set the token with `$env:GH_TOKEN = "<short-lived-token-with-repository-write-access>"` before running the CLI.
 
 The `allowNetwork` value declares the approved runner network mode; the local backend does not claim destination-level egress enforcement.
 
@@ -102,13 +109,13 @@ The agent receives this policy as an allowed boundary and chooses whether and ho
 - When `vulnerabilityIds` is empty, every baseline finding matching `severityScope` is a remediation target.
 - Validation continues to reject newly introduced findings in the prohibited severities independently of target selection.
 
-Before the first model-backed POC, replace the repository and scanner placeholders, confirm the configured scanner version and checksum, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity. Keep `delivery.mode` set to `manual`; the stock CLI does not enable automated GitHub delivery.
+Before the first model-backed POC, replace the repository and scanner placeholders, confirm the configured scanner version and checksum, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity.
 
 ## Delivery
 
-The stock CLI uses `ManualDeliveryAdapter` and therefore ends a validated remediation as `PARTIAL / MANUAL REVIEW REQUIRED` with `VALIDATED_MANUAL_DELIVERY_REQUIRED`.
+The stock CLI uses `ManualDeliveryAdapter` when `delivery.mode` is not `auto`. For automatic GitHub delivery, set `delivery.mode` to `auto`, select `github`, `github-rest`, or `git+github-rest`, and provide `GH_TOKEN` (preferred) or `GITHUB_TOKEN` to the runner process. The token must have permission to push a branch and create a pull request in the target repository.
 
-Automated delivery requires an explicitly injected approved `DeliveryAdapter`, normally through the orchestrator's per-run `delivery_adapter_factory` so the adapter receives the run-owned process runner and trace store. The included Git-plus-GitHub-REST adapter requires a credential provider whose secret is genuinely unavailable to the remediation shell identity. Its isolation flag is a deployment attestation, not an isolation mechanism. Never mark an environment-backed credential manager or secret store as isolated when the agent's OS identity can access it. If isolation cannot be established, preflight remains in manual-delivery mode and never resolves a credential.
+The CLI creates the Git-plus-GitHub-REST adapter through the orchestrator's per-run `delivery_adapter_factory`. Environment credentials are withheld from the model-controlled shell by the sanitized agent environment and are resolved only after deterministic validation succeeds. The delivery adapter supplies the token to `git push` through a temporary askpass helper and sends it directly in the GitHub REST authorization header; the token is not included in command arguments or trace evidence. If neither token variable is present, preflight remains in manual-delivery mode and never attempts delivery. This is process-level separation rather than an operating-system security boundary, so use a dedicated runner and a narrowly scoped, short-lived token.
 
 ## Verification
 

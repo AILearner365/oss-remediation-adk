@@ -15,8 +15,10 @@ from autonomous_oss_remediation_agent.integrations.delivery import (
     CallableCredentialProvider,
     DeliveryContext,
     DeliveryCredential,
+    EnvironmentCredentialProvider,
     GitHubRestDeliveryAdapter,
     ManualDeliveryAdapter,
+    configured_delivery_adapter,
     digest_changed_paths,
 )
 from autonomous_oss_remediation_agent.models import (
@@ -75,6 +77,42 @@ class AutonomousValidationDeliveryTests(unittest.TestCase):
         preflight = ManualDeliveryAdapter().preflight(self._request())
         self.assertFalse(preflight.eligible)
         self.assertEqual("manual", preflight.adapter)
+
+    def test_environment_provider_prefers_gh_token(self):
+        provider = EnvironmentCredentialProvider(
+            {"GH_TOKEN": "gh-token", "GITHUB_TOKEN": "github-token"}
+        )
+        isolated, reason = provider.isolation_status()
+        self.assertTrue(isolated)
+        self.assertIn("GH_TOKEN", reason)
+        self.assertEqual("gh-token", provider.resolve().token)
+
+    def test_environment_provider_fails_closed_without_token(self):
+        provider = EnvironmentCredentialProvider({})
+        isolated, reason = provider.isolation_status()
+        self.assertFalse(isolated)
+        self.assertIn("GH_TOKEN", reason)
+        with self.assertRaises(RuntimeError):
+            provider.resolve()
+
+    def test_configured_adapter_uses_environment_token_for_auto_github(self):
+        request = self._request()
+        adapter = configured_delivery_adapter(
+            request,
+            _FakeProcessRunner(),
+            self.trace,
+            {"GH_TOKEN": "secret"},
+        )
+        self.assertIsInstance(adapter, GitHubRestDeliveryAdapter)
+        self.assertTrue(adapter.preflight(request).eligible)
+
+    def test_configured_adapter_remains_manual_when_requested(self):
+        request = RemediationRequest(
+            repository_url="https://github.com/example/repo.git",
+            delivery=DeliveryConfig(mode="manual", adapter="github-rest"),
+        )
+        adapter = configured_delivery_adapter(request, _FakeProcessRunner(), self.trace, {})
+        self.assertIsInstance(adapter, ManualDeliveryAdapter)
 
     def test_github_rest_adapter_delivers_only_validated_digest(self):
         changed = self.workspace.repository / "pom.xml"

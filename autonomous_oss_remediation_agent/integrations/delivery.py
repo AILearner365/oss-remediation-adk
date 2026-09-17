@@ -51,6 +51,36 @@ class CallableCredentialProvider:
         return self._resolver()
 
 
+class EnvironmentCredentialProvider:
+    def __init__(
+        self,
+        environment: dict[str, str] | None = None,
+        variable_names: tuple[str, ...] = ("GH_TOKEN", "GITHUB_TOKEN"),
+    ):
+        self._environment = environment if environment is not None else os.environ
+        self._variable_names = variable_names
+
+    def isolation_status(self) -> tuple[bool, str]:
+        variable_name = self._configured_variable_name()
+        if variable_name is None:
+            expected = " or ".join(self._variable_names)
+            return False, f"No GitHub token is configured; set {expected} for the runner process"
+        return True, f"{variable_name} is available only to deterministic delivery and is removed from the agent shell environment"
+
+    def resolve(self) -> DeliveryCredential:
+        variable_name = self._configured_variable_name()
+        if variable_name is None:
+            expected = " or ".join(self._variable_names)
+            raise RuntimeError(f"No GitHub token is configured; set {expected}")
+        return DeliveryCredential(self._environment[variable_name].strip())
+
+    def _configured_variable_name(self) -> str | None:
+        for variable_name in self._variable_names:
+            if self._environment.get(variable_name, "").strip():
+                return variable_name
+        return None
+
+
 @dataclass(frozen=True)
 class DeliveryContext:
     request: RemediationRequest
@@ -80,6 +110,25 @@ class ManualDeliveryAdapter:
             "VALIDATED_MANUAL_DELIVERY_REQUIRED",
             reason="Automated delivery is disabled; validated artifacts are retained for manual delivery",
         )
+
+
+def configured_delivery_adapter(
+    request: RemediationRequest,
+    process_runner: ProcessRunner,
+    trace: TraceStore,
+    environment: dict[str, str] | None = None,
+) -> DeliveryAdapter:
+    if request.delivery.mode.lower() != "auto":
+        return ManualDeliveryAdapter()
+    adapter = request.delivery.adapter.lower()
+    if adapter not in {"github", "github-rest", "git+github-rest"}:
+        return ManualDeliveryAdapter()
+    return GitHubRestDeliveryAdapter(
+        request.delivery,
+        EnvironmentCredentialProvider(environment),
+        process_runner,
+        trace,
+    )
 
 
 class GitHubRestDeliveryAdapter:

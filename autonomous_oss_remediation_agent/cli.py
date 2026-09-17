@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .config import RemediationRequest
+from .integrations import configured_delivery_adapter
 from .orchestrator import AutonomousRemediationOrchestrator
 
 
@@ -18,7 +19,14 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     request = RemediationRequest.from_json_file(args.request)
-    result = AutonomousRemediationOrchestrator(request).run()
+    result = AutonomousRemediationOrchestrator(
+        request,
+        delivery_adapter_factory=lambda workspace, process_runner, trace: configured_delivery_adapter(
+            request,
+            process_runner,
+            trace,
+        ),
+    ).run()
     serialized = json.dumps(result.to_dict(), indent=2, sort_keys=True) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
