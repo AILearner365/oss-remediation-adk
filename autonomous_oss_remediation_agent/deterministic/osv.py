@@ -9,11 +9,15 @@ import shutil
 import stat
 import tarfile
 import tempfile
+import threading
 import time
 import urllib.request
 import zipfile
+from contextlib import contextmanager
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Iterator
 
 from ..capabilities.execution import ProcessRunner
 from ..config import ScannerConfig
@@ -34,12 +38,14 @@ class OsvScanner:
         *,
         retry_backoff_seconds: tuple[float, ...] = (5.0, 15.0),
         sleep: Callable[[float], None] = time.sleep,
+        maven_repository: Path | None = None,
     ):
         self.workspace = workspace
         self.process_runner = process_runner
         self.trace = trace
         self.retry_backoff_seconds = retry_backoff_seconds
         self.sleep = sleep
+        self.maven_repository = maven_repository or _default_maven_repository()
         self.handle: ScannerHandle | None = None
 
     def preflight(self, config: ScannerConfig) -> ScannerHandle:
@@ -147,17 +153,17 @@ class OsvScanner:
                 staged,
                 ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
             )
+            if self.maven_repository.is_dir():
+                with _serve_maven_repository(self.maven_repository) as registry_url:
+                    command = _scan_command(handle.executable, staged, "native", registry_url)
+                    return self.process_runner.run_argv(
+                        command,
+                        cwd=staged,
+                        source=f"osv_{label}_attempt_{attempt_number}",
+                    )
+            command = _scan_command(handle.executable, staged, "deps.dev")
             return self.process_runner.run_argv(
-                [
-                    handle.executable,
-                    "scan",
-                    "source",
-                    "-r",
-                    str(staged),
-                    "--format",
-                    "json",
-                    "--data-source=deps.dev",
-                ],
+                command,
                 cwd=staged,
                 source=f"osv_{label}_attempt_{attempt_number}",
             )
@@ -216,6 +222,54 @@ _TRANSIENT_FAILURE_PATTERNS = (
     (re.compile(r"connection reset|connection aborted|connection refused|broken pipe|unexpected eof|tls handshake timeout|remote host terminated", re.IGNORECASE), "TEMPORARY_CONNECTION_FAILURE"),
     (re.compile(r"connect(?:ion)? timed out|read timed out|i/o timeout|network is unreachable|temporary network|transport.*temporar", re.IGNORECASE), "TEMPORARY_TRANSPORT_FAILURE"),
 )
+
+
+class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format: str, *args: Any) -> None:
+        return None
+
+
+@contextmanager
+def _serve_maven_repository(repository: Path) -> Iterator[str]:
+    handler = partial(_QuietMavenRepositoryHandler, directory=str(repository))
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    server.daemon_threads = True
+    thread = threading.Thread(target=server.serve_forever, name="osv-maven-cache", daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}/"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def _default_maven_repository() -> Path:
+    maven_user_home = os.environ.get("MAVEN_USER_HOME")
+    if maven_user_home:
+        return Path(maven_user_home).expanduser() / "repository"
+    return Path.home() / ".m2" / "repository"
+
+
+def _scan_command(
+    executable: str,
+    staged: Path,
+    data_source: str,
+    maven_registry: str | None = None,
+) -> list[str]:
+    command = [
+        executable,
+        "scan",
+        "source",
+        "-r",
+        str(staged),
+        "--format",
+        "json",
+        f"--data-source={data_source}",
+    ]
+    if maven_registry:
+        command.append(f"--maven-registry={maven_registry}")
+    return command
 
 
 def _classify_attempt(

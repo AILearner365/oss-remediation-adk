@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import unittest
+import urllib.request
 import zipfile
 from pathlib import Path
 
@@ -31,12 +32,19 @@ class _ArtifactScannerRunner:
 
 
 class _SequenceScannerRunner:
-    def __init__(self, results):
+    def __init__(self, results, registry_probe=None):
         self.results = list(results)
         self.commands = []
+        self.registry_probe = registry_probe
+        self.registry_probe_content = None
 
     def run_argv(self, command, **kwargs):
         self.commands.append((list(command), kwargs))
+        if self.registry_probe:
+            registry_argument = next(value for value in command if value.startswith("--maven-registry="))
+            registry_url = registry_argument.split("=", 1)[1]
+            with urllib.request.urlopen(registry_url + self.registry_probe) as response:
+                self.registry_probe_content = response.read().decode("utf-8")
         result = self.results.pop(0)
         return CommandResult(
             list(command),
@@ -55,6 +63,8 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.workspace = RunWorkspace.create(self.temp.name, "run")
         self.workspace.repository.mkdir()
         self.trace = TraceStore(self.workspace)
+        self.maven_repository = Path(self.temp.name) / "m2" / "repository"
+        self.maven_repository.mkdir(parents=True)
         budget = ExecutionBudget(ExecutionBudgetConfig(overall_timeout_seconds=60, command_timeout_seconds=10))
         policy = RuntimePolicy(trusted_repository=True, dedicated_runner=True, enable_autonomous_shell=True)
         self.runner = ProcessRunner(self.workspace, self.trace, budget, policy)
@@ -135,10 +145,16 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(1, len(result.findings))
 
     def test_transient_429_retries_then_succeeds_clean(self):
-        runner = _SequenceScannerRunner([
-            CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP 429 Too Many Requests"),
-            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
-        ])
+        probe = self.maven_repository / "org" / "example" / "demo" / "1.0" / "demo-1.0.pom"
+        probe.parent.mkdir(parents=True)
+        probe.write_text("<project/>", encoding="utf-8")
+        runner = _SequenceScannerRunner(
+            [
+                CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP 429 Too Many Requests"),
+                CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+            ],
+            registry_probe="org/example/demo/1.0/demo-1.0.pom",
+        )
         sleeps = []
         scanner = self._scanner(runner, sleep=sleeps.append)
 
@@ -153,7 +169,22 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertTrue(Path(report.attempts[0]["stdoutArtifact"]).is_file())
         self.assertTrue(Path(report.attempts[0]["stderrArtifact"]).is_file())
         self.assertEqual('{"results": []}', Path(report.attempts[0]["rawReportPath"]).read_text(encoding="utf-8"))
+        self.assertIn("--data-source=native", runner.commands[0][0])
+        registry_argument = next(value for value in runner.commands[0][0] if value.startswith("--maven-registry="))
+        self.assertTrue(registry_argument.startswith("--maven-registry=http://127.0.0.1:"))
+        self.assertEqual("<project/>", runner.registry_probe_content)
+
+    def test_missing_local_maven_repository_uses_deps_dev(self):
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+        ])
+        scanner = self._scanner(runner, maven_repository=Path(self.temp.name) / "missing-repository")
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "deps-dev-fallback")
+
+        self.assertTrue(report.succeeded)
         self.assertIn("--data-source=deps.dev", runner.commands[0][0])
+        self.assertFalse(any(value.startswith("--maven-registry=") for value in runner.commands[0][0]))
 
     def test_repeated_429_exhausts_retries_and_fails_closed(self):
         failure = CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP status 429")
@@ -195,7 +226,7 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(1, len(report.findings))
         self.assertEqual(1, len(report.attempts))
 
-    def _scanner(self, runner, sleep=lambda _: None):
+    def _scanner(self, runner, sleep=lambda _: None, maven_repository=None):
         executable = self.workspace.tools / "osv-scanner.exe"
         executable.write_bytes(b"scanner")
         scanner = OsvScanner(
@@ -204,6 +235,7 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
             self.trace,
             retry_backoff_seconds=(5.0, 15.0),
             sleep=sleep,
+            maven_repository=maven_repository or self.maven_repository,
         )
         scanner.handle = ScannerHandle(str(executable), "test", hashlib.sha256(b"scanner").hexdigest(), False)
         return scanner
