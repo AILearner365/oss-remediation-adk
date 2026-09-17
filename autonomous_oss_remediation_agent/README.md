@@ -21,6 +21,8 @@ The deterministic lifecycle, never the LLM, selects OSV Scanner.
 
 An unavailable, unexecutable, changed, or unrecognizable scanner fails closed.
 
+Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier releases do not include the upstream local-reactor-module resolution fix and are rejected rather than allowing an incomplete scan to appear clean.
+
 ## Request Example
 
 ```json
@@ -50,7 +52,7 @@ An unavailable, unexecutable, changed, or unrecognizable scanner fails closed.
   "scanner": {
     "mode": "configured",
     "executable": "C:/approved-tools/osv-scanner.exe",
-    "version": "2.3.8",
+    "version": "2.6.0",
     "sha256": "approved-executable-sha256"
   },
   "delivery": {

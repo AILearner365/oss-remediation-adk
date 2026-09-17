@@ -15,7 +15,6 @@ from autonomous_oss_remediation_agent.deterministic.constraints import Constrain
 from autonomous_oss_remediation_agent.deterministic.osv import (
     OsvScanner,
     ScannerPreflightError,
-    _add_snapshot_aliases,
     normalize_osv_findings,
 )
 from autonomous_oss_remediation_agent.models import CommandResult, ScanOutcome, ScannerHandle
@@ -250,43 +249,38 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
         self.assertEqual((), report.findings)
 
-    def test_multimodule_scan_deploys_reactor_to_temporary_registry(self):
+    def test_multimodule_scan_rejects_scanner_before_local_module_fix(self):
         (self.workspace.repository / "pom.xml").write_text("<project/>", encoding="utf-8")
         module = self.workspace.repository / "module"
         module.mkdir()
         (module / "pom.xml").write_text("<project/>", encoding="utf-8")
         runner = _SequenceScannerRunner([
-            CommandResult(["mvn", "deploy"], str(self.workspace.repository), 0),
             CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
         ])
-        scanner = self._scanner(runner)
+        scanner = self._scanner(runner, version="osv-scanner version: 2.3.8")
+
+        with self.assertRaisesRegex(ScannerPreflightError, "2.4.0 or newer"):
+            scanner.scan(self.workspace.repository, ("HIGH",), "reactor")
+
+        self.assertEqual([], runner.commands)
+
+    def test_multimodule_scan_uses_fixed_scanner_without_reactor_deploy(self):
+        (self.workspace.repository / "pom.xml").write_text("<project/>", encoding="utf-8")
+        module = self.workspace.repository / "module"
+        module.mkdir()
+        (module / "pom.xml").write_text("<project/>", encoding="utf-8")
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+        ])
+        scanner = self._scanner(runner, version="osv-scanner version: 2.6.0")
 
         report = scanner.scan(self.workspace.repository, ("HIGH",), "reactor")
 
         self.assertTrue(report.succeeded)
-        self.assertIn("deploy", runner.commands[0][0])
-        self.assertTrue(any(value.startswith("-DaltDeploymentRepository=osv-local::file:") for value in runner.commands[0][0]))
-        self.assertIn("--data-source=native", runner.commands[1][0])
+        self.assertEqual(1, len(runner.commands))
+        self.assertIn("--data-source=native", runner.commands[0][0])
 
-    def test_snapshot_registry_adds_non_timestamped_aliases(self):
-        version_directory = (
-            Path(self.temp.name)
-            / "registry"
-            / "com"
-            / "example"
-            / "task-domain"
-            / "1.0.0-SNAPSHOT"
-        )
-        version_directory.mkdir(parents=True)
-        timestamped = version_directory / "task-domain-1.0.0-20260917.031257-1.pom"
-        timestamped.write_text("<project/>", encoding="utf-8")
-
-        _add_snapshot_aliases(Path(self.temp.name) / "registry")
-
-        alias = version_directory / "task-domain-1.0.0-SNAPSHOT.pom"
-        self.assertEqual("<project/>", alias.read_text(encoding="utf-8"))
-
-    def _scanner(self, runner, sleep=lambda _: None, maven_repository=None):
+    def _scanner(self, runner, sleep=lambda _: None, maven_repository=None, version="test"):
         executable = self.workspace.tools / "osv-scanner.exe"
         executable.write_bytes(b"scanner")
         scanner = OsvScanner(
@@ -297,7 +291,7 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
             sleep=sleep,
             maven_repository=maven_repository or self.maven_repository,
         )
-        scanner.handle = ScannerHandle(str(executable), "test", hashlib.sha256(b"scanner").hexdigest(), False)
+        scanner.handle = ScannerHandle(str(executable), version, hashlib.sha256(b"scanner").hexdigest(), False)
         return scanner
 
     @unittest.skipUnless(os.name == "nt", "Provisioning fixture uses a Windows cmd executable")
