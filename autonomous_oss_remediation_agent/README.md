@@ -33,9 +33,11 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
   "vulnerabilityIds": [],
   "severityScope": ["CRITICAL", "HIGH"],
   "buildCommands": ["mvn clean verify"],
+  "testCommands": [],
+  "startupCommands": [ "mvn -pl task-web spring-boot:start", "mvn -pl task-web spring-boot:stop"],
   "model": "gemini-2.5-flash",
   "budget": {
-    "maxCycles": 3,
+    "maxCycles": 3
     "maxToolCalls": 80,
     "maxLlmCallsPerTurn": 40,
     "commandTimeoutSeconds": 1800,
@@ -117,7 +119,24 @@ The stock CLI uses `ManualDeliveryAdapter` when `delivery.mode` is not `auto`. F
 
 The CLI creates the Git-plus-GitHub-REST adapter through the orchestrator's per-run `delivery_adapter_factory`. Environment credentials are withheld from the model-controlled shell by the sanitized agent environment and are resolved only after deterministic validation succeeds. The delivery adapter supplies the token to `git push` through a temporary askpass helper and sends it directly in the GitHub REST authorization header; the token is not included in command arguments or trace evidence. If neither token variable is present, preflight remains in manual-delivery mode and never attempts delivery. This is process-level separation rather than an operating-system security boundary, so use a dedicated runner and a narrowly scoped, short-lived token.
 
-## Verification
+## Validation Scope
+
+Every remediation cycle must pass all applicable deterministic checks before automatic delivery is allowed:
+
+- Confirm the repository still descends from the recorded baseline commit.
+- Capture the complete Git status, changed-file list, and remediation diff.
+- Run every configured build, test, and startup command successfully.
+- Run a fresh OSV scan against the final dependency state.
+- Confirm all requested in-scope vulnerability findings are resolved.
+- Reject newly introduced findings in prohibited severities.
+- Enforce the protected Java version exactly when configured or detected.
+- Enforce the configured Spring Boot version movement policy.
+- Reject prohibited suppression or ignore-file changes.
+- Recompute the changed-tree digest immediately before delivery.
+
+Findings outside `severityScope` may remain and are reported as scan findings, but they do not fail target remediation unless they violate another configured constraint. A scan exit code indicating findings is accepted only when scanner output is complete and parseable; scanner execution or dependency-resolution failures fail closed.
+
+## Test Verification
 
 ```text
 python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery -v
