@@ -12,7 +12,7 @@ from autonomous_oss_remediation_agent.config import (
 )
 from autonomous_oss_remediation_agent.deterministic.constraints import ConstraintEvaluator
 from autonomous_oss_remediation_agent.models import RepositoryBaseline
-from autonomous_oss_remediation_agent.prompt import initial_message
+from autonomous_oss_remediation_agent.prompt import AGENT_INSTRUCTION, initial_message
 
 
 class AutonomousSpringBootPolicyTests(unittest.TestCase):
@@ -143,6 +143,14 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
         self.assertIn('"spring_boot"', message)
         self.assertIn('"approved_versions": [', message)
         self.assertIn('"4.0.7"', message)
+
+    def test_agent_instruction_preserves_structure_aware_remediation_discretion(self):
+        self.assertIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)
+        self.assertIn("avoid redundant or unnecessary lower-level overrides", AGENT_INSTRUCTION)
+        self.assertIn("retain discretion to use a lower-level override", AGENT_INSTRUCTION)
+        self.assertIn("not treat these management layers as a required remediation order", AGENT_INSTRUCTION)
+        self.assertIn("version policies solely as remediation boundaries", AGENT_INSTRUCTION)
+        self.assertIn("does not prescribe how to achieve it", AGENT_INSTRUCTION)
 
     def test_unparseable_version_change_fails_closed(self):
         check = self._validate("3.5.0", "4.0.0-RC1", ConstraintSpec())

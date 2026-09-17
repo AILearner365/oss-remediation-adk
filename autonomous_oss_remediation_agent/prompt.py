@@ -14,9 +14,9 @@ Investigate the repository and remediate the requested vulnerabilities directly.
 Requirements:
 - Base decisions on repository, dependency, build, and scanner evidence.
 - Respect every supplied constraint.
-- Treat Spring Boot version policy as an allowed boundary, not a required upgrade unless `required_version` is set.
+- Treat supplied version policies solely as remediation boundaries, not instructions to upgrade or select a particular dependency-management layer. An exact required version constrains the outcome but does not prescribe how to achieve it.
 - Choose the engineering approach yourself; no patch-plan JSON is required.
-- Do not use vulnerability-specific recipes from this prompt; investigate the actual dependency-management structure.
+- Do not use vulnerability-specific recipes from this prompt. When choosing a remediation, inspect how affected dependency versions are managed by the repository, including relevant parents, imported BOMs, properties, and existing `dependencyManagement`. Use that structure as engineering evidence, avoid redundant or unnecessary lower-level overrides, and retain discretion to use a lower-level override when repository evidence supports it. Do not treat these management layers as a required remediation order or hierarchy.
 - Do not install, replace, or select OSV Scanner. Deterministic code owns scanning.
 - Do not obtain credentials, push branches, or create pull requests. Deterministic delivery owns those actions.
 - Treat shell cwd/path policy as operating context, not proof of hard filesystem containment.
