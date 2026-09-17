@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 import urllib.request
+import urllib.parse
 import zipfile
 from contextlib import contextmanager
 from functools import partial
@@ -23,6 +24,7 @@ from ..capabilities.execution import ProcessRunner
 from ..config import ScannerConfig
 from ..models import CommandResult, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
 from ..workspace import RunWorkspace, TraceStore, sha256_file
+from .maven import MavenService
 
 
 class ScannerPreflightError(RuntimeError):
@@ -78,66 +80,97 @@ class OsvScanner:
         handle = self.verify()
         attempts: list[dict[str, Any]] = []
         max_attempts = len(self.retry_backoff_seconds) + 1
-        for attempt_number in range(1, max_attempts + 1):
-            result = self._execute_scan(handle, repository, label, attempt_number)
-            raw_stdout = _full_output(result.stdout, result.stdout_artifact)
-            raw_stderr = _full_output(result.stderr, result.stderr_artifact)
-            raw_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.json"
-            raw_path.parent.mkdir(parents=True, exist_ok=True)
-            raw_path.write_text(raw_stdout or "{}", encoding="utf-8")
-            stdout_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stdout.log"
-            stderr_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stderr.log"
-            stdout_path.write_text(raw_stdout, encoding="utf-8")
-            stderr_path.write_text(raw_stderr, encoding="utf-8")
-            payload = _parse_payload(raw_stdout)
-            recognizable = _is_recognizable_report(payload)
-            findings = tuple(normalize_osv_findings(payload or {}, severity_scope)) if recognizable else ()
-            outcome, failure_reason = _classify_attempt(result, payload, raw_stdout, raw_stderr)
-            retry_scheduled = (
-                outcome == ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE
-                and attempt_number < max_attempts
-            )
-            backoff_seconds = self.retry_backoff_seconds[attempt_number - 1] if retry_scheduled else None
-            attempt = {
-                "attemptNumber": attempt_number,
-                "command": result.command,
-                "exitCode": result.exit_code,
-                "stdoutArtifact": str(stdout_path),
-                "stderrArtifact": str(stderr_path),
-                "rawReportPath": str(raw_path),
-                "outcome": outcome.value,
-                "failureReason": failure_reason,
-                "retryScheduled": retry_scheduled,
-                "backoffSeconds": backoff_seconds,
-                "commandResult": result.to_dict(),
-            }
-            attempts.append(attempt)
-            self.trace.write_json(f"scans/{label}-attempt-{attempt_number}.evidence.json", attempt)
-            self.trace.append_event("osv_scan_attempt", label=label, **attempt)
-            if retry_scheduled:
-                self.sleep(backoff_seconds)
-                continue
-            final_path = self.workspace.artifacts / "scans" / f"{label}.json"
-            final_path.write_text(raw_stdout or "{}", encoding="utf-8")
-            succeeded = outcome in {
-                ScanOutcome.COMPLETED_CLEAN,
-                ScanOutcome.COMPLETED_WITH_FINDINGS,
-            }
-            error = None if succeeded else failure_reason
-            report = ScanReport(
-                succeeded=succeeded,
-                findings=findings if succeeded else (),
-                command_result=result,
-                raw_report_path=str(final_path),
-                error=error,
-                outcome=outcome,
-                attempts=tuple(attempts),
-            )
-            break
-        else:
-            raise AssertionError("OSV retry loop did not produce a report")
+        with tempfile.TemporaryDirectory(prefix="autonomous-osv-maven-", dir=self.workspace.temp) as registry_dir:
+            reactor_repository = Path(registry_dir) / "repository"
+            registry_roots = self._prepare_registry(repository, reactor_repository, label)
+            for attempt_number in range(1, max_attempts + 1):
+                result = self._execute_scan(handle, repository, label, attempt_number, registry_roots)
+                raw_stdout = _full_output(result.stdout, result.stdout_artifact)
+                raw_stderr = _full_output(result.stderr, result.stderr_artifact)
+                raw_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.json"
+                raw_path.parent.mkdir(parents=True, exist_ok=True)
+                raw_path.write_text(raw_stdout or "{}", encoding="utf-8")
+                stdout_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stdout.log"
+                stderr_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stderr.log"
+                stdout_path.write_text(raw_stdout, encoding="utf-8")
+                stderr_path.write_text(raw_stderr, encoding="utf-8")
+                payload = _parse_payload(raw_stdout)
+                recognizable = _is_recognizable_report(payload)
+                findings = tuple(normalize_osv_findings(payload or {}, severity_scope)) if recognizable else ()
+                outcome, failure_reason = _classify_attempt(result, payload, raw_stdout, raw_stderr)
+                retry_scheduled = (
+                    outcome == ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE
+                    and attempt_number < max_attempts
+                )
+                backoff_seconds = self.retry_backoff_seconds[attempt_number - 1] if retry_scheduled else None
+                attempt = {
+                    "attemptNumber": attempt_number,
+                    "command": result.command,
+                    "exitCode": result.exit_code,
+                    "stdoutArtifact": str(stdout_path),
+                    "stderrArtifact": str(stderr_path),
+                    "rawReportPath": str(raw_path),
+                    "outcome": outcome.value,
+                    "failureReason": failure_reason,
+                    "retryScheduled": retry_scheduled,
+                    "backoffSeconds": backoff_seconds,
+                    "commandResult": result.to_dict(),
+                }
+                attempts.append(attempt)
+                self.trace.write_json(f"scans/{label}-attempt-{attempt_number}.evidence.json", attempt)
+                self.trace.append_event("osv_scan_attempt", label=label, **attempt)
+                if retry_scheduled:
+                    self.sleep(backoff_seconds)
+                    continue
+                final_path = self.workspace.artifacts / "scans" / f"{label}.json"
+                final_path.write_text(raw_stdout or "{}", encoding="utf-8")
+                succeeded = outcome in {
+                    ScanOutcome.COMPLETED_CLEAN,
+                    ScanOutcome.COMPLETED_WITH_FINDINGS,
+                }
+                error = None if succeeded else failure_reason
+                report = ScanReport(
+                    succeeded=succeeded,
+                    findings=findings if succeeded else (),
+                    command_result=result,
+                    raw_report_path=str(final_path),
+                    error=error,
+                    outcome=outcome,
+                    attempts=tuple(attempts),
+                )
+                break
+            else:
+                raise AssertionError("OSV retry loop did not produce a report")
         self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
         return report
+
+    def _prepare_registry(self, repository: Path, reactor_repository: Path, label: str) -> tuple[Path, ...]:
+        roots: list[Path] = []
+        if len(tuple(repository.rglob("pom.xml"))) > 1:
+            reactor_repository.mkdir(parents=True, exist_ok=True)
+            maven = MavenService(repository, self.process_runner)
+            deploy_result = self.process_runner.run_argv(
+                [
+                    maven.maven_executable(),
+                    "-DskipTests",
+                    f"-DaltDeploymentRepository=osv-local::{reactor_repository.resolve().as_uri()}",
+                    "deploy",
+                ],
+                cwd=repository,
+                source=f"osv_{label}_reactor_deploy",
+            )
+            self.trace.write_json(f"scans/{label}-reactor-deploy.json", deploy_result.to_dict())
+            if deploy_result.succeeded:
+                roots.append(reactor_repository)
+            else:
+                self.trace.append_event(
+                    "osv_reactor_registry_failed",
+                    label=label,
+                    result=deploy_result.to_dict(),
+                )
+        if self.maven_repository.is_dir():
+            roots.append(self.maven_repository)
+        return tuple(roots)
 
     def _execute_scan(
         self,
@@ -145,6 +178,7 @@ class OsvScanner:
         repository: Path,
         label: str,
         attempt_number: int,
+        registry_roots: tuple[Path, ...],
     ) -> CommandResult:
         with tempfile.TemporaryDirectory(prefix="autonomous-osv-", dir=self.workspace.temp) as temp_dir:
             staged = Path(temp_dir) / "repository"
@@ -153,8 +187,8 @@ class OsvScanner:
                 staged,
                 ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
             )
-            if self.maven_repository.is_dir():
-                with _serve_maven_repository(self.maven_repository) as registry_url:
+            if registry_roots:
+                with _serve_maven_repository(registry_roots) as registry_url:
                     command = _scan_command(handle.executable, staged, "native", registry_url)
                     return self.process_runner.run_argv(
                         command,
@@ -225,13 +259,27 @@ _TRANSIENT_FAILURE_PATTERNS = (
 
 
 class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args: Any, repositories: tuple[Path, ...], **kwargs: Any):
+        self.repositories = repositories
+        super().__init__(*args, directory=str(repositories[0]), **kwargs)
+
     def log_message(self, format: str, *args: Any) -> None:
         return None
 
+    def translate_path(self, path: str) -> str:
+        relative = Path(urllib.parse.unquote(urllib.parse.urlsplit(path).path).lstrip("/"))
+        if ".." in relative.parts:
+            return str(self.repositories[0] / "__invalid_path__")
+        for repository in self.repositories:
+            candidate = repository / relative
+            if candidate.exists():
+                return str(candidate)
+        return str(self.repositories[0] / relative)
+
 
 @contextmanager
-def _serve_maven_repository(repository: Path) -> Iterator[str]:
-    handler = partial(_QuietMavenRepositoryHandler, directory=str(repository))
+def _serve_maven_repository(repositories: tuple[Path, ...]) -> Iterator[str]:
+    handler = partial(_QuietMavenRepositoryHandler, repositories=repositories)
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     server.daemon_threads = True
     thread = threading.Thread(target=server.serve_forever, name="osv-maven-cache", daemon=True)
@@ -292,6 +340,9 @@ def _classify_attempt(
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "SCANNER_EXECUTION_BLOCKED"
     if "no package sources found" in combined_output.lower():
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "NO_PACKAGE_SOURCES: OSV Scanner found no package sources"
+    if re.search(r"failed resolution|error during extraction", raw_stderr, re.IGNORECASE):
+        detail = raw_stderr.strip() or "OSV Scanner could not resolve the complete dependency graph"
+        return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"DEPENDENCY_RESOLUTION_FAILURE: {detail}"
     if not recognizable:
         detail = raw_stderr.strip() or "OSV Scanner did not produce a recognizable JSON report"
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"UNRECOGNIZABLE_REPORT: {detail}"

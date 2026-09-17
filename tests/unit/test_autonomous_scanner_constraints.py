@@ -226,6 +226,43 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(1, len(report.findings))
         self.assertEqual(1, len(report.attempts))
 
+    def test_partial_findings_with_resolution_errors_are_incomplete(self):
+        payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
+        runner = _SequenceScannerRunner([
+            CommandResult(
+                ["scanner"],
+                ".",
+                1,
+                stdout=payload,
+                stderr="Error during extraction: failed resolution for local module",
+            ),
+        ])
+        scanner = self._scanner(runner)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "partial-resolution")
+
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
+        self.assertEqual((), report.findings)
+
+    def test_multimodule_scan_deploys_reactor_to_temporary_registry(self):
+        (self.workspace.repository / "pom.xml").write_text("<project/>", encoding="utf-8")
+        module = self.workspace.repository / "module"
+        module.mkdir()
+        (module / "pom.xml").write_text("<project/>", encoding="utf-8")
+        runner = _SequenceScannerRunner([
+            CommandResult(["mvn", "deploy"], str(self.workspace.repository), 0),
+            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+        ])
+        scanner = self._scanner(runner)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "reactor")
+
+        self.assertTrue(report.succeeded)
+        self.assertIn("deploy", runner.commands[0][0])
+        self.assertTrue(any(value.startswith("-DaltDeploymentRepository=osv-local::file:") for value in runner.commands[0][0]))
+        self.assertIn("--data-source=native", runner.commands[1][0])
+
     def _scanner(self, runner, sleep=lambda _: None, maven_repository=None):
         executable = self.workspace.tools / "osv-scanner.exe"
         executable.write_bytes(b"scanner")

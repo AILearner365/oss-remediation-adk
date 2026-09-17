@@ -65,7 +65,7 @@ class _RetryingFixtureScanner(OsvScanner):
         )
         return self.handle
 
-    def _execute_scan(self, handle, repository, label, attempt_number):
+    def _execute_scan(self, handle, repository, label, attempt_number, registry_roots):
         self.execution_labels.append((label, attempt_number))
         if label == "baseline":
             payload = {
