@@ -70,6 +70,13 @@ python -m autonomous_oss_remediation_agent.cli request.json --output result.json
 
 The `allowNetwork` value declares the approved runner network mode; the local backend does not claim destination-level egress enforcement.
 
+## Target Selection
+
+- When `vulnerabilityIds` is non-empty, only baseline findings matching one of those IDs or aliases and `severityScope` are remediation targets.
+- If none match, the run stops before invoking the model with `REQUESTED_VULNERABILITY_NOT_FOUND` and preserves the completed baseline as evidence.
+- When `vulnerabilityIds` is empty, every baseline finding matching `severityScope` is a remediation target.
+- Validation continues to reject newly introduced findings in the prohibited severities independently of target selection.
+
 Before the first model-backed POC, replace the repository and scanner placeholders, confirm the configured scanner version and checksum, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity. Keep `delivery.mode` set to `manual`; the stock CLI does not enable automated GitHub delivery.
 
 ## Delivery

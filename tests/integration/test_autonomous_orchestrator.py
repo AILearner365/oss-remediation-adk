@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import json
 import hashlib
+from dataclasses import replace
 from pathlib import Path
 
 from autonomous_oss_remediation_agent.config import (
@@ -282,6 +283,44 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         ).run()
         self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
         self.assertIn("AGENT_RUNTIME_FAILURE", result.reason)
+
+    def test_missing_explicit_vulnerability_stops_before_agent(self):
+        invoked = []
+        request = replace(self._request(max_cycles=2), vulnerability_ids=("CVE-2021-44228",))
+
+        result = AutonomousRemediationOrchestrator(
+            request,
+            agent_session_factory=lambda capabilities, model: invoked.append(True),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(Outcome.REQUESTED_VULNERABILITY_NOT_FOUND, result.outcome)
+        self.assertIn("REQUESTED_VULNERABILITY_NOT_FOUND", result.reason)
+        self.assertEqual((), result.baseline.target_findings)
+        self.assertEqual(0, result.cycles_completed)
+        self.assertEqual([], invoked)
+        baseline_pom = Path(result.baseline.repository_path) / "pom.xml"
+        self.assertIn("<demo.version>1.0</demo.version>", baseline_pom.read_text(encoding="utf-8"))
+
+    def test_empty_vulnerability_ids_target_all_in_scope_findings(self):
+        sessions = []
+        request = replace(self._request(max_cycles=1), vulnerability_ids=())
+
+        def factory(capabilities, model):
+            session = _ScriptedAgentSession(capabilities, [("1.0", "2.0")])
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            request,
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(1, len(result.baseline.target_findings))
+        self.assertEqual("CVE-2024-0001", result.baseline.target_findings[0].vulnerability_id)
+        self.assertEqual(1, len(sessions))
+        self.assertEqual(1, result.cycles_completed)
 
     def test_validation_includes_agent_local_commits_since_baseline(self):
         result = AutonomousRemediationOrchestrator(

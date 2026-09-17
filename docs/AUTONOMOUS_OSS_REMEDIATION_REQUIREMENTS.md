@@ -401,6 +401,9 @@ Available approaches would violate supplied constraints, or no compatible remedi
 ### EXECUTION LIMIT REACHED
 The autonomous work/validation budget was exhausted.
 
+### REQUESTED_VULNERABILITY_NOT_FOUND
+The completed baseline scan contained no finding matching any explicitly requested vulnerability ID, so remediation stopped before model invocation.
+
 ### BASELINE FAILURE
 Repository/build/scanner baseline prevented remediation from safely beginning.
 

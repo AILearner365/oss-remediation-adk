@@ -371,6 +371,7 @@ Outcome mapping:
 - `PARTIAL / MANUAL REVIEW REQUIRED`: validation or delivery remains incomplete. Reason `VALIDATED_MANUAL_DELIVERY_REQUIRED` explicitly means deterministic validation passed but automated delivery was disabled or failed, so a human may deliver the preserved validated change.
 - `NO SAFE REMEDIATION`: the agent reports no viable approach without a supplied constraint violation, validation remains unsatisfied, and evidence is retained; this never implies technical success.
 - `EXECUTION LIMIT REACHED`: a configured cycle/tool/command/time limit ended the run.
+- `REQUESTED_VULNERABILITY_NOT_FOUND`: an explicit vulnerability-ID request matched no in-scope finding in the completed baseline scan, so the run stopped before model invocation while preserving baseline evidence.
 - `BASELINE FAILURE`: clone, build, startup requirement, or scanner baseline prevented safe work.
 
 ## 14. Proposed Independent Package Structure

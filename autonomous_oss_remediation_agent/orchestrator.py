@@ -119,6 +119,19 @@ class AutonomousRemediationOrchestrator:
                 ),
             )
 
+        if self.request.vulnerability_ids and not baseline.target_findings:
+            requested_ids = ", ".join(self.request.vulnerability_ids)
+            return self._finish(
+                trace,
+                RunResult(
+                    Outcome.REQUESTED_VULNERABILITY_NOT_FOUND,
+                    "REQUESTED_VULNERABILITY_NOT_FOUND: None of the requested vulnerability IDs "
+                    f"were found in the completed baseline scan: {requested_ids}",
+                    str(workspace.root),
+                    baseline=baseline,
+                ),
+            )
+
         workspace_io = WorkspaceIO(workspace, trace)
         capabilities = DeveloperCapabilitySet(workspace_io, process_runner, budget, trace)
         agent_session = self.agent_session_factory(capabilities, self.request.model)
