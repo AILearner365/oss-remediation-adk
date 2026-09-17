@@ -12,57 +12,25 @@ from typing import Any
 from google.adk.tools import FunctionTool
 
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+WORKING_DIRECTORY = Path(os.environ.get("CODING_AGENT_WORKSPACE", os.getcwd())).expanduser().resolve()
 MAX_FILE_BYTES = 5_000_000
 MAX_RESULTS = 500
 MAX_OUTPUT_CHARS = 60_000
 
-_SKIPPED_DIRECTORIES = {
-    ".git",
-    ".idea",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-    "node_modules",
-    "target",
-}
 
-_ALWAYS_BLOCKED_COMMANDS = (
-    (re.compile(r"(^|[;&|]\s*)sudo(?:\s|$)", re.IGNORECASE), "privilege elevation is not allowed"),
-    (re.compile(r"(^|[;&|]\s*)runas(?:\.exe)?(?:\s|$)", re.IGNORECASE), "privilege elevation is not allowed"),
-    (re.compile(r"\b(?:shutdown|reboot|format)(?:\.exe)?(?:\s|$)", re.IGNORECASE), "machine-level destructive commands are not allowed"),
-    (re.compile(r"\b(?:winget|choco)(?:\.exe)?\s+install\b", re.IGNORECASE), "global package installation is not allowed"),
-    (re.compile(r"\bnpm\s+(?:install|i)\s+(?:--global|-g)\b", re.IGNORECASE), "global package installation is not allowed"),
-    (re.compile(r"\bpip(?:3)?\s+install\b[^\r\n]*(?:--user|--prefix|--root)\b", re.IGNORECASE), "non-workspace package installation is not allowed"),
-)
-
-_CONFIRMATION_PATTERNS = (
-    re.compile(r"\bgit\s+(?:push|reset\s+--hard|clean\s+-[^\s]*[fd]|checkout\s+--|restore\s+--source)\b", re.IGNORECASE),
-    re.compile(r"\b(?:rm|rmdir)(?:\.exe)?\b", re.IGNORECASE),
-    re.compile(r"\bRemove-Item\b", re.IGNORECASE),
-    re.compile(r"\b(?:del|erase)(?:\.exe)?\b", re.IGNORECASE),
-    re.compile(r"\b(?:curl|wget|Invoke-WebRequest|Invoke-RestMethod)\b", re.IGNORECASE),
-)
+def _path(path: str, *, must_exist: bool = False) -> Path:
+    value = Path(path or ".").expanduser()
+    if not value.is_absolute():
+        value = WORKING_DIRECTORY / value
+    return value.resolve(strict=must_exist)
 
 
-def _resolve_workspace_path(path: str, *, must_exist: bool = False) -> Path:
-    raw_path = Path(path or ".")
-    candidate = raw_path if raw_path.is_absolute() else WORKSPACE_ROOT / raw_path
-    resolved = candidate.resolve(strict=must_exist)
+def _display_path(path: Path) -> str:
     try:
-        resolved.relative_to(WORKSPACE_ROOT)
-    except ValueError as exc:
-        raise ValueError(f"Path is outside the repository workspace: {path}") from exc
-    return resolved
-
-
-def _relative_path(path: Path) -> str:
-    relative = path.relative_to(WORKSPACE_ROOT)
-    return "." if not relative.parts else relative.as_posix()
+        relative = path.relative_to(WORKING_DIRECTORY)
+        return "." if not relative.parts else relative.as_posix()
+    except ValueError:
+        return str(path)
 
 
 def _error(message: str) -> dict[str, Any]:
@@ -75,32 +43,28 @@ def list_files(
     max_depth: int = 3,
     include_hidden: bool = False,
 ) -> dict[str, Any]:
-    """List repository files and directories below a repository-relative path.
+    """List files and directories below a path.
 
-    Args:
-        path: Repository-relative directory or file to inspect.
-        pattern: Glob matched against each entry name, such as ``*.py``.
-        max_depth: Maximum directory depth to traverse, from 0 through 10.
-        include_hidden: Include dot-prefixed entries and common generated directories.
+    Relative paths start at the coding agent's working directory. Absolute paths are accepted.
+    Results are bounded and may be filtered by a file-name glob.
     """
     try:
-        target = _resolve_workspace_path(path, must_exist=True)
-        depth_limit = max(0, min(max_depth, 10))
+        target = _path(path, must_exist=True)
         if target.is_file():
-            return {"status": "ok", "entries": [{"path": _relative_path(target), "type": "file"}], "truncated": False}
+            return {"status": "ok", "entries": [{"path": _display_path(target), "type": "file"}], "truncated": False}
         if not target.is_dir():
             return _error(f"Not a file or directory: {path}")
 
         entries: list[dict[str, str]] = []
+        depth_limit = max(0, min(max_depth, 20))
         start_depth = len(target.parts)
         for current_root, directory_names, file_names in os.walk(target, followlinks=False):
             current = Path(current_root)
             depth = len(current.parts) - start_depth
-            directory_names[:] = sorted(
-                name
-                for name in directory_names
-                if include_hidden or (not name.startswith(".") and name not in _SKIPPED_DIRECTORIES)
-            )
+            if not include_hidden:
+                directory_names[:] = sorted(name for name in directory_names if not name.startswith("."))
+            else:
+                directory_names.sort()
             if depth >= depth_limit:
                 directory_names[:] = []
 
@@ -110,7 +74,7 @@ def list_files(
                 if not include_hidden and name.startswith("."):
                     continue
                 if fnmatch.fnmatch(name, pattern):
-                    entries.append({"path": _relative_path(current / name), "type": entry_type})
+                    entries.append({"path": _display_path(current / name), "type": entry_type})
                     if len(entries) >= MAX_RESULTS:
                         return {"status": "ok", "entries": entries, "truncated": True}
         return {"status": "ok", "entries": entries, "truncated": False}
@@ -127,41 +91,32 @@ def search_files(
     case_sensitive: bool = False,
     max_results: int = 100,
 ) -> dict[str, Any]:
-    """Search repository file contents or paths and return bounded matches.
+    """Search file contents or paths below a directory.
 
-    Args:
-        query: Text or regular expression to find.
-        path: Repository-relative file or directory to search.
-        file_pattern: Glob limiting files, such as ``*.py``.
-        search_names: Search repository-relative paths instead of file contents.
-        use_regex: Interpret query as a regular expression.
-        case_sensitive: Use case-sensitive matching.
-        max_results: Maximum matches to return, from 1 through 500.
+    The query is literal unless use_regex is true. Relative paths start at the working directory.
     """
     try:
-        target = _resolve_workspace_path(path, must_exist=True)
+        target = _path(path, must_exist=True)
+        expression = re.compile(query if use_regex else re.escape(query), 0 if case_sensitive else re.IGNORECASE)
         result_limit = max(1, min(max_results, MAX_RESULTS))
-        flags = 0 if case_sensitive else re.IGNORECASE
-        expression = re.compile(query if use_regex else re.escape(query), flags)
         matches: list[dict[str, Any]] = []
 
-        candidates = [target] if target.is_file() else (
-            candidate
-            for candidate in target.rglob("*")
-            if candidate.is_file()
-            and not any(part in _SKIPPED_DIRECTORIES for part in candidate.relative_to(target).parts)
-        )
+        if target.is_file():
+            candidates = [target]
+        else:
+            candidates = (
+                candidate
+                for candidate in target.rglob("*")
+                if candidate.is_file() and ".git" not in candidate.parts
+            )
+
         for candidate in candidates:
-            try:
-                candidate = _resolve_workspace_path(str(candidate), must_exist=True)
-            except ValueError:
-                continue
-            relative = _relative_path(candidate)
             if not fnmatch.fnmatch(candidate.name, file_pattern):
                 continue
+            display_path = _display_path(candidate)
             if search_names:
-                if expression.search(relative):
-                    matches.append({"path": relative})
+                if expression.search(display_path):
+                    matches.append({"path": display_path})
             else:
                 if candidate.stat().st_size > MAX_FILE_BYTES:
                     continue
@@ -176,7 +131,7 @@ def search_files(
                     if found:
                         matches.append(
                             {
-                                "path": relative,
+                                "path": display_path,
                                 "line": line_number,
                                 "column": found.start() + 1,
                                 "text": line[:500],
@@ -192,15 +147,9 @@ def search_files(
 
 
 def read_file(path: str, start_line: int = 1, end_line: int = 0) -> dict[str, Any]:
-    """Read a bounded UTF-8 text range from a repository-relative file.
-
-    Args:
-        path: Repository-relative file path.
-        start_line: First line to return, using one-based numbering.
-        end_line: Last line to return inclusively, or 0 for the end of the file.
-    """
+    """Read a UTF-8 text file, optionally selecting a one-based inclusive line range."""
     try:
-        target = _resolve_workspace_path(path, must_exist=True)
+        target = _path(path, must_exist=True)
         if not target.is_file():
             return _error(f"Not a file: {path}")
         if target.stat().st_size > MAX_FILE_BYTES:
@@ -212,7 +161,7 @@ def read_file(path: str, start_line: int = 1, end_line: int = 0) -> dict[str, An
         if not lines:
             return {
                 "status": "ok",
-                "path": _relative_path(target),
+                "path": _display_path(target),
                 "start_line": 1,
                 "end_line": 0,
                 "total_lines": 0,
@@ -225,7 +174,7 @@ def read_file(path: str, start_line: int = 1, end_line: int = 0) -> dict[str, An
         selected = "\n".join(f"{number:6d}\t{lines[number - 1]}" for number in range(first, last + 1))
         return {
             "status": "ok",
-            "path": _relative_path(target),
+            "path": _display_path(target),
             "start_line": first,
             "end_line": last,
             "total_lines": len(lines),
@@ -236,15 +185,9 @@ def read_file(path: str, start_line: int = 1, end_line: int = 0) -> dict[str, An
 
 
 def write_file(path: str, content: str, overwrite: bool = False) -> dict[str, Any]:
-    """Create a UTF-8 text file inside the repository, optionally overwriting it.
-
-    Args:
-        path: Repository-relative destination path.
-        content: Complete text to write.
-        overwrite: Allow replacing an existing file when true.
-    """
+    """Create a UTF-8 text file, optionally overwriting an existing file."""
     try:
-        target = _resolve_workspace_path(path)
+        target = _path(path)
         if target.exists() and not overwrite:
             return _error(f"File already exists; set overwrite=true to replace it: {path}")
         if target.exists() and not target.is_file():
@@ -253,29 +196,16 @@ def write_file(path: str, content: str, overwrite: bool = False) -> dict[str, An
         if len(encoded) > MAX_FILE_BYTES:
             return _error(f"Content exceeds the {MAX_FILE_BYTES}-byte write limit")
         target.parent.mkdir(parents=True, exist_ok=True)
-        _resolve_workspace_path(str(target.parent), must_exist=True)
         target.write_bytes(encoded)
-        return {"status": "ok", "path": _relative_path(target), "bytes_written": len(encoded)}
+        return {"status": "ok", "path": _display_path(target), "bytes_written": len(encoded)}
     except (OSError, UnicodeError, ValueError) as exc:
         return _error(str(exc))
 
 
-def edit_file(
-    path: str,
-    old_text: str,
-    new_text: str,
-    expected_occurrences: int = 1,
-) -> dict[str, Any]:
-    """Replace exact text in an existing repository file.
-
-    Args:
-        path: Repository-relative text file to edit.
-        old_text: Exact text to replace; include context when it is not unique.
-        new_text: Replacement text.
-        expected_occurrences: Required occurrence count before any write occurs.
-    """
+def edit_file(path: str, old_text: str, new_text: str, expected_occurrences: int = 1) -> dict[str, Any]:
+    """Replace exact text in an existing UTF-8 file after checking its occurrence count."""
     try:
-        target = _resolve_workspace_path(path, must_exist=True)
+        target = _path(path, must_exist=True)
         if not target.is_file():
             return _error(f"Not a file: {path}")
         if not old_text:
@@ -292,25 +222,15 @@ def edit_file(
             return _error(f"Edited content exceeds the {MAX_FILE_BYTES}-byte limit")
         with target.open("w", encoding="utf-8", newline="") as file:
             file.write(updated)
-        return {"status": "ok", "path": _relative_path(target), "replacements": occurrences}
+        return {"status": "ok", "path": _display_path(target), "replacements": occurrences}
     except (OSError, UnicodeError, ValueError) as exc:
         return _error(str(exc))
 
 
 def _shell_command(command: str) -> list[str]:
     if os.name == "nt":
-        return [
-            "powershell.exe",
-            "-NoLogo",
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-Command",
-            command,
-        ]
-    shell = shutil.which("bash") or "/bin/sh"
-    return [shell, "-lc", command]
+        return ["powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command]
+    return [shutil.which("bash") or "/bin/sh", "-lc", command]
 
 
 def _bounded_output(value: str) -> tuple[str, bool]:
@@ -320,38 +240,32 @@ def _bounded_output(value: str) -> tuple[str, bool]:
     return value[:half] + "\n... output truncated ...\n" + value[-half:], True
 
 
-def _blocked_command_reason(command: str) -> str | None:
-    if not command.strip():
-        return "Command must not be empty"
-    for pattern, reason in _ALWAYS_BLOCKED_COMMANDS:
-        if pattern.search(command):
-            return reason
-    return None
+_CONSEQUENTIAL_COMMAND = re.compile(
+    r"(?:^|[;&|]\s*)(?:sudo|runas|shutdown|reboot|format|rm|rmdir|del|erase|Remove-Item)(?:\.exe)?(?:\s|$)"
+    r"|\bgit\s+(?:push|reset\s+--hard|clean\s+-[^\s]*f[^\s]*|checkout\s+--|restore\b)"
+    r"|\b(?:winget|choco|apt|apt-get|yum|dnf|brew)\s+install\b"
+    r"|\bnpm\s+(?:install|i)\b[^\r\n]*(?:--global|-g)\b"
+    r"|\bpip(?:3)?\s+install\b[^\r\n]*(?:--user|--prefix|--root)\b",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 
 def shell_requires_confirmation(command: str, cwd: str = ".", timeout_seconds: int = 120) -> bool:
-    """Return whether a shell request is destructive or externally mutating."""
+    """Require confirmation for destructive, privileged, publishing, or machine-wide commands."""
     del cwd, timeout_seconds
-    return any(pattern.search(command) for pattern in _CONFIRMATION_PATTERNS)
+    return bool(_CONSEQUENTIAL_COMMAND.search(command))
 
 
 def run_shell(command: str, cwd: str = ".", timeout_seconds: int = 120) -> dict[str, Any]:
-    """Run a host-native shell command from a directory inside the repository.
+    """Run a command using PowerShell on Windows or Bash on Unix.
 
-    Use this general tool for Python, tests, builds, Git inspection, and repository-local scripts.
-    Common non-destructive commands run without confirmation; destructive or externally mutating
-    commands require ADK confirmation, and machine-level dangerous commands are blocked.
-
-    Args:
-        command: Command line interpreted by PowerShell on Windows or Bash on Unix.
-        cwd: Repository-relative working directory.
-        timeout_seconds: Execution timeout from 1 through 900 seconds.
+    The process starts in cwd, resolved relative to the coding agent's working directory.
+    This is a trusted host shell, not a filesystem sandbox.
     """
+    if not command.strip():
+        return _error("Command must not be empty")
     try:
-        reason = _blocked_command_reason(command)
-        if reason:
-            return _error(f"Command blocked: {reason}")
-        working_directory = _resolve_workspace_path(cwd, must_exist=True)
+        working_directory = _path(cwd, must_exist=True)
         if not working_directory.is_dir():
             return _error(f"Working directory is not a directory: {cwd}")
         timeout = max(1, min(timeout_seconds, 900))
@@ -372,7 +286,7 @@ def run_shell(command: str, cwd: str = ".", timeout_seconds: int = 120) -> dict[
             return {
                 "status": "ok" if completed.returncode == 0 else "error",
                 "command": command,
-                "cwd": _relative_path(working_directory),
+                "cwd": _display_path(working_directory),
                 "exit_code": completed.returncode,
                 "duration_seconds": round(time.monotonic() - started, 3),
                 "stdout": stdout,
@@ -385,7 +299,7 @@ def run_shell(command: str, cwd: str = ".", timeout_seconds: int = 120) -> dict[
             return {
                 "status": "error",
                 "command": command,
-                "cwd": _relative_path(working_directory),
+                "cwd": _display_path(working_directory),
                 "exit_code": 124,
                 "duration_seconds": round(time.monotonic() - started, 3),
                 "stdout": stdout,
