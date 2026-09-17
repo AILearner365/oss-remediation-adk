@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 import json
+import hashlib
 from pathlib import Path
 
 from autonomous_oss_remediation_agent.config import (
@@ -23,6 +24,7 @@ from autonomous_oss_remediation_agent.models import (
     ScannerHandle,
     VulnerabilityFinding,
 )
+from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner
 from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 
 
@@ -45,6 +47,48 @@ class _FixtureScanner:
             CommandResult(["fake-osv"], str(repository), 0, stdout="{}"),
             str(raw),
         )
+
+
+class _RetryingFixtureScanner(OsvScanner):
+    def __init__(self, workspace, process_runner, trace):
+        super().__init__(workspace, process_runner, trace, sleep=lambda _: None)
+        self.execution_labels = []
+
+    def preflight(self, config):
+        executable = self.workspace.tools / "fake-osv"
+        executable.write_bytes(b"scanner")
+        self.handle = ScannerHandle(
+            str(executable),
+            "fake 1.0",
+            hashlib.sha256(b"scanner").hexdigest(),
+            False,
+        )
+        return self.handle
+
+    def _execute_scan(self, handle, repository, label, attempt_number):
+        self.execution_labels.append((label, attempt_number))
+        if label == "baseline":
+            payload = {
+                "results": [{
+                    "packages": [{
+                        "package": {"ecosystem": "Maven", "name": "org.example:demo", "version": "1.0"},
+                        "vulnerabilities": [{
+                            "id": "CVE-2024-0001",
+                            "database_specific": {"severity": "HIGH"},
+                        }],
+                    }],
+                }],
+            }
+            return CommandResult([handle.executable], str(repository), 1, stdout=json.dumps(payload))
+        if attempt_number == 1:
+            return CommandResult(
+                [handle.executable],
+                str(repository),
+                1,
+                stdout='{"results": []}',
+                stderr="HTTP 429 Too Many Requests",
+            )
+        return CommandResult([handle.executable], str(repository), 0, stdout='{"results": []}')
 
 
 class _ScriptedAgentSession:
@@ -159,6 +203,34 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+
+    def test_scanner_retry_stays_inside_one_remediation_cycle(self):
+        sessions = []
+        scanners = []
+
+        def agent_factory(capabilities, model):
+            session = _ScriptedAgentSession(capabilities, [("1.0", "2.0")])
+            sessions.append(session)
+            return session
+
+        def scanner_factory(workspace, process_runner, trace):
+            scanner = _RetryingFixtureScanner(workspace, process_runner, trace)
+            scanners.append(scanner)
+            return scanner
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=agent_factory,
+            scanner_factory=scanner_factory,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(1, result.cycles_completed)
+        self.assertEqual(1, len(sessions[0].messages))
+        self.assertEqual(
+            [("baseline", 1), ("validation-cycle-1", 1), ("validation-cycle-1", 2)],
+            scanners[0].execution_labels,
+        )
 
     def test_cycle_budget_exhaustion_is_truthful(self):
         request = self._request(max_cycles=1)

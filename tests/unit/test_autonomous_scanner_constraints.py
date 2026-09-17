@@ -12,7 +12,7 @@ from autonomous_oss_remediation_agent.capabilities import ExecutionBudget, Proce
 from autonomous_oss_remediation_agent.config import ConstraintSpec, ExecutionBudgetConfig, RuntimePolicy, ScannerConfig
 from autonomous_oss_remediation_agent.deterministic.constraints import ConstraintEvaluator
 from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner, ScannerPreflightError, normalize_osv_findings
-from autonomous_oss_remediation_agent.models import CommandResult, ScannerHandle
+from autonomous_oss_remediation_agent.models import CommandResult, ScanOutcome, ScannerHandle
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
@@ -27,6 +27,25 @@ class _ArtifactScannerRunner:
             1,
             stdout="[output truncated]",
             stdout_artifact=str(self.artifact),
+        )
+
+
+class _SequenceScannerRunner:
+    def __init__(self, results):
+        self.results = list(results)
+        self.commands = []
+
+    def run_argv(self, command, **kwargs):
+        self.commands.append((list(command), kwargs))
+        result = self.results.pop(0)
+        return CommandResult(
+            list(command),
+            str(kwargs.get("cwd")),
+            result.exit_code,
+            stdout=result.stdout,
+            stderr=result.stderr,
+            timed_out=result.timed_out,
+            blocked=result.blocked,
         )
 
 
@@ -114,6 +133,79 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         result = scanner.scan(self.workspace.repository, ("HIGH",), "large")
         self.assertTrue(result.succeeded)
         self.assertEqual(1, len(result.findings))
+
+    def test_transient_429_retries_then_succeeds_clean(self):
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP 429 Too Many Requests"),
+            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+        ])
+        sleeps = []
+        scanner = self._scanner(runner, sleep=sleeps.append)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "rate-limit-recovery")
+
+        self.assertTrue(report.succeeded)
+        self.assertEqual(ScanOutcome.COMPLETED_CLEAN, report.effective_outcome)
+        self.assertEqual(2, len(report.attempts))
+        self.assertEqual("HTTP_429_RATE_LIMIT", report.attempts[0]["failureReason"].split(":", 1)[0])
+        self.assertTrue(report.attempts[0]["retryScheduled"])
+        self.assertEqual([5.0], sleeps)
+        self.assertTrue(Path(report.attempts[0]["stdoutArtifact"]).is_file())
+        self.assertTrue(Path(report.attempts[0]["stderrArtifact"]).is_file())
+        self.assertEqual('{"results": []}', Path(report.attempts[0]["rawReportPath"]).read_text(encoding="utf-8"))
+
+    def test_repeated_429_exhausts_retries_and_fails_closed(self):
+        failure = CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP status 429")
+        runner = _SequenceScannerRunner([failure, failure, failure])
+        sleeps = []
+        scanner = self._scanner(runner, sleep=sleeps.append)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "rate-limit-exhausted")
+
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, report.effective_outcome)
+        self.assertEqual(3, len(report.attempts))
+        self.assertEqual([5.0, 15.0], sleeps)
+        self.assertFalse(report.attempts[-1]["retryScheduled"])
+
+    def test_empty_results_from_non_successful_execution_are_not_clean(self):
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 2, stdout='{"results": []}', stderr="invalid scanner configuration"),
+        ])
+        scanner = self._scanner(runner)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "incomplete-empty")
+
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
+        self.assertEqual((), report.findings)
+
+    def test_normal_vulnerability_findings_remain_complete(self):
+        payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 1, stdout=payload),
+        ])
+        scanner = self._scanner(runner)
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "findings")
+
+        self.assertTrue(report.succeeded)
+        self.assertEqual(ScanOutcome.COMPLETED_WITH_FINDINGS, report.effective_outcome)
+        self.assertEqual(1, len(report.findings))
+        self.assertEqual(1, len(report.attempts))
+
+    def _scanner(self, runner, sleep=lambda _: None):
+        executable = self.workspace.tools / "osv-scanner.exe"
+        executable.write_bytes(b"scanner")
+        scanner = OsvScanner(
+            self.workspace,
+            runner,
+            self.trace,
+            retry_backoff_seconds=(5.0, 15.0),
+            sleep=sleep,
+        )
+        scanner.handle = ScannerHandle(str(executable), "test", hashlib.sha256(b"scanner").hexdigest(), False)
+        return scanner
 
     @unittest.skipUnless(os.name == "nt", "Provisioning fixture uses a Windows cmd executable")
     def test_pinned_project_scoped_scanner_provisioning(self):

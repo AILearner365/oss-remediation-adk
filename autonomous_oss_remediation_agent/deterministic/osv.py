@@ -2,21 +2,22 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
 import stat
 import tarfile
 import tempfile
+import time
 import urllib.request
 import zipfile
-import math
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from ..capabilities.execution import ProcessRunner
 from ..config import ScannerConfig
-from ..models import CommandResult, ScanReport, ScannerHandle, VulnerabilityFinding
+from ..models import CommandResult, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
 from ..workspace import RunWorkspace, TraceStore, sha256_file
 
 
@@ -25,10 +26,20 @@ class ScannerPreflightError(RuntimeError):
 
 
 class OsvScanner:
-    def __init__(self, workspace: RunWorkspace, process_runner: ProcessRunner, trace: TraceStore):
+    def __init__(
+        self,
+        workspace: RunWorkspace,
+        process_runner: ProcessRunner,
+        trace: TraceStore,
+        *,
+        retry_backoff_seconds: tuple[float, ...] = (5.0, 15.0),
+        sleep: Callable[[float], None] = time.sleep,
+    ):
         self.workspace = workspace
         self.process_runner = process_runner
         self.trace = trace
+        self.retry_backoff_seconds = retry_backoff_seconds
+        self.sleep = sleep
         self.handle: ScannerHandle | None = None
 
     def preflight(self, config: ScannerConfig) -> ScannerHandle:
@@ -59,6 +70,76 @@ class OsvScanner:
 
     def scan(self, repository: Path, severity_scope: tuple[str, ...], label: str) -> ScanReport:
         handle = self.verify()
+        attempts: list[dict[str, Any]] = []
+        max_attempts = len(self.retry_backoff_seconds) + 1
+        for attempt_number in range(1, max_attempts + 1):
+            result = self._execute_scan(handle, repository, label, attempt_number)
+            raw_stdout = _full_output(result.stdout, result.stdout_artifact)
+            raw_stderr = _full_output(result.stderr, result.stderr_artifact)
+            raw_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.json"
+            raw_path.parent.mkdir(parents=True, exist_ok=True)
+            raw_path.write_text(raw_stdout or "{}", encoding="utf-8")
+            stdout_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stdout.log"
+            stderr_path = self.workspace.artifacts / "scans" / f"{label}-attempt-{attempt_number}.stderr.log"
+            stdout_path.write_text(raw_stdout, encoding="utf-8")
+            stderr_path.write_text(raw_stderr, encoding="utf-8")
+            payload = _parse_payload(raw_stdout)
+            recognizable = _is_recognizable_report(payload)
+            findings = tuple(normalize_osv_findings(payload or {}, severity_scope)) if recognizable else ()
+            outcome, failure_reason = _classify_attempt(result, payload, raw_stdout, raw_stderr)
+            retry_scheduled = (
+                outcome == ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE
+                and attempt_number < max_attempts
+            )
+            backoff_seconds = self.retry_backoff_seconds[attempt_number - 1] if retry_scheduled else None
+            attempt = {
+                "attemptNumber": attempt_number,
+                "command": result.command,
+                "exitCode": result.exit_code,
+                "stdoutArtifact": str(stdout_path),
+                "stderrArtifact": str(stderr_path),
+                "rawReportPath": str(raw_path),
+                "outcome": outcome.value,
+                "failureReason": failure_reason,
+                "retryScheduled": retry_scheduled,
+                "backoffSeconds": backoff_seconds,
+                "commandResult": result.to_dict(),
+            }
+            attempts.append(attempt)
+            self.trace.write_json(f"scans/{label}-attempt-{attempt_number}.evidence.json", attempt)
+            self.trace.append_event("osv_scan_attempt", label=label, **attempt)
+            if retry_scheduled:
+                self.sleep(backoff_seconds)
+                continue
+            final_path = self.workspace.artifacts / "scans" / f"{label}.json"
+            final_path.write_text(raw_stdout or "{}", encoding="utf-8")
+            succeeded = outcome in {
+                ScanOutcome.COMPLETED_CLEAN,
+                ScanOutcome.COMPLETED_WITH_FINDINGS,
+            }
+            error = None if succeeded else failure_reason
+            report = ScanReport(
+                succeeded=succeeded,
+                findings=findings if succeeded else (),
+                command_result=result,
+                raw_report_path=str(final_path),
+                error=error,
+                outcome=outcome,
+                attempts=tuple(attempts),
+            )
+            break
+        else:
+            raise AssertionError("OSV retry loop did not produce a report")
+        self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
+        return report
+
+    def _execute_scan(
+        self,
+        handle: ScannerHandle,
+        repository: Path,
+        label: str,
+        attempt_number: int,
+    ) -> CommandResult:
         with tempfile.TemporaryDirectory(prefix="autonomous-osv-", dir=self.workspace.temp) as temp_dir:
             staged = Path(temp_dir) / "repository"
             shutil.copytree(
@@ -66,39 +147,11 @@ class OsvScanner:
                 staged,
                 ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
             )
-            result = self.process_runner.run_argv(
+            return self.process_runner.run_argv(
                 [handle.executable, "scan", "source", "-r", str(staged), "--format", "json"],
                 cwd=staged,
-                source=f"osv_{label}",
+                source=f"osv_{label}_attempt_{attempt_number}",
             )
-        raw_stdout = result.stdout
-        if result.stdout_artifact:
-            raw_stdout = Path(result.stdout_artifact).read_text(encoding="utf-8")
-        raw_path = self.workspace.artifacts / "scans" / f"{label}.json"
-        raw_path.parent.mkdir(parents=True, exist_ok=True)
-        raw_path.write_text(raw_stdout or "{}", encoding="utf-8")
-        try:
-            payload = json.loads(raw_stdout or "{}")
-        except json.JSONDecodeError:
-            payload = None
-        recognizable = isinstance(payload, dict) and (
-            isinstance(payload.get("results"), list) or isinstance(payload.get("packages"), list)
-        )
-        no_sources = "no package sources found" in result.stderr.lower()
-        succeeded = result.exit_code in (0, 1) and recognizable and not result.timed_out and not no_sources
-        findings = tuple(normalize_osv_findings(payload or {}, severity_scope)) if recognizable else ()
-        error = None
-        if not succeeded:
-            error = result.stderr.strip() or "OSV Scanner did not produce a recognizable JSON report"
-        report = ScanReport(
-            succeeded=succeeded,
-            findings=findings,
-            command_result=result,
-            raw_report_path=str(raw_path),
-            error=error,
-        )
-        self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
-        return report
 
     def _inspect(self, executable: Path, config: ScannerConfig, provisioned: bool) -> ScannerHandle:
         digest = sha256_file(executable)
@@ -145,6 +198,67 @@ class OsvScanner:
             timeout_seconds=config.timeout_seconds,
         )
         return self._inspect(executable, inspect_config, provisioned=True)
+
+
+_TRANSIENT_FAILURE_PATTERNS = (
+    (re.compile(r"(?:http(?: response)?(?: status)?|status(?: code)?)[^\n\r]{0,40}\b429\b|\b429\s+(?:too many requests|rate limit)", re.IGNORECASE), "HTTP_429_RATE_LIMIT"),
+    (re.compile(r"(?:http(?: response)?(?: status)?|status(?: code)?)[^\n\r]{0,40}\b5\d\d\b|\b5(?:00|02|03|04)\s+(?:internal server error|bad gateway|service unavailable|gateway timeout)", re.IGNORECASE), "HTTP_5XX_SERVER_ERROR"),
+    (re.compile(r"temporary failure in name resolution|name or service not known|no such host|server misbehaving|dns lookup failed", re.IGNORECASE), "TEMPORARY_DNS_FAILURE"),
+    (re.compile(r"connection reset|connection aborted|connection refused|broken pipe|unexpected eof|tls handshake timeout|remote host terminated", re.IGNORECASE), "TEMPORARY_CONNECTION_FAILURE"),
+    (re.compile(r"connect(?:ion)? timed out|read timed out|i/o timeout|network is unreachable|temporary network|transport.*temporar", re.IGNORECASE), "TEMPORARY_TRANSPORT_FAILURE"),
+)
+
+
+def _classify_attempt(
+    result: CommandResult,
+    payload: Any,
+    raw_stdout: str,
+    raw_stderr: str,
+) -> tuple[ScanOutcome, str | None]:
+    combined_output = "\n".join((raw_stderr, raw_stdout))
+    recognizable = _is_recognizable_report(payload)
+    has_vulnerabilities = recognizable and any(True for _ in _iter_records(payload))
+    if result.timed_out:
+        return ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, "SCANNER_TIMEOUT: OSV Scanner execution timed out"
+    transient_output = raw_stderr if has_vulnerabilities else combined_output
+    for pattern, reason in _TRANSIENT_FAILURE_PATTERNS:
+        if pattern.search(transient_output):
+            detail = raw_stderr.strip() or raw_stdout.strip() or "transient scanner infrastructure failure"
+            return ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, f"{reason}: {detail}"
+    if result.blocked:
+        return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "SCANNER_EXECUTION_BLOCKED"
+    if "no package sources found" in combined_output.lower():
+        return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "NO_PACKAGE_SOURCES: OSV Scanner found no package sources"
+    if not recognizable:
+        detail = raw_stderr.strip() or "OSV Scanner did not produce a recognizable JSON report"
+        return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"UNRECOGNIZABLE_REPORT: {detail}"
+    if result.exit_code == 0:
+        outcome = ScanOutcome.COMPLETED_WITH_FINDINGS if has_vulnerabilities else ScanOutcome.COMPLETED_CLEAN
+        return outcome, None
+    if result.exit_code == 1 and has_vulnerabilities:
+        return ScanOutcome.COMPLETED_WITH_FINDINGS, None
+    detail = raw_stderr.strip() or f"OSV Scanner exited with code {result.exit_code}"
+    return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"NON_SUCCESSFUL_EXECUTION: {detail}"
+
+
+def _parse_payload(raw_stdout: str) -> Any:
+    try:
+        return json.loads(raw_stdout or "{}")
+    except json.JSONDecodeError:
+        return None
+
+
+def _is_recognizable_report(payload: Any) -> bool:
+    return isinstance(payload, dict) and (
+        isinstance(payload.get("results"), list) or isinstance(payload.get("packages"), list)
+    )
+
+
+def _full_output(value: str, artifact: str | None) -> str:
+    path = Path(artifact) if artifact else None
+    if path and path.is_file():
+        return path.read_text(encoding="utf-8")
+    return value
 
 
 def normalize_osv_findings(raw_json: Any, severity_scope: Iterable[str]) -> list[VulnerabilityFinding]:

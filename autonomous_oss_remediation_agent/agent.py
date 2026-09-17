@@ -21,7 +21,7 @@ def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -
         description="Autonomously investigates and remediates OSS vulnerabilities in one prepared repository.",
         instruction=AGENT_INSTRUCTION,
         tools=capabilities.adk_tools(),
-        mode="task",
+        mode="chat",
     )
 
 

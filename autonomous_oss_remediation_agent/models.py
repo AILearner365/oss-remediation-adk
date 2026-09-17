@@ -14,6 +14,13 @@ class Outcome(str, Enum):
     BASELINE_FAILURE = "BASELINE FAILURE"
 
 
+class ScanOutcome(str, Enum):
+    COMPLETED_CLEAN = "COMPLETED_CLEAN"
+    COMPLETED_WITH_FINDINGS = "COMPLETED_WITH_FINDINGS"
+    INCOMPLETE_RETRYABLE_FAILURE = "INCOMPLETE_RETRYABLE_FAILURE"
+    INCOMPLETE_FATAL_FAILURE = "INCOMPLETE_FATAL_FAILURE"
+
+
 @dataclass(frozen=True)
 class CommandResult:
     command: list[str]
@@ -105,6 +112,18 @@ class ScanReport:
     command_result: CommandResult
     raw_report_path: str
     error: str | None = None
+    outcome: ScanOutcome | None = None
+    attempts: tuple[dict[str, Any], ...] = ()
+
+    @property
+    def effective_outcome(self) -> ScanOutcome:
+        if self.outcome is not None:
+            return self.outcome
+        if not self.succeeded:
+            return ScanOutcome.INCOMPLETE_FATAL_FAILURE
+        if self.findings:
+            return ScanOutcome.COMPLETED_WITH_FINDINGS
+        return ScanOutcome.COMPLETED_CLEAN
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -113,6 +132,8 @@ class ScanReport:
             "commandResult": self.command_result.to_dict(),
             "rawReportPath": self.raw_report_path,
             "error": self.error,
+            "outcome": self.effective_outcome.value,
+            "attempts": list(self.attempts),
         }
 
 

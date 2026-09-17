@@ -94,7 +94,7 @@ class AutonomousRemediationOrchestrator:
                 raise RuntimeError("Baseline Maven build failed")
             scan = scanner.scan(workspace.repository, self._baseline_scan_scope(), "baseline")
             if not scan.succeeded:
-                raise RuntimeError(f"Baseline OSV scan failed: {scan.error}")
+                raise RuntimeError(f"Baseline OSV scan failed ({scan.effective_outcome.value}): {scan.error}")
             constraint_evaluator = ConstraintEvaluator()
             constraint_baseline = constraint_evaluator.capture(workspace.repository)
             targets = tuple(finding for finding in scan.findings if self._is_target(finding))

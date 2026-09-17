@@ -76,7 +76,11 @@ class DeterministicValidator:
                 ValidationCheck(
                     "fresh_osv_scan",
                     scan_report.succeeded,
-                    "Fresh OSV scan completed" if scan_report.succeeded else "Fresh OSV scan failed",
+                    (
+                        f"Fresh OSV scan completed: {scan_report.effective_outcome.value}"
+                        if scan_report.succeeded
+                        else f"Fresh OSV scan incomplete: {scan_report.effective_outcome.value}"
+                    ),
                     scan_report.to_dict(),
                 )
             )
