@@ -146,9 +146,15 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
 
     def test_agent_instruction_preserves_structure_aware_remediation_discretion(self):
         self.assertIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)
-        self.assertIn("avoid redundant or unnecessary lower-level overrides", AGENT_INSTRUCTION)
-        self.assertIn("retain discretion to use a lower-level override", AGENT_INSTRUCTION)
         self.assertIn("not treat these management layers as a required remediation order", AGENT_INSTRUCTION)
+        self.assertIn("When multiple safe remediations", AGENT_INSTRUCTION)
+        self.assertIn("preserves the repository's existing dependency-management model", AGENT_INSTRUCTION)
+        self.assertIn("minimizes fragmented version control", AGENT_INSTRUCTION)
+        self.assertIn("coherent, maintainable change", AGENT_INSTRUCTION)
+        self.assertIn("Avoid unnecessary explicit lower-level overrides", AGENT_INSTRUCTION)
+        self.assertIn("retain discretion to use targeted overrides", AGENT_INSTRUCTION)
+        self.assertIn("repository structure, compatibility, build, or validation evidence", AGENT_INSTRUCTION)
+        self.assertIn("not choose a remediation solely because it is the quickest way", AGENT_INSTRUCTION)
         self.assertIn("version policies solely as remediation boundaries", AGENT_INSTRUCTION)
         self.assertIn("does not prescribe how to achieve it", AGENT_INSTRUCTION)
 
