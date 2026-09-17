@@ -140,12 +140,12 @@ class OsvScanner:
         label: str,
         attempt_number: int,
     ) -> CommandResult:
-        with tempfile.TemporaryDirectory(prefix="autonomous-osv-", dir=self.workspace.temp) as temp_dir:
+        with tempfile.TemporaryDirectory(prefix="oss-remediation-osv-scan-") as temp_dir:
             staged = Path(temp_dir) / "repository"
             shutil.copytree(
                 repository,
                 staged,
-                ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
+                ignore=shutil.ignore_patterns(".git", "target", ".mvn/.gradle", ".gradle"),
             )
             return self.process_runner.run_argv(
                 [handle.executable, "scan", "source", "-r", str(staged), "--format", "json"],
