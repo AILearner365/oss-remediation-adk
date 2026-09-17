@@ -41,9 +41,45 @@ class ScannerConfig:
 
 
 @dataclass(frozen=True)
+class SpringBootVersionPolicy:
+    allow_patch: bool = True
+    allow_minor: bool = True
+    allow_major: bool = False
+    allow_downgrade: bool = False
+    approved_versions: tuple[str, ...] = ()
+    required_version: str | None = None
+
+    def __post_init__(self) -> None:
+        for name in ("allow_patch", "allow_minor", "allow_major", "allow_downgrade"):
+            if not isinstance(getattr(self, name), bool):
+                raise ValueError(f"Spring Boot version policy field {name} must be a boolean")
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "SpringBootVersionPolicy":
+        normalized = _snake_keys(data)
+        normalized["approved_versions"] = tuple(
+            str(value) for value in normalized.get("approved_versions", ()) or ()
+        )
+        if normalized.get("required_version") is not None:
+            normalized["required_version"] = str(normalized["required_version"])
+        return cls(**normalized)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "allow_patch": self.allow_patch,
+            "allow_minor": self.allow_minor,
+            "allow_major": self.allow_major,
+            "allow_downgrade": self.allow_downgrade,
+            "approved_versions": list(self.approved_versions),
+            "required_version": self.required_version,
+        }
+
+
+@dataclass(frozen=True)
 class ConstraintSpec:
     protected_java_version: str | None = None
     protected_spring_boot_version: str | None = None
+    spring_boot_version_policy: SpringBootVersionPolicy = field(default_factory=SpringBootVersionPolicy)
     prohibit_suppressions: bool = True
     prohibited_new_severities: tuple[str, ...] = ("CRITICAL", "HIGH")
     allowed_paths: tuple[str, ...] = ()
@@ -92,6 +128,15 @@ class RemediationRequest:
         runtime_data = data.get("runtime_policy") or data.get("runtimePolicy") or {}
         scanner_data = data.get("scanner") or {}
         constraint_data = data.get("constraints") or {}
+        version_policy_data = constraint_data.get("version_policies", constraint_data.get("versionPolicies", {})) or {}
+        unsupported_version_policies = set(version_policy_data) - {"spring_boot", "springBoot"}
+        if unsupported_version_policies:
+            unsupported = ", ".join(sorted(str(value) for value in unsupported_version_policies))
+            raise ValueError(f"Unsupported version policy component: {unsupported}")
+        spring_boot_policy_data = version_policy_data.get(
+            "spring_boot",
+            version_policy_data.get("springBoot", {}),
+        ) or {}
         delivery_data = data.get("delivery") or {}
         return cls(
             repository_url=str(data["repository_url"] if "repository_url" in data else data["repositoryUrl"]),
@@ -109,6 +154,7 @@ class RemediationRequest:
             constraints=ConstraintSpec(
                 protected_java_version=constraint_data.get("protected_java_version", constraint_data.get("protectedJavaVersion")),
                 protected_spring_boot_version=constraint_data.get("protected_spring_boot_version", constraint_data.get("protectedSpringBootVersion")),
+                spring_boot_version_policy=SpringBootVersionPolicy.from_dict(spring_boot_policy_data),
                 prohibit_suppressions=bool(constraint_data.get("prohibit_suppressions", constraint_data.get("prohibitSuppressions", True))),
                 prohibited_new_severities=tuple(str(value).upper() for value in constraint_data.get("prohibited_new_severities", constraint_data.get("prohibitedNewSeverities", ("CRITICAL", "HIGH"))) or ()),
                 allowed_paths=tuple(str(value) for value in constraint_data.get("allowed_paths", constraint_data.get("allowedPaths", ())) or ()),
@@ -124,6 +170,11 @@ class RemediationRequest:
         return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
 
     def to_dict(self) -> dict[str, Any]:
+        constraint_values = {
+            key: value
+            for key, value in self.constraints.__dict__.items()
+            if key != "spring_boot_version_policy"
+        }
         return {
             "repositoryUrl": self.repository_url,
             "referenceBranch": self.reference_branch,
@@ -138,7 +189,10 @@ class RemediationRequest:
             "runtimePolicy": self.runtime_policy.__dict__,
             "scanner": self.scanner.__dict__,
             "constraints": {
-                **self.constraints.__dict__,
+                **constraint_values,
+                "version_policies": {
+                    "spring_boot": self.constraints.spring_boot_version_policy.to_dict(),
+                },
                 "prohibited_new_severities": list(self.constraints.prohibited_new_severities),
                 "allowed_paths": list(self.constraints.allowed_paths),
                 "protected_paths": list(self.constraints.protected_paths),

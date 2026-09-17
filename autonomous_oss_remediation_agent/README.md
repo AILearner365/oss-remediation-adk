@@ -55,6 +55,19 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
     "version": "2.6.0",
     "sha256": "approved-executable-sha256"
   },
+  "constraints": {
+    "prohibit_suppressions": true,
+    "version_policies": {
+      "spring_boot": {
+        "allow_patch": true,
+        "allow_minor": true,
+        "allow_major": false,
+        "allow_downgrade": false,
+        "approved_versions": ["4.0.7"],
+        "required_version": null
+      }
+    }
+  },
   "delivery": {
     "mode": "manual"
   }
@@ -69,6 +82,18 @@ python -m autonomous_oss_remediation_agent.cli request.json --output result.json
 ```
 
 The `allowNetwork` value declares the approved runner network mode; the local backend does not claim destination-level egress enforcement.
+
+## Spring Boot Version Policy
+
+Spring Boot version movement is checked against the captured baseline after the agent finishes. The default policy allows stable numeric patch and minor upgrades, rejects major upgrades and downgrades, and permits unchanged versions. For example, from `3.5.0`, `3.5.1` and `3.6.0` pass while `4.0.0` and `3.4.9` fail.
+
+- `approved_versions` lists exact otherwise-disallowed major-upgrade destinations. It does not authorize downgrades.
+- `required_version` requires the final concrete Spring Boot version to exactly match that value.
+- Legacy `protected_spring_boot_version` remains supported as an exact required version and takes precedence over `required_version`.
+- Stable dot-separated numeric versions are compared component-wise. Unparseable qualifiers or structural declaration changes fail closed.
+- Java version protection remains unchanged and exact; this focused policy applies only to Spring Boot.
+
+The agent receives this policy as an allowed boundary and chooses whether and how to upgrade. Deterministic validation independently emits `spring_boot_version_policy` evidence containing the component, baseline and final versions, applicable policy, detected change type, pass/fail value, and reason.
 
 ## Target Selection
 
@@ -88,7 +113,7 @@ Automated delivery requires an explicitly injected approved `DeliveryAdapter`, n
 ## Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_validation_delivery -v
+python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 

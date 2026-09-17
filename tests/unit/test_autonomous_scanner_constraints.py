@@ -353,7 +353,7 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
             "",
         )
         self.assertFalse(next(check for check in checks if check.name == "protected_java_version").passed)
-        self.assertFalse(next(check for check in checks if check.name == "protected_spring_boot_version").passed)
+        self.assertFalse(next(check for check in checks if check.name == "spring_boot_version_policy").passed)
 
 
 if __name__ == "__main__":

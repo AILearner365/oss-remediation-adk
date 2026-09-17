@@ -14,6 +14,7 @@ Investigate the repository and remediate the requested vulnerabilities directly.
 Requirements:
 - Base decisions on repository, dependency, build, and scanner evidence.
 - Respect every supplied constraint.
+- Treat Spring Boot version policy as an allowed boundary, not a required upgrade unless `required_version` is set.
 - Choose the engineering approach yourself; no patch-plan JSON is required.
 - Do not use vulnerability-specific recipes from this prompt; investigate the actual dependency-management structure.
 - Do not install, replace, or select OSV Scanner. Deterministic code owns scanning.
