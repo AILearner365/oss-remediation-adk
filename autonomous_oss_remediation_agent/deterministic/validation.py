@@ -55,7 +55,11 @@ class DeterministicValidator:
             )
         )
         diff_path = self.trace.write_text(f"validation/cycle-{cycle}.diff", diff_text)
-        build_results = MavenService(self.workspace.repository, self.process_runner).run_validation(
+        build_results = MavenService(
+            self.workspace.repository,
+            self.process_runner,
+            self.request.maven,
+        ).run_validation(
             self.request.build_commands,
             self.request.test_commands,
             self.request.startup_commands,

@@ -8,6 +8,7 @@ from pathlib import Path
 import requests
 
 from autonomous_oss_remediation_agent.config import (
+    MavenConfig,
     RemediationRequest,
     ScannerConfig,
     XrayScannerConfig,
@@ -141,15 +142,22 @@ class AutonomousXrayScannerTests(unittest.TestCase):
             )
 
     def test_selector_constructs_explicit_backends(self):
-        osv = create_scanner(ScannerConfig(), self.workspace, _TgfRunner(self.tgf), self.trace)
+        osv = create_scanner(
+            ScannerConfig(),
+            self.workspace,
+            _TgfRunner(self.tgf),
+            self.trace,
+        )
         self.assertIsInstance(osv, OsvScanner)
         xray = create_scanner(
             self._config(),
             self.workspace,
             _TgfRunner(self.tgf),
             self.trace,
+            maven_config=MavenConfig(mode="system"),
         )
         self.assertIsInstance(xray, XrayScanner)
+        self.assertEqual("system", xray.maven_config.mode)
 
     def test_graph_generation_supports_multiple_reactor_modules(self):
         graph = build_xray_graph(
@@ -417,6 +425,24 @@ class AutonomousXrayScannerTests(unittest.TestCase):
         self.assertFalse(report.succeeded)
         self.assertEqual(ScanFailureKind.DEPENDENCY_RESOLUTION, report.failure_kind)
         self.assertEqual([], session.requests)
+
+    def test_dependency_graph_uses_configured_system_maven(self):
+        (self.workspace.repository / "mvnw.cmd").write_text("@echo off\n", encoding="utf-8")
+        runner = _TgfRunner(self.tgf)
+        scanner = XrayScanner(
+            self.workspace,
+            runner,
+            self.trace,
+            maven_config=MavenConfig(mode="system"),
+            session=_Session([_Response(401)]),
+            environment={"XRAY_ACCESS_TOKEN": "token"},
+        )
+        scanner.preflight(self._config())
+        scanner.scan(self.workspace.repository, ("HIGH",), "system-maven")
+
+        selected = runner.commands[0][0][0]
+        self.assertIn(Path(selected).name.lower(), {"mvn", "mvn.cmd"})
+        self.assertNotEqual(str(self.workspace.repository / "mvnw.cmd"), selected)
 
     def test_credentials_are_used_only_in_http_and_redacted_from_artifacts(self):
         token = "top-secret-xray-token"

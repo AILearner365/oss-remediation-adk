@@ -92,14 +92,24 @@ class AutonomousRemediationOrchestrator:
             )
         delivery_preflight = delivery_adapter.preflight(self.request)
         trace.write_json("delivery/preflight.json", delivery_preflight.to_dict())
-        scanner = self.scanner_factory(self.request.scanner, workspace, process_runner, trace)
+        scanner = (
+            create_scanner(
+                self.request.scanner,
+                workspace,
+                process_runner,
+                trace,
+                maven_config=self.request.maven,
+            )
+            if self.scanner_factory is create_scanner
+            else self.scanner_factory(self.request.scanner, workspace, process_runner, trace)
+        )
         try:
             scanner.preflight(self.request.scanner)
             metadata = RepositoryPreparer(workspace, process_runner, trace).clone(
                 self.request.repository_url,
                 self.request.reference_branch,
             )
-            maven = MavenService(workspace.repository, process_runner)
+            maven = MavenService(workspace.repository, process_runner, self.request.maven)
             build_results = maven.run_baseline(
                 self.request.build_commands,
                 self.request.test_commands,

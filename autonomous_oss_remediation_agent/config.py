@@ -31,6 +31,17 @@ class RuntimePolicy:
 
 
 @dataclass(frozen=True)
+class MavenConfig:
+    mode: str = "auto"
+
+    def __post_init__(self) -> None:
+        normalized = str(self.mode).strip().lower()
+        if normalized not in {"auto", "wrapper", "system"}:
+            raise ValueError(f"Unsupported Maven mode: {self.mode}")
+        object.__setattr__(self, "mode", normalized)
+
+
+@dataclass(frozen=True)
 class OsvScannerConfig:
     mode: str = "configured"
     executable: str = "osv-scanner"
@@ -264,6 +275,7 @@ class RemediationRequest:
     model: str = "gemini-2.5-flash"
     budget: ExecutionBudgetConfig = field(default_factory=ExecutionBudgetConfig)
     runtime_policy: RuntimePolicy = field(default_factory=RuntimePolicy)
+    maven: MavenConfig = field(default_factory=MavenConfig)
     scanner: ScannerConfig = field(default_factory=ScannerConfig)
     constraints: ConstraintSpec = field(default_factory=ConstraintSpec)
     delivery: DeliveryConfig = field(default_factory=DeliveryConfig)
@@ -275,6 +287,11 @@ class RemediationRequest:
 
         budget_data = data.get("budget") or {}
         runtime_data = data.get("runtime_policy") or data.get("runtimePolicy") or {}
+        maven_data = data.get("maven", {})
+        if maven_data is None:
+            maven_data = {}
+        if not isinstance(maven_data, dict):
+            raise ValueError("maven must be an object")
         scanner_data = data.get("scanner") or {}
         constraint_data = data.get("constraints") or {}
         version_policy_data = constraint_data.get("version_policies", constraint_data.get("versionPolicies", {})) or {}
@@ -299,6 +316,7 @@ class RemediationRequest:
             model=str(data.get("model", "gemini-2.5-flash")),
             budget=ExecutionBudgetConfig(**_snake_keys(budget_data)),
             runtime_policy=RuntimePolicy(**_snake_keys(runtime_data)),
+            maven=MavenConfig(**_snake_keys(maven_data)),
             scanner=ScannerConfig.from_dict(scanner_data),
             constraints=ConstraintSpec(
                 protected_java_version=constraint_data.get("protected_java_version", constraint_data.get("protectedJavaVersion")),
@@ -336,6 +354,7 @@ class RemediationRequest:
             "model": self.model,
             "budget": self.budget.__dict__,
             "runtimePolicy": self.runtime_policy.__dict__,
+            "maven": self.maven.__dict__,
             "scanner": self.scanner.to_dict(),
             "constraints": {
                 **constraint_values,

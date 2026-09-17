@@ -13,7 +13,7 @@ from typing import Any, Callable, Iterable, Mapping
 import requests
 
 from ..capabilities.execution import ProcessRunner
-from ..config import ScannerConfig, XrayScannerConfig
+from ..config import MavenConfig, ScannerConfig, XrayScannerConfig
 from ..models import CommandResult, ScanFailureKind, ScanOutcome, ScanReport, VulnerabilityFinding
 from ..workspace import RunWorkspace, TraceStore
 from .maven import MavenService
@@ -40,6 +40,7 @@ class XrayScanner:
         process_runner: ProcessRunner,
         trace: TraceStore,
         *,
+        maven_config: MavenConfig | None = None,
         session: requests.Session | None = None,
         environment: Mapping[str, str] | None = None,
         sleep: Callable[[float], None] = time.sleep,
@@ -48,6 +49,7 @@ class XrayScanner:
         self.workspace = workspace
         self.process_runner = process_runner
         self.trace = trace
+        self.maven_config = maven_config or MavenConfig()
         self.session = session or requests.Session()
         self.environment = environment if environment is not None else os.environ
         self.sleep = sleep
@@ -451,7 +453,11 @@ class XrayScanner:
         temp_path.unlink(missing_ok=True)
         dependency_path = self.workspace.artifacts / "scans" / f"{label}.dependencies.tgf"
         dependency_path.parent.mkdir(parents=True, exist_ok=True)
-        executable = MavenService(repository, self.process_runner).maven_executable()
+        executable = MavenService(
+            repository,
+            self.process_runner,
+            self.maven_config,
+        ).maven_executable()
         command = [
             executable,
             "-q",

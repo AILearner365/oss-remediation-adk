@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Protocol
 
 from ..capabilities.execution import ProcessRunner
-from ..config import ScannerConfig
+from ..config import MavenConfig, ScannerConfig
 from ..models import ScanReport
 from ..workspace import RunWorkspace, TraceStore
 
@@ -28,16 +28,19 @@ def create_scanner(
     workspace: RunWorkspace,
     process_runner: ProcessRunner,
     trace: TraceStore,
+    *,
+    maven_config: MavenConfig | None = None,
 ) -> VulnerabilityScanner:
     from .osv import OsvScanner
     from .xray import XrayScanner
 
-    scanners = {
-        "osv": OsvScanner,
-        "xray": XrayScanner,
-    }
-    try:
-        scanner_type = scanners[config.backend]
-    except KeyError as exc:
-        raise ScannerPreflightError(f"Unsupported scanner backend: {config.backend}") from exc
-    return scanner_type(workspace, process_runner, trace)
+    if config.backend == "osv":
+        return OsvScanner(workspace, process_runner, trace)
+    if config.backend == "xray":
+        return XrayScanner(
+            workspace,
+            process_runner,
+            trace,
+            maven_config=maven_config or MavenConfig(),
+        )
+    raise ScannerPreflightError(f"Unsupported scanner backend: {config.backend}")
