@@ -22,6 +22,17 @@ class ScanOutcome(str, Enum):
     INCOMPLETE_FATAL_FAILURE = "INCOMPLETE_FATAL_FAILURE"
 
 
+class ScanFailureKind(str, Enum):
+    AUTHENTICATION = "AUTHENTICATION"
+    AUTHORIZATION = "AUTHORIZATION"
+    NETWORK = "NETWORK"
+    TIMEOUT = "TIMEOUT"
+    DEPENDENCY_RESOLUTION = "DEPENDENCY_RESOLUTION"
+    CONFIGURATION = "CONFIGURATION"
+    INVALID_RESPONSE = "INVALID_RESPONSE"
+    BACKEND = "BACKEND"
+
+
 @dataclass(frozen=True)
 class CommandResult:
     command: list[str]
@@ -65,6 +76,8 @@ class VulnerabilityFinding:
     version: str
     fixed_versions: tuple[str, ...] = ()
     summary: str = ""
+    ecosystem: str = "Maven"
+    backend_evidence: dict[str, Any] = field(default_factory=dict)
 
     @property
     def coordinate(self) -> str:
@@ -97,12 +110,13 @@ class VulnerabilityFinding:
                 "groupId": self.group_id,
                 "artifactId": self.artifact_id,
                 "packageName": self.package_name,
-                "ecosystem": "Maven",
+                "ecosystem": self.ecosystem,
                 "currentVersion": self.version,
             },
             "fixedVersions": list(self.fixed_versions),
             "summary": self.summary,
             "identity": self.identity,
+            "backendEvidence": dict(self.backend_evidence),
         }
 
 
@@ -110,11 +124,14 @@ class VulnerabilityFinding:
 class ScanReport:
     succeeded: bool
     findings: tuple[VulnerabilityFinding, ...]
-    command_result: CommandResult
+    command_result: CommandResult | None
     raw_report_path: str
     error: str | None = None
     outcome: ScanOutcome | None = None
     attempts: tuple[dict[str, Any], ...] = ()
+    backend: str = "osv"
+    failure_kind: ScanFailureKind | None = None
+    evidence: dict[str, Any] = field(default_factory=dict)
 
     @property
     def effective_outcome(self) -> ScanOutcome:
@@ -130,11 +147,14 @@ class ScanReport:
         return {
             "succeeded": self.succeeded,
             "findings": [finding.to_dict() for finding in self.findings],
-            "commandResult": self.command_result.to_dict(),
+            "commandResult": self.command_result.to_dict() if self.command_result else None,
             "rawReportPath": self.raw_report_path,
             "error": self.error,
             "outcome": self.effective_outcome.value,
             "attempts": list(self.attempts),
+            "backend": self.backend,
+            "failureKind": self.failure_kind.value if self.failure_kind else None,
+            "evidence": dict(self.evidence),
         }
 
 

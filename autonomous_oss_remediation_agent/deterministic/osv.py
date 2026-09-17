@@ -22,15 +22,14 @@ from typing import Any, Callable, Iterable, Iterator
 
 from ..capabilities.execution import ProcessRunner
 from ..config import ScannerConfig
-from ..models import CommandResult, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
+from ..models import CommandResult, ScanFailureKind, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
 from ..workspace import RunWorkspace, TraceStore, sha256_file
-
-
-class ScannerPreflightError(RuntimeError):
-    pass
+from .scanner import ScannerPreflightError
 
 
 class OsvScanner:
+    backend = "osv"
+
     def __init__(
         self,
         workspace: RunWorkspace,
@@ -135,6 +134,8 @@ class OsvScanner:
                 error=error,
                 outcome=outcome,
                 attempts=tuple(attempts),
+                backend=self.backend,
+                failure_kind=_failure_kind(failure_reason),
             )
             break
         else:
@@ -369,6 +370,29 @@ def _parse_payload(raw_stdout: str) -> Any:
         return json.loads(raw_stdout or "{}")
     except json.JSONDecodeError:
         return None
+
+
+def _failure_kind(reason: str | None) -> ScanFailureKind | None:
+    if not reason:
+        return None
+    prefix = reason.split(":", 1)[0]
+    if prefix == "SCANNER_TIMEOUT":
+        return ScanFailureKind.TIMEOUT
+    if prefix == "DEPENDENCY_RESOLUTION_FAILURE":
+        return ScanFailureKind.DEPENDENCY_RESOLUTION
+    if prefix in {
+        "HTTP_429_RATE_LIMIT",
+        "HTTP_5XX_SERVER_ERROR",
+        "TEMPORARY_DNS_FAILURE",
+        "TEMPORARY_CONNECTION_FAILURE",
+        "TEMPORARY_TRANSPORT_FAILURE",
+    }:
+        return ScanFailureKind.NETWORK
+    if prefix in {"UNRECOGNIZABLE_REPORT"}:
+        return ScanFailureKind.INVALID_RESPONSE
+    if prefix in {"SCANNER_EXECUTION_BLOCKED", "NO_PACKAGE_SOURCES"}:
+        return ScanFailureKind.CONFIGURATION
+    return ScanFailureKind.BACKEND
 
 
 def _is_recognizable_report(payload: Any) -> bool:

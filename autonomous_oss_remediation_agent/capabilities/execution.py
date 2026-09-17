@@ -108,7 +108,7 @@ class ProcessRunner:
             _host_shell_command(command),
             cwd=Path(cwd),
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
-            environment=dict(environment) if environment is not None else os.environ.copy(),
+            environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
             display_command=[command],
         )
@@ -125,7 +125,7 @@ class ProcessRunner:
             list(command),
             cwd=Path(cwd) if cwd else self.workspace.root,
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
-            environment=dict(environment) if environment is not None else os.environ.copy(),
+            environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
             display_command=list(command),
         )
@@ -209,6 +209,13 @@ def _host_shell_command(command: str) -> list[str]:
             command,
         ]
     return ["/bin/bash", "-lc", command]
+
+
+def _deterministic_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    for name in ("XRAY_ACCESS_TOKEN", "XRAY_USERNAME", "XRAY_PASSWORD"):
+        environment.pop(name, None)
+    return environment
 
 
 def _terminate_process_tree(process: subprocess.Popen[str]) -> None:

@@ -19,7 +19,7 @@ Requirements:
 - Do not use vulnerability-specific recipes from this prompt. When choosing a remediation, inspect how affected dependency versions are managed by the repository, including relevant parents, imported BOMs, properties, and existing `dependencyManagement`. Use that structure as engineering evidence, avoid redundant or unnecessary lower-level overrides, and retain discretion to use a lower-level override when repository evidence supports it. Do not treat these management layers as a required remediation order or hierarchy.
 - When multiple safe remediations are available, prefer the approach that best preserves the repository's existing dependency-management model, minimizes fragmented version control, and avoids unnecessary explicit overrides. Favor maintainable, coherent changes over a larger set of isolated dependency pins, while retaining discretion to use targeted overrides when repository, compatibility, build, or validation evidence supports them.
 - Do not choose a remediation solely because it is the fastest path to a passing scan; also consider maintainability, dependency ownership, and consistency with the project's existing version-management approach.
-- Do not install, replace, or select OSV Scanner. Deterministic code owns scanning.
+- Do not install, replace, or select vulnerability scanners. Deterministic code owns scanning.
 - Do not obtain credentials, push branches, or create pull requests. Deterministic delivery owns those actions.
 - Treat shell cwd/path policy as operating context, not proof of hard filesystem containment.
 - Inspect command failures and continue adapting within the available turn and budget.
@@ -40,7 +40,7 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
         "budgets": request.to_dict()["budget"],
         "completionCriteria": [
             "required build/test/startup commands pass",
-            "fresh deterministic OSV scan succeeds",
+            "fresh deterministic vulnerability scan succeeds",
             "requested target findings are absent",
             "no new prohibited findings are introduced",
             "typed constraints remain satisfied",

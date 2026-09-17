@@ -12,9 +12,13 @@ The host-native shell is permitted only when all three request flags are explici
 
 This preflight is an operational gate, not hard filesystem or process containment. The dedicated runner identity must be least privilege, contain no unrelated sensitive data, and have no delivery credential or credential store reachable by agent-run shell/build/script execution. Destination-level filesystem, process, or network isolation requires separately approved runner infrastructure.
 
-## Scanner Modes
+## Scanner Backends
 
-The deterministic lifecycle, never the LLM, selects OSV Scanner.
+The deterministic lifecycle, never the LLM, selects the vulnerability scanner. The selected backend is constructed once and reused for the baseline scan and every post-remediation validation scan.
+
+Set `scanner.backend` to `osv` or `xray`. If `backend` is omitted, the request uses OSV and the previous flat OSV scanner object remains accepted.
+
+### OSV Scanner
 
 - `configured`: resolves a configured executable, verifies an optional expected version/checksum, records its absolute path and digest, and rechecks that digest before every scan.
 - `provision`: downloads an approved pinned artifact into the run tools directory and requires `version`, `downloadUrl`, and `sha256` before extraction and execution.
@@ -22,6 +26,17 @@ The deterministic lifecycle, never the LLM, selects OSV Scanner.
 An unavailable, unexecutable, changed, or unrecognizable scanner fails closed.
 
 Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier releases do not include the upstream local-reactor-module resolution fix and are rejected rather than allowing an incomplete scan to appear clean.
+
+### JFrog Xray REST
+
+The Xray backend uses Maven dependency-tree evidence to construct a `gav://` component graph, submits it to Xray `/api/v1/scan/graph`, polls for completion, and normalizes the response into the same scan result consumed by deterministic validation. It does not require JFrog CLI.
+
+Xray credentials are runtime-only:
+
+- `authMethod: "access-token"` requires `XRAY_ACCESS_TOKEN`.
+- `authMethod: "basic"` requires `XRAY_USERNAME` and `XRAY_PASSWORD`.
+
+Credentials are not accepted in request JSON, serialized results, prompts, traces, or repository-controlled subprocess environments. TLS verification is enabled by default. Use `caBundle` for a private CA rather than disabling verification where possible.
 
 ## Request Example
 
@@ -37,7 +52,7 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
   "startupCommands": [ "mvn -pl task-web spring-boot:start", "mvn -pl task-web spring-boot:stop"],
   "model": "gemini-2.5-flash",
   "budget": {
-    "maxCycles": 3
+    "maxCycles": 3,
     "maxToolCalls": 80,
     "maxLlmCallsPerTurn": 40,
     "commandTimeoutSeconds": 1800,
@@ -52,10 +67,13 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
     "allowNetwork": true
   },
   "scanner": {
-    "mode": "configured",
-    "executable": "/home/kavya_parivarababu/bin/osv-scanner",
-    "version": "2.6.0",
-    "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
+    "backend": "osv",
+    "osv": {
+      "mode": "configured",
+      "executable": "/home/kavya_parivarababu/bin/osv-scanner",
+      "version": "2.6.0",
+      "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
+    }
   },
   "constraints": {
     "prohibit_suppressions": true,
@@ -76,6 +94,26 @@ Multi-module Maven scanning requires OSV Scanner 2.4.0 or newer. Earlier release
     "branch_prefix": "autonomous-oss-remediation",
     "draft": true,
     "github_api_base": "https://api.github.com"
+  }
+}
+```
+
+The equivalent scanner section for Xray is:
+
+```json
+{
+  "scanner": {
+    "backend": "xray",
+    "xray": {
+      "url": "https://jfrog.example.com/xray",
+      "authMethod": "access-token",
+      "verifyTls": true,
+      "caBundle": null,
+      "connectTimeoutSeconds": 10,
+      "readTimeoutSeconds": 60,
+      "pollIntervalSeconds": 3,
+      "pollTimeoutSeconds": 300
+    }
   }
 }
 ```
@@ -111,7 +149,7 @@ The agent receives this policy as an allowed boundary and chooses whether and ho
 - When `vulnerabilityIds` is empty, every baseline finding matching `severityScope` is a remediation target.
 - Validation continues to reject newly introduced findings in the prohibited severities independently of target selection.
 
-Before the first model-backed POC, replace the repository and scanner placeholders, confirm the configured scanner version and checksum, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity.
+Before the first model-backed POC, replace the repository and scanner placeholders, configure the selected scanner's runtime prerequisites, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity.
 
 ## Delivery
 
@@ -126,7 +164,7 @@ Every remediation cycle must pass all applicable deterministic checks before aut
 - Confirm the repository still descends from the recorded baseline commit.
 - Capture the complete Git status, changed-file list, and remediation diff.
 - Run every configured build, test, and startup command successfully.
-- Run a fresh OSV scan against the final dependency state.
+- Run a fresh scan with the same deterministic vulnerability scanner used for the baseline.
 - Confirm all requested in-scope vulnerability findings are resolved.
 - Reject newly introduced findings in prohibited severities.
 - Enforce the protected Java version exactly when configured or detected.
@@ -134,12 +172,14 @@ Every remediation cycle must pass all applicable deterministic checks before aut
 - Reject prohibited suppression or ignore-file changes.
 - Recompute the changed-tree digest immediately before delivery.
 
-Findings outside `severityScope` may remain and are reported as scan findings, but they do not fail target remediation unless they violate another configured constraint. A scan exit code indicating findings is accepted only when scanner output is complete and parseable; scanner execution or dependency-resolution failures fail closed.
+Findings outside `severityScope` may remain and are reported as scan findings, but they do not fail target remediation unless they violate another configured constraint. A completed scan with findings is distinct from scanner execution, authentication, authorization, network, timeout, dependency-resolution, or response failures. Every incomplete scan fails closed even when it contains zero findings.
+
+Scanner-provided fixed versions are evidence rather than remediation instructions. OSV fixed events retain their existing behavior. Xray singleton values are exposed through `fixedVersions`; ambiguous Xray ranges remain backend evidence. The autonomous agent may choose any evidence-supported remediation approach, and the deterministic re-scan decides whether it succeeded.
 
 ## Test Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery -v
+python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 

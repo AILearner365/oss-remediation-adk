@@ -94,13 +94,15 @@ class AutonomousCapabilityTests(unittest.TestCase):
         (self.workspace.repository / "nested").mkdir()
         (self.workspace.repository / "nested" / "pom.xml").write_text("<project/>", encoding="utf-8")
         previous = os.environ.get("GH_TOKEN")
+        previous_xray = os.environ.get("XRAY_ACCESS_TOKEN")
         os.environ["GH_TOKEN"] = "must-not-be-visible"
+        os.environ["XRAY_ACCESS_TOKEN"] = "xray-must-not-be-visible"
         try:
             command = (
                 "Get-ChildItem -Recurse -Filter pom.xml | Select-Object -ExpandProperty Name; "
-                "Write-Output $env:GH_TOKEN"
+                "Write-Output $env:GH_TOKEN; Write-Output $env:XRAY_ACCESS_TOKEN"
                 if os.name == "nt"
-                else "find . -name pom.xml -print; printf '%s' \"$GH_TOKEN\""
+                else "find . -name pom.xml -print; printf '%s%s' \"$GH_TOKEN\" \"$XRAY_ACCESS_TOKEN\""
             )
             result = self.capabilities.run_workspace_shell(command)
         finally:
@@ -108,15 +110,38 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 os.environ.pop("GH_TOKEN", None)
             else:
                 os.environ["GH_TOKEN"] = previous
+            if previous_xray is None:
+                os.environ.pop("XRAY_ACCESS_TOKEN", None)
+            else:
+                os.environ["XRAY_ACCESS_TOKEN"] = previous_xray
         self.assertEqual(0, result["exitCode"])
         self.assertIn("pom.xml", result["stdout"])
         self.assertNotIn("must-not-be-visible", result["stdout"])
+        self.assertNotIn("xray-must-not-be-visible", result["stdout"])
 
     def test_command_timeout_is_enforced(self):
         command = "Start-Sleep -Seconds 3" if os.name == "nt" else "sleep 3"
         result = self.runner.run_agent_shell(command, timeout_seconds=1)
         self.assertTrue(result.timed_out)
         self.assertEqual(124, result.exit_code)
+
+    def test_deterministic_repository_process_strips_xray_credentials(self):
+        previous = os.environ.get("XRAY_ACCESS_TOKEN")
+        os.environ["XRAY_ACCESS_TOKEN"] = "deterministic-secret"
+        try:
+            command = (
+                ["powershell.exe", "-NoProfile", "-Command", "Write-Output $env:XRAY_ACCESS_TOKEN"]
+                if os.name == "nt"
+                else ["/bin/sh", "-c", "printf '%s' \"$XRAY_ACCESS_TOKEN\""]
+            )
+            result = self.runner.run_argv(command, cwd=self.workspace.repository)
+        finally:
+            if previous is None:
+                os.environ.pop("XRAY_ACCESS_TOKEN", None)
+            else:
+                os.environ["XRAY_ACCESS_TOKEN"] = previous
+        self.assertTrue(result.succeeded)
+        self.assertNotIn("deterministic-secret", result.stdout)
 
     def test_budget_is_enforced_by_tool_bindings(self):
         budget = ExecutionBudget(

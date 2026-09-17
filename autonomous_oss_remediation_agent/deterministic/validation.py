@@ -10,7 +10,7 @@ from ..models import RepositoryBaseline, ValidationCheck, ValidationReport, Vuln
 from ..workspace import RunWorkspace, TraceStore, sha256_file
 from .constraints import ConstraintEvaluator
 from .maven import MavenService
-from .osv import OsvScanner, ScannerPreflightError
+from .scanner import ScannerPreflightError, VulnerabilityScanner
 
 
 class DeterministicValidator:
@@ -19,7 +19,7 @@ class DeterministicValidator:
         request: RemediationRequest,
         workspace: RunWorkspace,
         process_runner: ProcessRunner,
-        scanner: OsvScanner,
+        scanner: VulnerabilityScanner,
         constraints: ConstraintEvaluator,
         trace: TraceStore,
     ):
@@ -74,18 +74,18 @@ class DeterministicValidator:
             scan_report = self.scanner.scan(self.workspace.repository, self._scan_scope(), f"validation-cycle-{cycle}")
             checks.append(
                 ValidationCheck(
-                    "fresh_osv_scan",
+                    "fresh_vulnerability_scan",
                     scan_report.succeeded,
                     (
-                        f"Fresh OSV scan completed: {scan_report.effective_outcome.value}"
+                        f"Fresh vulnerability scan completed: {scan_report.effective_outcome.value}"
                         if scan_report.succeeded
-                        else f"Fresh OSV scan incomplete: {scan_report.effective_outcome.value}"
+                        else f"Fresh vulnerability scan incomplete: {scan_report.effective_outcome.value}"
                     ),
                     scan_report.to_dict(),
                 )
             )
         except ScannerPreflightError as exc:
-            checks.append(ValidationCheck("fresh_osv_scan", False, str(exc)))
+            checks.append(ValidationCheck("fresh_vulnerability_scan", False, str(exc)))
         final_findings = scan_report.findings if scan_report and scan_report.succeeded else ()
         remaining_targets = [
             target.to_dict()

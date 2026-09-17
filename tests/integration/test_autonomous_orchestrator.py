@@ -30,7 +30,7 @@ from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationO
 
 
 class _FixtureScanner:
-    def __init__(self, workspace, process_runner, trace):
+    def __init__(self, config, workspace, process_runner, trace):
         self.workspace = workspace
 
     def preflight(self, config):
@@ -51,7 +51,7 @@ class _FixtureScanner:
 
 
 class _RetryingFixtureScanner(OsvScanner):
-    def __init__(self, workspace, process_runner, trace):
+    def __init__(self, config, workspace, process_runner, trace):
         super().__init__(workspace, process_runner, trace, sleep=lambda _: None)
         self.execution_labels = []
 
@@ -214,8 +214,8 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             sessions.append(session)
             return session
 
-        def scanner_factory(workspace, process_runner, trace):
-            scanner = _RetryingFixtureScanner(workspace, process_runner, trace)
+        def scanner_factory(config, workspace, process_runner, trace):
+            scanner = _RetryingFixtureScanner(config, workspace, process_runner, trace)
             scanners.append(scanner)
             return scanner
 
@@ -228,6 +228,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertTrue(result.validation.passed)
         self.assertEqual(1, result.cycles_completed)
         self.assertEqual(1, len(sessions[0].messages))
+        self.assertEqual(1, len(scanners))
         self.assertEqual(
             [("baseline", 1), ("validation-cycle-1", 1), ("validation-cycle-1", 2)],
             scanners[0].execution_labels,

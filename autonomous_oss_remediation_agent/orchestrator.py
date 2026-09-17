@@ -9,11 +9,11 @@ from .agent import AgentSession, default_agent_session_factory
 from .capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from .capabilities.execution import BudgetExceeded
 from .capabilities.policy import evaluate_runtime_boundary
-from .config import RemediationRequest
+from .config import RemediationRequest, ScannerConfig
 from .deterministic.constraints import ConstraintEvaluator
 from .deterministic.maven import MavenService
-from .deterministic.osv import OsvScanner, ScannerPreflightError
 from .deterministic.repository import RepositoryPreparationError, RepositoryPreparer
+from .deterministic.scanner import ScannerPreflightError, VulnerabilityScanner, create_scanner
 from .deterministic.validation import DeterministicValidator
 from .integrations.delivery import DeliveryAdapter, DeliveryContext, ManualDeliveryAdapter
 from .models import (
@@ -28,7 +28,7 @@ from .workspace import RunWorkspace, TraceStore
 
 
 AgentSessionFactory = Callable[[DeveloperCapabilitySet, str], AgentSession]
-ScannerFactory = Callable[[RunWorkspace, ProcessRunner, TraceStore], OsvScanner]
+ScannerFactory = Callable[[ScannerConfig, RunWorkspace, ProcessRunner, TraceStore], VulnerabilityScanner]
 DeliveryAdapterFactory = Callable[[RunWorkspace, ProcessRunner, TraceStore], DeliveryAdapter]
 
 
@@ -40,7 +40,7 @@ class AutonomousRemediationOrchestrator:
         delivery_adapter: DeliveryAdapter | None = None,
         delivery_adapter_factory: DeliveryAdapterFactory | None = None,
         agent_session_factory: AgentSessionFactory = default_agent_session_factory,
-        scanner_factory: ScannerFactory = OsvScanner,
+        scanner_factory: ScannerFactory = create_scanner,
     ):
         if delivery_adapter is not None and delivery_adapter_factory is not None:
             raise ValueError("Specify delivery_adapter or delivery_adapter_factory, not both")
@@ -77,7 +77,7 @@ class AutonomousRemediationOrchestrator:
             )
         delivery_preflight = delivery_adapter.preflight(self.request)
         trace.write_json("delivery/preflight.json", delivery_preflight.to_dict())
-        scanner = self.scanner_factory(workspace, process_runner, trace)
+        scanner = self.scanner_factory(self.request.scanner, workspace, process_runner, trace)
         try:
             scanner.preflight(self.request.scanner)
             metadata = RepositoryPreparer(workspace, process_runner, trace).clone(
@@ -94,7 +94,9 @@ class AutonomousRemediationOrchestrator:
                 raise RuntimeError("Baseline Maven build failed")
             scan = scanner.scan(workspace.repository, self._baseline_scan_scope(), "baseline")
             if not scan.succeeded:
-                raise RuntimeError(f"Baseline OSV scan failed ({scan.effective_outcome.value}): {scan.error}")
+                raise RuntimeError(
+                    f"Baseline vulnerability scan failed ({scan.effective_outcome.value}): {scan.error}"
+                )
             constraint_evaluator = ConstraintEvaluator()
             constraint_baseline = constraint_evaluator.capture(workspace.repository)
             targets = tuple(finding for finding in scan.findings if self._is_target(finding))
