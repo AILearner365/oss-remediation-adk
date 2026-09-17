@@ -54,6 +54,10 @@ class ExecutionBudget:
         configured = requested or self.config.command_timeout_seconds
         return max(1, int(min(configured, self.config.command_timeout_seconds, self.remaining_seconds)))
 
+    def model_turn_timeout(self) -> float:
+        self.ensure_time_remaining()
+        return min(float(self.config.model_turn_timeout_seconds), self.remaining_seconds)
+
 
 class ProcessRunner:
     def __init__(

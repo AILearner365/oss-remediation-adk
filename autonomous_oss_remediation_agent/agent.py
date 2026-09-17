@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import aclosing
 from typing import Protocol
 
-from google.adk.agents import LlmAgent
+from google.adk.agents import LlmAgent, RunConfig
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
+from .capabilities.execution import BudgetExceeded, ExecutionBudget
 from .capabilities.toolset import DeveloperCapabilitySet
 from .models import AgentTurnResult
 from .prompt import AGENT_INSTRUCTION
@@ -30,14 +32,29 @@ class AgentSession(Protocol):
 
 
 class GoogleAdkAgentSession:
-    def __init__(self, agent: LlmAgent, app_name: str = "autonomous_oss_remediation"):
+    def __init__(
+        self,
+        agent: LlmAgent,
+        budget: ExecutionBudget,
+        app_name: str = "autonomous_oss_remediation",
+    ):
         self.agent = agent
+        self.budget = budget
         self.app_name = app_name
         self.user_id = "remediation-runner"
         self.runner = InMemoryRunner(agent=agent, app_name=app_name)
         self.session_id: str | None = None
 
     async def run_turn(self, message: str) -> AgentTurnResult:
+        timeout_seconds = self.budget.model_turn_timeout()
+        try:
+            return await asyncio.wait_for(self._run_turn(message), timeout=timeout_seconds)
+        except TimeoutError as exc:
+            raise BudgetExceeded(
+                f"Agent model turn exceeded its {timeout_seconds:g}s wall-clock limit"
+            ) from exc
+
+    async def _run_turn(self, message: str) -> AgentTurnResult:
         if self.session_id is None:
             session = await self.runner.session_service.create_session(
                 app_name=self.app_name,
@@ -51,6 +68,7 @@ class GoogleAdkAgentSession:
                 user_id=self.user_id,
                 session_id=self.session_id,
                 new_message=content,
+                run_config=RunConfig(max_llm_calls=self.budget.config.max_llm_calls_per_turn),
             )
         ) as events:
             async for event in events:
@@ -61,8 +79,8 @@ class GoogleAdkAgentSession:
         return AgentTurnResult(text=texts[-1] if texts else "")
 
     async def close(self) -> None:
-        self.runner.close()
+        await self.runner.close()
 
 
 def default_agent_session_factory(capabilities: DeveloperCapabilitySet, model: str) -> AgentSession:
-    return GoogleAdkAgentSession(create_remediation_agent(capabilities, model))
+    return GoogleAdkAgentSession(create_remediation_agent(capabilities, model), capabilities.budget)

@@ -10,7 +10,9 @@ from typing import Any
 class ExecutionBudgetConfig:
     max_cycles: int = 3
     max_tool_calls: int = 80
+    max_llm_calls_per_turn: int = 40
     command_timeout_seconds: int = 1800
+    model_turn_timeout_seconds: int = 1800
     overall_timeout_seconds: int = 7200
     max_returned_output_chars: int = 30_000
 

@@ -31,6 +31,16 @@ An unavailable, unexecutable, changed, or unrecognizable scanner fails closed.
   "vulnerabilityIds": ["CVE-2021-44228"],
   "severityScope": ["CRITICAL", "HIGH"],
   "buildCommands": ["mvn clean verify"],
+  "model": "gemini-2.5-flash",
+  "budget": {
+    "maxCycles": 3,
+    "maxToolCalls": 80,
+    "maxLlmCallsPerTurn": 40,
+    "commandTimeoutSeconds": 1800,
+    "modelTurnTimeoutSeconds": 1800,
+    "overallTimeoutSeconds": 7200,
+    "maxReturnedOutputChars": 30000
+  },
   "runtimePolicy": {
     "trustedRepository": true,
     "dedicatedRunner": true,
@@ -58,6 +68,8 @@ python -m autonomous_oss_remediation_agent.cli request.json --output result.json
 
 The `allowNetwork` value declares the approved runner network mode; the local backend does not claim destination-level egress enforcement.
 
+Before the first model-backed POC, replace the repository and scanner placeholders, confirm the configured scanner version and checksum, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity. Keep `delivery.mode` set to `manual`; the stock CLI does not enable automated GitHub delivery.
+
 ## Delivery
 
 The stock CLI uses `ManualDeliveryAdapter` and therefore ends a validated remediation as `PARTIAL / MANUAL REVIEW REQUIRED` with `VALIDATED_MANUAL_DELIVERY_REQUIRED`.
@@ -67,7 +79,7 @@ Automated delivery requires an explicitly injected approved `DeliveryAdapter`, n
 ## Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_validation_delivery -v
+python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_validation_delivery -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 
