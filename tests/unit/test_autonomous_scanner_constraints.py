@@ -153,6 +153,7 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertTrue(Path(report.attempts[0]["stdoutArtifact"]).is_file())
         self.assertTrue(Path(report.attempts[0]["stderrArtifact"]).is_file())
         self.assertEqual('{"results": []}', Path(report.attempts[0]["rawReportPath"]).read_text(encoding="utf-8"))
+        self.assertIn("--data-source=deps.dev", runner.commands[0][0])
 
     def test_repeated_429_exhausts_retries_and_fails_closed(self):
         failure = CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP status 429")
