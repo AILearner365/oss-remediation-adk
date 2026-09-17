@@ -12,7 +12,12 @@ from pathlib import Path
 from autonomous_oss_remediation_agent.capabilities import ExecutionBudget, ProcessRunner
 from autonomous_oss_remediation_agent.config import ConstraintSpec, ExecutionBudgetConfig, RuntimePolicy, ScannerConfig
 from autonomous_oss_remediation_agent.deterministic.constraints import ConstraintEvaluator
-from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner, ScannerPreflightError, normalize_osv_findings
+from autonomous_oss_remediation_agent.deterministic.osv import (
+    OsvScanner,
+    ScannerPreflightError,
+    _add_snapshot_aliases,
+    normalize_osv_findings,
+)
 from autonomous_oss_remediation_agent.models import CommandResult, ScanOutcome, ScannerHandle
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
@@ -262,6 +267,24 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertIn("deploy", runner.commands[0][0])
         self.assertTrue(any(value.startswith("-DaltDeploymentRepository=osv-local::file:") for value in runner.commands[0][0]))
         self.assertIn("--data-source=native", runner.commands[1][0])
+
+    def test_snapshot_registry_adds_non_timestamped_aliases(self):
+        version_directory = (
+            Path(self.temp.name)
+            / "registry"
+            / "com"
+            / "example"
+            / "task-domain"
+            / "1.0.0-SNAPSHOT"
+        )
+        version_directory.mkdir(parents=True)
+        timestamped = version_directory / "task-domain-1.0.0-20260917.031257-1.pom"
+        timestamped.write_text("<project/>", encoding="utf-8")
+
+        _add_snapshot_aliases(Path(self.temp.name) / "registry")
+
+        alias = version_directory / "task-domain-1.0.0-SNAPSHOT.pom"
+        self.assertEqual("<project/>", alias.read_text(encoding="utf-8"))
 
     def _scanner(self, runner, sleep=lambda _: None, maven_repository=None):
         executable = self.workspace.tools / "osv-scanner.exe"

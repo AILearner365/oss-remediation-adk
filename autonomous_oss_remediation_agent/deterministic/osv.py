@@ -161,6 +161,17 @@ class OsvScanner:
             )
             self.trace.write_json(f"scans/{label}-reactor-deploy.json", deploy_result.to_dict())
             if deploy_result.succeeded:
+                _add_snapshot_aliases(reactor_repository)
+                self.trace.write_json(
+                    f"scans/{label}-reactor-registry.json",
+                    {
+                        "files": sorted(
+                            path.relative_to(reactor_repository).as_posix()
+                            for path in reactor_repository.rglob("*")
+                            if path.is_file()
+                        )
+                    },
+                )
                 roots.append(reactor_repository)
             else:
                 self.trace.append_event(
@@ -188,13 +199,18 @@ class OsvScanner:
                 ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
             )
             if registry_roots:
-                with _serve_maven_repository(registry_roots) as registry_url:
+                with _serve_maven_repository(registry_roots) as (registry_url, requests):
                     command = _scan_command(handle.executable, staged, "native", registry_url)
-                    return self.process_runner.run_argv(
+                    result = self.process_runner.run_argv(
                         command,
                         cwd=staged,
                         source=f"osv_{label}_attempt_{attempt_number}",
                     )
+                self.trace.write_json(
+                    f"scans/{label}-attempt-{attempt_number}.maven-requests.json",
+                    {"registryUrl": registry_url, "requests": requests},
+                )
+                return result
             command = _scan_command(handle.executable, staged, "deps.dev")
             return self.process_runner.run_argv(
                 command,
@@ -259,8 +275,15 @@ _TRANSIENT_FAILURE_PATTERNS = (
 
 
 class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args: Any, repositories: tuple[Path, ...], **kwargs: Any):
+    def __init__(
+        self,
+        *args: Any,
+        repositories: tuple[Path, ...],
+        requests: list[dict[str, Any]],
+        **kwargs: Any,
+    ):
         self.repositories = repositories
+        self.requests = requests
         super().__init__(*args, directory=str(repositories[0]), **kwargs)
 
     def log_message(self, format: str, *args: Any) -> None:
@@ -273,23 +296,55 @@ class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
         for repository in self.repositories:
             candidate = repository / relative
             if candidate.exists():
+                self.requests.append(
+                    {"path": f"/{relative.as_posix()}", "resolvedPath": str(candidate), "found": True}
+                )
                 return str(candidate)
+        self.requests.append(
+            {
+                "path": f"/{relative.as_posix()}",
+                "resolvedPath": str(self.repositories[0] / relative),
+                "found": False,
+            }
+        )
         return str(self.repositories[0] / relative)
 
 
 @contextmanager
-def _serve_maven_repository(repositories: tuple[Path, ...]) -> Iterator[str]:
-    handler = partial(_QuietMavenRepositoryHandler, repositories=repositories)
+def _serve_maven_repository(
+    repositories: tuple[Path, ...],
+) -> Iterator[tuple[str, list[dict[str, Any]]]]:
+    requests: list[dict[str, Any]] = []
+    handler = partial(_QuietMavenRepositoryHandler, repositories=repositories, requests=requests)
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     server.daemon_threads = True
     thread = threading.Thread(target=server.serve_forever, name="osv-maven-cache", daemon=True)
     thread.start()
     try:
-        yield f"http://127.0.0.1:{server.server_port}/"
+        yield f"http://127.0.0.1:{server.server_port}/", requests
     finally:
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def _add_snapshot_aliases(repository: Path) -> None:
+    for version_directory in repository.rglob("*-SNAPSHOT"):
+        if not version_directory.is_dir():
+            continue
+        artifact_id = version_directory.parent.name
+        version = version_directory.name
+        for extension in ("pom", "jar"):
+            alias = version_directory / f"{artifact_id}-{version}.{extension}"
+            if alias.exists():
+                continue
+            candidates = sorted(
+                path
+                for path in version_directory.glob(f"{artifact_id}-*.{extension}")
+                if not path.name.endswith(f"-{version}.{extension}")
+            )
+            if candidates:
+                shutil.copy2(candidates[-1], alias)
 
 
 def _default_maven_repository() -> Path:
