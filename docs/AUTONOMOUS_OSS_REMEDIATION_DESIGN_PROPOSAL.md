@@ -1,6 +1,6 @@
 # Autonomous OSS Remediation Agent - Design Proposal
 
-**Status:** Revised after design review. No implementation is authorized by this document.
+**Status:** Implemented POC design; maintained as the current architecture and design reference.
 
 ## 1. Review Basis
 
@@ -32,13 +32,13 @@ The reference implementation is a staged, artifact-heavy workflow:
 
 Useful reference behavior exists, but the planner/patch-interpreter/outcome-agent pipeline and its Maven-specific strategy prompt are explicitly not the target architecture for the new package.
 
-## 3. Installed ADK Capability Investigation
+## 3. Design-Time ADK Capability Investigation
 
-The active project virtual environment has `include-system-site-packages = true` and resolves:
+At design-review time, the active project virtual environment had `include-system-site-packages = true` and resolved:
 
 - `google-adk==2.4.0` from the user site-packages directory;
 - `google-genai==2.11.0`;
-- no repository dependency manifest currently pins either package.
+- no repository dependency manifest then pinned either package.
 
 ADK 2.4.0 provides:
 
@@ -57,19 +57,19 @@ The native environment tools are not sufficient as the POC security boundary:
 - all of these environment APIs are marked experimental.
 - ADK's `bash_tool` cannot be imported on this Windows host because Python's `resource` module is unavailable. It is Unix-oriented and therefore not a viable local option here.
 
-Other materially relevant local findings are:
+Other materially relevant local findings at design-review time were:
 
-- ADK's `FunctionTool`, tool callbacks, and normal multi-tool turns are installed and import successfully without optional dependencies.
-- ADK contains an `McpToolset`, but the optional `mcp` package and a reviewed server are not currently configured. Node/npm/npx are available, so a pinned project-scoped MCP provider could be started without global installation; that remains an option only if its capability, boundary, or integration value justifies the protocol and provider lifecycle.
+- ADK's `FunctionTool`, tool callbacks, and normal multi-tool turns were installed and imported successfully without optional dependencies.
+- ADK contained an `McpToolset`, but the optional `mcp` package and a reviewed server were not configured. Node/npm/npx were available, so a pinned project-scoped MCP provider remained an option only if its capability, boundary, or integration value justified the protocol and provider lifecycle.
 - Gemini's `BuiltInCodeExecutor` is model-hosted code execution; it does not expose the prepared host repository or the required Maven/OSV toolchain.
-- The environment has Git 2.46.0, Maven 3.9.11, Java 21, PowerShell 5.1, Python, Node/npm/npx, and `rg`. `gh`, `osv-scanner`, `jq`, and `pwsh` are not currently on `PATH`.
-- Docker CLI 27.1.1 is installed, but its Linux daemon is not running. WSL has only the Docker Desktop distribution, and the Python Docker SDK, E2B, Daytona, Kubernetes, and MCP packages are absent.
-- Git Credential Manager is configured at the system level, but no `GH_TOKEN` or `GITHUB_TOKEN` environment variable is present. Credential values were not inspected.
-- No repository dependency manifest pins ADK, Google Gen AI, MCP, or a sandbox provider.
+- The environment had Git 2.46.0, Maven 3.9.11, Java 21, PowerShell 5.1, Python, Node/npm/npx, and `rg`. `gh`, `osv-scanner`, `jq`, and `pwsh` were not on `PATH`.
+- Docker CLI 27.1.1 was installed, but its Linux daemon was not running. WSL had only the Docker Desktop distribution, and the Python Docker SDK, E2B, Daytona, Kubernetes, and MCP packages were absent.
+- Git Credential Manager was configured at the system level, but no `GH_TOKEN` or `GITHUB_TOKEN` environment variable was present. Credential values were not inspected.
+- No repository dependency manifest pinned ADK, Google Gen AI, MCP, or a sandbox provider at that time.
 
-These facts weaken or eliminate some options in this environment, but do not by themselves select the developer-capability implementation. Section 7 compares the materially available choices before making that selection.
+These findings informed the selection recorded in Section 7. The implemented autonomous package now pins its direct ADK, Google Gen AI, and HTTP dependencies; MCP and a sandbox provider remain outside the current design.
 
-## 4. Proposed Architecture
+## 4. Current Architecture
 
 ```text
 RemediationRequest
@@ -112,18 +112,19 @@ The orchestrator retains one working repository across cycles. The original obje
 
 ## 5. Remediation Contract
 
-`RemediationRequest` will contain:
+`RemediationRequest` contains:
 
 - repository URL and reference branch;
 - workspace root or configured workspace parent;
 - requested vulnerability IDs and/or severity scope;
 - required build, test, and optional startup commands;
+- deterministic scanner and Maven execution configuration;
 - typed enforceable constraints;
 - free-text engineering constraints for agent context;
 - command timeout, maximum cycles, maximum command/tool calls, and overall elapsed-time budget;
 - delivery mode and Draft PR settings.
 
-Initial typed constraints will cover at least:
+The implemented typed constraints cover:
 
 - protected Java version;
 - protected Spring Boot version;
@@ -182,18 +183,18 @@ The remediation objective requires the agent to be able to:
 
 ### Material options investigated
 
-| Option | Current-environment evidence | Autonomy, dependency, and boundary trade-off | Decision |
+| Option | Design-review evidence | Autonomy, dependency, and boundary trade-off | Decision |
 | --- | --- | --- | --- |
 | ADK `EnvironmentToolset(LocalEnvironment)` | Installed; provides shell execute and read/edit/write tools | Low added code and broad shell autonomy, but experimental, fixed 30-second command timeout, 30,000-character returned-output limit, inherited host environment, and no filesystem confinement | Not used directly |
 | Stable ADK `FunctionTool` wrappers over local capabilities | Installed and importable; supports typed callables, callbacks, and the existing same-session runner design | Adds a small amount of independent bridge/policy code, but permits Maven-scale timeouts, full log artifacts, selected editing semantics, budget accounting, and honest boundary enforcement | Selected for the initial POC |
-| ADK MCP client plus local filesystem/command or GitHub servers | ADK adapter source and Node/npm/npx are available; `mcp` and a reviewed/pinned server are not currently configured | A project-scoped provider could be launched without global installation and may add portability, centralized credentials, or provider-enforced scoping. For the current local read/patch/shell needs it adds protocol, version pinning, provider trust, and process lifecycle without removing the shell trust boundary or adding unique capability | Deferred on material-value grounds, not merely installation state |
+| ADK MCP client plus local filesystem/command or GitHub servers | ADK adapter source and Node/npm/npx were available; `mcp` and a reviewed/pinned server were not configured | A project-scoped provider could be launched without global installation and may add portability, centralized credentials, or provider-enforced scoping. For the current local read/patch/shell needs it adds protocol, version pinning, provider trust, and process lifecycle without removing the shell trust boundary or adding unique capability | Deferred on material-value grounds, not merely installation state |
 | Local Docker/WSL sandbox | Docker CLI is installed, but the daemon is unavailable and no usable WSL development distribution is present | Would strengthen isolation, but requires daemon availability, images matching repository JDK/tool needs, mount/cache/network design, and materially more operations | Alternative if hard isolation is required, not the initial backend |
 | Hosted sandbox providers such as E2B/Daytona/Vertex sandbox | Relevant optional packages and credentials/configuration are absent; the inspected Vertex sandbox integration is browser/computer-use oriented | Adds vendor credentials, remote repository transfer, cost, and environment parity work without an established project requirement | Not selected |
 | ADK `bash_tool` or Gemini built-in code execution | `bash_tool` fails to import on Windows; built-in execution is not attached to the host repository | Cannot provide the required local repository/build workflow | Rejected |
 
 ### Selected capability surface
 
-The initial POC will use stable ADK `FunctionTool` integration for three coding-oriented capability categories bound to the prepared repository:
+The implemented POC uses stable ADK `FunctionTool` integration for three coding-oriented capability categories bound to the prepared repository:
 
 1. a bounded repository text-read capability with line/range metadata;
 2. a repository-relative patch capability that can create, update, or delete text files and returns changed paths/hashes;
@@ -201,7 +202,7 @@ The initial POC will use stable ADK `FunctionTool` integration for three coding-
 
 Discovery, search, dependency analysis, local Git inspection, and diff review use the shell with installed/project-provided commands such as `rg`, `git`, Maven/Maven Wrapper, Java, and workspace-local scripts. This deliberately avoids separate Maven, Java, Python, Git-inspection, list, and search abstractions that would constrain how the agent investigates. The read and patch capabilities remain separate because they give the model reliable, auditable text interaction without shell quoting, while the shell retains pipes, command chaining, wrapper behavior, plugins, and ad hoc helpers that the original `shell=False` argument-vector proposal would lose.
 
-The same internal execution service will run deterministic build/test/scanner commands outside the model-facing tool surface. The LLM does not receive validator, delivery, manifest, credential, or PR-publication tools.
+The same internal execution service runs deterministic build/test/scanner commands outside the model-facing tool surface. The LLM does not receive validator, delivery, manifest, credential, or PR-publication tools.
 
 The implementation uses custom ADK function tools for bounded text interaction and the approved host-native developer shell. Focused runtime tests exercise the bindings, same-session runner behavior, installed Git/Maven/Java tooling, command limits, and credential stripping. Optional MCP/provider integrations remain unnecessary for the current local capability requirements.
 
@@ -304,7 +305,7 @@ Budget exhaustion never becomes success. Command timeouts consume budget and are
 
 ## 11. Independent Deterministic Validation
 
-Every cycle produces a structured `ValidationReport` containing individual checks, evidence references, and an overall pass/fail result. At minimum it will:
+Every cycle produces a structured `ValidationReport` containing individual checks, evidence references, and an overall pass/fail result. At minimum it:
 
 1. capture `git status`, changed paths, and a reviewable binary-safe diff;
 2. ensure the repository remains based on the recorded baseline and contains no forbidden path changes;
@@ -330,7 +331,7 @@ Material adapter choices are:
 | Adapter | Benefits | Costs/credential implications |
 | --- | --- | --- |
 | Git subprocess plus GitHub REST | Cross-platform, direct structured API response and Draft PR control, no `gh` binary requirement; `requests` is already available in the inspected environment | Requires an explicitly scoped token or broker, API/version/error handling, and secure Git push authentication separate from agent execution |
-| Git plus `gh` | Mature GitHub workflow, concise Draft PR operation, and established authentication support | `gh` is not currently installed; its credential store is unacceptable if reachable by the remediation identity, so the same isolation/preflight requirement remains |
+| Git plus `gh` | Mature GitHub workflow, concise Draft PR operation, and established authentication support | `gh` was not installed during design review and is not required by the implementation; its credential store would require the same isolation/preflight review |
 | Approved trusted-provider or MCP integration | May centralize credentials, audit, and provider-side authorization outside the runner | Requires provider approval, dependency/process lifecycle, availability, and proof that the agent cannot invoke delivery authority directly |
 
 The current implementation provides Git subprocess plus GitHub REST. It resolves `GH_TOKEN` first and `GITHUB_TOKEN` second inside deterministic infrastructure, uses redacted temporary authenticated HTTPS URLs for clone/fetch/push, restores a clean persisted origin, and sends the token directly only in the GitHub REST authorization header. The adapter boundary remains replaceable without changing the lifecycle.
@@ -358,7 +359,7 @@ If validation passes while automated delivery is disabled, or if the approved ad
 
 ## 13. Traceability and Outcomes
 
-The POC will retain a small set of JSON/JSONL and log artifacts:
+The POC retains a small set of JSON/JSONL and log artifacts:
 
 - request and resolved policy;
 - repository/baseline metadata;
@@ -379,7 +380,7 @@ Outcome mapping:
 - `REQUESTED_VULNERABILITY_NOT_FOUND`: an explicit vulnerability-ID request matched no in-scope finding in the completed baseline scan, so the run stopped before model invocation while preserving baseline evidence.
 - `BASELINE FAILURE`: clone, build, startup requirement, or scanner baseline prevented safe work.
 
-## 14. Proposed Independent Package Structure
+## 14. Current Independent Package Structure
 
 ```text
 autonomous_oss_remediation_agent/
@@ -411,20 +412,18 @@ autonomous_oss_remediation_agent/
   integrations/
     __init__.py
     delivery.py            # approved deterministic delivery adapter boundary
-    github.py              # optional GitHub adapter implementations
 tests/
-  autonomous_oss_remediation_agent/
-    unit/
-    integration/
-    e2e/
-    fixtures/
+  unit/
+  integration/
+  e2e/
+  fixtures/
 ```
 
 The package has its own imports, configuration, models, tools, entry point, and tests. Runtime imports from `oss_remediation_agent` are forbidden and checked by a focused import/dependency test.
 
 ## 15. Conceptual Adaptation from the Reference
 
-The following behavior will be independently reimplemented, not imported:
+The following behavior was independently reimplemented rather than imported:
 
 - isolated clone/workspace and baseline commit recording;
 - structured command result and log capture;
@@ -435,9 +434,9 @@ The following behavior will be independently reimplemented, not imported:
 - delivery preconditions, remediation branch naming, deterministic commit/push, and Draft PR creation;
 - fixture-driven and mocked-boundary testing patterns.
 
-The exact patch-plan schemas/interpreter, POM-only change policy, planning recipes, separate outcome-analysis agent, accepted-patch replay model, and staged many-agent ADK workflow will not be copied into the new architecture.
+The exact patch-plan schemas/interpreter, POM-only change policy, planning recipes, separate outcome-analysis agent, accepted-patch replay model, and staged many-agent ADK workflow were not copied into the autonomous architecture.
 
-## 16. Focused Testing Strategy
+## 16. Focused Test Coverage
 
 ### Unit tests
 
@@ -460,44 +459,44 @@ The exact patch-plan schemas/interpreter, POM-only change policy, planning recip
 
 ### End-to-end smoke tests
 
-- a committed vulnerable Maven/Spring fixture with real Maven and OSV Scanner when binaries/network/cache make it practical;
-- a two-cycle scenario in which the first change fails deterministic validation and the same agent session corrects it;
-- Draft PR delivery exercised only in an explicitly configured test repository; otherwise verify through a fake GitHub boundary.
+- a committed vulnerable Maven/Spring fixture supports a real Maven and OSV Scanner smoke test when its external prerequisites are available;
+- a scripted two-cycle integration scenario verifies that failed deterministic validation continues in the same agent session and repository;
+- Draft PR behavior is verified through a fake GitHub boundary; live delivery remains an explicitly configured deployment exercise.
 
-Existing tests are reference coverage only and will not be imported by the independent package.
+Tests from the reference package informed coverage but were not imported as the autonomous package's test suite.
 
 ## 17. Important Limitations and Prerequisites
 
-1. ADK 2.4.0 and Google Gen AI 2.11.0 are available but not repository-pinned. Implementation should declare and pin its direct dependencies after approval, including any dependency required by the selected delivery adapter.
+1. The autonomous package pins ADK 2.4.0, Google Gen AI 2.11.0, and its direct HTTP dependency. Deployment still must install and verify those dependencies in its controlled runtime.
 2. Stable ADK `FunctionTool` bindings implement the developer-capability categories through independent patch, execution, policy, and trace code. The capability contract remains architectural; the binding mechanism may evolve if future evidence favors an ADK-native, MCP, or trusted-provider adapter without weakening boundaries.
-3. The boundary decision is resolved for the initial POC: host-native shell is permitted only for trusted repositories on a dedicated, least-privilege, delivery-credential-free trusted runner. It is not an OS sandbox. If that deployment cannot be provided, implementation is blocked until a hard-isolation backend is approved.
-4. Reliable descendant-process termination is platform-specific, especially on Windows, and needs focused tests.
+3. Host-native shell is permitted only for trusted repositories on a dedicated, least-privilege trusted runner. Runtime GitHub/Xray credentials may exist for deterministic infrastructure, but model-controlled and ordinary repository subprocess environments are stripped of them. This process-level boundary is not an OS sandbox; if the deployment assumptions cannot be met, execution must fail preflight until a hard-isolation backend is approved.
+4. Reliable descendant-process termination is platform-specific, especially on Windows; focused tests cover the implemented best-effort cleanup behavior without claiming complete OS-level containment.
 5. Deployment must configure the selected scanner backend. OSV requires an approved executable or pinned provisioning policy; Xray requires an approved endpoint, TLS trust, and runtime-only credentials. The LLM has no scanner selection, installation, replacement, or credential authority.
 6. Spring Boot startup applicability/readiness is project-specific. The request must be able to specify the module/command/readiness rule; otherwise startup is only enforced when reliably detectable.
-7. Git is installed and Git Credential Manager is configured, but `gh` and token environment variables are absent. Configuration neither proves a usable credential nor establishes isolation. Deployment must select an approved delivery adapter and inaccessible credential boundary; otherwise automated delivery remains disabled and validated runs require manual delivery.
+7. GitHub network operations use deterministic, non-interactive Git plus GitHub REST without requiring `gh`. Public clone may proceed without a token; private clone, authenticated fetch/push, and PR delivery require runtime `GH_TOKEN` or `GITHUB_TOKEN`. Missing or unusable credentials fail non-interactively, and automated delivery remains disabled when delivery preflight cannot establish eligibility.
 8. Unstructured user constraints cannot all be proven automatically. Unknown constraints prevent automated delivery rather than being treated as satisfied.
 9. `InMemoryRunner` is sufficient for one process/run and preserves the same-session feedback loop; resumability across process restarts would require a persistent ADK session service and is deferred for the initial POC.
 10. Focused tests cover capability bindings, scanner lifecycle, same-session continuation, cycle evidence, and deterministic validation. A live model-backed run and live Xray/GitHub integration remain deployment verification work.
 
-## 18. Final Review Changes and Approval Gate
+## 18. Implemented POC Status and Maintained Decisions
 
-This final review preserves the accepted architecture and makes only the remaining boundary/evidence corrections:
+The implemented POC preserves the reviewed architecture and the following maintained decisions:
 
 - explicitly selects the trusted-repository/dedicated-trusted-runner operating model for the initial host-native shell and states that cwd/path/command controls are not hard shell containment;
-- corrects the design checklist and proposal language from runtime “demonstrated” capability to design coverage supported by investigation;
+- uses tested custom `FunctionTool` capabilities while distinguishing local test evidence from deployment-specific live integration evidence;
 - makes automated delivery fail closed and adds a validated/manual-delivery reason when credentials are not isolated;
-- makes deterministic delivery adapter-neutral while retaining Git-plus-REST as a justified candidate when its credential model fits;
+- keeps deterministic delivery adapter-neutral while implementing Git-plus-GitHub-REST behind that boundary;
 - defers MCP because it adds no material capability or boundary value for this POC, not because it lacks a global installation;
 - assigns scanner selection, OSV provisioning/integrity, Xray REST execution, and credentials to deterministic code rather than the remediation LLM;
 - preserves model-owned WORKING_STATE continuity and cycle evidence without introducing deterministic remediation strategy.
 
-The implemented POC accepts the documented trusted-runner boundary. Deployment approval still depends on the environment-specific prerequisites below.
+The implemented POC accepts the documented trusted-runner boundary. Deployment remains subject to the environment-specific prerequisites below.
 
 Deployment prerequisites are:
 
-1. an approved dedicated, least-privilege, delivery-credential-free remediation runner identity, or a separately approved hard-isolation replacement;
+1. an approved dedicated, least-privilege remediation runner with no unrelated sensitive data, plus process-level credential isolation for model-controlled and ordinary repository subprocesses, or a separately approved hard-isolation replacement;
 2. configured OSV Scanner executable/pinned provisioning policy or approved Xray endpoint/TLS/credential configuration;
-3. an approved deterministic delivery adapter and credential boundary inaccessible to the remediation identity, or explicit validation-only/manual-delivery mode;
+3. an approved deterministic delivery adapter whose runtime credentials are unavailable to model-controlled and ordinary repository subprocesses, or explicit validation-only/manual-delivery mode;
 4. pinned independent runtime dependencies and the configured model/provider credentials needed by ADK without exposing delivery credentials to agent-run commands.
 
 Implementation is complete for the reviewed POC scope; live model, Xray, and GitHub delivery exercises remain deployment activities rather than model authority.
