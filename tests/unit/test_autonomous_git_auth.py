@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from autonomous_oss_remediation_agent.capabilities import ExecutionBudget, ProcessRunner
 from autonomous_oss_remediation_agent.config import DeliveryConfig, ExecutionBudgetConfig, RuntimePolicy
@@ -174,6 +176,57 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self.assertNotIn(token, " ".join(call["command"]))
         self.assertIn("core.hooksPath=", " ".join(call["command"]))
 
+    def test_windows_askpass_uses_secret_for_every_non_username_prompt(self):
+        token = "github-secret-token"
+        with tempfile.TemporaryDirectory() as directory:
+            directory_path = Path(directory)
+            with patch("autonomous_oss_remediation_agent.deterministic.git_auth.os.name", "nt"):
+                askpass = NonInteractiveGitAuth._write_askpass(directory_path)
+            script = askpass.read_text(encoding="utf-8")
+            self.assertIn('findstr /I "Username"', script)
+            self.assertNotIn('findstr /I "Password"', script)
+            self.assertIn("echo %GIT_ASKPASS_SECRET%", script)
+            self.assertIn("exit /b 0", script)
+            self.assertNotIn(token, script)
+            if os.name == "nt":
+                environment = os.environ.copy()
+                environment.update(
+                    {"GIT_ASKPASS_USERNAME": "x-access-token", "GIT_ASKPASS_SECRET": token}
+                )
+                self.assertEqual("x-access-token", self._run_windows_askpass(askpass, "Username for GitHub", environment))
+                self.assertEqual(token, self._run_windows_askpass(askpass, "Password for GitHub", environment))
+                self.assertEqual(token, self._run_windows_askpass(askpass, "Token for GitHub", environment))
+
+    def test_posix_askpass_uses_secret_for_every_non_username_prompt(self):
+        token = "github-secret-token"
+        with tempfile.TemporaryDirectory() as directory:
+            directory_path = Path(directory)
+            with patch("autonomous_oss_remediation_agent.deterministic.git_auth.os.name", "posix"):
+                askpass = NonInteractiveGitAuth._write_askpass(directory_path)
+            script = askpass.read_text(encoding="utf-8")
+            self.assertIn('*Username*) printf \'%s\\n\' "$GIT_ASKPASS_USERNAME"', script)
+            self.assertIn('*) printf \'%s\\n\' "$GIT_ASKPASS_SECRET"', script)
+            self.assertNotIn("*Password*", script)
+            self.assertNotIn("exit 1", script)
+            self.assertNotIn(token, script)
+            if os.name != "nt":
+                environment = os.environ.copy()
+                environment.update(
+                    {"GIT_ASKPASS_USERNAME": "x-access-token", "GIT_ASKPASS_SECRET": token}
+                )
+                self.assertEqual(
+                    "x-access-token",
+                    self._run_posix_askpass(askpass, "Username for GitHub", environment),
+                )
+                self.assertEqual(
+                    token,
+                    self._run_posix_askpass(askpass, "Password for GitHub", environment),
+                )
+                self.assertEqual(
+                    token,
+                    self._run_posix_askpass(askpass, "Token for GitHub", environment),
+                )
+
     def test_process_runner_redacts_secret_from_results_artifacts_and_trace(self):
         token = "github-secret-token"
         runner = ProcessRunner(
@@ -245,6 +298,28 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self.assertIn("credential.helper=", command)
         self.assertIn("credential.interactive=false", command)
         self.assertIn("credential.modalPrompt=false", command)
+
+    @staticmethod
+    def _run_windows_askpass(askpass: Path, prompt: str, environment: dict[str, str]) -> str:
+        result = subprocess.run(
+            ["cmd.exe", "/d", "/c", str(askpass), prompt],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=environment,
+        )
+        return result.stdout.strip()
+
+    @staticmethod
+    def _run_posix_askpass(askpass: Path, prompt: str, environment: dict[str, str]) -> str:
+        result = subprocess.run(
+            [str(askpass), prompt],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=environment,
+        )
+        return result.stdout.strip()
 
 
 if __name__ == "__main__":

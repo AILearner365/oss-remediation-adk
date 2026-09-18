@@ -151,15 +151,15 @@ class NonInteractiveGitAuth:
             askpass.write_text(
                 "@echo off\r\n"
                 "echo %~1 | findstr /I \"Username\" >nul && (echo %GIT_ASKPASS_USERNAME% & exit /b 0)\r\n"
-                "echo %~1 | findstr /I \"Password\" >nul && (echo %GIT_ASKPASS_SECRET% & exit /b 0)\r\n"
-                "exit /b 1\r\n",
+                "echo %GIT_ASKPASS_SECRET%\r\n"
+                "exit /b 0\r\n",
                 encoding="utf-8",
             )
         else:
             askpass.write_text(
                 "#!/bin/sh\n"
                 "case \"$1\" in *Username*) printf '%s\\n' \"$GIT_ASKPASS_USERNAME\" ;; "
-                "*Password*) printf '%s\\n' \"$GIT_ASKPASS_SECRET\" ;; *) exit 1 ;; esac\n",
+                "*) printf '%s\\n' \"$GIT_ASKPASS_SECRET\" ;; esac\n",
                 encoding="utf-8",
             )
             askpass.chmod(askpass.stat().st_mode | stat.S_IXUSR)
