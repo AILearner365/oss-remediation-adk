@@ -69,8 +69,48 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("supports, contradicts, or leaves unresolved", feedback)
         self.assertIn("continue, modify, or replace your strategy", feedback)
         self.assertIn(prior_state, feedback)
+        self.assertIn('"currentVersion": "1.0"', feedback)
+        self.assertIn('"fixedVersions": [', feedback)
+        self.assertIn('"2.0"', feedback)
+        self.assertIn('"fixedVersionExpressions": [', feedback)
+        self.assertIn('"[2.0,3.0)"', feedback)
+        self.assertIn("empty fixedVersions does not mean remediation is impossible", feedback)
         self.assertNotIn("scanner-raw-secret", feedback)
         self.assertNotIn("requiredVersion", feedback)
+
+    def test_empty_fixed_versions_remain_normalized_evidence(self):
+        report = _validation_report()
+        finding = report.scan.findings[0]
+        report = ValidationReport(
+            cycle=report.cycle,
+            passed=report.passed,
+            checks=report.checks,
+            changed_files=report.changed_files,
+            diff_path=report.diff_path,
+            tree_digest=report.tree_digest,
+            scan=ScanReport(
+                True,
+                (
+                    VulnerabilityFinding(
+                        vulnerability_id=finding.vulnerability_id,
+                        aliases=finding.aliases,
+                        severity=finding.severity,
+                        group_id=finding.group_id,
+                        artifact_id=finding.artifact_id,
+                        package_name=finding.package_name,
+                        version=finding.version,
+                    ),
+                ),
+                report.scan.command_result,
+                report.scan.raw_report_path,
+            ),
+            cycle_evidence=report.cycle_evidence,
+        )
+
+        feedback = validation_feedback(report, "WORKING_STATE\n- Unresolved: target remains")
+
+        self.assertIn('"fixedVersions": []', feedback)
+        self.assertNotIn("NO_SAFE_REMEDIATION", feedback)
 
 
 def _validation_report() -> ValidationReport:
@@ -82,6 +122,8 @@ def _validation_report() -> ValidationReport:
         artifact_id="demo",
         package_name="org.example:demo",
         version="1.0",
+        fixed_versions=("2.0",),
+        backend_evidence={"fixedVersionExpressions": ["[2.0,3.0)"]},
     )
     scan = ScanReport(
         True,

@@ -31,6 +31,7 @@ Requirements:
 - Treat shell cwd/path policy as operating context, not proof of hard filesystem containment.
 - Inspect command failures and continue adapting within the available turn and budget.
 - Do not claim success. Deterministic validation after your turn decides success.
+- Treat scanner-provided fixed versions and fixed-version expressions as evidence, not required remediation targets. Empty fixed-version evidence does not prove remediation is impossible, and ambiguous ranges must not be converted into guessed concrete versions.
 - Maintain a concise model-owned working state across turns: current understanding, strategy or hypothesis, assumptions being tested, meaningful progress, and unresolved work. Revise or replace it whenever evidence warrants. This is engineering continuity, not a rigid patch plan or prescribed sequence.
 - Do not provide hidden chain-of-thought or detailed private reasoning. Record only concise engineering state that is useful for the next work cycle.
 
@@ -106,6 +107,19 @@ def validation_feedback(report: ValidationReport, prior_working_state: str) -> s
                     "aliases": list(finding.aliases),
                     "severity": finding.severity,
                     "coordinate": finding.coordinate,
+                    "currentVersion": finding.version,
+                    "fixedVersions": list(finding.fixed_versions),
+                    **(
+                        {
+                            "backendEvidence": {
+                                "fixedVersionExpressions": finding.backend_evidence[
+                                    "fixedVersionExpressions"
+                                ]
+                            }
+                        }
+                        if "fixedVersionExpressions" in finding.backend_evidence
+                        else {}
+                    ),
                 }
                 for finding in report.scan.findings
             ],
@@ -122,6 +136,7 @@ def validation_feedback(report: ValidationReport, prior_working_state: str) -> s
     return (
         "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
         "Relate the evidence to your previous strategy and actions. Determine what it supports, contradicts, or leaves unresolved; preserve useful progress; reconsider unsupported assumptions or unsuccessful approaches when appropriate; decide whether to continue, modify, or replace your strategy; then continue investigation and remediation with the available developer capabilities. Do not restart by default, and do not assume a particular dependency, version, management layer, file, or remediation technique.\n\n"
+        "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "Previous model-owned working state:\n"
         + prior_working_state
         + "\n\nNew deterministic validation evidence:\n"

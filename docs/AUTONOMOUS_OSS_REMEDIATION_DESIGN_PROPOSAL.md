@@ -82,7 +82,7 @@ Deterministic preparation
        v
 Deterministic baseline and assessment
   - build/test/startup expectations
-  - fresh OSV scan and normalization
+  - selected deterministic scanner and normalization
   - capture enforceable constraint baseline
        |
        v
@@ -91,12 +91,13 @@ Deterministic baseline and assessment
 |                                                   |
 | same ADK LlmAgent + same Runner session           |
 |   -> inspect/edit/execute in same repository      |
+|   -> maintain concise model-owned WORKING_STATE   |
 |   -> agent turn ends                              |
 |                                                   |
 | deterministic validator                           |
 |   PASS -> leave loop                              |
-|   FAIL -> structured evidence becomes next        |
-|           user message in the same ADK session    |
+|   FAIL -> WORKING_STATE + normalized evidence     |
+|           become the next same-session message    |
 +---------------------------------------------------+
        |
        v
@@ -107,7 +108,7 @@ Deterministic delivery gate
 
 There is one primary remediation `LlmAgent`. Preparation, baseline assessment, validation, outcome selection, and delivery are ordinary deterministic Python services called by the outer orchestrator, not additional LLM agents.
 
-The orchestrator retains one working repository across cycles. It does not reset the repository or ask the model for a machine-interpreted patch plan. The model directly investigates and changes the repository with developer tools.
+The orchestrator retains one working repository across cycles. The original objective, constraints, and completion criteria remain the stable run contract. It does not reset the repository or ask the model for a machine-interpreted patch plan. The model directly investigates and changes the repository with developer tools, records a concise visible `WORKING_STATE`, and may revise or abandon that strategy when new evidence warrants.
 
 ## 5. Remediation Contract
 
@@ -139,13 +140,14 @@ Free-text constraints are always shown to the agent and retained as evidence. A 
 
 - validate the request and create the isolated run layout;
 - clone and resolve the requested Git ref to a baseline commit;
-- choose Maven wrapper versus installed Maven by repository evidence/configuration;
+- choose Maven wrapper versus installed Maven through deterministic request configuration;
 - execute and record baseline build/test/startup requirements;
-- execute OSV Scanner, validate its report, normalize findings, and select requested scope;
+- select and construct the configured OSV or Xray scanner once, reuse it for baseline and validation, normalize findings, and select requested scope;
 - capture protected versions, relevant config, initial Git state, and constraint baselines;
 - bind all LLM tools to the one prepared repository;
 - enforce text-tool path containment and process timeout, output, environment, and budget controls while recording the shell's trusted-runner scope;
 - run fresh validation after every agent work cycle;
+- record cumulative baseline-to-current change evidence plus per-cycle before/after state and delta evidence;
 - determine validation pass/fail and final outcome;
 - gate and perform approved Git branch/commit/push/Draft PR operations, or select the validated/manual-delivery outcome when automated delivery is ineligible;
 - persist concise trace artifacts.
@@ -159,6 +161,7 @@ Free-text constraints are always shown to the agent and retained as evidence. A 
 - run permitted developer commands and Maven plugins;
 - create workspace-local temporary scripts or tools;
 - observe command failures and revise or revert its approach;
+- maintain and revise a concise model-owned `WORKING_STATE` without exposing hidden chain-of-thought or producing a deterministic patch plan;
 - explain its work and blockers.
 
 The LLM never decides that validation passed, never performs delivery, and never receives credentials required to push or create a PR.
@@ -200,7 +203,7 @@ Discovery, search, dependency analysis, local Git inspection, and diff review us
 
 The same internal execution service will run deterministic build/test/scanner commands outside the model-facing tool surface. The LLM does not receive validator, delivery, manifest, credential, or PR-publication tools.
 
-The investigation imported and inspected the installed `FunctionTool` interface and callbacks, confirmed same-session runner support, and executed the installed Git, Maven, Java, and `rg` binaries. It also confirmed the native 30-second timeout and optional-provider dependency gaps described above. This is design and environment evidence only: no runtime capability implementation was created, the proposed bindings were not exercised end to end, and `osv-scanner` is not currently on `PATH`. Runtime demonstration remains part of the implementation checklist and test strategy.
+The implementation uses custom ADK function tools for bounded text interaction and the approved host-native developer shell. Focused runtime tests exercise the bindings, same-session runner behavior, installed Git/Maven/Java tooling, command limits, and credential stripping. Optional MCP/provider integrations remain unnecessary for the current local capability requirements.
 
 ### Capability coverage in design
 
@@ -219,7 +222,7 @@ This selection introduces independent code for patch application, process contro
 
 ### Initial POC boundary decision
 
-The initial POC explicitly accepts a **trusted-repository/trusted-runner operational boundary** for host-native shell, build, plugin, and script execution. Hard container, restricted-filesystem identity, or remote-sandbox isolation is not a prerequisite for this POC. Consequently, it may run only on a dedicated, least-privilege runner identity with no delivery credentials or unrelated sensitive data and only against repositories whose build code is trusted. The currently inspected developer workstation establishes tool availability but is not automatically an approved runtime merely because the tools exist there.
+The initial POC explicitly accepts a **trusted-repository/trusted-runner operational boundary** for host-native shell, build, plugin, and script execution. Hard container, restricted-filesystem identity, or remote-sandbox isolation is not a prerequisite for this POC. Consequently, it may run only on a dedicated, least-privilege runner with no unrelated sensitive data and only against repositories whose build code is trusted. Runtime GitHub/Xray credentials may exist in the orchestrator environment but are removed from model-controlled and ordinary repository subprocess environments and used only by deterministic infrastructure. This is process-level isolation, not a claim of OS credential containment.
 
 If those operational assumptions cannot be met, the run fails preflight before the autonomous agent receives shell capability. It must then be deployed behind a separately reviewed hard-isolation backend; it must not silently fall back to unrestricted execution on a general-purpose workstation.
 
@@ -227,7 +230,7 @@ If those operational assumptions cannot be met, the run fails preflight before t
 
 - Deterministic code selects the prepared repository, creates the run layout, exposes only the approved capability bindings, sets budgets/timeouts, records results, and retains the validation/delivery gates.
 - Deterministic validation alone establishes remediation success; the LLM cannot override checks or authorize delivery.
-- Automated push/PR delivery is disabled unless a delivery adapter and credential boundary inaccessible to the remediation execution identity pass preflight and are rechecked after validation.
+- Automated push/PR delivery is disabled unless the configured delivery adapter passes preflight; credentialed push and PR creation remain deterministic and occur only after validation.
 - Per-command timeout, overall elapsed time, cycle/tool-call budgets, returned-output bounds, full-log capture, and process cleanup are enforced outside the prompt.
 - Text read/patch calls are canonically confined below the repository root and reject absolute paths, traversal, NULs, direct `.git` edits, and symlink/junction escape. This guarantee applies to those file capabilities only.
 - Every model tool call and deterministic command is traceable with redacted arguments, result metadata, log reference, and affected paths where applicable.
@@ -236,7 +239,7 @@ If those operational assumptions cannot be met, the run fails preflight before t
 
 - A repository-relative shell working directory is convenience and context, not filesystem containment.
 - Arbitrary shell commands, Maven plugins, repository scripts, Python, and Java can read or modify any resource available to the OS identity. Repository path checks on the separate text tools do not change that fact.
-- Environment stripping, isolated Git configuration, disabled push URLs, and command filtering reduce accidental exposure but do not make the shell a hostile-code sandbox or prevent all equivalent actions.
+- Environment stripping, non-interactive Git controls, disabled push URLs, and command filtering reduce accidental exposure but do not make the shell a hostile-code sandbox or prevent all equivalent actions.
 - Prohibitions on administrative elevation, service/daemon changes, system security changes, global JDK replacement, global package installation, unrelated paths, and autonomous delivery are enforced by policy, deterministic checks where practical, and the trusted-runner operating model—not claimed as complete syscall/filesystem isolation.
 
 The effective filesystem and process boundary for the initial POC is therefore the runner identity and machine assigned to the run. The dedicated runner must contain no secrets or unrelated assets that would be unacceptable for agent-run code to access. Untrusted repositories or a requirement for destination-level filesystem/process containment require a container, restricted OS identity, or approved remote sandbox instead.
@@ -247,36 +250,36 @@ For arbitrary shell execution, deterministic control of “where” means determ
 
 - The host-native shell starts in a repository-relative directory, uses a sanitized non-interactive environment, redirects temporary/cache locations into the run, and returns bounded output while preserving complete logs.
 - Timeout handling terminates the process and makes a platform-specific best effort to terminate descendants; Windows process-tree behavior is covered by focused tests rather than assumed.
-- Git commands in the remediation environment use isolated system/global Git configuration, disable interactive prompting, and disable the prepared clone's normal push path. Local history/diff/revert operations remain available.
+- Deterministic Git network operations preserve legitimate system/global corporate Git configuration while disabling interactive prompting and credential helpers. Temporary authenticated GitHub URLs are redacted from command evidence and replaced with a clean persisted origin; the prepared clone's normal push path remains disabled. Local history/diff/revert operations remain available.
 - Obvious administrative, delivery, interactive, and machine-wide commands are rejected as defense in depth. Command-string filtering is not treated as a security boundary.
 
 The shell accepts host-native command syntax rather than a `shell=False` executable/argument list. That choice permits pipes, conditional/chained commands, wrapper scripts, redirection, and temporary helpers needed for realistic coding-agent work. An exhaustive executable allowlist, path-token parser, blanket network ban, or forced empty Maven repository was rejected because each is both bypassable by allowed build code and likely to break legitimate repository-specific engineering.
 
 ### Network behavior
 
-Maven, scanner provisioning, and some remediation investigations require outbound access. The run policy declares network mode explicitly. The initial local backend may use the trusted runner's approved outbound network for dependency/plugin/scanner access, but no delivery credential is present in or reachable from the remediation identity. Destination-level egress enforcement, when required, must be provided by the runner/container/network platform rather than inferred from shell command filtering.
+Maven, scanner provisioning, Xray REST access, and some remediation investigations require outbound access. The run policy declares network mode explicitly. Runtime GitHub/Xray credentials are removed from model-controlled and ordinary build/scanner subprocess environments and are supplied only to their deterministic infrastructure boundary. Destination-level egress enforcement, when required, must be provided by the runner/container/network platform rather than inferred from shell command filtering.
 
 ## 9. Baseline and Assessment
 
-Before repository baseline work, deterministic scanner preflight resolves OSV Scanner in one of two approved modes:
+Before repository baseline work, deterministic scanner selection constructs the request-selected backend. OSV preflight supports two approved modes:
 
 1. use a configured executable whose resolved path, version, and required integrity metadata satisfy policy; or
 2. provision a configured, pinned scanner version into a runner-managed tools location from an approved source and verify its checksum/signature before use.
 
-The resolved absolute scanner path and identity are recorded and reverified before the baseline scan and every validation scan; scanner execution never relies on an agent-modified `PATH`. Provisioning and replacement are deterministic lifecycle operations outside the model-facing tools. The remediation LLM is never asked to install, upgrade, replace, or select the scanner. A project-local scanner installation is available to the agent only if a future approved runtime policy explicitly permits it; that is not the initial design.
+For OSV, the resolved absolute scanner path and identity are recorded and reverified before the baseline scan and every validation scan; scanner execution never relies on an agent-modified `PATH`. Xray uses deterministic Maven dependency-graph generation and REST submission/polling without JFrog CLI. Scanner construction, credentials, provisioning, retries, and replacement remain outside the model-facing tools, and the same scanner instance is used for baseline and post-remediation validation.
 
 The deterministic preparer will:
 
 1. create `<run>/repository`, `<run>/artifacts`, `<run>/cache`, and `<run>/temp`;
 2. clone the requested reference, resolve and record `HEAD`, remote, branch/ref, and clean status;
-3. run configured baseline build/test commands, preferring a checked-in Maven Wrapper;
+3. run configured baseline build/test commands using the configured `auto`, `wrapper`, or `system` Maven execution mode;
 4. perform Spring Boot startup validation only when requested or when a runnable target can be determined reliably; aggregator/non-runnable projects are recorded as not applicable rather than failed by an unconditional `spring-boot:run`;
-5. run the proven OSV source-scan pattern against a temporary scan copy that excludes `.git` and build outputs;
-6. require a recognizable JSON report and normalize Maven findings, aliases, coordinates, versions, fixed versions, severity, and raw evidence;
+5. run the selected OSV or Xray backend and require a complete successful scanner result rather than interpreting failure as clean;
+6. normalize Maven findings, aliases, coordinates, resolved versions, concrete fixed versions, severity, and sanitized backend evidence;
 7. select findings matching the requested IDs/severities;
 8. capture protected Java/Spring Boot values, suppression configuration, relevant file hashes, and the initial Git tree.
 
-An unavailable/unverifiable scanner, failed deterministic provisioning, unusable baseline build, scanner failure, empty/unrecognized scanner evidence, or missing requested ref produces `BASELINE_FAILURE` and prevents autonomous work. A later scanner integrity or execution failure makes validation fail and can never be converted into success by an LLM assertion.
+An unavailable/unverifiable scanner, failed deterministic provisioning, unusable baseline build, incomplete/unrecognized scanner response, or missing requested ref produces `BASELINE_FAILURE` and prevents autonomous work. A successful scan with zero findings remains a valid clean result. A later scanner integrity or execution failure makes validation fail and can never be converted into success by an LLM assertion.
 
 ## 10. Autonomous Feedback Loop and Budgets
 
@@ -284,7 +287,9 @@ The orchestrator creates one `LlmAgent`, one `Runner`, and one session ID for th
 
 First invocation content contains the remediation contract, normalized baseline findings, repository-relative location, supported deterministic constraints, completion criteria, budgets, and tool policy. The agent uses tools until its turn ends. Its final text is advisory; the orchestrator validates regardless of whether the agent claims completion.
 
-After a failed validation, the orchestrator sends the same session a new user message containing the structured validation report and a concise instruction to continue in the same repository. The report includes failed checks, command exit codes, relevant stderr/stdout tails and log references, remaining/new findings, constraint violations, changed files, and diff summary. Prior conversation and tool history remain available through the reused ADK session.
+The full agent response is retained as the cycle summary. Its explicit `WORKING_STATE` section is extracted without interpreting its engineering meaning and retained separately; a bounded placeholder/excerpt is used if the section is missing. After failed validation, the orchestrator sends the same session the latest `WORKING_STATE`, failed checks, changed-file and cycle-state references, and compact normalized scan findings. Those findings include identity, aliases, severity, coordinate, current version, concrete `fixedVersions`, and Xray fixed-version expressions when present, but not raw scanner responses.
+
+Scanner fixed-version data remains evidence rather than a required target. Empty `fixedVersions` does not prove that remediation is impossible, and ambiguous Xray expressions remain evidence rather than guessed concrete versions. Prior conversation and tool history remain available through the reused ADK session; the model decides whether to continue, modify, or replace its prior strategy.
 
 Termination occurs on the first of:
 
@@ -305,14 +310,14 @@ Every cycle produces a structured `ValidationReport` containing individual check
 2. ensure the repository remains based on the recorded baseline and contains no forbidden path changes;
 3. run all required build/test commands from the request;
 4. run applicable startup validation;
-5. run a fresh OSV scan and require scanner success;
+5. run a fresh scan with the same selected backend and require scanner success;
 6. prove every requested baseline finding is absent according to a normalized identity based on vulnerability ID/aliases plus Maven coordinate;
 7. compare the full prohibited severity scope against baseline and reject new identities;
 8. validate typed constraints against captured baseline state, including protected Java/Spring Boot versions;
-9. detect prohibited additions/changes to known OSV suppression or ignore mechanisms and report uncertain cases for manual review;
-10. record final file hashes and a validated tree/diff digest.
+9. detect prohibited additions/changes to suppression or ignore mechanisms and report uncertain cases for manual review;
+10. preserve the cumulative baseline-to-current diff and record per-cycle before/after repository-state digests and path-level deltas;
 
-Success is established only by this validator. A build passing by itself, a changed file, a model statement, or an OSV scan alone is insufficient.
+Success is established only by this validator. A build passing by itself, a changed file, a model statement, or a scanner result alone is insufficient.
 
 ## 12. Delivery
 
@@ -328,15 +333,15 @@ Material adapter choices are:
 | Git plus `gh` | Mature GitHub workflow, concise Draft PR operation, and established authentication support | `gh` is not currently installed; its credential store is unacceptable if reachable by the remediation identity, so the same isolation/preflight requirement remains |
 | Approved trusted-provider or MCP integration | May centralize credentials, audit, and provider-side authorization outside the runner | Requires provider approval, dependency/process lifecycle, availability, and proof that the agent cannot invoke delivery authority directly |
 
-Git subprocess plus GitHub REST is a reasonable initial adapter candidate when an approved broker can supply short-lived, repository-scoped credentials only to the deterministic delivery boundary: it has the required GitHub capabilities, produces structured responses, and avoids an additional CLI installation. The absence of `gh` alone is not the selection reason, and REST is not an architectural requirement. If `gh` or a trusted provider offers a stronger available credential boundary in the deployment environment, that adapter should be selected instead without changing the lifecycle.
+The current implementation provides Git subprocess plus GitHub REST. It resolves `GH_TOKEN` first and `GITHUB_TOKEN` second inside deterministic infrastructure, uses redacted temporary authenticated HTTPS URLs for clone/fetch/push, restores a clean persisted origin, and sends the token directly only in the GitHub REST authorization header. The adapter boundary remains replaceable without changing the lifecycle.
 
 Credential handling is fail closed:
 
-1. before autonomous work, delivery preflight records whether automated delivery is eligible without obtaining or exposing a delivery secret to the remediation identity;
-2. if no adapter/credential source exists, or the same OS identity used for remediation could access the credential manager, token, or secret store, automated delivery is disabled and no push/PR credential is resolved;
-3. remediation may continue in validation-only/manual-delivery mode so useful validated work is not discarded;
-4. after validation, the adapter and isolation conditions are rechecked before any credential resolution or remote mutation;
-5. loss or ambiguity of credential isolation aborts automated delivery without fallback to environment variables, inherited Git configuration, or an agent-accessible credential helper.
+1. before autonomous work, delivery preflight records whether automated delivery and its configured runtime credential source are available;
+2. if no usable delivery credential exists, remediation may continue in validation-only/manual-delivery mode so useful validated work is not discarded;
+3. GitHub tokens are removed from model-controlled, Maven, scanner, and ordinary deterministic subprocess environments;
+4. deterministic Git network commands disable terminal/GCM prompting and credential helpers, use a redacted display command, and never retain the authenticated URL as the repository origin;
+5. push and PR creation remain gated on passing validation and validated-tree identity, with no interactive or credential-manager fallback.
 
 When automated delivery remains eligible, the deterministic delivery service then:
 
@@ -360,8 +365,8 @@ The POC will retain a small set of JSON/JSONL and log artifacts:
 - baseline build/test/startup logs;
 - raw and normalized baseline scan;
 - append-only tool action records and full command outputs;
-- per-cycle agent summary and deterministic validation report;
-- per-cycle Git diff;
+- per-cycle full agent summary, extracted `WORKING_STATE`, and deterministic validation report;
+- cumulative baseline-to-current Git diff plus per-cycle repository-state/delta evidence;
 - final build/scan/constraint evidence;
 - final outcome and delivery information.
 
@@ -396,7 +401,9 @@ autonomous_oss_remediation_agent/
     __init__.py
     repository.py          # clone and Git metadata
     maven.py               # baseline/validation command execution
-    osv.py                 # scanner execution and normalization
+    scanner.py             # common scanner contract and deterministic selector
+    osv.py                 # OSV execution and normalization
+    xray.py                # Xray graph REST execution and normalization
     constraints.py         # baseline capture and typed checks
     validation.py          # independent validation report
     delivery.py            # validation-gated Git delivery orchestration
@@ -413,7 +420,7 @@ tests/
     fixtures/
 ```
 
-The package will have its own imports, configuration, models, tools, entry point, and tests. Runtime imports from `oss_remediation_agent` are explicitly forbidden and will be checked by a focused import/dependency test.
+The package has its own imports, configuration, models, tools, entry point, and tests. Runtime imports from `oss_remediation_agent` are forbidden and checked by a focused import/dependency test.
 
 ## 15. Conceptual Adaptation from the Reference
 
@@ -437,7 +444,7 @@ The exact patch-plan schemas/interpreter, POM-only change policy, planning recip
 - path containment, traversal, absolute path, symlink/junction escape, `.git` protection, patch behavior, and size/output limits;
 - shell-based discovery/search plus bounded text-read behavior;
 - shell policy, sanitized environment, credential isolation, stdout/stderr/exit code, timeout, process cleanup, full-log references, and budget accounting;
-- OSV executable preflight/provisioning policy, version/integrity recheck, parsing across representative report shapes, alias-aware identity, severity scope, target resolution, and new-finding detection;
+- scanner selection, OSV executable preflight/provisioning and integrity, Xray REST/graph/retry behavior, normalization, alias-aware identity, severity scope, target resolution, fixed-version evidence, and new-finding detection;
 - Java/Spring Boot/suppression constraint checks;
 - validation outcome mapping and validated-digest delivery gate;
 - package import scan proving no runtime dependency on `oss_remediation_agent`.
@@ -449,7 +456,7 @@ The exact patch-plan schemas/interpreter, POM-only change policy, planning recip
 - build failure, remaining finding, constraint violation, and then-success feedback cases;
 - maximum cycles, command timeout, tool-call limit, and overall deadline;
 - delivery adapters mocked to prove no branch/push/PR before validation success, fail-closed manual-delivery behavior when credentials are not isolated, and no credential exposure to the agent;
-- configured-scanner, pinned-provisioning, missing-scanner, integrity-failure, and validation-rescan cases without agent-controlled installation.
+- configured OSV/Xray selection, pinned provisioning, missing scanner, integrity/failure handling, same-backend validation rescans, WORKING_STATE continuation, and cycle-delta evidence without agent-controlled scanner installation.
 
 ### End-to-end smoke tests
 
@@ -462,15 +469,15 @@ Existing tests are reference coverage only and will not be imported by the indep
 ## 17. Important Limitations and Prerequisites
 
 1. ADK 2.4.0 and Google Gen AI 2.11.0 are available but not repository-pinned. Implementation should declare and pin its direct dependencies after approval, including any dependency required by the selected delivery adapter.
-2. Stable ADK `FunctionTool` binding is the proposed initial integration for the three developer-capability categories and requires independent patch, execution, policy, and trace code. The capability contract is architectural; the exact callable count and binding mechanism may evolve if implementation evidence favors an ADK-native, MCP, or trusted-provider adapter without weakening boundaries.
+2. Stable ADK `FunctionTool` bindings implement the developer-capability categories through independent patch, execution, policy, and trace code. The capability contract remains architectural; the binding mechanism may evolve if future evidence favors an ADK-native, MCP, or trusted-provider adapter without weakening boundaries.
 3. The boundary decision is resolved for the initial POC: host-native shell is permitted only for trusted repositories on a dedicated, least-privilege, delivery-credential-free trusted runner. It is not an OS sandbox. If that deployment cannot be provided, implementation is blocked until a hard-isolation backend is approved.
 4. Reliable descendant-process termination is platform-specific, especially on Windows, and needs focused tests.
-5. `osv-scanner` is not currently on `PATH`. Deployment must choose configured-executable or deterministic pinned-provisioning mode; scanner identity/integrity is rechecked for every scan, and the LLM has no scanner installation/replacement authority.
+5. Deployment must configure the selected scanner backend. OSV requires an approved executable or pinned provisioning policy; Xray requires an approved endpoint, TLS trust, and runtime-only credentials. The LLM has no scanner selection, installation, replacement, or credential authority.
 6. Spring Boot startup applicability/readiness is project-specific. The request must be able to specify the module/command/readiness rule; otherwise startup is only enforced when reliably detectable.
 7. Git is installed and Git Credential Manager is configured, but `gh` and token environment variables are absent. Configuration neither proves a usable credential nor establishes isolation. Deployment must select an approved delivery adapter and inaccessible credential boundary; otherwise automated delivery remains disabled and validated runs require manual delivery.
 8. Unstructured user constraints cannot all be proven automatically. Unknown constraints prevent automated delivery rather than being treated as satisfied.
 9. `InMemoryRunner` is sufficient for one process/run and preserves the same-session feedback loop; resumability across process restarts would require a persistent ADK session service and is deferred for the initial POC.
-10. Capability coverage is supported by source/environment investigation and design mapping, not runtime demonstration. The bindings, scanner lifecycle, iterative diagnosis, and end-to-end workflow remain implementation verification work.
+10. Focused tests cover capability bindings, scanner lifecycle, same-session continuation, cycle evidence, and deterministic validation. A live model-backed run and live Xray/GitHub integration remain deployment verification work.
 
 ## 18. Final Review Changes and Approval Gate
 
@@ -481,15 +488,16 @@ This final review preserves the accepted architecture and makes only the remaini
 - makes automated delivery fail closed and adds a validated/manual-delivery reason when credentials are not isolated;
 - makes deterministic delivery adapter-neutral while retaining Git-plus-REST as a justified candidate when its credential model fits;
 - defers MCP because it adds no material capability or boundary value for this POC, not because it lacks a global installation;
-- assigns OSV Scanner resolution, pinned provisioning, and integrity checks to deterministic code rather than the remediation LLM.
+- assigns scanner selection, OSV provisioning/integrity, Xray REST execution, and credentials to deterministic code rather than the remediation LLM;
+- preserves model-owned WORKING_STATE continuity and cycle evidence without introducing deterministic remediation strategy.
 
-The security-boundary design choice is no longer open: the initial POC accepts the documented trusted-runner boundary. The remaining approval decision is whether to authorize implementation of this revised design.
+The implemented POC accepts the documented trusted-runner boundary. Deployment approval still depends on the environment-specific prerequisites below.
 
 Deployment prerequisites are:
 
 1. an approved dedicated, least-privilege, delivery-credential-free remediation runner identity, or a separately approved hard-isolation replacement;
-2. configured OSV Scanner executable or pinned deterministic provisioning policy with integrity metadata;
+2. configured OSV Scanner executable/pinned provisioning policy or approved Xray endpoint/TLS/credential configuration;
 3. an approved deterministic delivery adapter and credential boundary inaccessible to the remediation identity, or explicit validation-only/manual-delivery mode;
 4. pinned independent runtime dependencies and the configured model/provider credentials needed by ADK without exposing delivery credentials to agent-run commands.
 
-Implementation must not start until this proposal receives explicit approval. No implementation file is authorized by this design pass.
+Implementation is complete for the reviewed POC scope; live model, Xray, and GitHub delivery exercises remain deployment activities rather than model authority.

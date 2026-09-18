@@ -174,6 +174,14 @@ The agent receives this policy as an allowed boundary and chooses whether and ho
 
 Before the first model-backed POC, replace the repository and scanner placeholders, configure the selected scanner's runtime prerequisites, provide the selected Gemini authentication method to the ADK process, and run only on the approved trusted-repository/dedicated-runner identity.
 
+## Remediation Continuity and Responsibilities
+
+Each run uses one primary remediation LLM agent, one continuing ADK session, and one prepared repository retained across remediation cycles. The initial objective, constraints, and completion criteria remain the stable run contract. The model investigates, chooses and revises its engineering strategy, uses the developer capabilities, and modifies the repository directly; there is no planner agent, patch-plan interpreter, outcome-analysis agent, vulnerability-specific recipe, or Maven-specific remediation decision tree.
+
+At the end of each turn, the full response is retained as the cycle summary and the explicit, concise `WORKING_STATE` section is retained separately. `WORKING_STATE` records visible engineering continuity—understanding, strategy or hypothesis, assumptions, progress, and unresolved work—not hidden chain-of-thought or a deterministic plan. After the turn, deterministic validation runs outside the agent. If validation fails, the same ADK session receives only the latest `WORKING_STATE` plus compact normalized validation evidence and decides whether to continue, modify, or replace its strategy.
+
+The model owns investigation and remediation choices. Deterministic infrastructure owns repository preparation, scanner selection and execution, constraints, validation, cycle evidence, success/failure authority, and delivery. The model cannot declare success or invoke the validator as a tool.
+
 ## Delivery
 
 The stock CLI uses `ManualDeliveryAdapter` when `delivery.mode` is not `auto`. For automatic GitHub delivery, set `delivery.mode` to `auto`, select `github`, `github-rest`, or `git+github-rest`, and provide `GH_TOKEN` (preferred) or `GITHUB_TOKEN` to the runner process. The token must have permission to push a branch and create a pull request in the target repository.
@@ -188,6 +196,7 @@ Every remediation cycle must pass all applicable deterministic checks before aut
 
 - Confirm the repository still descends from the recorded baseline commit.
 - Capture the complete Git status, changed-file list, and remediation diff.
+- Preserve the cumulative baseline-to-current diff and record separate before/after digests and path-level delta evidence for the individual agent cycle.
 - Run every configured build, test, and startup command successfully.
 - Run a fresh scan with the same deterministic vulnerability scanner used for the baseline.
 - Confirm all requested in-scope vulnerability findings are resolved.
@@ -199,12 +208,14 @@ Every remediation cycle must pass all applicable deterministic checks before aut
 
 Findings outside `severityScope` may remain and are reported as scan findings, but they do not fail target remediation unless they violate another configured constraint. A completed scan with findings is distinct from scanner execution, authentication, authorization, network, timeout, dependency-resolution, or response failures. Every incomplete scan fails closed even when it contains zero findings.
 
-Scanner-provided fixed versions are evidence rather than remediation instructions. OSV fixed events retain their existing behavior. Xray singleton values are exposed through `fixedVersions`; ambiguous Xray ranges remain backend evidence. The autonomous agent may choose any evidence-supported remediation approach, and the deterministic re-scan decides whether it succeeded.
+Failed-validation feedback includes normalized finding identity, aliases, severity, coordinate, resolved/current version, concrete `fixedVersions`, and Xray `backendEvidence.fixedVersionExpressions` when present. Raw scanner responses and command output are not copied into that compact finding payload.
+
+Scanner-provided fixed versions are evidence rather than remediation instructions. OSV fixed events retain their existing behavior. Xray singleton values are exposed through `fixedVersions`; ambiguous Xray ranges remain backend evidence and are never guessed into concrete targets. Empty `fixedVersions` does not imply that remediation is impossible. The autonomous agent may choose any evidence-supported remediation approach, and the deterministic re-scan decides whether it succeeded.
 
 ## Test Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_git_auth tests.unit.test_autonomous_maven_policy tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
+python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_git_auth tests.unit.test_autonomous_maven_policy tests.unit.test_autonomous_prompt_continuity tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 
