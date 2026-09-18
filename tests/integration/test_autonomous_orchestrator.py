@@ -149,7 +149,16 @@ class _ScriptedAgentSession:
                 old_text=f"<demo.version>{old}</demo.version>",
                 new_text=f"<demo.version>{new}</demo.version>",
             )
-        return AgentTurnResult(f"cycle {len(self.messages)} complete")
+        cycle = len(self.messages)
+        return AgentTurnResult(
+            f"cycle {cycle} complete\n\n"
+            "WORKING_STATE\n"
+            f"- Understanding: validation cycle {cycle} repository evidence\n"
+            f"- Current strategy/hypothesis: strategy-{cycle}\n"
+            "- Assumptions: verify through deterministic validation\n"
+            f"- Progress: completed work cycle {cycle}\n"
+            "- Unresolved: deterministic completion criteria"
+        )
 
     async def close(self):
         self.closed = True
@@ -236,14 +245,68 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(1, len(sessions))
         self.assertEqual(2, len(sessions[0].messages))
         self.assertIn("Deterministic validation failed", sessions[0].messages[1])
+        self.assertIn("original remediation objective", sessions[0].messages[1])
+        self.assertIn("supports, contradicts, or leaves unresolved", sessions[0].messages[1])
+        self.assertIn("strategy-1", sessions[0].messages[1])
+        self.assertNotIn("strategy-2", sessions[0].messages[1])
         self.assertTrue(sessions[0].closed)
-        self.assertTrue((Path(result.workspace_root) / "artifacts" / "final-result.json").is_file())
-        push_url = _git(Path(result.workspace_root) / "repository", "remote", "get-url", "--push", "origin")
+        workspace_root = Path(result.workspace_root)
+        self.assertTrue((workspace_root / "artifacts" / "final-result.json").is_file())
+        cycle_one_agent = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-1.json").read_text(encoding="utf-8")
+        )
+        cycle_two_agent = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(encoding="utf-8")
+        )
+        self.assertIn("strategy-1", cycle_one_agent["workingState"])
+        self.assertIn("strategy-2", cycle_two_agent["workingState"])
+        cycle_one = json.loads(
+            (workspace_root / "artifacts" / "validation" / "cycle-1.json").read_text(encoding="utf-8")
+        )
+        cycle_two = json.loads(
+            (workspace_root / "artifacts" / "validation" / "cycle-2.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(["pom.xml"], cycle_one["cycleEvidence"]["pathsAddedToChangeSet"])
+        self.assertEqual(["pom.xml"], cycle_two["cycleEvidence"]["pathsModifiedSinceCycleStart"])
+        cumulative_diff = (workspace_root / "artifacts" / "validation" / "cycle-2.diff").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("<demo.version>1.0</demo.version>", cumulative_diff)
+        self.assertIn("<demo.version>2.0</demo.version>", cumulative_diff)
+        push_url = _git(workspace_root / "repository", "remote", "get-url", "--push", "origin")
         self.assertEqual("disabled://autonomous-remediation-delivery-only", push_url.strip())
-        events = [json.loads(line) for line in (Path(result.workspace_root) / "artifacts" / "events.jsonl").read_text(encoding="utf-8").splitlines()]
+        events = [json.loads(line) for line in (workspace_root / "artifacts" / "events.jsonl").read_text(encoding="utf-8").splitlines()]
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+
+    def test_cycle_evidence_identifies_preserved_and_repeated_repository_state(self):
+        sessions = []
+
+        def factory(capabilities, model):
+            session = _ScriptedAgentSession(capabilities, [("1.0", "1.5")])
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(Outcome.EXECUTION_LIMIT_REACHED, result.outcome)
+        workspace_root = Path(result.workspace_root)
+        cycle_two = json.loads(
+            (workspace_root / "artifacts" / "validation" / "cycle-2.json").read_text(encoding="utf-8")
+        )
+        evidence = cycle_two["cycleEvidence"]
+        self.assertFalse(evidence["repositoryStateChanged"])
+        self.assertEqual(1, evidence["matchesPriorCycle"])
+        self.assertEqual(["pom.xml"], evidence["beforeChangedFiles"])
+        self.assertEqual(["pom.xml"], evidence["afterChangedFiles"])
+        self.assertEqual([], evidence["pathsAddedToChangeSet"])
+        self.assertEqual([], evidence["pathsModifiedSinceCycleStart"])
+        self.assertEqual([], evidence["pathsRemovedFromChangeSet"])
 
     def test_scanner_retry_stays_inside_one_remediation_cycle(self):
         sessions = []

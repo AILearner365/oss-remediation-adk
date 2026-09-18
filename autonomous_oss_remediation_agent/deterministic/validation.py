@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 from ..capabilities.execution import ProcessRunner
 from ..config import RemediationRequest
-from ..models import RepositoryBaseline, ValidationCheck, ValidationReport, VulnerabilityFinding
+from ..models import (
+    RepositoryBaseline,
+    RepositoryCycleEvidence,
+    ValidationCheck,
+    ValidationReport,
+    VulnerabilityFinding,
+)
 from ..workspace import RunWorkspace, TraceStore, sha256_file
 from .constraints import ConstraintEvaluator
 from .maven import MavenService
@@ -29,6 +36,12 @@ class DeterministicValidator:
         self.scanner = scanner
         self.constraints = constraints
         self.trace = trace
+        self._cycle_starts: dict[int, _RepositoryState] = {}
+        self._completed_cycle_digests: dict[int, str] = {}
+
+    def capture_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> None:
+        changed_files, captured = self._capture_changed_files(baseline.commit)
+        self._cycle_starts[cycle] = self._repository_state(changed_files, captured)
 
     def validate(self, cycle: int, baseline: RepositoryBaseline) -> ValidationReport:
         checks: list[ValidationCheck] = []
@@ -46,6 +59,9 @@ class DeterministicValidator:
             )
         )
         changed_files, status_succeeded = self._capture_changed_files(baseline.commit)
+        after_state = self._repository_state(changed_files, status_succeeded)
+        before_state = self._cycle_starts.pop(cycle, after_state)
+        cycle_evidence = self._cycle_evidence(cycle, before_state, after_state)
         diff_text, diff_succeeded = self._capture_diff_text(baseline.commit, changed_files)
         checks.append(
             ValidationCheck(
@@ -144,10 +160,101 @@ class DeterministicValidator:
             scan=scan_report,
             delivery_eligible=delivery_eligible,
             warnings=warnings,
+            cycle_evidence=cycle_evidence,
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
         self.trace.append_event("validation", cycle=cycle, passed=report.passed, treeDigest=digest)
+        if after_state.captured:
+            self._completed_cycle_digests[cycle] = after_state.digest
         return report
+
+    def _repository_state(
+        self,
+        changed_files: tuple[str, ...],
+        captured: bool,
+    ) -> "_RepositoryState":
+        file_digests: dict[str, str] = {}
+        for relative in changed_files:
+            path = self.workspace.repository / relative
+            if path.is_symlink():
+                value = f"symlink:{path.readlink()}"
+            elif path.is_file():
+                value = f"file:{path.stat().st_mode & 0o777:o}:{sha256_file(path)}"
+            else:
+                value = "deleted"
+            file_digests[relative] = hashlib.sha256(value.encode("utf-8")).hexdigest()
+        return _RepositoryState(
+            digest=self.tree_digest(changed_files),
+            changed_files=changed_files,
+            file_digests=file_digests,
+            captured=captured,
+        )
+
+    def _cycle_evidence(
+        self,
+        cycle: int,
+        before: "_RepositoryState",
+        after: "_RepositoryState",
+    ) -> RepositoryCycleEvidence:
+        before_paths = set(before.file_digests)
+        after_paths = set(after.file_digests)
+        added = tuple(sorted(after_paths - before_paths))
+        removed = tuple(sorted(before_paths - after_paths))
+        modified = tuple(
+            sorted(
+                path
+                for path in before_paths & after_paths
+                if before.file_digests[path] != after.file_digests[path]
+            )
+        )
+        matches_prior_cycle = next(
+            (
+                prior_cycle
+                for prior_cycle, digest in self._completed_cycle_digests.items()
+                if after.captured and digest == after.digest
+            ),
+            None,
+        )
+        delta_payload = {
+            "cycle": cycle,
+            "before": {
+                "captured": before.captured,
+                "stateDigest": before.digest,
+                "changedFiles": list(before.changed_files),
+                "fileDigests": before.file_digests,
+            },
+            "after": {
+                "captured": after.captured,
+                "stateDigest": after.digest,
+                "changedFiles": list(after.changed_files),
+                "fileDigests": after.file_digests,
+            },
+            "delta": {
+                "pathsAddedToChangeSet": list(added),
+                "pathsModifiedSinceCycleStart": list(modified),
+                "pathsRemovedFromChangeSet": list(removed),
+                "repositoryStateChanged": before.file_digests != after.file_digests,
+                "matchesPriorCycle": matches_prior_cycle,
+            },
+        }
+        delta_path = self.trace.write_json(
+            f"validation/cycle-{cycle}-repository-delta.json",
+            delta_payload,
+        )
+        return RepositoryCycleEvidence(
+            before_state_digest=before.digest,
+            after_state_digest=after.digest,
+            before_changed_files=before.changed_files,
+            after_changed_files=after.changed_files,
+            paths_added_to_change_set=added,
+            paths_modified_since_cycle_start=modified,
+            paths_removed_from_change_set=removed,
+            repository_state_changed=before.file_digests != after.file_digests,
+            matches_prior_cycle=matches_prior_cycle,
+            delta_path=str(delta_path),
+            before_state_captured=before.captured,
+            after_state_captured=after.captured,
+        )
 
     def changed_files(self, baseline_commit: str = "HEAD") -> tuple[str, ...]:
         return self._capture_changed_files(baseline_commit)[0]
@@ -239,3 +346,11 @@ def _full_stdout(result) -> str:
     if result.stdout_artifact:
         return Path(result.stdout_artifact).read_text(encoding="utf-8")
     return result.stdout
+
+
+@dataclass(frozen=True)
+class _RepositoryState:
+    digest: str
+    changed_files: tuple[str, ...]
+    file_digests: dict[str, str]
+    captured: bool

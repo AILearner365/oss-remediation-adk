@@ -177,9 +177,13 @@ class AutonomousRemediationOrchestrator:
         try:
             for cycle in range(1, self.request.budget.max_cycles + 1):
                 budget.ensure_time_remaining()
+                validator.capture_cycle_start(cycle, baseline)
                 turn = await agent_session.run_turn(message)
                 summaries.append(turn.text)
-                trace.write_json(f"agent/cycle-{cycle}.json", {"summary": turn.text})
+                trace.write_json(
+                    f"agent/cycle-{cycle}.json",
+                    {"summary": turn.text, "workingState": turn.text},
+                )
                 last_validation = validator.validate(cycle, baseline)
                 if _is_scanner_infrastructure_failure(last_validation.scan):
                     await agent_session.close()
@@ -239,7 +243,7 @@ class AutonomousRemediationOrchestrator:
                     )
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     break
-                message = validation_feedback(last_validation)
+                message = validation_feedback(last_validation, turn.text)
         except BudgetExceeded as exc:
             reason = str(exc)
         except Exception as exc:

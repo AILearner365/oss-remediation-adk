@@ -219,6 +219,38 @@ class ValidationCheck:
 
 
 @dataclass(frozen=True)
+class RepositoryCycleEvidence:
+    before_state_digest: str
+    after_state_digest: str
+    before_changed_files: tuple[str, ...]
+    after_changed_files: tuple[str, ...]
+    paths_added_to_change_set: tuple[str, ...]
+    paths_modified_since_cycle_start: tuple[str, ...]
+    paths_removed_from_change_set: tuple[str, ...]
+    repository_state_changed: bool
+    matches_prior_cycle: int | None
+    delta_path: str
+    before_state_captured: bool = True
+    after_state_captured: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "beforeStateDigest": self.before_state_digest,
+            "afterStateDigest": self.after_state_digest,
+            "beforeChangedFiles": list(self.before_changed_files),
+            "afterChangedFiles": list(self.after_changed_files),
+            "pathsAddedToChangeSet": list(self.paths_added_to_change_set),
+            "pathsModifiedSinceCycleStart": list(self.paths_modified_since_cycle_start),
+            "pathsRemovedFromChangeSet": list(self.paths_removed_from_change_set),
+            "repositoryStateChanged": self.repository_state_changed,
+            "matchesPriorCycle": self.matches_prior_cycle,
+            "deltaPath": self.delta_path,
+            "beforeStateCaptured": self.before_state_captured,
+            "afterStateCaptured": self.after_state_captured,
+        }
+
+
+@dataclass(frozen=True)
 class ValidationReport:
     cycle: int
     passed: bool
@@ -229,6 +261,7 @@ class ValidationReport:
     scan: ScanReport | None = None
     delivery_eligible: bool = True
     warnings: tuple[str, ...] = ()
+    cycle_evidence: RepositoryCycleEvidence | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -241,6 +274,7 @@ class ValidationReport:
             "scan": self.scan.to_dict() if self.scan else None,
             "deliveryEligible": self.delivery_eligible,
             "warnings": list(self.warnings),
+            "cycleEvidence": self.cycle_evidence.to_dict() if self.cycle_evidence else None,
         }
 
 
