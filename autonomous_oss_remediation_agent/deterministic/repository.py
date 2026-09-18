@@ -71,7 +71,7 @@ class RepositoryPreparer:
                 credential=credential,
             )
             if not fetch.succeeded:
-                raise RepositoryPreparationError("Requested repository reference is unavailable", checkout)
+                raise RepositoryPreparationError("Requested repository reference is unavailable", fetch)
             checkout = self.process_runner.run_argv(
                 ["git", "checkout", "--detach", "FETCH_HEAD"],
                 cwd=self.workspace.repository,

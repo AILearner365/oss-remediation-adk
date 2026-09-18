@@ -19,9 +19,16 @@ from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
 class _RecordingRunner:
-    def __init__(self, *, clone_exit_code: int = 0, checkout_fails_once: bool = False):
+    def __init__(
+        self,
+        *,
+        clone_exit_code: int = 0,
+        checkout_fails_once: bool = False,
+        fetch_exit_code: int = 0,
+    ):
         self.clone_exit_code = clone_exit_code
         self.checkout_fails_once = checkout_fails_once
+        self.fetch_exit_code = fetch_exit_code
         self.calls: list[dict[str, object]] = []
 
     def run_argv(self, command, **kwargs):
@@ -47,6 +54,8 @@ class _RecordingRunner:
         elif source == "repository_checkout" and self.checkout_fails_once:
             self.checkout_fails_once = False
             exit_code = 1
+        elif source == "repository_fetch_ref":
+            exit_code = self.fetch_exit_code
         elif source == "repository_metadata" and "rev-parse" in command:
             stdout = "abc123\n"
         elif source == "repository_metadata" and "get-url" in command:
@@ -86,7 +95,13 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
             self.workspace,
             runner,
             self.trace,
-            {"GH_TOKEN": token, "GITHUB_TOKEN": "lower-priority-token"},
+            {
+                "GH_TOKEN": token,
+                "GITHUB_TOKEN": "lower-priority-token",
+                "HOME": "corporate-home",
+                "USERPROFILE": "corporate-profile",
+                "GIT_CONFIG_GLOBAL": "corporate.gitconfig",
+            },
         ).clone("https://github.com/example/repo.git", "main")
 
         call = runner.call("repository_clone")
@@ -95,6 +110,10 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self.assertEqual((token,), call["redact_values"])
         self.assertNotIn("GH_TOKEN", call["environment"])
         self.assertNotIn("GITHUB_TOKEN", call["environment"])
+        self.assertEqual("corporate-home", call["environment"]["HOME"])
+        self.assertEqual("corporate-profile", call["environment"]["USERPROFILE"])
+        self.assertEqual("corporate.gitconfig", call["environment"]["GIT_CONFIG_GLOBAL"])
+        self.assertNotIn("GIT_CONFIG_NOSYSTEM", call["environment"])
         self.assertNotIn(token, " ".join(call["command"]))
         self.assertNotIn(token, call["askpass_text"])
         self.assertEqual("https://github.com/example/repo.git", metadata.remote_url)
@@ -112,6 +131,19 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self._assert_noninteractive(call)
         self.assertEqual(token, call["environment"]["GIT_ASKPASS_SECRET"])
         self.assertNotIn(token, " ".join(call["command"]))
+
+    def test_failed_fetch_reports_fetch_result(self):
+        runner = _RecordingRunner(checkout_fails_once=True, fetch_exit_code=128)
+
+        with self.assertRaises(RepositoryPreparationError) as raised:
+            RepositoryPreparer(self.workspace, runner, self.trace, {}).clone(
+                "https://github.com/example/repo.git", "missing-reference"
+            )
+
+        self.assertIsNotNone(raised.exception.result)
+        self.assertEqual(128, raised.exception.result.exit_code)
+        self.assertIn("fetch", raised.exception.result.command)
+        self.assertNotIn("checkout", raised.exception.result.command)
 
     def test_failed_github_clone_without_token_fails_deterministically(self):
         runner = _RecordingRunner(clone_exit_code=128)

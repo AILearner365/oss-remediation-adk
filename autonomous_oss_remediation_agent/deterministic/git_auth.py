@@ -89,10 +89,8 @@ class NonInteractiveGitAuth:
         self.workspace.temp.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="git-auth-", dir=self.workspace.temp) as directory:
             auth_root = Path(directory)
-            home = auth_root / "home"
-            home.mkdir()
             askpass = self._write_askpass(auth_root)
-            environment = self._environment(home, askpass, credential)
+            environment = self._environment(askpass, credential)
             command = [
                 "git",
                 "-c",
@@ -120,7 +118,6 @@ class NonInteractiveGitAuth:
 
     def _environment(
         self,
-        home: Path,
         askpass: Path,
         credential: GitCredential | None,
     ) -> dict[str, str]:
@@ -137,10 +134,6 @@ class NonInteractiveGitAuth:
                 environment.pop(name, None)
         environment.update(
             {
-                "HOME": str(home),
-                "USERPROFILE": str(home),
-                "GIT_CONFIG_NOSYSTEM": "1",
-                "GIT_CONFIG_GLOBAL": "NUL" if os.name == "nt" else "/dev/null",
                 "GIT_ASKPASS": str(askpass),
                 "GIT_TERMINAL_PROMPT": "0",
                 "GCM_INTERACTIVE": "never",
