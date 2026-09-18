@@ -214,6 +214,7 @@ class GitHubRestDeliveryAdapter:
             cwd=workspace.repository,
             source="delivery_push",
             credential=credential,
+            remote_url=remote_url,
             disable_hooks=True,
         )
 

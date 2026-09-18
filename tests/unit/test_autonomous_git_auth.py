@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import os
-import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 from autonomous_oss_remediation_agent.capabilities import ExecutionBudget, ProcessRunner
 from autonomous_oss_remediation_agent.config import DeliveryConfig, ExecutionBudgetConfig, RuntimePolicy
@@ -32,19 +30,19 @@ class _RecordingRunner:
         self.checkout_fails_once = checkout_fails_once
         self.fetch_exit_code = fetch_exit_code
         self.calls: list[dict[str, object]] = []
+        self.repository: Path | None = None
+        self.origin_url = ""
 
     def run_argv(self, command, **kwargs):
         source = kwargs.get("source", "deterministic")
         environment = dict(kwargs.get("environment", {}))
-        askpass = Path(environment["GIT_ASKPASS"]) if environment.get("GIT_ASKPASS") else None
         self.calls.append(
             {
                 "command": list(command),
+                "display_command": list(kwargs.get("display_command", command)),
                 "source": source,
                 "environment": environment,
                 "redact_values": tuple(kwargs.get("redact_values", ())),
-                "askpass_exists": bool(askpass and askpass.exists()),
-                "askpass_text": askpass.read_text(encoding="utf-8") if askpass and askpass.exists() else "",
             }
         )
         exit_code = 0
@@ -52,7 +50,13 @@ class _RecordingRunner:
         if source == "repository_clone":
             exit_code = self.clone_exit_code
             if exit_code == 0:
-                Path(command[-1]).mkdir(parents=True, exist_ok=True)
+                self.repository = Path(command[-1])
+                self.repository.mkdir(parents=True, exist_ok=True)
+                self.origin_url = command[-2]
+                self._write_config()
+        elif source == "repository_clean_origin":
+            self.origin_url = command[-1]
+            self._write_config()
         elif source == "repository_checkout" and self.checkout_fails_once:
             self.checkout_fails_once = False
             exit_code = 1
@@ -61,11 +65,26 @@ class _RecordingRunner:
         elif source == "repository_metadata" and "rev-parse" in command:
             stdout = "abc123\n"
         elif source == "repository_metadata" and "get-url" in command:
-            stdout = "https://github.com/example/repo.git\n"
-        return CommandResult(list(command), str(kwargs.get("cwd", ".")), exit_code, stdout=stdout)
+            stdout = f"{self.origin_url}\n"
+        return CommandResult(
+            list(kwargs.get("display_command", command)),
+            str(kwargs.get("cwd", ".")),
+            exit_code,
+            stdout=stdout,
+        )
 
     def call(self, source: str) -> dict[str, object]:
         return next(call for call in self.calls if call["source"] == source)
+
+    def _write_config(self) -> None:
+        if self.repository is None:
+            return
+        git_directory = self.repository / ".git"
+        git_directory.mkdir(exist_ok=True)
+        (git_directory / "config").write_text(
+            f'[remote "origin"]\n\turl = {self.origin_url}\n',
+            encoding="utf-8",
+        )
 
 
 class NonInteractiveGitAuthTests(unittest.TestCase):
@@ -86,10 +105,11 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
 
         call = runner.call("repository_clone")
         self._assert_noninteractive(call)
-        self.assertEqual("", call["environment"]["GIT_ASKPASS_SECRET"])
+        self.assertNotIn("GIT_ASKPASS_SECRET", call["environment"])
+        self.assertIn("https://github.com/example/repo.git", call["command"])
         self.assertEqual("https://github.com/example/repo.git", metadata.remote_url)
 
-    def test_authenticated_clone_uses_askpass_without_embedding_token(self):
+    def test_authenticated_clone_uses_temporary_url_and_restores_clean_origin(self):
         token = "github-secret-token"
         runner = _RecordingRunner()
 
@@ -108,18 +128,30 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
 
         call = runner.call("repository_clone")
         self._assert_noninteractive(call)
-        self.assertEqual(token, call["environment"]["GIT_ASKPASS_SECRET"])
-        self.assertEqual((token,), call["redact_values"])
+        actual_command = " ".join(call["command"])
+        display_command = " ".join(call["display_command"])
+        self.assertIn(
+            f"https://x-access-token:{token}@github.com/example/repo.git",
+            actual_command,
+        )
+        self.assertIn(
+            "https://x-access-token:[REDACTED]@github.com/example/repo.git",
+            display_command,
+        )
+        self.assertNotIn(token, display_command)
+        self.assertIn(token, call["redact_values"])
         self.assertNotIn("GH_TOKEN", call["environment"])
         self.assertNotIn("GITHUB_TOKEN", call["environment"])
         self.assertEqual("corporate-home", call["environment"]["HOME"])
         self.assertEqual("corporate-profile", call["environment"]["USERPROFILE"])
         self.assertEqual("corporate.gitconfig", call["environment"]["GIT_CONFIG_GLOBAL"])
         self.assertNotIn("GIT_CONFIG_NOSYSTEM", call["environment"])
-        self.assertNotIn(token, " ".join(call["command"]))
-        self.assertNotIn(token, call["askpass_text"])
         self.assertEqual("https://github.com/example/repo.git", metadata.remote_url)
         self.assertNotIn(token, metadata.remote_url)
+        config = (self.workspace.repository / ".git" / "config").read_text(encoding="utf-8")
+        self.assertIn("https://github.com/example/repo.git", config)
+        self.assertNotIn(token, config)
+        self.assertNotIn(token, self.trace.events_path.read_text(encoding="utf-8"))
 
     def test_fetch_uses_same_noninteractive_auth(self):
         token = "github-secret-token"
@@ -131,8 +163,14 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
 
         call = runner.call("repository_fetch_ref")
         self._assert_noninteractive(call)
-        self.assertEqual(token, call["environment"]["GIT_ASKPASS_SECRET"])
-        self.assertNotIn(token, " ".join(call["command"]))
+        self.assertIn(
+            f"https://x-access-token:{token}@github.com/example/repo.git",
+            " ".join(call["command"]),
+        )
+        self.assertNotIn(token, " ".join(call["display_command"]))
+        config = (self.workspace.repository / ".git" / "config").read_text(encoding="utf-8")
+        self.assertIn("https://github.com/example/repo.git", config)
+        self.assertNotIn(token, config)
 
     def test_failed_fetch_reports_fetch_result(self):
         runner = _RecordingRunner(checkout_fails_once=True, fetch_exit_code=128)
@@ -161,10 +199,16 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         token = "github-secret-token"
         runner = _RecordingRunner()
         adapter = GitHubRestDeliveryAdapter(DeliveryConfig(), object(), runner, self.trace)
+        self.workspace.repository.mkdir()
+        git_directory = self.workspace.repository / ".git"
+        git_directory.mkdir()
+        config_path = git_directory / "config"
+        clean_url = "https://github.com/example/repo.git"
+        config_path.write_text(f'[remote "origin"]\n\turl = {clean_url}\n', encoding="utf-8")
 
         result = adapter._push(
             self.workspace,
-            "https://github.com/example/repo.git",
+            clean_url,
             "remediation-branch",
             GitCredential(token),
         )
@@ -172,60 +216,15 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self.assertTrue(result.succeeded)
         call = runner.call("delivery_push")
         self._assert_noninteractive(call)
-        self.assertEqual(token, call["environment"]["GIT_ASKPASS_SECRET"])
-        self.assertNotIn(token, " ".join(call["command"]))
+        self.assertIn(
+            f"https://x-access-token:{token}@github.com/example/repo.git",
+            " ".join(call["command"]),
+        )
+        self.assertNotIn(token, " ".join(call["display_command"]))
+        self.assertNotIn(token, " ".join(result.command))
+        self.assertIn("[REDACTED]", " ".join(result.command))
         self.assertIn("core.hooksPath=", " ".join(call["command"]))
-
-    def test_windows_askpass_uses_secret_for_every_non_username_prompt(self):
-        token = "github-secret-token"
-        with tempfile.TemporaryDirectory() as directory:
-            directory_path = Path(directory)
-            with patch("autonomous_oss_remediation_agent.deterministic.git_auth.os.name", "nt"):
-                askpass = NonInteractiveGitAuth._write_askpass(directory_path)
-            script = askpass.read_text(encoding="utf-8")
-            self.assertIn('findstr /I "Username"', script)
-            self.assertNotIn('findstr /I "Password"', script)
-            self.assertIn("echo %GIT_ASKPASS_SECRET%", script)
-            self.assertIn("exit /b 0", script)
-            self.assertNotIn(token, script)
-            if os.name == "nt":
-                environment = os.environ.copy()
-                environment.update(
-                    {"GIT_ASKPASS_USERNAME": "x-access-token", "GIT_ASKPASS_SECRET": token}
-                )
-                self.assertEqual("x-access-token", self._run_windows_askpass(askpass, "Username for GitHub", environment))
-                self.assertEqual(token, self._run_windows_askpass(askpass, "Password for GitHub", environment))
-                self.assertEqual(token, self._run_windows_askpass(askpass, "Token for GitHub", environment))
-
-    def test_posix_askpass_uses_secret_for_every_non_username_prompt(self):
-        token = "github-secret-token"
-        with tempfile.TemporaryDirectory() as directory:
-            directory_path = Path(directory)
-            with patch("autonomous_oss_remediation_agent.deterministic.git_auth.os.name", "posix"):
-                askpass = NonInteractiveGitAuth._write_askpass(directory_path)
-            script = askpass.read_text(encoding="utf-8")
-            self.assertIn('*Username*) printf \'%s\\n\' "$GIT_ASKPASS_USERNAME"', script)
-            self.assertIn('*) printf \'%s\\n\' "$GIT_ASKPASS_SECRET"', script)
-            self.assertNotIn("*Password*", script)
-            self.assertNotIn("exit 1", script)
-            self.assertNotIn(token, script)
-            if os.name != "nt":
-                environment = os.environ.copy()
-                environment.update(
-                    {"GIT_ASKPASS_USERNAME": "x-access-token", "GIT_ASKPASS_SECRET": token}
-                )
-                self.assertEqual(
-                    "x-access-token",
-                    self._run_posix_askpass(askpass, "Username for GitHub", environment),
-                )
-                self.assertEqual(
-                    token,
-                    self._run_posix_askpass(askpass, "Password for GitHub", environment),
-                )
-                self.assertEqual(
-                    token,
-                    self._run_posix_askpass(askpass, "Token for GitHub", environment),
-                )
+        self.assertEqual(f'[remote "origin"]\n\turl = {clean_url}\n', config_path.read_text(encoding="utf-8"))
 
     def test_process_runner_redacts_secret_from_results_artifacts_and_trace(self):
         token = "github-secret-token"
@@ -242,11 +241,12 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
             [
                 sys.executable,
                 "-c",
-                "import os,sys; print(os.environ['GIT_ASKPASS_SECRET']); "
-                "print(os.environ['GIT_ASKPASS_SECRET'], file=sys.stderr)",
+                "import sys; print(sys.argv[1]); print(sys.argv[1], file=sys.stderr)",
+                token,
             ],
             environment=environment,
             redact_values=(token,),
+            display_command=[sys.executable, "-c", "<redacted-test>", "[REDACTED]"],
             source="credential_redaction",
         )
 
@@ -256,6 +256,7 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
         self.assertNotIn(token, Path(result.stdout_artifact).read_text(encoding="utf-8"))
         self.assertNotIn(token, Path(result.stderr_artifact).read_text(encoding="utf-8"))
         self.assertNotIn(token, self.trace.events_path.read_text(encoding="utf-8"))
+        self.assertNotIn(token, " ".join(result.command))
 
     def test_github_rest_failures_do_not_expose_token(self):
         token = "github-secret-token"
@@ -291,35 +292,14 @@ class NonInteractiveGitAuthTests(unittest.TestCase):
     def _assert_noninteractive(self, call: dict[str, object]) -> None:
         command = call["command"]
         environment = call["environment"]
-        self.assertTrue(call["askpass_exists"])
         self.assertEqual("0", environment["GIT_TERMINAL_PROMPT"])
         self.assertEqual("never", environment["GCM_INTERACTIVE"])
         self.assertEqual("generic", environment["GCM_PROVIDER"])
+        self.assertNotIn("GIT_ASKPASS", environment)
+        self.assertNotIn("GIT_ASKPASS_SECRET", environment)
         self.assertIn("credential.helper=", command)
         self.assertIn("credential.interactive=false", command)
         self.assertIn("credential.modalPrompt=false", command)
-
-    @staticmethod
-    def _run_windows_askpass(askpass: Path, prompt: str, environment: dict[str, str]) -> str:
-        result = subprocess.run(
-            ["cmd.exe", "/d", "/c", str(askpass), prompt],
-            check=True,
-            capture_output=True,
-            text=True,
-            env=environment,
-        )
-        return result.stdout.strip()
-
-    @staticmethod
-    def _run_posix_askpass(askpass: Path, prompt: str, environment: dict[str, str]) -> str:
-        result = subprocess.run(
-            [str(askpass), prompt],
-            check=True,
-            capture_output=True,
-            text=True,
-            env=environment,
-        )
-        return result.stdout.strip()
 
 
 if __name__ == "__main__":

@@ -46,8 +46,11 @@ class RepositoryPreparer:
             cwd=self.workspace.root,
             source="repository_clone",
             credential=credential,
+            remote_url=repository_url,
         )
         if not clone.succeeded:
+            if self.workspace.repository.exists():
+                shutil.rmtree(self.workspace.repository)
             if self.git_auth.is_github_https(repository_url) and credential is None:
                 message = (
                     "Repository clone failed non-interactively; private GitHub repositories "
@@ -58,6 +61,15 @@ class RepositoryPreparer:
             else:
                 message = "Repository clone failed non-interactively"
             raise RepositoryPreparationError(message, clone)
+        clean_origin = self.process_runner.run_argv(
+            ["git", "remote", "set-url", "origin", repository_url],
+            cwd=self.workspace.repository,
+            source="repository_clean_origin",
+            redact_values=credential.redaction_values if credential else (),
+        )
+        if not clean_origin.succeeded:
+            shutil.rmtree(self.workspace.repository)
+            raise RepositoryPreparationError("Unable to restore the clean repository origin", clean_origin)
         checkout = self.process_runner.run_argv(
             ["git", "checkout", reference],
             cwd=self.workspace.repository,
@@ -65,10 +77,11 @@ class RepositoryPreparer:
         )
         if not checkout.succeeded:
             fetch = self.git_auth.run(
-                ["fetch", "origin", reference],
+                ["fetch", repository_url, reference],
                 cwd=self.workspace.repository,
                 source="repository_fetch_ref",
                 credential=credential,
+                remote_url=repository_url,
             )
             if not fetch.succeeded:
                 raise RepositoryPreparationError("Requested repository reference is unavailable", fetch)
@@ -88,9 +101,12 @@ class RepositoryPreparer:
             ["git", "remote", "get-url", "origin"],
             cwd=self.workspace.repository,
             source="repository_metadata",
+            redact_values=credential.redaction_values if credential else (),
         )
         if not commit_result.succeeded:
             raise RepositoryPreparationError("Unable to resolve baseline commit", commit_result)
+        if not remote_result.succeeded or remote_result.stdout.strip() != repository_url:
+            raise RepositoryPreparationError("Repository origin is not the clean requested URL", remote_result)
         disable_push = self.process_runner.run_argv(
             ["git", "remote", "set-url", "--push", "origin", "disabled://autonomous-remediation-delivery-only"],
             cwd=self.workspace.repository,
@@ -102,7 +118,7 @@ class RepositoryPreparer:
             path=str(self.workspace.repository),
             commit=commit_result.stdout.strip(),
             reference=reference,
-            remote_url=remote_result.stdout.strip() if remote_result.succeeded else repository_url,
+            remote_url=remote_result.stdout.strip(),
         )
         self.trace.append_event("repository_prepared", **metadata.__dict__)
         return metadata

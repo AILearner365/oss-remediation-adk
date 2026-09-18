@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import os
-import stat
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse, urlsplit, urlunsplit
 
 from ..capabilities.execution import ProcessRunner
 from ..models import CommandResult
@@ -17,6 +15,10 @@ from ..workspace import RunWorkspace
 class GitCredential:
     token: str
     username: str = "x-access-token"
+
+    @property
+    def redaction_values(self) -> tuple[str, ...]:
+        return self.token, quote(self.token, safe="")
 
 
 class EnvironmentGitCredentialProvider:
@@ -75,7 +77,12 @@ class NonInteractiveGitAuth:
     @staticmethod
     def is_github_https(remote_url: str) -> bool:
         parsed = urlparse(remote_url.strip())
-        return parsed.scheme == "https" and parsed.hostname in {"github.com", "www.github.com"}
+        return (
+            parsed.scheme == "https"
+            and parsed.hostname in {"github.com", "www.github.com"}
+            and parsed.username is None
+            and parsed.password is None
+        )
 
     def run(
         self,
@@ -84,47 +91,61 @@ class NonInteractiveGitAuth:
         cwd: Path,
         source: str,
         credential: GitCredential | None = None,
+        remote_url: str | None = None,
         disable_hooks: bool = False,
     ) -> CommandResult:
-        self.workspace.temp.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix="git-auth-", dir=self.workspace.temp) as directory:
-            auth_root = Path(directory)
-            askpass = self._write_askpass(auth_root)
-            environment = self._environment(askpass, credential)
-            command = [
-                "git",
-                "-c",
-                "core.askPass=",
-                "-c",
-                "credential.helper=",
-                "-c",
-                "credential.interactive=false",
-                "-c",
-                "credential.modalPrompt=false",
-            ]
-            if disable_hooks:
-                command.extend(
-                    ["-c", f"core.hooksPath={'NUL' if os.name == 'nt' else '/dev/null'}"]
-                )
-            command.extend(arguments)
-            redactions = (credential.token,) if credential and credential.token else ()
-            return self.process_runner.run_argv(
-                command,
-                cwd=cwd,
-                environment=environment,
-                source=source,
-                redact_values=redactions,
-            )
+        actual_arguments = list(arguments)
+        display_arguments = list(arguments)
+        redactions: tuple[str, ...] = ()
+        if credential and credential.token:
+            if remote_url is None or not self.is_github_https(remote_url):
+                raise ValueError("GitHub credentials require a clean GitHub HTTPS remote URL")
+            authenticated_url = self._authenticated_url(remote_url, credential)
+            redacted_url = self._authenticated_url(remote_url, credential, redact=True)
+            try:
+                remote_index = actual_arguments.index(remote_url)
+            except ValueError as exc:
+                raise ValueError("Git command does not contain the supplied remote URL") from exc
+            actual_arguments[remote_index] = authenticated_url
+            display_arguments[remote_index] = redacted_url
+            redactions = credential.redaction_values
 
-    def _environment(
-        self,
-        askpass: Path,
-        credential: GitCredential | None,
-    ) -> dict[str, str]:
+        command = [
+            "git",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.interactive=false",
+            "-c",
+            "credential.modalPrompt=false",
+        ]
+        if disable_hooks:
+            command.extend(
+                ["-c", f"core.hooksPath={'NUL' if os.name == 'nt' else '/dev/null'}"]
+            )
+        display_command = list(command)
+        command.extend(actual_arguments)
+        display_command.extend(display_arguments)
+        return self.process_runner.run_argv(
+            command,
+            cwd=cwd,
+            environment=self._environment(),
+            source=source,
+            redact_values=redactions,
+            display_command=display_command,
+        )
+
+    def _environment(self) -> dict[str, str]:
         environment = dict(self.environment)
         prohibited = {
             "GH_TOKEN",
             "GITHUB_TOKEN",
+            "GIT_ASKPASS",
+            "GIT_ASKPASS_USERNAME",
+            "GIT_ASKPASS_SECRET",
+            "SSH_ASKPASS",
             "XRAY_ACCESS_TOKEN",
             "XRAY_USERNAME",
             "XRAY_PASSWORD",
@@ -134,33 +155,25 @@ class NonInteractiveGitAuth:
                 environment.pop(name, None)
         environment.update(
             {
-                "GIT_ASKPASS": str(askpass),
                 "GIT_TERMINAL_PROMPT": "0",
                 "GCM_INTERACTIVE": "never",
                 "GCM_PROVIDER": "generic",
-                "GIT_ASKPASS_USERNAME": credential.username if credential else "x-access-token",
-                "GIT_ASKPASS_SECRET": credential.token if credential else "",
             }
         )
         return environment
 
     @staticmethod
-    def _write_askpass(directory: Path) -> Path:
-        askpass = directory / ("askpass.cmd" if os.name == "nt" else "askpass.sh")
-        if os.name == "nt":
-            askpass.write_text(
-                "@echo off\r\n"
-                "echo %~1 | findstr /I \"Username\" >nul && (echo %GIT_ASKPASS_USERNAME% & exit /b 0)\r\n"
-                "echo %GIT_ASKPASS_SECRET%\r\n"
-                "exit /b 0\r\n",
-                encoding="utf-8",
-            )
-        else:
-            askpass.write_text(
-                "#!/bin/sh\n"
-                "case \"$1\" in *Username*) printf '%s\\n' \"$GIT_ASKPASS_USERNAME\" ;; "
-                "*) printf '%s\\n' \"$GIT_ASKPASS_SECRET\" ;; esac\n",
-                encoding="utf-8",
-            )
-            askpass.chmod(askpass.stat().st_mode | stat.S_IXUSR)
-        return askpass
+    def _authenticated_url(
+        remote_url: str,
+        credential: GitCredential,
+        *,
+        redact: bool = False,
+    ) -> str:
+        parsed = urlsplit(remote_url)
+        password = "[REDACTED]" if redact else quote(credential.token, safe="")
+        username = quote(credential.username, safe="")
+        hostname = parsed.hostname or ""
+        port = f":{parsed.port}" if parsed.port is not None else ""
+        return urlunsplit(
+            (parsed.scheme, f"{username}:{password}@{hostname}{port}", parsed.path, parsed.query, parsed.fragment)
+        )

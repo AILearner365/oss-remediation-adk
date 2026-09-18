@@ -121,6 +121,7 @@ class ProcessRunner:
         environment: Mapping[str, str] | None = None,
         source: str = "deterministic",
         redact_values: Sequence[str] = (),
+        display_command: Sequence[str] | None = None,
     ) -> CommandResult:
         return self._run(
             list(command),
@@ -128,7 +129,7 @@ class ProcessRunner:
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
             environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
-            display_command=list(command),
+            display_command=list(display_command) if display_command is not None else list(command),
             redact_values=redact_values,
         )
 
