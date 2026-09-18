@@ -125,14 +125,21 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertTrue(result.timed_out)
         self.assertEqual(124, result.exit_code)
 
-    def test_deterministic_repository_process_strips_xray_credentials(self):
+    def test_deterministic_repository_process_strips_scanner_and_github_credentials(self):
         previous = os.environ.get("XRAY_ACCESS_TOKEN")
+        previous_github = os.environ.get("GITHUB_TOKEN")
         os.environ["XRAY_ACCESS_TOKEN"] = "deterministic-secret"
+        os.environ["GITHUB_TOKEN"] = "github-deterministic-secret"
         try:
             command = (
-                ["powershell.exe", "-NoProfile", "-Command", "Write-Output $env:XRAY_ACCESS_TOKEN"]
+                [
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-Command",
+                    "Write-Output $env:XRAY_ACCESS_TOKEN; Write-Output $env:GITHUB_TOKEN",
+                ]
                 if os.name == "nt"
-                else ["/bin/sh", "-c", "printf '%s' \"$XRAY_ACCESS_TOKEN\""]
+                else ["/bin/sh", "-c", "printf '%s%s' \"$XRAY_ACCESS_TOKEN\" \"$GITHUB_TOKEN\""]
             )
             result = self.runner.run_argv(command, cwd=self.workspace.repository)
         finally:
@@ -140,8 +147,13 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 os.environ.pop("XRAY_ACCESS_TOKEN", None)
             else:
                 os.environ["XRAY_ACCESS_TOKEN"] = previous
+            if previous_github is None:
+                os.environ.pop("GITHUB_TOKEN", None)
+            else:
+                os.environ["GITHUB_TOKEN"] = previous_github
         self.assertTrue(result.succeeded)
         self.assertNotIn("deterministic-secret", result.stdout)
+        self.assertNotIn("github-deterministic-secret", result.stdout)
 
     def test_budget_is_enforced_by_tool_bindings(self):
         budget = ExecutionBudget(

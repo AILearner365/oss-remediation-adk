@@ -2,10 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
-import stat
-import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,15 +11,13 @@ from urllib.parse import urlparse
 
 from ..capabilities.execution import ProcessRunner
 from ..config import DeliveryConfig, RemediationRequest
+from ..deterministic.git_auth import (
+    EnvironmentGitCredentialProvider as EnvironmentCredentialProvider,
+    GitCredential as DeliveryCredential,
+    NonInteractiveGitAuth,
+)
 from ..models import DeliveryPreflight, DeliveryResult, RepositoryBaseline, ValidationReport
 from ..workspace import RunWorkspace, TraceStore, sha256_file
-
-
-@dataclass(frozen=True)
-class DeliveryCredential:
-    token: str
-    username: str = "x-access-token"
-
 
 class DeliveryCredentialProvider(Protocol):
     def isolation_status(self) -> tuple[bool, str]: ...
@@ -49,36 +44,6 @@ class CallableCredentialProvider:
         if not self._isolated:
             raise RuntimeError("Credential provider is accessible to the remediation identity")
         return self._resolver()
-
-
-class EnvironmentCredentialProvider:
-    def __init__(
-        self,
-        environment: dict[str, str] | None = None,
-        variable_names: tuple[str, ...] = ("GH_TOKEN", "GITHUB_TOKEN"),
-    ):
-        self._environment = environment if environment is not None else os.environ
-        self._variable_names = variable_names
-
-    def isolation_status(self) -> tuple[bool, str]:
-        variable_name = self._configured_variable_name()
-        if variable_name is None:
-            expected = " or ".join(self._variable_names)
-            return False, f"No GitHub token is configured; set {expected} for the runner process"
-        return True, f"{variable_name} is available only to deterministic delivery and is removed from the agent shell environment"
-
-    def resolve(self) -> DeliveryCredential:
-        variable_name = self._configured_variable_name()
-        if variable_name is None:
-            expected = " or ".join(self._variable_names)
-            raise RuntimeError(f"No GitHub token is configured; set {expected}")
-        return DeliveryCredential(self._environment[variable_name].strip())
-
-    def _configured_variable_name(self) -> str | None:
-        for variable_name in self._variable_names:
-            if self._environment.get(variable_name, "").strip():
-                return variable_name
-        return None
 
 
 @dataclass(frozen=True)
@@ -206,8 +171,8 @@ class GitHubRestDeliveryAdapter:
             return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, commit=commit, reason=f"Credential isolation lost: {reason}")
         try:
             credential = self.credential_provider.resolve()
-        except Exception as exc:
-            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, commit=commit, reason=f"Credential resolution failed closed: {exc}")
+        except Exception:
+            return DeliveryResult(False, "VALIDATED_MANUAL_DELIVERY_REQUIRED", branch=branch, commit=commit, reason="Credential resolution failed closed")
         push_result = self._push(context.workspace, context.baseline.remote_url, branch, credential)
         commands.append(push_result.to_dict())
         if not push_result.succeeded:
@@ -244,54 +209,13 @@ class GitHubRestDeliveryAdapter:
         return result
 
     def _push(self, workspace: RunWorkspace, remote_url: str, branch: str, credential: DeliveryCredential):
-        delivery_home = workspace.temp / "delivery-home"
-        delivery_home.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix="delivery-askpass-", dir=workspace.temp) as directory:
-            askpass = Path(directory) / ("askpass.cmd" if os.name == "nt" else "askpass.sh")
-            if os.name == "nt":
-                askpass.write_text(
-                    "@echo off\r\n"
-                    "echo %~1 | findstr /I \"Username\" >nul && (echo %GIT_ASKPASS_USERNAME% & exit /b 0)\r\n"
-                    "echo %GIT_ASKPASS_SECRET%\r\n",
-                    encoding="utf-8",
-                )
-            else:
-                askpass.write_text(
-                    "#!/bin/sh\n"
-                    "case \"$1\" in *Username*) printf '%s\\n' \"$GIT_ASKPASS_USERNAME\" ;; "
-                    "*) printf '%s\\n' \"$GIT_ASKPASS_SECRET\" ;; esac\n",
-                    encoding="utf-8",
-                )
-                askpass.chmod(askpass.stat().st_mode | stat.S_IXUSR)
-            environment = os.environ.copy()
-            environment.update(
-                {
-                    "HOME": str(delivery_home),
-                    "USERPROFILE": str(delivery_home),
-                    "GIT_CONFIG_NOSYSTEM": "1",
-                    "GIT_CONFIG_GLOBAL": "NUL" if os.name == "nt" else "/dev/null",
-                    "GIT_ASKPASS": str(askpass),
-                    "GIT_TERMINAL_PROMPT": "0",
-                    "GIT_ASKPASS_USERNAME": credential.username,
-                    "GIT_ASKPASS_SECRET": credential.token,
-                }
-            )
-            return self.process_runner.run_argv(
-                [
-                    "git",
-                    "-c",
-                    "credential.helper=",
-                    "-c",
-                    f"core.hooksPath={'NUL' if os.name == 'nt' else '/dev/null'}",
-                    "push",
-                    "--no-verify",
-                    remote_url,
-                    branch,
-                ],
-                cwd=workspace.repository,
-                environment=environment,
-                source="delivery_push",
-            )
+        return NonInteractiveGitAuth(workspace, self.process_runner).run(
+            ["push", "--no-verify", remote_url, branch],
+            cwd=workspace.repository,
+            source="delivery_push",
+            credential=credential,
+            disable_hooks=True,
+        )
 
     def _create_pull_request(
         self,
@@ -321,9 +245,12 @@ class GitHubRestDeliveryAdapter:
             )
             status_code = int(getattr(response, "status_code", 0))
             payload = response.json() if hasattr(response, "json") else {}
-        except Exception as exc:
-            return {"succeeded": False, "error": f"GitHub PR request failed: {exc}", "evidence": {}}
-        evidence = {"statusCode": status_code, "response": _redacted_response(payload)}
+        except Exception:
+            return {"succeeded": False, "error": "GitHub PR request failed", "evidence": {}}
+        evidence = {
+            "statusCode": status_code,
+            "response": _redacted_response(payload, (credential.token,)),
+        }
         if status_code not in (200, 201):
             return {"succeeded": False, "error": f"GitHub PR creation failed with HTTP {status_code}", "evidence": evidence}
         return {"succeeded": True, "url": payload.get("html_url"), "evidence": evidence}
@@ -384,7 +311,19 @@ def _branch_name(prefix: str, reference: str, commit: str) -> str:
     return f"{prefix}-{safe_reference}-{commit[:7]}-{timestamp}"
 
 
-def _redacted_response(payload: Any) -> Any:
+def _redacted_response(payload: Any, secrets: tuple[str, ...] = ()) -> Any:
     if not isinstance(payload, dict):
         return {}
-    return {key: payload.get(key) for key in ("html_url", "number", "state", "draft", "message") if key in payload}
+    response = {
+        key: payload.get(key)
+        for key in ("html_url", "number", "state", "draft", "message")
+        if key in payload
+    }
+    for key, value in response.items():
+        if not isinstance(value, str):
+            continue
+        for secret in secrets:
+            if secret:
+                value = value.replace(secret, "[REDACTED]")
+        response[key] = value
+    return response

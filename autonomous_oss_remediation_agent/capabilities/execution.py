@@ -120,6 +120,7 @@ class ProcessRunner:
         timeout_seconds: int | None = None,
         environment: Mapping[str, str] | None = None,
         source: str = "deterministic",
+        redact_values: Sequence[str] = (),
     ) -> CommandResult:
         return self._run(
             list(command),
@@ -128,6 +129,7 @@ class ProcessRunner:
             environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
             display_command=list(command),
+            redact_values=redact_values,
         )
 
     def _run(
@@ -139,6 +141,7 @@ class ProcessRunner:
         environment: dict[str, str],
         source: str,
         display_command: list[str],
+        redact_values: Sequence[str] = (),
     ) -> CommandResult:
         command_id = f"{source}-{uuid.uuid4().hex[:12]}"
         stdout_path = self.workspace.artifacts / "commands" / f"{command_id}.stdout.log"
@@ -177,6 +180,8 @@ class ProcessRunner:
             stderr = str(exc)
         except OSError as exc:
             stderr = str(exc)
+        stdout = _redact(stdout, redact_values)
+        stderr = _redact(stderr, redact_values)
         duration = time.monotonic() - started
         stdout_path.write_text(stdout, encoding="utf-8")
         stderr_path.write_text(stderr, encoding="utf-8")
@@ -213,8 +218,16 @@ def _host_shell_command(command: str) -> list[str]:
 
 def _deterministic_environment() -> dict[str, str]:
     environment = os.environ.copy()
-    for name in ("XRAY_ACCESS_TOKEN", "XRAY_USERNAME", "XRAY_PASSWORD"):
-        environment.pop(name, None)
+    prohibited = {
+        "GH_TOKEN",
+        "GITHUB_TOKEN",
+        "XRAY_ACCESS_TOKEN",
+        "XRAY_USERNAME",
+        "XRAY_PASSWORD",
+    }
+    for name in tuple(environment):
+        if name.upper() in prohibited:
+            environment.pop(name, None)
     return environment
 
 
@@ -240,3 +253,11 @@ def _tail(value: str, limit: int) -> str:
     if len(value) <= limit:
         return value
     return f"[output truncated; full log retained]\n{value[-limit:]}"
+
+
+def _redact(value: str, secrets: Sequence[str]) -> str:
+    redacted = value
+    for secret in secrets:
+        if secret:
+            redacted = redacted.replace(secret, "[REDACTED]")
+    return redacted

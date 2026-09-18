@@ -178,7 +178,9 @@ Before the first model-backed POC, replace the repository and scanner placeholde
 
 The stock CLI uses `ManualDeliveryAdapter` when `delivery.mode` is not `auto`. For automatic GitHub delivery, set `delivery.mode` to `auto`, select `github`, `github-rest`, or `git+github-rest`, and provide `GH_TOKEN` (preferred) or `GITHUB_TOKEN` to the runner process. The token must have permission to push a branch and create a pull request in the target repository.
 
-The CLI creates the Git-plus-GitHub-REST adapter through the orchestrator's per-run `delivery_adapter_factory`. Environment credentials are withheld from the model-controlled shell by the sanitized agent environment and are resolved only after deterministic validation succeeds. The delivery adapter supplies the token to `git push` through a temporary askpass helper and sends it directly in the GitHub REST authorization header; the token is not included in command arguments or trace evidence. If neither token variable is present, preflight remains in manual-delivery mode and never attempts delivery. This is process-level separation rather than an operating-system security boundary, so use a dedicated runner and a narrowly scoped, short-lived token.
+Clone, fetch, and delivery push share a deterministic non-interactive Git authentication boundary. Public GitHub repositories work without a token; private repositories use `GH_TOKEN` first or `GITHUB_TOKEN` second through a temporary askpass helper. Git terminal prompting and Git Credential Manager interaction are disabled, credential helpers are cleared, and the clean HTTPS URL remains in `.git/config`. Tokens are removed from ordinary deterministic, Maven, scanner, and model-controlled shell environments and are never included in Git command arguments or trace evidence.
+
+The CLI creates the Git-plus-GitHub-REST adapter through the orchestrator's per-run `delivery_adapter_factory`. Automatic delivery resolves the same environment credential only after deterministic validation succeeds and sends it directly in the GitHub REST authorization header. If neither token variable is present, delivery preflight remains in manual-delivery mode and never attempts delivery. This is process-level separation rather than an operating-system security boundary, so use a dedicated runner and a narrowly scoped, short-lived token.
 
 ## Validation Scope
 
@@ -202,7 +204,7 @@ Scanner-provided fixed versions are evidence rather than remediation instruction
 ## Test Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
+python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_git_auth tests.unit.test_autonomous_maven_policy tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import shutil
 from dataclasses import dataclass
+from typing import Mapping
 
 from ..capabilities.execution import ProcessRunner
 from ..models import CommandResult
 from ..workspace import RunWorkspace, TraceStore
+from .git_auth import NonInteractiveGitAuth
 
 
 class RepositoryPreparationError(RuntimeError):
@@ -23,31 +25,50 @@ class RepositoryMetadata:
 
 
 class RepositoryPreparer:
-    def __init__(self, workspace: RunWorkspace, process_runner: ProcessRunner, trace: TraceStore):
+    def __init__(
+        self,
+        workspace: RunWorkspace,
+        process_runner: ProcessRunner,
+        trace: TraceStore,
+        environment: Mapping[str, str] | None = None,
+    ):
         self.workspace = workspace
         self.process_runner = process_runner
         self.trace = trace
+        self.git_auth = NonInteractiveGitAuth(workspace, process_runner, environment)
 
     def clone(self, repository_url: str, reference: str) -> RepositoryMetadata:
         if self.workspace.repository.exists():
             shutil.rmtree(self.workspace.repository)
-        clone = self.process_runner.run_argv(
-            ["git", "clone", "--no-tags", repository_url, str(self.workspace.repository)],
+        credential = self.git_auth.credential_for(repository_url)
+        clone = self.git_auth.run(
+            ["clone", "--no-tags", repository_url, str(self.workspace.repository)],
             cwd=self.workspace.root,
             source="repository_clone",
+            credential=credential,
         )
         if not clone.succeeded:
-            raise RepositoryPreparationError("Repository clone failed", clone)
+            if self.git_auth.is_github_https(repository_url) and credential is None:
+                message = (
+                    "Repository clone failed non-interactively; private GitHub repositories "
+                    "require GH_TOKEN or GITHUB_TOKEN"
+                )
+            elif credential is not None:
+                message = "Repository clone failed using non-interactive GitHub authentication"
+            else:
+                message = "Repository clone failed non-interactively"
+            raise RepositoryPreparationError(message, clone)
         checkout = self.process_runner.run_argv(
             ["git", "checkout", reference],
             cwd=self.workspace.repository,
             source="repository_checkout",
         )
         if not checkout.succeeded:
-            fetch = self.process_runner.run_argv(
-                ["git", "fetch", "origin", reference],
+            fetch = self.git_auth.run(
+                ["fetch", "origin", reference],
                 cwd=self.workspace.repository,
                 source="repository_fetch_ref",
+                credential=credential,
             )
             if not fetch.succeeded:
                 raise RepositoryPreparationError("Requested repository reference is unavailable", checkout)
