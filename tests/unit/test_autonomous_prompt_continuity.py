@@ -10,10 +10,42 @@ from autonomous_oss_remediation_agent.models import (
     ValidationReport,
     VulnerabilityFinding,
 )
-from autonomous_oss_remediation_agent.prompt import AGENT_INSTRUCTION, validation_feedback
+from autonomous_oss_remediation_agent.prompt import (
+    AGENT_INSTRUCTION,
+    extract_working_state,
+    validation_feedback,
+)
 
 
 class AutonomousPromptContinuityTests(unittest.TestCase):
+    def test_extracts_only_explicit_working_state_section(self):
+        response = (
+            "Updated the managed dependency property and verified the effective graph.\n\n"
+            "WORKING_STATE\n"
+            "- Understanding: dependency ownership is now clear\n"
+            "- Current strategy/hypothesis: validate the property change\n"
+            "- Unresolved: deterministic scan result"
+        )
+
+        working_state = extract_working_state(response)
+
+        self.assertTrue(working_state.startswith("WORKING_STATE\n"))
+        self.assertIn("dependency ownership is now clear", working_state)
+        self.assertNotIn("Updated the managed dependency", working_state)
+
+    def test_missing_or_malformed_working_state_uses_bounded_fallback(self):
+        missing = "Investigated the repository. " + ("detail " * 300) + "TAIL_MARKER"
+        malformed = "Investigation complete. WORKING_STATE is still being developed."
+
+        missing_fallback = extract_working_state(missing)
+        malformed_fallback = extract_working_state(malformed)
+
+        self.assertIn("No structured WORKING_STATE was supplied", missing_fallback)
+        self.assertIn("Visible response excerpt", missing_fallback)
+        self.assertLess(len(missing_fallback), 800)
+        self.assertNotIn("TAIL_MARKER", missing_fallback)
+        self.assertIn("No structured WORKING_STATE was supplied", malformed_fallback)
+
     def test_instruction_requires_concise_model_owned_working_state(self):
         self.assertIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("current understanding", AGENT_INSTRUCTION)

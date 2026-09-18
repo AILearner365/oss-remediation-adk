@@ -25,7 +25,7 @@ from .models import (
     ScanReport,
     ValidationReport,
 )
-from .prompt import initial_message, validation_feedback
+from .prompt import extract_working_state, initial_message, validation_feedback
 from .workspace import RunWorkspace, TraceStore
 
 
@@ -180,9 +180,10 @@ class AutonomousRemediationOrchestrator:
                 validator.capture_cycle_start(cycle, baseline)
                 turn = await agent_session.run_turn(message)
                 summaries.append(turn.text)
+                working_state = extract_working_state(turn.text)
                 trace.write_json(
                     f"agent/cycle-{cycle}.json",
-                    {"summary": turn.text, "workingState": turn.text},
+                    {"summary": turn.text, "workingState": working_state},
                 )
                 last_validation = validator.validate(cycle, baseline)
                 if _is_scanner_infrastructure_failure(last_validation.scan):
@@ -243,7 +244,7 @@ class AutonomousRemediationOrchestrator:
                     )
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     break
-                message = validation_feedback(last_validation, turn.text)
+                message = validation_feedback(last_validation, working_state)
         except BudgetExceeded as exc:
             reason = str(exc)
         except Exception as exc:

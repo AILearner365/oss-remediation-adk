@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import json
+import re
 
 from .config import RemediationRequest
 from .models import RepositoryBaseline, ValidationReport
+
+
+_WORKING_STATE_HEADER = re.compile(
+    r"(?im)^[ \t]*(?:#{1,6}[ \t]+)?WORKING_STATE[ \t]*:?[ \t]*$"
+)
+_WORKING_STATE_FALLBACK_LIMIT = 600
 
 
 AGENT_INSTRUCTION = """
@@ -53,6 +60,26 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
         "The objective, constraints, and completion criteria below are the stable run contract for every turn. "
         "Use tools to investigate and modify the repository, maintain your concise WORKING_STATE, then end the turn for deterministic validation.\n\n"
         + json.dumps(payload, indent=2, sort_keys=True)
+    )
+
+
+def extract_working_state(turn_text: str) -> str:
+    matches = tuple(_WORKING_STATE_HEADER.finditer(turn_text))
+    if matches:
+        match = matches[-1]
+        section = turn_text[match.start():].strip()
+        if turn_text[match.end():].strip():
+            return section
+    visible = " ".join(turn_text.split())
+    if not visible:
+        return "WORKING_STATE\n- No structured WORKING_STATE was supplied in the previous cycle."
+    excerpt = visible[:_WORKING_STATE_FALLBACK_LIMIT].rstrip()
+    if len(visible) > _WORKING_STATE_FALLBACK_LIMIT:
+        excerpt += "…"
+    return (
+        "WORKING_STATE\n"
+        "- No structured WORKING_STATE was supplied in the previous cycle.\n"
+        f"- Visible response excerpt: {excerpt}"
     )
 
 

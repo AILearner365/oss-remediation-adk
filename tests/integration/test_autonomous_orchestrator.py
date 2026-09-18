@@ -172,6 +172,18 @@ class _FailingAgentSession:
         return None
 
 
+class _UnstructuredAgentSession:
+    def __init__(self):
+        self.messages = []
+
+    async def run_turn(self, message):
+        self.messages.append(message)
+        return AgentTurnResult("Investigated without a structured state. " + ("detail " * 300))
+
+    async def close(self):
+        return None
+
+
 class _CommittingAgentSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -249,6 +261,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("supports, contradicts, or leaves unresolved", sessions[0].messages[1])
         self.assertIn("strategy-1", sessions[0].messages[1])
         self.assertNotIn("strategy-2", sessions[0].messages[1])
+        self.assertNotIn("cycle 1 complete", sessions[0].messages[1])
         self.assertTrue(sessions[0].closed)
         workspace_root = Path(result.workspace_root)
         self.assertTrue((workspace_root / "artifacts" / "final-result.json").is_file())
@@ -259,6 +272,8 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(encoding="utf-8")
         )
         self.assertIn("strategy-1", cycle_one_agent["workingState"])
+        self.assertNotIn("cycle 1 complete", cycle_one_agent["workingState"])
+        self.assertIn("cycle 1 complete", cycle_one_agent["summary"])
         self.assertIn("strategy-2", cycle_two_agent["workingState"])
         cycle_one = json.loads(
             (workspace_root / "artifacts" / "validation" / "cycle-1.json").read_text(encoding="utf-8")
@@ -279,6 +294,24 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+
+    def test_missing_working_state_uses_bounded_fallback_without_failing_run(self):
+        session = _UnstructuredAgentSession()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: session,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(Outcome.EXECUTION_LIMIT_REACHED, result.outcome)
+        cycle = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertGreater(len(cycle["summary"]), len(cycle["workingState"]))
+        self.assertIn("No structured WORKING_STATE was supplied", cycle["workingState"])
+        self.assertLess(len(cycle["workingState"]), 800)
 
     def test_cycle_evidence_identifies_preserved_and_repeated_repository_state(self):
         sessions = []
