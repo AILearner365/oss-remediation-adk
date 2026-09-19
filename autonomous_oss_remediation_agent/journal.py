@@ -741,7 +741,7 @@ Deterministic validation status and capture quality are reported separately. Run
 
 {'### Uncategorized model-reported coverage' if coverage and not coverage_is_structured else ''}
 
-{coverage if coverage and not coverage_is_structured else ''}
+{_captured_block('Accepted model-reported coverage', coverage) if coverage and not coverage_is_structured else ''}
 
 ## Final evidence
 

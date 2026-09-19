@@ -43,6 +43,7 @@ class DeveloperCapabilitySet:
         """List files with bounded traversal; pass opaque `nextCursor` to continue the same query.
 
         `truncationReason` distinguishes an output `PAGE_LIMIT` from a traversal `SCAN_LIMIT`.
+        Continuation is stable within one live cursor; cross-run lexical ordering is not guaranteed.
         """
         denied = self._require_phase("list_workspace_files", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:

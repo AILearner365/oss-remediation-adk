@@ -11,10 +11,17 @@ from ..workspace import RunWorkspace, TraceStore
 
 
 class WorkspaceIO:
-    def __init__(self, workspace: RunWorkspace, trace: TraceStore, max_file_bytes: int = 2_000_000):
+    def __init__(
+        self,
+        workspace: RunWorkspace,
+        trace: TraceStore,
+        max_file_bytes: int = 2_000_000,
+        max_active_listing_cursors: int = 8,
+    ):
         self.workspace = workspace
         self.trace = trace
         self.max_file_bytes = max_file_bytes
+        self.max_active_listing_cursors = max(1, min(max_active_listing_cursors, 100))
         self._listing_cursors: dict[str, _ListingCursor] = {}
 
     def read_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
@@ -52,6 +59,9 @@ class WorkspaceIO:
         scan_limit = max(1, min(max_scanned_entries, 20_000))
         if cursor in {None, 0, ""}:
             directory = self.workspace.repository_directory(path)
+            while len(self._listing_cursors) >= self.max_active_listing_cursors:
+                oldest_cursor = next(iter(self._listing_cursors))
+                self._close_listing_cursor(oldest_cursor)
             cursor_id = uuid.uuid4().hex
             state = _ListingCursor(
                 iterator=_walk_repository_entries(directory),
@@ -63,7 +73,9 @@ class WorkspaceIO:
             cursor_id = str(cursor)
             state = self._listing_cursors.get(cursor_id)
             if state is None:
-                raise ValueError("Unknown or completed listing cursor; start a new listing")
+                raise ValueError(
+                    "Expired, evicted, unknown, or completed listing cursor; start a new listing"
+                )
 
         entries: list[str] = []
         scanned_entries = 0
@@ -74,6 +86,9 @@ class WorkspaceIO:
             except StopIteration:
                 exhausted = True
                 break
+            except Exception:
+                self._close_listing_cursor(cursor_id)
+                raise
             scanned_entries += 1
             state.scanned_entries += 1
             if not is_file:
@@ -85,7 +100,7 @@ class WorkspaceIO:
             state.matched_entries += 1
 
         if exhausted:
-            self._listing_cursors.pop(cursor_id, None)
+            self._close_listing_cursor(cursor_id)
             next_cursor = None
             truncation_reason = None
         else:
@@ -115,6 +130,14 @@ class WorkspaceIO:
             "truncated": not exhausted,
             "truncationReason": truncation_reason,
         }
+
+    def _close_listing_cursor(self, cursor_id: str) -> None:
+        state = self._listing_cursors.pop(cursor_id, None)
+        if state is None:
+            return
+        close = getattr(state.iterator, "close", None)
+        if close is not None:
+            close()
 
     def search_text(
         self,
@@ -257,11 +280,13 @@ def _walk_repository_entries(directory: Path) -> Iterator[tuple[Path, bool]]:
             except StopIteration:
                 iterators.pop().close()
                 continue
+            if entry.name == ".git":
+                continue
             candidate = Path(entry.path)
             is_directory = entry.is_dir(follow_symlinks=False)
             is_file = entry.is_file(follow_symlinks=False)
             yield candidate, is_file
-            if is_directory and entry.name != ".git":
+            if is_directory:
                 iterators.append(os.scandir(candidate))
     finally:
         for iterator in iterators:

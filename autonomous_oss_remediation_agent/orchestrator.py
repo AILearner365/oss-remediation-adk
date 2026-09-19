@@ -304,9 +304,6 @@ class AutonomousRemediationOrchestrator:
                         last_delivery,
                         last_validation,
                     )
-                if outcome_status in {"BLOCKED", "FAILED", "INCONCLUSIVE", "NO_CHANGE_REQUIRED"}:
-                    reason = f"Agent reported {outcome_status}; deterministic validation did not establish full success"
-                    break
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     reason = "Configured operational budget reached"
                     break

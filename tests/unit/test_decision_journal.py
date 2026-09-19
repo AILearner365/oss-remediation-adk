@@ -205,7 +205,13 @@ class DecisionJournalTests(unittest.TestCase):
             self.assertTrue(any(expected in error for error in result.errors), result.errors)
 
     def test_unstructured_coverage_is_preserved_without_reclassification(self):
-        coverage = "The first requirement passed; the second still needs external evidence."
+        coverage = """### Satisfied
+
+One item appears satisfied.
+
+### Unresolved
+
+Another item remains unresolved."""
         cycle = CycleCapture(
             outcome_answers={
                 "Requirement and problem coverage": coverage,
@@ -225,9 +231,51 @@ class DecisionJournalTests(unittest.TestCase):
         )
 
         conditional = rendered.split("### Conditional", 1)[1].split("### Unresolved", 1)[0]
-        self.assertNotIn(coverage, conditional)
+        self.assertNotIn("One item appears satisfied.", conditional)
         self.assertIn("### Uncategorized model-reported coverage", rendered)
-        self.assertIn(coverage, rendered)
+        self.assertIn("> ### Satisfied", rendered)
+        self.assertIn("> One item appears satisfied.", rendered)
+        self.assertIn("> ### Unresolved", rendered)
+        self.assertIn("> Another item remains unresolved.", rendered)
+        self.assertEqual(1, rendered.splitlines().count("### Satisfied"))
+        self.assertEqual(1, rendered.splitlines().count("### Unresolved"))
+
+    def test_fully_structured_coverage_uses_normal_categories(self):
+        coverage = """### Satisfied
+
+Satisfied evidence.
+
+### Conditional
+
+Conditional evidence.
+
+### Unresolved
+
+Unresolved evidence.
+
+### Not applicable
+
+Not-applicable evidence."""
+        cycle = CycleCapture(
+            outcome_answers={"Requirement and problem coverage": coverage}
+        )
+
+        rendered = render_final_resolution(
+            RemediationOutcome.INCONCLUSIVE,
+            "Original problem",
+            {1: cycle},
+            None,
+            CaptureStatus.COMPLETE,
+            DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "No delivery.",
+            "Evidence remains incomplete.",
+        )
+
+        self.assertNotIn("### Uncategorized model-reported coverage", rendered)
+        self.assertIn("> Satisfied evidence.", rendered)
+        self.assertIn("> Conditional evidence.", rendered)
+        self.assertIn("> Unresolved evidence.", rendered)
+        self.assertIn("> Not-applicable evidence.", rendered)
 
     @staticmethod
     def _replace(answers, section, answer):

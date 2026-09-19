@@ -277,6 +277,65 @@ class AutonomousCapabilityTests(unittest.TestCase):
         }
         self.assertEqual(before, after)
 
+    def test_file_listing_excludes_git_files_and_directories(self):
+        git_directory = self.workspace.repository / ".git"
+        git_directory.mkdir()
+        (git_directory / "config").write_text("hidden", encoding="utf-8")
+        module = self.workspace.repository / "module"
+        module.mkdir()
+        (module / ".git").write_text("gitdir: ../metadata", encoding="utf-8")
+        (module / "visible.txt").write_text("visible", encoding="utf-8")
+
+        files = []
+        cursor = None
+        while True:
+            page = self.io.list_files(max_entries=1, cursor=cursor, max_scanned_entries=2)
+            files.extend(page["files"])
+            cursor = page["nextCursor"]
+            if cursor is None:
+                break
+
+        self.assertEqual(["module/visible.txt"], files)
+        self.assertFalse(any(part == ".git" for path in files for part in Path(path).parts))
+
+    def test_listing_cursor_completion_and_eviction_close_resources(self):
+        for index in range(5):
+            (self.workspace.repository / f"item-{index}.txt").write_text(
+                str(index), encoding="utf-8"
+            )
+        io = WorkspaceIO(
+            self.workspace,
+            self.trace,
+            max_active_listing_cursors=2,
+        )
+
+        first_page = io.list_files(max_entries=1, max_scanned_entries=1)
+        completed_cursor = first_page["nextCursor"]
+        completed_state = io._listing_cursors[completed_cursor]
+        cursor = completed_cursor
+        while cursor is not None:
+            page = io.list_files(max_entries=10, cursor=cursor, max_scanned_entries=20)
+            cursor = page["nextCursor"]
+        self.assertNotIn(completed_cursor, io._listing_cursors)
+        self.assertIsNone(completed_state.iterator.gi_frame)
+        with self.assertRaisesRegex(ValueError, "completed listing cursor"):
+            io.list_files(cursor=completed_cursor)
+
+        first = io.list_files(max_entries=1, max_scanned_entries=1)["nextCursor"]
+        first_state = io._listing_cursors[first]
+        second = io.list_files(max_entries=1, max_scanned_entries=1)["nextCursor"]
+        third = io.list_files(max_entries=1, max_scanned_entries=1)["nextCursor"]
+        self.assertEqual(2, len(io._listing_cursors))
+        self.assertNotIn(first, io._listing_cursors)
+        self.assertIn(second, io._listing_cursors)
+        self.assertIn(third, io._listing_cursors)
+        self.assertIsNone(first_state.iterator.gi_frame)
+        with self.assertRaisesRegex(ValueError, "evicted"):
+            io.list_files(cursor=first)
+        for active_cursor in tuple(io._listing_cursors):
+            io._close_listing_cursor(active_cursor)
+        self.assertEqual({}, io._listing_cursors)
+
     def test_pre_intent_mutation_and_shell_are_enforced_and_late_capture_is_detected(self):
         changed = False
         journal = JournalLifecycle(

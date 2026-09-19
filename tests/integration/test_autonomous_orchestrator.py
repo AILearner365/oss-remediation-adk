@@ -480,6 +480,76 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
 
+    def test_cycle_one_outcome_status_does_not_terminate_recovery(self):
+        statuses = (
+            "FAILED",
+            "INCONCLUSIVE",
+            "BLOCKED",
+            "NO_CHANGE_REQUIRED",
+            "PARTIALLY_REMEDIATED",
+            "READY_FOR_INDEPENDENT_VALIDATION",
+        )
+        for status in statuses:
+            with self.subTest(status=status):
+                sessions = []
+
+                def factory(capabilities, model):
+                    session = _ScriptedAgentSession(
+                        capabilities,
+                        [("1.0", "1.5"), ("1.5", "2.0")],
+                        status,
+                    )
+                    sessions.append(session)
+                    return session
+
+                result = AutonomousRemediationOrchestrator(
+                    self._request(max_cycles=2),
+                    agent_session_factory=factory,
+                    scanner_factory=_FixtureScanner,
+                ).run()
+
+                self.assertTrue(result.validation.passed)
+                self.assertEqual(2, result.cycles_completed)
+                self.assertEqual(1, len(sessions))
+                self.assertEqual(2, len(sessions[0].messages))
+                continuation = sessions[0].messages[1]
+                self.assertIn("# Cycle 1 — Intent", continuation)
+                self.assertIn("# Cycle 1 — Outcome", continuation)
+                self.assertIn(f"`{status}`", continuation)
+                self.assertIn("Execution completed and is ready for deterministic checks.", continuation)
+                self.assertIn("# Cycle 1 — Deterministic Validation", continuation)
+                self.assertIn("New deterministic validation evidence", continuation)
+                self.assertIn("original remediation objective, constraints, and completion criteria", continuation)
+                self.assertIn('"prohibit_suppressions": true', continuation)
+                self.assertEqual(
+                    Path(result.baseline.repository_path),
+                    sessions[0].capabilities.workspace_io.workspace.repository,
+                )
+
+    def test_operational_tool_budget_prevents_another_cycle(self):
+        sessions = []
+        request = self._request(max_cycles=2)
+        request = replace(
+            request,
+            budget=replace(request.budget, max_tool_calls=1),
+        )
+
+        result = AutonomousRemediationOrchestrator(
+            request,
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _ScriptedAgentSession(
+                    capabilities,
+                    [("1.0", "1.5"), ("1.5", "2.0")],
+                    "FAILED",
+                )
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(1, result.cycles_completed)
+        self.assertEqual(1, len(sessions[0].messages))
+        self.assertEqual("Configured operational budget reached", result.reason)
+
     def test_working_state_is_generated_without_model_authorship(self):
         sessions = []
         result = AutonomousRemediationOrchestrator(
