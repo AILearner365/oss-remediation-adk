@@ -4,6 +4,9 @@ import unittest
 
 from autonomous_oss_remediation_agent.models import (
     CommandResult,
+    DecisionAction,
+    DecisionRecord,
+    DecisionState,
     RepositoryCycleEvidence,
     ScanReport,
     ValidationCheck,
@@ -52,6 +55,14 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("strategy or hypothesis", AGENT_INSTRUCTION)
         self.assertIn("Revise or replace it whenever evidence warrants", AGENT_INSTRUCTION)
         self.assertIn("Do not provide hidden chain-of-thought", AGENT_INSTRUCTION)
+
+    def test_instruction_defines_material_decision_and_self_validation_protocol(self):
+        self.assertIn("Material decision protocol", AGENT_INSTRUCTION)
+        self.assertIn("do not invent artificial alternatives", AGENT_INSTRUCTION)
+        self.assertIn("call `record_decision` with action `SELECT`", AGENT_INSTRUCTION)
+        self.assertIn("READY_FOR_INDEPENDENT_VALIDATION", AGENT_INSTRUCTION)
+        self.assertIn("Independent deterministic validation remains authoritative", AGENT_INSTRUCTION)
+        self.assertIn("Do not record routine navigation", AGENT_INSTRUCTION)
 
     def test_failed_validation_feedback_preserves_objective_and_prior_strategy(self):
         prior_state = (
@@ -111,6 +122,37 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
 
         self.assertIn('"fixedVersions": []', feedback)
         self.assertNotIn("NO_SAFE_REMEDIATION", feedback)
+
+    def test_failed_validation_feedback_includes_decision_context_and_requires_reconciliation(self):
+        decision = DecisionRecord(
+            decision_id="D2",
+            cycle=1,
+            action=DecisionAction.READY_FOR_INDEPENDENT_VALIDATION,
+            diagnosis="Implementation appears complete",
+            strategy="Apply and verify the selected compatible change",
+            rationale="Local evidence supported all criteria",
+            evidence=("focused tests passed",),
+            coverage={"satisfied": ("build",), "conditional": (), "unresolved": ()},
+            assumptions=(),
+            validation=("focused tests passed",),
+            previous_decision_id="D1",
+        )
+
+        feedback = validation_feedback(
+            _validation_report(),
+            "WORKING_STATE\n- Unresolved: independent validation",
+            DecisionState.from_record(decision),
+            (decision,),
+        )
+
+        self.assertIn("reconcile any contradiction", feedback)
+        self.assertIn("implementation defect", feedback)
+        self.assertIn("strategy deficiency", feedback)
+        self.assertIn("environmental/tooling problem", feedback)
+        self.assertIn('"latestDecisionId": "D2"', feedback)
+        self.assertIn('"previousSelfValidationConclusion"', feedback)
+        self.assertIn('"action": "READY_FOR_INDEPENDENT_VALIDATION"', feedback)
+        self.assertIn("Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`", feedback)
 
 
 def _validation_report() -> ValidationReport:

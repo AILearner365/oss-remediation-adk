@@ -4,7 +4,7 @@ import json
 import re
 
 from .config import RemediationRequest
-from .models import RepositoryBaseline, ValidationReport
+from .models import DecisionRecord, DecisionState, RepositoryBaseline, ValidationReport
 
 
 _WORKING_STATE_HEADER = re.compile(
@@ -21,11 +21,9 @@ Investigate the repository and remediate the requested vulnerabilities directly.
 Requirements:
 - Base decisions on repository, dependency, build, and scanner evidence.
 - Respect every supplied constraint.
-- Treat supplied version policies solely as remediation boundaries, not instructions to upgrade or select a particular dependency-management layer. An exact required version constrains the outcome but does not prescribe how to achieve it.
 - Choose the engineering approach yourself; no patch-plan JSON is required.
-- Do not use vulnerability-specific recipes from this prompt. When choosing a remediation, inspect how affected dependency versions are managed by the repository, including relevant parents, imported BOMs, properties, and existing `dependencyManagement`. Use that structure as engineering evidence, avoid redundant or unnecessary lower-level overrides, and retain discretion to use a lower-level override when repository evidence supports it. Do not treat these management layers as a required remediation order or hierarchy.
-- When multiple safe remediations are available, prefer the approach that best preserves the repository's existing dependency-management model, minimizes fragmented version control, and avoids unnecessary explicit overrides. Favor maintainable, coherent changes over a larger set of isolated dependency pins, while retaining discretion to use targeted overrides when repository, compatibility, build, or validation evidence supports them.
-- Do not choose a remediation solely because it is the fastest path to a passing scan; also consider maintainability, dependency ownership, and consistency with the project's existing version-management approach.
+- Treat supplied policies as outcome boundaries, not instructions to use a particular implementation technique.
+- Do not use vulnerability-specific or technology-specific recipes from this prompt.
 - Do not install, replace, or select vulnerability scanners. Deterministic code owns scanning.
 - Do not obtain credentials, push branches, or create pull requests. Deterministic delivery owns those actions.
 - Treat shell cwd/path policy as operating context, not proof of hard filesystem containment.
@@ -34,6 +32,20 @@ Requirements:
 - Treat scanner-provided fixed versions and fixed-version expressions as evidence, not required remediation targets. Empty fixed-version evidence does not prove remediation is impossible, and ambiguous ranges must not be converted into guessed concrete versions.
 - Maintain a concise model-owned working state across turns: current understanding, strategy or hypothesis, assumptions being tested, meaningful progress, and unresolved work. Revise or replace it whenever evidence warrants. This is engineering continuity, not a rigid patch plan or prescribed sequence.
 - Do not provide hidden chain-of-thought or detailed private reasoning. Record only concise engineering state that is useful for the next work cycle.
+
+Material decision protocol:
+1. Establish the problem, complete success criteria, scope, and constraints.
+2. Gather relevant evidence before selecting a solution.
+3. Identify only materially credible candidate approaches; do not invent artificial alternatives.
+4. Evaluate credible candidates against requirement coverage, constraints, evidence, compatibility and engineering risk, maintainability, unresolved assumptions, and ability to validate.
+5. Select one approach or a justified combination.
+6. Before consequential implementation changes, call `record_decision` with action `SELECT` and the concise observable engineering decision.
+7. Implement the selected strategy, then compare new evidence against its coverage, assumptions, validation plan, and success criteria.
+8. When evidence materially affects the strategy, decide whether to `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`, and call `record_decision` before continuing under that decision.
+9. Self-validate the complete solution with available tools. If self-validation finds a resolvable problem, keep investigating and correcting it within the same cycle rather than knowingly submitting incomplete work for the external validator to rediscover.
+10. Finish a work cycle only after recording `READY_FOR_INDEPENDENT_VALIDATION` when evidence supports every success criterion, or `BLOCK` when a concrete blocker prevents completion or verification. Independent deterministic validation remains authoritative and is not replaced by self-validation.
+
+A decision is material when choosing differently could change coverage, technical direction, compatibility, risk, maintainability, permitted scope, validation outcome, or the next meaningful action. Do not record routine navigation, searches, ordinary command selection, formatting, repeated observations, or low-level implementation steps that do not change strategy. Candidate approaches may be classified `COMPLETE`, `PARTIAL`, `CONDITIONAL`, or `NOT_VIABLE`; alternatives are not required when they add no value, including final readiness.
 
 When you have completed a useful work cycle, summarize what you changed and why, followed by a concise `WORKING_STATE` covering understanding, current strategy/hypothesis, assumptions, progress, and unresolved work. If repository evidence shows no safe remediation can satisfy the supplied constraints, respond with `NO_SAFE_REMEDIATION:` followed by the evidence-based reason.
 """.strip()
@@ -59,7 +71,7 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
     return (
         "Begin the first autonomous remediation work cycle in the prepared repository. "
         "The objective, constraints, and completion criteria below are the stable run contract for every turn. "
-        "Use tools to investigate and modify the repository, maintain your concise WORKING_STATE, then end the turn for deterministic validation.\n\n"
+        "Use tools to investigate and modify the repository, record material decisions, maintain your concise WORKING_STATE, then end the turn for deterministic validation.\n\n"
         + json.dumps(payload, indent=2, sort_keys=True)
     )
 
@@ -84,7 +96,12 @@ def extract_working_state(turn_text: str) -> str:
     )
 
 
-def validation_feedback(report: ValidationReport, prior_working_state: str) -> str:
+def validation_feedback(
+    report: ValidationReport,
+    prior_working_state: str,
+    decision_state: DecisionState | None = None,
+    decision_trail: tuple[DecisionRecord, ...] = (),
+) -> str:
     failed_checks = []
     for check in report.checks:
         if check.passed:
@@ -133,12 +150,27 @@ def validation_feedback(report: ValidationReport, prior_working_state: str) -> s
         "cycleEvidence": report.cycle_evidence.to_dict() if report.cycle_evidence else None,
         "scan": scan,
     }
+    decision_context = {
+        "currentDecisionState": decision_state.to_dict() if decision_state else None,
+        "recentMaterialDecisions": [decision.to_dict() for decision in decision_trail],
+        "previousSelfValidationConclusion": (
+            {
+                "action": decision_state.current_action.value,
+                "status": decision_state.status,
+                "validation": list(decision_state.current_validation),
+            }
+            if decision_state
+            else None
+        ),
+    }
     return (
         "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
-        "Relate the evidence to your previous strategy and actions. Determine what it supports, contradicts, or leaves unresolved; preserve useful progress; reconsider unsupported assumptions or unsuccessful approaches when appropriate; decide whether to continue, modify, or replace your strategy; then continue investigation and remediation with the available developer capabilities. Do not restart by default, and do not assume a particular dependency, version, management layer, file, or remediation technique.\n\n"
+        "Relate the evidence to your previous strategy and actions; determine what it supports, contradicts, or leaves unresolved; and reconcile any contradiction between your prior decision/self-validation and the authoritative result before making material corrective changes. Determine whether the failure is an implementation defect, incomplete coverage, invalid assumption, strategy deficiency, constraint conflict, or environmental/tooling problem. Decide whether to continue, modify, or replace your strategy. Preserve useful progress, but do not default to extending the prior implementation when revision or replacement is better supported. Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK` with `record_decision` before continuing under that decision. Do not assume a particular technology, dependency, version, management layer, file, or remediation technique.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "Previous model-owned working state:\n"
         + prior_working_state
+        + "\n\nCurrent material decision context:\n"
+        + json.dumps(decision_context, indent=2, sort_keys=True)
         + "\n\nNew deterministic validation evidence:\n"
         + json.dumps(evidence, indent=2, sort_keys=True)
     )

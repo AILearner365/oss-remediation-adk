@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Callable
 
 from .agent import AgentSession, default_agent_session_factory
 from .capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from .capabilities.execution import BudgetExceeded
+from .capabilities.decisions import DecisionTracker
 from .capabilities.policy import evaluate_runtime_boundary
 from .config import RemediationRequest, ScannerConfig
 from .deterministic.constraints import ConstraintEvaluator
@@ -64,11 +66,13 @@ class AutonomousRemediationOrchestrator:
         self.delivery_adapter_factory = delivery_adapter_factory
         self.agent_session_factory = agent_session_factory
         self.scanner_factory = scanner_factory
+        self._decision_tracker: DecisionTracker | None = None
 
     def run(self) -> RunResult:
         return asyncio.run(self.run_async())
 
     async def run_async(self) -> RunResult:
+        self._decision_tracker = None
         workspace = RunWorkspace.create(self.request.workspace_parent)
         trace = TraceStore(workspace)
         trace.write_json("request.json", self.request.to_dict())
@@ -161,6 +165,7 @@ class AutonomousRemediationOrchestrator:
 
         workspace_io = WorkspaceIO(workspace, trace)
         capabilities = DeveloperCapabilitySet(workspace_io, process_runner, budget, trace)
+        self._decision_tracker = capabilities.decisions
         agent_session = self.agent_session_factory(capabilities, self.request.model)
         validator = DeterministicValidator(
             self.request,
@@ -177,15 +182,49 @@ class AutonomousRemediationOrchestrator:
         try:
             for cycle in range(1, self.request.budget.max_cycles + 1):
                 budget.ensure_time_remaining()
+                capabilities.start_cycle(cycle)
                 validator.capture_cycle_start(cycle, baseline)
                 turn = await agent_session.run_turn(message)
                 summaries.append(turn.text)
                 working_state = extract_working_state(turn.text)
+                decision_state = capabilities.decisions.current_state
+                decision_trail = capabilities.decisions.records_for_cycle(cycle)
+                cycle_artifact: dict[str, object] = {
+                    "summary": turn.text,
+                    "workingState": working_state,
+                }
+                if decision_state is not None:
+                    cycle_artifact["decisionState"] = decision_state.to_dict()
+                    cycle_artifact["decisionTrail"] = [
+                        decision.to_dict() for decision in decision_trail
+                    ]
                 trace.write_json(
                     f"agent/cycle-{cycle}.json",
-                    {"summary": turn.text, "workingState": working_state},
+                    cycle_artifact,
                 )
+                if not decision_trail:
+                    capabilities.decisions.warn(
+                        cycle,
+                        "No material decision was recorded during the agent cycle",
+                    )
                 last_validation = validator.validate(cycle, baseline)
+                if (
+                    decision_state is not None
+                    and decision_state.status == "READY"
+                    and not last_validation.passed
+                ):
+                    capabilities.decisions.warn(
+                        cycle,
+                        "Agent readiness decision contradicted deterministic validation",
+                        decisionId=decision_state.latest_decision_id,
+                    )
+                elif last_validation.passed and (
+                    decision_state is None or decision_state.status != "READY"
+                ):
+                    capabilities.decisions.warn(
+                        cycle,
+                        "Deterministic validation passed without a current readiness decision",
+                    )
                 if _is_scanner_infrastructure_failure(last_validation.scan):
                     await agent_session.close()
                     agent_closed = True
@@ -244,7 +283,12 @@ class AutonomousRemediationOrchestrator:
                     )
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     break
-                message = validation_feedback(last_validation, working_state)
+                message = validation_feedback(
+                    last_validation,
+                    working_state,
+                    capabilities.decisions.current_state,
+                    capabilities.decisions.recent_records(),
+                )
         except BudgetExceeded as exc:
             reason = str(exc)
         except Exception as exc:
@@ -316,8 +360,13 @@ class AutonomousRemediationOrchestrator:
         requested_ids = {value.upper() for value in self.request.vulnerability_ids}
         return not requested_ids or bool(requested_ids & finding.identifiers)
 
-    @staticmethod
-    def _finish(trace: TraceStore, result: RunResult) -> RunResult:
+    def _finish(self, trace: TraceStore, result: RunResult) -> RunResult:
+        if self._decision_tracker and self._decision_tracker.current_state is not None:
+            result = replace(
+                result,
+                final_decision_state=self._decision_tracker.current_state,
+                decision_event_count=self._decision_tracker.event_count,
+            )
         trace.write_json("final-result.json", result.to_dict())
         trace.append_event("run_finished", outcome=result.outcome.value, reason=result.reason)
         return result

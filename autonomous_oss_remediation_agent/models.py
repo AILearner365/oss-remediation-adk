@@ -33,6 +33,107 @@ class ScanFailureKind(str, Enum):
     BACKEND = "BACKEND"
 
 
+class DecisionAction(str, Enum):
+    SELECT = "SELECT"
+    RETAIN = "RETAIN"
+    EXTEND = "EXTEND"
+    REVISE = "REVISE"
+    REPLACE = "REPLACE"
+    READY_FOR_INDEPENDENT_VALIDATION = "READY_FOR_INDEPENDENT_VALIDATION"
+    BLOCK = "BLOCK"
+
+
+class CandidateClassification(str, Enum):
+    COMPLETE = "COMPLETE"
+    PARTIAL = "PARTIAL"
+    CONDITIONAL = "CONDITIONAL"
+    NOT_VIABLE = "NOT_VIABLE"
+
+
+@dataclass(frozen=True)
+class DecisionRecord:
+    decision_id: str
+    cycle: int
+    action: DecisionAction
+    diagnosis: str
+    strategy: str
+    rationale: str
+    evidence: tuple[str, ...]
+    coverage: dict[str, tuple[str, ...]]
+    assumptions: tuple[dict[str, str], ...]
+    validation: tuple[str, ...]
+    previous_decision_id: str | None = None
+    alternatives: tuple[dict[str, Any], ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "decisionId": self.decision_id,
+            "cycle": self.cycle,
+            "action": self.action.value,
+            "diagnosis": self.diagnosis,
+            "strategy": self.strategy,
+            "rationale": self.rationale,
+            "evidence": list(self.evidence),
+            "coverage": {name: list(values) for name, values in self.coverage.items()},
+            "assumptions": [dict(value) for value in self.assumptions],
+            "validation": list(self.validation),
+            "previousDecisionId": self.previous_decision_id,
+            "alternatives": [dict(value) for value in self.alternatives],
+        }
+
+
+@dataclass(frozen=True)
+class DecisionState:
+    latest_decision_id: str
+    current_action: DecisionAction
+    active_strategy: str
+    current_diagnosis: str
+    current_coverage: dict[str, tuple[str, ...]]
+    active_assumptions: tuple[dict[str, str], ...]
+    remaining_unresolved_items: tuple[str, ...]
+    current_validation: tuple[str, ...]
+    status: str
+
+    @classmethod
+    def from_record(cls, record: DecisionRecord) -> "DecisionState":
+        status = "IN_PROGRESS"
+        if record.action == DecisionAction.READY_FOR_INDEPENDENT_VALIDATION:
+            status = "READY"
+        elif record.action == DecisionAction.BLOCK:
+            status = "BLOCKED"
+        remaining_items = tuple(
+            dict.fromkeys(
+                (*record.coverage.get("conditional", ()), *record.coverage.get("unresolved", ()))
+            )
+        )
+        return cls(
+            latest_decision_id=record.decision_id,
+            current_action=record.action,
+            active_strategy=record.strategy,
+            current_diagnosis=record.diagnosis,
+            current_coverage=dict(record.coverage),
+            active_assumptions=record.assumptions,
+            remaining_unresolved_items=remaining_items,
+            current_validation=record.validation,
+            status=status,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "latestDecisionId": self.latest_decision_id,
+            "currentAction": self.current_action.value,
+            "activeStrategy": self.active_strategy,
+            "currentDiagnosis": self.current_diagnosis,
+            "currentCoverage": {
+                name: list(values) for name, values in self.current_coverage.items()
+            },
+            "activeAssumptions": [dict(value) for value in self.active_assumptions],
+            "remainingUnresolvedItems": list(self.remaining_unresolved_items),
+            "currentValidation": list(self.current_validation),
+            "status": self.status,
+        }
+
+
 @dataclass(frozen=True)
 class CommandResult:
     command: list[str]
@@ -325,9 +426,11 @@ class RunResult:
     delivery: DeliveryResult | None = None
     cycles_completed: int = 0
     agent_summaries: tuple[str, ...] = ()
+    final_decision_state: DecisionState | None = None
+    decision_event_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "outcome": self.outcome.value,
             "reason": self.reason,
             "workspaceRoot": self.workspace_root,
@@ -337,6 +440,10 @@ class RunResult:
             "cyclesCompleted": self.cycles_completed,
             "agentSummaries": list(self.agent_summaries),
         }
+        if self.final_decision_state is not None:
+            result["finalDecisionState"] = self.final_decision_state.to_dict()
+            result["decisionEventCount"] = self.decision_event_count
+        return result
 
 
 def relative_to_string(path: str | Path) -> str:

@@ -164,6 +164,47 @@ class _ScriptedAgentSession:
         self.closed = True
 
 
+class _DecisionAwareAgentSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits):
+        super().__init__(capabilities, edits)
+        self.latest_decision_id = None
+
+    async def run_turn(self, message):
+        cycle = len(self.messages) + 1
+        action = "SELECT" if cycle == 1 else "REVISE"
+        decision = self._record(action, f"cycle {cycle} strategy")
+        self.latest_decision_id = decision["decision"]["decisionId"]
+        turn = await super().run_turn(message)
+        readiness = self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            f"cycle {cycle} self-validation complete",
+        )
+        self.latest_decision_id = readiness["decision"]["decisionId"]
+        return turn
+
+    def _record(self, action, strategy):
+        return self.capabilities.record_decision(
+            action=action,
+            diagnosis="The target finding requires a compatible repository change",
+            strategy=strategy,
+            rationale="Repository and validation evidence support this direction",
+            evidence=["fixture repository evidence"],
+            coverage_satisfied=["requested repository change"],
+            coverage_conditional=[],
+            coverage_unresolved=["independent deterministic validation"],
+            assumptions=[
+                {
+                    "assumption": "The edited value controls the fixture result",
+                    "test": "Run deterministic fixture validation",
+                    "status": "TESTED",
+                }
+            ],
+            validation=["fixture self-check complete"],
+            previous_decision_id=self.latest_decision_id,
+            alternatives=[],
+        )
+
+
 class _FailingAgentSession:
     async def run_turn(self, message):
         raise RuntimeError("model service unavailable")
@@ -294,6 +335,98 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+
+    def test_decision_state_flows_through_cycle_continuation_and_final_artifacts(self):
+        sessions = []
+
+        def factory(capabilities, model):
+            session = _DecisionAwareAgentSession(
+                capabilities, [("1.0", "1.5"), ("1.5", "2.0")]
+            )
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=3),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(4, result.decision_event_count)
+        self.assertEqual("D4", result.final_decision_state.latest_decision_id)
+        self.assertIn('"latestDecisionId": "D2"', sessions[0].messages[1])
+        self.assertIn('"previousSelfValidationConclusion"', sessions[0].messages[1])
+        self.assertIn("New deterministic validation evidence", sessions[0].messages[1])
+        self.assertLess(len(sessions[0].messages[1]), 25_000)
+        workspace_root = Path(result.workspace_root)
+        cycle_one = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        cycle_two = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertIn("cycle 1 complete", cycle_one["summary"])
+        self.assertIn("strategy-1", cycle_one["workingState"])
+        self.assertEqual("D2", cycle_one["decisionState"]["latestDecisionId"])
+        self.assertEqual(["D1", "D2"], [item["decisionId"] for item in cycle_one["decisionTrail"]])
+        self.assertEqual(["D3", "D4"], [item["decisionId"] for item in cycle_two["decisionTrail"]])
+        self.assertNotIn("timestamp", cycle_one["decisionTrail"][0])
+        self.assertNotIn("type", cycle_one["decisionTrail"][0])
+        final_result = json.loads(
+            (workspace_root / "artifacts" / "final-result.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(4, final_result["decisionEventCount"])
+        self.assertEqual("D4", final_result["finalDecisionState"]["latestDecisionId"])
+        events = [
+            json.loads(line)
+            for line in (workspace_root / "artifacts" / "events.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        decisions = [event for event in events if event["type"] == "decision_recorded"]
+        self.assertEqual(4, len(decisions))
+        warnings = [event for event in events if event["type"] == "decision_warning"]
+        self.assertTrue(
+            any("contradicted deterministic validation" in event["warning"] for event in warnings)
+        )
+
+    def test_no_decision_events_preserves_legacy_cycle_and_final_shapes(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _UnstructuredAgentSession(),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        workspace_root = Path(result.workspace_root)
+        cycle = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        final_result = json.loads(
+            (workspace_root / "artifacts" / "final-result.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual({"summary", "workingState"}, set(cycle))
+        self.assertNotIn("finalDecisionState", final_result)
+        self.assertNotIn("decisionEventCount", final_result)
+        events = [
+            json.loads(line)
+            for line in (workspace_root / "artifacts" / "events.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        self.assertTrue(
+            any(
+                event["type"] == "decision_warning"
+                and "No material decision" in event["warning"]
+                for event in events
+            )
+        )
 
     def test_missing_working_state_uses_bounded_fallback_without_failing_run(self):
         session = _UnstructuredAgentSession()

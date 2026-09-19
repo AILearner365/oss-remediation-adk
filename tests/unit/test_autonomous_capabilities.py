@@ -167,7 +167,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
     def test_adk_tool_surface_matches_capability_categories(self):
         tools = self.capabilities.adk_tools()
         self.assertEqual(
-            {"read_workspace_text", "edit_workspace_text", "run_workspace_shell"},
+            {"read_workspace_text", "edit_workspace_text", "run_workspace_shell", "record_decision"},
             {tool.name for tool in tools},
         )
 
@@ -175,7 +175,14 @@ class AutonomousCapabilityTests(unittest.TestCase):
         agent = create_remediation_agent(self.capabilities, "gemini-2.5-flash")
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
         names = {tool.name for tool in agent.tools}
-        self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
+        self.assertTrue(
+            {
+                "read_workspace_text",
+                "edit_workspace_text",
+                "run_workspace_shell",
+                "record_decision",
+            }.issubset(names)
+        )
 
     def test_new_package_has_no_reference_agent_imports(self):
         package_root = Path(__file__).resolve().parents[2] / "autonomous_oss_remediation_agent"

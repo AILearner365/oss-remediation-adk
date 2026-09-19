@@ -5,6 +5,7 @@ from typing import Any
 from google.adk.tools.function_tool import FunctionTool
 
 from ..workspace import TraceStore
+from .decisions import DecisionTracker
 from .execution import BudgetExceeded, ExecutionBudget, ProcessRunner
 from .workspace_io import WorkspaceIO
 
@@ -21,6 +22,7 @@ class DeveloperCapabilitySet:
         self.process_runner = process_runner
         self.budget = budget
         self.trace = trace
+        self.decisions = DecisionTracker(trace)
 
     def read_workspace_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
         """Read a bounded UTF-8 text range from a repository-relative path."""
@@ -58,17 +60,54 @@ class DeveloperCapabilitySet:
         )
         return result.to_dict() if hasattr(result, "to_dict") else result
 
+    def record_decision(
+        self,
+        action: str,
+        diagnosis: str,
+        strategy: str,
+        rationale: str,
+        evidence: list[str],
+        coverage_satisfied: list[str],
+        coverage_conditional: list[str],
+        coverage_unresolved: list[str],
+        assumptions: list[dict[str, str]],
+        validation: list[str],
+        previous_decision_id: str | None = None,
+        alternatives: list[dict[str, str]] | None = None,
+    ) -> dict[str, Any]:
+        """Record one material engineering decision without modifying or executing the repository."""
+        return self._invoke(
+            "record_decision",
+            self.decisions.record,
+            action=action,
+            diagnosis=diagnosis,
+            strategy=strategy,
+            rationale=rationale,
+            evidence=evidence,
+            coverage_satisfied=coverage_satisfied,
+            coverage_conditional=coverage_conditional,
+            coverage_unresolved=coverage_unresolved,
+            assumptions=assumptions,
+            validation=validation,
+            previous_decision_id=previous_decision_id,
+            alternatives=alternatives,
+        )
+
+    def start_cycle(self, cycle: int) -> None:
+        self.decisions.start_cycle(cycle)
+
     def adk_tools(self) -> list[FunctionTool]:
         return [
             FunctionTool(self.read_workspace_text),
             FunctionTool(self.edit_workspace_text),
             FunctionTool(self.run_workspace_shell),
+            FunctionTool(self.record_decision),
         ]
 
-    def _invoke(self, name: str, function: Any, *args: Any) -> Any:
+    def _invoke(self, name: str, function: Any, *args: Any, **kwargs: Any) -> Any:
         try:
             self.budget.consume_tool_call()
-            return function(*args)
+            return function(*args, **kwargs)
         except BudgetExceeded as exc:
             self.trace.append_event("tool_budget_exceeded", tool=name, error=str(exc))
             return {"status": "error", "error": str(exc), "failureCode": "EXECUTION_BUDGET_EXCEEDED"}
