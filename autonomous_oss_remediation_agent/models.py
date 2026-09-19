@@ -56,6 +56,13 @@ class AgentDecisionStatus(str, Enum):
     BLOCKED = "BLOCKED"
 
 
+class DecisionCaptureStatus(str, Enum):
+    COMPLETE = "COMPLETE"
+    LATE = "LATE"
+    INCOMPLETE = "INCOMPLETE"
+    MISSING = "MISSING"
+
+
 class DeterministicValidationStatus(str, Enum):
     NOT_RUN = "NOT_RUN"
     PASSED = "PASSED"
@@ -85,6 +92,7 @@ class DecisionRecord:
     validation: tuple[str, ...]
     previous_decision_id: str | None = None
     alternatives: tuple[dict[str, Any], ...] = ()
+    workspace_edit_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -100,6 +108,7 @@ class DecisionRecord:
             "validation": list(self.validation),
             "previousDecisionId": self.previous_decision_id,
             "alternatives": [dict(value) for value in self.alternatives],
+            "workspaceEditCount": self.workspace_edit_count,
         }
 
 
@@ -152,6 +161,30 @@ class DecisionState:
             "remainingUnresolvedItems": list(self.remaining_unresolved_items),
             "currentValidation": list(self.current_validation),
             "agentStatus": self.agent_status.value,
+        }
+
+
+@dataclass(frozen=True)
+class DecisionCaptureAssessment:
+    status: DecisionCaptureStatus
+    workspace_edit_count: int
+    first_select_workspace_edit_count: int | None
+    latest_decision_workspace_edit_count: int | None
+    terminal_decision_recorded: bool
+    reasons: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "status": self.status.value,
+            "workspaceEditCount": self.workspace_edit_count,
+            "firstSelectWorkspaceEditCount": self.first_select_workspace_edit_count,
+            "latestDecisionWorkspaceEditCount": self.latest_decision_workspace_edit_count,
+            "terminalDecisionRecorded": self.terminal_decision_recorded,
+            "reasons": list(self.reasons),
+            "mutationOrderingCoverage": {
+                "workspaceEditCapability": "TRACKED",
+                "shellCommands": "NOT_DETECTED",
+            },
         }
 
 
@@ -401,6 +434,7 @@ class ValidationReport:
     delivery_eligible: bool = True
     warnings: tuple[str, ...] = ()
     cycle_evidence: RepositoryCycleEvidence | None = None
+    diagnostic_artifacts: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -414,6 +448,7 @@ class ValidationReport:
             "deliveryEligible": self.delivery_eligible,
             "warnings": list(self.warnings),
             "cycleEvidence": self.cycle_evidence.to_dict() if self.cycle_evidence else None,
+            "diagnosticArtifacts": list(self.diagnostic_artifacts),
         }
 
 
@@ -466,6 +501,9 @@ class RunResult:
     agent_summaries: tuple[str, ...] = ()
     final_decision_state: FinalDecisionState | None = None
     decision_event_count: int = 0
+    decision_capture: DecisionCaptureAssessment | None = None
+    deterministic_validation_status: DeterministicValidationStatus | None = None
+    effective_resolution_status: EffectiveResolutionStatus | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -481,6 +519,15 @@ class RunResult:
         if self.final_decision_state is not None:
             result["finalDecisionState"] = self.final_decision_state.to_dict()
             result["decisionEventCount"] = self.decision_event_count
+        if self.decision_capture is not None:
+            result["decisionCaptureStatus"] = self.decision_capture.status.value
+            result["decisionCapture"] = self.decision_capture.to_dict()
+        if self.deterministic_validation_status is not None:
+            result["deterministicValidationStatus"] = (
+                self.deterministic_validation_status.value
+            )
+        if self.effective_resolution_status is not None:
+            result["effectiveResolutionStatus"] = self.effective_resolution_status.value
         return result
 
 

@@ -1,8 +1,0 @@
-Welcome to Cloud Shell! Type "help" to get started.
-To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
-You can view your projects by running `gcloud projects list`.
-./task-service/pom.xml
-./task-common/pom.xml
-./task-web/pom.xml
-./pom.xml
-./task-domain/pom.xml

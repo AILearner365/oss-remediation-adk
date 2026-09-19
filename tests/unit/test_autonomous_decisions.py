@@ -14,6 +14,7 @@ from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, Runti
 from autonomous_oss_remediation_agent.models import (
     AgentDecisionStatus,
     CommandResult,
+    DecisionCaptureStatus,
     ScanReport,
     ValidationCheck,
     ValidationReport,
@@ -51,6 +52,89 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual("decision-run", self._decision_events()[0]["runId"])
         self.assertEqual(before, self.repository_file.read_text(encoding="utf-8"))
         self.assertEqual(1, len(self._decision_events()))
+
+    def test_select_before_edits_and_terminal_snapshot_can_be_complete(self):
+        self._record("SELECT")
+        self.capabilities.edit_workspace_text(
+            "replace",
+            "pom.xml",
+            old_text="<project/>",
+            new_text="<project><version>2</version></project>",
+        )
+        self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=["observed: build and focused checks passed"],
+        )
+
+        assessment = self.capabilities.decisions.capture_assessment
+
+        self.assertEqual(DecisionCaptureStatus.COMPLETE, assessment.status)
+        self.assertEqual(1, assessment.workspace_edit_count)
+        self.assertEqual(0, assessment.first_select_workspace_edit_count)
+        self.assertEqual(1, assessment.latest_decision_workspace_edit_count)
+
+    def test_select_after_edit_remains_late_after_terminal_reconciliation(self):
+        self.capabilities.edit_workspace_text(
+            "replace",
+            "pom.xml",
+            old_text="<project/>",
+            new_text="<project><version>2</version></project>",
+        )
+        selected = self._record("SELECT")
+        ready = self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=["observed: build and focused checks passed"],
+        )
+
+        assessment = self.capabilities.decisions.capture_assessment
+
+        self.assertEqual(1, selected["decision"]["workspaceEditCount"])
+        self.assertEqual(1, ready["decision"]["workspaceEditCount"])
+        self.assertEqual(DecisionCaptureStatus.LATE, assessment.status)
+        self.assertIn("after a workspace edit", " ".join(assessment.reasons))
+
+    def test_missing_and_nonterminal_capture_statuses_are_distinct(self):
+        self.assertEqual(
+            DecisionCaptureStatus.MISSING,
+            self.capabilities.decisions.capture_assessment.status,
+        )
+
+        self._record("SELECT")
+
+        assessment = self.capabilities.decisions.capture_assessment
+        self.assertEqual(DecisionCaptureStatus.INCOMPLETE, assessment.status)
+        self.assertFalse(assessment.terminal_decision_recorded)
+
+    def test_failed_validation_requires_a_later_decision_update(self):
+        self._record("SELECT")
+        self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=["observed: local validation passed"],
+        )
+        self.assertEqual(
+            DecisionCaptureStatus.COMPLETE,
+            self.capabilities.decisions.capture_assessment.status,
+        )
+
+        self.capabilities.decisions.require_update_after_failed_validation(1)
+
+        assessment = self.capabilities.decisions.capture_assessment
+        self.assertEqual(DecisionCaptureStatus.INCOMPLETE, assessment.status)
+        self.assertIn("failed deterministic validation", " ".join(assessment.reasons))
+        self._record("REVISE")
+        self.assertEqual(
+            DecisionCaptureStatus.INCOMPLETE,
+            self.capabilities.decisions.capture_assessment.status,
+        )
 
     def test_complete_extend_snapshot_repeats_retained_and_new_coverage(self):
         self._record(
@@ -99,6 +183,29 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertTrue(
             any(event["type"] == "decision_warning" for event in self._events())
         )
+
+    def test_readiness_warns_for_unresolved_assumptions_planned_checks_and_errors(self):
+        self._record("SELECT")
+
+        result = self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[
+                {
+                    "assumption": "The scanner result is reliable",
+                    "test": "planned: rerun the scanner",
+                    "status": "PENDING",
+                }
+            ],
+            evidence=["observed: scanner error occurred"],
+            validation=["planned: rerun build and scanner"],
+        )
+
+        warnings = " ".join(result["warnings"])
+        self.assertIn("assumptions remain explicitly unresolved", warnings)
+        self.assertIn("without observed self-validation evidence", warnings)
+        self.assertIn("without supporting recovery evidence", warnings)
 
     def test_block_without_unresolved_coverage_or_concrete_blocker_warns(self):
         self._record("SELECT")
@@ -248,6 +355,24 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.capabilities.read_workspace_text("pom.xml")
 
         self.assertEqual(1, self.budget.tool_calls)
+
+    def test_reconciliation_mode_blocks_operational_tools_without_budget_use(self):
+        before = self.repository_file.read_text(encoding="utf-8")
+        tool_calls_before = self.budget.tool_calls
+
+        with self.capabilities.decision_reconciliation_only():
+            edit = self.capabilities.edit_workspace_text(
+                "write", "blocked.txt", content="not allowed"
+            )
+            shell = self.capabilities.run_workspace_shell("git status --short")
+            decision = self._record("SELECT")
+
+        self.assertEqual("DECISION_RECONCILIATION_METADATA_ONLY", edit["failureCode"])
+        self.assertEqual("DECISION_RECONCILIATION_METADATA_ONLY", shell["failureCode"])
+        self.assertEqual("ok", decision["status"])
+        self.assertEqual(tool_calls_before, self.budget.tool_calls)
+        self.assertEqual(before, self.repository_file.read_text(encoding="utf-8"))
+        self.assertFalse((self.workspace.repository / "blocked.txt").exists())
 
     def test_decision_specific_limit_is_enforced_without_id_gap(self):
         capabilities, _ = self._new_capabilities(max_cycles=1)

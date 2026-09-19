@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -38,10 +39,16 @@ class DeterministicValidator:
         self.trace = trace
         self._cycle_starts: dict[int, _RepositoryState] = {}
         self._completed_cycle_digests: dict[int, str] = {}
+        self._initial_untracked_files: frozenset[str] | None = None
 
     def capture_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> None:
         changed_files, captured = self._capture_changed_files(baseline.commit)
         self._cycle_starts[cycle] = self._repository_state(changed_files, captured)
+        if self._initial_untracked_files is None:
+            untracked, succeeded = self._capture_untracked_files()
+            self._initial_untracked_files = (
+                frozenset(untracked) if succeeded else frozenset()
+            )
 
     def validate(self, cycle: int, baseline: RepositoryBaseline) -> ValidationReport:
         checks: list[ValidationCheck] = []
@@ -59,6 +66,17 @@ class DeterministicValidator:
             )
         )
         changed_files, status_succeeded = self._capture_changed_files(baseline.commit)
+        untracked_files, untracked_succeeded = self._capture_untracked_files()
+        introduced_untracked = set(untracked_files) - set(
+            self._initial_untracked_files or ()
+        )
+        diagnostic_artifacts = tuple(
+            sorted(
+                path
+                for path in introduced_untracked
+                if _looks_like_diagnostic_artifact(path)
+            )
+        )
         after_state = self._repository_state(changed_files, status_succeeded)
         before_state = self._cycle_starts.pop(cycle, after_state)
         cycle_evidence = self._cycle_evidence(cycle, before_state, after_state)
@@ -145,11 +163,24 @@ class DeterministicValidator:
             )
         )
         digest = self.tree_digest(changed_files)
-        delivery_eligible = not self.request.constraints.unenforced_constraints
-        warnings = tuple(
+        delivery_eligible = (
+            not self.request.constraints.unenforced_constraints
+            and untracked_succeeded
+            and not diagnostic_artifacts
+        )
+        warnings = [
             f"Constraint is not deterministically enforced: {constraint}"
             for constraint in self.request.constraints.unenforced_constraints
-        )
+        ]
+        if diagnostic_artifacts:
+            warnings.append(
+                "Automatic delivery withheld because newly introduced untracked diagnostic "
+                "artifacts remain: " + ", ".join(diagnostic_artifacts)
+            )
+        if not untracked_succeeded:
+            warnings.append(
+                "Automatic delivery withheld because untracked-file inspection failed"
+            )
         report = ValidationReport(
             cycle=cycle,
             passed=all(check.passed for check in checks),
@@ -159,8 +190,9 @@ class DeterministicValidator:
             tree_digest=digest,
             scan=scan_report,
             delivery_eligible=delivery_eligible,
-            warnings=warnings,
+            warnings=tuple(warnings),
             cycle_evidence=cycle_evidence,
+            diagnostic_artifacts=diagnostic_artifacts,
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
         self.trace.append_event("validation", cycle=cycle, passed=report.passed, treeDigest=digest)
@@ -295,6 +327,25 @@ class DeterministicValidator:
         )
         return tuple(sorted(set(paths))), True
 
+    def _capture_untracked_files(self) -> tuple[tuple[str, ...], bool]:
+        result = self.process_runner.run_argv(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z"],
+            cwd=self.workspace.repository,
+            source="git_untracked_files",
+        )
+        if not result.succeeded:
+            return (), False
+        return (
+            tuple(
+                sorted(
+                    value.replace("\\", "/")
+                    for value in _full_stdout(result).split("\0")
+                    if value
+                )
+            ),
+            True,
+        )
+
     def diff_text(self, baseline_commit: str, changed_files: tuple[str, ...]) -> str:
         return self._capture_diff_text(baseline_commit, changed_files)[0]
 
@@ -354,3 +405,13 @@ class _RepositoryState:
     changed_files: tuple[str, ...]
     file_digests: dict[str, str]
     captured: bool
+
+
+_DIAGNOSTIC_ARTIFACT_NAME = re.compile(
+    r"^(?:maven[-_])?dependency[-_]tree(?:\.(?:txt|log|json|dot|tgf))?$",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_diagnostic_artifact(path: str) -> bool:
+    return bool(_DIAGNOSTIC_ARTIFACT_NAME.fullmatch(Path(path).name))

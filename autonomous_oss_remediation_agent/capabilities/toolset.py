@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import Any
 
 from google.adk.tools.function_tool import FunctionTool
@@ -26,6 +27,7 @@ class DeveloperCapabilitySet:
             trace,
             max_decisions=max(4, budget.config.max_cycles * 4),
         )
+        self._decision_reconciliation_only = False
 
     def read_workspace_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
         """Read a bounded UTF-8 text range from a repository-relative path."""
@@ -41,7 +43,7 @@ class DeveloperCapabilitySet:
         expected_occurrences: int = 1,
     ) -> dict[str, Any]:
         """Write, exactly replace text in, or delete a repository-relative text file."""
-        return self._invoke(
+        result = self._invoke(
             "edit_workspace_text",
             self.workspace_io.edit_text,
             action,
@@ -51,6 +53,13 @@ class DeveloperCapabilitySet:
             new_text,
             expected_occurrences,
         )
+        if (
+            isinstance(result, dict)
+            and result.get("status") == "ok"
+            and result.get("changed")
+        ):
+            self.decisions.note_workspace_edit(str(result["path"]))
+        return result
 
     def run_workspace_shell(self, command: str, cwd: str = ".", timeout_seconds: int | None = None) -> dict[str, Any]:
         """Run a host-native shell command in the trusted prepared repository and return structured evidence."""
@@ -138,6 +147,15 @@ class DeveloperCapabilitySet:
     def start_cycle(self, cycle: int) -> None:
         self.decisions.start_cycle(cycle)
 
+    @contextmanager
+    def decision_reconciliation_only(self):
+        previous = self._decision_reconciliation_only
+        self._decision_reconciliation_only = True
+        try:
+            yield
+        finally:
+            self._decision_reconciliation_only = previous
+
     def adk_tools(self) -> list[FunctionTool]:
         return [
             FunctionTool(self.read_workspace_text),
@@ -147,6 +165,20 @@ class DeveloperCapabilitySet:
         ]
 
     def _invoke(self, name: str, function: Any, *args: Any, **kwargs: Any) -> Any:
+        if self._decision_reconciliation_only:
+            error = (
+                "Only record_decision is available during decision-capture reconciliation"
+            )
+            self.trace.append_event(
+                "reconciliation_tool_blocked",
+                tool=name,
+                error=error,
+            )
+            return {
+                "status": "error",
+                "error": error,
+                "failureCode": "DECISION_RECONCILIATION_METADATA_ONLY",
+            }
         try:
             self.budget.consume_tool_call()
             return function(*args, **kwargs)

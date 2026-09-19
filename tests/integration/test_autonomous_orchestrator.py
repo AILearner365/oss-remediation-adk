@@ -137,9 +137,13 @@ class _ScriptedAgentSession:
         self.capabilities = capabilities
         self.edits = edits
         self.messages = []
+        self.reconciliation_messages = []
         self.closed = False
 
     async def run_turn(self, message):
+        if message.startswith("Decision-capture reconciliation only."):
+            self.reconciliation_messages.append(message)
+            return AgentTurnResult("No decision metadata recorded during reconciliation")
         self.messages.append(message)
         if self.edits:
             old, new = self.edits.pop(0)
@@ -215,6 +219,8 @@ class _LateDecisionAgentSession(_ScriptedAgentSession):
         self.decision_result = None
 
     async def run_turn(self, message):
+        if message.startswith("Decision-capture reconciliation only."):
+            return await super().run_turn(message)
         cycle = len(self.messages) + 1
         if cycle == 2:
             self.decision_result = self.capabilities.record_decision(
@@ -237,6 +243,102 @@ class _LateDecisionAgentSession(_ScriptedAgentSession):
                 alternatives=[],
             )
         return await super().run_turn(message)
+
+
+class _ReconciliationCompletingAgentSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits):
+        super().__init__(capabilities, edits)
+        self.blocked_edit = None
+        self.blocked_shell = None
+        self.operational_calls_before = None
+        self.operational_calls_after = None
+
+    async def run_turn(self, message):
+        if message.startswith("Decision-capture reconciliation only."):
+            self.reconciliation_messages.append(message)
+            self.operational_calls_before = self.capabilities.budget.tool_calls
+            self.blocked_edit = self.capabilities.edit_workspace_text(
+                "write", "reconciliation-must-not-write.txt", content="blocked"
+            )
+            self.blocked_shell = self.capabilities.run_workspace_shell("git status --short")
+            result = self._record(
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "Selected change is implemented and self-validated",
+            )
+            self.operational_calls_after = self.capabilities.budget.tool_calls
+            return AgentTurnResult(f"Reconciliation recorded {result['decision']['decisionId']}")
+
+        if not self.messages:
+            self.latest_decision_id = self._record(
+                "SELECT",
+                "Use repository evidence to apply a compatible change",
+            )["decision"]["decisionId"]
+        return await super().run_turn(message)
+
+    def _record(self, action, strategy):
+        result = self.capabilities.record_decision(
+            action=action,
+            diagnosis="The fixture finding requires a compatible repository change",
+            strategy=strategy,
+            rationale="Repository evidence supports the current strategy",
+            evidence=["observed: fixture repository evidence"],
+            coverage_satisfied=[
+                "requested repository change",
+                "local self-validation",
+            ],
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=["observed: fixture self-validation passed"],
+            previous_decision_id=getattr(self, "latest_decision_id", None),
+            alternatives=[],
+        )
+        self.latest_decision_id = result["decision"]["decisionId"]
+        return result
+
+
+class _RetroactiveReconciliationAgentSession(_ScriptedAgentSession):
+    async def run_turn(self, message):
+        if message.startswith("Decision-capture reconciliation only."):
+            self.reconciliation_messages.append(message)
+            selected = self._record("SELECT")
+            ready = self._record(
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                previous_decision_id=selected["decision"]["decisionId"],
+            )
+            return AgentTurnResult(f"Recorded {ready['decision']['decisionId']}")
+        return await super().run_turn(message)
+
+    def _record(self, action, previous_decision_id=None):
+        return self.capabilities.record_decision(
+            action=action,
+            diagnosis="The repository change addresses the fixture finding",
+            strategy="Apply and validate the compatible fixture change",
+            rationale="Observed repository evidence supports the change",
+            evidence=["observed: fixture change and local checks"],
+            coverage_satisfied=["fixture remediation", "local self-validation"],
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=["observed: fixture self-validation passed"],
+            previous_decision_id=previous_decision_id,
+            alternatives=[],
+        )
+
+
+class _DiagnosticArtifactAgentSession(_DecisionAwareAgentSession):
+    async def run_turn(self, message):
+        turn = await super().run_turn(message)
+        self.capabilities.edit_workspace_text(
+            "write",
+            "reports/dependency_tree.txt",
+            content="fixture dependency tree\n",
+        )
+        self._record(
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            "Complete strategy with intended repository change only",
+        )
+        return turn
 
 
 class _DecisionThenFailingAgentSession:
@@ -274,8 +376,12 @@ class _FailingAgentSession:
 class _UnstructuredAgentSession:
     def __init__(self):
         self.messages = []
+        self.reconciliation_messages = []
 
     async def run_turn(self, message):
+        if message.startswith("Decision-capture reconciliation only."):
+            self.reconciliation_messages.append(message)
+            return AgentTurnResult("No decision metadata recorded during reconciliation")
         self.messages.append(message)
         return AgentTurnResult("Investigated without a structured state. " + ("detail " * 300))
 
@@ -350,7 +456,8 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner_factory=_FixtureScanner,
         ).run()
         self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
-        self.assertEqual("VALIDATED_MANUAL_DELIVERY_REQUIRED", result.delivery.status)
+        self.assertEqual("VALIDATED_DECISION_AUDIT_REVIEW_REQUIRED", result.delivery.status)
+        self.assertEqual("MISSING", result.decision_capture.status.value)
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, result.cycles_completed)
         self.assertEqual(1, len(sessions))
@@ -374,6 +481,9 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertNotIn("cycle 1 complete", cycle_one_agent["workingState"])
         self.assertIn("cycle 1 complete", cycle_one_agent["summary"])
         self.assertIn("strategy-2", cycle_two_agent["workingState"])
+        self.assertEqual("MISSING", cycle_one_agent["decisionCaptureStatus"])
+        self.assertEqual("MISSING", cycle_two_agent["decisionCaptureStatus"])
+        self.assertTrue(cycle_one_agent["decisionReconciliation"]["attempted"])
         cycle_one = json.loads(
             (workspace_root / "artifacts" / "validation" / "cycle-1.json").read_text(encoding="utf-8")
         )
@@ -455,6 +565,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             "VALIDATED",
             final_result["finalDecisionState"]["effectiveResolutionStatus"],
         )
+        self.assertEqual("COMPLETE", final_result["decisionCaptureStatus"])
         events = [
             json.loads(line)
             for line in (workspace_root / "artifacts" / "events.jsonl")
@@ -487,6 +598,11 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
 
         session = sessions[0]
         self.assertTrue(result.validation.passed)
+        self.assertEqual("LATE", result.decision_capture.status.value)
+        self.assertEqual(
+            "VALIDATED_DECISION_AUDIT_REVIEW_REQUIRED",
+            result.delivery.status,
+        )
         self.assertEqual("ok", session.decision_result["status"])
         self.assertEqual("D1", session.decision_result["decision"]["decisionId"])
         self.assertIn("No current material decision state is recorded", session.messages[1])
@@ -513,8 +629,10 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             )
         )
         self.assertNotIn("decisionState", cycle_one)
+        self.assertEqual("MISSING", cycle_one["decisionCaptureStatus"])
         self.assertEqual("D1", cycle_two["decisionState"]["latestDecisionId"])
         self.assertEqual(["D1"], [item["decisionId"] for item in cycle_two["decisionTrail"]])
+        self.assertEqual("LATE", cycle_two["decisionCaptureStatus"])
         self.assertEqual(
             "D1",
             final_result["finalDecisionState"]["agentDecisionState"]["latestDecisionId"],
@@ -531,6 +649,126 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
                 for event in events
             )
         )
+
+    def test_reconciliation_completes_nonterminal_chain_without_operational_tools(self):
+        adapter = _RecordingDeliveryAdapter()
+        sessions = []
+
+        def factory(capabilities, model):
+            session = _ReconciliationCompletingAgentSession(
+                capabilities,
+                [("1.0", "2.0")],
+            )
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        session = sessions[0]
+        self.assertEqual(Outcome.SUCCESS, result.outcome)
+        self.assertEqual("COMPLETE", result.decision_capture.status.value)
+        self.assertEqual(1, len(adapter.contexts))
+        self.assertEqual(
+            "DECISION_RECONCILIATION_METADATA_ONLY",
+            session.blocked_edit["failureCode"],
+        )
+        self.assertEqual(
+            "DECISION_RECONCILIATION_METADATA_ONLY",
+            session.blocked_shell["failureCode"],
+        )
+        self.assertEqual(
+            session.operational_calls_before,
+            session.operational_calls_after,
+        )
+        self.assertIn("currentDecisionContext", session.reconciliation_messages[0])
+        self.assertIn("repositoryChangeSummary", session.reconciliation_messages[0])
+        self.assertIn("self-validation supports it", session.reconciliation_messages[0])
+        self.assertFalse(
+            (Path(result.workspace_root) / "repository" / "reconciliation-must-not-write.txt").exists()
+        )
+        cycle = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("INCOMPLETE", cycle["decisionReconciliation"]["statusBefore"])
+        self.assertEqual("COMPLETE", cycle["decisionReconciliation"]["statusAfter"])
+        self.assertEqual(0, cycle["decisionReconciliation"]["operationalToolCallsConsumed"])
+
+    def test_retroactive_reconciliation_remains_late_and_withholds_delivery(self):
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _RetroactiveReconciliationAgentSession(
+                capabilities,
+                [("1.0", "2.0")],
+            ),
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("LATE", result.decision_capture.status.value)
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual(
+            "VALIDATED_DECISION_AUDIT_REVIEW_REQUIRED",
+            result.delivery.status,
+        )
+        self.assertEqual([], adapter.contexts)
+
+    def test_failed_reconciliation_keeps_missing_status_visible(self):
+        adapter = _RecordingDeliveryAdapter()
+        session = _ScriptedAgentSession(None, [])
+
+        def factory(capabilities, model):
+            session.capabilities = capabilities
+            session.edits = [("1.0", "2.0")]
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("MISSING", result.decision_capture.status.value)
+        self.assertEqual("PASSED", result.deterministic_validation_status.value)
+        self.assertEqual("VALIDATED", result.effective_resolution_status.value)
+        self.assertEqual(
+            "VALIDATED_DECISION_AUDIT_REVIEW_REQUIRED",
+            result.delivery.status,
+        )
+        self.assertEqual([], adapter.contexts)
+        self.assertEqual(1, len(session.reconciliation_messages))
+
+    def test_diagnostic_artifact_withholds_delivery_without_failing_validation(self):
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DiagnosticArtifactAgentSession(
+                capabilities,
+                [("1.0", "2.0")],
+            ),
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("COMPLETE", result.decision_capture.status.value)
+        self.assertEqual(
+            ("reports/dependency_tree.txt",),
+            result.validation.diagnostic_artifacts,
+        )
+        self.assertEqual("VALIDATED_MANUAL_DELIVERY_REQUIRED", result.delivery.status)
+        self.assertIn("diagnostic artifacts remain", result.delivery.reason)
+        self.assertEqual([], adapter.contexts)
 
     def test_ready_then_failed_validation_is_effectively_rejected(self):
         result = AutonomousRemediationOrchestrator(
@@ -593,7 +831,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
 
         self._assert_final_decision_status(result, "IN_PROGRESS", "NOT_RUN", "INCOMPLETE")
 
-    def test_no_decision_events_preserves_legacy_cycle_and_final_shapes(self):
+    def test_no_decision_events_expose_missing_capture_without_decision_state(self):
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
             agent_session_factory=lambda capabilities, model: _UnstructuredAgentSession(),
@@ -609,9 +847,16 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         final_result = json.loads(
             (workspace_root / "artifacts" / "final-result.json").read_text(encoding="utf-8")
         )
-        self.assertEqual({"summary", "workingState"}, set(cycle))
+        self.assertEqual("MISSING", cycle["decisionCaptureStatus"])
+        self.assertEqual("MISSING", cycle["decisionCapture"]["status"])
+        self.assertTrue(cycle["decisionReconciliation"]["attempted"])
+        self.assertNotIn("decisionState", cycle)
+        self.assertNotIn("decisionTrail", cycle)
         self.assertNotIn("finalDecisionState", final_result)
         self.assertNotIn("decisionEventCount", final_result)
+        self.assertEqual("MISSING", final_result["decisionCaptureStatus"])
+        self.assertEqual("FAILED", final_result["deterministicValidationStatus"])
+        self.assertEqual("VALIDATION_REJECTED", final_result["effectiveResolutionStatus"])
         events = [
             json.loads(line)
             for line in (workspace_root / "artifacts" / "events.jsonl")
@@ -749,7 +994,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         adapter = _RecordingDeliveryAdapter()
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=3),
-            agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
+            agent_session_factory=lambda capabilities, model: _DecisionAwareAgentSession(
                 capabilities, [("1.0", "1.5"), ("1.5", "2.0")]
             ),
             scanner_factory=_FixtureScanner,
@@ -758,6 +1003,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(Outcome.SUCCESS, result.outcome)
         self.assertEqual(1, len(adapter.contexts))
         self.assertEqual(2, adapter.contexts[0].validation.cycle)
+        self.assertEqual("COMPLETE", result.decision_capture.status.value)
 
     def test_unapproved_runtime_boundary_stops_before_agent(self):
         invoked = []

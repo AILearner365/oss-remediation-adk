@@ -4,7 +4,14 @@ import json
 import threading
 from typing import Any
 
-from ..models import CandidateClassification, DecisionAction, DecisionRecord, DecisionState
+from ..models import (
+    CandidateClassification,
+    DecisionAction,
+    DecisionCaptureAssessment,
+    DecisionCaptureStatus,
+    DecisionRecord,
+    DecisionState,
+)
 from ..workspace import TraceStore
 
 
@@ -28,6 +35,9 @@ class DecisionTracker:
         self.max_decisions = max_decisions
         self._cycle: int | None = None
         self._records: list[DecisionRecord] = []
+        self._workspace_edit_count = 0
+        self._workspace_edit_paths: list[str] = []
+        self._required_update_after_decision_count: int | None = None
         self._lock = threading.Lock()
 
     def start_cycle(self, cycle: int) -> None:
@@ -89,6 +99,7 @@ class DecisionTracker:
                 validation=normalized_validation,
                 previous_decision_id=previous_decision_id,
                 alternatives=normalized_alternatives,
+                workspace_edit_count=self._workspace_edit_count,
             )
             payload = record.to_dict()
             serialized = json.dumps(
@@ -118,6 +129,102 @@ class DecisionTracker:
             "decisionState": DecisionState.from_record(record).to_dict(),
             "warnings": list(warnings),
         }
+
+    def note_workspace_edit(self, path: str) -> None:
+        if self._cycle is None:
+            return
+        normalized_path = path.replace("\\", "/")
+        with self._lock:
+            self._workspace_edit_count += 1
+            self._workspace_edit_paths.append(normalized_path)
+            count = self._workspace_edit_count
+        self.trace.append_event(
+            "decision_workspace_edit_observed",
+            runId=self.trace.workspace.root.name,
+            cycle=self._cycle,
+            path=normalized_path,
+            workspaceEditCount=count,
+        )
+
+    def require_update_after_failed_validation(self, cycle: int) -> None:
+        with self._lock:
+            self._required_update_after_decision_count = len(self._records)
+        self.trace.append_event(
+            "decision_update_required",
+            runId=self.trace.workspace.root.name,
+            cycle=cycle,
+            afterDecisionCount=self._required_update_after_decision_count,
+            reason="Authoritative deterministic validation rejected the submitted state",
+        )
+
+    @property
+    def workspace_edit_paths(self) -> tuple[str, ...]:
+        with self._lock:
+            return tuple(self._workspace_edit_paths)
+
+    @property
+    def capture_assessment(self) -> DecisionCaptureAssessment:
+        with self._lock:
+            workspace_edit_count = self._workspace_edit_count
+            if not self._records:
+                reasons = ["No accepted material decision record exists"]
+                if workspace_edit_count:
+                    reasons.append(
+                        "Workspace edits were observed before any strategy snapshot"
+                    )
+                return DecisionCaptureAssessment(
+                    DecisionCaptureStatus.MISSING,
+                    workspace_edit_count,
+                    None,
+                    None,
+                    False,
+                    tuple(reasons),
+                )
+
+            first = self._records[0]
+            latest = self._records[-1]
+            terminal = latest.action in {
+                DecisionAction.READY_FOR_INDEPENDENT_VALIDATION,
+                DecisionAction.BLOCK,
+            }
+            reasons = []
+            if first.workspace_edit_count > 0:
+                reasons.append(
+                    "The initial SELECT was recorded after a workspace edit"
+                )
+            if not terminal:
+                reasons.append("The current decision chain has no terminal READY or BLOCK")
+            if terminal and latest.workspace_edit_count < workspace_edit_count:
+                reasons.append(
+                    "A workspace edit occurred after the terminal decision snapshot"
+                )
+            update_required = (
+                self._required_update_after_decision_count is not None
+                and len(self._records) <= self._required_update_after_decision_count
+            )
+            if update_required:
+                reasons.append(
+                    "No decision update has reconciled the latest failed deterministic validation"
+                )
+
+            if first.workspace_edit_count > 0:
+                status = DecisionCaptureStatus.LATE
+            elif (
+                not terminal
+                or latest.workspace_edit_count < workspace_edit_count
+                or update_required
+            ):
+                status = DecisionCaptureStatus.INCOMPLETE
+            else:
+                status = DecisionCaptureStatus.COMPLETE
+            return DecisionCaptureAssessment(
+                status,
+                workspace_edit_count,
+                first.workspace_edit_count,
+                latest.workspace_edit_count,
+                terminal,
+                tuple(reasons),
+            )
 
     def _validate_chain(
         self,
@@ -196,6 +303,63 @@ def _record_warnings(record: DecisionRecord) -> tuple[str, ...]:
         warnings.append(
             "Readiness was recorded while coverage remains conditional or unresolved"
         )
+    if record.action == DecisionAction.READY_FOR_INDEPENDENT_VALIDATION:
+        unresolved_assumptions = [
+            assumption
+            for assumption in record.assumptions
+            if assumption.get("status", "").strip().upper()
+            in {"UNTESTED", "PENDING", "UNRESOLVED"}
+        ]
+        if unresolved_assumptions:
+            warnings.append(
+                "Readiness was recorded while material assumptions remain explicitly unresolved"
+            )
+        validation_text = " ".join(record.validation).lower()
+        observed_markers = (
+            "observed",
+            "performed",
+            "passed",
+            "succeeded",
+            "completed",
+            "verified",
+        )
+        if not record.validation or not any(
+            marker in validation_text for marker in observed_markers
+        ):
+            warnings.append(
+                "Readiness was recorded without observed self-validation evidence"
+            )
+        decision_text = " ".join(
+            (
+                record.diagnosis,
+                record.rationale,
+                *record.evidence,
+                *record.validation,
+            )
+        ).lower()
+        error_markers = (
+            "scanner error",
+            "scan error",
+            "scan failed",
+            "scanner failed",
+            "build error",
+            "build failed",
+            "incomplete scan",
+        )
+        recovery_markers = (
+            "subsequent scan succeeded",
+            "scanner recovered",
+            "scan completed successfully",
+            "successful vulnerability scan",
+            "subsequent build succeeded",
+            "build completed successfully",
+        )
+        if any(marker in decision_text for marker in error_markers) and not any(
+            marker in decision_text for marker in recovery_markers
+        ):
+            warnings.append(
+                "Readiness acknowledges a scanner/build error without supporting recovery evidence"
+            )
     blocker_text = f"{record.diagnosis} {record.rationale}".lower()
     describes_blocker = any(
         marker in blocker_text

@@ -39,6 +39,36 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("dependency ownership is now clear", working_state)
         self.assertNotIn("Updated the managed dependency", working_state)
 
+    def test_extracts_observed_working_state_heading_formats(self):
+        headings = (
+            "WORKING_STATE",
+            "## WORKING_STATE:",
+            "**WORKING_STATE**",
+            "**WORKING_STATE**:",
+            "**Current_Working_State:**",
+            "### **current-working-state:**",
+        )
+
+        for heading in headings:
+            with self.subTest(heading=heading):
+                extracted = extract_working_state(
+                    f"Cycle summary\n\n{heading}\n- Progress: preserved"
+                )
+                self.assertEqual(
+                    f"{heading}\n- Progress: preserved",
+                    extracted,
+                )
+
+    def test_working_state_phrase_in_prose_is_not_a_heading(self):
+        response = (
+            "The WORKING_STATE is discussed here but is not a section.\n"
+            "Another sentence mentions current-working-state: without a heading."
+        )
+
+        extracted = extract_working_state(response)
+
+        self.assertIn("No structured WORKING_STATE was supplied", extracted)
+
     def test_missing_or_malformed_working_state_uses_bounded_fallback(self):
         missing = "Investigated the repository. " + ("detail " * 300) + "TAIL_MARKER"
         malformed = "Investigation complete. WORKING_STATE is still being developed."
@@ -69,6 +99,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("complete current snapshot", AGENT_INSTRUCTION)
         self.assertIn("never a partial delta", AGENT_INSTRUCTION)
         self.assertIn("Do not rely on deterministic code to infer or merge", AGENT_INSTRUCTION)
+        self.assertIn("Repository inspection and exploration may precede selection", AGENT_INSTRUCTION)
+        self.assertIn("Before material implementation begins", AGENT_INSTRUCTION)
+        self.assertIn("never fabricate alternatives", AGENT_INSTRUCTION)
+        self.assertIn("not a mandatory remediation algorithm", AGENT_INSTRUCTION)
+        self.assertIn("inspect the final repository diff", AGENT_INSTRUCTION)
 
     def test_failed_validation_feedback_preserves_objective_and_prior_strategy(self):
         prior_state = (

@@ -20,6 +20,8 @@ from .deterministic.validation import DeterministicValidator
 from .integrations.delivery import DeliveryAdapter, DeliveryContext, ManualDeliveryAdapter
 from .models import (
     AgentDecisionStatus,
+    DecisionCaptureAssessment,
+    DecisionCaptureStatus,
     DeliveryResult,
     DeterministicValidationStatus,
     DecisionState,
@@ -32,7 +34,12 @@ from .models import (
     ScanReport,
     ValidationReport,
 )
-from .prompt import extract_working_state, initial_message, validation_feedback
+from .prompt import (
+    decision_reconciliation_message,
+    extract_working_state,
+    initial_message,
+    validation_feedback,
+)
 from .workspace import RunWorkspace, TraceStore
 
 
@@ -192,12 +199,27 @@ class AutonomousRemediationOrchestrator:
                 turn = await agent_session.run_turn(message)
                 summaries.append(turn.text)
                 working_state = extract_working_state(turn.text)
+                reconciliation = await self._reconcile_decision_capture(
+                    cycle,
+                    turn.text,
+                    working_state,
+                    baseline,
+                    validator,
+                    capabilities,
+                    agent_session,
+                    trace,
+                )
                 decision_state = capabilities.decisions.current_state
                 decision_trail = capabilities.decisions.records_for_cycle(cycle)
+                capture_assessment = capabilities.decisions.capture_assessment
                 cycle_artifact: dict[str, object] = {
                     "summary": turn.text,
                     "workingState": working_state,
+                    "decisionCaptureStatus": capture_assessment.status.value,
+                    "decisionCapture": capture_assessment.to_dict(),
                 }
+                if reconciliation is not None:
+                    cycle_artifact["decisionReconciliation"] = reconciliation
                 if decision_state is not None:
                     cycle_artifact["decisionState"] = decision_state.to_dict()
                     cycle_artifact["decisionTrail"] = [
@@ -211,6 +233,13 @@ class AutonomousRemediationOrchestrator:
                     capabilities.decisions.warn(
                         cycle,
                         "No material decision was recorded during the agent cycle",
+                    )
+                if capture_assessment.status != DecisionCaptureStatus.COMPLETE:
+                    capabilities.decisions.warn(
+                        cycle,
+                        "Decision capture remains deficient after reconciliation",
+                        decisionCaptureStatus=capture_assessment.status.value,
+                        reasons=list(capture_assessment.reasons),
                     )
                 last_validation = validator.validate(cycle, baseline)
                 if (
@@ -258,6 +287,7 @@ class AutonomousRemediationOrchestrator:
                         baseline,
                         last_validation,
                         summaries[-1] if summaries else "",
+                        capabilities.decisions.capture_assessment,
                     )
                     outcome = Outcome.SUCCESS if delivery.succeeded else Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED
                     reason = "Validated remediation delivered as a Draft PR" if delivery.succeeded else (delivery.reason or delivery.status)
@@ -289,6 +319,7 @@ class AutonomousRemediationOrchestrator:
                     )
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     break
+                capabilities.decisions.require_update_after_failed_validation(cycle)
                 message = validation_feedback(
                     last_validation,
                     working_state,
@@ -339,13 +370,39 @@ class AutonomousRemediationOrchestrator:
         baseline: RepositoryBaseline,
         validation: ValidationReport,
         agent_summary: str,
+        decision_capture: DecisionCaptureAssessment,
     ) -> DeliveryResult:
+        if decision_capture.status != DecisionCaptureStatus.COMPLETE:
+            return DeliveryResult(
+                False,
+                "VALIDATED_DECISION_AUDIT_REVIEW_REQUIRED",
+                reason=(
+                    "Deterministic validation passed, but automatic delivery was withheld "
+                    "because decision capture is "
+                    f"{decision_capture.status.value}"
+                ),
+                evidence={
+                    "diffPath": validation.diff_path,
+                    "treeDigest": validation.tree_digest,
+                    "decisionCapture": decision_capture.to_dict(),
+                    "validationWarnings": list(validation.warnings),
+                },
+            )
         if not preflight_eligible or not validation.delivery_eligible:
             return DeliveryResult(
                 False,
                 "VALIDATED_MANUAL_DELIVERY_REQUIRED",
-                reason="Validation passed but isolated automated delivery is unavailable or ineligible",
-                evidence={"diffPath": validation.diff_path, "treeDigest": validation.tree_digest},
+                reason=(
+                    "; ".join(validation.warnings)
+                    if validation.warnings
+                    else "Validation passed but isolated automated delivery is unavailable or ineligible"
+                ),
+                evidence={
+                    "diffPath": validation.diff_path,
+                    "treeDigest": validation.tree_digest,
+                    "validationWarnings": list(validation.warnings),
+                    "diagnosticArtifacts": list(validation.diagnostic_artifacts),
+                },
             )
         return delivery_adapter.deliver(
             DeliveryContext(
@@ -357,6 +414,77 @@ class AutonomousRemediationOrchestrator:
             )
         )
 
+    async def _reconcile_decision_capture(
+        self,
+        cycle: int,
+        turn_text: str,
+        working_state: str,
+        baseline: RepositoryBaseline,
+        validator: DeterministicValidator,
+        capabilities: DeveloperCapabilitySet,
+        agent_session: AgentSession,
+        trace: TraceStore,
+    ) -> dict[str, object] | None:
+        assessment_before = capabilities.decisions.capture_assessment
+        if assessment_before.status == DecisionCaptureStatus.COMPLETE:
+            return None
+
+        changed_files = validator.changed_files(baseline.commit)
+        decision_count_before = capabilities.decisions.event_count
+        operational_calls_before = capabilities.budget.tool_calls
+        message = decision_reconciliation_message(
+            assessment_before,
+            working_state,
+            turn_text,
+            capabilities.decisions.current_state,
+            capabilities.decisions.all_records(),
+            changed_files,
+            capabilities.decisions.workspace_edit_paths,
+        )
+        response_text = ""
+        error = None
+        try:
+            with capabilities.decision_reconciliation_only():
+                response = await agent_session.run_turn(message)
+                response_text = response.text
+        except Exception as exc:
+            error = str(exc)
+            capabilities.decisions.warn(
+                cycle,
+                "Decision-capture reconciliation turn failed",
+                error=error,
+            )
+
+        assessment_after = capabilities.decisions.capture_assessment
+        recorded_count = capabilities.decisions.event_count - decision_count_before
+        operational_calls_consumed = (
+            capabilities.budget.tool_calls - operational_calls_before
+        )
+        result: dict[str, object] = {
+            "attempted": True,
+            "statusBefore": assessment_before.status.value,
+            "statusAfter": assessment_after.status.value,
+            "reason": list(assessment_before.reasons),
+            "recordedDecisionCount": recorded_count,
+            "operationalToolCallsConsumed": operational_calls_consumed,
+            "changedFiles": list(changed_files),
+        }
+        if response_text:
+            normalized_response = " ".join(response_text.split())
+            result["responseExcerpt"] = normalized_response[:1_200]
+        if error:
+            result["error"] = error
+        trace.append_event(
+            "decision_reconciliation",
+            cycle=cycle,
+            statusBefore=assessment_before.status.value,
+            statusAfter=assessment_after.status.value,
+            recordedDecisionCount=recorded_count,
+            operationalToolCallsConsumed=operational_calls_consumed,
+            error=error,
+        )
+        return result
+
     def _baseline_scan_scope(self) -> tuple[str, ...]:
         return tuple(sorted(set(self.request.severity_scope) | set(self.request.constraints.prohibited_new_severities)))
 
@@ -367,16 +495,31 @@ class AutonomousRemediationOrchestrator:
         return not requested_ids or bool(requested_ids & finding.identifiers)
 
     def _finish(self, trace: TraceStore, result: RunResult) -> RunResult:
-        if self._decision_tracker and self._decision_tracker.current_state is not None:
-            final_decision_state = _resolve_final_decision_state(
+        if self._decision_tracker:
+            decision_capture = self._decision_tracker.capture_assessment
+            current_state = self._decision_tracker.current_state
+            validation_status = _deterministic_validation_status(result.validation)
+            effective_status = _effective_resolution_status(
                 result,
-                self._decision_tracker.current_state,
+                validation_status,
+                current_state,
             )
             result = replace(
                 result,
-                final_decision_state=final_decision_state,
-                decision_event_count=self._decision_tracker.event_count,
+                decision_capture=decision_capture,
+                deterministic_validation_status=validation_status,
+                effective_resolution_status=effective_status,
             )
+            if current_state is not None:
+                final_decision_state = _resolve_final_decision_state(
+                    result,
+                    current_state,
+                )
+                result = replace(
+                    result,
+                    final_decision_state=final_decision_state,
+                    decision_event_count=self._decision_tracker.event_count,
+                )
         trace.write_json("final-result.json", result.to_dict())
         trace.append_event("run_finished", outcome=result.outcome.value, reason=result.reason)
         return result
@@ -395,17 +538,11 @@ def _resolve_final_decision_state(
     agent_state: DecisionState,
 ) -> FinalDecisionState:
     validation_status = _deterministic_validation_status(result.validation)
-    if validation_status == DeterministicValidationStatus.PASSED:
-        effective_status = EffectiveResolutionStatus.VALIDATED
-    elif validation_status == DeterministicValidationStatus.FAILED:
-        effective_status = (
-            EffectiveResolutionStatus.BLOCKED
-            if result.outcome == Outcome.NO_SAFE_REMEDIATION
-            and agent_state.agent_status == AgentDecisionStatus.BLOCKED
-            else EffectiveResolutionStatus.VALIDATION_REJECTED
-        )
-    else:
-        effective_status = EffectiveResolutionStatus.INCOMPLETE
+    effective_status = _effective_resolution_status(
+        result,
+        validation_status,
+        agent_state,
+    )
 
     warnings = []
     if (
@@ -426,6 +563,24 @@ def _resolve_final_decision_state(
         effective_resolution_status=effective_status,
         warnings=tuple(warnings),
     )
+
+
+def _effective_resolution_status(
+    result: RunResult,
+    validation_status: DeterministicValidationStatus,
+    agent_state: DecisionState | None,
+) -> EffectiveResolutionStatus:
+    if validation_status == DeterministicValidationStatus.PASSED:
+        return EffectiveResolutionStatus.VALIDATED
+    if validation_status == DeterministicValidationStatus.FAILED:
+        if (
+            result.outcome == Outcome.NO_SAFE_REMEDIATION
+            and agent_state is not None
+            and agent_state.agent_status == AgentDecisionStatus.BLOCKED
+        ):
+            return EffectiveResolutionStatus.BLOCKED
+        return EffectiveResolutionStatus.VALIDATION_REJECTED
+    return EffectiveResolutionStatus.INCOMPLETE
 
 
 def _deterministic_validation_status(

@@ -47,6 +47,7 @@ class WorkspaceIO:
     ) -> dict[str, Any]:
         normalized_action = action.lower().strip()
         target = self.workspace.repository_path(path, allow_missing=True)
+        existed_before = target.exists()
         before = target.read_bytes() if target.exists() and target.is_file() else b""
         if len(before) > self.max_file_bytes:
             raise ValueError(f"File exceeds {self.max_file_bytes} byte edit limit: {path}")
@@ -73,6 +74,7 @@ class WorkspaceIO:
         else:
             raise ValueError("action must be write, replace, or delete")
         after = target.read_bytes() if target.exists() else b""
+        exists_after = target.exists()
         result = {
             "status": "ok",
             "action": normalized_action,
@@ -80,6 +82,7 @@ class WorkspaceIO:
             "beforeSha256": _sha256(before),
             "afterSha256": _sha256(after) if target.exists() else None,
             "bytes": len(after),
+            "changed": existed_before != exists_after or before != after,
         }
         self.trace.append_event("workspace_edit", **result)
         return result

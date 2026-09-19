@@ -4,13 +4,19 @@ import json
 import re
 
 from .config import RemediationRequest
-from .models import DecisionRecord, DecisionState, RepositoryBaseline, ValidationReport
-
-
-_WORKING_STATE_HEADER = re.compile(
-    r"(?im)^[ \t]*(?:#{1,6}[ \t]+)?WORKING_STATE[ \t]*:?[ \t]*$"
+from .models import (
+    DecisionCaptureAssessment,
+    DecisionRecord,
+    DecisionState,
+    RepositoryBaseline,
+    ValidationReport,
 )
+
+
+_MARKDOWN_HEADING = re.compile(r"^#{1,6}\s+")
+_WORKING_STATE_SEPARATOR = re.compile(r"[\s_-]+")
 _WORKING_STATE_FALLBACK_LIMIT = 600
+_RECONCILIATION_SUMMARY_LIMIT = 1_200
 MAX_DECISION_CONTEXT_CHARACTERS = 16_000
 
 
@@ -46,15 +52,17 @@ Material decision protocol:
 3. Identify only materially credible candidate approaches; do not invent artificial alternatives.
 4. Evaluate credible candidates against requirement coverage, constraints, evidence, compatibility and engineering risk, maintainability, unresolved assumptions, and ability to validate.
 5. Select one approach or a justified combination.
-6. Before consequential implementation changes, call `record_decision` with action `SELECT` and the concise observable engineering decision.
+6. Repository inspection and exploration may precede selection. Before material implementation begins, call `record_decision` with action `SELECT` and the concise observable engineering decision.
 7. Implement the selected strategy, then compare new evidence against its coverage, assumptions, validation plan, and success criteria.
-8. When evidence materially affects the strategy, decide whether to `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`, and call `record_decision` before continuing under that decision.
+8. When evidence materially affects the strategy, update the snapshot before continuing: use `RETAIN` when the strategy remains supported, `EXTEND` when adding material scope, `REVISE` when materially changing it, `REPLACE` when substituting it, or `BLOCK` for a genuine unresolved blocker.
 9. Self-validate the complete solution with available tools. If self-validation finds a resolvable problem, keep investigating and correcting it within the same cycle rather than knowingly submitting incomplete work for the external validator to rediscover.
-10. Finish a work cycle only after recording `READY_FOR_INDEPENDENT_VALIDATION` when evidence supports every success criterion, or `BLOCK` when a concrete blocker prevents completion or verification. Independent deterministic validation remains authoritative and is not replaced by self-validation.
+10. Record `READY_FOR_INDEPENDENT_VALIDATION` only after observed self-validation supports readiness, or `BLOCK` when a concrete unresolved blocker prevents completion or verification. Independent deterministic validation remains authoritative and is not replaced by self-validation.
 
-A decision is material when choosing differently could change coverage, technical direction, compatibility, risk, maintainability, permitted scope, validation outcome, or the next meaningful action. Do not record routine navigation, searches, ordinary command selection, formatting, repeated observations, or low-level implementation steps that do not change strategy. Candidate approaches may be classified `COMPLETE`, `PARTIAL`, `CONDITIONAL`, or `NOT_VIABLE`; alternatives are not required when they add no value, including final readiness.
+A decision is material when choosing differently could change coverage, technical direction, compatibility, risk, maintainability, permitted scope, validation outcome, or the next meaningful action. Do not record routine navigation, searches, ordinary command selection, formatting, repeated observations, or low-level implementation steps that do not change strategy. Candidate approaches may be classified `COMPLETE`, `PARTIAL`, `CONDITIONAL`, or `NOT_VIABLE`; record credible alternatives actually considered when they inform the choice, but never fabricate alternatives to populate the field. This iterative protocol observes your engineering decisions; it is not a mandatory remediation algorithm and does not choose a technical strategy for you.
 
 Every `record_decision` call is a complete current snapshot after applying the action, never a partial delta. Restate the complete current diagnosis, active strategy, all satisfied/conditional/unresolved requirement coverage, all active material assumptions and their tests, and current planned or observed self-validation. For `EXTEND`, retain previously satisfied coverage that remains applicable and add the new coverage in the same snapshot. Do not rely on deterministic code to infer or merge semantically similar free-form requirement strings.
+
+Prefer captured command output or ignored build directories for investigation evidence. Avoid writing diagnostic reports into tracked source directories. Before readiness, inspect the final repository diff and remove investigation-only files so deterministic validation and delivery see only intended repository changes.
 
 When you have completed a useful work cycle, summarize what you changed and why, followed by a concise `WORKING_STATE` covering understanding, current strategy/hypothesis, assumptions, progress, and unresolved work. If repository evidence shows no safe remediation can satisfy the supplied constraints, respond with `NO_SAFE_REMEDIATION:` followed by the evidence-based reason.
 """.strip()
@@ -86,11 +94,19 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
 
 
 def extract_working_state(turn_text: str) -> str:
-    matches = tuple(_WORKING_STATE_HEADER.finditer(turn_text))
-    if matches:
-        match = matches[-1]
-        section = turn_text[match.start():].strip()
-        if turn_text[match.end():].strip():
+    lines = turn_text.splitlines()
+    heading_indexes = [
+        index for index, line in enumerate(lines) if _is_working_state_heading(line)
+    ]
+    if heading_indexes:
+        start = heading_indexes[-1]
+        end = len(lines)
+        for index in range(start + 1, len(lines)):
+            if _MARKDOWN_HEADING.match(lines[index].strip()):
+                end = index
+                break
+        section = "\n".join(lines[start:end]).strip()
+        if any(line.strip() for line in lines[start + 1 : end]):
             return section
     visible = " ".join(turn_text.split())
     if not visible:
@@ -102,6 +118,73 @@ def extract_working_state(turn_text: str) -> str:
         "WORKING_STATE\n"
         "- No structured WORKING_STATE was supplied in the previous cycle.\n"
         f"- Visible response excerpt: {excerpt}"
+    )
+
+
+def _is_working_state_heading(line: str) -> bool:
+    candidate = line.strip()
+    if not candidate:
+        return False
+    candidate = _MARKDOWN_HEADING.sub("", candidate).strip()
+    candidate = candidate.rstrip(":").strip()
+    for marker in ("**", "__", "*", "_", "`"):
+        if candidate.startswith(marker) and candidate.endswith(marker):
+            candidate = candidate[len(marker) : -len(marker)].strip()
+            break
+    candidate = candidate.rstrip(":").strip()
+    normalized = _WORKING_STATE_SEPARATOR.sub(" ", candidate).strip().upper()
+    return normalized in {"WORKING STATE", "CURRENT WORKING STATE"}
+
+
+def decision_reconciliation_message(
+    assessment: DecisionCaptureAssessment,
+    working_state: str,
+    turn_text: str,
+    decision_state: DecisionState | None,
+    decision_trail: tuple[DecisionRecord, ...],
+    changed_files: tuple[str, ...],
+    workspace_edit_paths: tuple[str, ...],
+) -> str:
+    if decision_state is None:
+        action_guidance = (
+            "No accepted decision exists. Reconstruct the current diagnosis and active "
+            "strategy from the same-session history and evidence, then record the first "
+            "complete snapshot with `SELECT`. If the work is already ready or blocked, "
+            "record the corresponding terminal snapshot after `SELECT`. A retroactive "
+            "selection remains classified as late when workspace edits already occurred."
+        )
+    else:
+        action_guidance = (
+            "A decision chain exists but its audit capture is deficient. Record the complete "
+            "current snapshot using the action that truthfully relates it to the latest "
+            "decision: `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, "
+            "`READY_FOR_INDEPENDENT_VALIDATION`, or `BLOCK`. Do not default to readiness; "
+            "use it only when observed self-validation supports it."
+        )
+    payload = {
+        "captureAssessment": assessment.to_dict(),
+        "repositoryChangeSummary": {
+            "changedFiles": list(changed_files),
+            "workspaceEditPathsObserved": list(dict.fromkeys(workspace_edit_paths))[-20:],
+            "shellMutationDetection": "NOT_AVAILABLE",
+        },
+        "currentDecisionContext": json.loads(
+            serialize_decision_context(decision_state, decision_trail)
+        ),
+        "workingState": working_state,
+        "agentCycleSummaryExcerpt": _clip(
+            " ".join(turn_text.split()),
+            _RECONCILIATION_SUMMARY_LIMIT,
+        ),
+    }
+    return (
+        "Decision-capture reconciliation only. Authoritative validation has not run yet. "
+        "You may call only `record_decision`; do not read or modify repository files, run "
+        "shell commands, scan, or deliver. This turn records observable engineering metadata "
+        "and does not choose a remediation strategy for you. "
+        + action_guidance
+        + "\n\nReconciliation evidence:\n"
+        + json.dumps(payload, indent=2, sort_keys=True)
     )
 
 
