@@ -144,13 +144,19 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
         self.assertIn('"approved_versions": [', message)
         self.assertIn('"4.0.7"', message)
 
-    def test_agent_instruction_preserves_technology_neutral_remediation_discretion(self):
+    def test_agent_instruction_preserves_generic_and_dependency_management_discretion(self):
         self.assertIn("Choose the engineering approach yourself", AGENT_INSTRUCTION)
         self.assertIn("policies as outcome boundaries", AGENT_INSTRUCTION)
         self.assertIn("not instructions to use a particular implementation technique", AGENT_INSTRUCTION)
-        self.assertIn("Do not use vulnerability-specific or technology-specific recipes", AGENT_INSTRUCTION)
         self.assertIn("compatibility and engineering risk", AGENT_INSTRUCTION)
         self.assertIn("maintainability", AGENT_INSTRUCTION)
+        self.assertIn("parent definitions, imported BOMs, properties", AGENT_INSTRUCTION)
+        self.assertIn("direct versus transitive ownership", AGENT_INSTRUCTION)
+        self.assertIn("framework-managed versions", AGENT_INSTRUCTION)
+        self.assertIn("Avoid redundant or unnecessary lower-level overrides", AGENT_INSTRUCTION)
+        self.assertIn("Retain discretion to use targeted overrides", AGENT_INSTRUCTION)
+        self.assertIn("Do not treat parent, BOM, property", AGENT_INSTRUCTION)
+        self.assertIn("fastest passing scan", AGENT_INSTRUCTION)
 
     def test_unparseable_version_change_fails_closed(self):
         check = self._validate("3.5.0", "4.0.0-RC1", ConstraintSpec())

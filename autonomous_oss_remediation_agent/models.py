@@ -50,6 +50,27 @@ class CandidateClassification(str, Enum):
     NOT_VIABLE = "NOT_VIABLE"
 
 
+class AgentDecisionStatus(str, Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    READY = "READY"
+    BLOCKED = "BLOCKED"
+
+
+class DeterministicValidationStatus(str, Enum):
+    NOT_RUN = "NOT_RUN"
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    INCOMPLETE = "INCOMPLETE"
+
+
+class EffectiveResolutionStatus(str, Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    VALIDATED = "VALIDATED"
+    VALIDATION_REJECTED = "VALIDATION_REJECTED"
+    BLOCKED = "BLOCKED"
+    INCOMPLETE = "INCOMPLETE"
+
+
 @dataclass(frozen=True)
 class DecisionRecord:
     decision_id: str
@@ -92,15 +113,15 @@ class DecisionState:
     active_assumptions: tuple[dict[str, str], ...]
     remaining_unresolved_items: tuple[str, ...]
     current_validation: tuple[str, ...]
-    status: str
+    agent_status: AgentDecisionStatus
 
     @classmethod
     def from_record(cls, record: DecisionRecord) -> "DecisionState":
-        status = "IN_PROGRESS"
+        status = AgentDecisionStatus.IN_PROGRESS
         if record.action == DecisionAction.READY_FOR_INDEPENDENT_VALIDATION:
-            status = "READY"
+            status = AgentDecisionStatus.READY
         elif record.action == DecisionAction.BLOCK:
-            status = "BLOCKED"
+            status = AgentDecisionStatus.BLOCKED
         remaining_items = tuple(
             dict.fromkeys(
                 (*record.coverage.get("conditional", ()), *record.coverage.get("unresolved", ()))
@@ -115,7 +136,7 @@ class DecisionState:
             active_assumptions=record.assumptions,
             remaining_unresolved_items=remaining_items,
             current_validation=record.validation,
-            status=status,
+            agent_status=status,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -130,7 +151,24 @@ class DecisionState:
             "activeAssumptions": [dict(value) for value in self.active_assumptions],
             "remainingUnresolvedItems": list(self.remaining_unresolved_items),
             "currentValidation": list(self.current_validation),
-            "status": self.status,
+            "agentStatus": self.agent_status.value,
+        }
+
+
+@dataclass(frozen=True)
+class FinalDecisionState:
+    agent_decision_state: DecisionState
+    deterministic_validation_status: DeterministicValidationStatus
+    effective_resolution_status: EffectiveResolutionStatus
+    warnings: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "agentDecisionState": self.agent_decision_state.to_dict(),
+            "agentStatus": self.agent_decision_state.agent_status.value,
+            "deterministicValidationStatus": self.deterministic_validation_status.value,
+            "effectiveResolutionStatus": self.effective_resolution_status.value,
+            "warnings": list(self.warnings),
         }
 
 
@@ -426,7 +464,7 @@ class RunResult:
     delivery: DeliveryResult | None = None
     cycles_completed: int = 0
     agent_summaries: tuple[str, ...] = ()
-    final_decision_state: DecisionState | None = None
+    final_decision_state: FinalDecisionState | None = None
     decision_event_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:

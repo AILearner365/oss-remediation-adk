@@ -19,7 +19,12 @@ from .deterministic.scanner import ScannerPreflightError, VulnerabilityScanner, 
 from .deterministic.validation import DeterministicValidator
 from .integrations.delivery import DeliveryAdapter, DeliveryContext, ManualDeliveryAdapter
 from .models import (
+    AgentDecisionStatus,
     DeliveryResult,
+    DeterministicValidationStatus,
+    DecisionState,
+    EffectiveResolutionStatus,
+    FinalDecisionState,
     Outcome,
     RepositoryBaseline,
     RunResult,
@@ -210,7 +215,7 @@ class AutonomousRemediationOrchestrator:
                 last_validation = validator.validate(cycle, baseline)
                 if (
                     decision_state is not None
-                    and decision_state.status == "READY"
+                    and decision_state.agent_status == AgentDecisionStatus.READY
                     and not last_validation.passed
                 ):
                     capabilities.decisions.warn(
@@ -219,7 +224,8 @@ class AutonomousRemediationOrchestrator:
                         decisionId=decision_state.latest_decision_id,
                     )
                 elif last_validation.passed and (
-                    decision_state is None or decision_state.status != "READY"
+                    decision_state is None
+                    or decision_state.agent_status != AgentDecisionStatus.READY
                 ):
                     capabilities.decisions.warn(
                         cycle,
@@ -287,7 +293,7 @@ class AutonomousRemediationOrchestrator:
                     last_validation,
                     working_state,
                     capabilities.decisions.current_state,
-                    capabilities.decisions.recent_records(),
+                    capabilities.decisions.all_records(),
                 )
         except BudgetExceeded as exc:
             reason = str(exc)
@@ -362,9 +368,13 @@ class AutonomousRemediationOrchestrator:
 
     def _finish(self, trace: TraceStore, result: RunResult) -> RunResult:
         if self._decision_tracker and self._decision_tracker.current_state is not None:
+            final_decision_state = _resolve_final_decision_state(
+                result,
+                self._decision_tracker.current_state,
+            )
             result = replace(
                 result,
-                final_decision_state=self._decision_tracker.current_state,
+                final_decision_state=final_decision_state,
                 decision_event_count=self._decision_tracker.event_count,
             )
         trace.write_json("final-result.json", result.to_dict())
@@ -378,3 +388,53 @@ def _is_scanner_infrastructure_failure(report: ScanReport | None) -> bool:
         and not report.succeeded
         and report.failure_kind in _SCANNER_INFRASTRUCTURE_FAILURES
     )
+
+
+def _resolve_final_decision_state(
+    result: RunResult,
+    agent_state: DecisionState,
+) -> FinalDecisionState:
+    validation_status = _deterministic_validation_status(result.validation)
+    if validation_status == DeterministicValidationStatus.PASSED:
+        effective_status = EffectiveResolutionStatus.VALIDATED
+    elif validation_status == DeterministicValidationStatus.FAILED:
+        effective_status = (
+            EffectiveResolutionStatus.BLOCKED
+            if result.outcome == Outcome.NO_SAFE_REMEDIATION
+            and agent_state.agent_status == AgentDecisionStatus.BLOCKED
+            else EffectiveResolutionStatus.VALIDATION_REJECTED
+        )
+    else:
+        effective_status = EffectiveResolutionStatus.INCOMPLETE
+
+    warnings = []
+    if (
+        agent_state.agent_status == AgentDecisionStatus.READY
+        and validation_status != DeterministicValidationStatus.PASSED
+    ):
+        warnings.append("Agent readiness was not confirmed by deterministic validation")
+    if (
+        validation_status == DeterministicValidationStatus.PASSED
+        and agent_state.agent_status != AgentDecisionStatus.READY
+    ):
+        warnings.append(
+            "Deterministic validation passed despite the agent not recording readiness"
+        )
+    return FinalDecisionState(
+        agent_decision_state=agent_state,
+        deterministic_validation_status=validation_status,
+        effective_resolution_status=effective_status,
+        warnings=tuple(warnings),
+    )
+
+
+def _deterministic_validation_status(
+    validation: ValidationReport | None,
+) -> DeterministicValidationStatus:
+    if validation is None:
+        return DeterministicValidationStatus.NOT_RUN
+    if validation.scan is not None and not validation.scan.succeeded:
+        return DeterministicValidationStatus.INCOMPLETE
+    if validation.passed:
+        return DeterministicValidationStatus.PASSED
+    return DeterministicValidationStatus.FAILED

@@ -165,9 +165,10 @@ class _ScriptedAgentSession:
 
 
 class _DecisionAwareAgentSession(_ScriptedAgentSession):
-    def __init__(self, capabilities, edits):
+    def __init__(self, capabilities, edits, completion_action="READY_FOR_INDEPENDENT_VALIDATION"):
         super().__init__(capabilities, edits)
         self.latest_decision_id = None
+        self.completion_action = completion_action
 
     async def run_turn(self, message):
         cycle = len(self.messages) + 1
@@ -175,11 +176,12 @@ class _DecisionAwareAgentSession(_ScriptedAgentSession):
         decision = self._record(action, f"cycle {cycle} strategy")
         self.latest_decision_id = decision["decision"]["decisionId"]
         turn = await super().run_turn(message)
-        readiness = self._record(
-            "READY_FOR_INDEPENDENT_VALIDATION",
-            f"cycle {cycle} self-validation complete",
-        )
-        self.latest_decision_id = readiness["decision"]["decisionId"]
+        if self.completion_action:
+            completion = self._record(
+                self.completion_action,
+                f"cycle {cycle} self-validation conclusion",
+            )
+            self.latest_decision_id = completion["decision"]["decisionId"]
         return turn
 
     def _record(self, action, strategy):
@@ -189,20 +191,46 @@ class _DecisionAwareAgentSession(_ScriptedAgentSession):
             strategy=strategy,
             rationale="Repository and validation evidence support this direction",
             evidence=["fixture repository evidence"],
-            coverage_satisfied=["requested repository change"],
+            coverage_satisfied=["requested repository change", "local self-validation"],
             coverage_conditional=[],
-            coverage_unresolved=["independent deterministic validation"],
+            coverage_unresolved=(
+                ["concrete blocker prevents completion"] if action == "BLOCK" else []
+            ),
             assumptions=[
                 {
                     "assumption": "The edited value controls the fixture result",
-                    "test": "Run deterministic fixture validation",
+                    "test": "observed: deterministic fixture pre-check completed",
                     "status": "TESTED",
                 }
             ],
-            validation=["fixture self-check complete"],
+            validation=["observed: fixture self-check complete"],
             previous_decision_id=self.latest_decision_id,
             alternatives=[],
         )
+
+
+class _DecisionThenFailingAgentSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+
+    async def run_turn(self, message):
+        self.capabilities.record_decision(
+            action="SELECT",
+            diagnosis="Runtime work began but did not complete",
+            strategy="Inspect and remediate using repository evidence",
+            rationale="Initial evidence justified beginning investigation",
+            evidence=["observed: baseline finding"],
+            coverage_satisfied=[],
+            coverage_conditional=[],
+            coverage_unresolved=["all completion criteria"],
+            assumptions=[],
+            validation=["planned: run focused validation"],
+            alternatives=[],
+        )
+        raise RuntimeError("model service unavailable after decision")
+
+    async def close(self):
+        return None
 
 
 class _FailingAgentSession:
@@ -354,8 +382,11 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
 
         self.assertTrue(result.validation.passed)
         self.assertEqual(4, result.decision_event_count)
-        self.assertEqual("D4", result.final_decision_state.latest_decision_id)
-        self.assertIn('"latestDecisionId": "D2"', sessions[0].messages[1])
+        self.assertEqual(
+            "D4",
+            result.final_decision_state.agent_decision_state.latest_decision_id,
+        )
+        self.assertIn('"latestDecisionId":"D2"', sessions[0].messages[1])
         self.assertIn('"previousSelfValidationConclusion"', sessions[0].messages[1])
         self.assertIn("New deterministic validation evidence", sessions[0].messages[1])
         self.assertLess(len(sessions[0].messages[1]), 25_000)
@@ -381,7 +412,19 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             (workspace_root / "artifacts" / "final-result.json").read_text(encoding="utf-8")
         )
         self.assertEqual(4, final_result["decisionEventCount"])
-        self.assertEqual("D4", final_result["finalDecisionState"]["latestDecisionId"])
+        self.assertEqual(
+            "D4",
+            final_result["finalDecisionState"]["agentDecisionState"]["latestDecisionId"],
+        )
+        self.assertEqual("READY", final_result["finalDecisionState"]["agentStatus"])
+        self.assertEqual(
+            "PASSED",
+            final_result["finalDecisionState"]["deterministicValidationStatus"],
+        )
+        self.assertEqual(
+            "VALIDATED",
+            final_result["finalDecisionState"]["effectiveResolutionStatus"],
+        )
         events = [
             json.loads(line)
             for line in (workspace_root / "artifacts" / "events.jsonl")
@@ -394,6 +437,67 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertTrue(
             any("contradicted deterministic validation" in event["warning"] for event in warnings)
         )
+
+    def test_ready_then_failed_validation_is_effectively_rejected(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DecisionAwareAgentSession(
+                capabilities, [("1.0", "1.5")]
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self._assert_final_decision_status(result, "READY", "FAILED", "VALIDATION_REJECTED")
+
+    def test_ready_then_scanner_failure_is_effectively_incomplete(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DecisionAwareAgentSession(
+                capabilities, [("1.0", "2.0")]
+            ),
+            scanner_factory=_InfrastructureFailingScanner,
+        ).run()
+
+        self._assert_final_decision_status(result, "READY", "INCOMPLETE", "INCOMPLETE")
+
+    def test_blocked_agent_belief_does_not_override_successful_validation(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DecisionAwareAgentSession(
+                capabilities,
+                [("1.0", "2.0")],
+                completion_action="BLOCK",
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self._assert_final_decision_status(result, "BLOCKED", "PASSED", "VALIDATED")
+        self.assertTrue(result.final_decision_state.warnings)
+
+    def test_omitted_readiness_does_not_override_successful_validation(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DecisionAwareAgentSession(
+                capabilities,
+                [("1.0", "2.0")],
+                completion_action=None,
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self._assert_final_decision_status(result, "IN_PROGRESS", "PASSED", "VALIDATED")
+        self.assertTrue(result.final_decision_state.warnings)
+
+    def test_runtime_failure_before_validation_reports_not_run_and_incomplete(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DecisionThenFailingAgentSession(
+                capabilities
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self._assert_final_decision_status(result, "IN_PROGRESS", "NOT_RUN", "INCOMPLETE")
 
     def test_no_decision_events_preserves_legacy_cycle_and_final_shapes(self):
         result = AutonomousRemediationOrchestrator(
@@ -655,6 +759,19 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner=ScannerConfig(executable="fake"),
             delivery=DeliveryConfig(mode="manual"),
         )
+
+    def _assert_final_decision_status(
+        self,
+        result,
+        agent_status,
+        validation_status,
+        effective_status,
+    ):
+        state = result.final_decision_state
+        self.assertIsNotNone(state)
+        self.assertEqual(agent_status, state.agent_decision_state.agent_status.value)
+        self.assertEqual(validation_status, state.deterministic_validation_status.value)
+        self.assertEqual(effective_status, state.effective_resolution_status.value)
 
 
 def _finding():

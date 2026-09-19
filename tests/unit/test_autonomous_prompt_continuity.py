@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+import json
 
 from autonomous_oss_remediation_agent.models import (
     CommandResult,
@@ -15,7 +16,9 @@ from autonomous_oss_remediation_agent.models import (
 )
 from autonomous_oss_remediation_agent.prompt import (
     AGENT_INSTRUCTION,
+    MAX_DECISION_CONTEXT_CHARACTERS,
     extract_working_state,
+    serialize_decision_context,
     validation_feedback,
 )
 
@@ -63,6 +66,9 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("READY_FOR_INDEPENDENT_VALIDATION", AGENT_INSTRUCTION)
         self.assertIn("Independent deterministic validation remains authoritative", AGENT_INSTRUCTION)
         self.assertIn("Do not record routine navigation", AGENT_INSTRUCTION)
+        self.assertIn("complete current snapshot", AGENT_INSTRUCTION)
+        self.assertIn("never a partial delta", AGENT_INSTRUCTION)
+        self.assertIn("Do not rely on deterministic code to infer or merge", AGENT_INSTRUCTION)
 
     def test_failed_validation_feedback_preserves_objective_and_prior_strategy(self):
         prior_state = (
@@ -149,10 +155,46 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("implementation defect", feedback)
         self.assertIn("strategy deficiency", feedback)
         self.assertIn("environmental/tooling problem", feedback)
-        self.assertIn('"latestDecisionId": "D2"', feedback)
+        self.assertIn('"latestDecisionId":"D2"', feedback)
         self.assertIn('"previousSelfValidationConclusion"', feedback)
-        self.assertIn('"action": "READY_FOR_INDEPENDENT_VALIDATION"', feedback)
+        self.assertIn('"action":"READY_FOR_INDEPENDENT_VALIDATION"', feedback)
         self.assertIn("Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`", feedback)
+
+    def test_decision_context_is_bounded_valid_json_and_keeps_newest_transitions(self):
+        coverage_values = tuple(f"criterion-{index}-" + ("x" * 280) for index in range(12))
+        decisions = tuple(
+            DecisionRecord(
+                decision_id=f"D{index}",
+                cycle=index,
+                action=(DecisionAction.SELECT if index == 1 else DecisionAction.REVISE),
+                diagnosis="current diagnosis",
+                strategy=f"strategy-{index}-" + ("s" * 1200),
+                rationale=f"rationale-{index}-" + ("r" * 1200),
+                evidence=tuple(f"evidence-{item}-" + ("e" * 500) for item in range(12)),
+                coverage={
+                    "satisfied": coverage_values,
+                    "conditional": (),
+                    "unresolved": (),
+                },
+                assumptions=(),
+                validation=("observed: focused validation passed",),
+                previous_decision_id=f"D{index - 1}" if index > 1 else None,
+            )
+            for index in range(1, 31)
+        )
+
+        serialized = serialize_decision_context(
+            DecisionState.from_record(decisions[-1]),
+            decisions,
+        )
+        context = json.loads(serialized)
+
+        self.assertLessEqual(len(serialized), MAX_DECISION_CONTEXT_CHARACTERS)
+        self.assertTrue(context["historyTruncated"])
+        self.assertLess(context["includedDecisionCount"], context["totalDecisionCount"])
+        self.assertEqual(30, context["totalDecisionCount"])
+        self.assertEqual("D30", context["materialDecisionHistory"][-1]["decisionId"])
+        self.assertEqual("D30", context["currentDecisionState"]["latestDecisionId"])
 
 
 def _validation_report() -> ValidationReport:
