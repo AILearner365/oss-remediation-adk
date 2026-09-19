@@ -710,29 +710,32 @@ def _remediation_outcome(
 
 
 def _has_safe_partial_improvement(report: ValidationReport) -> bool:
-    if not report.scan or not report.scan.succeeded:
+    if not report.scan or not report.scan.succeeded or not report.target_comparison_complete:
         return False
     if not report.resolved_target_findings or not report.remaining_target_findings:
         return False
     if not report.changed_files or report.diagnostic_artifacts or not report.delivery_eligible:
         return False
-    safety_names = {
-        "baseline_ancestry",
-        "git_change_evidence",
-        "build_test_startup",
-        "fresh_vulnerability_scan",
-        "no_new_prohibited_findings",
-        "delivery_diff_hygiene",
-    }
-    checks_by_name = {check.name: check for check in report.checks}
-    if not safety_names.issubset(checks_by_name):
-        return False
-    safety = [
-        check
-        for check in report.checks
-        if check.name in safety_names or "constraint" in check.name or "policy" in check.name
+    improvement_checks = [
+        check for check in report.checks if check.name == "target_findings_improved"
     ]
-    return all(check.passed for check in safety)
+    resolution_checks = [
+        check for check in report.checks if check.name == "target_findings_resolved"
+    ]
+    scan_checks = [
+        check for check in report.checks if check.name == "fresh_vulnerability_scan"
+    ]
+    if len(improvement_checks) != 1 or not improvement_checks[0].passed:
+        return False
+    if len(resolution_checks) != 1 or resolution_checks[0].passed:
+        return False
+    if len(scan_checks) != 1 or not scan_checks[0].passed:
+        return False
+    return all(
+        check.passed
+        for check in report.checks
+        if check.name != "target_findings_resolved"
+    )
 
 
 def _is_scanner_infrastructure_failure(report: ScanReport | None) -> bool:

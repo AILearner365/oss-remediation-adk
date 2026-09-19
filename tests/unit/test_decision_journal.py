@@ -5,12 +5,16 @@ import unittest
 
 from autonomous_oss_remediation_agent.journal import (
     CaptureStatus,
+    CycleCapture,
+    DeliveryEligibility,
     INTENT_SECTIONS,
     JournalLifecycle,
     JournalPhase,
     JournalStore,
     OUTCOME_SECTIONS,
     OUTCOME_STATUSES,
+    RemediationOutcome,
+    render_final_resolution,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
@@ -199,6 +203,31 @@ class DecisionJournalTests(unittest.TestCase):
             result = lifecycle.submit_intent(1, answers)
             self.assertFalse(result.accepted)
             self.assertTrue(any(expected in error for error in result.errors), result.errors)
+
+    def test_unstructured_coverage_is_preserved_without_reclassification(self):
+        coverage = "The first requirement passed; the second still needs external evidence."
+        cycle = CycleCapture(
+            outcome_answers={
+                "Requirement and problem coverage": coverage,
+                "Final approach present at cycle end": "Preserved implementation.",
+            }
+        )
+
+        rendered = render_final_resolution(
+            RemediationOutcome.INCONCLUSIVE,
+            "Original problem",
+            {1: cycle},
+            None,
+            CaptureStatus.COMPLETE,
+            DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "No delivery.",
+            "Evidence remains incomplete.",
+        )
+
+        conditional = rendered.split("### Conditional", 1)[1].split("### Unresolved", 1)[0]
+        self.assertNotIn(coverage, conditional)
+        self.assertIn("### Uncategorized model-reported coverage", rendered)
+        self.assertIn(coverage, rendered)
 
     @staticmethod
     def _replace(answers, section, answer):

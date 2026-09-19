@@ -115,24 +115,35 @@ class DeterministicValidator:
             )
         except ScannerPreflightError as exc:
             checks.append(ValidationCheck("fresh_vulnerability_scan", False, str(exc)))
-        final_findings = scan_report.findings if scan_report and scan_report.succeeded else ()
-        remaining_targets = [
-            target.to_dict()
-            for target in baseline.target_findings
-            if any(target.matches(current) for current in final_findings)
-        ]
-        resolved_targets = [
-            target.to_dict()
-            for target in baseline.target_findings
-            if not any(target.matches(current) for current in final_findings)
-        ]
+        target_comparison_complete = bool(scan_report and scan_report.succeeded)
+        final_findings = scan_report.findings if target_comparison_complete else ()
+        remaining_targets = (
+            [
+                target.to_dict()
+                for target in baseline.target_findings
+                if any(target.matches(current) for current in final_findings)
+            ]
+            if target_comparison_complete
+            else []
+        )
+        resolved_targets = (
+            [
+                target.to_dict()
+                for target in baseline.target_findings
+                if not any(target.matches(current) for current in final_findings)
+            ]
+            if target_comparison_complete
+            else []
+        )
         checks.append(
             ValidationCheck(
                 "target_findings_improved",
-                bool(scan_report and scan_report.succeeded)
+                target_comparison_complete
                 and (not baseline.target_findings or bool(resolved_targets)),
                 (
-                    f"{len(resolved_targets)} of {len(baseline.target_findings)} original target findings are absent"
+                    "Target comparison unavailable because the fresh scan did not complete"
+                    if not target_comparison_complete
+                    else f"{len(resolved_targets)} of {len(baseline.target_findings)} original target findings are absent"
                     if resolved_targets
                     else (
                         "No original target finding was present in the baseline"
@@ -144,15 +155,25 @@ class DeterministicValidator:
                     "resolved": resolved_targets,
                     "remaining": remaining_targets,
                     "baselineTargetCount": len(baseline.target_findings),
+                    "comparisonComplete": target_comparison_complete,
                 },
             )
         )
         checks.append(
             ValidationCheck(
                 "target_findings_resolved",
-                not remaining_targets and bool(scan_report and scan_report.succeeded),
-                "Requested target findings are absent" if not remaining_targets else "Requested target findings remain",
-                {"remaining": remaining_targets},
+                target_comparison_complete and not remaining_targets,
+                (
+                    "Target comparison unavailable because the fresh scan did not complete"
+                    if not target_comparison_complete
+                    else "Requested target findings are absent"
+                    if not remaining_targets
+                    else "Requested target findings remain"
+                ),
+                {
+                    "remaining": remaining_targets,
+                    "comparisonComplete": target_comparison_complete,
+                },
             )
         )
         prohibited = set(self.request.constraints.prohibited_new_severities)
@@ -166,8 +187,17 @@ class DeterministicValidator:
             ValidationCheck(
                 "no_new_prohibited_findings",
                 not new_findings and bool(scan_report and scan_report.succeeded),
-                "No new prohibited findings were introduced" if not new_findings else "New prohibited findings were introduced",
-                {"newFindings": new_findings},
+                (
+                    "New prohibited finding comparison unavailable because the fresh scan did not complete"
+                    if not target_comparison_complete
+                    else "No new prohibited findings were introduced"
+                    if not new_findings
+                    else "New prohibited findings were introduced"
+                ),
+                {
+                    "newFindings": new_findings,
+                    "comparisonComplete": target_comparison_complete,
+                },
             )
         )
         checks.extend(
@@ -214,6 +244,7 @@ class DeterministicValidator:
             diagnostic_artifacts=diagnostic_artifacts,
             resolved_target_findings=tuple(resolved_targets),
             remaining_target_findings=tuple(remaining_targets),
+            target_comparison_complete=target_comparison_complete,
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
         self.trace.append_event("validation", cycle=cycle, passed=report.passed, treeDigest=digest)

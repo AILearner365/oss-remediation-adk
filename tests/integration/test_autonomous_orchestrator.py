@@ -29,6 +29,7 @@ from autonomous_oss_remediation_agent.models import (
     VulnerabilityFinding,
 )
 from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner
+from autonomous_oss_remediation_agent.deterministic.scanner import ScannerPreflightError
 from autonomous_oss_remediation_agent.journal import JournalPhase
 from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 
@@ -151,6 +152,13 @@ class _BaselineInfrastructureFailingScanner(_InfrastructureFailingScanner):
             backend="xray",
             failure_kind=ScanFailureKind.BACKEND,
         )
+
+
+class _ValidationRaisingScanner(_FixtureScanner):
+    def scan(self, repository, severity_scope, label):
+        if label == "baseline":
+            return super().scan(repository, severity_scope, label)
+        raise ScannerPreflightError("validation scanner unavailable")
 
 
 class _ScriptedAgentSession:
@@ -620,6 +628,19 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(1, len(sessions[0].messages))
         self.assertTrue(sessions[0].closed)
         self.assertEqual(ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, result.validation.scan.effective_outcome)
+        self._assert_target_comparison_incomplete(result)
+
+    def test_scanner_exception_does_not_infer_target_resolution(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
+                capabilities, [("1.0", "2.0")], "PARTIALLY_REMEDIATED"
+            ),
+            scanner_factory=_ValidationRaisingScanner,
+        ).run()
+
+        self.assertIsNone(result.validation.scan)
+        self._assert_target_comparison_incomplete(result)
 
     def test_baseline_scanner_failure_stops_before_agent_creation(self):
         invoked = []
@@ -830,6 +851,22 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner=ScannerConfig(executable="fake"),
             delivery=DeliveryConfig(mode="manual"),
         )
+
+    def _assert_target_comparison_incomplete(self, result):
+        self.assertFalse(result.validation.target_comparison_complete)
+        self.assertEqual((), result.validation.resolved_target_findings)
+        self.assertEqual((), result.validation.remaining_target_findings)
+        self.assertEqual("INCOMPLETE", result.validation_status)
+        self.assertNotEqual("PARTIALLY_REMEDIATED", result.remediation_outcome)
+        payload = result.validation.to_dict()
+        self.assertFalse(payload["targetComparisonComplete"])
+        self.assertEqual([], payload["resolvedTargetFindings"])
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        validation_section = journal.split("Deterministic Validation", 1)[1]
+        self.assertIn("Target comparison unavailable because the fresh scan did not complete", validation_section)
+        self.assertIn("Target comparison completed:** No", validation_section)
+        self.assertNotIn("original target findings are absent", validation_section)
+        self.assertNotIn("Requested target findings are absent", validation_section)
 
 
 def _finding():

@@ -219,6 +219,64 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
         self.assertFalse((self.workspace.repository / "mutated.txt").exists())
 
+    def test_file_listing_bounds_traversal_and_continues_without_duplicates(self):
+        for index in range(17):
+            suffix = "txt" if index % 2 == 0 else "md"
+            (self.workspace.repository / f"file-{index:02d}.{suffix}").write_text(
+                str(index), encoding="utf-8"
+            )
+        before = {
+            path.name: path.read_bytes()
+            for path in self.workspace.repository.iterdir() if path.is_file()
+        }
+
+        pages = []
+        cursor = None
+        while True:
+            page = self.io.list_files(
+                max_entries=3,
+                cursor=cursor,
+                max_scanned_entries=4,
+            )
+            pages.append(page)
+            self.assertLessEqual(page["scannedEntries"], 4)
+            if page["nextCursor"] is None:
+                break
+            self.assertTrue(page["truncated"])
+            self.assertIn(page["truncationReason"], {"PAGE_LIMIT", "SCAN_LIMIT"})
+            self.assertIsNone(page["totalMatches"])
+            self.assertFalse(page["totalMatchesExact"])
+            cursor = page["nextCursor"]
+
+        files = [path for page in pages for path in page["files"]]
+        self.assertEqual(17, len(files))
+        self.assertEqual(17, len(set(files)))
+        self.assertFalse(pages[-1]["truncated"])
+        self.assertIsNone(pages[-1]["truncationReason"])
+        self.assertTrue(pages[-1]["totalMatchesExact"])
+        self.assertEqual(17, pages[-1]["totalMatches"])
+
+        txt_files = []
+        cursor = None
+        while True:
+            page = self.io.list_files(
+                max_entries=2,
+                cursor=cursor,
+                file_glob="*.txt",
+                max_scanned_entries=3,
+            )
+            txt_files.extend(page["files"])
+            cursor = page["nextCursor"]
+            if cursor is None:
+                break
+        self.assertEqual(9, len(txt_files))
+        self.assertTrue(all(path.endswith(".txt") for path in txt_files))
+        after = {
+            path.name: path.read_bytes()
+            for path in self.workspace.repository.iterdir() if path.is_file()
+        }
+        self.assertEqual(before, after)
+
     def test_pre_intent_mutation_and_shell_are_enforced_and_late_capture_is_detected(self):
         changed = False
         journal = JournalLifecycle(

@@ -265,6 +265,29 @@ class AutonomousValidationDeliveryTests(unittest.TestCase):
             _delivery_eligibility(partial, CaptureStatus.COMPLETE, "PARTIALLY_REMEDIATED"),
         )
 
+    def test_partial_rejects_every_non_resolution_check_failure(self):
+        for failed_check in (
+            "protected_java_version",
+            "allowed_paths",
+            "protected_paths",
+            "build_test_startup",
+        ):
+            with self.subTest(failed_check=failed_check):
+                report = _policy_report(False, 1, 1, failed_check=failed_check)
+                self.assertEqual(ValidationStatus.FAILED, _validation_status(report))
+                self.assertEqual(
+                    "FAILED",
+                    _remediation_outcome(report, "PARTIALLY_REMEDIATED").value,
+                )
+                self.assertEqual(
+                    DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+                    _delivery_eligibility(
+                        report,
+                        CaptureStatus.COMPLETE,
+                        "PARTIALLY_REMEDIATED",
+                    ),
+                )
+
     def _request(self):
         return RemediationRequest(
             repository_url="https://github.com/example/repo.git",
@@ -280,8 +303,8 @@ def _finding():
     )
 
 
-def _policy_report(passed, resolved, remaining, changed=("pom.xml",)):
-    checks = (
+def _policy_report(passed, resolved, remaining, changed=("pom.xml",), failed_check=None):
+    checks = [
         ValidationCheck("baseline_ancestry", True, "passed"),
         ValidationCheck("git_change_evidence", True, "passed"),
         ValidationCheck("build_test_startup", True, "passed"),
@@ -290,13 +313,20 @@ def _policy_report(passed, resolved, remaining, changed=("pom.xml",)):
         ValidationCheck("target_findings_resolved", remaining == 0, "comparison"),
         ValidationCheck("no_new_prohibited_findings", True, "passed"),
         ValidationCheck("delivery_diff_hygiene", True, "passed"),
-    )
+    ]
+    if failed_check:
+        existing = next((index for index, check in enumerate(checks) if check.name == failed_check), None)
+        failed = ValidationCheck(failed_check, False, "failed")
+        if existing is None:
+            checks.append(failed)
+        else:
+            checks[existing] = failed
     resolved_findings = tuple({"vulnerabilityId": f"CVE-R-{index}"} for index in range(resolved))
     remaining_findings = tuple({"vulnerabilityId": f"CVE-U-{index}"} for index in range(remaining))
     return ValidationReport(
         cycle=1,
         passed=passed,
-        checks=checks,
+        checks=tuple(checks),
         changed_files=changed,
         diff_path="diff",
         tree_digest="digest",
@@ -304,6 +334,7 @@ def _policy_report(passed, resolved, remaining, changed=("pom.xml",)):
         delivery_eligible=True,
         resolved_target_findings=resolved_findings,
         remaining_target_findings=remaining_findings,
+        target_comparison_complete=True,
     )
 
 

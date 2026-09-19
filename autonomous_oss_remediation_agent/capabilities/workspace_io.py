@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
+import uuid
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from ..workspace import RunWorkspace, TraceStore
 
@@ -12,6 +15,7 @@ class WorkspaceIO:
         self.workspace = workspace
         self.trace = trace
         self.max_file_bytes = max_file_bytes
+        self._listing_cursors: dict[str, _ListingCursor] = {}
 
     def read_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
         target = self.workspace.repository_path(path, allow_missing=False)
@@ -40,37 +44,76 @@ class WorkspaceIO:
         self,
         path: str = ".",
         max_entries: int = 500,
-        cursor: int = 0,
+        cursor: str | int | None = None,
         file_glob: str | None = None,
+        max_scanned_entries: int = 5_000,
     ) -> dict[str, Any]:
-        directory = self.workspace.repository_directory(path)
         limit = max(1, min(max_entries, 2_000))
-        offset = max(0, cursor)
-        matches: list[str] = []
-        for candidate in sorted(directory.rglob("*")):
-            if ".git" in candidate.parts or not candidate.is_file():
+        scan_limit = max(1, min(max_scanned_entries, 20_000))
+        if cursor in {None, 0, ""}:
+            directory = self.workspace.repository_directory(path)
+            cursor_id = uuid.uuid4().hex
+            state = _ListingCursor(
+                iterator=_walk_repository_entries(directory),
+                path=directory.relative_to(self.workspace.repository).as_posix() or ".",
+                file_glob=file_glob,
+            )
+            self._listing_cursors[cursor_id] = state
+        else:
+            cursor_id = str(cursor)
+            state = self._listing_cursors.get(cursor_id)
+            if state is None:
+                raise ValueError("Unknown or completed listing cursor; start a new listing")
+
+        entries: list[str] = []
+        scanned_entries = 0
+        exhausted = False
+        while scanned_entries < scan_limit and len(entries) < limit:
+            try:
+                candidate, is_file = next(state.iterator)
+            except StopIteration:
+                exhausted = True
+                break
+            scanned_entries += 1
+            state.scanned_entries += 1
+            if not is_file:
                 continue
             relative = candidate.relative_to(self.workspace.repository).as_posix()
-            if file_glob and not candidate.match(file_glob):
+            if state.file_glob and not Path(relative).match(state.file_glob):
                 continue
-            matches.append(relative)
-        entries = matches[offset : offset + limit]
-        next_cursor = offset + len(entries) if offset + len(entries) < len(matches) else None
+            entries.append(relative)
+            state.matched_entries += 1
+
+        if exhausted:
+            self._listing_cursors.pop(cursor_id, None)
+            next_cursor = None
+            truncation_reason = None
+        else:
+            next_cursor = cursor_id
+            truncation_reason = "PAGE_LIMIT" if len(entries) >= limit else "SCAN_LIMIT"
         self.trace.append_event(
             "workspace_list",
-            path=str(path),
+            path=state.path,
             count=len(entries),
-            cursor=offset,
+            cursor=cursor_id,
             nextCursor=next_cursor,
-            fileGlob=file_glob,
+            fileGlob=state.file_glob,
+            scannedEntries=scanned_entries,
+            truncationReason=truncation_reason,
         )
         return {
             "status": "ok",
             "files": entries,
-            "cursor": offset,
+            "path": state.path,
+            "fileGlob": state.file_glob,
+            "cursor": cursor_id,
             "nextCursor": next_cursor,
-            "totalMatches": len(matches),
-            "truncated": next_cursor is not None,
+            "totalMatches": state.matched_entries if exhausted else None,
+            "totalMatchesExact": exhausted,
+            "scannedEntries": scanned_entries,
+            "cumulativeScannedEntries": state.scanned_entries,
+            "truncated": not exhausted,
+            "truncationReason": truncation_reason,
         }
 
     def search_text(
@@ -194,3 +237,32 @@ class WorkspaceIO:
 
 def _sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+@dataclass
+class _ListingCursor:
+    iterator: Iterator[tuple[Path, bool]]
+    path: str
+    file_glob: str | None
+    scanned_entries: int = 0
+    matched_entries: int = 0
+
+
+def _walk_repository_entries(directory: Path) -> Iterator[tuple[Path, bool]]:
+    iterators = [os.scandir(directory)]
+    try:
+        while iterators:
+            try:
+                entry = next(iterators[-1])
+            except StopIteration:
+                iterators.pop().close()
+                continue
+            candidate = Path(entry.path)
+            is_directory = entry.is_dir(follow_symlinks=False)
+            is_file = entry.is_file(follow_symlinks=False)
+            yield candidate, is_file
+            if is_directory and entry.name != ".git":
+                iterators.append(os.scandir(candidate))
+    finally:
+        for iterator in iterators:
+            iterator.close()

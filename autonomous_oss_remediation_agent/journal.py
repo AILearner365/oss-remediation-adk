@@ -643,6 +643,7 @@ def render_validation(
             f"- **State digest:** `{report.tree_digest}`",
             f"- **Diff or evidence artifact:** `{report.diff_path}`",
             f"- **Investigation-only artifacts detected:** {', '.join(diagnostics) or 'None'}",
+            f"- **Target comparison completed:** {'Yes' if report.target_comparison_complete else 'No'}",
             "",
             "## Delivery eligibility",
             "",
@@ -681,7 +682,14 @@ def render_final_resolution(
     latest_answers = latest.outcome_answers if latest else {}
     implemented_approach = latest_answers.get("Final approach present at cycle end", "")
     coverage = latest_answers.get("Requirement and problem coverage", "")
-    coverage_is_structured = "### " in coverage
+    coverage_headings = {
+        line.strip()[4:].strip().casefold()
+        for line in coverage.splitlines()
+        if line.strip().startswith("### ")
+    }
+    coverage_categories = {"satisfied", "conditional", "unresolved", "not applicable"}
+    coverage_is_structured = coverage_categories.issubset(coverage_headings)
+    structured_coverage = coverage if coverage_is_structured else ""
     constraints = latest_answers.get("Constraints and regression assessment", "")
     partial_value = latest_answers.get("Partial-remediation value", "")
     partial = (
@@ -716,21 +724,24 @@ Deterministic validation status and capture quality are reported separately. Run
 ### Satisfied
 
 {_bullets(satisfied)}
-{_captured_block('Model-reported satisfied coverage', _coverage_subsection(coverage, 'Satisfied'))}
+{_captured_block('Model-reported satisfied coverage', _coverage_subsection(structured_coverage, 'Satisfied'))}
 
 ### Conditional
 
-{_captured_block('Model-reported conditional coverage', _coverage_subsection(coverage, 'Conditional'))}
-{_captured_block('Model-reported coverage not separately categorized', coverage) if coverage and not coverage_is_structured else ''}
+{_captured_block('Model-reported conditional coverage', _coverage_subsection(structured_coverage, 'Conditional'))}
 
 ### Unresolved
 
 {_bullets(unresolved)}
-{_captured_block('Model-reported unresolved coverage', _coverage_subsection(coverage, 'Unresolved'))}
+{_captured_block('Model-reported unresolved coverage', _coverage_subsection(structured_coverage, 'Unresolved'))}
 
 ### Not applicable
 
-{_captured_block('Model-reported not-applicable coverage', _coverage_subsection(coverage, 'Not applicable'))}
+{_captured_block('Model-reported not-applicable coverage', _coverage_subsection(structured_coverage, 'Not applicable'))}
+
+{'### Uncategorized model-reported coverage' if coverage and not coverage_is_structured else ''}
+
+{coverage if coverage and not coverage_is_structured else ''}
 
 ## Final evidence
 
@@ -771,7 +782,11 @@ def _validation_contradictions(
         contradictions.append(
             "- Outcome reported no change required, but authoritative Git evidence contains changed files."
         )
-    if outcome_status == "PARTIALLY_REMEDIATED" and resolved == 0:
+    if outcome_status == "PARTIALLY_REMEDIATED" and not report.target_comparison_complete:
+        contradictions.append(
+            "- Outcome reported partial remediation, but target comparison was unavailable because the fresh scan did not complete."
+        )
+    elif outcome_status == "PARTIALLY_REMEDIATED" and resolved == 0:
         contradictions.append(
             "- Outcome reported partial remediation, but deterministic comparison found no original target finding resolved."
         )

@@ -265,6 +265,7 @@ class ValidationReport:
     diagnostic_artifacts: tuple[str, ...] = ()
     resolved_target_findings: tuple[dict[str, Any], ...] = ()
     remaining_target_findings: tuple[dict[str, Any], ...] = ()
+    target_comparison_complete: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -281,6 +282,7 @@ class ValidationReport:
             "diagnosticArtifacts": list(self.diagnostic_artifacts),
             "resolvedTargetFindings": list(self.resolved_target_findings),
             "remainingTargetFindings": list(self.remaining_target_findings),
+            "targetComparisonComplete": self.target_comparison_complete,
         }
 
 

@@ -36,14 +36,26 @@ class DeveloperCapabilitySet:
         self,
         path: str = ".",
         max_entries: int = 500,
-        cursor: int = 0,
+        cursor: str | int | None = None,
         file_glob: str | None = None,
+        max_scanned_entries: int = 5_000,
     ) -> dict[str, Any]:
-        """List a bounded page of repository-relative files, optionally filtered by glob."""
+        """List files with bounded traversal; pass opaque `nextCursor` to continue the same query.
+
+        `truncationReason` distinguishes an output `PAGE_LIMIT` from a traversal `SCAN_LIMIT`.
+        """
         denied = self._require_phase("list_workspace_files", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
-        return self._invoke("list_workspace_files", self.workspace_io.list_files, path, max_entries, cursor, file_glob)
+        return self._invoke(
+            "list_workspace_files",
+            self.workspace_io.list_files,
+            path,
+            max_entries,
+            cursor,
+            file_glob,
+            max_scanned_entries,
+        )
 
     def search_workspace_text(
         self,
