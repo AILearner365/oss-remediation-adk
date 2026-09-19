@@ -59,14 +59,14 @@ class DecisionJournalTests(unittest.TestCase):
         duplicate = self._intent_answers() + [{"section": INTENT_SECTIONS[0], "answer": "duplicate"}]
         cases.append((duplicate, "Duplicate section"))
         placeholder = self._intent_answers()
-        self._replace(placeholder, INTENT_SECTIONS[0], "TODO")
+        self._replace(placeholder, INTENT_SECTIONS[0], "**TODO**")
         cases.append((placeholder, "Placeholder-only"))
         oversized = self._intent_answers()
         self._replace(oversized, INTENT_SECTIONS[0], "x" * 201)
         cases.append((oversized, "exceeds 200"))
         malformed = self._intent_answers()
         self._replace(malformed, INTENT_SECTIONS[0], "```\nunclosed")
-        cases.append((malformed, "unclosed fenced"))
+        cases.append((malformed, "unclosed ``` fenced"))
 
         for answers, expected in cases:
             with self.subTest(expected=expected):
@@ -155,6 +155,50 @@ class DecisionJournalTests(unittest.TestCase):
         context = self.lifecycle.context()
         self.assertLessEqual(len(context), 550)
         self.assertIn("bounded for model input", context)
+
+    def test_run_capture_uses_least_trustworthy_cycle(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.begin_cycle(2)
+        answers = self._intent_answers() + [
+            {"section": "Prior-cycle learning", "answer": "The prior outcome was not captured."},
+            {"section": "Relationship to the prior approach", "answer": "Continue using repository evidence."},
+        ]
+        self.assertTrue(self.lifecycle.submit_intent(2, answers).accepted)
+        self.lifecycle.require_outcome()
+        self.assertTrue(
+            self.lifecycle.submit_outcome(
+                2, "READY_FOR_INDEPENDENT_VALIDATION", "Ready for checks.", self._outcome_answers()
+            ).accepted
+        )
+
+        self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.capture_status(1))
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.capture_status(2))
+        self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.run_capture_status)
+        self.assertEqual(("Cycle 1 capture is INCOMPLETE",), self.lifecycle.capture_warnings())
+
+    def test_limited_markdown_subset_handles_fences_and_rejects_heading_injection(self):
+        accepted = self._intent_answers()
+        self._replace(
+            accepted,
+            INTENT_SECTIONS[0],
+            "Observed code:\n\n```text\n# not a heading\n~~~ also not a closer\n```\n\n### Useful detail\nEvidence follows.",
+        )
+        self.assertTrue(self.lifecycle.submit_intent(1, accepted).accepted)
+
+        for answer, expected in (
+            ("# Injected top level", "level 3-6"),
+            ("~~~text\nunclosed", "unclosed ~~~ fenced"),
+        ):
+            workspace = RunWorkspace.create(self.temp.name)
+            workspace.repository.mkdir()
+            trace = TraceStore(workspace)
+            lifecycle = JournalLifecycle(JournalStore(trace), trace, "contract", lambda: False)
+            lifecycle.begin_cycle(1)
+            answers = self._intent_answers()
+            self._replace(answers, INTENT_SECTIONS[0], answer)
+            result = lifecycle.submit_intent(1, answers)
+            self.assertFalse(result.accepted)
+            self.assertTrue(any(expected in error for error in result.errors), result.errors)
 
     @staticmethod
     def _replace(answers, section, answer):

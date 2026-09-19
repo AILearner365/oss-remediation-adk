@@ -171,6 +171,8 @@ class AutonomousCapabilityTests(unittest.TestCase):
             {
                 "read_workspace_text",
                 "list_workspace_files",
+                "search_workspace_text",
+                "inspect_git_state",
                 "edit_workspace_text",
                 "run_workspace_shell",
                 "submit_cycle_intent",
@@ -184,6 +186,38 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
         names = {tool.name for tool in agent.tools}
         self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
+
+    def test_pre_intent_discovery_is_bounded_read_only_and_finds_late_files(self):
+        for index in range(12):
+            directory = self.workspace.repository / f"module-{index:02d}"
+            directory.mkdir()
+            (directory / "config.txt").write_text(
+                "needle-value\n" if index == 11 else "ordinary\n",
+                encoding="utf-8",
+            )
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
+        before = {
+            path.relative_to(self.workspace.repository).as_posix(): path.read_bytes()
+            for path in self.workspace.repository.rglob("*") if path.is_file()
+        }
+
+        first = capabilities.list_workspace_files(max_entries=5)
+        second = capabilities.list_workspace_files(max_entries=5, cursor=first["nextCursor"])
+        search = capabilities.search_workspace_text("needle-value", max_results=5)
+
+        self.assertTrue(first["truncated"])
+        self.assertNotEqual(first["files"], second["files"])
+        self.assertEqual("module-11/config.txt", search["results"][0]["path"])
+        after = {
+            path.relative_to(self.workspace.repository).as_posix(): path.read_bytes()
+            for path in self.workspace.repository.rglob("*") if path.is_file()
+        }
+        self.assertEqual(before, after)
+        denied = capabilities.edit_workspace_text("write", "mutated.txt", content="no")
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+        self.assertFalse((self.workspace.repository / "mutated.txt").exists())
 
     def test_pre_intent_mutation_and_shell_are_enforced_and_late_capture_is_detected(self):
         changed = False

@@ -121,6 +121,32 @@ class DeterministicValidator:
             for target in baseline.target_findings
             if any(target.matches(current) for current in final_findings)
         ]
+        resolved_targets = [
+            target.to_dict()
+            for target in baseline.target_findings
+            if not any(target.matches(current) for current in final_findings)
+        ]
+        checks.append(
+            ValidationCheck(
+                "target_findings_improved",
+                bool(scan_report and scan_report.succeeded)
+                and (not baseline.target_findings or bool(resolved_targets)),
+                (
+                    f"{len(resolved_targets)} of {len(baseline.target_findings)} original target findings are absent"
+                    if resolved_targets
+                    else (
+                        "No original target finding was present in the baseline"
+                        if not baseline.target_findings
+                        else "No original target finding was resolved"
+                    )
+                ),
+                {
+                    "resolved": resolved_targets,
+                    "remaining": remaining_targets,
+                    "baselineTargetCount": len(baseline.target_findings),
+                },
+            )
+        )
         checks.append(
             ValidationCheck(
                 "target_findings_resolved",
@@ -186,6 +212,8 @@ class DeterministicValidator:
             warnings=warnings,
             cycle_evidence=cycle_evidence,
             diagnostic_artifacts=diagnostic_artifacts,
+            resolved_target_findings=tuple(resolved_targets),
+            remaining_target_findings=tuple(remaining_targets),
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
         self.trace.append_event("validation", cycle=cycle, passed=report.passed, treeDigest=digest)

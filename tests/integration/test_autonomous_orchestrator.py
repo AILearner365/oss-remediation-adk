@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import json
 import hashlib
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -59,6 +60,17 @@ class _CleanAfterBaselineScanner(_FixtureScanner):
         if label == "baseline":
             return report
         return ScanReport(True, (), report.command_result, report.raw_report_path)
+
+
+class _TwoFindingScanner(_FixtureScanner):
+    def scan(self, repository, severity_scope, label):
+        report = super().scan(repository, severity_scope, label)
+        pom = (Path(repository) / "pom.xml").read_text(encoding="utf-8")
+        second = VulnerabilityFinding(
+            "CVE-2024-0002", ("GHSA-second",), "HIGH", "org.example", "other", "org.example:other", "1.0"
+        )
+        findings = (_finding(), second) if "<demo.version>1.0</demo.version>" in pom else (second,)
+        return ScanReport(True, findings, report.command_result, report.raw_report_path)
 
 
 class _RetryingFixtureScanner(OsvScanner):
@@ -253,6 +265,76 @@ class _UnstructuredAgentSession:
         return None
 
 
+class _PromptLearningSession:
+    def __init__(self, capabilities, *, reject_first_intent=False, reject_first_outcome=False):
+        self.capabilities = capabilities
+        self.reject_first_intent = reject_first_intent
+        self.reject_first_outcome = reject_first_outcome
+        self.intent_attempts = 0
+        self.outcome_attempts = 0
+        self.messages = []
+        self.denied_mutation = None
+        self.intent_sections = []
+        self.outcome_sections = []
+
+    @staticmethod
+    def _questionnaire(message):
+        return re.findall(r"^- `([^`]+)`(?: \(required after Cycle 1\))?: ", message, re.MULTILINE)
+
+    async def run_turn(self, message):
+        self.messages.append(message)
+        cycle = self.capabilities.journal.active_cycle
+        sections = self._questionnaire(message)
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            if sections:
+                self.outcome_sections = sections
+            self.outcome_attempts += 1
+            submitted = (
+                self.outcome_sections[1:]
+                if self.reject_first_outcome and self.outcome_attempts == 1
+                else self.outcome_sections
+            )
+            self.capabilities.submit_cycle_outcome(
+                cycle,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "The recorded work is ready for independent validation.",
+                [{"section": section, "answer": f"Observed answer for {section}."} for section in submitted],
+            )
+            return AgentTurnResult("Outcome learned from runtime questionnaire")
+        if sections:
+            self.intent_sections = sections
+        sections = self.intent_sections
+        self.intent_attempts += 1
+        submitted = sections[1:] if self.reject_first_intent and self.intent_attempts == 1 else sections
+        result = self.capabilities.submit_cycle_intent(
+            cycle,
+            [{"section": section, "answer": f"Evidence-based answer for {section}."} for section in submitted],
+        )
+        if result["status"] != "accepted":
+            self.denied_mutation = self.capabilities.edit_workspace_text("write", "forbidden.txt", content="no")
+            return AgentTurnResult("Correcting rejected checkpoint")
+        self.capabilities.edit_workspace_text(
+            "replace",
+            "pom.xml",
+            old_text="<demo.version>1.0</demo.version>",
+            new_text="<demo.version>2.0</demo.version>",
+        )
+        return AgentTurnResult("Executed after learning the questionnaire")
+
+    async def close(self):
+        return None
+
+
+class _MissingFirstOutcomeSession(_ScriptedAgentSession):
+    async def run_turn(self, message):
+        if (
+            self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED
+            and self.capabilities.journal.active_cycle == 1
+        ):
+            return AgentTurnResult("Outcome not submitted")
+        return await super().run_turn(message)
+
+
 class _CommittingAgentSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -354,10 +436,22 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         cycle_two_agent = json.loads(
             (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(encoding="utf-8")
         )
-        self.assertIn("strategy-1", cycle_one_agent["workingState"])
+        self.assertIn("deprecated deterministic compatibility projection", cycle_one_agent["workingState"])
+        self.assertIn("Observed result for Final approach", cycle_one_agent["workingState"])
         self.assertNotIn("cycle 1 complete", cycle_one_agent["workingState"])
         self.assertIn("cycle 1 complete", cycle_one_agent["summary"])
-        self.assertIn("strategy-2", cycle_two_agent["workingState"])
+        self.assertIn("Observed result for Final approach", cycle_two_agent["workingState"])
+        self.assertTrue(cycle_one_agent["workingStateDeprecated"])
+        self.assertIn(result.baseline.commit, sessions[0].messages[1])
+        self.assertIn("CVE-2024-0001", sessions[0].messages[1])
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("# Baseline Contract", journal)
+        self.assertIn(result.baseline.commit, journal)
+        self.assertIn('"targetFindings"', journal)
+        self.assertIn("## How the approach evolved", journal)
+        self.assertIn("Cycle 1 selected direction", journal)
+        self.assertIn("Cycle 2 validation learning", journal)
+        self.assertNotIn("See the immutable cycle", journal)
         cycle_one = json.loads(
             (workspace_root / "artifacts" / "validation" / "cycle-1.json").read_text(encoding="utf-8")
         )
@@ -378,7 +472,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
 
-    def test_missing_working_state_uses_bounded_fallback_without_failing_run(self):
+    def test_working_state_is_generated_without_model_authorship(self):
         sessions = []
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
@@ -387,14 +481,66 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         ).run()
 
         self.assertEqual(Outcome.EXECUTION_LIMIT_REACHED, result.outcome)
+        self.assertEqual("INCONCLUSIVE", result.remediation_outcome)
         cycle = json.loads(
             (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.assertGreater(len(cycle["summary"]), len(cycle["workingState"]))
-        self.assertIn("No structured WORKING_STATE was supplied", cycle["workingState"])
-        self.assertLess(len(cycle["workingState"]), 800)
+        self.assertIn("deprecated deterministic compatibility projection", cycle["workingState"])
+        self.assertIn("Outcome status: INCONCLUSIVE", cycle["workingState"])
+        self.assertNotIn("Investigated without", cycle["workingState"])
+        self.assertTrue(cycle["workingStateDeprecated"])
+
+    def test_model_learns_questionnaires_and_exact_retry_errors_from_runtime_prompt(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _PromptLearningSession(capabilities, reject_first_intent=True)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        session = sessions[0]
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(2, session.intent_attempts)
+        self.assertIn("Missing required section: Problem as received", session.messages[1])
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", session.denied_mutation["failureCode"])
+        self.assertFalse((Path(result.baseline.repository_path) / "forbidden.txt").exists())
+        self.assertIn("Cycle Outcome questionnaire", session.messages[-1])
+
+    def test_outcome_retry_contains_exact_structural_error(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _PromptLearningSession(capabilities, reject_first_outcome=True)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        session = sessions[0]
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(2, session.outcome_attempts)
+        self.assertIn("Missing required section: Work actually performed", session.messages[-1])
+
+    def test_incomplete_cycle_one_capture_is_not_hidden_by_complete_cycle_two(self):
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: _MissingFirstOutcomeSession(
+                capabilities, [("1.0", "1.5"), ("1.5", "2.0")]
+            ),
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("INCOMPLETE", result.capture_status)
+        self.assertIn("Cycle 1 capture is INCOMPLETE", result.capture_warnings)
+        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
+        self.assertEqual([], adapter.contexts)
 
     def test_cycle_evidence_identifies_preserved_and_repeated_repository_state(self):
         sessions = []
@@ -410,7 +556,8 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner_factory=_FixtureScanner,
         ).run()
 
-        self.assertEqual(Outcome.EXECUTION_LIMIT_REACHED, result.outcome)
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("FAILED", result.remediation_outcome)
         workspace_root = Path(result.workspace_root)
         cycle_two = json.loads(
             (workspace_root / "artifacts" / "validation" / "cycle-2.json").read_text(encoding="utf-8")
@@ -485,6 +632,9 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(Outcome.BASELINE_FAILURE, result.outcome)
         self.assertIn("INCOMPLETE_RETRYABLE_FAILURE", result.reason)
         self.assertEqual([], invoked)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("# Preliminary Run Contract", journal)
+        self.assertNotIn("# Baseline Contract", journal)
 
     def test_cycle_budget_exhaustion_is_truthful(self):
         request = self._request(max_cycles=1)
@@ -493,7 +643,8 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(capabilities, []),
             scanner_factory=_FixtureScanner,
         ).run()
-        self.assertEqual(Outcome.EXECUTION_LIMIT_REACHED, result.outcome)
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("FAILED", result.remediation_outcome)
         self.assertFalse(result.validation.passed)
         self.assertEqual(1, result.cycles_completed)
 
@@ -601,6 +752,22 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("pom.xml", result.validation.changed_files)
 
     def test_safe_partial_progress_is_separate_from_full_success_and_manual_only(self):
+        request = replace(self._request(max_cycles=1), vulnerability_ids=())
+        result = AutonomousRemediationOrchestrator(
+            request,
+            agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
+                capabilities, [("1.0", "1.5")], "PARTIALLY_REMEDIATED"
+            ),
+            scanner_factory=_TwoFindingScanner,
+        ).run()
+
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("PARTIALLY_REMEDIATED", result.remediation_outcome)
+        self.assertEqual("PARTIAL", result.validation_status)
+        self.assertEqual("PARTIAL_MANUAL_REVIEW_DELIVERY", result.delivery_eligibility)
+        self.assertIsNone(result.delivery)
+
+    def test_unchanged_target_coverage_is_not_partial_remediation(self):
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
             agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
@@ -609,11 +776,9 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner_factory=_FixtureScanner,
         ).run()
 
-        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
-        self.assertEqual("PARTIALLY_REMEDIATED", result.remediation_outcome)
-        self.assertEqual("PARTIAL", result.validation_status)
-        self.assertEqual("PARTIAL_MANUAL_REVIEW_DELIVERY", result.delivery_eligibility)
-        self.assertIsNone(result.delivery)
+        self.assertEqual("FAILED", result.remediation_outcome)
+        self.assertEqual("FAILED", result.validation_status)
+        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
 
     def test_no_change_outcome_never_invokes_delivery(self):
         adapter = _RecordingDeliveryAdapter()

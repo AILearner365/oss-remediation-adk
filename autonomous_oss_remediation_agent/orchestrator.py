@@ -37,7 +37,7 @@ from .models import (
     ValidationReport,
 )
 from .prompt import (
-    extract_working_state,
+    compatibility_working_state,
     initial_message,
     intent_retry_message,
     outcome_message,
@@ -95,6 +95,7 @@ class AutonomousRemediationOrchestrator:
             trace,
             json.dumps(self._run_contract(None), indent=2, sort_keys=True),
             lambda: False,
+            preliminary_contract=True,
         )
         budget = ExecutionBudget(self.request.budget)
         process_runner = ProcessRunner(workspace, trace, budget, self.request.runtime_policy)
@@ -141,6 +142,9 @@ class AutonomousRemediationOrchestrator:
         )
         lifecycle.set_repository_changed_probe(
             lambda: validator.repository_changed_since_cycle_start(lifecycle.active_cycle, baseline)
+        )
+        lifecycle.append_baseline_contract(
+            json.dumps(self._run_contract(baseline), indent=2, sort_keys=True)
         )
 
         if self.request.vulnerability_ids and not baseline.target_findings:
@@ -211,19 +215,23 @@ class AutonomousRemediationOrchestrator:
                     execution_turn.text,
                     self._execution_evidence(trace, budget, changed_files),
                 )
-                working_state = extract_working_state(execution_turn.text)
                 capture = lifecycle.cycles[cycle]
                 last_validation = validator.validate(cycle, baseline)
                 validation_status = _validation_status(last_validation)
                 last_delivery = _delivery_eligibility(
-                    last_validation, capture.status, lifecycle.outcome_status(cycle)
+                    last_validation,
+                    lifecycle.run_capture_status,
+                    lifecycle.outcome_status(cycle),
+                    delivery_preflight.eligible,
                 )
                 lifecycle.append_validation(last_validation, validation_status, last_delivery)
                 trace.write_json(
                     f"agent/cycle-{cycle}.json",
                     {
                         "summary": execution_turn.text,
-                        "workingState": working_state,
+                        "workingState": compatibility_working_state(
+                            capture.outcome_status, capture.outcome_answers
+                        ),
                         "workingStateDeprecated": True,
                         "outcomeCaptureResponse": outcome_turn.text,
                         "captureStatus": capture.status.value,
@@ -249,7 +257,7 @@ class AutonomousRemediationOrchestrator:
                     reason = f"VALIDATION_SCANNER_FAILURE: {scan.effective_outcome.value}: {scan.error}"
                     break
                 if last_validation.passed:
-                    if not last_validation.changed_files or outcome_status == "NO_CHANGE_REQUIRED":
+                    if not last_validation.changed_files:
                         reason = "No repository change requires delivery"
                         delivery = DeliveryResult(False, "NO_CHANGE_REQUIRED", reason=reason)
                         last_remediation = RemediationOutcome.NO_CHANGE_REQUIRED
@@ -302,7 +310,7 @@ class AutonomousRemediationOrchestrator:
                 if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
                     reason = "Configured operational budget reached"
                     break
-                message = validation_feedback(last_validation, lifecycle.context())
+                message = validation_feedback(last_validation, lifecycle.context(), cycle + 1)
         except BudgetExceeded as exc:
             reason = str(exc)
         except Exception as exc:
@@ -335,7 +343,10 @@ class AutonomousRemediationOrchestrator:
                     last_validation = validator.validate(cycle, baseline)
                     validation_status = _validation_status(last_validation)
                     last_delivery = _delivery_eligibility(
-                        last_validation, lifecycle.capture_status(cycle), lifecycle.outcome_status(cycle)
+                        last_validation,
+                        lifecycle.run_capture_status,
+                        lifecycle.outcome_status(cycle),
+                        delivery_preflight.eligible,
                     )
                     lifecycle.append_validation(last_validation, validation_status, last_delivery)
                     capture = lifecycle.cycles[cycle]
@@ -343,7 +354,9 @@ class AutonomousRemediationOrchestrator:
                         f"agent/cycle-{cycle}.json",
                         {
                             "summary": interrupted_summary,
-                            "workingState": extract_working_state(interrupted_summary),
+                            "workingState": compatibility_working_state(
+                                capture.outcome_status, capture.outcome_answers
+                            ),
                             "workingStateDeprecated": True,
                             "outcomeCaptureResponse": outcome_turn.text,
                             "captureStatus": capture.status.value,
@@ -366,11 +379,14 @@ class AutonomousRemediationOrchestrator:
                 except Exception:
                     pass
 
-        capture_status = lifecycle.capture_status()
+        capture_status = lifecycle.run_capture_status
         validation_status = _validation_status(last_validation)
         if last_validation:
             last_delivery = _delivery_eligibility(
-                last_validation, capture_status, lifecycle.outcome_status()
+                last_validation,
+                capture_status,
+                lifecycle.outcome_status(),
+                delivery_preflight.eligible,
             )
             last_remediation = _remediation_outcome(last_validation, lifecycle.outcome_status())
         result_outcome = (
@@ -450,9 +466,9 @@ class AutonomousRemediationOrchestrator:
             if lifecycle.phase == JournalPhase.EXECUTION:
                 return turn
             capture = lifecycle.cycles[cycle]
-            errors = ["No accepted Cycle Intent submission was received"]
-            if capture.rejected_intents:
-                errors.append(f"Rejected submissions: {capture.rejected_intents}")
+            errors = list(capture.last_intent_errors) or [
+                "No Cycle Intent submission was received in the previous turn"
+            ]
             message = intent_retry_message(cycle, errors)
         return turn
 
@@ -471,9 +487,9 @@ class AutonomousRemediationOrchestrator:
             if lifecycle.phase == JournalPhase.DETERMINISTIC_VALIDATION:
                 return turn
             capture = lifecycle.cycles[cycle]
-            errors = ["No accepted Cycle Outcome submission was received"]
-            if capture.rejected_outcomes:
-                errors.append(f"Rejected submissions: {capture.rejected_outcomes}")
+            errors = list(capture.last_outcome_errors) or [
+                "No Cycle Outcome submission was received in the previous turn"
+            ]
             message = outcome_retry_message(cycle, errors)
         return turn
 
@@ -507,13 +523,7 @@ class AutonomousRemediationOrchestrator:
         delivery: DeliveryEligibility,
         validation: ValidationReport | None,
     ) -> RunResult:
-        capture = lifecycle.capture_status()
-        active_capture = lifecycle.cycles.get(lifecycle.active_cycle)
-        implemented = (
-            active_capture.outcome_answers.get("Final approach present at cycle end", "")
-            if active_capture
-            else ""
-        )
+        capture = lifecycle.run_capture_status
         first_capture = lifecycle.cycles.get(1)
         original_problem = (
             first_capture.intent_answers.get("Problem as received", "")
@@ -525,7 +535,7 @@ class AutonomousRemediationOrchestrator:
             render_final_resolution(
                 remediation,
                 original_problem or json.dumps(self._run_contract(result.baseline), sort_keys=True),
-                implemented,
+                lifecycle.cycles,
                 validation,
                 capture,
                 delivery,
@@ -539,6 +549,7 @@ class AutonomousRemediationOrchestrator:
                 "remediation_outcome": remediation.value,
                 "validation_status": validation_status.value,
                 "capture_status": capture.value,
+                "capture_warnings": lifecycle.capture_warnings(),
                 "delivery_eligibility": delivery.value,
                 "journal_path": str(lifecycle.store.path),
             }
@@ -552,15 +563,42 @@ class AutonomousRemediationOrchestrator:
                 "severityScope": list(self.request.severity_scope),
             },
             "constraints": self.request.to_dict()["constraints"],
+            "completionCriteria": [
+                "required build/test/startup commands pass",
+                "fresh deterministic vulnerability scan succeeds",
+                "requested target findings are absent",
+                "no new prohibited findings are introduced",
+                "typed constraints remain satisfied",
+            ],
+            "requiredCommands": {
+                "build": list(self.request.build_commands),
+                "test": list(self.request.test_commands),
+                "startup": list(self.request.startup_commands),
+            },
             "baseline": (
                 {
                     "commit": baseline.commit,
                     "reference": baseline.reference,
+                    "repositoryPath": baseline.repository_path,
+                    "remoteUrl": baseline.remote_url,
                     "scanBackend": baseline.scan.backend,
                     "targetFindings": [finding.to_dict() for finding in baseline.target_findings],
                 }
                 if baseline
                 else None
+            ),
+            "baselineCommandEvidence": (
+                [
+                    {
+                        "command": result.command,
+                        "exitCode": result.exit_code,
+                        "timedOut": result.timed_out,
+                        "blocked": result.blocked,
+                    }
+                    for result in baseline.build_results
+                ]
+                if baseline
+                else []
             ),
             "budgets": self.request.to_dict()["budget"],
         }
@@ -620,17 +658,23 @@ def _validation_status(report: ValidationReport | None) -> ValidationStatus:
         return ValidationStatus.PASSED
     if report.scan is None or not report.scan.succeeded:
         return ValidationStatus.INCOMPLETE
-    safety_names = {"baseline_ancestry", "git_change_evidence", "build_test_startup", "no_new_prohibited_findings", "delivery_diff_hygiene"}
-    safety = [check for check in report.checks if check.name in safety_names or "constraint" in check.name or "policy" in check.name]
-    return ValidationStatus.PARTIAL if safety and all(check.passed for check in safety) else ValidationStatus.FAILED
+    return ValidationStatus.PARTIAL if _has_safe_partial_improvement(report) else ValidationStatus.FAILED
 
 
 def _delivery_eligibility(
     report: ValidationReport,
     capture: CaptureStatus,
     outcome_status: str | None,
+    automatic_delivery_available: bool = True,
 ) -> DeliveryEligibility:
-    if report.passed and report.changed_files and report.delivery_eligible and capture == CaptureStatus.COMPLETE:
+    if (
+        report.passed
+        and report.changed_files
+        and report.delivery_eligible
+        and capture == CaptureStatus.COMPLETE
+        and outcome_status == "READY_FOR_INDEPENDENT_VALIDATION"
+        and automatic_delivery_available
+    ):
         return DeliveryEligibility.FULL_AUTOMATIC_DELIVERY
     if (
         _validation_status(report) == ValidationStatus.PARTIAL
@@ -648,15 +692,47 @@ def _remediation_outcome(
     outcome_status: str | None,
 ) -> RemediationOutcome:
     if report.passed:
-        return RemediationOutcome.NO_CHANGE_REQUIRED if not report.changed_files or outcome_status == "NO_CHANGE_REQUIRED" else RemediationOutcome.FULLY_VALIDATED
+        return RemediationOutcome.NO_CHANGE_REQUIRED if not report.changed_files else RemediationOutcome.FULLY_VALIDATED
+    if _has_safe_partial_improvement(report):
+        return RemediationOutcome.PARTIALLY_REMEDIATED
+    if report.scan is None or not report.scan.succeeded:
+        if outcome_status == "FAILED":
+            return RemediationOutcome.FAILED
+        if outcome_status == "BLOCKED":
+            return RemediationOutcome.BLOCKED
+        return RemediationOutcome.INCONCLUSIVE
     mapping = {
-        "PARTIALLY_REMEDIATED": RemediationOutcome.PARTIALLY_REMEDIATED,
         "BLOCKED": RemediationOutcome.BLOCKED,
-        "FAILED": RemediationOutcome.FAILED,
         "INCONCLUSIVE": RemediationOutcome.INCONCLUSIVE,
-        "NO_CHANGE_REQUIRED": RemediationOutcome.INCONCLUSIVE,
+        "FAILED": RemediationOutcome.FAILED,
     }
-    return mapping.get(outcome_status, RemediationOutcome.INCONCLUSIVE)
+    return mapping.get(outcome_status, RemediationOutcome.FAILED)
+
+
+def _has_safe_partial_improvement(report: ValidationReport) -> bool:
+    if not report.scan or not report.scan.succeeded:
+        return False
+    if not report.resolved_target_findings or not report.remaining_target_findings:
+        return False
+    if not report.changed_files or report.diagnostic_artifacts or not report.delivery_eligible:
+        return False
+    safety_names = {
+        "baseline_ancestry",
+        "git_change_evidence",
+        "build_test_startup",
+        "fresh_vulnerability_scan",
+        "no_new_prohibited_findings",
+        "delivery_diff_hygiene",
+    }
+    checks_by_name = {check.name: check for check in report.checks}
+    if not safety_names.issubset(checks_by_name):
+        return False
+    safety = [
+        check
+        for check in report.checks
+        if check.name in safety_names or "constraint" in check.name or "policy" in check.name
+    ]
+    return all(check.passed for check in safety)
 
 
 def _is_scanner_infrastructure_failure(report: ScanReport | None) -> bool:

@@ -32,12 +32,47 @@ class DeveloperCapabilitySet:
             return denied
         return self._invoke("read_workspace_text", self.workspace_io.read_text, path, start_line, end_line)
 
-    def list_workspace_files(self, path: str = ".", max_entries: int = 500) -> dict[str, Any]:
-        """List repository-relative files for read-only discovery."""
+    def list_workspace_files(
+        self,
+        path: str = ".",
+        max_entries: int = 500,
+        cursor: int = 0,
+        file_glob: str | None = None,
+    ) -> dict[str, Any]:
+        """List a bounded page of repository-relative files, optionally filtered by glob."""
         denied = self._require_phase("list_workspace_files", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
-        return self._invoke("list_workspace_files", self.workspace_io.list_files, path, max_entries)
+        return self._invoke("list_workspace_files", self.workspace_io.list_files, path, max_entries, cursor, file_glob)
+
+    def search_workspace_text(
+        self,
+        query: str,
+        path: str = ".",
+        file_glob: str | None = None,
+        max_results: int = 100,
+        max_files: int = 5_000,
+    ) -> dict[str, Any]:
+        """Search bounded repository text content without invoking a shell."""
+        denied = self._require_phase("search_workspace_text", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
+        if denied:
+            return denied
+        return self._invoke(
+            "search_workspace_text",
+            self.workspace_io.search_text,
+            query,
+            path,
+            file_glob,
+            max_results,
+            max_files,
+        )
+
+    def inspect_git_state(self, max_log_entries: int = 10) -> dict[str, Any]:
+        """Inspect bounded Git status, branch, HEAD, and recent commit metadata read-only."""
+        denied = self._require_phase("inspect_git_state", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
+        if denied:
+            return denied
+        return self._invoke("inspect_git_state", self._inspect_git_state, max_log_entries)
 
     def edit_workspace_text(
         self,
@@ -99,6 +134,8 @@ class DeveloperCapabilitySet:
         return [
             FunctionTool(self.read_workspace_text),
             FunctionTool(self.list_workspace_files),
+            FunctionTool(self.search_workspace_text),
+            FunctionTool(self.inspect_git_state),
             FunctionTool(self.edit_workspace_text),
             FunctionTool(self.run_workspace_shell),
             FunctionTool(self.submit_cycle_intent),
@@ -107,10 +144,10 @@ class DeveloperCapabilitySet:
 
     def available_tool_names(self) -> frozenset[str]:
         if not self.journal:
-            return frozenset({"read_workspace_text", "list_workspace_files", "edit_workspace_text", "run_workspace_shell"})
+            return frozenset({"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "edit_workspace_text", "run_workspace_shell"})
         by_phase = {
-            JournalPhase.INTENT_REQUIRED: {"read_workspace_text", "list_workspace_files", "submit_cycle_intent"},
-            JournalPhase.EXECUTION: {"read_workspace_text", "list_workspace_files", "edit_workspace_text", "run_workspace_shell"},
+            JournalPhase.INTENT_REQUIRED: {"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "submit_cycle_intent"},
+            JournalPhase.EXECUTION: {"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "edit_workspace_text", "run_workspace_shell"},
             JournalPhase.OUTCOME_REQUIRED: {"submit_cycle_outcome"},
         }
         return frozenset(by_phase.get(self.journal.phase, set()))
@@ -131,6 +168,32 @@ class DeveloperCapabilitySet:
             reason=reason,
         )
         return {"status": "error", "error": reason, "failureCode": "PHASE_CAPABILITY_UNAVAILABLE"}
+
+    def _inspect_git_state(self, max_log_entries: int) -> dict[str, Any]:
+        limit = max(1, min(max_log_entries, 50))
+        commands = {
+            "status": ["git", "status", "--short", "--branch"],
+            "head": ["git", "rev-parse", "HEAD"],
+            "branch": ["git", "branch", "--show-current"],
+            "recentCommits": ["git", "log", f"-{limit}", "--oneline", "--decorate=no"],
+        }
+        evidence: dict[str, Any] = {"status": "ok"}
+        for name, command in commands.items():
+            result = self.process_runner.run_argv(
+                command,
+                cwd=self.workspace_io.workspace.repository,
+                source=f"agent_readonly_git_{name}",
+            )
+            if not result.succeeded:
+                return {
+                    "status": "error",
+                    "failureCode": "READ_ONLY_GIT_INSPECTION_FAILED",
+                    "operation": name,
+                    "exitCode": result.exit_code,
+                    "stderrArtifact": result.stderr_artifact,
+                }
+            evidence[name] = result.stdout.strip()
+        return evidence
 
     def _invoke(self, name: str, function: Any, *args: Any) -> Any:
         try:

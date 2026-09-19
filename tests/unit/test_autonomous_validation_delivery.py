@@ -32,6 +32,12 @@ from autonomous_oss_remediation_agent.models import (
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 from autonomous_oss_remediation_agent.deterministic.validation import _is_likely_diagnostic_artifact
+from autonomous_oss_remediation_agent.journal import CaptureStatus, DeliveryEligibility, ValidationStatus
+from autonomous_oss_remediation_agent.orchestrator import (
+    _delivery_eligibility,
+    _remediation_outcome,
+    _validation_status,
+)
 
 
 class _FakeResponse:
@@ -220,6 +226,45 @@ class AutonomousValidationDeliveryTests(unittest.TestCase):
         self.assertFalse(_is_likely_diagnostic_artifact("src/main/resources/dependencies.txt"))
         self.assertFalse(_is_likely_diagnostic_artifact("dependency-tree-parser.py"))
 
+    def test_passing_validation_requires_ready_outcome_for_automatic_delivery(self):
+        report = _policy_report(passed=True, resolved=1, remaining=0)
+        expected = {
+            "READY_FOR_INDEPENDENT_VALIDATION": DeliveryEligibility.FULL_AUTOMATIC_DELIVERY,
+            "PARTIALLY_REMEDIATED": DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "BLOCKED": DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "FAILED": DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "INCONCLUSIVE": DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "NO_CHANGE_REQUIRED": DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+        }
+        for status, eligibility in expected.items():
+            with self.subTest(status=status):
+                self.assertEqual(
+                    eligibility,
+                    _delivery_eligibility(report, CaptureStatus.COMPLETE, status),
+                )
+        self.assertEqual(
+            DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            _delivery_eligibility(report, CaptureStatus.INCOMPLETE, "READY_FOR_INDEPENDENT_VALIDATION"),
+        )
+
+    def test_partial_requires_measurable_target_improvement(self):
+        cases = (
+            ("some removed and some remain", _policy_report(False, 1, 1), ValidationStatus.PARTIAL),
+            ("no findings removed", _policy_report(False, 0, 2), ValidationStatus.FAILED),
+            ("only unrelated file changed", _policy_report(False, 0, 1, changed=("README.md",)), ValidationStatus.FAILED),
+            ("build passes but coverage unchanged", _policy_report(False, 0, 1), ValidationStatus.FAILED),
+            ("all findings removed", _policy_report(True, 2, 0), ValidationStatus.PASSED),
+        )
+        for label, report, expected in cases:
+            with self.subTest(label=label):
+                self.assertEqual(expected, _validation_status(report))
+        partial = cases[0][1]
+        self.assertEqual("PARTIALLY_REMEDIATED", _remediation_outcome(partial, "PARTIALLY_REMEDIATED").value)
+        self.assertEqual(
+            DeliveryEligibility.PARTIAL_MANUAL_REVIEW_DELIVERY,
+            _delivery_eligibility(partial, CaptureStatus.COMPLETE, "PARTIALLY_REMEDIATED"),
+        )
+
     def _request(self):
         return RemediationRequest(
             repository_url="https://github.com/example/repo.git",
@@ -232,6 +277,33 @@ class AutonomousValidationDeliveryTests(unittest.TestCase):
 def _finding():
     return VulnerabilityFinding(
         "CVE-2024-0001", ("GHSA-demo",), "HIGH", "org.example", "demo", "org.example:demo", "1.0"
+    )
+
+
+def _policy_report(passed, resolved, remaining, changed=("pom.xml",)):
+    checks = (
+        ValidationCheck("baseline_ancestry", True, "passed"),
+        ValidationCheck("git_change_evidence", True, "passed"),
+        ValidationCheck("build_test_startup", True, "passed"),
+        ValidationCheck("fresh_vulnerability_scan", True, "passed"),
+        ValidationCheck("target_findings_improved", resolved > 0, "comparison"),
+        ValidationCheck("target_findings_resolved", remaining == 0, "comparison"),
+        ValidationCheck("no_new_prohibited_findings", True, "passed"),
+        ValidationCheck("delivery_diff_hygiene", True, "passed"),
+    )
+    resolved_findings = tuple({"vulnerabilityId": f"CVE-R-{index}"} for index in range(resolved))
+    remaining_findings = tuple({"vulnerabilityId": f"CVE-U-{index}"} for index in range(remaining))
+    return ValidationReport(
+        cycle=1,
+        passed=passed,
+        checks=checks,
+        changed_files=changed,
+        diff_path="diff",
+        tree_digest="digest",
+        scan=ScanReport(True, (), CommandResult(["scan"], ".", 0), "scan.json"),
+        delivery_eligible=True,
+        resolved_target_findings=resolved_findings,
+        remaining_target_findings=remaining_findings,
     )
 
 

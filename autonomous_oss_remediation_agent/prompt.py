@@ -1,16 +1,10 @@
 from __future__ import annotations
 
 import json
-import re
 
 from .config import RemediationRequest
+from .journal import intent_questionnaire, outcome_questionnaire
 from .models import RepositoryBaseline, ValidationReport
-
-
-_WORKING_STATE_HEADER = re.compile(
-    r"(?im)^[ \t]*(?:#{1,6}[ \t]+)?WORKING_STATE[ \t]*:?[ \t]*$"
-)
-_WORKING_STATE_FALLBACK_LIMIT = 600
 
 
 AGENT_INSTRUCTION = """
@@ -32,14 +26,13 @@ Requirements:
 - Inspect command failures and continue adapting within the available turn and budget.
 - Do not claim success. Deterministic validation after your turn decides success.
 - Treat scanner-provided fixed versions and fixed-version expressions as evidence, not required remediation targets. Empty fixed-version evidence does not prove remediation is impossible, and ambiguous ranges must not be converted into guessed concrete versions.
-- Maintain a concise model-owned working state across turns: current understanding, strategy or hypothesis, assumptions being tested, meaningful progress, and unresolved work. Revise or replace it whenever evidence warrants. This is engineering continuity, not a rigid patch plan or prescribed sequence.
 - Do not provide hidden chain-of-thought or detailed private reasoning. Record only concise engineering state that is useful for the next work cycle.
 - Never edit `agent/decision-journal.md`; deterministic orchestration exclusively owns that artifact.
 - At the start of each cycle, use only read-only discovery capabilities, then call `submit_cycle_intent` with every required journal section. The checkpoint constrains reporting timing, not your engineering strategy. One credible approach or a reversible diagnostic experiment is valid; never invent alternatives.
 - Material edit and shell capabilities become usable only after Cycle Intent is accepted. You may freely adapt or replace the selected direction when execution evidence warrants.
 - When execution ends, repository capabilities are removed. Use the metadata-only `submit_cycle_outcome` capability to report actual work, deviations, evidence, unresolved coverage, and the applicable outcome status. Deterministic validation remains authoritative.
 
-When you have completed a useful execution phase, summarize what you changed and why, followed by a concise `WORKING_STATE` for compatibility. Do not claim success; the orchestrator will request Cycle Outcome in a separate metadata-only turn.
+When you have completed a useful execution phase, provide a concise ordinary summary. Do not emit `WORKING_STATE` and do not claim success; the orchestrator will request Cycle Outcome in a separate metadata-only turn and will generate any deprecated compatibility projection deterministically.
 """.strip()
 
 
@@ -65,6 +58,8 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
         "The objective, constraints, and completion criteria below are the stable run contract for every turn. "
         "Inspect only with read capabilities, then submit every required Cycle Intent section through `submit_cycle_intent`. "
         "After it is accepted, execution capabilities become available in the same turn; investigate, modify, and self-validate, then end the turn.\n\n"
+        + intent_questionnaire(1)
+        + "\n\n"
         + json.dumps(payload, indent=2, sort_keys=True)
     )
 
@@ -82,7 +77,9 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         f"Execution for Cycle {cycle} has ended. Repository read, edit, and shell capabilities are now unavailable. "
         "Submit a metadata-only Cycle Outcome through `submit_cycle_outcome` for any successful, partial, blocked, "
         "failed, inconclusive, or no-change execution. Report intended-versus-actual work and unresolved coverage; "
-        "do not claim deterministic success.\n\nExecution response (compatibility evidence):\n"
+        "do not claim deterministic success.\n\n"
+        + outcome_questionnaire()
+        + "\n\nExecution response (compatibility evidence):\n"
         + execution_summary
         + "\n\nDeterministic execution evidence available before validation:\n"
         + json.dumps(evidence, indent=2, sort_keys=True, default=str)
@@ -96,27 +93,27 @@ def outcome_retry_message(cycle: int, errors: list[str]) -> str:
     )
 
 
-def extract_working_state(turn_text: str) -> str:
-    matches = tuple(_WORKING_STATE_HEADER.finditer(turn_text))
-    if matches:
-        match = matches[-1]
-        section = turn_text[match.start():].strip()
-        if turn_text[match.end():].strip():
-            return section
-    visible = " ".join(turn_text.split())
-    if not visible:
-        return "WORKING_STATE\n- No structured WORKING_STATE was supplied in the previous cycle."
-    excerpt = visible[:_WORKING_STATE_FALLBACK_LIMIT].rstrip()
-    if len(visible) > _WORKING_STATE_FALLBACK_LIMIT:
-        excerpt += "…"
-    return (
-        "WORKING_STATE\n"
-        "- No structured WORKING_STATE was supplied in the previous cycle.\n"
-        f"- Visible response excerpt: {excerpt}"
+def compatibility_working_state(
+    outcome_status: str | None,
+    outcome_answers: dict[str, str],
+) -> str:
+    fields = (
+        ("Outcome status", outcome_status or "MISSING"),
+        ("Final approach", outcome_answers.get("Final approach present at cycle end", "Not captured")),
+        ("Evidence", outcome_answers.get("Evidence actually observed", "Not captured")),
+        ("Remaining work", outcome_answers.get("Remaining work, blockers, or uncertainty", "Not captured")),
+        ("Conclusion", outcome_answers.get("Cycle conclusion", "Not captured")),
     )
+    lines = ["WORKING_STATE (deprecated deterministic compatibility projection)"]
+    for label, value in fields:
+        normalized = " ".join(value.split())
+        if len(normalized) > 500:
+            normalized = normalized[:499].rstrip() + "…"
+        lines.append(f"- {label}: {normalized}")
+    return "\n".join(lines)
 
 
-def validation_feedback(report: ValidationReport, journal_context: str) -> str:
+def validation_feedback(report: ValidationReport, journal_context: str, next_cycle: int) -> str:
     failed_checks = []
     for check in report.checks:
         if check.passed:
@@ -171,6 +168,8 @@ def validation_feedback(report: ValidationReport, journal_context: str) -> str:
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "The bounded Markdown decision journal below is the authoritative cross-cycle problem-solving state. Legacy WORKING_STATE is compatibility-only and must not override it.\n\n"
         + journal_context
+        + "\n\n"
+        + intent_questionnaire(next_cycle)
         + "\n\nNew deterministic validation evidence:\n"
         + json.dumps(evidence, indent=2, sort_keys=True)
     )

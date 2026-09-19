@@ -263,6 +263,8 @@ class ValidationReport:
     warnings: tuple[str, ...] = ()
     cycle_evidence: RepositoryCycleEvidence | None = None
     diagnostic_artifacts: tuple[str, ...] = ()
+    resolved_target_findings: tuple[dict[str, Any], ...] = ()
+    remaining_target_findings: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -277,6 +279,8 @@ class ValidationReport:
             "warnings": list(self.warnings),
             "cycleEvidence": self.cycle_evidence.to_dict() if self.cycle_evidence else None,
             "diagnosticArtifacts": list(self.diagnostic_artifacts),
+            "resolvedTargetFindings": list(self.resolved_target_findings),
+            "remainingTargetFindings": list(self.remaining_target_findings),
         }
 
 
@@ -332,6 +336,7 @@ class RunResult:
     capture_status: str | None = None
     delivery_eligibility: str | None = None
     journal_path: str | None = None
+    capture_warnings: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -348,6 +353,7 @@ class RunResult:
             "captureStatus": self.capture_status,
             "deliveryEligibility": self.delivery_eligibility,
             "journalPath": self.journal_path,
+            "captureWarnings": list(self.capture_warnings),
         }
 
 

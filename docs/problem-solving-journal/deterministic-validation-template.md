@@ -17,17 +17,29 @@ For every check, include:
 
 {{system_generated_check_results}}
 
-## Outcome claims confirmed
+## Deterministic checks passed
 
-List Cycle Outcome claims directly supported by deterministic evidence.
+List authoritative checks that passed. Do not describe them as confirmation of a model claim unless an explicit claim-to-check mapping exists.
 
-{{system_generated_confirmed_claims}}
+{{system_generated_passed_checks}}
 
-## Outcome claims contradicted
+## Deterministic checks failed
 
-List claims contradicted by deterministic evidence. Preserve the original Outcome rather than silently rewriting it.
+List authoritative checks that failed.
+
+{{system_generated_failed_checks}}
+
+## Model claims directly contradicted
+
+List only contradictions established by an explicit mapping, such as a no-change status when Git evidence shows changed files. Preserve the original Outcome rather than silently rewriting it.
 
 {{system_generated_contradictions}}
+
+## Model claims not independently evaluated
+
+State that narrative claims without an explicit deterministic mapping remain unevaluated.
+
+{{system_generated_unevaluated_claims}}
 
 ## Requirements satisfied
 

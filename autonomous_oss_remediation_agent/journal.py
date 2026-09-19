@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -50,39 +51,49 @@ class DeliveryEligibility(str, Enum):
     NOT_DELIVERY_ELIGIBLE = "NOT_DELIVERY_ELIGIBLE"
 
 
-INTENT_SECTIONS = (
-    "Problem as received",
-    "Interpreted objective",
-    "Relevant context and evidence discovered",
-    "Input ambiguities, discrepancies, or missing information",
-    "Applicable constraints and success criteria",
-    "Materially credible candidate approaches",
-    "Selected direction",
-    "Selection rationale",
-    "Assumptions to test",
-    "Intended work",
-    "Validation approach",
-    "Current uncertainties and risks",
+
+
+@dataclass(frozen=True)
+class QuestionnaireSection:
+    name: str
+    guidance: str
+    after_cycle_one: bool = False
+
+
+INTENT_QUESTIONNAIRE = (
+    QuestionnaireSection("Problem as received", "Restate the supplied problem, requested outcome, and reported findings without changing their meaning."),
+    QuestionnaireSection("Interpreted objective", "Describe the engineering outcome currently required and distinguish it from any literal wording when necessary."),
+    QuestionnaireSection("Relevant context and evidence discovered", "Record material observed repository, environment, dependency, build, scan, and prior-work evidence; keep observations separate from assumptions."),
+    QuestionnaireSection("Input ambiguities, discrepancies, or missing information", "Identify material uncertainty or explicitly explain why current information is sufficient."),
+    QuestionnaireSection("Applicable constraints and success criteria", "Apply caller constraints and state evidence needed for full, partial, blocked, and inconclusive outcomes without turning techniques into constraints."),
+    QuestionnaireSection("Prior-cycle learning", "Explain what prior authoritative validation supported, contradicted, or left unresolved.", after_cycle_one=True),
+    QuestionnaireSection("Relationship to the prior approach", "Explain whether this direction continues, adjusts, replaces, expands, or investigates before committing to the prior approach.", after_cycle_one=True),
+    QuestionnaireSection("Materially credible candidate approaches", "Describe only genuine candidates. One credible approach is valid; if more evidence is needed, a reversible diagnostic experiment is valid. Do not invent alternatives."),
+    QuestionnaireSection("Selected direction", "State the approach, combination, or diagnostic experiment selected for execution."),
+    QuestionnaireSection("Selection rationale", "Explain evidence, coverage, constraints, risks, maintainability, validation, and meaningful tradeoffs."),
+    QuestionnaireSection("Assumptions to test", "For each material assumption state why it matters, how it will be tested, and its current status; explain if none remain."),
+    QuestionnaireSection("Intended work", "Describe meaningful directional work and any reversible investigation, not a rigid command-by-command plan."),
+    QuestionnaireSection("Validation approach", "State required checks, expected evidence, failure signals, and evidence that should trigger adaptation; do not present planned checks as completed."),
+    QuestionnaireSection("Current uncertainties and risks", "Record material uncertainty or risk and how execution or validation should reduce it."),
 )
-PRIOR_CYCLE_INTENT_SECTIONS = (
-    "Prior-cycle learning",
-    "Relationship to the prior approach",
+OUTCOME_QUESTIONNAIRE = (
+    QuestionnaireSection("Work actually performed", "Describe material changes, investigations, experiments, corrective actions, and relevant reverted or abandoned work."),
+    QuestionnaireSection("Evidence actually observed", "Record successful, failed, incomplete, and inconclusive evidence separately from conclusions, with stable references when available."),
+    QuestionnaireSection("Intended versus actual", "Compare the accepted Intent with completed, omitted, added, and materially changed work."),
+    QuestionnaireSection("Material deviations and their causes", "Explain each strategy-level deviation, its evidence, cause, and effect; say explicitly if none occurred."),
+    QuestionnaireSection("Approaches attempted, rejected, or abandoned", "Record material approaches not retained, supporting evidence, failure category, and preserved value; say explicitly if none."),
+    QuestionnaireSection("Final approach present at cycle end", "Describe only the approach actually represented by repository state."),
+    QuestionnaireSection("Assumption results", "Give each material assumption's final status, evidence, and effect on the implementation or conclusion."),
+    QuestionnaireSection("Requirement and problem coverage", "Distinguish satisfied, conditional, unresolved, and not-applicable coverage with justification."),
+    QuestionnaireSection("Constraints and regression assessment", "Report constraint compliance, compatibility, regressions, unrelated changes, and investigation-only artifacts."),
+    QuestionnaireSection("Self-validation assessment", "Distinguish planned-not-run, passed, failed, inconclusive, and environmentally blocked checks; state what independent validation must confirm."),
+    QuestionnaireSection("Remaining work, blockers, or uncertainty", "For each remaining item state why it remains, whether another cycle can resolve it, and whether external input is needed."),
+    QuestionnaireSection("Partial-remediation value", "When partial, state measurable improvement, remaining requirements, safety, test health, prohibited issues, manual-review value, and disclosures; otherwise state why not applicable."),
+    QuestionnaireSection("Cycle conclusion", "Concise evidence-based summary of intent, actual work, deviations, established results, unresolved work, and next step."),
 )
-OUTCOME_SECTIONS = (
-    "Work actually performed",
-    "Evidence actually observed",
-    "Intended versus actual",
-    "Material deviations and their causes",
-    "Approaches attempted, rejected, or abandoned",
-    "Final approach present at cycle end",
-    "Assumption results",
-    "Requirement and problem coverage",
-    "Constraints and regression assessment",
-    "Self-validation assessment",
-    "Remaining work, blockers, or uncertainty",
-    "Partial-remediation value",
-    "Cycle conclusion",
-)
+INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if not section.after_cycle_one)
+PRIOR_CYCLE_INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if section.after_cycle_one)
+OUTCOME_SECTIONS = tuple(section.name for section in OUTCOME_QUESTIONNAIRE)
 OUTCOME_STATUSES = frozenset(
     {
         "READY_FOR_INDEPENDENT_VALIDATION",
@@ -142,6 +153,9 @@ class CycleCapture:
     intent_answers: dict[str, str] = field(default_factory=dict)
     outcome_answers: dict[str, str] = field(default_factory=dict)
     outcome_status: str | None = None
+    last_intent_errors: tuple[str, ...] = ()
+    last_outcome_errors: tuple[str, ...] = ()
+    validation_report: ValidationReport | None = None
 
     @property
     def status(self) -> CaptureStatus:
@@ -158,6 +172,7 @@ class JournalStore:
         self.path = trace.workspace.artifacts / "agent" / "decision-journal.md"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._accepted_digest = hashlib.sha256(b"").hexdigest()
+        self.sections: list[JournalSection] = []
 
     def initialize(self, run_contract: str) -> JournalSection:
         if self.path.exists():
@@ -194,6 +209,7 @@ class JournalStore:
             path=str(self.path),
             contentHash=metadata.content_hash,
         )
+        self.sections.append(metadata)
         return metadata
 
     def read(self) -> str:
@@ -212,6 +228,7 @@ class JournalLifecycle:
         max_section_chars: int = 8_000,
         max_checkpoint_chars: int = 48_000,
         max_context_chars: int = 24_000,
+        preliminary_contract: bool = False,
     ):
         self.store = store
         self.trace = trace
@@ -222,11 +239,41 @@ class JournalLifecycle:
         self.max_checkpoint_chars = max_checkpoint_chars
         self.max_context_chars = max_context_chars
         self.cycles: dict[int, CycleCapture] = {}
-        self.store.initialize(render_run_contract(run_contract))
+        self.store.initialize(render_run_contract(run_contract, preliminary=preliminary_contract))
         self._repository_changed = repository_changed
+
+    def append_baseline_contract(self, run_contract: str) -> JournalSection:
+        if self.cycles:
+            raise RuntimeError("Baseline Contract must precede remediation cycles")
+        return self.store.append(
+            "baseline_contract",
+            None,
+            "# Baseline Contract\n\n" + run_contract.strip(),
+        )
 
     def set_repository_changed_probe(self, repository_changed: Callable[[], bool]) -> None:
         self._repository_changed = repository_changed
+
+    @property
+    def run_capture_status(self) -> CaptureStatus:
+        if not self.cycles:
+            return CaptureStatus.MISSING
+        trust = {
+            CaptureStatus.MISSING: 0,
+            CaptureStatus.INCOMPLETE: 1,
+            CaptureStatus.LATE: 2,
+            CaptureStatus.COMPLETE: 3,
+        }
+        return min((capture.status for capture in self.cycles.values()), key=trust.__getitem__)
+
+    def capture_warnings(self) -> tuple[str, ...]:
+        if not self.cycles:
+            return ("No remediation-cycle checkpoints were captured",)
+        return tuple(
+            f"Cycle {cycle} capture is {capture.status.value}"
+            for cycle, capture in sorted(self.cycles.items())
+            if capture.status != CaptureStatus.COMPLETE
+        )
 
     def begin_cycle(self, cycle: int) -> None:
         self.active_cycle = cycle
@@ -253,6 +300,7 @@ class JournalLifecycle:
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
         }
         capture.late_intent = late
+        capture.last_intent_errors = ()
         self.phase = JournalPhase.EXECUTION
         self.trace.append_event(
             "intent_submission_accepted",
@@ -296,6 +344,7 @@ class JournalLifecycle:
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
         }
         capture.outcome_status = normalized_status
+        capture.last_outcome_errors = ()
         self.phase = JournalPhase.DETERMINISTIC_VALIDATION
         self.trace.append_event(
             "outcome_submission_accepted",
@@ -311,12 +360,13 @@ class JournalLifecycle:
         status: ValidationStatus,
         delivery: DeliveryEligibility,
     ) -> JournalSection:
-        rendered = render_validation(report, status, delivery)
+        capture = self.cycles.setdefault(report.cycle, CycleCapture())
+        rendered = render_validation(report, status, delivery, capture.outcome_status)
         errors = validate_rendered_markdown(rendered, f"Cycle {report.cycle} — Deterministic Validation")
         if errors:
             raise RuntimeError("Invalid deterministic validation journal section: " + "; ".join(errors))
-        capture = self.cycles.setdefault(report.cycle, CycleCapture())
         capture.validation = self.store.append("deterministic_validation", report.cycle, rendered)
+        capture.validation_report = report
         self.phase = JournalPhase.DELIVERY_OR_CONTINUATION
         self.trace.append_event(
             "deterministic_validation_appended",
@@ -345,7 +395,15 @@ class JournalLifecycle:
         if len(content) <= self.max_context_chars:
             return content
         marker = "\n\n[Earlier journal content bounded for model input]\n\n"
-        head_limit = min(6_000, self.max_context_chars // 3)
+        contract_sections = [
+            section
+            for section in self.store.sections
+            if section.kind in {"run_contract", "baseline_contract"}
+        ]
+        contract_end = max((section.end_offset for section in contract_sections), default=0)
+        contract_chars = len(self.store.path.read_bytes()[:contract_end].decode("utf-8"))
+        head_limit = min(contract_chars, self.max_context_chars * 2 // 3)
+        head_limit = max(head_limit, min(6_000, self.max_context_chars // 3))
         tail_limit = max(0, self.max_context_chars - head_limit - len(marker))
         return content[:head_limit] + marker + content[-tail_limit:]
 
@@ -387,6 +445,7 @@ class JournalLifecycle:
             seen.add(key)
             total += len(answer)
             errors.extend(_answer_errors(section, answer, self.max_section_chars))
+            errors.extend(validate_answer_markdown(answer, section))
         if total > self.max_checkpoint_chars:
             errors.append(
                 f"Checkpoint content exceeds {self.max_checkpoint_chars} characters ({total})"
@@ -399,6 +458,11 @@ class JournalLifecycle:
         return [f"Missing required section: {section}" for section in required if section.casefold() not in supplied]
 
     def _reject(self, kind: str, cycle: int, errors: list[str], attempt: int) -> CheckpointResult:
+        capture = self.cycles.setdefault(cycle, CycleCapture())
+        if kind == "intent":
+            capture.last_intent_errors = tuple(errors)
+        else:
+            capture.last_outcome_errors = tuple(errors)
         self.trace.append_event(
             f"{kind}_submission_rejected",
             cycle=cycle,
@@ -409,8 +473,9 @@ class JournalLifecycle:
         return CheckpointResult(False, tuple(errors))
 
 
-def render_run_contract(run_contract: str) -> str:
-    return "# Run Contract\n\n" + run_contract.strip()
+def render_run_contract(run_contract: str, *, preliminary: bool = False) -> str:
+    title = "Preliminary Run Contract" if preliminary else "Run Contract"
+    return f"# {title}\n\n" + run_contract.strip()
 
 
 def render_checkpoint(cycle: int, checkpoint: str, answers: list[dict[str, str]]) -> str:
@@ -422,22 +487,57 @@ def render_checkpoint(cycle: int, checkpoint: str, answers: list[dict[str, str]]
     return "\n".join(lines).rstrip()
 
 
+def intent_questionnaire(cycle: int) -> str:
+    sections = [
+        section for section in INTENT_QUESTIONNAIRE
+        if cycle > 1 or not section.after_cycle_one
+    ]
+    rules = (
+        "Use these exact section names as `section` values in `submit_cycle_intent`. "
+        "Answer observations as observations, assumptions as unproven assumptions, intended work as future work, "
+        "and do not present planned validation as completed evidence. One credible approach or a reversible "
+        "diagnostic experiment is sufficient; never invent alternatives. You may add clearly named, "
+        "decision-relevant sections after all required sections."
+    )
+    return _render_questionnaire("Cycle Intent questionnaire", sections, rules)
+
+
+def outcome_questionnaire() -> str:
+    statuses = ", ".join(f"`{status}`" for status in sorted(OUTCOME_STATUSES))
+    rules = (
+        "Use these exact section names as `section` values in `submit_cycle_outcome`. "
+        f"Allowed `status` values: {statuses}. Separate observed evidence from conclusions, compare intended with "
+        "actual work, and do not treat self-validation as deterministic validation. You may add clearly named, "
+        "decision-relevant sections after all required sections."
+    )
+    return _render_questionnaire("Cycle Outcome questionnaire", OUTCOME_QUESTIONNAIRE, rules)
+
+
+def _render_questionnaire(
+    title: str,
+    sections: Iterable[QuestionnaireSection],
+    rules: str,
+) -> str:
+    lines = [title, rules, "Required sections:"]
+    for section in sections:
+        conditional = " (required after Cycle 1)" if section.after_cycle_one else ""
+        lines.append(f"- `{section.name}`{conditional}: {section.guidance}")
+    return "\n".join(lines)
+
+
+def validate_answer_markdown(answer: str, section: str) -> list[str]:
+    errors, headings = _markdown_structure(answer)
+    result = [f"{section}: {error}" for error in errors]
+    for level, title in headings:
+        if level < 3:
+            result.append(
+                f"{section}: answer headings must use level 3-6; top-level and required-section headings are rendered by the system ({title})"
+            )
+    return result
+
+
 def validate_rendered_markdown(content: str, expected_title: str) -> list[str]:
-    errors: list[str] = []
-    headings: list[tuple[int, str]] = []
-    fenced = False
-    for line in content.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith("```") or stripped.startswith("~~~"):
-            fenced = not fenced
-            continue
-        if fenced or not stripped.startswith("#"):
-            continue
-        marker, separator, title = stripped.partition(" ")
-        if separator and set(marker) == {"#"} and 1 <= len(marker) <= 6 and title.strip():
-            headings.append((len(marker), title.strip()))
-    if fenced:
-        errors.append("Markdown contains an unclosed fenced code block")
+    errors, headings = _markdown_structure(content)
     if not headings or headings[0] != (1, expected_title):
         errors.append(f"Rendered Markdown must begin with '# {expected_title}'")
     if any(level == 1 for level, _ in headings[1:]):
@@ -445,10 +545,47 @@ def validate_rendered_markdown(content: str, expected_title: str) -> list[str]:
     return errors
 
 
+def _markdown_structure(content: str) -> tuple[list[str], list[tuple[int, str]]]:
+    """Validate the deliberately limited Markdown subset accepted in journal answers."""
+    errors: list[str] = []
+    headings: list[tuple[int, str]] = []
+    fence_char: str | None = None
+    fence_length = 0
+    previous_nonblank = False
+    for line in content.splitlines():
+        stripped = line.lstrip(" ")
+        indent = len(line) - len(stripped)
+        marker_char = stripped[:1]
+        marker_length = 0
+        if indent <= 3 and marker_char in {"`", "~"}:
+            marker_length = len(stripped) - len(stripped.lstrip(marker_char))
+        if fence_char is not None:
+            if marker_char == fence_char and marker_length >= fence_length and not stripped[marker_length:].strip():
+                fence_char = None
+                fence_length = 0
+            continue
+        if marker_length >= 3:
+            fence_char = marker_char
+            fence_length = marker_length
+            previous_nonblank = False
+            continue
+        if indent <= 3 and stripped.startswith("#"):
+            marker, separator, title = stripped.partition(" ")
+            if separator and set(marker) == {"#"} and 1 <= len(marker) <= 6 and title.strip():
+                headings.append((len(marker), title.strip()))
+        if previous_nonblank and indent <= 3 and stripped and set(stripped) <= {"="}:
+            errors.append("setext headings are not supported; use level 3-6 ATX headings")
+        previous_nonblank = bool(stripped)
+    if fence_char is not None:
+        errors.append(f"Markdown contains an unclosed {fence_char * fence_length} fenced code block")
+    return errors, headings
+
+
 def render_validation(
     report: ValidationReport,
     status: ValidationStatus,
     delivery: DeliveryEligibility,
+    outcome_status: str | None,
 ) -> str:
     failed = [check for check in report.checks if not check.passed]
     passed = [check for check in report.checks if check.passed]
@@ -468,15 +605,23 @@ def render_validation(
     lines.extend(
         [
             "",
-            "## Outcome claims confirmed",
+            "## Deterministic checks passed",
             "",
             *(f"- {check.name}: {check.message}" for check in passed),
-            *([] if passed else ["- No outcome claim was independently confirmed."]),
+            *([] if passed else ["- None."]),
             "",
-            "## Outcome claims contradicted",
+            "## Deterministic checks failed",
             "",
             *(f"- {check.name}: {check.message}" for check in failed),
-            *([] if failed else ["- None identified by deterministic checks."]),
+            *([] if failed else ["- None."]),
+            "",
+            "## Model claims directly contradicted",
+            "",
+            *_validation_contradictions(report, outcome_status),
+            "",
+            "## Model claims not independently evaluated",
+            "",
+            "- Narrative claims without an explicit deterministic check mapping remain unevaluated; structural capture does not establish semantic correctness.",
             "",
             "## Requirements satisfied",
             "",
@@ -490,9 +635,7 @@ def render_validation(
             "",
             "## Constraint result",
             "",
-            "All deterministic constraint checks passed."
-            if all(check.passed for check in report.checks if "constraint" in check.name or "policy" in check.name)
-            else "One or more deterministic constraint checks failed.",
+            _constraint_result(report),
             "",
             "## Repository or system state",
             "",
@@ -520,7 +663,7 @@ def render_validation(
 def render_final_resolution(
     outcome: RemediationOutcome,
     original_problem: str,
-    implemented_approach: str,
+    cycles: dict[int, CycleCapture],
     validation: ValidationReport | None,
     capture_status: CaptureStatus,
     delivery: DeliveryEligibility,
@@ -530,9 +673,19 @@ def render_final_resolution(
     checks = validation.checks if validation else ()
     satisfied = [check.name for check in checks if check.passed]
     unresolved = [check.name for check in checks if not check.passed]
-    evidence = "\n".join(f"- {check.name}: {'passed' if check.passed else 'failed'} — {check.message}" for check in checks)
+    evidence = "\n".join(
+        f"- {check.name}: {'passed' if check.passed else 'failed'} — {check.message}"
+        for check in checks
+    )
+    latest = cycles[max(cycles)] if cycles else None
+    latest_answers = latest.outcome_answers if latest else {}
+    implemented_approach = latest_answers.get("Final approach present at cycle end", "")
+    coverage = latest_answers.get("Requirement and problem coverage", "")
+    coverage_is_structured = "### " in coverage
+    constraints = latest_answers.get("Constraints and regression assessment", "")
+    partial_value = latest_answers.get("Partial-remediation value", "")
     partial = (
-        f"Preserved changes require manual review. Unresolved: {', '.join(unresolved) or 'not deterministically identified'}."
+        f"Preserved changes require manual review. Unresolved deterministic checks: {', '.join(unresolved) or 'none identified'}."
         if outcome == RemediationOutcome.PARTIALLY_REMEDIATED
         else "Not applicable."
     )
@@ -548,7 +701,7 @@ def render_final_resolution(
 
 ## Final interpreted resolution
 
-Deterministic validation status and capture quality are reported separately. Capture status: `{capture_status.value}`.
+Deterministic validation status and capture quality are reported separately. Run-level capture status: `{capture_status.value}`.
 
 ## Final implemented approach
 
@@ -556,25 +709,28 @@ Deterministic validation status and capture quality are reported separately. Cap
 
 ## How the approach evolved
 
-See the immutable cycle Intent, Outcome, and Deterministic Validation sections above.
+{_approach_evolution(cycles)}
 
 ## Final requirement coverage
 
 ### Satisfied
 
 {_bullets(satisfied)}
+{_captured_block('Model-reported satisfied coverage', _coverage_subsection(coverage, 'Satisfied'))}
 
 ### Conditional
 
-- Any model-authored claims not directly established by deterministic checks remain conditional.
+{_captured_block('Model-reported conditional coverage', _coverage_subsection(coverage, 'Conditional'))}
+{_captured_block('Model-reported coverage not separately categorized', coverage) if coverage and not coverage_is_structured else ''}
 
 ### Unresolved
 
 {_bullets(unresolved)}
+{_captured_block('Model-reported unresolved coverage', _coverage_subsection(coverage, 'Unresolved'))}
 
 ### Not applicable
 
-- None identified by deterministic orchestration.
+{_captured_block('Model-reported not-applicable coverage', _coverage_subsection(coverage, 'Not applicable'))}
 
 ## Final evidence
 
@@ -582,11 +738,15 @@ See the immutable cycle Intent, Outcome, and Deterministic Validation sections a
 
 ## Constraints and known risks
 
-Capture quality `{capture_status.value}`; delivery eligibility `{delivery.value}`.
+Run-level capture quality `{capture_status.value}`; delivery eligibility `{delivery.value}`.
+
+{constraints or 'No accepted Cycle Outcome captured a constraints and regression assessment.'}
 
 ## Partial-remediation disclosure
 
 {partial}
+
+{partial_value or 'No additional partial-remediation value statement was captured.'}
 
 ## Delivery result
 
@@ -601,12 +761,108 @@ Capture quality `{capture_status.value}`; delivery eligibility `{delivery.value}
 Final outcome is `{outcome.value}`; this does not override the separate deterministic validation, capture, or delivery states."""
 
 
+def _validation_contradictions(
+    report: ValidationReport,
+    outcome_status: str | None,
+) -> list[str]:
+    contradictions: list[str] = []
+    resolved = len(report.resolved_target_findings)
+    if outcome_status == "NO_CHANGE_REQUIRED" and report.changed_files:
+        contradictions.append(
+            "- Outcome reported no change required, but authoritative Git evidence contains changed files."
+        )
+    if outcome_status == "PARTIALLY_REMEDIATED" and resolved == 0:
+        contradictions.append(
+            "- Outcome reported partial remediation, but deterministic comparison found no original target finding resolved."
+        )
+    if outcome_status == "PARTIALLY_REMEDIATED" and report.passed:
+        contradictions.append(
+            "- Outcome reported partial remediation, but deterministic validation found all target requirements satisfied."
+        )
+    if report.passed and outcome_status in {"BLOCKED", "FAILED", "INCONCLUSIVE"}:
+        contradictions.append(
+            f"- Outcome status `{outcome_status}` records an unresolved concern despite all deterministic checks passing; automatic delivery requires manual review."
+        )
+    return contradictions or ["- None established by an explicit model-claim-to-check mapping."]
+
+
+def _constraint_result(report: ValidationReport) -> str:
+    constraint_checks = [
+        check for check in report.checks
+        if "constraint" in check.name or "policy" in check.name
+    ]
+    if not constraint_checks:
+        return "No dedicated deterministic constraint check was applicable."
+    if all(check.passed for check in constraint_checks):
+        return "All applicable deterministic constraint checks passed."
+    return "One or more applicable deterministic constraint checks failed."
+
+
+def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
+    if not cycles:
+        return "- No remediation cycle was captured."
+    lines: list[str] = []
+    for cycle, capture in sorted(cycles.items()):
+        selected = capture.intent_answers.get("Selected direction", "Not captured")
+        final = capture.outcome_answers.get("Final approach present at cycle end", "Not captured")
+        deviations = capture.outcome_answers.get("Material deviations and their causes", "Not captured")
+        assumptions = capture.outcome_answers.get("Assumption results", "Not captured")
+        report = capture.validation_report
+        if report:
+            failed = [check.name for check in report.checks if not check.passed]
+            learning = (
+                "all deterministic checks passed"
+                if report.passed
+                else "failed or unresolved checks: " + ", ".join(failed)
+            )
+        else:
+            learning = "deterministic validation was not completed"
+        lines.extend(
+            (
+                f"- **Cycle {cycle} selected direction:** {_inline(selected)}",
+                f"- **Cycle {cycle} final approach:** {_inline(final)}",
+                f"- **Cycle {cycle} material deviations:** {_inline(deviations)}",
+                f"- **Cycle {cycle} assumption results:** {_inline(assumptions)}",
+                f"- **Cycle {cycle} validation learning:** {learning}.",
+            )
+        )
+    return "\n".join(lines)
+
+
+def _coverage_subsection(content: str, title: str) -> str:
+    current: str | None = None
+    collected: list[str] = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("### "):
+            current = stripped[4:].strip().casefold()
+            continue
+        if current == title.casefold():
+            collected.append(line)
+    return "\n".join(collected).strip()
+
+
+def _captured_block(label: str, content: str) -> str:
+    if not content:
+        return f"- {label}: not separately captured."
+    quoted = "\n".join(f"> {line}" if line else ">" for line in content.splitlines())
+    return f"- {label}:\n\n{quoted}"
+
+
+def _inline(content: str, limit: int = 600) -> str:
+    normalized = " ".join(content.split())
+    if len(normalized) > limit:
+        return normalized[: limit - 1].rstrip() + "…"
+    return normalized
+
+
 def _answer_errors(section: str, answer: str, max_chars: int) -> list[str]:
     stripped = answer.strip()
+    placeholder_candidate = re.sub(r"^[\s`*_~#>+\-.]+|[\s`*_~.!]+$", "", stripped.casefold())
     errors: list[str] = []
     if not stripped:
         errors.append(f"Empty answer for section: {section}")
-    elif stripped.casefold().rstrip(".!") in PLACEHOLDERS:
+    elif placeholder_candidate in PLACEHOLDERS:
         errors.append(f"Placeholder-only answer for section: {section}")
     if len(answer) > max_chars:
         errors.append(f"Section exceeds {max_chars} characters: {section}")

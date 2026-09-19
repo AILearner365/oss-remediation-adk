@@ -2,8 +2,16 @@ from __future__ import annotations
 
 import unittest
 
+from autonomous_oss_remediation_agent.config import RemediationRequest
+from autonomous_oss_remediation_agent.journal import (
+    INTENT_SECTIONS,
+    OUTCOME_SECTIONS,
+    PRIOR_CYCLE_INTENT_SECTIONS,
+)
 from autonomous_oss_remediation_agent.models import (
     CommandResult,
+    ConstraintBaseline,
+    RepositoryBaseline,
     RepositoryCycleEvidence,
     ScanReport,
     ValidationCheck,
@@ -12,63 +20,62 @@ from autonomous_oss_remediation_agent.models import (
 )
 from autonomous_oss_remediation_agent.prompt import (
     AGENT_INSTRUCTION,
-    extract_working_state,
+    compatibility_working_state,
+    initial_message,
+    outcome_message,
     validation_feedback,
 )
 
 
 class AutonomousPromptContinuityTests(unittest.TestCase):
-    def test_extracts_only_explicit_working_state_section(self):
-        response = (
-            "Updated the managed dependency property and verified the effective graph.\n\n"
-            "WORKING_STATE\n"
-            "- Understanding: dependency ownership is now clear\n"
-            "- Current strategy/hypothesis: validate the property change\n"
-            "- Unresolved: deterministic scan result"
-        )
+    def test_runtime_messages_expose_every_canonical_questionnaire_section(self):
+        initial = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+        outcome = outcome_message(1, "execution summary", {})
 
-        working_state = extract_working_state(response)
+        for section in INTENT_SECTIONS:
+            self.assertIn(f"`{section}`", initial)
+        for section in OUTCOME_SECTIONS:
+            self.assertIn(f"`{section}`", outcome)
+        self.assertIn("One credible approach", initial)
+        self.assertIn("reversible diagnostic experiment", initial)
+        self.assertIn("add clearly named, decision-relevant sections", initial.lower())
+        self.assertIn("Allowed `status` values", outcome)
+        self.assertIn("observations", initial)
+        self.assertIn("assumptions", initial)
+        self.assertIn("future work", initial)
+        self.assertIn("completed evidence", initial)
 
-        self.assertTrue(working_state.startswith("WORKING_STATE\n"))
-        self.assertIn("dependency ownership is now clear", working_state)
-        self.assertNotIn("Updated the managed dependency", working_state)
-
-    def test_missing_or_malformed_working_state_uses_bounded_fallback(self):
-        missing = "Investigated the repository. " + ("detail " * 300) + "TAIL_MARKER"
-        malformed = "Investigation complete. WORKING_STATE is still being developed."
-
-        missing_fallback = extract_working_state(missing)
-        malformed_fallback = extract_working_state(malformed)
-
-        self.assertIn("No structured WORKING_STATE was supplied", missing_fallback)
-        self.assertIn("Visible response excerpt", missing_fallback)
-        self.assertLess(len(missing_fallback), 800)
-        self.assertNotIn("TAIL_MARKER", missing_fallback)
-        self.assertIn("No structured WORKING_STATE was supplied", malformed_fallback)
-
-    def test_instruction_requires_concise_model_owned_working_state(self):
-        self.assertIn("model-owned working state", AGENT_INSTRUCTION)
-        self.assertIn("current understanding", AGENT_INSTRUCTION)
-        self.assertIn("strategy or hypothesis", AGENT_INSTRUCTION)
-        self.assertIn("Revise or replace it whenever evidence warrants", AGENT_INSTRUCTION)
+    def test_instruction_rejects_model_authored_working_state(self):
+        self.assertIn("Do not emit `WORKING_STATE`", AGENT_INSTRUCTION)
+        self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not provide hidden chain-of-thought", AGENT_INSTRUCTION)
 
-    def test_failed_validation_feedback_preserves_objective_and_prior_strategy(self):
-        prior_state = (
-            "WORKING_STATE\n"
-            "- Understanding: managed dependency remains vulnerable\n"
-            "- Current strategy/hypothesis: inspect the existing version owner\n"
-            "- Assumptions: current declaration controls the graph\n"
-            "- Progress: repository structure inspected\n"
-            "- Unresolved: validation still reports the target"
+    def test_compatibility_working_state_is_deterministic_outcome_projection(self):
+        state = compatibility_working_state(
+            "INCONCLUSIVE",
+            {
+                "Final approach present at cycle end": "Inspected dependency ownership.",
+                "Evidence actually observed": "The parent controls the version.",
+                "Remaining work, blockers, or uncertainty": "Scanner evidence remains.",
+                "Cycle conclusion": "Continue in another cycle.",
+            },
         )
-        feedback = validation_feedback(_validation_report(), prior_state)
+
+        self.assertIn("deprecated deterministic compatibility projection", state)
+        self.assertIn("Outcome status: INCONCLUSIVE", state)
+        self.assertIn("The parent controls the version", state)
+
+    def test_failed_validation_feedback_preserves_journal_and_exposes_next_questionnaire(self):
+        prior_journal = "# Baseline Contract\n\ncommit: abc\n\n# Cycle 1 — Intent"
+        feedback = validation_feedback(_validation_report(), prior_journal, 2)
 
         self.assertIn("original remediation objective, constraints, and completion criteria", feedback)
         self.assertIn("new evidence, not a replacement objective", feedback)
         self.assertIn("supports, contradicts, or leaves unresolved", feedback)
         self.assertIn("continue, modify, or replace your strategy", feedback)
-        self.assertIn(prior_state, feedback)
+        self.assertIn(prior_journal, feedback)
+        for section in (*INTENT_SECTIONS, *PRIOR_CYCLE_INTENT_SECTIONS):
+            self.assertIn(f"`{section}`", feedback)
         self.assertIn('"currentVersion": "1.0"', feedback)
         self.assertIn('"fixedVersions": [', feedback)
         self.assertIn('"2.0"', feedback)
@@ -107,10 +114,24 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             cycle_evidence=report.cycle_evidence,
         )
 
-        feedback = validation_feedback(report, "WORKING_STATE\n- Unresolved: target remains")
+        feedback = validation_feedback(report, "# Journal", 2)
 
         self.assertIn('"fixedVersions": []', feedback)
         self.assertNotIn("NO_SAFE_REMEDIATION", feedback)
+
+
+def _baseline() -> RepositoryBaseline:
+    report = _validation_report()
+    return RepositoryBaseline(
+        repository_path="repo",
+        commit="abc123",
+        reference="main",
+        remote_url="repo",
+        build_results=(CommandResult(["build"], "repo", 0),),
+        scan=report.scan,
+        constraints=ConstraintBaseline(),
+        target_findings=report.scan.findings,
+    )
 
 
 def _validation_report() -> ValidationReport:

@@ -36,20 +36,105 @@ class WorkspaceIO:
         self.trace.append_event("workspace_read", path=result["path"], startLine=start, endLine=end)
         return result
 
-    def list_files(self, path: str = ".", max_entries: int = 500) -> dict[str, Any]:
+    def list_files(
+        self,
+        path: str = ".",
+        max_entries: int = 500,
+        cursor: int = 0,
+        file_glob: str | None = None,
+    ) -> dict[str, Any]:
         directory = self.workspace.repository_directory(path)
         limit = max(1, min(max_entries, 2_000))
-        entries: list[str] = []
-        truncated = False
+        offset = max(0, cursor)
+        matches: list[str] = []
         for candidate in sorted(directory.rglob("*")):
             if ".git" in candidate.parts or not candidate.is_file():
                 continue
-            entries.append(candidate.relative_to(self.workspace.repository).as_posix())
-            if len(entries) >= limit:
+            relative = candidate.relative_to(self.workspace.repository).as_posix()
+            if file_glob and not candidate.match(file_glob):
+                continue
+            matches.append(relative)
+        entries = matches[offset : offset + limit]
+        next_cursor = offset + len(entries) if offset + len(entries) < len(matches) else None
+        self.trace.append_event(
+            "workspace_list",
+            path=str(path),
+            count=len(entries),
+            cursor=offset,
+            nextCursor=next_cursor,
+            fileGlob=file_glob,
+        )
+        return {
+            "status": "ok",
+            "files": entries,
+            "cursor": offset,
+            "nextCursor": next_cursor,
+            "totalMatches": len(matches),
+            "truncated": next_cursor is not None,
+        }
+
+    def search_text(
+        self,
+        query: str,
+        path: str = ".",
+        file_glob: str | None = None,
+        max_results: int = 100,
+        max_files: int = 5_000,
+    ) -> dict[str, Any]:
+        if not query or len(query) > 500:
+            raise ValueError("query must contain 1-500 characters")
+        directory = self.workspace.repository_directory(path)
+        result_limit = max(1, min(max_results, 500))
+        file_limit = max(1, min(max_files, 20_000))
+        results: list[dict[str, Any]] = []
+        searched_files = 0
+        truncated = False
+        for candidate in sorted(directory.rglob("*")):
+            if searched_files >= file_limit:
                 truncated = True
                 break
-        self.trace.append_event("workspace_list", path=str(path), count=len(entries), truncated=truncated)
-        return {"status": "ok", "files": entries, "truncated": truncated}
+            if ".git" in candidate.parts or not candidate.is_file():
+                continue
+            if file_glob and not candidate.match(file_glob):
+                continue
+            if candidate.stat().st_size > self.max_file_bytes:
+                continue
+            searched_files += 1
+            try:
+                lines = candidate.read_text(encoding="utf-8").splitlines()
+            except (UnicodeDecodeError, OSError):
+                continue
+            for line_number, line in enumerate(lines, start=1):
+                if query.casefold() not in line.casefold():
+                    continue
+                results.append(
+                    {
+                        "path": candidate.relative_to(self.workspace.repository).as_posix(),
+                        "line": line_number,
+                        "text": line[:500],
+                    }
+                )
+                if len(results) >= result_limit:
+                    truncated = True
+                    break
+            if len(results) >= result_limit:
+                break
+        self.trace.append_event(
+            "workspace_search",
+            path=str(path),
+            query=query,
+            fileGlob=file_glob,
+            searchedFiles=searched_files,
+            resultCount=len(results),
+            truncated=truncated,
+        )
+        return {
+            "status": "ok",
+            "query": query,
+            "results": results,
+            "searchedFiles": searched_files,
+            "truncated": truncated,
+        }
 
     def edit_text(
         self,
