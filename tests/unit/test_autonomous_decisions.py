@@ -11,7 +11,18 @@ from autonomous_oss_remediation_agent.capabilities import (
     WorkspaceIO,
 )
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
-from autonomous_oss_remediation_agent.models import AgentDecisionStatus
+from autonomous_oss_remediation_agent.models import (
+    AgentDecisionStatus,
+    CommandResult,
+    ScanReport,
+    ValidationCheck,
+    ValidationReport,
+)
+from autonomous_oss_remediation_agent.prompt import (
+    MAX_DECISION_CONTEXT_CHARACTERS,
+    serialize_decision_context,
+    validation_feedback,
+)
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
@@ -177,6 +188,58 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual("DECISION_RECORD_TOO_LARGE", result["failureCode"])
         self.assertEqual([], self._decision_events())
 
+    def test_near_limit_accepted_record_has_bounded_continuation_context(self):
+        validation = [f"observed-{index}-" + ("v" * 560) for index in range(12)]
+        coverage = [f"criterion-{index}-" + ("c" * 480) for index in range(3)]
+
+        result = self.capabilities.record_decision(
+            action="SELECT",
+            diagnosis="diagnosis " + ("d" * 1180),
+            strategy="strategy " + ("s" * 1180),
+            rationale="rationale " + ("r" * 1180),
+            evidence=["observed: " + ("e" * 280)],
+            coverage_satisfied=coverage,
+            coverage_conditional=[],
+            coverage_unresolved=[],
+            assumptions=[],
+            validation=validation,
+            alternatives=[],
+        )
+
+        self.assertEqual("ok", result["status"])
+        record_size = len(
+            json.dumps(
+                result["decision"],
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+        )
+        self.assertGreater(record_size, 12_000)
+        state = self.capabilities.decisions.current_state
+        trail = self.capabilities.decisions.all_records()
+
+        serialized = serialize_decision_context(state, trail)
+        context = json.loads(serialized)
+        feedback = validation_feedback(
+            _failed_validation_report(),
+            "WORKING_STATE\n- Unresolved: deterministic validation",
+            state,
+            trail,
+        )
+
+        self.assertLessEqual(len(serialized), MAX_DECISION_CONTEXT_CHARACTERS)
+        self.assertEqual("D1", context["currentDecisionState"]["latestDecisionId"])
+        self.assertEqual("SELECT", context["currentDecisionState"]["currentAction"])
+        self.assertEqual("IN_PROGRESS", context["currentDecisionState"]["agentStatus"])
+        self.assertEqual(
+            context["includedDecisionCount"] < context["totalDecisionCount"],
+            context["historyTruncated"],
+        )
+        self.assertEqual(12, context["currentStateFieldCounts"]["validation"]["total"])
+        self.assertIn('"latestDecisionId":"D1"', feedback)
+        self.assertIn("New deterministic validation evidence", feedback)
+
     def test_decision_recording_does_not_consume_operational_tool_budget(self):
         self.assertEqual(0, self.budget.tool_calls)
 
@@ -278,6 +341,23 @@ class AutonomousDecisionTests(unittest.TestCase):
 
     def _decision_events(self):
         return [event for event in self._events() if event["type"] == "decision_recorded"]
+
+
+def _failed_validation_report() -> ValidationReport:
+    return ValidationReport(
+        cycle=1,
+        passed=False,
+        checks=(ValidationCheck("target_findings_resolved", False, "Target remains"),),
+        changed_files=("pom.xml",),
+        diff_path="cycle-1.diff",
+        tree_digest="after",
+        scan=ScanReport(
+            True,
+            (),
+            CommandResult(["scanner"], ".", 0, stdout="{}"),
+            "scan.json",
+        ),
+    )
 
 
 if __name__ == "__main__":

@@ -95,6 +95,20 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("scanner-raw-secret", feedback)
         self.assertNotIn("requiredVersion", feedback)
 
+    def test_failed_validation_without_decision_requires_initial_select(self):
+        feedback = validation_feedback(
+            _validation_report(),
+            "WORKING_STATE\n- Unresolved: deterministic completion criteria",
+        )
+
+        self.assertIn("No current material decision state is recorded", feedback)
+        self.assertIn("action `SELECT`", feedback)
+        self.assertIn("first complete current snapshot", feedback)
+        self.assertNotIn(
+            "Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`",
+            feedback,
+        )
+
     def test_empty_fixed_versions_remain_normalized_evidence(self):
         report = _validation_report()
         finding = report.scan.findings[0]
@@ -159,6 +173,49 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn('"previousSelfValidationConclusion"', feedback)
         self.assertIn('"action":"READY_FOR_INDEPENDENT_VALIDATION"', feedback)
         self.assertIn("Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`", feedback)
+
+    def test_small_decision_context_retains_full_current_information(self):
+        decision = DecisionRecord(
+            decision_id="D1",
+            cycle=1,
+            action=DecisionAction.SELECT,
+            diagnosis="Small diagnosis",
+            strategy="Small strategy",
+            rationale="Small rationale",
+            evidence=("observed: repository evidence",),
+            coverage={
+                "satisfied": ("criterion one",),
+                "conditional": ("criterion two",),
+                "unresolved": (),
+            },
+            assumptions=(
+                {
+                    "assumption": "Small assumption",
+                    "test": "planned: focused check",
+                    "status": "UNRESOLVED",
+                },
+            ),
+            validation=("planned: focused check", "observed: local check passed"),
+        )
+
+        serialized = serialize_decision_context(
+            DecisionState.from_record(decision),
+            (decision,),
+        )
+        context = json.loads(serialized)
+
+        self.assertFalse(context["currentStateTruncated"])
+        self.assertFalse(context["historyTruncated"])
+        self.assertEqual("Small strategy", context["currentDecisionState"]["activeStrategy"])
+        self.assertEqual(
+            ["planned: focused check", "observed: local check passed"],
+            context["currentDecisionState"]["currentValidation"],
+        )
+        self.assertEqual(
+            2,
+            context["previousSelfValidationConclusion"]["validationEntryCount"],
+        )
+        self.assertNotIn("validation", context["previousSelfValidationConclusion"])
 
     def test_decision_context_is_bounded_valid_json_and_keeps_newest_transitions(self):
         coverage_values = tuple(f"criterion-{index}-" + ("x" * 280) for index in range(12))

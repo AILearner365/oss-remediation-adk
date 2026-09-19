@@ -209,6 +209,36 @@ class _DecisionAwareAgentSession(_ScriptedAgentSession):
         )
 
 
+class _LateDecisionAgentSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits):
+        super().__init__(capabilities, edits)
+        self.decision_result = None
+
+    async def run_turn(self, message):
+        cycle = len(self.messages) + 1
+        if cycle == 2:
+            self.decision_result = self.capabilities.record_decision(
+                action="SELECT",
+                diagnosis="The first cycle did not resolve the target finding",
+                strategy="Use current repository and validation evidence to complete remediation",
+                rationale="The failed validation establishes the remaining work",
+                evidence=["observed: cycle-one deterministic validation failed"],
+                coverage_satisfied=["repository constraints preserved"],
+                coverage_conditional=[],
+                coverage_unresolved=["independent validation"],
+                assumptions=[
+                    {
+                        "assumption": "The second edit controls the fixture result",
+                        "test": "planned: deterministic validation",
+                        "status": "UNRESOLVED",
+                    }
+                ],
+                validation=["planned: deterministic validation"],
+                alternatives=[],
+            )
+        return await super().run_turn(message)
+
+
 class _DecisionThenFailingAgentSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -436,6 +466,70 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         warnings = [event for event in events if event["type"] == "decision_warning"]
         self.assertTrue(
             any("contradicted deterministic validation" in event["warning"] for event in warnings)
+        )
+
+    def test_later_cycle_can_begin_decision_chain_with_select(self):
+        sessions = []
+
+        def factory(capabilities, model):
+            session = _LateDecisionAgentSession(
+                capabilities,
+                [("1.0", "1.5"), ("1.5", "2.0")],
+            )
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=3),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        session = sessions[0]
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("ok", session.decision_result["status"])
+        self.assertEqual("D1", session.decision_result["decision"]["decisionId"])
+        self.assertIn("No current material decision state is recorded", session.messages[1])
+        self.assertIn("action `SELECT`", session.messages[1])
+        self.assertNotIn(
+            "Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK`",
+            session.messages[1],
+        )
+
+        workspace_root = Path(result.workspace_root)
+        cycle_one = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        cycle_two = json.loads(
+            (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        final_result = json.loads(
+            (workspace_root / "artifacts" / "final-result.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertNotIn("decisionState", cycle_one)
+        self.assertEqual("D1", cycle_two["decisionState"]["latestDecisionId"])
+        self.assertEqual(["D1"], [item["decisionId"] for item in cycle_two["decisionTrail"]])
+        self.assertEqual(
+            "D1",
+            final_result["finalDecisionState"]["agentDecisionState"]["latestDecisionId"],
+        )
+        events = [
+            json.loads(line)
+            for line in (workspace_root / "artifacts" / "events.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        self.assertFalse(
+            any(
+                event.get("failureCode") == "DECISION_CHAIN_INVALID"
+                for event in events
+            )
         )
 
     def test_ready_then_failed_validation_is_effectively_rejected(self):

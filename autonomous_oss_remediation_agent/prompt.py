@@ -160,9 +160,37 @@ def validation_feedback(
         "scan": scan,
     }
     decision_context = serialize_decision_context(decision_state, decision_trail)
+    if decision_state is None:
+        decision_instruction = (
+            "No current material decision state is recorded. Reconstruct your current "
+            "diagnosis and active strategy from repository evidence, the previous "
+            "WORKING_STATE, and the authoritative deterministic validation evidence. Relate "
+            "that evidence to the prior work and determine what it supports, contradicts, or "
+            "leaves unresolved. Reconstruct your strategy, then decide whether to continue, "
+            "modify, or replace your strategy. "
+            "Then call `record_decision` with action `SELECT` to record the first complete "
+            "current snapshot before making material corrective changes. Do not fabricate "
+            "a prior decision or strategy."
+        )
+    else:
+        decision_instruction = (
+            "Relate the evidence to your previous strategy and actions; determine what it "
+            "supports, contradicts, or leaves unresolved; and reconcile any contradiction "
+            "between your prior decision/self-validation and the authoritative result before "
+            "making material corrective changes. Determine whether the failure is an "
+            "implementation defect, incomplete coverage, invalid assumption, strategy "
+            "deficiency, constraint conflict, or environmental/tooling problem. Decide "
+            "whether to continue, modify, or replace your strategy. Preserve useful progress, "
+            "but do not default to extending the prior implementation when revision or "
+            "replacement is better supported. Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, "
+            "or `BLOCK` with `record_decision` before continuing under that decision. Do not "
+            "assume a particular technology, dependency, version, management layer, file, or "
+            "remediation technique."
+        )
     return (
         "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
-        "Relate the evidence to your previous strategy and actions; determine what it supports, contradicts, or leaves unresolved; and reconcile any contradiction between your prior decision/self-validation and the authoritative result before making material corrective changes. Determine whether the failure is an implementation defect, incomplete coverage, invalid assumption, strategy deficiency, constraint conflict, or environmental/tooling problem. Decide whether to continue, modify, or replace your strategy. Preserve useful progress, but do not default to extending the prior implementation when revision or replacement is better supported. Record `RETAIN`, `EXTEND`, `REVISE`, `REPLACE`, or `BLOCK` with `record_decision` before continuing under that decision. Do not assume a particular technology, dependency, version, management layer, file, or remediation technique.\n\n"
+        + decision_instruction
+        + "\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "Previous model-owned working state:\n"
         + prior_working_state
@@ -179,13 +207,24 @@ def serialize_decision_context(
 ) -> str:
     total_count = len(decision_trail)
     history: list[dict[str, object]] = []
-    context = _decision_context_payload(decision_state, history, total_count)
+    state_payload, state_metadata = _bounded_current_state(decision_state, total_count)
+    context = _decision_context_payload(
+        decision_state,
+        state_payload,
+        state_metadata,
+        history,
+        total_count,
+    )
     serialized = _compact_json(context)
-    if len(serialized) > MAX_DECISION_CONTEXT_CHARACTERS:
-        raise ValueError("Current decision state exceeds the continuation context limit")
     for decision in reversed(decision_trail):
         candidate_history = [_compact_history_entry(decision), *history]
-        candidate = _decision_context_payload(decision_state, candidate_history, total_count)
+        candidate = _decision_context_payload(
+            decision_state,
+            state_payload,
+            state_metadata,
+            candidate_history,
+            total_count,
+        )
         candidate_serialized = _compact_json(candidate)
         if len(candidate_serialized) > MAX_DECISION_CONTEXT_CHARACTERS:
             break
@@ -196,16 +235,24 @@ def serialize_decision_context(
 
 def _decision_context_payload(
     decision_state: DecisionState | None,
+    state_payload: dict[str, object] | None,
+    state_metadata: dict[str, object],
     history: list[dict[str, object]],
     total_count: int,
 ) -> dict[str, object]:
     return {
-        "currentDecisionState": decision_state.to_dict() if decision_state else None,
+        "currentDecisionState": state_payload,
+        **state_metadata,
         "previousSelfValidationConclusion": (
             {
                 "action": decision_state.current_action.value,
                 "agentStatus": decision_state.agent_status.value,
-                "validation": list(decision_state.current_validation),
+                "validationEntryCount": len(decision_state.current_validation),
+                "latestValidationEvidence": (
+                    _clip(decision_state.current_validation[-1], 320)
+                    if decision_state.current_validation
+                    else None
+                ),
             }
             if decision_state
             else None
@@ -215,6 +262,146 @@ def _decision_context_payload(
         "includedDecisionCount": len(history),
         "totalDecisionCount": total_count,
     }
+
+
+def _bounded_current_state(
+    decision_state: DecisionState | None,
+    total_count: int,
+) -> tuple[dict[str, object] | None, dict[str, object]]:
+    if decision_state is None:
+        return None, {
+            "currentStateTruncated": False,
+            "currentStateFieldCounts": None,
+        }
+
+    profiles: tuple[dict[str, int] | None, ...] = (
+        None,
+        {
+            "text": 800,
+            "coverage_items": 6,
+            "coverage_text": 220,
+            "assumption_items": 5,
+            "assumption_text": 220,
+            "unresolved_items": 6,
+            "unresolved_text": 220,
+            "validation_items": 6,
+            "validation_text": 260,
+        },
+        {
+            "text": 400,
+            "coverage_items": 4,
+            "coverage_text": 120,
+            "assumption_items": 3,
+            "assumption_text": 120,
+            "unresolved_items": 4,
+            "unresolved_text": 120,
+            "validation_items": 4,
+            "validation_text": 160,
+        },
+    )
+    for profile in profiles:
+        payload, counts, truncated = _current_state_payload(decision_state, profile)
+        metadata = {
+            "currentStateTruncated": truncated,
+            "currentStateFieldCounts": counts,
+        }
+        context = _decision_context_payload(
+            decision_state,
+            payload,
+            metadata,
+            [],
+            total_count,
+        )
+        if len(_compact_json(context)) <= MAX_DECISION_CONTEXT_CHARACTERS:
+            return payload, metadata
+
+    payload, counts, _ = _current_state_payload(
+        decision_state,
+        {
+            "text": 240,
+            "coverage_items": 1,
+            "coverage_text": 80,
+            "assumption_items": 1,
+            "assumption_text": 80,
+            "unresolved_items": 1,
+            "unresolved_text": 80,
+            "validation_items": 1,
+            "validation_text": 100,
+        },
+    )
+    return payload, {
+        "currentStateTruncated": True,
+        "currentStateFieldCounts": counts,
+    }
+
+
+def _current_state_payload(
+    decision_state: DecisionState,
+    profile: dict[str, int] | None,
+) -> tuple[dict[str, object], dict[str, object], bool]:
+    if profile is None:
+        payload = decision_state.to_dict()
+    else:
+        payload = {
+            "latestDecisionId": decision_state.latest_decision_id,
+            "currentAction": decision_state.current_action.value,
+            "activeStrategy": _clip(decision_state.active_strategy, profile["text"]),
+            "currentDiagnosis": _clip(decision_state.current_diagnosis, profile["text"]),
+            "currentCoverage": {
+                name: [
+                    _clip(value, profile["coverage_text"])
+                    for value in values[: profile["coverage_items"]]
+                ]
+                for name, values in decision_state.current_coverage.items()
+            },
+            "activeAssumptions": [
+                {
+                    name: _clip(value, profile["assumption_text"])
+                    for name, value in assumption.items()
+                }
+                for assumption in decision_state.active_assumptions[
+                    : profile["assumption_items"]
+                ]
+            ],
+            "remainingUnresolvedItems": [
+                _clip(value, profile["unresolved_text"])
+                for value in decision_state.remaining_unresolved_items[
+                    : profile["unresolved_items"]
+                ]
+            ],
+            "currentValidation": [
+                _clip(value, profile["validation_text"])
+                for value in decision_state.current_validation[
+                    : profile["validation_items"]
+                ]
+            ],
+            "agentStatus": decision_state.agent_status.value,
+        }
+
+    coverage_counts = {
+        name: {
+            "included": len(payload["currentCoverage"].get(name, [])),
+            "total": len(values),
+        }
+        for name, values in decision_state.current_coverage.items()
+    }
+    counts: dict[str, object] = {
+        "coverage": coverage_counts,
+        "assumptions": {
+            "included": len(payload["activeAssumptions"]),
+            "total": len(decision_state.active_assumptions),
+        },
+        "unresolvedItems": {
+            "included": len(payload["remainingUnresolvedItems"]),
+            "total": len(decision_state.remaining_unresolved_items),
+        },
+        "validation": {
+            "included": len(payload["currentValidation"]),
+            "total": len(decision_state.current_validation),
+        },
+    }
+    truncated = payload != decision_state.to_dict()
+    return payload, counts, truncated
 
 
 def _compact_history_entry(decision: DecisionRecord) -> dict[str, object]:
