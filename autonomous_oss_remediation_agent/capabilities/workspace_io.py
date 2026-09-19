@@ -36,6 +36,21 @@ class WorkspaceIO:
         self.trace.append_event("workspace_read", path=result["path"], startLine=start, endLine=end)
         return result
 
+    def list_files(self, path: str = ".", max_entries: int = 500) -> dict[str, Any]:
+        directory = self.workspace.repository_directory(path)
+        limit = max(1, min(max_entries, 2_000))
+        entries: list[str] = []
+        truncated = False
+        for candidate in sorted(directory.rglob("*")):
+            if ".git" in candidate.parts or not candidate.is_file():
+                continue
+            entries.append(candidate.relative_to(self.workspace.repository).as_posix())
+            if len(entries) >= limit:
+                truncated = True
+                break
+        self.trace.append_event("workspace_list", path=str(path), count=len(entries), truncated=truncated)
+        return {"status": "ok", "files": entries, "truncated": truncated}
+
     def edit_text(
         self,
         action: str,

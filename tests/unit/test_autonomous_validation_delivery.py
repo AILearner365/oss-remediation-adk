@@ -31,6 +31,7 @@ from autonomous_oss_remediation_agent.models import (
     VulnerabilityFinding,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
+from autonomous_oss_remediation_agent.deterministic.validation import _is_likely_diagnostic_artifact
 
 
 class _FakeResponse:
@@ -212,6 +213,12 @@ class AutonomousValidationDeliveryTests(unittest.TestCase):
         result = adapter.deliver(DeliveryContext(request, self.workspace, baseline, validation, ""))
         self.assertFalse(result.succeeded)
         self.assertEqual([], calls)
+
+    def test_dependency_tree_diagnostic_artifact_is_detected_conservatively(self):
+        self.assertTrue(_is_likely_diagnostic_artifact("dependency_tree.txt"))
+        self.assertTrue(_is_likely_diagnostic_artifact("tmp/dependency-tree.tgf"))
+        self.assertFalse(_is_likely_diagnostic_artifact("src/main/resources/dependencies.txt"))
+        self.assertFalse(_is_likely_diagnostic_artifact("dependency-tree-parser.py"))
 
     def _request(self):
         return RemediationRequest(

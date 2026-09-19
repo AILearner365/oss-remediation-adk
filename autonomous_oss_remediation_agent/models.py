@@ -262,6 +262,7 @@ class ValidationReport:
     delivery_eligible: bool = True
     warnings: tuple[str, ...] = ()
     cycle_evidence: RepositoryCycleEvidence | None = None
+    diagnostic_artifacts: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -275,6 +276,7 @@ class ValidationReport:
             "deliveryEligible": self.delivery_eligible,
             "warnings": list(self.warnings),
             "cycleEvidence": self.cycle_evidence.to_dict() if self.cycle_evidence else None,
+            "diagnosticArtifacts": list(self.diagnostic_artifacts),
         }
 
 
@@ -325,6 +327,11 @@ class RunResult:
     delivery: DeliveryResult | None = None
     cycles_completed: int = 0
     agent_summaries: tuple[str, ...] = ()
+    remediation_outcome: str | None = None
+    validation_status: str | None = None
+    capture_status: str | None = None
+    delivery_eligibility: str | None = None
+    journal_path: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -336,6 +343,11 @@ class RunResult:
             "delivery": self.delivery.to_dict() if self.delivery else None,
             "cyclesCompleted": self.cycles_completed,
             "agentSummaries": list(self.agent_summaries),
+            "remediationOutcome": self.remediation_outcome,
+            "validationStatus": self.validation_status,
+            "captureStatus": self.capture_status,
+            "deliveryEligibility": self.delivery_eligibility,
+            "journalPath": self.journal_path,
         }
 
 

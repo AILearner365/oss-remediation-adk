@@ -28,6 +28,7 @@ from autonomous_oss_remediation_agent.models import (
     VulnerabilityFinding,
 )
 from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner
+from autonomous_oss_remediation_agent.journal import JournalPhase
 from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 
 
@@ -50,6 +51,14 @@ class _FixtureScanner:
             CommandResult(["fake-osv"], str(repository), 0, stdout="{}"),
             str(raw),
         )
+
+
+class _CleanAfterBaselineScanner(_FixtureScanner):
+    def scan(self, repository, severity_scope, label):
+        report = super().scan(repository, severity_scope, label)
+        if label == "baseline":
+            return report
+        return ScanReport(True, (), report.command_result, report.raw_report_path)
 
 
 class _RetryingFixtureScanner(OsvScanner):
@@ -133,14 +142,27 @@ class _BaselineInfrastructureFailingScanner(_InfrastructureFailingScanner):
 
 
 class _ScriptedAgentSession:
-    def __init__(self, capabilities, edits):
+    def __init__(self, capabilities, edits, outcome_status="READY_FOR_INDEPENDENT_VALIDATION"):
         self.capabilities = capabilities
         self.edits = edits
+        self.outcome_status = outcome_status
         self.messages = []
         self.closed = False
 
     async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                self.capabilities.journal.active_cycle,
+                self.outcome_status,
+                "Execution completed and is ready for deterministic checks.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Cycle Outcome submitted")
         self.messages.append(message)
+        self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle,
+            _intent_answers(self.capabilities.journal.active_cycle),
+        )
         if self.edits:
             old, new = self.edits.pop(0)
             self.capabilities.edit_workspace_text(
@@ -164,6 +186,17 @@ class _ScriptedAgentSession:
         self.closed = True
 
 
+class _DiagnosticArtifactSession(_ScriptedAgentSession):
+    async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            return await super().run_turn(message)
+        result = await super().run_turn(message)
+        self.capabilities.edit_workspace_text(
+            "write", "dependency_tree.txt", content="investigation-only graph\n"
+        )
+        return result
+
+
 class _FailingAgentSession:
     async def run_turn(self, message):
         raise RuntimeError("model service unavailable")
@@ -172,12 +205,48 @@ class _FailingAgentSession:
         return None
 
 
+class _ExecutionFailingSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+
+    async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                self.capabilities.journal.active_cycle,
+                "FAILED",
+                "Execution ended because the model session raised an error.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Failure outcome submitted")
+        self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle,
+            _intent_answers(self.capabilities.journal.active_cycle),
+        )
+        raise RuntimeError("model failed during execution")
+
+    async def close(self):
+        return None
+
+
 class _UnstructuredAgentSession:
-    def __init__(self):
+    def __init__(self, capabilities=None):
+        self.capabilities = capabilities
         self.messages = []
 
     async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                self.capabilities.journal.active_cycle,
+                "INCONCLUSIVE",
+                "No conclusive remediation was completed.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Outcome submitted")
         self.messages.append(message)
+        self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle,
+            _intent_answers(self.capabilities.journal.active_cycle),
+        )
         return AgentTurnResult("Investigated without a structured state. " + ("detail " * 300))
 
     async def close(self):
@@ -189,6 +258,18 @@ class _CommittingAgentSession:
         self.capabilities = capabilities
 
     async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                self.capabilities.journal.active_cycle,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "The local commit contains the completed remediation.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Outcome submitted")
+        self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle,
+            _intent_answers(self.capabilities.journal.active_cycle),
+        )
         self.capabilities.edit_workspace_text(
             "replace",
             "pom.xml",
@@ -259,8 +340,10 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("Deterministic validation failed", sessions[0].messages[1])
         self.assertIn("original remediation objective", sessions[0].messages[1])
         self.assertIn("supports, contradicts, or leaves unresolved", sessions[0].messages[1])
-        self.assertIn("strategy-1", sessions[0].messages[1])
-        self.assertNotIn("strategy-2", sessions[0].messages[1])
+        self.assertIn("decision journal", sessions[0].messages[1])
+        self.assertIn("# Cycle 1 — Intent", sessions[0].messages[1])
+        self.assertIn("# Cycle 1 — Outcome", sessions[0].messages[1])
+        self.assertIn("# Cycle 1 — Deterministic Validation", sessions[0].messages[1])
         self.assertNotIn("cycle 1 complete", sessions[0].messages[1])
         self.assertTrue(sessions[0].closed)
         workspace_root = Path(result.workspace_root)
@@ -296,10 +379,10 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("baseline_startup_1", command_sources)
 
     def test_missing_working_state_uses_bounded_fallback_without_failing_run(self):
-        session = _UnstructuredAgentSession()
+        sessions = []
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
-            agent_session_factory=lambda capabilities, model: session,
+            agent_session_factory=lambda capabilities, model: sessions.append(_UnstructuredAgentSession(capabilities)) or sessions[-1],
             scanner_factory=_FixtureScanner,
         ).run()
 
@@ -454,6 +537,21 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
         self.assertIn("AGENT_RUNTIME_FAILURE", result.reason)
 
+    def test_execution_failure_still_requests_outcome_and_runs_validation(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _ExecutionFailingSession(capabilities),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("FAILED", result.remediation_outcome)
+        self.assertEqual("COMPLETE", result.capture_status)
+        self.assertIsNotNone(result.validation)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("# Cycle 1 — Outcome", journal)
+        self.assertIn("# Cycle 1 — Deterministic Validation", journal)
+
     def test_missing_explicit_vulnerability_stops_before_agent(self):
         invoked = []
         request = replace(self._request(max_cycles=2), vulnerability_ids=("CVE-2021-44228",))
@@ -502,6 +600,51 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertTrue(result.validation.passed)
         self.assertIn("pom.xml", result.validation.changed_files)
 
+    def test_safe_partial_progress_is_separate_from_full_success_and_manual_only(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
+                capabilities, [("1.0", "1.5")], "PARTIALLY_REMEDIATED"
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("PARTIALLY_REMEDIATED", result.remediation_outcome)
+        self.assertEqual("PARTIAL", result.validation_status)
+        self.assertEqual("PARTIAL_MANUAL_REVIEW_DELIVERY", result.delivery_eligibility)
+        self.assertIsNone(result.delivery)
+
+    def test_no_change_outcome_never_invokes_delivery(self):
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _ScriptedAgentSession(
+                capabilities, [], "NO_CHANGE_REQUIRED"
+            ),
+            scanner_factory=_CleanAfterBaselineScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertEqual("NO_CHANGE_REQUIRED", result.remediation_outcome)
+        self.assertEqual("NO_CHANGE_REQUIRED", result.delivery.status)
+        self.assertEqual([], adapter.contexts)
+
+    def test_diagnostic_artifact_blocks_delivery_and_is_reported(self):
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _DiagnosticArtifactSession(
+                capabilities, [("1.0", "2.0")]
+            ),
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertIn("dependency_tree.txt", result.validation.diagnostic_artifacts)
+        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
+        self.assertEqual([], adapter.contexts)
+
     def _request(self, max_cycles):
         return RemediationRequest(
             repository_url=str(self.source),
@@ -535,6 +678,45 @@ def _finding():
         "1.0",
         ("2.0",),
     )
+
+
+def _intent_answers(cycle):
+    sections = [
+        "Problem as received",
+        "Interpreted objective",
+        "Relevant context and evidence discovered",
+        "Input ambiguities, discrepancies, or missing information",
+        "Applicable constraints and success criteria",
+        "Materially credible candidate approaches",
+        "Selected direction",
+        "Selection rationale",
+        "Assumptions to test",
+        "Intended work",
+        "Validation approach",
+        "Current uncertainties and risks",
+    ]
+    if cycle > 1:
+        sections[5:5] = ["Prior-cycle learning", "Relationship to the prior approach"]
+    return [{"section": section, "answer": f"Evidence-based answer for {section}."} for section in sections]
+
+
+def _outcome_answers():
+    sections = [
+        "Work actually performed",
+        "Evidence actually observed",
+        "Intended versus actual",
+        "Material deviations and their causes",
+        "Approaches attempted, rejected, or abandoned",
+        "Final approach present at cycle end",
+        "Assumption results",
+        "Requirement and problem coverage",
+        "Constraints and regression assessment",
+        "Self-validation assessment",
+        "Remaining work, blockers, or uncertainty",
+        "Partial-remediation value",
+        "Cycle conclusion",
+    ]
+    return [{"section": section, "answer": f"Observed result for {section}."} for section in sections]
 
 
 def _git(cwd: Path, *args: str):

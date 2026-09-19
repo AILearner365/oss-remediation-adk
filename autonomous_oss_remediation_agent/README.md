@@ -178,7 +178,9 @@ Before the first model-backed POC, replace the repository and scanner placeholde
 
 Each run uses one primary remediation LLM agent, one continuing ADK session, and one prepared repository retained across remediation cycles. The initial objective, constraints, and completion criteria remain the stable run contract. The model investigates, chooses and revises its engineering strategy, uses the developer capabilities, and modifies the repository directly; there is no planner agent, patch-plan interpreter, outcome-analysis agent, vulnerability-specific recipe, or Maven-specific remediation decision tree.
 
-At the end of each turn, the full response is retained as the cycle summary and the explicit, concise `WORKING_STATE` section is retained separately. `WORKING_STATE` records visible engineering continuity—understanding, strategy or hypothesis, assumptions, progress, and unresolved work—not hidden chain-of-thought or a deterministic plan. After the turn, deterministic validation runs outside the agent. If validation fails, the same ADK session receives only the latest `WORKING_STATE` plus compact normalized validation evidence and decides whether to continue, modify, or replace its strategy.
+Each cycle is governed by an append-only Markdown journal at `artifacts/agent/decision-journal.md`. Read-only discovery precedes a metadata-only Cycle Intent submission. Repository mutation and shell capabilities remain unavailable until the intent is structurally accepted. After execution, repository capabilities are removed and a metadata-only Cycle Outcome is captured before deterministic validation. Deterministic code renders headings, validates required sections, appends validation and final-resolution sections, and records hashes and lifecycle events. The checkpoints constrain capture timing and completeness, not engineering choices; one credible approach, reversible experiments, and evidence-driven strategy changes remain valid.
+
+The full execution response remains in `agent/cycle-N.json` as `summary`, and the extracted `workingState` remains as a deprecated compatibility field. The accepted journal is authoritative for cross-cycle continuity. Failed-validation continuation includes bounded journal content plus compact new validation evidence, without allowing legacy `WORKING_STATE` to override accepted intent, outcome, or validation history.
 
 The model owns investigation and remediation choices. Deterministic infrastructure owns repository preparation, scanner selection and execution, constraints, validation, cycle evidence, success/failure authority, and delivery. The model cannot declare success or invoke the validator as a tool.
 
@@ -204,7 +206,10 @@ Every remediation cycle must pass all applicable deterministic checks before aut
 - Enforce the protected Java version exactly when configured or detected.
 - Enforce the configured Spring Boot version movement policy.
 - Reject prohibited suppression or ignore-file changes.
+- Detect likely investigation-only files, including generated dependency-tree artifacts, and require cleanup or manual review rather than delivering them.
 - Recompute the changed-tree digest immediately before delivery.
+
+Remediation outcome, deterministic validation status, journal capture status, and delivery eligibility are projected independently in `final-result.json`. Safe partial work can be preserved and labeled `PARTIALLY_REMEDIATED`, but the current delivery adapter contract defaults partial delivery to manual review. No-change outcomes never create empty pull requests, and incomplete or late capture cannot convert failed validation into success.
 
 Findings outside `severityScope` may remain and are reported as scan findings, but they do not fail target remediation unless they violate another configured constraint. A completed scan with findings is distinct from scanner execution, authentication, authorization, network, timeout, dependency-resolution, or response failures. Every incomplete scan fails closed even when it contains zero findings.
 
@@ -215,7 +220,7 @@ Scanner-provided fixed versions are evidence rather than remediation instruction
 ## Test Verification
 
 ```text
-python -m unittest tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_git_auth tests.unit.test_autonomous_maven_policy tests.unit.test_autonomous_prompt_continuity tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
+python -m unittest tests.unit.test_decision_journal tests.unit.test_autonomous_agent_runtime tests.unit.test_autonomous_capabilities tests.unit.test_autonomous_git_auth tests.unit.test_autonomous_maven_policy tests.unit.test_autonomous_prompt_continuity tests.unit.test_autonomous_scanner_constraints tests.unit.test_autonomous_spring_boot_policy tests.unit.test_autonomous_validation_delivery tests.unit.test_autonomous_xray_scanner -v
 python -m unittest tests.integration.test_autonomous_orchestrator -v
 ```
 

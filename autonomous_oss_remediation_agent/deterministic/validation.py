@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -42,6 +43,14 @@ class DeterministicValidator:
     def capture_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> None:
         changed_files, captured = self._capture_changed_files(baseline.commit)
         self._cycle_starts[cycle] = self._repository_state(changed_files, captured)
+
+    def repository_changed_since_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> bool:
+        before = self._cycle_starts.get(cycle)
+        if before is None or not before.captured:
+            return True
+        changed_files, captured = self._capture_changed_files(baseline.commit)
+        after = self._repository_state(changed_files, captured)
+        return not captured or before.file_digests != after.file_digests
 
     def validate(self, cycle: int, baseline: RepositoryBaseline) -> ValidationReport:
         checks: list[ValidationCheck] = []
@@ -144,8 +153,23 @@ class DeterministicValidator:
                 diff_text,
             )
         )
+        diagnostic_artifacts = tuple(
+            relative for relative in changed_files if _is_likely_diagnostic_artifact(relative)
+        )
+        checks.append(
+            ValidationCheck(
+                "delivery_diff_hygiene",
+                not diagnostic_artifacts,
+                (
+                    "No newly changed likely investigation-only artifacts were detected"
+                    if not diagnostic_artifacts
+                    else "Likely investigation-only artifacts require cleanup or manual review"
+                ),
+                {"diagnosticArtifacts": list(diagnostic_artifacts)},
+            )
+        )
         digest = self.tree_digest(changed_files)
-        delivery_eligible = not self.request.constraints.unenforced_constraints
+        delivery_eligible = not self.request.constraints.unenforced_constraints and not diagnostic_artifacts
         warnings = tuple(
             f"Constraint is not deterministically enforced: {constraint}"
             for constraint in self.request.constraints.unenforced_constraints
@@ -161,6 +185,7 @@ class DeterministicValidator:
             delivery_eligible=delivery_eligible,
             warnings=warnings,
             cycle_evidence=cycle_evidence,
+            diagnostic_artifacts=diagnostic_artifacts,
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
         self.trace.append_event("validation", cycle=cycle, passed=report.passed, treeDigest=digest)
@@ -354,3 +379,14 @@ class _RepositoryState:
     changed_files: tuple[str, ...]
     file_digests: dict[str, str]
     captured: bool
+
+
+_DIAGNOSTIC_ARTIFACT = re.compile(
+    r"(?i)(?:^|/)(?:dependency[-_ ]?tree|dependency[-_ ]?graph|diagnostic[-_ ]?report|investigation[-_ ]?notes?)"
+    r"(?:\.[a-z0-9._-]+)?$"
+)
+
+
+def _is_likely_diagnostic_artifact(relative_path: str) -> bool:
+    normalized = relative_path.replace("\\", "/")
+    return bool(_DIAGNOSTIC_ARTIFACT.search(normalized))

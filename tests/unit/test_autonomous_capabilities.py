@@ -9,6 +9,7 @@ from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
+from autonomous_oss_remediation_agent.journal import INTENT_SECTIONS, JournalLifecycle, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore, WorkspaceBoundaryError
 
 
@@ -167,7 +168,14 @@ class AutonomousCapabilityTests(unittest.TestCase):
     def test_adk_tool_surface_matches_capability_categories(self):
         tools = self.capabilities.adk_tools()
         self.assertEqual(
-            {"read_workspace_text", "edit_workspace_text", "run_workspace_shell"},
+            {
+                "read_workspace_text",
+                "list_workspace_files",
+                "edit_workspace_text",
+                "run_workspace_shell",
+                "submit_cycle_intent",
+                "submit_cycle_outcome",
+            },
             {tool.name for tool in tools},
         )
 
@@ -176,6 +184,32 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
         names = {tool.name for tool in agent.tools}
         self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
+
+    def test_pre_intent_mutation_and_shell_are_enforced_and_late_capture_is_detected(self):
+        changed = False
+        journal = JournalLifecycle(
+            JournalStore(self.trace), self.trace, "contract", lambda: changed
+        )
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
+
+        edit = capabilities.edit_workspace_text("write", "blocked.txt", content="blocked")
+        shell = capabilities.run_workspace_shell("Set-Content bypass.txt bypass" if os.name == "nt" else "touch bypass.txt")
+
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", edit["failureCode"])
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", shell["failureCode"])
+        self.assertFalse((self.workspace.repository / "blocked.txt").exists())
+        self.assertFalse((self.workspace.repository / "bypass.txt").exists())
+        changed = True
+        answers = [
+            {"section": section, "answer": f"Substantive answer for {section}."}
+            for section in INTENT_SECTIONS
+        ]
+        self.assertTrue(capabilities.submit_cycle_intent(1, answers)["status"] == "accepted")
+        self.assertTrue(journal.cycles[1].late_intent)
+        journal.require_outcome()
+        denied = capabilities.edit_workspace_text("write", "outcome.txt", content="blocked")
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
 
     def test_new_package_has_no_reference_agent_imports(self):
         package_root = Path(__file__).resolve().parents[2] / "autonomous_oss_remediation_agent"

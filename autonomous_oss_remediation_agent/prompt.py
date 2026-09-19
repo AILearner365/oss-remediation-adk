@@ -34,8 +34,12 @@ Requirements:
 - Treat scanner-provided fixed versions and fixed-version expressions as evidence, not required remediation targets. Empty fixed-version evidence does not prove remediation is impossible, and ambiguous ranges must not be converted into guessed concrete versions.
 - Maintain a concise model-owned working state across turns: current understanding, strategy or hypothesis, assumptions being tested, meaningful progress, and unresolved work. Revise or replace it whenever evidence warrants. This is engineering continuity, not a rigid patch plan or prescribed sequence.
 - Do not provide hidden chain-of-thought or detailed private reasoning. Record only concise engineering state that is useful for the next work cycle.
+- Never edit `agent/decision-journal.md`; deterministic orchestration exclusively owns that artifact.
+- At the start of each cycle, use only read-only discovery capabilities, then call `submit_cycle_intent` with every required journal section. The checkpoint constrains reporting timing, not your engineering strategy. One credible approach or a reversible diagnostic experiment is valid; never invent alternatives.
+- Material edit and shell capabilities become usable only after Cycle Intent is accepted. You may freely adapt or replace the selected direction when execution evidence warrants.
+- When execution ends, repository capabilities are removed. Use the metadata-only `submit_cycle_outcome` capability to report actual work, deviations, evidence, unresolved coverage, and the applicable outcome status. Deterministic validation remains authoritative.
 
-When you have completed a useful work cycle, summarize what you changed and why, followed by a concise `WORKING_STATE` covering understanding, current strategy/hypothesis, assumptions, progress, and unresolved work. If repository evidence shows no safe remediation can satisfy the supplied constraints, respond with `NO_SAFE_REMEDIATION:` followed by the evidence-based reason.
+When you have completed a useful execution phase, summarize what you changed and why, followed by a concise `WORKING_STATE` for compatibility. Do not claim success; the orchestrator will request Cycle Outcome in a separate metadata-only turn.
 """.strip()
 
 
@@ -57,10 +61,38 @@ def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -
         ],
     }
     return (
-        "Begin the first autonomous remediation work cycle in the prepared repository. "
+        "Begin Cycle 1 read-only discovery in the prepared repository. "
         "The objective, constraints, and completion criteria below are the stable run contract for every turn. "
-        "Use tools to investigate and modify the repository, maintain your concise WORKING_STATE, then end the turn for deterministic validation.\n\n"
+        "Inspect only with read capabilities, then submit every required Cycle Intent section through `submit_cycle_intent`. "
+        "After it is accepted, execution capabilities become available in the same turn; investigate, modify, and self-validate, then end the turn.\n\n"
         + json.dumps(payload, indent=2, sort_keys=True)
+    )
+
+
+def intent_retry_message(cycle: int, errors: list[str]) -> str:
+    return (
+        f"Cycle {cycle} Intent has not been accepted. Correct the checkpoint using `submit_cycle_intent`. "
+        "Do not perform material work before acceptance. Rejection details:\n- "
+        + "\n- ".join(errors)
+    )
+
+
+def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
+    return (
+        f"Execution for Cycle {cycle} has ended. Repository read, edit, and shell capabilities are now unavailable. "
+        "Submit a metadata-only Cycle Outcome through `submit_cycle_outcome` for any successful, partial, blocked, "
+        "failed, inconclusive, or no-change execution. Report intended-versus-actual work and unresolved coverage; "
+        "do not claim deterministic success.\n\nExecution response (compatibility evidence):\n"
+        + execution_summary
+        + "\n\nDeterministic execution evidence available before validation:\n"
+        + json.dumps(evidence, indent=2, sort_keys=True, default=str)
+    )
+
+
+def outcome_retry_message(cycle: int, errors: list[str]) -> str:
+    return (
+        f"Cycle {cycle} Outcome has not been accepted. Correct it using `submit_cycle_outcome`; only that metadata "
+        "capability is available. Rejection details:\n- " + "\n- ".join(errors)
     )
 
 
@@ -84,7 +116,7 @@ def extract_working_state(turn_text: str) -> str:
     )
 
 
-def validation_feedback(report: ValidationReport, prior_working_state: str) -> str:
+def validation_feedback(report: ValidationReport, journal_context: str) -> str:
     failed_checks = []
     for check in report.checks:
         if check.passed:
@@ -137,8 +169,8 @@ def validation_feedback(report: ValidationReport, prior_working_state: str) -> s
         "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
         "Relate the evidence to your previous strategy and actions. Determine what it supports, contradicts, or leaves unresolved; preserve useful progress; reconsider unsupported assumptions or unsuccessful approaches when appropriate; decide whether to continue, modify, or replace your strategy; then continue investigation and remediation with the available developer capabilities. Do not restart by default, and do not assume a particular dependency, version, management layer, file, or remediation technique.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
-        "Previous model-owned working state:\n"
-        + prior_working_state
+        "The bounded Markdown decision journal below is the authoritative cross-cycle problem-solving state. Legacy WORKING_STATE is compatibility-only and must not override it.\n\n"
+        + journal_context
         + "\n\nNew deterministic validation evidence:\n"
         + json.dumps(evidence, indent=2, sort_keys=True)
     )
