@@ -3,11 +3,7 @@ from __future__ import annotations
 import json
 
 from .config import RemediationRequest
-from .journal import (
-    intent_questionnaire,
-    outcome_questionnaire,
-    strategy_checkpoint_questionnaire,
-)
+from .journal import intent_questionnaire, outcome_questionnaire
 from .models import RepositoryBaseline, ValidationReport
 
 
@@ -17,9 +13,6 @@ You are the single autonomous OSS remediation engineering agent for one prepared
 Investigate the repository and remediate the requested vulnerabilities directly. You may read and patch repository text and use the trusted host-native shell for repository discovery, dependency analysis, builds, tests, local Git inspection, and workspace-local helper scripts.
 
 Requirements:
-- Evidence discipline is mandatory. Treat decision-relevant claims according to their evidence, not merely their source. User input, repository content, documentation, prior-cycle statements, external information, model knowledge, and tool output can each be incomplete, outdated, environment-specific, or incorrect.
-- Do not convert an uncertain claim into fact because one source states it or it matches model knowledge. Identify and verify claims that materially affect strategy selection using evidence appropriate to the claim: repository files/history/effective configuration, safe environment probes, builds/tests, authoritative compatibility information, or current authoritative external information when available. Internet access is not required for every claim.
-- Reconcile evidence sources. Repository evidence is relevant but not universally authoritative. Check constraint interpretations against the complete run contract. When verification is unavailable, preserve uncertainty; do not silently convert unverified into false, invalid, unsupported, or nonexistent. Prefer strategies that depend on fewer unresolved decision-critical assumptions.
 - Base decisions on repository, dependency, build, and scanner evidence.
 - Respect every supplied constraint.
 - Treat supplied version policies solely as remediation boundaries, not instructions to upgrade or select a particular dependency-management layer. An exact required version constrains the outcome but does not prescribe how to achieve it.
@@ -37,13 +30,10 @@ Requirements:
 - Never edit `agent/decision-journal.md`; deterministic orchestration exclusively owns that artifact.
 - At the start of each cycle, use only read-only discovery capabilities, then call `submit_cycle_intent` with every required journal section. The checkpoint constrains reporting timing, not your engineering strategy. One credible approach or a reversible diagnostic experiment is valid; never invent alternatives.
 - Material edit and shell capabilities become usable only after Cycle Intent is accepted. You may freely adapt or replace the selected direction when execution evidence warrants.
-- After Intent, call `record_strategy_checkpoint` when material evidence changes a decision-critical assumption, understood cause, expected coverage, compatibility, safety, constraint compliance, ownership, or availability of a materially better approach. Do not record one mechanically for every failed command, edit correction, or minor adjustment.
-- When material evidence weakens or invalidates the strategy, reassess the complete unresolved problem before proceeding. Reconsider the original goal, all constraints, current state, verified and disproved assumptions, attempted approaches, achieved and missing coverage, credible alternatives, validation options, compatibility, maintainability, and risk. Prior effort is not evidence that a strategy remains best; partial success establishes only what the evidence supports, and a remaining-items list does not require reuse of the same mechanism.
-- Any permitted tool may be used to reduce decision-critical uncertainty, investigate, or self-validate. Report an invocation failure exactly: it does not by itself prove agent-environment, global capability, or authoritative-validation unavailability. Agent validation is supporting evidence; configured deterministic validation remains authoritative and may run in a different environment or path.
 - When execution ends, repository capabilities are removed. Use the metadata-only `submit_cycle_outcome` capability to report actual work, deviations, evidence, unresolved coverage, and the applicable outcome status. Deterministic validation remains authoritative.
 
 When you have completed a useful execution phase, provide a concise ordinary summary. Do not emit `WORKING_STATE` and do not claim success; the orchestrator will request Cycle Outcome in a separate metadata-only turn and will generate any deprecated compatibility projection deterministically.
-""".strip() + "\n\n" + strategy_checkpoint_questionnaire()
+""".strip()
 
 
 def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -> str:
@@ -89,7 +79,6 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         "failed, inconclusive, or no-change execution. Report intended-versus-actual work and unresolved coverage; "
         "do not claim deterministic success.\n\n"
         + outcome_questionnaire()
-        + "\n\nSet optional `material_strategy_revision` to true only when execution materially revised or replaced the accepted strategy; a missing checkpoint then produces a non-blocking capture warning."
         + "\n\nExecution response (compatibility evidence):\n"
         + execution_summary
         + "\n\nDeterministic execution evidence available before validation:\n"
@@ -175,8 +164,7 @@ def validation_feedback(report: ValidationReport, journal_context: str, next_cyc
     }
     return (
         "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
-        "Prior-cycle work is evidence, not an endorsed strategy. Determine what the new evidence supports, contradicts, or leaves unresolved. Reconstruct the current unresolved problem from the complete original contract, current repository/system state, accepted Intent, material strategy checkpoints, Outcome, assumptions confirmed/disproved/unresolved, and authoritative validation. Explicitly compare retaining, extending, revising, and replacing the prior strategy. Choose based on complete coverage, evidence, constraints, system fit, compatibility, maintainability, risk, and validation rather than prior investment, strategy momentum, or the smallest next edit. Preserve useful progress without treating partial success as proof that the same mechanism fits every remaining item.\n\n"
-        "Distinguish local invocation failure, agent-environment unavailability, global capability unavailability, and authoritative-validation failure. Use any permitted tool that can reduce material uncertainty; do not generalize beyond observed evidence.\n\n"
+        "Relate the evidence to your previous strategy and actions. Determine what it supports, contradicts, or leaves unresolved; preserve useful progress; reconsider unsupported assumptions or unsuccessful approaches when appropriate; decide whether to continue, modify, or replace your strategy; then continue investigation and remediation with the available developer capabilities. Do not restart by default, and do not assume a particular dependency, version, management layer, file, or remediation technique.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "The bounded Markdown decision journal below is the authoritative cross-cycle problem-solving state. Legacy WORKING_STATE is compatibility-only and must not override it.\n\n"
         + journal_context

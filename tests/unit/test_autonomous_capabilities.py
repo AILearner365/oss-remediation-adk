@@ -9,12 +9,7 @@ from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
-from autonomous_oss_remediation_agent.journal import (
-    INTENT_SECTIONS,
-    STRATEGY_CHECKPOINT_SECTIONS,
-    JournalLifecycle,
-    JournalStore,
-)
+from autonomous_oss_remediation_agent.journal import INTENT_SECTIONS, JournalLifecycle, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore, WorkspaceBoundaryError
 
 
@@ -181,7 +176,6 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 "edit_workspace_text",
                 "run_workspace_shell",
                 "submit_cycle_intent",
-                "record_strategy_checkpoint",
                 "submit_cycle_outcome",
             },
             {tool.name for tool in tools},
@@ -192,28 +186,6 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
         names = {tool.name for tool in agent.tools}
         self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
-
-    def test_strategy_checkpoint_is_execution_only_and_does_not_consume_tool_budget(self):
-        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
-        journal.begin_cycle(1)
-        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
-        answers = [
-            {"section": section, "answer": f"Evidence for {section}."}
-            for section in STRATEGY_CHECKPOINT_SECTIONS
-        ]
-
-        denied = capabilities.record_strategy_checkpoint(1, answers)
-        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
-        capabilities.submit_cycle_intent(
-            1,
-            [{"section": section, "answer": f"Evidence for {section}."} for section in INTENT_SECTIONS],
-        )
-        before = self.budget.tool_calls
-        accepted = capabilities.record_strategy_checkpoint(1, answers)
-
-        self.assertEqual("accepted", accepted["status"])
-        self.assertEqual(before, self.budget.tool_calls)
-        self.assertIn("record_strategy_checkpoint", capabilities.available_tool_names())
 
     def test_pre_intent_discovery_is_bounded_read_only_and_finds_late_files(self):
         for index in range(12):

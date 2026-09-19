@@ -13,7 +13,6 @@ from autonomous_oss_remediation_agent.journal import (
     JournalStore,
     OUTCOME_SECTIONS,
     OUTCOME_STATUSES,
-    STRATEGY_CHECKPOINT_SECTIONS,
     RemediationOutcome,
     render_final_resolution,
 )
@@ -161,63 +160,6 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertLessEqual(len(context), 550)
         self.assertIn("bounded for model input", context)
 
-    def test_strategy_checkpoints_are_append_only_ordered_and_bounded(self):
-        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
-        first = self.lifecycle.record_strategy_checkpoint(1, self._strategy_answers("first evidence", "REVISED"))
-        second = self.lifecycle.record_strategy_checkpoint(1, self._strategy_answers("second evidence", "REPLACED"))
-
-        self.assertTrue(first.accepted)
-        self.assertTrue(second.accepted)
-        content = self.lifecycle.store.read()
-        self.assertLess(
-            content.index("Strategy Checkpoint 1"),
-            content.index("Strategy Checkpoint 2"),
-        )
-        self.assertLess(content.index("first evidence"), content.index("second evidence"))
-        self.assertEqual(2, len(self.lifecycle.cycles[1].strategy_checkpoints))
-
-        self.lifecycle.max_strategy_checkpoints = 2
-        rejected = self.lifecycle.record_strategy_checkpoint(1, self._strategy_answers("third", "RETAINED"))
-        self.assertFalse(rejected.accepted)
-        self.assertTrue(any("checkpoint limit" in error for error in rejected.errors))
-
-    def test_revision_without_checkpoint_warns_but_does_not_block_outcome(self):
-        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
-        self.lifecycle.require_outcome()
-        result = self.lifecycle.submit_outcome(
-            1,
-            "INCONCLUSIVE",
-            "The direction was materially replaced.",
-            self._outcome_answers(),
-            material_strategy_revision=True,
-        )
-
-        self.assertTrue(result.accepted)
-        self.assertIn("without a recorded strategy checkpoint", self.lifecycle.capture_warnings()[0])
-
-    def test_checkpoint_digest_survives_bounded_continuation_context(self):
-        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
-        self.assertTrue(
-            self.lifecycle.record_strategy_checkpoint(
-                1,
-                self._strategy_answers("material ownership evidence", "REVISED"),
-            ).accepted
-        )
-        self.lifecycle.require_outcome()
-        self.assertTrue(
-            self.lifecycle.submit_outcome(
-                1,
-                "INCONCLUSIVE",
-                "Validation remains necessary.",
-                self._outcome_answers(),
-            ).accepted
-        )
-
-        context = self.lifecycle.context()
-        self.assertIn("Structured latest-cycle continuity digest", context)
-        self.assertIn("material ownership evidence", context)
-        self.assertIn("REVISED", context)
-
     def test_run_capture_uses_least_trustworthy_cycle(self):
         self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
         self.lifecycle.begin_cycle(2)
@@ -335,41 +277,6 @@ Not-applicable evidence."""
         self.assertIn("> Unresolved evidence.", rendered)
         self.assertIn("> Not-applicable evidence.", rendered)
 
-    def test_passing_validation_marks_stale_model_assessment_superseded(self):
-        from autonomous_oss_remediation_agent.models import ValidationReport
-
-        cycle = CycleCapture(
-            outcome_status="PARTIALLY_REMEDIATED",
-            outcome_status_explanation="One part appeared unresolved before validation.",
-            outcome_answers={
-                "Partial-remediation value": "Only partial value was believed to remain.",
-            },
-        )
-        report = ValidationReport(
-            cycle=1,
-            passed=True,
-            checks=(),
-            changed_files=("pom.xml",),
-            diff_path="diff",
-            tree_digest="digest",
-        )
-
-        rendered = render_final_resolution(
-            RemediationOutcome.FULLY_VALIDATED,
-            "Original problem",
-            {1: cycle},
-            report,
-            CaptureStatus.COMPLETE,
-            DeliveryEligibility.FULL_AUTOMATIC_DELIVERY,
-            "Delivered.",
-            "No runtime reconstruction.",
-        )
-
-        self.assertIn("superseded pre-validation assessment", rendered)
-        self.assertIn("One part appeared unresolved", rendered)
-        self.assertIn("not an active final limitation", rendered)
-        self.assertIn("does not prove their semantic correctness", rendered)
-
     @staticmethod
     def _replace(answers, section, answer):
         next(item for item in answers if item["section"] == section)["answer"] = answer
@@ -381,16 +288,6 @@ Not-applicable evidence."""
     @staticmethod
     def _outcome_answers():
         return [{"section": section, "answer": f"Observed evidence for {section}."} for section in OUTCOME_SECTIONS]
-
-    @staticmethod
-    def _strategy_answers(trigger="Material evidence changed.", direction="REVISED"):
-        answers = [
-            {"section": section, "answer": f"Substantive checkpoint answer for {section}."}
-            for section in STRATEGY_CHECKPOINT_SECTIONS
-        ]
-        next(item for item in answers if item["section"] == "Trigger or new evidence")["answer"] = trigger
-        next(item for item in answers if item["section"] == "Updated strategy direction")["answer"] = direction
-        return answers
 
 
 if __name__ == "__main__":

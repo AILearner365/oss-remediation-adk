@@ -137,49 +137,11 @@ class DeveloperCapabilitySet:
         status: str,
         status_explanation: str,
         answers: list[dict[str, str]],
-        material_strategy_revision: bool = False,
     ) -> dict[str, Any]:
         """Submit the required metadata-only Cycle Outcome after execution."""
         if not self.journal:
             return self._unavailable("submit_cycle_outcome", "Journal lifecycle is not configured")
-        return self.journal.submit_outcome(
-            cycle_number,
-            status,
-            status_explanation,
-            answers,
-            material_strategy_revision,
-        ).to_dict()
-
-    def record_strategy_checkpoint(
-        self,
-        cycle_number: int,
-        answers: list[dict[str, str]],
-    ) -> dict[str, Any]:
-        """Record a bounded metadata-only reassessment after material strategy evidence changes."""
-        if not self.journal:
-            return self._unavailable(
-                "record_strategy_checkpoint",
-                "Journal lifecycle is not configured",
-            )
-        denied = self._require_phase(
-            "record_strategy_checkpoint",
-            {JournalPhase.EXECUTION},
-        )
-        if denied:
-            return denied
-        try:
-            self.budget.ensure_time_remaining()
-            return self.journal.record_strategy_checkpoint(cycle_number, answers).to_dict()
-        except BudgetExceeded as exc:
-            self.trace.append_event(
-                "strategy_checkpoint_deadline_exceeded",
-                error=str(exc),
-            )
-            return {
-                "status": "error",
-                "error": str(exc),
-                "failureCode": "EXECUTION_BUDGET_EXCEEDED",
-            }
+        return self.journal.submit_outcome(cycle_number, status, status_explanation, answers).to_dict()
 
     def adk_tools(self) -> list[FunctionTool]:
         return [
@@ -190,7 +152,6 @@ class DeveloperCapabilitySet:
             FunctionTool(self.edit_workspace_text),
             FunctionTool(self.run_workspace_shell),
             FunctionTool(self.submit_cycle_intent),
-            FunctionTool(self.record_strategy_checkpoint),
             FunctionTool(self.submit_cycle_outcome),
         ]
 
@@ -199,7 +160,7 @@ class DeveloperCapabilitySet:
             return frozenset({"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "edit_workspace_text", "run_workspace_shell"})
         by_phase = {
             JournalPhase.INTENT_REQUIRED: {"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "submit_cycle_intent"},
-            JournalPhase.EXECUTION: {"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "edit_workspace_text", "run_workspace_shell", "record_strategy_checkpoint"},
+            JournalPhase.EXECUTION: {"read_workspace_text", "list_workspace_files", "search_workspace_text", "inspect_git_state", "edit_workspace_text", "run_workspace_shell"},
             JournalPhase.OUTCOME_REQUIRED: {"submit_cycle_outcome"},
         }
         return frozenset(by_phase.get(self.journal.phase, set()))
