@@ -61,17 +61,17 @@ class QuestionnaireSection:
 
 
 INTENT_QUESTIONNAIRE = (
-    QuestionnaireSection("Problem as received", "Restate the supplied problem, requested outcome, and reported findings without changing their meaning."),
-    QuestionnaireSection("Interpreted objective", "Describe the engineering outcome currently required and distinguish it from any literal wording when necessary."),
-    QuestionnaireSection("Relevant context and evidence discovered", "Record material observed repository, environment, dependency, build, scan, and prior-work evidence; keep observations separate from assumptions."),
-    QuestionnaireSection("Input ambiguities, discrepancies, or missing information", "Identify material uncertainty or explicitly explain why current information is sufficient."),
-    QuestionnaireSection("Applicable constraints and success criteria", "Apply caller constraints and state evidence needed for full, partial, blocked, and inconclusive outcomes without turning techniques into constraints."),
-    QuestionnaireSection("Prior-cycle learning", "Explain what prior authoritative validation supported, contradicted, or left unresolved.", after_cycle_one=True),
-    QuestionnaireSection("Relationship to the prior approach", "Explain whether this direction continues, adjusts, replaces, expands, or investigates before committing to the prior approach.", after_cycle_one=True),
-    QuestionnaireSection("Materially credible candidate approaches", "Describe only genuine candidates. One credible approach is valid; if more evidence is needed, a reversible diagnostic experiment is valid. Do not invent alternatives."),
-    QuestionnaireSection("Selected direction", "State the approach, combination, or diagnostic experiment selected for execution."),
-    QuestionnaireSection("Selection rationale", "Explain evidence, coverage, constraints, risks, maintainability, validation, and meaningful tradeoffs."),
-    QuestionnaireSection("Assumptions to test", "For each material assumption state why it matters, how it will be tested, and its current status; explain if none remain."),
+    QuestionnaireSection("Problem as received", "Restate the complete supplied problem, requested outcome, relevant context, and reported findings without changing their meaning."),
+    QuestionnaireSection("Interpreted objective", "Describe every material part of the required engineering outcome and identify any ambiguity or inconsistency in the supplied information."),
+    QuestionnaireSection("Relevant context and evidence discovered", "Separate observed or verified facts from unresolved questions and model assumptions. For each decision-critical claim, record supporting and contradicting evidence, how it was or will be verified, and what decision changes if it is false."),
+    QuestionnaireSection("Input ambiguities, discrepancies, or missing information", "Identify unresolved questions, discrepancies, or unavailable verification. Preserve uncertainty rather than converting unverified claims into facts or negative conclusions."),
+    QuestionnaireSection("Applicable constraints and success criteria", "Enumerate every applicable caller constraint and success criterion, explain the current interpretation, and state evidence needed to evaluate complete goal coverage without turning techniques into constraints."),
+    QuestionnaireSection("Prior-cycle learning", "Reconstruct the unresolved problem from the original contract, current state, prior checkpoints and Outcome, and authoritative validation; identify confirmed, disproved, and unresolved assumptions.", after_cycle_one=True),
+    QuestionnaireSection("Relationship to the prior approach", "Compare retaining, extending, revising, and replacing the prior direction as credible; select based on current evidence rather than prior investment or local momentum.", after_cycle_one=True),
+    QuestionnaireSection("Materially credible candidate approaches", "For every genuine candidate, capture its conceptual mechanism, complete-goal coverage, compatibility with every constraint, supporting and contradicting evidence, critical assumptions, validation approach, and material trade-offs, risks, and maintainability implications. One credible approach is valid when no material alternative exists; explain why, or select a reversible diagnostic experiment. Do not invent alternatives, assign scores, or use an eligibility taxonomy."),
+    QuestionnaireSection("Selected direction", "State the approach, combination, or diagnostic experiment selected for execution and what it does not cover."),
+    QuestionnaireSection("Selection rationale", "Audit why the direction is currently preferable for the complete problem: address every material goal and constraint, verified support, unresolved dependencies, the strongest contrary evidence or argument, why selection remains justified or should change, and how success and failure will be recognized."),
+    QuestionnaireSection("Assumptions to test", "List only decision-critical assumptions. For each, state current uncertainty, supporting and contradicting evidence, verification method, why it matters, and what part of the decision changes if false; explain if none remain."),
     QuestionnaireSection("Intended work", "Describe meaningful directional work and any reversible investigation, not a rigid command-by-command plan."),
     QuestionnaireSection("Validation approach", "State required checks, expected evidence, failure signals, and evidence that should trigger adaptation; do not present planned checks as completed."),
     QuestionnaireSection("Current uncertainties and risks", "Record material uncertainty or risk and how execution or validation should reduce it."),
@@ -80,20 +80,32 @@ OUTCOME_QUESTIONNAIRE = (
     QuestionnaireSection("Work actually performed", "Describe material changes, investigations, experiments, corrective actions, and relevant reverted or abandoned work."),
     QuestionnaireSection("Evidence actually observed", "Record successful, failed, incomplete, and inconclusive evidence separately from conclusions, with stable references when available."),
     QuestionnaireSection("Intended versus actual", "Compare the accepted Intent with completed, omitted, added, and materially changed work."),
-    QuestionnaireSection("Material deviations and their causes", "Explain each strategy-level deviation, its evidence, cause, and effect; say explicitly if none occurred."),
+    QuestionnaireSection("Material deviations and their causes", "Explain each strategy-level deviation, its evidence, cause, effect, and whether the strategy was retained, extended, revised, or replaced; identify the corresponding strategy checkpoint when one was required, or say explicitly if none occurred."),
     QuestionnaireSection("Approaches attempted, rejected, or abandoned", "Record material approaches not retained, supporting evidence, failure category, and preserved value; say explicitly if none."),
     QuestionnaireSection("Final approach present at cycle end", "Describe only the approach actually represented by repository state."),
-    QuestionnaireSection("Assumption results", "Give each material assumption's final status, evidence, and effect on the implementation or conclusion."),
-    QuestionnaireSection("Requirement and problem coverage", "Distinguish satisfied, conditional, unresolved, and not-applicable coverage with justification."),
-    QuestionnaireSection("Constraints and regression assessment", "Report constraint compliance, compatibility, regressions, unrelated changes, and investigation-only artifacts."),
-    QuestionnaireSection("Self-validation assessment", "Distinguish planned-not-run, passed, failed, inconclusive, and environmentally blocked checks; state what independent validation must confirm."),
-    QuestionnaireSection("Remaining work, blockers, or uncertainty", "For each remaining item state why it remains, whether another cycle can resolve it, and whether external input is needed."),
+    QuestionnaireSection("Assumption results", "Classify each decision-critical assumption as confirmed, disproved, or unresolved; cite observed evidence and explain how the result affected the strategy. Do not broaden a local tool failure into global unavailability."),
+    QuestionnaireSection("Requirement and problem coverage", "For every material part of the original goal, classify it under Satisfied, Conditional, Unresolved, or Not applicable and explain supporting evidence and remaining uncertainty."),
+    QuestionnaireSection("Constraints and regression assessment", "For every applicable constraint, explain how compliance was evaluated, supporting evidence, remaining uncertainty, compatibility, regressions, unrelated changes, and investigation-only artifacts."),
+    QuestionnaireSection("Self-validation assessment", "State what was run or inspected and what each result establishes and does not establish. Distinguish planned-not-run, passed, failed, inconclusive, local invocation failure, environment unavailability, and checks needing authoritative deterministic validation."),
+    QuestionnaireSection("Remaining work, blockers, or uncertainty", "For each remaining item state why it remains, whether another cycle can resolve it, and whether external input or authoritative validation is needed. If operational budget remains, explain why this cycle is ending rather than continuing."),
     QuestionnaireSection("Partial-remediation value", "When partial, state measurable improvement, remaining requirements, safety, test health, prohibited issues, manual-review value, and disclosures; otherwise state why not applicable."),
     QuestionnaireSection("Cycle conclusion", "Concise evidence-based summary of intent, actual work, deviations, established results, unresolved work, and next step."),
+)
+STRATEGY_CHECKPOINT_QUESTIONNAIRE = (
+    QuestionnaireSection("Trigger or new evidence", "Record the material evidence or changed understanding that triggered reassessment."),
+    QuestionnaireSection("Effect on prior facts, assumptions, or rationale", "Identify what the evidence supports, weakens, disproves, or leaves unresolved without rewriting prior history."),
+    QuestionnaireSection("Complete unresolved problem", "Reconstruct remaining scope against the original goal, every constraint, and current repository or system state."),
+    QuestionnaireSection("Reconsidered candidate approaches", "Reconsider credible ways to retain, extend, revise, or replace the strategy; do not invent alternatives or prescribe a fixed number."),
+    QuestionnaireSection("Updated strategy direction", "State whether the strategy is retained, extended, revised, or replaced and describe the updated direction."),
+    QuestionnaireSection("Updated direction rationale", "Explain why the updated direction is preferable given complete coverage, evidence, constraints, compatibility, maintainability, risk, and validation."),
+    QuestionnaireSection("Updated goal and constraint coverage", "Explain what the direction covers, does not cover, and how every applicable constraint remains addressed."),
+    QuestionnaireSection("Updated validation plan", "State how the revised reasoning will be tested and what evidence would trigger another reassessment."),
+    QuestionnaireSection("Remaining uncertainty", "Preserve unresolved decision-critical uncertainty and its effect on the next decision."),
 )
 INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if not section.after_cycle_one)
 PRIOR_CYCLE_INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if section.after_cycle_one)
 OUTCOME_SECTIONS = tuple(section.name for section in OUTCOME_QUESTIONNAIRE)
+STRATEGY_CHECKPOINT_SECTIONS = tuple(section.name for section in STRATEGY_CHECKPOINT_QUESTIONNAIRE)
 OUTCOME_STATUSES = frozenset(
     {
         "READY_FOR_INDEPENDENT_VALIDATION",
@@ -153,6 +165,10 @@ class CycleCapture:
     intent_answers: dict[str, str] = field(default_factory=dict)
     outcome_answers: dict[str, str] = field(default_factory=dict)
     outcome_status: str | None = None
+    outcome_status_explanation: str = ""
+    strategy_checkpoints: list[JournalSection] = field(default_factory=list)
+    strategy_checkpoint_answers: list[dict[str, str]] = field(default_factory=list)
+    material_strategy_revision_reported: bool = False
     last_intent_errors: tuple[str, ...] = ()
     last_outcome_errors: tuple[str, ...] = ()
     validation_report: ValidationReport | None = None
@@ -228,6 +244,8 @@ class JournalLifecycle:
         max_section_chars: int = 8_000,
         max_checkpoint_chars: int = 48_000,
         max_context_chars: int = 24_000,
+        max_strategy_checkpoints: int = 6,
+        max_strategy_checkpoint_chars: int = 24_000,
         preliminary_contract: bool = False,
     ):
         self.store = store
@@ -238,6 +256,8 @@ class JournalLifecycle:
         self.max_section_chars = max_section_chars
         self.max_checkpoint_chars = max_checkpoint_chars
         self.max_context_chars = max_context_chars
+        self.max_strategy_checkpoints = max_strategy_checkpoints
+        self.max_strategy_checkpoint_chars = max_strategy_checkpoint_chars
         self.cycles: dict[int, CycleCapture] = {}
         self.store.initialize(render_run_contract(run_contract, preliminary=preliminary_contract))
         self._repository_changed = repository_changed
@@ -269,11 +289,17 @@ class JournalLifecycle:
     def capture_warnings(self) -> tuple[str, ...]:
         if not self.cycles:
             return ("No remediation-cycle checkpoints were captured",)
-        return tuple(
+        warnings = [
             f"Cycle {cycle} capture is {capture.status.value}"
             for cycle, capture in sorted(self.cycles.items())
             if capture.status != CaptureStatus.COMPLETE
+        ]
+        warnings.extend(
+            f"Cycle {cycle} reported a material strategy revision or replacement without a recorded strategy checkpoint"
+            for cycle, capture in sorted(self.cycles.items())
+            if capture.material_strategy_revision_reported and not capture.strategy_checkpoints
         )
+        return tuple(warnings)
 
     def begin_cycle(self, cycle: int) -> None:
         self.active_cycle = cycle
@@ -314,12 +340,94 @@ class JournalLifecycle:
         self.phase = JournalPhase.OUTCOME_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=self.active_cycle, phase=self.phase.value)
 
+    def record_strategy_checkpoint(
+        self,
+        cycle: int,
+        answers: list[dict[str, str]],
+    ) -> CheckpointResult:
+        capture = self.cycles.setdefault(cycle, CycleCapture())
+        errors: list[str] = []
+        if cycle != self.active_cycle:
+            errors.append(f"Expected active cycle {self.active_cycle}, received {cycle}")
+        if self.phase != JournalPhase.EXECUTION:
+            errors.append(
+                f"Expected phase {JournalPhase.EXECUTION.value}, current phase is {self.phase.value}"
+            )
+        if not capture.intent:
+            errors.append(f"Cycle {cycle} Intent must be accepted before a strategy checkpoint")
+        if len(capture.strategy_checkpoints) >= self.max_strategy_checkpoints:
+            errors.append(
+                f"Cycle {cycle} strategy checkpoint limit is {self.max_strategy_checkpoints}"
+            )
+        errors.extend(self._missing_sections(answers, STRATEGY_CHECKPOINT_SECTIONS))
+        existing_chars = sum(
+            len(answer)
+            for checkpoint in capture.strategy_checkpoint_answers
+            for answer in checkpoint.values()
+        )
+        submitted_chars = sum(len(str(item.get("answer", ""))) for item in answers)
+        if existing_chars + submitted_chars > self.max_strategy_checkpoint_chars:
+            errors.append(
+                "Cycle strategy checkpoint content exceeds "
+                f"{self.max_strategy_checkpoint_chars} characters "
+                f"({existing_chars + submitted_chars})"
+            )
+        errors.extend(
+            self._answer_collection_errors(
+                answers,
+                self.max_strategy_checkpoint_chars,
+                "Strategy checkpoint",
+            )
+        )
+        if errors:
+            self.trace.append_event(
+                "strategy_checkpoint_rejected",
+                cycle=cycle,
+                errors=errors,
+            )
+            return CheckpointResult(False, tuple(errors))
+        ordinal = len(capture.strategy_checkpoints) + 1
+        checkpoint_id = f"cycle-{cycle}-strategy-{ordinal}"
+        rendered = render_checkpoint(
+            cycle,
+            f"Strategy Checkpoint {ordinal}",
+            [
+                {"section": "Checkpoint identifier", "answer": f"`{checkpoint_id}`"},
+                *answers,
+            ],
+        )
+        errors.extend(
+            validate_rendered_markdown(
+                rendered,
+                rendered.splitlines()[0].removeprefix("# "),
+            )
+        )
+        if errors:
+            return CheckpointResult(False, tuple(errors))
+        metadata = self.store.append("strategy_checkpoint", cycle, rendered)
+        capture.strategy_checkpoints.append(metadata)
+        capture.strategy_checkpoint_answers.append(
+            {
+                str(item["section"]).strip(): str(item["answer"]).strip()
+                for item in answers
+            }
+        )
+        self.trace.append_event(
+            "strategy_checkpoint_accepted",
+            cycle=cycle,
+            checkpointId=checkpoint_id,
+            ordinal=ordinal,
+            contentHash=metadata.content_hash,
+        )
+        return CheckpointResult(True, metadata=metadata)
+
     def submit_outcome(
         self,
         cycle: int,
         status: str,
         status_explanation: str,
         answers: list[dict[str, str]],
+        material_strategy_revision: bool = False,
     ) -> CheckpointResult:
         capture = self.cycles.setdefault(cycle, CycleCapture())
         normalized_status = status.strip().upper()
@@ -330,9 +438,11 @@ class JournalLifecycle:
         if errors:
             capture.rejected_outcomes += 1
             return self._reject("outcome", cycle, errors, capture.rejected_outcomes)
+        checkpoint_digest = _strategy_checkpoint_digest(capture.strategy_checkpoint_answers, cycle)
         all_answers = [
             {"section": "Cycle outcome status", "answer": f"`{normalized_status}`\n\n{status_explanation.strip()}"},
             *answers,
+            {"section": "Recorded strategy checkpoints", "answer": checkpoint_digest},
         ]
         rendered = render_checkpoint(cycle, "Outcome", all_answers)
         errors.extend(validate_rendered_markdown(rendered, f"Cycle {cycle} — Outcome"))
@@ -344,12 +454,16 @@ class JournalLifecycle:
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
         }
         capture.outcome_status = normalized_status
+        capture.outcome_status_explanation = status_explanation.strip()
+        capture.material_strategy_revision_reported = bool(material_strategy_revision)
         capture.last_outcome_errors = ()
         self.phase = JournalPhase.DETERMINISTIC_VALIDATION
         self.trace.append_event(
             "outcome_submission_accepted",
             cycle=cycle,
             status=normalized_status,
+            materialStrategyRevisionReported=bool(material_strategy_revision),
+            strategyCheckpointCount=len(capture.strategy_checkpoints),
             contentHash=capture.outcome.content_hash,
         )
         return CheckpointResult(True, metadata=capture.outcome)
@@ -395,6 +509,11 @@ class JournalLifecycle:
         if len(content) <= self.max_context_chars:
             return content
         marker = "\n\n[Earlier journal content bounded for model input]\n\n"
+        digest = self._continuation_digest()
+        digest_limit = min(3_000, max(0, self.max_context_chars // 3))
+        if len(digest) > digest_limit:
+            digest = digest[: max(0, digest_limit - 1)].rstrip() + "â€¦"
+        digest = "\n\n[Structured latest-cycle continuity digest]\n\n" + digest
         contract_sections = [
             section
             for section in self.store.sections
@@ -402,10 +521,28 @@ class JournalLifecycle:
         ]
         contract_end = max((section.end_offset for section in contract_sections), default=0)
         contract_chars = len(self.store.path.read_bytes()[:contract_end].decode("utf-8"))
-        head_limit = min(contract_chars, self.max_context_chars * 2 // 3)
+        available = max(0, self.max_context_chars - len(marker) - len(digest))
+        head_limit = min(contract_chars, available * 2 // 3)
         head_limit = max(head_limit, min(6_000, self.max_context_chars // 3))
-        tail_limit = max(0, self.max_context_chars - head_limit - len(marker))
-        return content[:head_limit] + marker + content[-tail_limit:]
+        head_limit = min(head_limit, available)
+        tail_limit = max(0, available - head_limit)
+        return content[:head_limit] + marker + content[-tail_limit:] + digest
+
+    def _continuation_digest(self) -> str:
+        if not self.cycles:
+            return "No remediation cycle has been captured."
+        cycle = max(self.cycles)
+        capture = self.cycles[cycle]
+        return "\n".join(
+            (
+                f"- Cycle: {cycle}",
+                f"- Strategy checkpoints: {_inline(_strategy_checkpoint_digest(capture.strategy_checkpoint_answers, cycle), 1_200)}",
+                f"- Selected direction: {_inline(capture.intent_answers.get('Selected direction', 'Not captured'), 500)}",
+                f"- Outcome status: {capture.outcome_status or 'MISSING'}",
+                f"- Assumption results: {_inline(capture.outcome_answers.get('Assumption results', 'Not captured'), 500)}",
+                f"- Unresolved coverage: {_inline(capture.outcome_answers.get('Remaining work, blockers, or uncertainty', 'Not captured'), 500)}",
+            )
+        )
 
     def _checkpoint_errors(
         self,
@@ -431,6 +568,16 @@ class JournalLifecycle:
             errors.append(f"Cycle {cycle} {kind} has already been accepted")
         required = INTENT_SECTIONS if kind == "intent" else OUTCOME_SECTIONS
         errors.extend(self._missing_sections(answers, required))
+        errors.extend(self._answer_collection_errors(answers, self.max_checkpoint_chars, "Checkpoint"))
+        return errors
+
+    def _answer_collection_errors(
+        self,
+        answers: list[dict[str, str]],
+        max_total_chars: int,
+        label: str,
+    ) -> list[str]:
+        errors: list[str] = []
         seen: set[str] = set()
         total = 0
         for item in answers:
@@ -446,10 +593,8 @@ class JournalLifecycle:
             total += len(answer)
             errors.extend(_answer_errors(section, answer, self.max_section_chars))
             errors.extend(validate_answer_markdown(answer, section))
-        if total > self.max_checkpoint_chars:
-            errors.append(
-                f"Checkpoint content exceeds {self.max_checkpoint_chars} characters ({total})"
-            )
+        if total > max_total_chars:
+            errors.append(f"{label} content exceeds {max_total_chars} characters ({total})")
         return errors
 
     @staticmethod
@@ -495,7 +640,8 @@ def intent_questionnaire(cycle: int) -> str:
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
         "Answer observations as observations, assumptions as unproven assumptions, intended work as future work, "
-        "and do not present planned validation as completed evidence. One credible approach or a reversible "
+        "and do not present planned validation as completed evidence. Treat structural capture as distinct from "
+        "reasoning correctness and deterministic validation. One credible approach or a reversible "
         "diagnostic experiment is sufficient; never invent alternatives. You may add clearly named, "
         "decision-relevant sections after all required sections."
     )
@@ -511,6 +657,20 @@ def outcome_questionnaire() -> str:
         "decision-relevant sections after all required sections."
     )
     return _render_questionnaire("Cycle Outcome questionnaire", OUTCOME_QUESTIONNAIRE, rules)
+
+
+def strategy_checkpoint_questionnaire() -> str:
+    rules = (
+        "Use these exact section names as `section` values in `record_strategy_checkpoint`. Record this only "
+        "when material evidence changes a decision-critical assumption, understood cause, expected coverage, "
+        "compatibility, safety, constraint compliance, ownership, or materially better available direction. "
+        "Minor command failures and local edit corrections do not mechanically require a checkpoint."
+    )
+    return _render_questionnaire(
+        "In-cycle strategy checkpoint questionnaire",
+        STRATEGY_CHECKPOINT_QUESTIONNAIRE,
+        rules,
+    )
 
 
 def _render_questionnaire(
@@ -623,6 +783,15 @@ def render_validation(
             "",
             "- Narrative claims without an explicit deterministic check mapping remain unevaluated; structural capture does not establish semantic correctness.",
             "",
+            "## Pre-validation model assessment",
+            "",
+            f"- Accepted Cycle Outcome status: `{outcome_status or 'MISSING'}`.",
+            "- The original Cycle Outcome remains preserved above for auditability.",
+            "",
+            "## Assessment reconciliation",
+            "",
+            _validation_reconciliation(report, outcome_status),
+            "",
             "## Requirements satisfied",
             "",
             *(f"- {check.name}" for check in passed),
@@ -661,6 +830,29 @@ def render_validation(
     return "\n".join(lines)
 
 
+def _validation_reconciliation(
+    report: ValidationReport,
+    outcome_status: str | None,
+) -> str:
+    if report.passed and outcome_status in {
+        "BLOCKED",
+        "FAILED",
+        "INCONCLUSIVE",
+        "PARTIALLY_REMEDIATED",
+    }:
+        return (
+            "The earlier model status is a superseded pre-validation technical assessment because "
+            "authoritative validation passed. It remains relevant to capture and delivery policy but is "
+            "not an active technical limitation."
+        )
+    if report.passed:
+        return "The model assessment is consistent with passing authoritative validation."
+    return (
+        "Authoritative validation did not supersede unresolved model concerns; final semantics follow "
+        "the deterministic result while the model assessment remains supporting audit evidence."
+    )
+
+
 def render_final_resolution(
     outcome: RemediationOutcome,
     original_problem: str,
@@ -692,6 +884,10 @@ def render_final_resolution(
     structured_coverage = coverage if coverage_is_structured else ""
     constraints = latest_answers.get("Constraints and regression assessment", "")
     partial_value = latest_answers.get("Partial-remediation value", "")
+    latest_status = latest.outcome_status if latest else None
+    latest_status_explanation = latest.outcome_status_explanation if latest else ""
+    fully_validated = bool(validation and validation.passed)
+    superseded = _superseded_assessments(cycles, fully_validated)
     partial = (
         f"Preserved changes require manual review. Unresolved deterministic checks: {', '.join(unresolved) or 'none identified'}."
         if outcome == RemediationOutcome.PARTIALLY_REMEDIATED
@@ -709,7 +905,20 @@ def render_final_resolution(
 
 ## Final interpreted resolution
 
-Deterministic validation status and capture quality are reported separately. Run-level capture status: `{capture_status.value}`.
+Deterministic validation status, model reasoning, and capture quality are reported separately. Run-level capture status: `{capture_status.value}`. `COMPLETE` means required decision records were captured; it does not prove their semantic correctness.
+
+## Model self-assessment
+
+- **Latest accepted status:** `{latest_status or 'MISSING'}`
+- **Recorded explanation:** {_inline(latest_status_explanation) if latest_status_explanation else 'Not captured.'}
+
+## Deterministic validation assessment
+
+{('Authoritative deterministic validation passed.' if fully_validated else 'Authoritative deterministic validation did not establish full success.') if validation else 'Authoritative deterministic validation did not complete.'}
+
+## Superseded pre-validation assessments
+
+{superseded}
 
 ## Final implemented approach
 
@@ -757,7 +966,7 @@ Run-level capture quality `{capture_status.value}`; delivery eligibility `{deliv
 
 {partial}
 
-{partial_value or 'No additional partial-remediation value statement was captured.'}
+{('The accepted pre-validation partial-remediation statement is preserved in its Cycle Outcome but is not an active final limitation because authoritative validation fully passed.' if fully_validated and partial_value else partial_value or 'No additional partial-remediation value statement was captured.')}
 
 ## Delivery result
 
@@ -822,6 +1031,7 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
         final = capture.outcome_answers.get("Final approach present at cycle end", "Not captured")
         deviations = capture.outcome_answers.get("Material deviations and their causes", "Not captured")
         assumptions = capture.outcome_answers.get("Assumption results", "Not captured")
+        checkpoints = _strategy_checkpoint_digest(capture.strategy_checkpoint_answers, cycle)
         report = capture.validation_report
         if report:
             failed = [check.name for check in report.checks if not check.passed]
@@ -838,10 +1048,51 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
                 f"- **Cycle {cycle} final approach:** {_inline(final)}",
                 f"- **Cycle {cycle} material deviations:** {_inline(deviations)}",
                 f"- **Cycle {cycle} assumption results:** {_inline(assumptions)}",
+                f"- **Cycle {cycle} strategy checkpoints:** {_inline(checkpoints)}",
                 f"- **Cycle {cycle} validation learning:** {learning}.",
             )
         )
     return "\n".join(lines)
+
+
+def _strategy_checkpoint_digest(
+    checkpoints: list[dict[str, str]],
+    cycle: int,
+) -> str:
+    if not checkpoints:
+        return "No material in-cycle strategy checkpoint was recorded."
+    lines: list[str] = []
+    for ordinal, answers in enumerate(checkpoints, 1):
+        trigger = _inline(answers.get("Trigger or new evidence", "Not captured"), 300)
+        direction = _inline(answers.get("Updated strategy direction", "Not captured"), 300)
+        rationale = _inline(answers.get("Updated direction rationale", "Not captured"), 300)
+        lines.append(
+            f"- `cycle-{cycle}-strategy-{ordinal}`: trigger={trigger}; direction={direction}; rationale={rationale}"
+        )
+    return "\n".join(lines)
+
+
+def _superseded_assessments(
+    cycles: dict[int, CycleCapture],
+    fully_validated: bool,
+) -> str:
+    if not fully_validated:
+        return "- None superseded by a fully passing authoritative validation; unresolved model statements remain relevant evidence, subject to deterministic results."
+    superseded_statuses = {
+        "BLOCKED",
+        "FAILED",
+        "INCONCLUSIVE",
+        "PARTIALLY_REMEDIATED",
+    }
+    items = []
+    for cycle, capture in sorted(cycles.items()):
+        if capture.outcome_status not in superseded_statuses:
+            continue
+        explanation = _inline(capture.outcome_status_explanation or "No explanation captured.")
+        items.append(
+            f"- Cycle {cycle} `{capture.outcome_status}` was a superseded pre-validation assessment: {explanation}"
+        )
+    return "\n".join(items) if items else "- None."
 
 
 def _coverage_subsection(content: str, title: str) -> str:

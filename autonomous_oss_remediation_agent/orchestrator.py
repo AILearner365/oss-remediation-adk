@@ -237,6 +237,10 @@ class AutonomousRemediationOrchestrator:
                         "captureStatus": capture.status.value,
                         "journalPath": str(lifecycle.store.path),
                         "intent": capture.intent.to_dict() if capture.intent else None,
+                        "strategyCheckpoints": [
+                            checkpoint.to_dict()
+                            for checkpoint in capture.strategy_checkpoints
+                        ],
                         "outcome": capture.outcome.to_dict() if capture.outcome else None,
                         "deterministicValidation": capture.validation.to_dict() if capture.validation else None,
                     },
@@ -359,6 +363,10 @@ class AutonomousRemediationOrchestrator:
                             "captureStatus": capture.status.value,
                             "journalPath": str(lifecycle.store.path),
                             "intent": capture.intent.to_dict() if capture.intent else None,
+                            "strategyCheckpoints": [
+                                checkpoint.to_dict()
+                                for checkpoint in capture.strategy_checkpoints
+                            ],
                             "outcome": capture.outcome.to_dict() if capture.outcome else None,
                             "deterministicValidation": capture.validation.to_dict() if capture.validation else None,
                         },

@@ -30,7 +30,7 @@ from autonomous_oss_remediation_agent.models import (
 )
 from autonomous_oss_remediation_agent.deterministic.osv import OsvScanner
 from autonomous_oss_remediation_agent.deterministic.scanner import ScannerPreflightError
-from autonomous_oss_remediation_agent.journal import JournalPhase
+from autonomous_oss_remediation_agent.journal import JournalPhase, STRATEGY_CHECKPOINT_SECTIONS
 from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 
 
@@ -214,6 +214,36 @@ class _DiagnosticArtifactSession(_ScriptedAgentSession):
         self.capabilities.edit_workspace_text(
             "write", "dependency_tree.txt", content="investigation-only graph\n"
         )
+        return result
+
+
+class _StrategyCheckpointSession(_ScriptedAgentSession):
+    async def run_turn(self, message):
+        cycle = self.capabilities.journal.active_cycle
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                cycle,
+                self.outcome_status,
+                "Execution completed and is ready for deterministic checks.",
+                _outcome_answers(),
+                material_strategy_revision=cycle == 1,
+            )
+            return AgentTurnResult("Cycle Outcome submitted")
+        result = await super().run_turn(message)
+        if cycle == 1:
+            answers = [
+                {"section": section, "answer": f"Checkpoint evidence for {section}."}
+                for section in STRATEGY_CHECKPOINT_SECTIONS
+            ]
+            next(
+                item for item in answers
+                if item["section"] == "Trigger or new evidence"
+            )["answer"] = "The first implementation result changed the coverage hypothesis."
+            next(
+                item for item in answers
+                if item["section"] == "Updated strategy direction"
+            )["answer"] = "Revise the direction based on the observed repository state."
+            self.capabilities.record_strategy_checkpoint(cycle, answers)
         return result
 
 
@@ -479,6 +509,39 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+
+    def test_material_strategy_checkpoint_flows_through_continuation_and_final_journal(self):
+        sessions = []
+
+        def factory(capabilities, model):
+            session = _StrategyCheckpointSession(
+                capabilities,
+                [("1.0", "1.5"), ("1.5", "2.0")],
+            )
+            sessions.append(session)
+            return session
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=factory,
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertEqual(1, len(sessions))
+        self.assertEqual(2, len(sessions[0].messages))
+        continuation = sessions[0].messages[1]
+        self.assertIn("Strategy Checkpoint 1", continuation)
+        self.assertIn("changed the coverage hypothesis", continuation)
+        self.assertIn("Prior-cycle work is evidence, not an endorsed strategy", continuation)
+        cycle_one = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(1, len(cycle_one["strategyCheckpoints"]))
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("Cycle 1 strategy checkpoints", journal)
+        self.assertNotIn("without a recorded strategy checkpoint", result.capture_warnings)
 
     def test_cycle_one_outcome_status_does_not_terminate_recovery(self):
         statuses = (

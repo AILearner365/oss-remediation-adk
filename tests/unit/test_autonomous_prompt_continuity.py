@@ -7,6 +7,7 @@ from autonomous_oss_remediation_agent.journal import (
     INTENT_SECTIONS,
     OUTCOME_SECTIONS,
     PRIOR_CYCLE_INTENT_SECTIONS,
+    STRATEGY_CHECKPOINT_SECTIONS,
 )
 from autonomous_oss_remediation_agent.models import (
     CommandResult,
@@ -50,6 +51,21 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not provide hidden chain-of-thought", AGENT_INSTRUCTION)
 
+    def test_instruction_requires_evidence_discipline_without_prescribing_strategy(self):
+        for phrase in (
+            "according to their evidence, not merely their source",
+            "preserve uncertainty",
+            "Prior effort is not evidence",
+            "partial success establishes only what the evidence supports",
+            "invocation failure",
+            "configured deterministic validation remains authoritative",
+        ):
+            self.assertIn(phrase, AGENT_INSTRUCTION)
+        for section in STRATEGY_CHECKPOINT_SECTIONS:
+            self.assertIn(f"`{section}`", AGENT_INSTRUCTION)
+        self.assertNotIn("ELIGIBLE / INELIGIBLE / NEEDS_EVIDENCE", AGENT_INSTRUCTION)
+        self.assertNotIn("numeric score", AGENT_INSTRUCTION.lower())
+
     def test_compatibility_working_state_is_deterministic_outcome_projection(self):
         state = compatibility_working_state(
             "INCONCLUSIVE",
@@ -72,7 +88,10 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("original remediation objective, constraints, and completion criteria", feedback)
         self.assertIn("new evidence, not a replacement objective", feedback)
         self.assertIn("supports, contradicts, or leaves unresolved", feedback)
-        self.assertIn("continue, modify, or replace your strategy", feedback)
+        self.assertIn("retaining, extending, revising, and replacing", feedback)
+        self.assertIn("Prior-cycle work is evidence, not an endorsed strategy", feedback)
+        self.assertIn("complete original contract", feedback)
+        self.assertIn("local invocation failure", feedback)
         self.assertIn(prior_journal, feedback)
         for section in (*INTENT_SECTIONS, *PRIOR_CYCLE_INTENT_SECTIONS):
             self.assertIn(f"`{section}`", feedback)
