@@ -1,0 +1,76 @@
+{
+  "budget": {
+    "command_timeout_seconds": 1800,
+    "max_cycles": 3,
+    "max_llm_calls_per_turn": 40,
+    "max_returned_output_chars": 30000,
+    "max_tool_calls": 80,
+    "model_turn_timeout_seconds": 1800,
+    "overall_timeout_seconds": 7200
+  },
+  "buildCommands": [
+    "mvn clean verify"
+  ],
+  "constraints": {
+    "allowed_paths": [],
+    "engineering_constraints": [],
+    "informational_constraints": [],
+    "prohibit_suppressions": true,
+    "prohibited_new_severities": [
+      "CRITICAL",
+      "HIGH"
+    ],
+    "protected_java_version": null,
+    "protected_paths": [],
+    "protected_spring_boot_version": null,
+    "version_policies": {
+      "spring_boot": {
+        "allow_downgrade": false,
+        "allow_major": false,
+        "allow_minor": true,
+        "allow_patch": true,
+        "approved_versions": [],
+        "required_version": null
+      }
+    }
+  },
+  "delivery": {
+    "adapter": "github-rest",
+    "branch_prefix": "autonomous-oss-remediation",
+    "draft": true,
+    "github_api_base": "https://api.github.com",
+    "mode": "auto"
+  },
+  "maven": {
+    "mode": "auto"
+  },
+  "model": "gemini-2.5-flash",
+  "referenceBranch": "main-runrunning",
+  "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app",
+  "runtimePolicy": {
+    "allow_network": true,
+    "dedicated_runner": true,
+    "enable_autonomous_shell": true,
+    "trusted_repository": true
+  },
+  "scanner": {
+    "backend": "osv",
+    "osv": {
+      "archive_member": null,
+      "download_url": null,
+      "executable": "/home/kavya_parivarababu/bin/osv-scanner",
+      "mode": "configured",
+      "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+      "timeout_seconds": 300,
+      "version": "2.6.0"
+    }
+  },
+  "severityScope": [
+    "CRITICAL",
+    "HIGH"
+  ],
+  "startupCommands": [],
+  "testCommands": [],
+  "vulnerabilityIds": [],
+  "workspaceParent": "autonomous-oss-remediation-workspaces"
+}

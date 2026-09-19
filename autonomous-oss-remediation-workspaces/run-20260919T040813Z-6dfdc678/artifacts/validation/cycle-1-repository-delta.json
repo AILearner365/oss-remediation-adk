@@ -1,0 +1,46 @@
+{
+  "after": {
+    "captured": true,
+    "changedFiles": [
+      "dependency_tree.txt",
+      "pom.xml",
+      "task-common/dependency_tree.txt",
+      "task-domain/dependency_tree.txt",
+      "task-service/dependency_tree.txt",
+      "task-web/dependency_tree.txt",
+      "task-web/pom.xml"
+    ],
+    "fileDigests": {
+      "dependency_tree.txt": "dab88e435b530a66a300f4447f3423f596a37f8fdea172e7300667eff3f16d52",
+      "pom.xml": "663d52587344d17c8f65c37f020e8a8e97fe82c8de21749fdf32473581e09756",
+      "task-common/dependency_tree.txt": "9bcc564463d4203a876cf53206502d5193383c1d9fcfcdf3c7c7ab05253459c7",
+      "task-domain/dependency_tree.txt": "2207773234b7961035923173f8c2ed31ead7bde1afcc9a289218a8685b296b73",
+      "task-service/dependency_tree.txt": "e42165baf9894d2aa08bf02b7415e8850b4276d9505a3c894e8919cac8b31d42",
+      "task-web/dependency_tree.txt": "2b9eb64a0d9cdfe83a89de86b23701dc283e371bfb18119945aee9a54b9be68d",
+      "task-web/pom.xml": "5622616461f634fff09e9755c384ebce54858d481f3aab853f5a3ed90065b209"
+    },
+    "stateDigest": "74d31b1ac110491e4fa390ae7c122633b6b536e728b36fbdfddb9052fda56586"
+  },
+  "before": {
+    "captured": true,
+    "changedFiles": [],
+    "fileDigests": {},
+    "stateDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "cycle": 1,
+  "delta": {
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [
+      "dependency_tree.txt",
+      "pom.xml",
+      "task-common/dependency_tree.txt",
+      "task-domain/dependency_tree.txt",
+      "task-service/dependency_tree.txt",
+      "task-web/dependency_tree.txt",
+      "task-web/pom.xml"
+    ],
+    "pathsModifiedSinceCycleStart": [],
+    "pathsRemovedFromChangeSet": [],
+    "repositoryStateChanged": true
+  }
+}
