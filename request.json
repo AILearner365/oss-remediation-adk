@@ -1,0 +1,58 @@
+{
+  "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app",
+  "referenceBranch": "main-runrunning",
+  "workspaceParent": "autonomous-oss-remediation-workspaces",
+  "vulnerabilityIds": [],
+  "severityScope": [
+    "CRITICAL",
+    "HIGH"
+  ],
+  "constraints": {
+    "prohibit_suppressions": true,
+    "version_policies": {
+      "spring_boot": {
+        "allow_patch": true,
+        "allow_minor": true,
+        "allow_major": false,
+        "allow_downgrade": false,
+        "approved_versions": null,
+        "required_version": null
+      }
+    }
+  },
+  "buildCommands": [
+    "mvn clean verify"
+  ],
+  "model": "gemini-2.5-flash",
+  "budget": {
+    "maxCycles": 3,
+    "maxToolCalls": 80,
+    "maxLlmCallsPerTurn": 40,
+    "commandTimeoutSeconds": 1800,
+    "modelTurnTimeoutSeconds": 1800,
+    "overallTimeoutSeconds": 7200,
+    "maxReturnedOutputChars": 30000
+  },
+  "runtimePolicy": {
+    "trustedRepository": true,
+    "dedicatedRunner": true,
+    "enableAutonomousShell": true,
+    "allowNetwork": true
+  },
+  "scanner": {
+    "mode": "configured",
+    "executable": "/home/kavya_parivarababu/bin/osv-scanner",
+    "version": "2.6.0",
+    "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
+  },
+  "delivery": {
+    "mode": "auto",
+    "adapter": "github",
+    "branch_prefix": "autonomous-oss-remediation",
+    "draft": true,
+    "github_api_base": "https://api.github.com"
+  },
+  "maven": {
+    "mode": "system"
+  }
+}
