@@ -1,59 +1,48 @@
 # Pre-Execution Prompt and Decision-Journal Design
 
-## Status and purpose
+## Scope
 
-This document is the agreed design reference for the first stage of each autonomous problem-solving cycle. It captures:
+This document is the agreed design reference for the first, pre-execution stage of a problem-solving cycle.
 
-1. the stable instructions supplied to the model;
-2. the run-specific task block supplied on the first request;
-3. the pre-execution questionnaire the model must answer;
-4. the corresponding section written to `decision-journal.md`;
-5. the transition from solution selection to implementation.
+It contains only:
 
-This document records the intended behavior for later implementation. It does not itself change runtime behavior.
+1. the stable operating instructions supplied to the model;
+2. the canonical run-specific task supplied on the first request;
+3. the instruction that tells the model how to complete the pre-execution analysis;
+4. the ordered questionnaire and answer requirements;
+5. the corresponding pre-execution section rendered into `decision-journal.md`.
 
-The design preserves the existing high-level execution flow:
+This design replaces the content currently described as Cycle Intent. It does not change the existing workflow sequence or define the later post-execution template. Implementation reassessment, post-execution reporting, deterministic validation, and later-cycle templates will be designed separately.
+
+The existing control flow remains:
 
 ```text
 Create one model session
         ↓
 Send the first cycle request
         ↓
-Read-only investigation
+Perform read-only investigation
         ↓
-Submit pre-execution decision record
+Submit the required pre-execution analysis and solution decision
         ↓
-Enable implementation capabilities
-        ↓
-Implement, reassess and self-validate
-        ↓
-Request post-execution result
-        ↓
-Run independent deterministic validation
+Existing workflow continues
 ```
 
-A cycle contains four stages:
-
-1. Problem analysis and solution decision.
-2. Implementation and reassessment.
-3. Post-execution result.
-4. Independent deterministic validation.
-
-The first three stages are model-owned. Deterministic validation remains authoritative.
+This document defines the content and structure of that first submitted record.
 
 ---
 
-# 1. First model request
+# 1. How the first request is assembled
 
-The first request seen by the model consists of three parts:
+The first request seen by the model consists of three connected parts:
 
-1. stable operating instructions;
-2. one canonical, run-specific `Task to Solve`;
-3. the pre-execution instruction and questionnaire.
+1. **Stable operating instructions** — how the model must work.
+2. **Task to Solve** — the exact run-specific problem and requirements.
+3. **Pre-execution instruction and questionnaire** — what the model must investigate, answer, and submit before material changes.
 
-The stable instructions explain how the model must work. The `Task to Solve` explains what must be resolved in this run. The pre-execution instruction explains what the model must do before implementation.
+These are prompt components, not separate workflow stages.
 
-The task must not be independently restated in multiple conflicting forms.
+The run-specific task must appear once as the canonical source of truth. It must not be independently paraphrased into conflicting problem statements elsewhere in the prompt.
 
 ---
 
@@ -125,8 +114,8 @@ The stable instruction must not prescribe:
 - a dependency-management layer;
 - a file or configuration location;
 - an upgrade, downgrade or version;
-- a remediation order;
-- a repository-specific command;
+- a solution order;
+- a project-specific command;
 - a vulnerability-specific recipe.
 
 Those details must come from the run-specific task, available evidence and the model's analysis.
@@ -135,7 +124,7 @@ Those details must come from the run-specific task, available evidence and the m
 
 # 3. Canonical Task to Solve
 
-The run-specific task is generated from one normalized source of truth assembled from:
+The run-specific task is assembled from one normalized source of truth using:
 
 - the submitted request;
 - prepared source and reference information;
@@ -147,12 +136,11 @@ The run-specific task is generated from one normalized source of truth assembled
 
 The same canonical task representation must be:
 
-1. sent to the model;
-2. rendered into the decision journal;
-3. retained for later cycles;
-4. used as the reference for validation and final reconciliation.
+1. supplied to the model;
+2. rendered into the pre-execution decision journal;
+3. retained as the unmodified task reference for the run.
 
-The journal must not contain an independently paraphrased version of the task.
+The model must not regenerate or rewrite this section.
 
 ## Task template
 
@@ -186,24 +174,27 @@ A passing command or partial improvement does not, by itself, constitute complet
 resolution.
 ```
 
+## Task-rendering rules
+
 Requirement rows are dynamic. Only applicable requirements are rendered.
 
-For example:
+- Requested scope controls the target-resolution requirement.
+- The prohibited-new-finding configuration controls the no-regression requirement.
+- Configured build, test and startup commands produce concrete validation requirements.
+- Suppression policy produces a concrete constraint when configured.
+- Version policy is rendered as its exact allowed and prohibited movement.
+- Protected values and allowed or protected paths are rendered when configured.
+- Other supplied engineering constraints are rendered without changing their meaning.
+- A constraint that was not supplied must not be invented.
+- Generic engineering requirements may remain stable, but their evaluation method must not be falsely described as deterministic when it requires evidence-based assessment.
 
-- supplied severity scope controls the target and prohibited-finding rows;
-- configured build, test and startup commands produce concrete validation rows;
-- suppression policy produces a concrete constraint row;
-- version policy is rendered as the exact permitted and prohibited movement;
-- protected values and allowed or protected paths are rendered when configured;
-- absent constraints are not invented.
-
-Qualitative engineering requirements may remain stable, but must not be misrepresented as fully deterministic when they require evidence-based assessment.
+The task section is the question paper supplied by the system. It is not a model answer.
 
 ---
 
 # 4. Pre-execution instruction
 
-The first request must make clear that the questionnaire is preparation for implementation, not a documentation-only exercise.
+The first request must explain why the model is answering the questionnaire and what quality is expected.
 
 ```text
 You are expected to implement and validate a solution for the Task to Solve.
@@ -213,87 +204,151 @@ Before making the first material change:
 1. investigate the supplied task and relevant evidence;
 2. answer every Model Response question below;
 3. develop only concrete, evidence-supported solutions;
-4. ensure every proposed solution satisfies all applicable requirements that
-   cannot be deferred to execution;
+4. ensure every proposed solution satisfies every applicable hard constraint;
 5. select the solution you currently intend to implement;
-6. submit the completed response through the required pre-execution capability.
+6. submit the completed pre-execution Model Response through the required
+   capability.
 
-This is a pre-execution decision record for work you are expected to perform.
-It is not a documentation-only or hypothetical planning exercise.
+This is the decision record for the solution you intend to implement. It is not
+a documentation-only exercise and it is not a request for vague or hypothetical
+directions.
 
-After the response is accepted, continue implementation in the same turn using
-the selected solution.
+Use read-only investigation before submission. Investigate avoidable uncertainty
+before proposing solutions. When a fact cannot be established until execution,
+identify it explicitly as execution-dependent evidence rather than presenting it
+as established.
 
-During implementation, continue evaluating evidence against the authoritative
-requirements. If material evidence contradicts the selected solution, reassess
-the complete problem and adapt the solution instead of blindly continuing or
-stopping after partial progress.
-
-Before ending execution, run the available self-validation. The orchestrator
-will request the post-execution result separately.
+Do not rewrite the Task to Solve. Answer the Model Response questions using the
+task, available context and evidence.
 ```
 
 ---
 
 # 5. Model Response questionnaire
 
-The model supplies answers to four sequenced questions.
+The model must answer the following four questions in this order.
 
-## Question 1 — Understanding
+---
+
+## Question 1 — Model understanding
+
+### Question supplied to the model
 
 ```markdown
-## Model Response
-
 ### 1. What does the model understand it has been asked to accomplish?
+```
 
+### Answer instructions supplied to the model
+
+```text
 Explain:
 
 - the requested result;
 - the target scope;
-- the important requirements;
+- the requirements that materially govern the work;
 - what constitutes complete resolution.
 
-Do not propose a solution in this answer.
+Use your own concise wording so that your understanding can be compared with the
+Task to Solve.
+
+Do not propose or select a solution in this answer.
+Do not replace, narrow or expand the authoritative task.
 ```
 
-Purpose: make the model's interpretation visible without allowing it to replace the canonical task.
+### Expected journal answer shape
 
-## Question 2 — Required information and investigation
+```markdown
+### 1. What does the model understand it has been asked to accomplish?
+
+<Model answer describing the requested result, scope, governing requirements and
+meaning of complete resolution>
+```
+
+Purpose: make misunderstanding visible before solution selection without allowing the model's interpretation to replace the canonical task.
+
+---
+
+## Question 2 — Information, investigation and remaining uncertainty
+
+### Question supplied to the model
+
+```markdown
+### 2. What information was needed to develop an evidence-supported solution,
+and what did the model find?
+```
+
+### Answer instructions supplied to the model
+
+```text
+Identify the information required to develop a concrete solution for this task.
+
+For every decision-relevant information category, state:
+
+- what information was needed;
+- why it was needed;
+- which sources, tools or methods were examined;
+- what was found;
+- what remains unknown or requires execution evidence.
+
+Use this table:
+
+| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+
+The Sources examined column must identify actual evidence sources or investigation
+methods. Do not claim that information was verified without identifying its
+source.
+
+After the table, identify every material assumption that remains necessary. For
+each assumption, state:
+
+- what is being assumed;
+- why the information could not be established;
+- what evidence was already checked;
+- why proceeding with the assumption is reasonable;
+- how the selected solution would control the risk.
+
+If no material assumption is required, state: None.
+
+Investigate avoidable uncertainty before solution selection. Keep assumptions
+limited and explicit.
+```
+
+### Expected journal answer shape
 
 ```markdown
 ### 2. What information was needed to develop an evidence-supported solution,
 and what did the model find?
 
-For every decision-relevant category, state:
-
-- what information was needed;
-- why it was needed;
-- which sources or methods were examined;
-- what was found;
-- what remains unknown or requires execution evidence.
-
-Use this structure:
-
 | Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
 |---|---|---|---|---|
+| <information> | <reason> | <actual sources or methods> | <finding> | <remaining gap> |
 
-Then identify every material assumption that remains necessary:
+#### Material assumptions that remain necessary
 
-- what is being assumed;
-- why it could not be established;
-- what evidence was already checked;
-- why the assumption is reasonable;
-- how the selected solution will control the risk.
+- <Assumption and supporting explanation>
 
-If no material assumption is required, state `None`.
+Or:
+
+None.
 ```
 
-Purpose: show what information the model determined was relevant, where it looked, what it established and what remains unproven. Avoidable uncertainty must be investigated before solution selection.
+Purpose: capture what information the model determined was necessary, what it actually investigated, what evidence it found and what remains unproven. This replaces disconnected context, evidence, uncertainty and assumption sections.
+
+---
 
 ## Question 3 — Concrete candidate solutions
 
+### Question supplied to the model
+
 ```markdown
 ### 3. What concrete solutions are supported by the available evidence?
+```
+
+### Answer instructions supplied to the model
+
+```text
+Develop only solutions that are concrete enough to implement.
 
 A proposed solution is valid only if it:
 
@@ -302,67 +357,135 @@ A proposed solution is valid only if it:
 - explains why those exact changes were selected;
 - identifies which parts of the problem it is expected to resolve;
 - supports its expected coverage with evidence;
-- includes an implementation sequence;
+- includes an ordered implementation sequence;
 - addresses compatibility and maintainability;
 - identifies remaining risks or execution-dependent evidence;
-- can be evaluated against the authoritative requirements.
+- can be evaluated against the requirements in the Task to Solve.
 
-Do not submit a vague direction such as "upgrade the framework" or "update the
-dependencies." State the exact proposed change, the evidence supporting it and
-how it is expected to resolve the identified problem.
+Do not submit a vague direction such as "upgrade the framework", "update the
+dependencies", "change the configuration" or "refactor the code". State the exact
+proposed versions, configurations, ownership boundaries, source changes,
+exclusions or other modifications needed to define the solution.
 
-For every candidate solution, answer:
+For every candidate, use the following structure:
+
+#### Candidate Solution <identifier> — <specific solution name>
 
 | Question | Model answer |
 |---|---|
-| What exact solution is proposed? | |
-| What evidence supports this solution? | |
-| Which parts of the problem will it resolve? | |
-| Does it comply with all applicable requirements? | |
-| How will it be implemented? | |
-| How will compatibility be preserved? | |
-| Why is the result maintainable? | |
-| What risks or unknowns remain? | |
-| How will the result be validated against the authoritative requirements? | |
-| Is it a COMPLETE or PARTIAL solution? | |
+| What exact solution is proposed? | <Exact implementable changes> |
+| Why were these exact changes selected? | <Evidence-based rationale> |
+| What evidence supports the expected result? | <Evidence sources and conclusions> |
+| Which parts of the problem will it resolve? | <Complete coverage or explicit partial coverage> |
+| Does it satisfy every applicable requirement? | <Evaluate the applicable requirement IDs; every hard constraint must be satisfied> |
+| How will it be implemented? | <Ordered implementation sequence> |
+| How will compatibility be preserved? | <Compatibility basis and execution-dependent checks> |
+| Why is the result coherent and maintainable? | <Ownership and maintainability explanation> |
+| What risks or unknowns remain? | <Conditions that could invalidate or alter the solution> |
+| How will the result be validated? | <Applicable task requirements and solution-specific checks> |
+| Is it a COMPLETE or PARTIAL solution? | <Classification and justification> |
 
-A solution known to violate a constraint must not be presented as a candidate.
+A solution known to violate a hard constraint must not be presented as a candidate.
 
-A PARTIAL solution may be considered only when no evidence-supported COMPLETE
-solution is currently available, it violates no constraint, it provides safe
-measurable progress, it does not unnecessarily prevent later complete resolution,
-and it explicitly identifies what remains unresolved.
+A solution may be classified COMPLETE only when the available evidence supports
+a credible route to every required result, subject to identified execution
+validation.
+
+A PARTIAL solution may be included only when:
+
+- no evidence-supported COMPLETE solution is currently available;
+- it violates no constraint;
+- it provides safe, measurable progress;
+- it does not unnecessarily prevent later complete resolution;
+- it precisely identifies what remains unresolved.
+
+Do not invent additional candidates merely to create alternatives. Include the
+concrete solutions genuinely supported by the evidence.
 ```
 
-A candidate solution must be implementable. It must specify concrete versions, configurations, ownership boundaries, source changes, exclusions or other modifications when those details are required to define the solution. A general direction is not a candidate solution.
+### Expected journal answer shape
 
-## Question 4 — Selection
+```markdown
+### 3. What concrete solutions are supported by the available evidence?
+
+#### Candidate Solution A — <specific solution name>
+
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | <answer> |
+| Why were these exact changes selected? | <answer> |
+| What evidence supports the expected result? | <answer> |
+| Which parts of the problem will it resolve? | <answer> |
+| Does it satisfy every applicable requirement? | <answer> |
+| How will it be implemented? | <answer> |
+| How will compatibility be preserved? | <answer> |
+| Why is the result coherent and maintainable? | <answer> |
+| What risks or unknowns remain? | <answer> |
+| How will the result be validated? | <answer> |
+| Is it a COMPLETE or PARTIAL solution? | <answer> |
+
+<Repeat only for other evidence-supported candidate solutions>
+```
+
+Purpose: require definitive proposed solutions rather than high-level directions. Each candidate includes its own implementation plan, so no separate implementation-plan question is needed.
+
+---
+
+## Question 4 — Selected solution
+
+### Question supplied to the model
+
+```markdown
+### 4. Which solution is selected, and why is it preferred?
+```
+
+### Answer instructions supplied to the model
+
+```text
+State:
+
+- the selected candidate solution;
+- whether it is COMPLETE or PARTIAL;
+- why it is preferred for this task and evidence;
+- why it provides better complete-problem coverage than the other candidates;
+- its material remaining risks;
+- the evidence that would require reconsidering the selection.
+
+Do not repeat the complete implementation sequence. It is already recorded in
+the selected candidate.
+
+Selection must be based on problem coverage, constraint compliance, evidence,
+compatibility, coherence, maintainability and risk. Do not select a solution only
+because it appears fastest or easiest.
+```
+
+### Expected journal answer shape
 
 ```markdown
 ### 4. Which solution is selected, and why is it preferred?
 
-State:
-
-- the selected solution;
-- whether it is COMPLETE or PARTIAL;
-- why it is preferred;
-- why it provides better complete-problem coverage than the other candidates;
-- its remaining risks;
-- the evidence that would require reconsidering the selection.
+- **Selected solution:** <candidate identifier and name>
+- **Classification:** COMPLETE or PARTIAL
+- **Why it is preferred:** <answer>
+- **Comparative coverage:** <answer>
+- **Remaining risks:** <answer>
+- **Evidence requiring reconsideration:** <answer>
 ```
 
-Implementation is not repeated here because each candidate already contains an implementation sequence.
+Purpose: record the decision without repeating the candidate's detailed solution and implementation plan.
 
 ---
 
-# 6. Pre-execution decision-journal template
+# 6. Complete pre-execution journal template
 
-The orchestrator writes the canonical task. The model supplies only the Model Response answers.
+The following is the complete agreed template for the first record in a cycle.
+
+The orchestrator renders the `Task to Solve` from the canonical task data. The model supplies the four accepted answers. Both are placed in the same journal document.
 
 ```markdown
 # Cycle <N> — Problem Analysis and Solution Decision
 
-> This cycle record captures the decision state before implementation begins.
+> This record captures the decision state before implementation begins.
 >
 > The first section contains the task and requirements supplied by the system.
 >
@@ -370,7 +493,7 @@ The orchestrator writes the canonical task. The model supplies only the Model Re
 > been asked to accomplish, the information it needed and established, the
 > evidence-supported solutions it developed, and the solution it selected.
 >
-> Keeping both sections in one record allows implementation, validation, later
+> Keeping both sections in one record allows the model, later validation, later
 > cycles and human reviewers to compare the original requirement with the
 > model's understanding and decision.
 
@@ -389,98 +512,77 @@ The orchestrator writes the canonical task. The model supplies only the Model Re
 ### 2. What information was needed to develop an evidence-supported solution,
 and what did the model find?
 
-<Model answer>
+| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+| <information> | <reason> | <actual sources or methods> | <finding> | <remaining gap> |
+
+#### Material assumptions that remain necessary
+
+<Model answer or None>
 
 ### 3. What concrete solutions are supported by the available evidence?
 
-<Model answer>
+#### Candidate Solution A — <specific solution name>
+
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | <answer> |
+| Why were these exact changes selected? | <answer> |
+| What evidence supports the expected result? | <answer> |
+| Which parts of the problem will it resolve? | <answer> |
+| Does it satisfy every applicable requirement? | <answer> |
+| How will it be implemented? | <answer> |
+| How will compatibility be preserved? | <answer> |
+| Why is the result coherent and maintainable? | <answer> |
+| What risks or unknowns remain? | <answer> |
+| How will the result be validated? | <answer> |
+| Is it a COMPLETE or PARTIAL solution? | <answer> |
+
+<Repeat only for other evidence-supported candidates>
 
 ### 4. Which solution is selected, and why is it preferred?
 
-<Model answer>
+- **Selected solution:** <candidate identifier and name>
+- **Classification:** COMPLETE or PARTIAL
+- **Why it is preferred:** <answer>
+- **Comparative coverage:** <answer>
+- **Remaining risks:** <answer>
+- **Evidence requiring reconsideration:** <answer>
 ```
 
-The model must not directly edit this file. The orchestrator renders accepted model answers safely so model-provided headings cannot corrupt the document structure.
+---
+
+# 7. Capture and rendering requirements
+
+The pre-execution record must satisfy these structural rules:
+
+- The canonical `Task to Solve` is system-rendered and cannot be overwritten by the model.
+- All four Model Response questions are required.
+- Question 2 must identify actual evidence sources or investigation methods.
+- Every material assumption must be explicit, or the answer must state `None`.
+- Every candidate must contain all required candidate fields.
+- Every candidate must satisfy all applicable hard constraints.
+- Candidate classification must be either `COMPLETE` or `PARTIAL`.
+- The selected solution must reference one of the submitted candidates.
+- A selected PARTIAL solution must explain why no supported COMPLETE solution is currently available.
+- Model-authored content must be rendered as data so embedded headings cannot escape or corrupt the journal structure.
+- Missing or structurally incomplete answers must be returned to the model for correction before material capabilities are enabled.
+- Structural acceptance does not prove semantic correctness. Later execution evidence and independent validation remain separate.
 
 ---
 
-# 7. Transition to implementation
+# 8. Current implementation relationship
 
-After the pre-execution response is accepted, implementation capabilities become available. The same model session continues when possible.
+The existing implementation already:
 
-```text
-The pre-execution Model Response was accepted.
+- creates one persistent model session;
+- sends stable instructions through the agent definition;
+- constructs a run-specific first message;
+- restricts initial capabilities to read-only investigation;
+- requires a pre-execution submission;
+- unlocks material capabilities after accepted submission;
+- renders the accepted data into `decision-journal.md`.
 
-Proceed with implementation of the selected solution.
+Implementation of this design should therefore replace and restructure the current Cycle Intent content without replacing the existing workflow sequence.
 
-Continue evaluating new evidence against the complete Task to Solve and its
-requirements. If evidence invalidates the selected solution, reassess and retain,
-revise, extend, replace or combine solutions as justified.
-
-Continue while time and operational budget remain. Before ending execution,
-perform the available self-validation and provide a concise execution summary.
-The orchestrator will request the mandatory post-execution result separately.
-```
-
-No optional strategy-checkpoint tool or additional workflow phase is introduced.
-
-When evidence materially changes the selected solution, the model adapts during normal implementation. The mandatory post-execution record later captures:
-
-- the solution actually implemented;
-- changes from the pre-execution selection;
-- new evidence;
-- rejected assumptions;
-- attempted and abandoned approaches;
-- self-validation;
-- requirement coverage;
-- unresolved work.
-
----
-
-# 8. Relationship to later cycles
-
-Every later cycle receives:
-
-1. the same canonical `Task to Solve`;
-2. prior pre-execution answers;
-3. actual changes and command evidence;
-4. the prior post-execution result;
-5. independent deterministic validation;
-6. unresolved requirements.
-
-The next cycle must audit prior evidence rather than automatically continue the previous solution. It remains free to retain, revise, extend, replace, combine or independently investigate solutions.
-
-The canonical task does not change merely because a previous cycle misunderstood it.
-
----
-
-# 9. Implementation guardrails
-
-When implementing this design:
-
-- Preserve the current single-session flow.
-- Preserve mandatory pre-execution and post-execution submissions.
-- Preserve independent deterministic validation.
-- Do not add optional decision or strategy checkpoints.
-- Do not create an additional approval or orchestration phase.
-- Do not duplicate the run-specific task in stable instructions.
-- Do not allow model-authored text to redefine authoritative requirements.
-- Do not hardcode technology-specific rules into the generic operating instructions.
-- Keep continuation context bounded and report truncation truthfully.
-- Treat missing model-authored information as a capture-quality issue; reconstruct later-cycle evidence from task data, project state, changes, commands and validation when possible.
-
----
-
-# 10. Current implementation mapping
-
-The existing architecture already provides the required high-level sequence:
-
-- the model is created with stable agent instructions;
-- the orchestrator builds the first run-specific message;
-- one persistent session is retained;
-- pre-execution submission gates material capabilities;
-- accepted submission enables implementation in the same turn;
-- post-execution reporting occurs in a separate metadata-only turn;
-- deterministic validation runs afterward.
-
-The intended implementation should therefore refine prompt content, questionnaire fields and journal rendering without replacing the established control flow.
+This document intentionally stops at acceptance of the pre-execution analysis and solution decision. The later implementation/reassessment record, post-execution questionnaire, deterministic-validation presentation and next-cycle prompt are outside its current scope.
