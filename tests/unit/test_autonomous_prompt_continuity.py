@@ -21,7 +21,6 @@ from autonomous_oss_remediation_agent.models import (
 from autonomous_oss_remediation_agent.prompt import (
     AGENT_INSTRUCTION,
     canonical_task_to_solve,
-    compatibility_working_state,
     initial_message,
     outcome_message,
     validation_feedback,
@@ -66,25 +65,10 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("mvn verify", first)
         self.assertIn("A passing command or partial improvement", first)
 
-    def test_instruction_rejects_model_authored_working_state(self):
-        self.assertIn("Do not emit `WORKING_STATE`", AGENT_INSTRUCTION)
+    def test_instruction_has_no_deprecated_working_state_contract(self):
+        self.assertNotIn("WORKING_STATE", AGENT_INSTRUCTION)
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
-
-    def test_compatibility_working_state_is_deterministic_outcome_projection(self):
-        state = compatibility_working_state(
-            "INCONCLUSIVE",
-            {
-                "Implementation Result": "The owning property was updated; scanner coverage remains unverified.",
-                "Cycle Intent vs. Implementation": "No material change from the selected solution.",
-                "Implementation Trail": "Inspected ownership, edited the property, and ran self-validation.",
-            },
-        )
-
-        self.assertIn("deprecated deterministic compatibility projection", state)
-        self.assertIn("Outcome status: INCONCLUSIVE", state)
-        self.assertIn("owning property was updated", state)
-        self.assertNotIn("Final approach present at cycle end", state)
 
     def test_failed_validation_feedback_preserves_journal_and_exposes_next_questionnaire(self):
         prior_journal = "# Task to Solve\n\nOriginal task\n\n# Cycle 1 — Problem Analysis and Solution Decision"
@@ -95,6 +79,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("Treat prior model statements as claims", feedback)
         self.assertIn("what cannot be verified and therefore remains uncertain", feedback)
         self.assertIn("Do not automatically continue or discard previous work", feedback)
+        self.assertNotIn("WORKING_STATE", feedback)
         self.assertIn(prior_journal, feedback)
         for section in (*INTENT_SECTIONS, *PRIOR_CYCLE_INTENT_SECTIONS):
             self.assertIn(f"`{section}`", feedback)

@@ -38,7 +38,6 @@ from .models import (
 )
 from .prompt import (
     canonical_task_to_solve,
-    compatibility_working_state,
     initial_message,
     intent_retry_message,
     outcome_message,
@@ -232,10 +231,6 @@ class AutonomousRemediationOrchestrator:
                     f"agent/cycle-{cycle}.json",
                     {
                         "summary": execution_turn.text,
-                        "workingState": compatibility_working_state(
-                            capture.outcome_status, capture.outcome_answers
-                        ),
-                        "workingStateDeprecated": True,
                         "outcomeCaptureResponse": outcome_turn.text,
                         "captureStatus": capture.status.value,
                         "journalPath": str(lifecycle.store.path),
@@ -354,10 +349,6 @@ class AutonomousRemediationOrchestrator:
                         f"agent/cycle-{cycle}.json",
                         {
                             "summary": interrupted_summary,
-                            "workingState": compatibility_working_state(
-                                capture.outcome_status, capture.outcome_answers
-                            ),
-                            "workingStateDeprecated": True,
                             "outcomeCaptureResponse": outcome_turn.text,
                             "captureStatus": capture.status.value,
                             "journalPath": str(lifecycle.store.path),
@@ -467,7 +458,7 @@ class AutonomousRemediationOrchestrator:
                 return turn
             capture = lifecycle.cycles[cycle]
             errors = list(capture.last_intent_errors) or [
-                "No Cycle Intent submission was received in the previous turn"
+                "No Problem Analysis and Solution Decision submission was received in the previous turn"
             ]
             message = intent_retry_message(cycle, errors)
         return turn

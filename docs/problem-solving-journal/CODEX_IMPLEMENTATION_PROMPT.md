@@ -221,7 +221,7 @@ If validation fails and another cycle is available, the next Cycle Intent receiv
 
 Do not rely on the legacy summary as the authoritative continuation state.
 
-## Compatibility with summary and WORKING_STATE
+## Compatibility with summary
 
 Retain the existing raw agent summary in `agent/cycle-N.json` initially for compatibility and debugging.
 
@@ -229,10 +229,6 @@ During migration:
 
 - The journal is the authoritative cross-cycle problem-solving state.
 - Do not let an unstructured summary override the journal.
-- Retain legacy `WORKING_STATE` only if required by existing compatibility tests.
-- Do not inject both journal state and a contradictory truncated WORKING_STATE into continuation prompts.
-- Clearly mark any deprecated compatibility field.
-- Do not remove legacy fields in the same change unless tests and consumers prove it safe.
 
 Cycle artifacts should reference or include capture metadata for the accepted journal sections without duplicating the entire journal unnecessarily.
 
@@ -402,7 +398,7 @@ Report:
 - How mutation gating is enforced
 - How cycle continuation works
 - How partial remediation and delivery are represented
-- Compatibility behavior for summary and WORKING_STATE
+- Compatibility behavior for the raw agent summary
 - Tests and exact results
 - Base comparison
 - Remaining limitations

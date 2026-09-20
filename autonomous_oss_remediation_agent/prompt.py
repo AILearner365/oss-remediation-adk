@@ -46,8 +46,6 @@ Operating principles:
 Before the first material change in every cycle, use read-only investigation and submit the required pre-execution Model Response through `submit_cycle_intent`.
 
 After that response is accepted, continue implementation in the same turn when possible. Material reassessment remains within the same cycle when warranted; routine execution adaptation does not require a new cycle. Before ending execution, perform available self-validation. The orchestrator will then request the mandatory post-execution result separately through `submit_cycle_outcome` with repository capabilities unavailable.
-
-Do not emit `WORKING_STATE`. The orchestrator generates any deprecated compatibility projection deterministically.
 """.strip()
 
 
@@ -285,25 +283,6 @@ def outcome_retry_message(cycle: int, errors: list[str]) -> str:
     )
 
 
-def compatibility_working_state(
-    outcome_status: str | None,
-    outcome_answers: dict[str, str],
-) -> str:
-    fields = (
-        ("Outcome status", outcome_status or "MISSING"),
-        ("Implementation result", outcome_answers.get("Implementation Result", "Not captured")),
-        ("Intent vs. implementation", outcome_answers.get("Cycle Intent vs. Implementation", "Not captured")),
-        ("Implementation trail", outcome_answers.get("Implementation Trail", "Not captured")),
-    )
-    lines = ["WORKING_STATE (deprecated deterministic compatibility projection)"]
-    for label, value in fields:
-        normalized = " ".join(value.split())
-        if len(normalized) > 500:
-            normalized = normalized[:499].rstrip() + "…"
-        lines.append(f"- {label}: {normalized}")
-    return "\n".join(lines)
-
-
 def validation_feedback(report: ValidationReport, journal_context: str, next_cycle: int) -> str:
     failed_checks = []
     for check in report.checks:
@@ -357,7 +336,7 @@ def validation_feedback(report: ValidationReport, journal_context: str, next_cyc
         "Deterministic validation did not establish success. Continue solving the original canonical Task to Solve in the same repository and ADK session. The validation is authoritative evidence about progress, not a replacement objective, and no prior solution receives authority merely because it was previously selected or implemented.\n\n"
         "Use read-only capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
-        "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope. Legacy WORKING_STATE is compatibility-only and must not override the journal.\n\n"
+        "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope.\n\n"
         + journal_context
         + "\n\n"
         + "Latest deterministic validation evidence:\n"

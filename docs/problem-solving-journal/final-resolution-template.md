@@ -8,7 +8,7 @@
 
 ## Original problem
 
-{{problem_as_received}}
+{{canonical_task_to_solve_reference}}
 
 ## Final interpreted resolution
 

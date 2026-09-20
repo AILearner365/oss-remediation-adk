@@ -192,15 +192,7 @@ class _ScriptedAgentSession:
                 new_text=f"<demo.version>{new}</demo.version>",
             )
         cycle = len(self.messages)
-        return AgentTurnResult(
-            f"cycle {cycle} complete\n\n"
-            "WORKING_STATE\n"
-            f"- Understanding: validation cycle {cycle} repository evidence\n"
-            f"- Current strategy/hypothesis: strategy-{cycle}\n"
-            "- Assumptions: verify through deterministic validation\n"
-            f"- Progress: completed work cycle {cycle}\n"
-            "- Unresolved: deterministic completion criteria"
-        )
+        return AgentTurnResult(f"cycle {cycle} complete")
 
     async def close(self):
         self.closed = True
@@ -220,6 +212,18 @@ class _DiagnosticArtifactSession(_ScriptedAgentSession):
 class _FailingAgentSession:
     async def run_turn(self, message):
         raise RuntimeError("model service unavailable")
+
+    async def close(self):
+        return None
+
+
+class _MissingIntentSession:
+    def __init__(self):
+        self.messages = []
+
+    async def run_turn(self, message):
+        self.messages.append(message)
+        return AgentTurnResult("No submission")
 
     async def close(self):
         return None
@@ -444,12 +448,11 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         cycle_two_agent = json.loads(
             (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(encoding="utf-8")
         )
-        self.assertIn("deprecated deterministic compatibility projection", cycle_one_agent["workingState"])
-        self.assertIn("Observed result for Implementation Result", cycle_one_agent["workingState"])
-        self.assertNotIn("cycle 1 complete", cycle_one_agent["workingState"])
+        self.assertNotIn("workingState", cycle_one_agent)
+        self.assertNotIn("workingStateDeprecated", cycle_one_agent)
         self.assertIn("cycle 1 complete", cycle_one_agent["summary"])
-        self.assertIn("Observed result for Implementation Result", cycle_two_agent["workingState"])
-        self.assertTrue(cycle_one_agent["workingStateDeprecated"])
+        self.assertNotIn("workingState", cycle_two_agent)
+        self.assertNotIn("workingStateDeprecated", cycle_two_agent)
         self.assertIn(result.baseline.commit, sessions[0].messages[1])
         self.assertIn("CVE-2024-0001", sessions[0].messages[1])
         journal = Path(result.journal_path).read_text(encoding="utf-8")
@@ -557,7 +560,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(1, len(sessions[0].messages))
         self.assertEqual("Configured operational budget reached", result.reason)
 
-    def test_working_state_is_generated_without_model_authorship(self):
+    def test_cycle_artifact_omits_deprecated_working_state(self):
         sessions = []
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
@@ -572,10 +575,9 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertIn("deprecated deterministic compatibility projection", cycle["workingState"])
-        self.assertIn("Outcome status: INCONCLUSIVE", cycle["workingState"])
-        self.assertNotIn("Investigated without", cycle["workingState"])
-        self.assertTrue(cycle["workingStateDeprecated"])
+        self.assertNotIn("workingState", cycle)
+        self.assertNotIn("workingStateDeprecated", cycle)
+        self.assertIn("Investigated without", cycle["summary"])
 
     def test_model_learns_questionnaires_and_exact_retry_errors_from_runtime_prompt(self):
         sessions = []
@@ -786,6 +788,23 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
         self.assertIn("AGENT_RUNTIME_FAILURE", result.reason)
 
+    def test_missing_pre_execution_submission_uses_current_stage_terminology(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _MissingIntentSession()
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertIn("CYCLE_INTENT_CAPTURE_INCOMPLETE", result.reason)
+        self.assertIn(
+            "No Problem Analysis and Solution Decision submission was received in the previous turn",
+            sessions[0].messages[1],
+        )
+        self.assertNotIn("No Cycle Intent submission", sessions[0].messages[1])
+
     def test_execution_failure_still_requests_outcome_and_runs_validation(self):
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
@@ -800,6 +819,13 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         journal = Path(result.journal_path).read_text(encoding="utf-8")
         self.assertIn("# Cycle 1 — Outcome", journal)
         self.assertIn("# Cycle 1 — Deterministic Validation", journal)
+        cycle = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertNotIn("workingState", cycle)
+        self.assertNotIn("workingStateDeprecated", cycle)
 
     def test_missing_explicit_vulnerability_stops_before_agent(self):
         invoked = []
