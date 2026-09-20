@@ -8,65 +8,256 @@ from .models import RepositoryBaseline, ValidationReport
 
 
 AGENT_INSTRUCTION = """
-You are the single autonomous OSS remediation engineering agent for one prepared repository.
+You are the autonomous software-engineering agent responsible for resolving one supplied task in a prepared working environment.
 
-Investigate the repository and remediate the requested vulnerabilities directly. You may read and patch repository text and use the trusted host-native shell for repository discovery, dependency analysis, builds, tests, local Git inspection, and workspace-local helper scripts.
+You own the complete work cycle:
 
-Requirements:
-- Base decisions on repository, dependency, build, and scanner evidence.
+1. understand the supplied task;
+2. investigate the relevant context and evidence;
+3. develop concrete, evidence-supported solutions;
+4. select a solution;
+5. implement it;
+6. reassess it when execution produces new evidence;
+7. self-validate the resulting work;
+8. submit an honest post-execution result.
+
+Operating principles:
+
+- Treat the supplied Task to Solve and its requirements as the source of truth.
 - Respect every supplied constraint.
-- Treat supplied version policies solely as remediation boundaries, not instructions to upgrade or select a particular dependency-management layer. An exact required version constrains the outcome but does not prescribe how to achieve it.
-- Choose the engineering approach yourself; no patch-plan JSON is required.
-- Do not use vulnerability-specific recipes from this prompt. When choosing a remediation, inspect how affected dependency versions are managed by the repository, including relevant parents, imported BOMs, properties, and existing `dependencyManagement`. Use that structure as engineering evidence, avoid redundant or unnecessary lower-level overrides, and retain discretion to use a lower-level override when repository evidence supports it. Do not treat these management layers as a required remediation order or hierarchy.
-- When multiple safe remediations are available, prefer the approach that best preserves the repository's existing dependency-management model, minimizes fragmented version control, and avoids unnecessary explicit overrides. Favor maintainable, coherent changes over a larger set of isolated dependency pins, while retaining discretion to use targeted overrides when repository, compatibility, build, or validation evidence supports them.
-- Do not choose a remediation solely because it is the fastest path to a passing scan; also consider maintainability, dependency ownership, and consistency with the project's existing version-management approach.
-- Do not install, replace, or select vulnerability scanners. Deterministic code owns scanning.
-- Do not obtain credentials, push branches, or create pull requests. Deterministic delivery owns those actions.
-- Treat shell cwd/path policy as operating context, not proof of hard filesystem containment.
-- Inspect command failures and continue adapting within the available turn and budget.
-- Do not claim success. Deterministic validation after your turn decides success.
-- Treat scanner-provided fixed versions and fixed-version expressions as evidence, not required remediation targets. Empty fixed-version evidence does not prove remediation is impossible, and ambiguous ranges must not be converted into guessed concrete versions.
-- Do not provide hidden chain-of-thought or detailed private reasoning. Record only concise engineering state that is useful for the next work cycle.
-- Never edit `agent/decision-journal.md`; deterministic orchestration exclusively owns that artifact.
-- At the start of each cycle, use only read-only discovery capabilities, then call `submit_cycle_intent` with every required journal section. The checkpoint constrains reporting timing, not your engineering strategy. One credible approach or a reversible diagnostic experiment is valid; never invent alternatives.
-- Material edit and shell capabilities become usable only after Cycle Intent is accepted. You may freely adapt or replace the selected direction when execution evidence warrants.
-- When execution ends, repository capabilities are removed. Use the metadata-only `submit_cycle_outcome` capability to report actual work, deviations, evidence, unresolved coverage, and the applicable outcome status. Deterministic validation remains authoritative.
+- Use available context, files, relationships, commands, tools, validation evidence and permitted authoritative information sources to investigate decision-critical facts.
+- Distinguish established information, unavailable information, assumptions and facts that require execution evidence.
+- Do not present an assumption as an established fact.
+- Before relying on a decision-critical assumption, attempt to verify it using the available evidence and tools.
+- Prefer focused, coherent and maintainable changes at the appropriate ownership or configuration boundary when supported by evidence.
+- Preserve required behavior, compatibility and existing system conventions.
+- Do not make unnecessary or unrelated changes.
+- Do not select a solution merely because it is the fastest way to produce one passing check.
+- Do not claim complete resolution based only on a passing build, partial improvement or unverified expectation.
+- Inspect failures and continue adapting while time and operational budget remain.
+- If new evidence weakens or invalidates the selected solution, reassess the complete unresolved task. Retain, revise, extend, replace or combine solutions according to the evidence.
+- Do not continue an invalidated solution merely to preserve work already done.
+- Do not abandon the complete task merely because the first solution failed.
+- Do not expose hidden chain-of-thought. Record concise, decision-relevant conclusions, evidence, assumptions and rationale.
+- Do not directly edit the decision journal. The orchestrator owns that artifact.
+- Do not perform delivery actions unless a supplied capability explicitly assigns them to you.
+- Independent deterministic validation remains authoritative.
 
-When you have completed a useful execution phase, provide a concise ordinary summary. Do not emit `WORKING_STATE` and do not claim success; the orchestrator will request Cycle Outcome in a separate metadata-only turn and will generate any deprecated compatibility projection deterministically.
+Before the first material change in every cycle, use read-only investigation and submit the required pre-execution Model Response through `submit_cycle_intent`.
+
+After that response is accepted, continue implementation in the same turn when possible. Material reassessment remains within the same cycle when warranted; routine execution adaptation does not require a new cycle. Before ending execution, perform available self-validation. The orchestrator will then request the mandatory post-execution result separately through `submit_cycle_outcome` with repository capabilities unavailable.
+
+Do not emit `WORKING_STATE`. The orchestrator generates any deprecated compatibility projection deterministically.
 """.strip()
 
 
-def initial_message(request: RemediationRequest, baseline: RepositoryBaseline) -> str:
-    payload = {
-        "objective": {
-            "vulnerabilityIds": list(request.vulnerability_ids),
-            "severityScope": list(request.severity_scope),
-        },
-        "constraints": request.to_dict()["constraints"],
-        "baseline": baseline.to_dict(),
-        "budgets": request.to_dict()["budget"],
-        "completionCriteria": [
-            "required build/test/startup commands pass",
-            "fresh deterministic vulnerability scan succeeds",
-            "requested target findings are absent",
-            "no new prohibited findings are introduced",
-            "typed constraints remain satisfied",
+def canonical_task_to_solve(
+    request: RemediationRequest,
+    baseline: RepositoryBaseline,
+) -> str:
+    requirements: list[tuple[str, str, str]] = []
+
+    def add_requirement(kind: str, result: str, evaluation: str) -> None:
+        requirements.append((kind, result, evaluation))
+
+    target_description = (
+        "Requested findings " + ", ".join(f"`{value}`" for value in request.vulnerability_ids)
+        if request.vulnerability_ids
+        else "All baseline findings within the configured severity scope"
+    )
+    add_requirement(
+        "Outcome",
+        f"{target_description} are absent from the final repository scan.",
+        "Fresh deterministic scan and comparison with the authoritative baseline.",
+    )
+    if request.constraints.prohibited_new_severities:
+        severities = ", ".join(request.constraints.prohibited_new_severities)
+        add_requirement(
+            "Outcome",
+            f"No newly introduced findings at prohibited severities `{severities}`.",
+            "Deterministic baseline-to-final finding comparison.",
+        )
+    for command_kind, commands in (
+        ("build", request.build_commands),
+        ("test", request.test_commands),
+        ("startup", request.startup_commands),
+    ):
+        for command in commands:
+            add_requirement(
+                "Validation",
+                f"Configured {command_kind} command succeeds: `{_markdown_cell(command)}`.",
+                "Deterministic command result.",
+            )
+    if request.constraints.prohibit_suppressions:
+        add_requirement(
+            "Constraint",
+            "No vulnerability-suppression file or suppression entry is introduced.",
+            "Deterministic constraint comparison.",
+        )
+    policy = request.constraints.spring_boot_version_policy
+    add_requirement(
+        "Constraint",
+        "Spring Boot version movement obeys the configured policy: "
+        f"allow patch={policy.allow_patch}, allow minor={policy.allow_minor}, "
+        f"allow major={policy.allow_major}, allow downgrade={policy.allow_downgrade}, "
+        f"approved versions={list(policy.approved_versions)}, required version={policy.required_version!r}.",
+        "Deterministic version-policy evaluation when Spring Boot is present.",
+    )
+    if request.constraints.protected_java_version:
+        add_requirement(
+            "Constraint",
+            f"Java version remains `{request.constraints.protected_java_version}`.",
+            "Deterministic protected-value comparison.",
+        )
+    if request.constraints.protected_spring_boot_version:
+        add_requirement(
+            "Constraint",
+            f"Spring Boot version remains `{request.constraints.protected_spring_boot_version}`.",
+            "Deterministic protected-value comparison.",
+        )
+    if request.constraints.allowed_paths:
+        add_requirement(
+            "Constraint",
+            "All changes stay within allowed paths: " + ", ".join(f"`{path}`" for path in request.constraints.allowed_paths) + ".",
+            "Deterministic changed-path evaluation.",
+        )
+    if request.constraints.protected_paths:
+        add_requirement(
+            "Constraint",
+            "Protected paths remain unchanged: " + ", ".join(f"`{path}`" for path in request.constraints.protected_paths) + ".",
+            "Deterministic protected-path comparison.",
+        )
+    for constraint in request.constraints.engineering_constraints:
+        add_requirement("Constraint", constraint, "Applicable deterministic or evidence-based assessment.")
+    for constraint in request.constraints.informational_constraints:
+        add_requirement("Constraint", constraint, "Evidence-based assessment; not falsely represented as deterministic.")
+    add_requirement(
+        "Compatibility",
+        "Required behavior and compatibility are preserved.",
+        "Configured tests, runtime checks, and available compatibility evidence.",
+    )
+    add_requirement(
+        "Engineering quality",
+        "Changes are focused, coherent, maintainable, and use an appropriate ownership or configuration boundary when supported by evidence.",
+        "Change evidence and engineering assessment.",
+    )
+    add_requirement(
+        "Scope",
+        "No unnecessary or unrelated change is included.",
+        "Diff and scope assessment.",
+    )
+    rows = [
+        f"| R{index} | {_markdown_cell(kind)} | {_markdown_cell(result)} | {_markdown_cell(evaluation)} |"
+        for index, (kind, result, evaluation) in enumerate(requirements, start=1)
+    ]
+    target_selection = (
+        "explicit vulnerability identifiers: " + ", ".join(request.vulnerability_ids)
+        if request.vulnerability_ids
+        else "all findings in the configured severity scope"
+    )
+    target_findings = json.dumps(
+        [
+            {
+                "vulnerabilityId": finding.vulnerability_id,
+                "aliases": list(finding.aliases),
+                "severity": finding.severity,
+                "coordinate": finding.coordinate,
+                "currentVersion": finding.version,
+                "fixedVersions": list(finding.fixed_versions),
+                **(
+                    {
+                        "backendEvidence": {
+                            "fixedVersionExpressions": finding.backend_evidence[
+                                "fixedVersionExpressions"
+                            ]
+                        }
+                    }
+                    if "fixedVersionExpressions" in finding.backend_evidence
+                    else {}
+                ),
+            }
+            for finding in baseline.target_findings
         ],
-    }
+        indent=2,
+        sort_keys=True,
+    )
+    constraints = json.dumps(
+        request.to_dict()["constraints"],
+        indent=2,
+        sort_keys=True,
+    )
+    budget = request.budget
+    return "\n".join(
+        [
+            "# Task to Solve",
+            "",
+            "## What is the task, and what must the final result satisfy?",
+            "",
+            "Resolve the requested problem in the prepared project using this authoritative run information:",
+            "",
+            f"- Source: `{request.repository_url}`",
+            f"- Prepared source: `{baseline.remote_url}`",
+            f"- Requested reference: `{request.reference_branch}`",
+            f"- Prepared reference: `{baseline.reference}` at commit `{baseline.commit}`",
+            f"- Working location: `{baseline.repository_path}`",
+            f"- Target selection: {target_selection}",
+            f"- Requested severity scope: {', '.join(request.severity_scope) or 'None'}",
+            f"- Baseline scanner: `{baseline.scan.backend}`; target finding count: `{len(baseline.target_findings)}`",
+            "- Operational budget: "
+            f"cycles={budget.max_cycles}, tool calls={budget.max_tool_calls}, "
+            f"model calls per turn={budget.max_llm_calls_per_turn}, overall seconds={budget.overall_timeout_seconds}",
+            "",
+            "### Authoritative baseline target findings",
+            "",
+            "```json",
+            target_findings,
+            "```",
+            "",
+            "### Configured constraints",
+            "",
+            "```json",
+            constraints,
+            "```",
+            "",
+            "The final result must satisfy every applicable requirement below.",
+            "",
+            "| ID | Type | Required final result | Evaluation |",
+            "|---|---|---|---|",
+            *rows,
+            "",
+            "A passing command or partial improvement does not, by itself, constitute complete resolution.",
+        ]
+    )
+
+
+def _markdown_cell(value: object) -> str:
+    return str(value).replace("|", "\\|").replace("\n", "<br>")
+
+
+def initial_message(
+    request: RemediationRequest,
+    baseline: RepositoryBaseline,
+    task_to_solve: str | None = None,
+) -> str:
+    task = task_to_solve or canonical_task_to_solve(request, baseline)
     return (
-        "Begin Cycle 1 read-only discovery in the prepared repository. "
-        "The objective, constraints, and completion criteria below are the stable run contract for every turn. "
-        "Inspect only with read capabilities, then submit every required Cycle Intent section through `submit_cycle_intent`. "
-        "After it is accepted, execution capabilities become available in the same turn; investigate, modify, and self-validate, then end the turn.\n\n"
+        task
+        + "\n\nYou are expected to implement and validate a solution for the Task to Solve.\n\n"
+        "Before making the first material change:\n\n"
+        "1. investigate the supplied task and relevant evidence using read-only capabilities;\n"
+        "2. answer every Model Response question below;\n"
+        "3. develop only concrete, evidence-supported solutions;\n"
+        "4. ensure every proposed solution satisfies every applicable hard constraint;\n"
+        "5. select the solution you currently intend to implement;\n"
+        "6. submit the completed pre-execution Model Response through `submit_cycle_intent`.\n\n"
+        "This is the decision record for the solution you intend to implement, not a documentation-only exercise or a request for vague hypothetical directions. Investigate avoidable uncertainty before proposing solutions. When a fact cannot be established until execution, identify it as execution-dependent evidence rather than established fact. Do not rewrite the Task to Solve. After acceptance, continue implementation in the same turn, materially reassess within the cycle if new evidence warrants it, and self-validate before ending execution.\n\n"
         + intent_questionnaire(1)
-        + "\n\n"
-        + json.dumps(payload, indent=2, sort_keys=True)
     )
 
 
 def intent_retry_message(cycle: int, errors: list[str]) -> str:
     return (
-        f"Cycle {cycle} Intent has not been accepted. Correct the checkpoint using `submit_cycle_intent`. "
+        f"Cycle {cycle} Problem Analysis and Solution Decision has not been accepted. Correct the checkpoint using `submit_cycle_intent`. "
         "Do not perform material work before acceptance. Rejection details:\n- "
         + "\n- ".join(errors)
     )
@@ -76,8 +267,9 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
     return (
         f"Execution for Cycle {cycle} has ended. Repository read, edit, and shell capabilities are now unavailable. "
         "Submit a metadata-only Cycle Outcome through `submit_cycle_outcome` for any successful, partial, blocked, "
-        "failed, inconclusive, or no-change execution. Report intended-versus-actual work and unresolved coverage; "
-        "do not claim deterministic success.\n\n"
+        "failed, inconclusive, or no-change execution. Report what was actually implemented, any material differences "
+        "from the selected solution, material implementation evidence and reassessments, self-validation, and unresolved "
+        "coverage; do not claim deterministic success.\n\n"
         + outcome_questionnaire()
         + "\n\nExecution response (compatibility evidence):\n"
         + execution_summary
@@ -99,10 +291,9 @@ def compatibility_working_state(
 ) -> str:
     fields = (
         ("Outcome status", outcome_status or "MISSING"),
-        ("Final approach", outcome_answers.get("Final approach present at cycle end", "Not captured")),
-        ("Evidence", outcome_answers.get("Evidence actually observed", "Not captured")),
-        ("Remaining work", outcome_answers.get("Remaining work, blockers, or uncertainty", "Not captured")),
-        ("Conclusion", outcome_answers.get("Cycle conclusion", "Not captured")),
+        ("Implementation result", outcome_answers.get("Implementation Result", "Not captured")),
+        ("Intent vs. implementation", outcome_answers.get("Cycle Intent vs. Implementation", "Not captured")),
+        ("Implementation trail", outcome_answers.get("Implementation Trail", "Not captured")),
     )
     lines = ["WORKING_STATE (deprecated deterministic compatibility projection)"]
     for label, value in fields:
@@ -163,13 +354,14 @@ def validation_feedback(report: ValidationReport, journal_context: str, next_cyc
         "scan": scan,
     }
     return (
-        "Deterministic validation failed. Continue the original remediation objective, constraints, and completion criteria in the same repository and ADK session; this validation is new evidence, not a replacement objective.\n\n"
-        "Relate the evidence to your previous strategy and actions. Determine what it supports, contradicts, or leaves unresolved; preserve useful progress; reconsider unsupported assumptions or unsuccessful approaches when appropriate; decide whether to continue, modify, or replace your strategy; then continue investigation and remediation with the available developer capabilities. Do not restart by default, and do not assume a particular dependency, version, management layer, file, or remediation technique.\n\n"
+        "Deterministic validation did not establish success. Continue solving the original canonical Task to Solve in the same repository and ADK session. The validation is authoritative evidence about progress, not a replacement objective, and no prior solution receives authority merely because it was previously selected or implemented.\n\n"
+        "Use read-only capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
-        "The bounded Markdown decision journal below is the authoritative cross-cycle problem-solving state. Legacy WORKING_STATE is compatibility-only and must not override it.\n\n"
+        "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope. Legacy WORKING_STATE is compatibility-only and must not override the journal.\n\n"
         + journal_context
         + "\n\n"
-        + intent_questionnaire(next_cycle)
-        + "\n\nNew deterministic validation evidence:\n"
+        + "Latest deterministic validation evidence:\n"
         + json.dumps(evidence, indent=2, sort_keys=True)
+        + "\n\n"
+        + intent_questionnaire(next_cycle)
     )

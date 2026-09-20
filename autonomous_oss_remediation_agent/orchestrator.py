@@ -37,6 +37,7 @@ from .models import (
     ValidationReport,
 )
 from .prompt import (
+    canonical_task_to_solve,
     compatibility_working_state,
     initial_message,
     intent_retry_message,
@@ -146,6 +147,8 @@ class AutonomousRemediationOrchestrator:
         lifecycle.append_baseline_contract(
             json.dumps(self._run_contract(baseline), indent=2, sort_keys=True)
         )
+        task_to_solve = canonical_task_to_solve(self.request, baseline)
+        lifecycle.append_task_to_solve(task_to_solve)
 
         if self.request.vulnerability_ids and not baseline.target_findings:
             requested_ids = ", ".join(self.request.vulnerability_ids)
@@ -172,7 +175,7 @@ class AutonomousRemediationOrchestrator:
             WorkspaceIO(workspace, trace), process_runner, budget, trace, lifecycle
         )
         agent_session = self.agent_session_factory(capabilities, self.request.model)
-        message = initial_message(self.request, baseline)
+        message = initial_message(self.request, baseline, task_to_solve)
         summaries: list[str] = []
         last_validation: ValidationReport | None = None
         last_delivery = DeliveryEligibility.NOT_DELIVERY_ELIGIBLE
@@ -521,17 +524,11 @@ class AutonomousRemediationOrchestrator:
         validation: ValidationReport | None,
     ) -> RunResult:
         capture = lifecycle.run_capture_status
-        first_capture = lifecycle.cycles.get(1)
-        original_problem = (
-            first_capture.intent_answers.get("Problem as received", "")
-            if first_capture
-            else ""
-        )
         delivery_result = result.delivery.status if result.delivery else "No automatic delivery was performed."
         lifecycle.finish(
             render_final_resolution(
                 remediation,
-                original_problem or json.dumps(self._run_contract(result.baseline), sort_keys=True),
+                lifecycle.task_to_solve or json.dumps(self._run_contract(result.baseline), sort_keys=True),
                 lifecycle.cycles,
                 validation,
                 capture,
