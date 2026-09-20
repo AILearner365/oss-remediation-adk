@@ -4,7 +4,7 @@ This folder defines a technology-neutral journal protocol for autonomous problem
 
 The protocol requires two model-authored checkpoints per work cycle:
 
-1. **Cycle Intent** — what the agent understands and intends before material work.
+1. **Problem Analysis and Solution Decision** — the model's evidence-grounded understanding, investigation, candidates, and selected solution before material work.
 2. **Cycle Outcome** — what actually happened after execution and self-validation.
 
 Deterministic code appends:
@@ -28,7 +28,7 @@ Deterministic code appends:
 ## Runtime lifecycle
 
 1. Read-only discovery.
-2. Submit and validate Cycle Intent.
+2. Submit and validate Problem Analysis and Solution Decision.
 3. Enable implementation capabilities.
 4. Execute and self-validate.
 5. Disable mutation capabilities.

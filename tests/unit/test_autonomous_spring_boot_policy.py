@@ -134,23 +134,24 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
             }
         )
         baseline = Mock(spec=RepositoryBaseline)
-        baseline.to_dict.return_value = {
-            "constraints": {"springBootVersions": ["parent=3.5.0"]}
-        }
+        baseline.remote_url = request.repository_url
+        baseline.reference = "main"
+        baseline.commit = "abc123"
+        baseline.repository_path = str(self.repository)
+        baseline.scan = Mock(backend="osv")
+        baseline.target_findings = ()
 
         message = initial_message(request, baseline)
 
-        self.assertIn('"spring_boot"', message)
-        self.assertIn('"approved_versions": [', message)
-        self.assertIn('"4.0.7"', message)
+        self.assertIn("Spring Boot version movement obeys the configured policy", message)
+        self.assertIn("approved versions=['4.0.7']", message)
 
-    def test_agent_instruction_preserves_structure_aware_remediation_discretion(self):
-        self.assertIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)
-        self.assertIn("avoid redundant or unnecessary lower-level overrides", AGENT_INSTRUCTION)
-        self.assertIn("retain discretion to use a lower-level override", AGENT_INSTRUCTION)
-        self.assertIn("not treat these management layers as a required remediation order", AGENT_INSTRUCTION)
-        self.assertIn("version policies solely as remediation boundaries", AGENT_INSTRUCTION)
-        self.assertIn("does not prescribe how to achieve it", AGENT_INSTRUCTION)
+    def test_agent_instruction_preserves_evidence_based_implementation_discretion(self):
+        self.assertIn("appropriate ownership or configuration boundary", AGENT_INSTRUCTION)
+        self.assertIn("Retain, revise, extend, replace or combine solutions", AGENT_INSTRUCTION)
+        self.assertIn("Do not make unnecessary or unrelated changes", AGENT_INSTRUCTION)
+        self.assertNotIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)
+        self.assertNotIn("required remediation order", AGENT_INSTRUCTION)
 
     def test_unparseable_version_change_fails_closed(self):
         check = self._validate("3.5.0", "4.0.0-RC1", ConstraintSpec())

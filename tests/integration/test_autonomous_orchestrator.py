@@ -316,7 +316,7 @@ class _PromptLearningSession:
         submitted = sections[1:] if self.reject_first_intent and self.intent_attempts == 1 else sections
         result = self.capabilities.submit_cycle_intent(
             cycle,
-            [{"section": section, "answer": f"Evidence-based answer for {section}."} for section in submitted],
+            [{"section": section, "answer": _intent_answer(section)} for section in submitted],
         )
         if result["status"] != "accepted":
             self.denied_mutation = self.capabilities.edit_workspace_text("write", "forbidden.txt", content="no")
@@ -427,11 +427,11 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(2, result.cycles_completed)
         self.assertEqual(1, len(sessions))
         self.assertEqual(2, len(sessions[0].messages))
-        self.assertIn("Deterministic validation failed", sessions[0].messages[1])
-        self.assertIn("original remediation objective", sessions[0].messages[1])
-        self.assertIn("supports, contradicts, or leaves unresolved", sessions[0].messages[1])
+        self.assertIn("Deterministic validation did not establish success", sessions[0].messages[1])
+        self.assertIn("original canonical Task to Solve", sessions[0].messages[1])
+        self.assertIn("Treat prior model statements as claims", sessions[0].messages[1])
         self.assertIn("decision journal", sessions[0].messages[1])
-        self.assertIn("# Cycle 1 — Intent", sessions[0].messages[1])
+        self.assertIn("# Cycle 1 — Problem Analysis and Solution Decision", sessions[0].messages[1])
         self.assertIn("# Cycle 1 — Outcome", sessions[0].messages[1])
         self.assertIn("# Cycle 1 — Deterministic Validation", sessions[0].messages[1])
         self.assertNotIn("cycle 1 complete", sessions[0].messages[1])
@@ -445,20 +445,27 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             (workspace_root / "artifacts" / "agent" / "cycle-2.json").read_text(encoding="utf-8")
         )
         self.assertIn("deprecated deterministic compatibility projection", cycle_one_agent["workingState"])
-        self.assertIn("Observed result for Final approach", cycle_one_agent["workingState"])
+        self.assertIn("Observed result for Implementation Result", cycle_one_agent["workingState"])
         self.assertNotIn("cycle 1 complete", cycle_one_agent["workingState"])
         self.assertIn("cycle 1 complete", cycle_one_agent["summary"])
-        self.assertIn("Observed result for Final approach", cycle_two_agent["workingState"])
+        self.assertIn("Observed result for Implementation Result", cycle_two_agent["workingState"])
         self.assertTrue(cycle_one_agent["workingStateDeprecated"])
         self.assertIn(result.baseline.commit, sessions[0].messages[1])
         self.assertIn("CVE-2024-0001", sessions[0].messages[1])
         journal = Path(result.journal_path).read_text(encoding="utf-8")
         self.assertIn("# Baseline Contract", journal)
+        self.assertIn("# Preliminary Run Contract", journal)
+        self.assertIn("# Task to Solve", journal)
+        self.assertEqual(1, journal.count("# Task to Solve"))
         self.assertIn(result.baseline.commit, journal)
         self.assertIn('"targetFindings"', journal)
         self.assertIn("## How the approach evolved", journal)
         self.assertIn("Cycle 1 selected direction", journal)
         self.assertIn("Cycle 2 validation learning", journal)
+        self.assertLess(
+            journal.index("# Cycle 1 — Outcome"),
+            journal.index("# Cycle 1 — Deterministic Validation"),
+        )
         self.assertNotIn("See the immutable cycle", journal)
         cycle_one = json.loads(
             (workspace_root / "artifacts" / "validation" / "cycle-1.json").read_text(encoding="utf-8")
@@ -513,13 +520,13 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
                 self.assertEqual(1, len(sessions))
                 self.assertEqual(2, len(sessions[0].messages))
                 continuation = sessions[0].messages[1]
-                self.assertIn("# Cycle 1 — Intent", continuation)
+                self.assertIn("# Cycle 1 — Problem Analysis and Solution Decision", continuation)
                 self.assertIn("# Cycle 1 — Outcome", continuation)
                 self.assertIn(f"`{status}`", continuation)
                 self.assertIn("Execution completed and is ready for deterministic checks.", continuation)
                 self.assertIn("# Cycle 1 — Deterministic Validation", continuation)
-                self.assertIn("New deterministic validation evidence", continuation)
-                self.assertIn("original remediation objective, constraints, and completion criteria", continuation)
+                self.assertIn("Latest deterministic validation evidence", continuation)
+                self.assertIn("original canonical Task to Solve", continuation)
                 self.assertIn('"prohibit_suppressions": true', continuation)
                 self.assertEqual(
                     Path(result.baseline.repository_path),
@@ -583,7 +590,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         session = sessions[0]
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, session.intent_attempts)
-        self.assertIn("Missing required section: Problem as received", session.messages[1])
+        self.assertIn("Missing required section: Model understanding", session.messages[1])
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", session.denied_mutation["failureCode"])
         self.assertFalse((Path(result.baseline.repository_path) / "forbidden.txt").exists())
         self.assertIn("Cycle Outcome questionnaire", session.messages[-1])
@@ -601,7 +608,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         session = sessions[0]
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, session.outcome_attempts)
-        self.assertIn("Missing required section: Work actually performed", session.messages[-1])
+        self.assertIn("Missing required section: Implementation Result", session.messages[-1])
 
     def test_incomplete_cycle_one_capture_is_not_hidden_by_complete_cycle_two(self):
         adapter = _RecordingDeliveryAdapter()
@@ -954,39 +961,57 @@ def _finding():
 
 def _intent_answers(cycle):
     sections = [
-        "Problem as received",
-        "Interpreted objective",
-        "Relevant context and evidence discovered",
-        "Input ambiguities, discrepancies, or missing information",
-        "Applicable constraints and success criteria",
-        "Materially credible candidate approaches",
-        "Selected direction",
-        "Selection rationale",
-        "Assumptions to test",
-        "Intended work",
-        "Validation approach",
-        "Current uncertainties and risks",
+        "Model understanding",
+        "Information, investigation and remaining uncertainty",
+        "Concrete candidate solutions",
+        "Selected solution",
     ]
     if cycle > 1:
-        sections[5:5] = ["Prior-cycle learning", "Relationship to the prior approach"]
-    return [{"section": section, "answer": f"Evidence-based answer for {section}."} for section in sections]
+        sections[2:2] = ["Prior-cycle reassessment"]
+    return [{"section": section, "answer": _intent_answer(section)} for section in sections]
+
+
+def _intent_answer(section):
+    if section == "Information, investigation and remaining uncertainty":
+        return """| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+| Version ownership | Select the change boundary | pom.xml | The property owns the version | Execution validation remains |
+
+### Material assumptions that remain necessary
+
+None."""
+    if section == "Concrete candidate solutions":
+        return """#### Candidate Solution A — Update the owning property
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | Update demo.version to the evidence-supported value. |
+| Why were these exact changes selected? | The repository assigns ownership to this property. |
+| What evidence supports the expected result? | pom.xml and baseline scanner evidence. |
+| Which parts of the problem will it resolve? | The requested target finding. |
+| Does it satisfy every applicable requirement? | Yes, subject to validation. |
+| How will it be implemented? | Update the property and self-validate. |
+| How will compatibility be preserved? | Run configured checks. |
+| Why is the result coherent and maintainable? | It preserves the existing owner. |
+| What risks or unknowns remain? | Runtime evidence remains execution-dependent. |
+| How will the result be validated? | Build, test, startup, and scan checks. |
+| Is it a COMPLETE or PARTIAL solution? | COMPLETE, subject to validation. |"""
+    if section == "Selected solution":
+        return """- **Selected solution:** Candidate A — Update the owning property
+- **Classification:** COMPLETE
+- **Why it is preferred:** Current evidence supports the ownership boundary.
+- **Comparative coverage:** It covers the complete task; no other supported candidate exists.
+- **Remaining risks:** Runtime compatibility requires execution evidence.
+- **Evidence requiring reconsideration:** Contrary effective-model or test results."""
+    if section == "Prior-cycle reassessment":
+        return "Current repository state preserves useful prior work, while prior conclusions remain claims checked against deterministic validation; unsupported claims remain uncertain and do not constrain the next solution."
+    return f"Evidence-based answer for {section}."
 
 
 def _outcome_answers():
     sections = [
-        "Work actually performed",
-        "Evidence actually observed",
-        "Intended versus actual",
-        "Material deviations and their causes",
-        "Approaches attempted, rejected, or abandoned",
-        "Final approach present at cycle end",
-        "Assumption results",
-        "Requirement and problem coverage",
-        "Constraints and regression assessment",
-        "Self-validation assessment",
-        "Remaining work, blockers, or uncertainty",
-        "Partial-remediation value",
-        "Cycle conclusion",
+        "Implementation Result",
+        "Cycle Intent vs. Implementation",
+        "Implementation Trail",
     ]
     return [{"section": section, "answer": f"Observed result for {section}."} for section in sections]
 

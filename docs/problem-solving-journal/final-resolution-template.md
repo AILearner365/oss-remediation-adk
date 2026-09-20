@@ -20,7 +20,7 @@
 
 ## How the approach evolved
 
-Summarize material evolution across cycles using accepted Intent, Outcome, and Deterministic Validation sections. Do not invent unrecorded intermediate decisions.
+Summarize material evolution across cycles using accepted Problem Analysis and Solution Decision, Outcome, and Deterministic Validation sections. Do not invent unrecorded intermediate decisions.
 
 ## Final requirement coverage
 

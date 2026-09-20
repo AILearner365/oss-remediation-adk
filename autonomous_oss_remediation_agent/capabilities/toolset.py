@@ -126,7 +126,7 @@ class DeveloperCapabilitySet:
         return result.to_dict() if hasattr(result, "to_dict") else result
 
     def submit_cycle_intent(self, cycle_number: int, answers: list[dict[str, str]]) -> dict[str, Any]:
-        """Submit the required metadata-only Cycle Intent before material mutation."""
+        """Submit the required Problem Analysis and Solution Decision before material mutation."""
         if not self.journal:
             return self._unavailable("submit_cycle_intent", "Journal lifecycle is not configured")
         return self.journal.submit_intent(cycle_number, answers).to_dict()

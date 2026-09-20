@@ -1,10 +1,10 @@
 # Cycle {{cycle_number}} — Outcome
 
-> This checkpoint records what actually happened after execution and self-validation. It must be completed for successful, partial, blocked, failed, and inconclusive cycles.
+> This mandatory checkpoint records what actually happened after implementation and self-validation. It applies to successful, partial, blocked, failed, inconclusive, and no-change execution. It does not establish deterministic success.
 
 ## Cycle outcome status
 
-Select one:
+Select one and explain why it fits the actual execution state:
 
 - `READY_FOR_INDEPENDENT_VALIDATION`
 - `PARTIALLY_REMEDIATED`
@@ -13,111 +13,24 @@ Select one:
 - `INCONCLUSIVE`
 - `NO_CHANGE_REQUIRED`
 
-Explain why the status fits the evidence. Readiness is not final success; deterministic validation remains authoritative.
+## Implementation Result
 
-## Work actually performed
+What was actually implemented during this cycle, and what did your self-validation establish against the Task to Solve, including its success criteria and constraints?
 
-Describe material changes, investigations, experiments, corrective actions, and relevant reverted or abandoned work. Avoid a command-by-command transcript unless a command materially affected the outcome.
+If no solution or only a partial solution was implemented, state that explicitly and identify what remains unresolved or unverified.
 
-## Evidence actually observed
+Capture the actual final repository approach, applicable requirement coverage, constraints, compatibility or regression implications, self-validation actually performed, unresolved or unverified coverage, and partial, blocked, failed, inconclusive, or no-change state when applicable.
 
-List successful, failed, incomplete, and inconclusive checks; tooling or environmental errors; and material repository or system observations.
+## Cycle Intent vs. Implementation
 
-Separate observed evidence from conclusions. Reference command, file, scan, validation, or artifact identifiers where available.
+Did the implemented solution materially differ from the selected strategy recorded in the Cycle Intent? If yes, what changed, what evidence or findings discovered during implementation led to the material reassessment, and why was the resulting strategy or solution selected?
 
-## Intended versus actual
+If there was no material change from the Cycle Intent, state that directly.
 
-Compare the accepted Cycle Intent with what happened:
+When material change did occur, include materially attempted, rejected, reverted, or abandoned approaches; material assumption changes; the resulting strategy; and why it was selected. Do not invent reassessment or attempts that did not occur.
 
-- Which intended work was completed?
-- Which intended work was not completed?
-- What additional work was introduced?
-- Did the original direction remain suitable?
-- Did the final implementation materially differ?
+## Implementation Trail
 
-If no material deviation occurred, state that explicitly.
+What was the actual sequence of material implementation and investigation actions from the Cycle Intent through self-validation?
 
-## Material deviations and their causes
-
-For each material deviation, explain what changed, what evidence caused it, why adapting was preferable, and how it affected coverage, constraints, risk, maintainability, or validation.
-
-Do not treat routine navigation or minor implementation details as strategy deviations.
-
-## Approaches attempted, rejected, or abandoned
-
-For every material approach not retained, explain what was attempted, why it was inadequate or unnecessary, the supporting evidence, the failure category, and whether useful progress was preserved.
-
-If no material approach was rejected or abandoned, state that explicitly.
-
-## Final approach present at cycle end
-
-Describe the approach actually represented by the repository or system state. Do not include planned but unapplied work.
-
-## Assumption results
-
-For each original or newly discovered material assumption, provide:
-
-- **Assumption**
-- **Final status:** Supported, rejected, partially supported, or unresolved
-- **Evidence**
-- **Effect on implementation or conclusion**
-
-## Requirement and problem coverage
-
-### Satisfied
-
-List portions supported by observed evidence.
-
-### Conditional
-
-List portions that appear satisfied but depend on incomplete, unreliable, or external verification.
-
-### Unresolved
-
-List everything still unresolved.
-
-### Not applicable
-
-Identify supplied requirements determined not to apply, with justification.
-
-## Constraints and regression assessment
-
-Explain constraint compliance, compatibility implications, new risks, failures or findings, unrelated changes, and investigation-only artifacts that must not be delivered.
-
-## Self-validation assessment
-
-For each important activity, distinguish:
-
-- Planned but not run
-- Run and passed
-- Run and failed
-- Run but inconclusive
-- Prevented by an environmental or tooling blocker
-
-Explain what independent validation must still confirm.
-
-## Remaining work, blockers, or uncertainty
-
-For each remaining item, state why it remains, whether another cycle can resolve it, whether a constraint prevents resolution, whether external input is needed, and whether safe partial delivery has independent value.
-
-## Partial-remediation value
-
-When partial:
-
-- What independently useful improvement was completed?
-- Which findings or requirements remain?
-- Are preserved changes internally consistent and safe?
-- Do build and tests remain healthy?
-- Was any prohibited issue introduced?
-- Would a draft manual-review delivery provide value?
-- What must be prominently disclosed?
-
-If not partial, state that this section is not applicable.
-
-## Cycle conclusion
-
-Concise summary of what was intended, what happened, why meaningful deviations occurred, what evidence currently establishes, what remains unresolved, and the recommended next step.
-
-## Additional decision-relevant information
-
-Add material information not adequately represented above. Omit when unnecessary.
+Report only material events that actually occurred. Include observed evidence, materially influential unsuccessful or reverted attempts, actual reassessment points, resulting changes, subsequent implementation, and self-validation where applicable. Do not invent missing history, manufacture reassessment, provide a routine command diary, or treat self-validation as authoritative deterministic success.

@@ -9,7 +9,7 @@ from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
-from autonomous_oss_remediation_agent.journal import INTENT_SECTIONS, JournalLifecycle, JournalStore
+from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore, WorkspaceBoundaryError
 
 
@@ -352,10 +352,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertFalse((self.workspace.repository / "blocked.txt").exists())
         self.assertFalse((self.workspace.repository / "bypass.txt").exists())
         changed = True
-        answers = [
-            {"section": section, "answer": f"Substantive answer for {section}."}
-            for section in INTENT_SECTIONS
-        ]
+        answers = _valid_intent_answers()
         self.assertTrue(capabilities.submit_cycle_intent(1, answers)["status"] == "accepted")
         self.assertTrue(journal.cycles[1].late_intent)
         journal.require_outcome()
@@ -368,6 +365,47 @@ class AutonomousCapabilityTests(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             self.assertNotIn("from oss_remediation_agent", text, path)
             self.assertNotIn("import oss_remediation_agent", text, path)
+
+def _valid_intent_answers():
+    return [
+        {"section": "Model understanding", "answer": "Resolve the supplied Task to Solve completely."},
+        {
+            "section": "Information, investigation and remaining uncertainty",
+            "answer": """| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+| Ownership | Choose a change | pom.xml | A property owns it | Execution checks remain |
+
+### Material assumptions that remain necessary
+
+None.""",
+        },
+        {
+            "section": "Concrete candidate solutions",
+            "answer": """#### Candidate Solution A — Focused change
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | Update the owned value. |
+| Why were these exact changes selected? | Evidence supports the owner. |
+| What evidence supports the expected result? | Repository inspection. |
+| Which parts of the problem will it resolve? | All requested scope. |
+| Does it satisfy every applicable requirement? | Yes. |
+| How will it be implemented? | Edit and validate. |
+| How will compatibility be preserved? | Run checks. |
+| Why is the result coherent and maintainable? | One owner remains. |
+| What risks or unknowns remain? | Execution evidence. |
+| How will the result be validated? | Configured checks. |
+| Is it a COMPLETE or PARTIAL solution? | COMPLETE. |""",
+        },
+        {
+            "section": "Selected solution",
+            "answer": """- **Selected solution:** Candidate A — Focused change
+- **Classification:** COMPLETE
+- **Why it is preferred:** Evidence supports it.
+- **Comparative coverage:** Complete.
+- **Remaining risks:** Execution evidence.
+- **Evidence requiring reconsideration:** Contradictory checks.""",
+        },
+    ]
 
 
 if __name__ == "__main__":

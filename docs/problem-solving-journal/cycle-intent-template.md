@@ -1,117 +1,64 @@
-# Cycle {{cycle_number}} — Intent
+# Cycle {{cycle_number}} — Problem Analysis and Solution Decision
 
-> This checkpoint records the best current direction before material implementation. It is provisional, permits uncertainty and reversible experiments, and does not prevent later adaptation.
+> This record captures the decision state before implementation begins. The canonical Task to Solve is supplied and rendered by deterministic orchestration; the model answers the sections below after read-only investigation.
 
-## Problem as received
+## Model understanding
 
-State the problem supplied by the user or calling system without silently rewriting its meaning. Include the requested outcome and reported symptoms, findings, or deficiencies.
+What does the model understand it has been asked to accomplish?
 
-## Interpreted objective
+Explain the requested result, target scope, materially governing requirements, and complete-resolution standard. Do not propose a solution or replace, narrow, or expand the authoritative Task to Solve.
 
-Explain the engineering outcome currently understood to be required. Clarify any difference between the literal request and the underlying objective.
+## Information, investigation and remaining uncertainty
 
-## Relevant context and evidence discovered
+What information was needed to develop an evidence-supported solution, and what did the model find?
 
-Describe the project, system, data, environment, prior work, and observed evidence that materially affects diagnosis, strategy, constraints, risk, coverage, or validation.
+| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+| {{information}} | {{reason}} | {{actual_sources_or_methods}} | {{finding}} | {{remaining_gap}} |
 
-Identify important evidence sources where practical. Do not describe assumptions as established facts.
+### Material assumptions that remain necessary
 
-## Input ambiguities, discrepancies, or missing information
-
-Identify incomplete, inconsistent, potentially inaccurate, or open-to-interpretation information in the request, supplied data, constraints, repository state, previous conclusions, or validation evidence.
-
-If no material ambiguity is known, state that explicitly and explain briefly why the information is currently sufficient.
-
-## Applicable constraints and success criteria
-
-Explain how supplied constraints apply to the current problem.
-
-Describe the evidence needed to classify the work as:
-
-- Fully resolved
-- Partially resolved
-- Blocked
-- Inconclusive
-
-Do not convert a preferred implementation technique into a constraint unless the run contract explicitly requires it.
+For each assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. State `None` when no material assumption remains.
 
 {{#if_prior_cycle}}
-## Prior-cycle learning
+## Prior-cycle reassessment
 
-Explain what the previous cycle and authoritative validation supported, contradicted, or left unresolved. Identify prior assumptions that remain supported, were rejected, or still require testing.
+Considering all prior cycles and the current repository state, what prior findings, assumptions, decisions, and implemented directions remain valid for solving the unresolved Task, and what should be reconsidered or discarded?
 
-## Relationship to the prior approach
-
-Explain whether the current direction continues, adjusts, expands, replaces, or investigates before committing to the prior approach. A short transition label may be included, but it cannot replace the explanation.
+Cross-check all relevant accumulated history against the original Task to Solve and current evidence. Treat prior model statements as claims, not automatically established facts. Identify supported, uncertain, contradicted, incomplete, useful, discarded, and unresolved material; verify decision-critical claims where reasonably feasible; preserve uncertainty when verification is unavailable. Do not automatically continue or discard previous work.
 {{/if_prior_cycle}}
 
-## Materially credible candidate approaches
+## Concrete candidate solutions
 
-Describe only genuinely credible approaches. Do not invent alternatives to populate this section.
+What concrete solutions are supported by the available evidence?
 
-For each candidate, address as applicable:
+Include only genuinely supported candidates. One candidate is valid; never manufacture alternatives.
 
-### Candidate: {{candidate_name}}
+#### Candidate Solution {{identifier}} — {{specific_solution_name}}
 
-- **Approach:** What would be done?
-- **Expected coverage:** Which parts of the problem could it resolve?
-- **Constraints:** Does it remain within supplied boundaries?
-- **Advantages:** Why might it fit?
-- **Risks or gaps:** What could remain unresolved or introduce risk?
-- **Assumptions:** What must be true?
-- **Validation:** How could it be tested?
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | {{answer}} |
+| Why were these exact changes selected? | {{answer}} |
+| What evidence supports the expected result? | {{answer}} |
+| Which parts of the problem will it resolve? | {{answer}} |
+| Does it satisfy every applicable requirement? | {{answer}} |
+| How will it be implemented? | {{ordered_directional_sequence}} |
+| How will compatibility be preserved? | {{answer}} |
+| Why is the result coherent and maintainable? | {{answer}} |
+| What risks or unknowns remain? | {{answer}} |
+| How will the result be validated? | {{answer}} |
+| Is it a COMPLETE or PARTIAL solution? | {{classification_and_justification}} |
 
-If only one credible approach exists, explain why apparent alternatives are not viable or add no value. If final selection requires more evidence, include credible diagnostic or reversible experimental approaches.
+## Selected solution
 
-## Selected direction
+Which solution is selected, and why is it preferred?
 
-State the approach, combination, or diagnostic experiment selected for the next work phase.
+- **Selected solution:** {{candidate_identifier_and_name}}
+- **Classification:** COMPLETE or PARTIAL
+- **Why it is preferred:** {{answer}}
+- **Comparative coverage:** {{answer}}
+- **Remaining risks:** {{answer}}
+- **Evidence requiring reconsideration:** {{answer}}
 
-## Selection rationale
-
-Explain why the selected direction presently best fits:
-
-- The interpreted objective
-- Relevant evidence and context
-- Requirement coverage
-- Supplied constraints
-- Compatibility and engineering risk
-- Maintainability
-- Ability to validate
-
-Explain meaningful tradeoffs instead of repeating the selected direction.
-
-## Assumptions to test
-
-For every active material assumption, provide:
-
-- **Assumption:** What is believed but not established?
-- **Why it matters:** How could it affect the result?
-- **Test:** What evidence would support or reject it?
-- **Current status:** Untested, partially supported, supported, rejected, or unresolved
-
-If there are no material assumptions, explain why existing evidence is sufficient.
-
-## Intended work
-
-Describe meaningful intended work. Keep it directional rather than prescribing every command or low-level step. Include reversible investigation or experimentation when applicable.
-
-## Validation approach
-
-Identify:
-
-- Required checks
-- Expected evidence
-- Failure signals
-- Evidence that should trigger adaptation
-- Evidence required before readiness for independent validation
-
-Do not describe planned validation as completed validation.
-
-## Current uncertainties and risks
-
-State material uncertainty or risk remaining before implementation and how execution or validation should reduce it.
-
-## Additional decision-relevant information
-
-Add any material observation, concern, alternative, dependency, stakeholder consideration, or contextual information not adequately represented above. Omit when unnecessary.
+The selected solution is directional, not immutable. Material execution evidence may justify retaining, revising, extending, combining, or replacing it within the same cycle.

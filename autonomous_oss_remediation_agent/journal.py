@@ -61,35 +61,70 @@ class QuestionnaireSection:
 
 
 INTENT_QUESTIONNAIRE = (
-    QuestionnaireSection("Problem as received", "Restate the supplied problem, requested outcome, and reported findings without changing their meaning."),
-    QuestionnaireSection("Interpreted objective", "Describe the engineering outcome currently required and distinguish it from any literal wording when necessary."),
-    QuestionnaireSection("Relevant context and evidence discovered", "Record material observed repository, environment, dependency, build, scan, and prior-work evidence; keep observations separate from assumptions."),
-    QuestionnaireSection("Input ambiguities, discrepancies, or missing information", "Identify material uncertainty or explicitly explain why current information is sufficient."),
-    QuestionnaireSection("Applicable constraints and success criteria", "Apply caller constraints and state evidence needed for full, partial, blocked, and inconclusive outcomes without turning techniques into constraints."),
-    QuestionnaireSection("Prior-cycle learning", "Explain what prior authoritative validation supported, contradicted, or left unresolved.", after_cycle_one=True),
-    QuestionnaireSection("Relationship to the prior approach", "Explain whether this direction continues, adjusts, replaces, expands, or investigates before committing to the prior approach.", after_cycle_one=True),
-    QuestionnaireSection("Materially credible candidate approaches", "Describe only genuine candidates. One credible approach is valid; if more evidence is needed, a reversible diagnostic experiment is valid. Do not invent alternatives."),
-    QuestionnaireSection("Selected direction", "State the approach, combination, or diagnostic experiment selected for execution."),
-    QuestionnaireSection("Selection rationale", "Explain evidence, coverage, constraints, risks, maintainability, validation, and meaningful tradeoffs."),
-    QuestionnaireSection("Assumptions to test", "For each material assumption state why it matters, how it will be tested, and its current status; explain if none remain."),
-    QuestionnaireSection("Intended work", "Describe meaningful directional work and any reversible investigation, not a rigid command-by-command plan."),
-    QuestionnaireSection("Validation approach", "State required checks, expected evidence, failure signals, and evidence that should trigger adaptation; do not present planned checks as completed."),
-    QuestionnaireSection("Current uncertainties and risks", "Record material uncertainty or risk and how execution or validation should reduce it."),
+    QuestionnaireSection(
+        "Model understanding",
+        "What does the model understand it has been asked to accomplish? Explain the requested result, target scope, materially governing requirements, and complete-resolution standard. Do not propose a solution or replace, narrow, or expand the Task to Solve.",
+    ),
+    QuestionnaireSection(
+        "Information, investigation and remaining uncertainty",
+        """What information was needed to develop an evidence-supported solution, and what did the model find?
+
+Use this table:
+
+| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
+|---|---|---|---|---|
+
+The Sources examined column must name actual sources, tools, or methods. Then add `### Material assumptions that remain necessary`. For each necessary assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. If none remain, state `None`.""",
+    ),
+    QuestionnaireSection(
+        "Prior-cycle reassessment",
+        """Considering all prior cycles and the current repository state, what prior findings, assumptions, decisions, and implemented directions remain valid for solving the unresolved original Task to Solve, and what should be reconsidered or discarded?
+
+Audit all relevant accumulated history as claims against current repository state, repository files and relationships, objective command evidence, deterministic validation evidence, and other permitted authoritative sources. Identify: supported conclusions and their evidence; claims that remain unverified and uncertain; contradicted, insufficiently supported, incomplete, or obsolete reasoning; prior implementation actually present and useful; directions that should no longer constrain selection; material information or solutions prior cycles may have missed; and everything unresolved against the original Task. Do not claim verification not performed, automatically continue a prior direction, or discard useful work merely because validation did not establish complete success.""",
+        after_cycle_one=True,
+    ),
+    QuestionnaireSection(
+        "Concrete candidate solutions",
+        """What concrete solutions are supported by the available evidence? Include only implementable, constraint-compliant candidates. One candidate is valid; never manufacture alternatives.
+
+For each candidate use `#### Candidate Solution <identifier> — <specific solution name>` followed by this table:
+
+| Question | Model answer |
+|---|---|
+| What exact solution is proposed? | <answer> |
+| Why were these exact changes selected? | <answer> |
+| What evidence supports the expected result? | <answer> |
+| Which parts of the problem will it resolve? | <answer> |
+| Does it satisfy every applicable requirement? | <answer> |
+| How will it be implemented? | <ordered directional sequence> |
+| How will compatibility be preserved? | <answer> |
+| Why is the result coherent and maintainable? | <answer> |
+| What risks or unknowns remain? | <answer> |
+| How will the result be validated? | <answer> |
+| Is it a COMPLETE or PARTIAL solution? | <classification and justification> |
+
+A PARTIAL candidate is valid only when no supported COMPLETE solution is available, it violates no constraint, provides safe measurable progress, preserves a route to completion, and identifies unresolved work.""",
+    ),
+    QuestionnaireSection(
+        "Selected solution",
+        """Which solution is selected, and why is it preferred?
+
+Use these fields: `Selected solution:`, `Classification:`, `Why it is preferred:`, `Comparative coverage:`, `Remaining risks:`, and `Evidence requiring reconsideration:`. Reference a submitted candidate and classify it COMPLETE or PARTIAL. Base selection on current evidence, complete-problem coverage, constraints, compatibility, coherence, maintainability, and risk—not speed, ease, or prior investment. Do not repeat the full implementation sequence. The implementation intent is directional and may be materially reassessed during this cycle when new evidence warrants it.""",
+    ),
 )
 OUTCOME_QUESTIONNAIRE = (
-    QuestionnaireSection("Work actually performed", "Describe material changes, investigations, experiments, corrective actions, and relevant reverted or abandoned work."),
-    QuestionnaireSection("Evidence actually observed", "Record successful, failed, incomplete, and inconclusive evidence separately from conclusions, with stable references when available."),
-    QuestionnaireSection("Intended versus actual", "Compare the accepted Intent with completed, omitted, added, and materially changed work."),
-    QuestionnaireSection("Material deviations and their causes", "Explain each strategy-level deviation, its evidence, cause, and effect; say explicitly if none occurred."),
-    QuestionnaireSection("Approaches attempted, rejected, or abandoned", "Record material approaches not retained, supporting evidence, failure category, and preserved value; say explicitly if none."),
-    QuestionnaireSection("Final approach present at cycle end", "Describe only the approach actually represented by repository state."),
-    QuestionnaireSection("Assumption results", "Give each material assumption's final status, evidence, and effect on the implementation or conclusion."),
-    QuestionnaireSection("Requirement and problem coverage", "Distinguish satisfied, conditional, unresolved, and not-applicable coverage with justification."),
-    QuestionnaireSection("Constraints and regression assessment", "Report constraint compliance, compatibility, regressions, unrelated changes, and investigation-only artifacts."),
-    QuestionnaireSection("Self-validation assessment", "Distinguish planned-not-run, passed, failed, inconclusive, and environmentally blocked checks; state what independent validation must confirm."),
-    QuestionnaireSection("Remaining work, blockers, or uncertainty", "For each remaining item state why it remains, whether another cycle can resolve it, and whether external input is needed."),
-    QuestionnaireSection("Partial-remediation value", "When partial, state measurable improvement, remaining requirements, safety, test health, prohibited issues, manual-review value, and disclosures; otherwise state why not applicable."),
-    QuestionnaireSection("Cycle conclusion", "Concise evidence-based summary of intent, actual work, deviations, established results, unresolved work, and next step."),
+    QuestionnaireSection(
+        "Implementation Result",
+        "What was actually implemented during this cycle, and what did your self-validation establish against the Task to Solve, including its success criteria and constraints? If no solution or only a partial solution was implemented, state that explicitly and identify what remains unresolved or unverified.",
+    ),
+    QuestionnaireSection(
+        "Cycle Intent vs. Implementation",
+        "Did the implemented solution materially differ from the selected strategy recorded in the Cycle Intent? If yes, what changed, what evidence or findings discovered during implementation led to the material reassessment, and why was the resulting strategy or solution selected? If there was no material change from the Cycle Intent, state that directly.",
+    ),
+    QuestionnaireSection(
+        "Implementation Trail",
+        "What was the actual sequence of material implementation and investigation actions from the Cycle Intent through self-validation?",
+    ),
 )
 INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if not section.after_cycle_one)
 PRIOR_CYCLE_INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if section.after_cycle_one)
@@ -106,6 +141,18 @@ OUTCOME_STATUSES = frozenset(
 )
 OPTIONAL_SECTION = "Additional decision-relevant information"
 PLACEHOLDERS = frozenset({"tbd", "todo", "n/a", "na", "none"})
+
+PRELIMINARY_CONTRACT_DESCRIPTION = (
+    "Initial run configuration captured before repository preparation and baseline discovery are complete. "
+    "It records the task inputs, configured constraints, budgets, commands, completion criteria, and other "
+    "information known when the run begins. Information that depends on repository preparation or baseline "
+    "discovery may still be unavailable or preliminary."
+)
+BASELINE_CONTRACT_DESCRIPTION = (
+    "Authoritative run starting state established after repository preparation and baseline discovery. It "
+    "records the prepared source/reference, repository baseline, initial findings, and other resolved run "
+    "information used to construct the canonical Task to Solve and evaluate subsequent changes."
+)
 
 
 @dataclass(frozen=True)
@@ -239,6 +286,7 @@ class JournalLifecycle:
         self.max_checkpoint_chars = max_checkpoint_chars
         self.max_context_chars = max_context_chars
         self.cycles: dict[int, CycleCapture] = {}
+        self.task_to_solve = ""
         self.store.initialize(render_run_contract(run_contract, preliminary=preliminary_contract))
         self._repository_changed = repository_changed
 
@@ -248,8 +296,18 @@ class JournalLifecycle:
         return self.store.append(
             "baseline_contract",
             None,
-            "# Baseline Contract\n\n" + run_contract.strip(),
+            "# Baseline Contract\n\n"
+            f"> {BASELINE_CONTRACT_DESCRIPTION}\n\n"
+            + run_contract.strip(),
         )
+
+    def append_task_to_solve(self, task_to_solve: str) -> JournalSection:
+        if self.cycles:
+            raise RuntimeError("Task to Solve must precede remediation cycles")
+        if self.task_to_solve:
+            raise RuntimeError("Task to Solve has already been established")
+        self.task_to_solve = task_to_solve.strip()
+        return self.store.append("task_to_solve", None, self.task_to_solve)
 
     def set_repository_changed_probe(self, repository_changed: Callable[[], bool]) -> None:
         self._repository_changed = repository_changed
@@ -290,8 +348,14 @@ class JournalLifecycle:
             capture.rejected_intents += 1
             return self._reject("intent", cycle, errors, capture.rejected_intents)
         late = self._repository_changed()
-        rendered = render_checkpoint(cycle, "Intent", answers)
-        errors.extend(validate_rendered_markdown(rendered, f"Cycle {cycle} — Intent"))
+        errors.extend(_intent_structure_errors(answers))
+        rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", answers)
+        errors.extend(
+            validate_rendered_markdown(
+                rendered,
+                f"Cycle {cycle} — Problem Analysis and Solution Decision",
+            )
+        )
         if errors:
             capture.rejected_intents += 1
             return self._reject("intent", cycle, errors, capture.rejected_intents)
@@ -395,17 +459,39 @@ class JournalLifecycle:
         if len(content) <= self.max_context_chars:
             return content
         marker = "\n\n[Earlier journal content bounded for model input]\n\n"
-        contract_sections = [
+        run_sections = [
             section
             for section in self.store.sections
-            if section.kind in {"run_contract", "baseline_contract"}
+            if section.kind in {"run_contract", "baseline_contract", "task_to_solve"}
         ]
-        contract_end = max((section.end_offset for section in contract_sections), default=0)
-        contract_chars = len(self.store.path.read_bytes()[:contract_end].decode("utf-8"))
-        head_limit = min(contract_chars, self.max_context_chars * 2 // 3)
-        head_limit = max(head_limit, min(6_000, self.max_context_chars // 3))
-        tail_limit = max(0, self.max_context_chars - head_limit - len(marker))
-        return content[:head_limit] + marker + content[-tail_limit:]
+        cycle_sections = [
+            section
+            for section in self.store.sections
+            if section.kind not in {"run_contract", "baseline_contract", "task_to_solve"}
+        ]
+        available = max(0, self.max_context_chars - len(marker))
+        run_size = sum(len(self._section_text(item)) for item in run_sections)
+        run_budget = min(available * 2 // 3, run_size)
+        if cycle_sections:
+            run_budget = min(run_budget, max(0, available - len(cycle_sections) * 40))
+        cycle_budget = max(0, available - run_budget)
+        bounded = (
+            _bounded_sections(
+                [(item.kind, self._section_text(item)) for item in run_sections],
+                run_budget,
+                preserve_kind="task_to_solve",
+            )
+            + marker
+            + _bounded_sections(
+                [(item.kind, self._section_text(item)) for item in cycle_sections],
+                cycle_budget,
+            )
+        )
+        return bounded[: self.max_context_chars]
+
+    def _section_text(self, section: JournalSection) -> str:
+        data = self.store.path.read_bytes()[section.start_offset : section.end_offset]
+        return data.decode("utf-8").rstrip()
 
     def _checkpoint_errors(
         self,
@@ -475,7 +561,8 @@ class JournalLifecycle:
 
 def render_run_contract(run_contract: str, *, preliminary: bool = False) -> str:
     title = "Preliminary Run Contract" if preliminary else "Run Contract"
-    return f"# {title}\n\n" + run_contract.strip()
+    description = f"> {PRELIMINARY_CONTRACT_DESCRIPTION}\n\n" if preliminary else ""
+    return f"# {title}\n\n" + description + run_contract.strip()
 
 
 def render_checkpoint(cycle: int, checkpoint: str, answers: list[dict[str, str]]) -> str:
@@ -494,20 +581,37 @@ def intent_questionnaire(cycle: int) -> str:
     ]
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
-        "Answer observations as observations, assumptions as unproven assumptions, intended work as future work, "
-        "and do not present planned validation as completed evidence. One credible approach or a reversible "
-        "diagnostic experiment is sufficient; never invent alternatives. You may add clearly named, "
+        "Perform read-only investigation before submission. Treat the original Task to Solve as authoritative; "
+        "distinguish established information, assumptions, uncertainty, and execution-dependent evidence. Verify "
+        "avoidable decision-critical uncertainty where reasonably feasible. One concrete evidence-supported "
+        "candidate is sufficient; never manufacture alternatives. The selected solution is directional rather "
+        "than immutable and may be materially reassessed during implementation. You may add clearly named, "
         "decision-relevant sections after all required sections."
     )
-    return _render_questionnaire("Cycle Intent questionnaire", sections, rules)
+    return _render_questionnaire(
+        "Problem Analysis and Solution Decision questionnaire",
+        sections,
+        rules,
+    )
 
 
 def outcome_questionnaire() -> str:
     statuses = ", ".join(f"`{status}`" for status in sorted(OUTCOME_STATUSES))
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_outcome`. "
-        f"Allowed `status` values: {statuses}. Separate observed evidence from conclusions, compare intended with "
-        "actual work, and do not treat self-validation as deterministic validation. You may add clearly named, "
+        f"Allowed `status` values: {statuses}. Report only what actually occurred; do not invent actions, evidence, "
+        "attempts, reassessment, or validation. Distinguish observed facts, self-validation, uncertainty, and "
+        "unverified expectations. Include material unsuccessful or reverted work only when it actually influenced "
+        "the result. Do not manufacture a reassessment merely because implementation differed. Report applicable "
+        "Task-to-Solve and constraint coverage as satisfied, not satisfied, unresolved, or unverified. "
+        "In Implementation Result, capture the actual final repository approach, requirement coverage, constraints, "
+        "compatibility or regression implications, actual self-validation, unresolved or unverified coverage, and "
+        "partial, blocked, failed, inconclusive, or no-change state when applicable. In Cycle Intent vs. "
+        "Implementation, capture material deviations, causal evidence, materially attempted or reverted approaches, "
+        "material assumption changes, the resulting strategy, and why it was selected when those events occurred. "
+        "In Implementation Trail, chronologically capture material implementation and investigation actions, observed "
+        "evidence, influential unsuccessful attempts, reassessment points, resulting changes, and self-validation. "
+        "Self-validation is not authoritative deterministic validation. You may add clearly named, "
         "decision-relevant sections after all required sections."
     )
     return _render_questionnaire("Cycle Outcome questionnaire", OUTCOME_QUESTIONNAIRE, rules)
@@ -523,6 +627,152 @@ def _render_questionnaire(
         conditional = " (required after Cycle 1)" if section.after_cycle_one else ""
         lines.append(f"- `{section.name}`{conditional}: {section.guidance}")
     return "\n".join(lines)
+
+
+def _intent_structure_errors(answers: list[dict[str, str]]) -> list[str]:
+    by_section = {
+        str(item.get("section", "")).strip(): str(item.get("answer", ""))
+        for item in answers
+    }
+    errors: list[str] = []
+    investigation = by_section.get("Information, investigation and remaining uncertainty", "")
+    required_columns = (
+        "Information needed",
+        "Why it was needed",
+        "Sources examined",
+        "Finding",
+        "What remains unknown or requires execution",
+    )
+    if investigation and not all(column in investigation for column in required_columns):
+        errors.append(
+            "Information, investigation and remaining uncertainty: required evidence table columns are missing"
+        )
+    if investigation and len([line for line in investigation.splitlines() if line.lstrip().startswith("|")]) < 3:
+        errors.append(
+            "Information, investigation and remaining uncertainty: required evidence table needs at least one information row"
+        )
+    if investigation and "Material assumptions that remain necessary" not in investigation:
+        errors.append(
+            "Information, investigation and remaining uncertainty: required material-assumptions subsection is missing"
+        )
+
+    candidates = by_section.get("Concrete candidate solutions", "")
+    candidate_pattern = re.compile(
+        r"^####\s+Candidate Solution\s+([A-Za-z0-9_-]+)\s+[—-]\s+(.+)$",
+        flags=re.MULTILINE,
+    )
+    candidate_matches = list(candidate_pattern.finditer(candidates))
+    candidate_ids = [match.group(1) for match in candidate_matches]
+    if candidates and not candidate_ids:
+        errors.append(
+            "Concrete candidate solutions: at least one '#### Candidate Solution <identifier> — <name>' heading is required"
+        )
+    candidate_fields = (
+        "What exact solution is proposed?",
+        "Why were these exact changes selected?",
+        "What evidence supports the expected result?",
+        "Which parts of the problem will it resolve?",
+        "Does it satisfy every applicable requirement?",
+        "How will it be implemented?",
+        "How will compatibility be preserved?",
+        "Why is the result coherent and maintainable?",
+        "What risks or unknowns remain?",
+        "How will the result be validated?",
+        "Is it a COMPLETE or PARTIAL solution?",
+    )
+    if candidate_matches:
+        for index, match in enumerate(candidate_matches):
+            end = candidate_matches[index + 1].start() if index + 1 < len(candidate_matches) else len(candidates)
+            candidate = candidates[match.end() : end]
+            for field_name in candidate_fields:
+                if field_name in candidate:
+                    continue
+                errors.append(
+                    f"Concrete candidate solutions: Candidate {match.group(1)} is missing field: {field_name}"
+                )
+            if not re.search(r"\b(?:COMPLETE|PARTIAL)\b", candidate):
+                errors.append(
+                    f"Concrete candidate solutions: Candidate {match.group(1)} requires COMPLETE or PARTIAL classification"
+                )
+
+    selected = by_section.get("Selected solution", "")
+    selected_fields = (
+        "Selected solution:",
+        "Classification:",
+        "Why it is preferred:",
+        "Comparative coverage:",
+        "Remaining risks:",
+        "Evidence requiring reconsideration:",
+    )
+    if selected:
+        for field_name in selected_fields:
+            if field_name not in selected:
+                errors.append(f"Selected solution: required field is missing: {field_name}")
+        if not re.search(r"\b(?:COMPLETE|PARTIAL)\b", selected):
+            errors.append("Selected solution: classification must be COMPLETE or PARTIAL")
+        selected_line = next(
+            (line for line in selected.splitlines() if "Selected solution:" in line),
+            "",
+        )
+        if candidate_ids and not any(
+            re.search(rf"\b{re.escape(identifier)}\b", selected_line)
+            for identifier in candidate_ids
+        ):
+            errors.append("Selected solution: selected candidate must reference a submitted candidate identifier")
+    return errors
+
+
+def _bounded_sections(
+    sections: list[tuple[str, str]],
+    budget: int,
+    *,
+    preserve_kind: str | None = None,
+) -> str:
+    if budget <= 0 or not sections:
+        return ""
+    joined = "\n\n".join(content for _, content in sections)
+    if len(joined) <= budget:
+        return joined
+    separator_cost = 2 * (len(sections) - 1)
+    usable = max(0, budget - separator_cost)
+    minimum = min(120, usable // len(sections))
+    allocations = [minimum for _ in sections]
+    remaining = usable - sum(allocations)
+    if preserve_kind is not None:
+        for index, (kind, content) in enumerate(sections):
+            if kind != preserve_kind:
+                continue
+            needed = max(0, len(content) - allocations[index])
+            granted = min(needed, remaining)
+            allocations[index] += granted
+            remaining -= granted
+            break
+    index = 0
+    while remaining > 0 and sections:
+        room = len(sections[index][1]) - allocations[index]
+        if room > 0:
+            granted = min(room, max(1, remaining // len(sections)))
+            allocations[index] += granted
+            remaining -= granted
+        index = (index + 1) % len(sections)
+        if all(len(content) <= allocations[position] for position, (_, content) in enumerate(sections)):
+            break
+    return "\n\n".join(
+        _bounded_excerpt(content, allocation)
+        for (_, content), allocation in zip(sections, allocations)
+        if allocation > 0
+    )
+
+
+def _bounded_excerpt(content: str, limit: int) -> str:
+    if len(content) <= limit:
+        return content
+    marker = "\n[... section content bounded ...]\n"
+    if limit <= len(marker) + 20:
+        return content[:limit]
+    head = (limit - len(marker)) * 2 // 3
+    tail = limit - len(marker) - head
+    return content[:head].rstrip() + marker + content[-tail:].lstrip()
 
 
 def validate_answer_markdown(answer: str, section: str) -> list[str]:
@@ -680,22 +930,16 @@ def render_final_resolution(
     )
     latest = cycles[max(cycles)] if cycles else None
     latest_answers = latest.outcome_answers if latest else {}
-    implemented_approach = latest_answers.get("Final approach present at cycle end", "")
-    coverage = latest_answers.get("Requirement and problem coverage", "")
-    coverage_headings = {
-        line.strip()[4:].strip().casefold()
-        for line in coverage.splitlines()
-        if line.strip().startswith("### ")
-    }
-    coverage_categories = {"satisfied", "conditional", "unresolved", "not applicable"}
-    coverage_is_structured = coverage_categories.issubset(coverage_headings)
-    structured_coverage = coverage if coverage_is_structured else ""
-    constraints = latest_answers.get("Constraints and regression assessment", "")
-    partial_value = latest_answers.get("Partial-remediation value", "")
+    implementation_result = latest_answers.get("Implementation Result", "")
     partial = (
         f"Preserved changes require manual review. Unresolved deterministic checks: {', '.join(unresolved) or 'none identified'}."
         if outcome == RemediationOutcome.PARTIALLY_REMEDIATED
         else "Not applicable."
+    )
+    original_problem_display = (
+        "The canonical Task to Solve recorded earlier in this journal remains the original run-level problem contract."
+        if original_problem.lstrip().startswith("# Task to Solve")
+        else original_problem
     )
     return f"""# Final Resolution
 
@@ -705,7 +949,7 @@ def render_final_resolution(
 
 ## Original problem
 
-{original_problem}
+{original_problem_display}
 
 ## Final interpreted resolution
 
@@ -713,7 +957,7 @@ Deterministic validation status and capture quality are reported separately. Run
 
 ## Final implemented approach
 
-{implemented_approach or 'No accepted Cycle Outcome described an implemented approach.'}
+{implementation_result or 'No accepted Cycle Outcome described the implementation result.'}
 
 ## How the approach evolved
 
@@ -724,24 +968,20 @@ Deterministic validation status and capture quality are reported separately. Run
 ### Satisfied
 
 {_bullets(satisfied)}
-{_captured_block('Model-reported satisfied coverage', _coverage_subsection(structured_coverage, 'Satisfied'))}
+
+- Model-reported coverage remains part of the accepted Implementation Result; only explicitly mapped deterministic checks are authoritative.
 
 ### Conditional
 
-{_captured_block('Model-reported conditional coverage', _coverage_subsection(structured_coverage, 'Conditional'))}
+- Any model-reported conditional or unverified coverage remains non-authoritative pending deterministic evidence.
 
 ### Unresolved
 
 {_bullets(unresolved)}
-{_captured_block('Model-reported unresolved coverage', _coverage_subsection(structured_coverage, 'Unresolved'))}
 
 ### Not applicable
 
-{_captured_block('Model-reported not-applicable coverage', _coverage_subsection(structured_coverage, 'Not applicable'))}
-
-{'### Uncategorized model-reported coverage' if coverage and not coverage_is_structured else ''}
-
-{_captured_block('Accepted model-reported coverage', coverage) if coverage and not coverage_is_structured else ''}
+- None established beyond the accepted model report and deterministic checks.
 
 ## Final evidence
 
@@ -751,13 +991,11 @@ Deterministic validation status and capture quality are reported separately. Run
 
 Run-level capture quality `{capture_status.value}`; delivery eligibility `{delivery.value}`.
 
-{constraints or 'No accepted Cycle Outcome captured a constraints and regression assessment.'}
+Model-reported constraint, compatibility, regression, and risk information remains in the accepted Implementation Result above; deterministic checks remain authoritative within their stated scope.
 
 ## Partial-remediation disclosure
 
 {partial}
-
-{partial_value or 'No additional partial-remediation value statement was captured.'}
 
 ## Delivery result
 
@@ -818,10 +1056,10 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
         return "- No remediation cycle was captured."
     lines: list[str] = []
     for cycle, capture in sorted(cycles.items()):
-        selected = capture.intent_answers.get("Selected direction", "Not captured")
-        final = capture.outcome_answers.get("Final approach present at cycle end", "Not captured")
-        deviations = capture.outcome_answers.get("Material deviations and their causes", "Not captured")
-        assumptions = capture.outcome_answers.get("Assumption results", "Not captured")
+        selected = capture.intent_answers.get("Selected solution", "Not captured")
+        final = capture.outcome_answers.get("Implementation Result", "Not captured")
+        deviations = capture.outcome_answers.get("Cycle Intent vs. Implementation", "Not captured")
+        trail = capture.outcome_answers.get("Implementation Trail", "Not captured")
         report = capture.validation_report
         if report:
             failed = [check.name for check in report.checks if not check.passed]
@@ -837,31 +1075,11 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
                 f"- **Cycle {cycle} selected direction:** {_inline(selected)}",
                 f"- **Cycle {cycle} final approach:** {_inline(final)}",
                 f"- **Cycle {cycle} material deviations:** {_inline(deviations)}",
-                f"- **Cycle {cycle} assumption results:** {_inline(assumptions)}",
+                f"- **Cycle {cycle} implementation trail:** {_inline(trail)}",
                 f"- **Cycle {cycle} validation learning:** {learning}.",
             )
         )
     return "\n".join(lines)
-
-
-def _coverage_subsection(content: str, title: str) -> str:
-    current: str | None = None
-    collected: list[str] = []
-    for line in content.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("### "):
-            current = stripped[4:].strip().casefold()
-            continue
-        if current == title.casefold():
-            collected.append(line)
-    return "\n".join(collected).strip()
-
-
-def _captured_block(label: str, content: str) -> str:
-    if not content:
-        return f"- {label}: not separately captured."
-    quoted = "\n".join(f"> {line}" if line else ">" for line in content.splitlines())
-    return f"- {label}:\n\n{quoted}"
 
 
 def _inline(content: str, limit: int = 600) -> str:
