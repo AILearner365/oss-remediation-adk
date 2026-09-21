@@ -91,7 +91,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "discovering an apparently appropriate control point does not by itself complete exploration",
+            "Discovering an apparently appropriate control point does not by itself complete exploration",
             message,
         )
         self.assertIn("Finding one credible or workable mechanism is not sufficient reason to stop investigation", message)
@@ -136,6 +136,51 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn(
             "Apply these engineering preferences here, after candidate formation; do not use them to retroactively exclude a viable candidate",
+            message,
+        )
+
+    def test_candidate_formation_requires_completed_repository_specific_investigation(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "Before forming candidates, perform decision-relevant investigation reasonably obtainable through the available read-only capabilities",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn("Planned or future investigation is not evidence supporting candidate formation", AGENT_INSTRUCTION)
+        self.assertIn("non-material questions need not be pursued", AGENT_INSTRUCTION)
+        self.assertIn("genuinely execution-dependent outcomes remain for implementation and validation", AGENT_INSTRUCTION)
+        self.assertIn("The table must report investigation actually performed and evidence actually obtained", message)
+        self.assertIn(
+            "Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation",
+            message,
+        )
+        self.assertIn(
+            "If decision-relevant information is reasonably obtainable through the available read-only capabilities",
+            message,
+        )
+        self.assertIn("non-material information does not require exhaustive investigation", message)
+        self.assertIn(
+            "General technical knowledge may suggest a mechanism to investigate, but does not by itself establish repository-specific applicability or viability",
+            message,
+        )
+        self.assertIn("that the mechanism exists or applies in the current context", message)
+        self.assertIn("participates in controlling or producing the relevant state or behavior", message)
+        self.assertIn("has a reasonable evidence-supported basis for the intended effect", message)
+        self.assertIn("This does not require proving implementation or validation outcomes in advance", message)
+        self.assertIn(
+            "candidate formation requires an evidence-supported basis for trying a mechanism, not pre-execution proof of those outcomes",
+            message,
+        )
+        self.assertIn(
+            "An assumption must not substitute for reasonably obtainable repository evidence material to candidate formation or selection",
+            message,
+        )
+        self.assertIn(
+            "Form candidates only from decision-relevant investigation actually performed and evidence actually obtained",
+            message,
+        )
+        self.assertIn(
+            "Planned investigation or general technical plausibility alone does not establish repository-specific applicability or viability",
             message,
         )
 

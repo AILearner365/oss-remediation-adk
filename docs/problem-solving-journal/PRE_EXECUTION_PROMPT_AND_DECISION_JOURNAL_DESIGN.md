@@ -72,9 +72,11 @@ Operating principles:
   candidate-admissibility condition, not a preference or optimization criterion.
   Only candidates whose hard-constraint compatibility is established sufficiently
   for selection may be compared, selected or implemented.
-- Use available context, files, relationships, commands, tools, validation
-  evidence and permitted authoritative information sources to investigate
-  decision-critical facts.
+- Before forming candidates, perform decision-relevant investigation reasonably
+  obtainable through the available read-only capabilities. Planned or future
+  investigation is not evidence supporting candidate formation; non-material
+  questions need not be pursued, and genuinely execution-dependent outcomes
+  remain for implementation and validation.
 - Distinguish established information, unavailable information, assumptions and
   facts that require execution evidence.
 - Do not present an assumption as an established fact.
@@ -90,8 +92,11 @@ Operating principles:
 - When solution choice depends on how relevant state or behavior is produced or
   controlled, investigate the existing ownership, control, management,
   inheritance, indirection, configuration, composition, abstraction or
-  relationships to the depth reasonably necessary for the decision. Treat that
-  existing structure as engineering evidence.
+  relationships to the depth reasonably necessary for the decision. General
+  technical knowledge may suggest a mechanism to investigate, but when
+  repository-specific evidence is material and reasonably obtainable, establish
+  that the mechanism applies, participates in controlling the relevant state and
+  has an evidence-supported basis for the intended effect.
 - Use repository evidence to evaluate which control points support focused,
   coherent and maintainable interventions; do not let an early preference for one
   control point end investigation or eliminate another materially distinct viable
@@ -313,9 +318,18 @@ Use this table:
 | Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
 |---|---|---|---|---|
 
-The Sources examined column must identify actual evidence sources or investigation
-methods. Do not claim that information was verified without identifying its
-source.
+The table must report investigation actually performed and evidence actually
+obtained. The Sources examined column must identify actual evidence sources or
+investigation methods. Planned, intended, future or not-yet-performed investigation
+is not a finding and is not evidence supporting candidate formation. If
+decision-relevant information is reasonably obtainable through the available
+read-only capabilities and could materially affect problem understanding,
+mechanism discovery or applicability, control structure, viability, constraints,
+candidate formation or selection, investigate it before submitting this response.
+Keep investigation proportional; non-material information does not require
+exhaustive investigation, and genuinely execution-dependent information may
+remain unknown. Do not claim that information was verified without identifying
+its source.
 
 Before reconciling candidates with hard constraints, establish candidate-relevant
 facts from the Task to Solve, directly observed repository state and observed
@@ -331,19 +345,27 @@ those properties.
 Distinguish ordinary execution-dependent uncertainty from uncertainty that
 materially determines hard-requirement or hard-constraint compliance. Ordinary
 uncertainty such as whether builds, tests or runtime checks succeed may remain
-for implementation and validation. Investigate hard-constraint-determining
-uncertainty before candidate selection when reasonably possible using available
-read-only evidence. If it cannot be resolved sufficiently for selection, preserve
-it honestly: the affected candidate is not yet admissible and the uncertainty
-must not be converted into an assumption that permits selection.
+for implementation and validation; candidate formation requires an
+evidence-supported basis for trying a mechanism, not pre-execution proof of those
+outcomes. Investigate hard-constraint-determining uncertainty before candidate
+selection when reasonably possible using available read-only evidence. If it
+cannot be resolved sufficiently for selection, preserve it honestly: the affected
+candidate is not yet admissible and the uncertainty must not be converted into an
+assumption that permits selection.
 
 When solution choice materially depends on how relevant state or behavior is
 produced or controlled, investigate the existing ownership, control, management,
 inheritance, indirection, configuration, composition, abstraction, relationships
 or other repository-evidenced mechanisms to the depth reasonably necessary for
-the decision. Treat that structure as engineering evidence when evaluating
-mechanism viability and later preference; discovering an apparently appropriate
-control point does not by itself complete exploration.
+the decision. General technical knowledge may suggest a mechanism to investigate,
+but does not by itself establish repository-specific applicability or viability
+when relevant repository evidence is reasonably obtainable. Before candidate
+formation, establish from repository-specific evidence, when material and
+reasonably obtainable, that the mechanism exists or applies in the current
+context, participates in controlling or producing the relevant state or behavior,
+and has a reasonable evidence-supported basis for the intended effect. This does
+not require proving implementation or validation outcomes in advance. Discovering
+an apparently appropriate control point does not by itself complete exploration.
 
 Finding one credible or workable mechanism is not sufficient reason to stop
 investigation. Before forming candidates, identify and investigate materially
@@ -365,6 +387,9 @@ engineering decision. For each assumption, state:
 - what evidence was already checked;
 - which decision or conclusion depends on the assumption;
 - what uncertainty or risk remains.
+
+An assumption must not substitute for reasonably obtainable repository evidence
+material to candidate formation or selection.
 
 Do not introduce an assumption merely to explain unexpected evidence or justify
 proceeding. If an unresolved interpretation is not necessary to the decision,
@@ -411,6 +436,14 @@ Purpose: capture what information the model determined was necessary, what it ac
 
 ```text
 Develop only solutions that are concrete enough to implement.
+
+Form candidates only from decision-relevant investigation actually performed and
+evidence actually obtained. Planned investigation or general technical
+plausibility alone does not establish repository-specific applicability or
+viability. When material and reasonably obtainable before implementation,
+repository evidence must support that the proposed mechanism applies to or
+controls the relevant state and has a reasonable basis for producing the intended
+effect.
 
 Candidate count is the result of investigation, not the target that determines
 investigation breadth. Preserve every materially distinct mechanism that remains
