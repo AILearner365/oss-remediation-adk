@@ -1,0 +1,30 @@
+{
+  "captureStatus": "COMPLETE",
+  "deterministicValidation": {
+    "capturedAt": "2026-09-21T23:22:53.438619+00:00",
+    "contentHash": "8596928ef047de0f5ab2f7c40cf2dba2fadb2682f935912453fa3953d1025fd3",
+    "cycle": 2,
+    "endOffset": 64664,
+    "kind": "deterministic_validation",
+    "startOffset": 61368
+  },
+  "intent": {
+    "capturedAt": "2026-09-21T23:21:33.396502+00:00",
+    "contentHash": "ee8d236861a22e23d66d0bfb977adf3632f93bf80e72f33442f84445be7a98b9",
+    "cycle": 2,
+    "endOffset": 58155,
+    "kind": "intent",
+    "startOffset": 47152
+  },
+  "journalPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T231447Z-f9ceb589/artifacts/agent/decision-journal.md",
+  "outcome": {
+    "capturedAt": "2026-09-21T23:22:21.484569+00:00",
+    "contentHash": "5c2cadb7197e9f06e5b176b4f3774e53be013c48da37a56d14f7bd8ae0c5cf89",
+    "cycle": 2,
+    "endOffset": 61368,
+    "kind": "outcome",
+    "startOffset": 58155
+  },
+  "outcomeCaptureResponse": "",
+  "summary": ""
+}
