@@ -1,0 +1,64 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..8b39b7c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -30,7 +30,7 @@
+         <java.version>21</java.version>
+         <maven.compiler.release>21</maven.compiler.release>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
++                <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+ 
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+@@ -54,18 +54,48 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-expression</artifactId>
++                <version>7.0.8</version>
++            </dependency>
++            <dependency>
++                <groupId>io.micrometer</groupId>
++                <artifactId>micrometer-core</artifactId>
++                <version>1.16.6</version>
++            </dependency>
++            <dependency>
++                <groupId>org.apache.tomcat.embed</groupId>
++                <artifactId>tomcat-embed-core</artifactId>
++                <version>11.0.25</version>
++            </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-webmvc</artifactId>
++                <version>7.0.8</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-core</artifactId>
++                <version>3.1.4</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>3.1.4</version>
++            </dependency>
+         </dependencies>
+     </dependencyManagement>
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
++            <version>1.10.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
++            <version>20231013</version>
+         </dependency>
+     </dependencies>
+     <build>

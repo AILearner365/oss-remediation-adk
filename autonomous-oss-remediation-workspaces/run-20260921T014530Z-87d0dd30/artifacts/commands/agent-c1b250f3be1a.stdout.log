@@ -1,0 +1,92 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/11.0.21/tomcat-annotations-api-11.0.21.pom
+Progress (1): 853 B
+Progress (1): 1.5 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/11.0.21/tomcat-annotations-api-11.0.21.pom (1.5 kB at 1.5 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/11.0.21/tomcat-annotations-api-11.0.21.jar
+Progress (1): 0.9/14 kB
+Progress (1): 2.3/14 kB
+Progress (1): 3.6/14 kB
+Progress (1): 5.0/14 kB
+Progress (1): 6.4/14 kB
+Progress (1): 7.7/14 kB
+Progress (1): 8.2/14 kB
+Progress (1): 9.6/14 kB
+Progress (1): 11/14 kB 
+Progress (1): 12/14 kB
+Progress (1): 14/14 kB
+Progress (1): 14 kB   
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/11.0.21/tomcat-annotations-api-11.0.21.jar (14 kB at 211 kB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... FAILURE [  4.468 s]
+[INFO] task-common ........................................ SKIPPED
+[INFO] task-domain ........................................ SKIPPED
+[INFO] task-service ....................................... SKIPPED
+[INFO] task-web ........................................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.509 s
+[INFO] Finished at: 2026-09-21T01:47:46Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-enforcer-plugin:3.6.2:enforce (base-oss-dependency-guardrails) on project secure-multimodule-springboot-java21: 
+[ERROR] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence failed with message:
+[ERROR] Failed while enforcing releasability.
+[ERROR] 
+[ERROR] Dependency convergence error for tools.jackson.core:jackson-core:jar:3.1.4. Paths to dependency are:
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-tools.jackson.core:jackson-core:jar:3.1.4:compile
+[ERROR] and
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-tools.jackson.core:jackson-databind:jar:3.1.4:compile
+[ERROR]     +-tools.jackson.core:jackson-core:jar:3.1.2:compile
+[ERROR] 
+[ERROR] 
+[ERROR] Dependency convergence error for org.springframework:spring-expression:jar:7.0.8. Paths to dependency are:
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-org.springframework:spring-expression:jar:7.0.8:compile
+[ERROR] and
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-org.springframework:spring-webmvc:jar:7.0.8:compile
+[ERROR]     +-org.springframework:spring-context:jar:7.0.7:compile
+[ERROR]       +-org.springframework:spring-expression:jar:7.0.7:compile
+[ERROR] and
+[ERROR] +-com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[ERROR]   +-org.springframework:spring-webmvc:jar:7.0.8:compile
+[ERROR]     +-org.springframework:spring-expression:jar:7.0.7:compile
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
