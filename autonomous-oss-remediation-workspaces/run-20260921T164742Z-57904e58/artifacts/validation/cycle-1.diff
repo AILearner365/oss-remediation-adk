@@ -1,0 +1,98 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..3cdc95c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -54,18 +54,57 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++            <!-- Vulnerability Fixes -->
++            <dependency>
++                <groupId>org.apache.commons</groupId>
++                <artifactId>commons-text</artifactId>
++                <version>1.10.0</version>
++            </dependency>
++            <dependency>
++                <groupId>org.json</groupId>
++                <artifactId>json</artifactId>
++                <version>20231013</version>
++            </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-expression</artifactId>
++                <version>7.0.8</version>
++            </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-webmvc</artifactId>
++                <version>7.0.8</version>
++            </dependency>
++            <dependency>
++                <groupId>io.micrometer</groupId>
++                <artifactId>micrometer-core</artifactId>
++                <version>1.16.6</version>
++            </dependency>
++            <dependency>
++                <groupId>org.apache.tomcat.embed</groupId>
++                <artifactId>tomcat-embed-core</artifactId>
++                <version>11.0.25</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-core</artifactId>
++                <version>3.1.4</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>3.1.4</version>
++            </dependency>
+         </dependencies>
+     </dependencyManagement>
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
+         </dependency>
+     </dependencies>
+     <build>
+diff --git a/task-service/pom.xml b/task-service/pom.xml
+index ff2af88..9d27d6e 100644
+--- a/task-service/pom.xml
++++ b/task-service/pom.xml
+@@ -28,6 +28,12 @@
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-test</artifactId>
+             <scope>test</scope>
++            <exclusions>
++                <exclusion>
++                    <groupId>com.vaadin.external.google</groupId>
++                    <artifactId>android-json</artifactId>
++                </exclusion>
++            </exclusions>
+         </dependency>
+     </dependencies>
+ </project>
+diff --git a/task-web/pom.xml b/task-web/pom.xml
+index d4cd9a7..fb48fe9 100644
+--- a/task-web/pom.xml
++++ b/task-web/pom.xml
+@@ -39,6 +39,12 @@
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-test</artifactId>
+       <scope>test</scope>
++      <exclusions>
++        <exclusion>
++          <groupId>com.vaadin.external.google</groupId>
++          <artifactId>android-json</artifactId>
++        </exclusion>
++      </exclusions>
+     </dependency>
+   </dependencies>
+   <build>
