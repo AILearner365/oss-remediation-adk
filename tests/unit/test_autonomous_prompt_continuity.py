@@ -71,6 +71,30 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
 
+    def test_self_validation_claims_remain_within_each_checks_evaluated_scope(self):
+        outcome = outcome_message(1, "execution summary", {})
+
+        self.assertIn(
+            "Scope every validation claim to the properties the underlying check actually evaluated",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn("A successful check supports only those properties", AGENT_INSTRUCTION)
+        self.assertIn(
+            "do not generalize it to requirements, success criteria, constraints or outcomes the check did not evaluate",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn("Keep unevaluated coverage unresolved or unverified", AGENT_INSTRUCTION)
+        self.assertIn(
+            "Scope each self-validation claim to what its underlying check actually evaluated",
+            outcome,
+        )
+        self.assertIn(
+            "a successful check does not establish a requirement, success criterion, constraint, or outcome that it did not evaluate",
+            outcome,
+        )
+        self.assertIn("keep that coverage unresolved or unverified", outcome)
+        self.assertIn("Self-validation is not authoritative deterministic validation", outcome)
+
     def test_pre_execution_reasoning_reconciles_constraints_control_and_exploration(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 

@@ -49,7 +49,8 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         "Submit a metadata-only Cycle Outcome through `submit_cycle_outcome` for any successful, partial, blocked, "
         "failed, inconclusive, or no-change execution. Report what was actually implemented, any material differences "
         "from the selected solution, material implementation evidence and reassessments, self-validation, and unresolved "
-        "coverage; do not claim deterministic success.\n\n"
+        "coverage. Scope each self-validation claim to what its underlying check actually evaluated; keep unevaluated "
+        "coverage unresolved or unverified, and do not claim deterministic success.\n\n"
         + outcome_questionnaire()
         + "\n\nExecution response (compatibility evidence):\n"
         + execution_summary
@@ -114,7 +115,7 @@ The following rules apply to all three answers:
 - Do not manufacture a material reassessment merely because the final implementation differs from the Cycle Intent. Report a reassessment only if one actually occurred during execution.
 - When referring to evidence, identify the actual evidence or observed result sufficiently to support the statement. Do not claim something was established when it was only assumed or expected.
 - Report failed or unsuccessful implementation attempts when they materially influenced the resulting implementation, eliminated an approach, disproved an assumption, or left part of the Task to Solve unresolved.
-- Report the self-validation actually performed and its actual results. Do not claim validation that was not performed.
+- Report the self-validation actually performed and its actual results. Scope each claim to the properties the underlying check actually evaluated. A successful check does not establish a requirement, success criterion, constraint, or outcome it did not evaluate; keep that coverage unresolved or unverified. Do not claim validation that was not performed.
 - Self-validation does not establish authoritative success. Do not claim that the Task to Solve is deterministically resolved merely because the model's own checks passed.
 - For applicable success criteria and constraints, clearly identify what the cycle's implementation and self-validation indicate is satisfied, not satisfied, unresolved, or unverified.
 - If implementation was partial, blocked, failed, inconclusive, or resulted in no change, report that state directly rather than forcing the response to describe a successful solution.

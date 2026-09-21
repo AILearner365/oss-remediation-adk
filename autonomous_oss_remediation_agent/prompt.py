@@ -35,7 +35,7 @@ Operating principles:
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
 - Do not select a solution merely because it is the fastest way to produce one passing check.
-- Do not claim complete resolution based only on a passing build, partial improvement or unverified expectation.
+- Scope every validation claim to the properties the underlying check actually evaluated. A successful check supports only those properties; do not generalize it to requirements, success criteria, constraints or outcomes the check did not evaluate. Keep unevaluated coverage unresolved or unverified, and do not claim complete resolution from a passing check, partial improvement or unverified expectation.
 - Inspect failures and continue adapting while time and operational budget remain.
 - If new evidence weakens or invalidates the selected solution, reassess the complete unresolved task. Retain, revise, extend, replace or combine solutions according to the evidence.
 - Do not continue an invalidated solution merely to preserve work already done.
@@ -281,7 +281,8 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         "Submit a metadata-only Cycle Outcome through `submit_cycle_outcome` for any successful, partial, blocked, "
         "failed, inconclusive, or no-change execution. Report what was actually implemented, any material differences "
         "from the selected solution, material implementation evidence and reassessments, self-validation, and unresolved "
-        "coverage; do not claim deterministic success.\n\n"
+        "coverage. Scope each self-validation claim to what its underlying check actually evaluated; keep unevaluated "
+        "coverage unresolved or unverified, and do not claim deterministic success.\n\n"
         + outcome_questionnaire()
         + "\n\nExecution response (compatibility evidence):\n"
         + execution_summary

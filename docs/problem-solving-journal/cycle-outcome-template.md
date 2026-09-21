@@ -19,7 +19,7 @@ What was actually implemented during this cycle, and what did your self-validati
 
 If no solution or only a partial solution was implemented, state that explicitly and identify what remains unresolved or unverified.
 
-Capture the actual final repository approach, applicable requirement coverage, constraints, compatibility or regression implications, self-validation actually performed, unresolved or unverified coverage, and partial, blocked, failed, inconclusive, or no-change state when applicable.
+Capture the actual final repository approach, applicable requirement coverage, constraints, compatibility or regression implications, self-validation actually performed, unresolved or unverified coverage, and partial, blocked, failed, inconclusive, or no-change state when applicable. Scope each self-validation claim to the properties its underlying check actually evaluated; a successful check does not establish coverage it did not evaluate.
 
 ## Cycle Intent vs. Implementation
 
