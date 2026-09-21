@@ -940,3 +940,180 @@ Comparative coverage: This solution covers all directly declared vulnerable depe
 Remaining risks: The main risks are potential issues with the `allow_downgrade: false` constraint for transitive dependencies and the unresolved `tools.jackson.core` findings. These will be addressed in subsequent steps if they persist after the initial changes.
 Evidence requiring reconsideration: If `mvn clean verify` fails or if the vulnerability scan reveals that the `spring-expression`, `spring-webmvc`, `micrometer-core`, `tomcat-embed-core`, or `tools.jackson.core` vulnerabilities persist, or if new CRITICAL/HIGH findings appear, the plan will need to be re-evaluated.
 
+# Cycle 1 — Deterministic Validation
+
+## Validation result
+
+FAILED
+
+## Checks performed
+
+- **baseline_ancestry:** PASSED — Repository remains based on the recorded baseline
+- **git_change_evidence:** PASSED — Git status and full diff were captured
+- **build_test_startup:** PASSED — Required build/test/startup commands passed
+- **fresh_vulnerability_scan:** PASSED — Fresh vulnerability scan completed: COMPLETED_WITH_FINDINGS
+- **target_findings_improved:** FAILED — No original target finding was resolved
+- **target_findings_resolved:** FAILED — Requested target findings remain
+- **no_new_prohibited_findings:** PASSED — No new prohibited findings were introduced
+- **protected_java_version:** PASSED — Java version configuration matches the protected value
+- **spring_boot_version_policy:** PASSED — Spring Boot version movement is allowed by policy
+- **suppression_policy:** PASSED — No prohibited suppression change detected
+- **delivery_diff_hygiene:** PASSED — No newly changed likely investigation-only artifacts were detected
+
+## Deterministic checks passed
+
+- baseline_ancestry: Repository remains based on the recorded baseline
+- git_change_evidence: Git status and full diff were captured
+- build_test_startup: Required build/test/startup commands passed
+- fresh_vulnerability_scan: Fresh vulnerability scan completed: COMPLETED_WITH_FINDINGS
+- no_new_prohibited_findings: No new prohibited findings were introduced
+- protected_java_version: Java version configuration matches the protected value
+- spring_boot_version_policy: Spring Boot version movement is allowed by policy
+- suppression_policy: No prohibited suppression change detected
+- delivery_diff_hygiene: No newly changed likely investigation-only artifacts were detected
+
+## Deterministic checks failed
+
+- target_findings_improved: No original target finding was resolved
+- target_findings_resolved: Requested target findings remain
+
+## Model claims directly contradicted
+
+- None established by an explicit model-claim-to-check mapping.
+
+## Model claims not independently evaluated
+
+- Narrative claims without an explicit deterministic check mapping remain unevaluated; structural capture does not establish semantic correctness.
+
+## Requirements satisfied
+
+- baseline_ancestry
+- git_change_evidence
+- build_test_startup
+- fresh_vulnerability_scan
+- no_new_prohibited_findings
+- protected_java_version
+- spring_boot_version_policy
+- suppression_policy
+- delivery_diff_hygiene
+
+## Requirements remaining
+
+- target_findings_improved
+- target_findings_resolved
+
+## Constraint result
+
+All applicable deterministic constraint checks passed.
+
+## Repository or system state
+
+- **Changed items:** None
+- **State digest:** `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
+- **Diff or evidence artifact:** `/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T175248Z-81a27071/artifacts/validation/cycle-1.diff`
+- **Investigation-only artifacts detected:** None
+- **Target comparison completed:** Yes
+
+## Delivery eligibility
+
+NOT_DELIVERY_ELIGIBLE
+
+## Validation conclusion
+
+Authoritative validation did not establish full success.
+
+## Next-cycle requirement
+
+Address failed checks and unresolved requirements without replacing the original run contract.
+
+# Final Resolution
+
+## Final outcome
+
+FAILED
+
+## Original problem
+
+The canonical Task to Solve recorded earlier in this journal remains the original run-level problem contract.
+
+## Final interpreted resolution
+
+Deterministic validation status and capture quality are reported separately. Run-level capture status: `INCOMPLETE`.
+
+## Final implemented approach
+
+No accepted Cycle Outcome described the implementation result.
+
+## How the approach evolved
+
+- **Cycle 1 selected direction:** Selected solution: Candidate Solution 1 — Upgrade vulnerable direct dependencies and fix Spring Boot parent version Classification: PARTIAL Why it is preferred: This solution directly addresses explicitly declared vulnerable dependencies and corrects a critical invalid configuration (the `spring-boot-starter-parent` version). It leverages Maven's and Spring Boot's dependency management capabilities, which is the most coherent and maintainable approach for this project structure. It is expected to resolve a significant portion of the reported vulnerabilities. Comparative coverage: This solutio…
+- **Cycle 1 final approach:** Not captured
+- **Cycle 1 material deviations:** Not captured
+- **Cycle 1 implementation trail:** Not captured
+- **Cycle 1 validation learning:** failed or unresolved checks: target_findings_improved, target_findings_resolved.
+
+## Final requirement coverage
+
+### Satisfied
+
+- baseline_ancestry
+- git_change_evidence
+- build_test_startup
+- fresh_vulnerability_scan
+- no_new_prohibited_findings
+- protected_java_version
+- spring_boot_version_policy
+- suppression_policy
+- delivery_diff_hygiene
+
+- Model-reported coverage remains part of the accepted Implementation Result; only explicitly mapped deterministic checks are authoritative.
+
+### Conditional
+
+- Any model-reported conditional or unverified coverage remains non-authoritative pending deterministic evidence.
+
+### Unresolved
+
+- target_findings_improved
+- target_findings_resolved
+
+### Not applicable
+
+- None established beyond the accepted model report and deterministic checks.
+
+## Final evidence
+
+- baseline_ancestry: passed — Repository remains based on the recorded baseline
+- git_change_evidence: passed — Git status and full diff were captured
+- build_test_startup: passed — Required build/test/startup commands passed
+- fresh_vulnerability_scan: passed — Fresh vulnerability scan completed: COMPLETED_WITH_FINDINGS
+- target_findings_improved: failed — No original target finding was resolved
+- target_findings_resolved: failed — Requested target findings remain
+- no_new_prohibited_findings: passed — No new prohibited findings were introduced
+- protected_java_version: passed — Java version configuration matches the protected value
+- spring_boot_version_policy: passed — Spring Boot version movement is allowed by policy
+- suppression_policy: passed — No prohibited suppression change detected
+- delivery_diff_hygiene: passed — No newly changed likely investigation-only artifacts were detected
+
+## Constraints and known risks
+
+Run-level capture quality `INCOMPLETE`; delivery eligibility `NOT_DELIVERY_ELIGIBLE`.
+
+Model-reported constraint, compatibility, regression, and risk information remains in the accepted Implementation Result above; deterministic checks remain authoritative within their stated scope.
+
+## Partial-remediation disclosure
+
+Not applicable.
+
+## Delivery result
+
+No automatic delivery was performed.
+
+## Remaining limitations
+
+Restart/resume reconstruction is not implemented; machine events and the append-only journal remain available for audit.
+
+## Final conclusion
+
+Final outcome is `FAILED`; this does not override the separate deterministic validation, capture, or delivery states.
+
