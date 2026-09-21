@@ -75,12 +75,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn(
-            "Reconcile every candidate against every applicable hard requirement and constraint",
+            "then reconcile those properties against every applicable hard requirement and constraint",
             message,
         )
-        self.assertIn("A candidate with an established conflict must not be selected", message)
         self.assertIn(
-            "A candidate must not be selected as COMPLETE or PARTIAL when its hard-requirement or hard-constraint compliance depends on an unresolved assumption",
+            "An established conflict makes a mechanism ineligible for selection or implementation",
             message,
         )
         self.assertIn(
@@ -138,11 +137,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn(
-            "must not displace stronger task-specific or observed evidence unless additional evidence establishes",
+            "Before reconciling candidates with hard constraints, establish candidate-relevant facts",
             message,
         )
         self.assertIn(
-            "may identify a decision-critical discrepancy to investigate",
+            "must not displace stronger task-specific or observed evidence unless additional evidence establishes",
             message,
         )
         self.assertIn(
@@ -150,17 +149,55 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "preserve it honestly rather than converting it into an assumption that permits selection",
+            "the affected candidate is not yet admissible",
             message,
         )
         self.assertIn(
-            "Do not select a candidate with an established hard-requirement or hard-constraint conflict, or one whose compliance depends on an unresolved assumption",
+            "the uncertainty must not be converted into an assumption that permits selection",
             message,
         )
         self.assertIn(
             "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance",
             message,
         )
+
+    def test_hard_constraints_gate_admissibility_before_engineering_preference(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "Hard constraints are mandatory candidate-admissibility conditions, not preferences to balance against engineering benefits",
+            message,
+        )
+        self.assertIn(
+            "first establish its constraint-relevant properties from the Task to Solve and available repository, tool, and execution evidence; then reconcile those properties",
+            message,
+        )
+        self.assertIn(
+            "Only candidates with hard-constraint compatibility established sufficiently for selection are admissible",
+            message,
+        )
+        self.assertIn(
+            "An established conflict makes a mechanism ineligible for selection or implementation",
+            message,
+        )
+        self.assertIn(
+            "Materially unresolved hard-constraint compatibility makes it not yet admissible and requires further investigation before selection",
+            message,
+        )
+        self.assertIn(
+            "Neither an assumption nor a different description, interpretation, or rationale for the same established operation can waive a hard constraint or make it admissible",
+            message,
+        )
+        self.assertIn(
+            "A constraint-conflicting mechanism may still be investigated and recorded as eliminated",
+            message,
+        )
+        self.assertIn("Confirm hard-constraint admissibility before applying preference", message)
+        self.assertIn("Compare only admissible candidates", message)
+        self.assertIn("These engineering qualities cannot outweigh a hard-constraint conflict", message)
+        self.assertIn("If multiple materially distinct solutions remain genuinely evidence-supported", message)
+        self.assertIn("If only one viable candidate remains, one candidate is valid", message)
+        self.assertIn("never manufacture alternatives merely to satisfy a count", message)
         self.assertIn(
             "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress",
             message,
