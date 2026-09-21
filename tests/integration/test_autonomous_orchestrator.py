@@ -229,6 +229,40 @@ class _MissingIntentSession:
         return None
 
 
+class _IntentThenContinuationSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+        self.messages = []
+        self.execution_tools = frozenset()
+
+    async def run_turn(self, message):
+        self.messages.append(message)
+        phase = self.capabilities.journal.phase
+        cycle = self.capabilities.journal.active_cycle
+        if phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                cycle,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "The continuation implemented and self-validated the selected solution.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Outcome submitted")
+        if phase == JournalPhase.INTENT_REQUIRED:
+            self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
+            return AgentTurnResult("")
+        self.execution_tools = self.capabilities.available_tool_names()
+        self.capabilities.edit_workspace_text(
+            "replace",
+            "pom.xml",
+            old_text="<demo.version>1.0</demo.version>",
+            new_text="<demo.version>2.0</demo.version>",
+        )
+        return AgentTurnResult("Implemented the accepted solution during same-cycle continuation")
+
+    async def close(self):
+        return None
+
+
 class _ExecutionFailingSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -489,6 +523,49 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         command_sources = {event.get("source") for event in events if event.get("type") == "command"}
         self.assertIn("baseline_test_1", command_sources)
         self.assertIn("baseline_startup_1", command_sources)
+        self.assertNotIn(
+            "execution_continuation_requested",
+            {event.get("type") for event in events},
+        )
+
+    def test_accepted_decision_without_execution_gets_same_cycle_continuation(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _IntentThenContinuationSession(capabilities)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(1, result.cycles_completed)
+        self.assertEqual(3, len(sessions[0].messages))
+        self.assertIn("same cycle is still in progress", sessions[0].messages[1])
+        self.assertIn("edit_workspace_text", sessions[0].execution_tools)
+        self.assertIn("run_workspace_shell", sessions[0].execution_tools)
+        self.assertIn('"executionAttempted": true', sessions[0].messages[2])
+        self.assertIn("Implemented the accepted solution", result.agent_summaries[0])
+        events = [
+            json.loads(line)
+            for line in (
+                Path(result.workspace_root) / "artifacts" / "events.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        event_types = [event["type"] for event in events]
+        self.assertLess(
+            event_types.index("intent_submission_accepted"),
+            event_types.index("execution_continuation_requested"),
+        )
+        self.assertLess(
+            event_types.index("execution_capability_invoked"),
+            event_types.index("journal_phase_changed", event_types.index("execution_capability_invoked")),
+        )
+        completed = next(
+            event for event in events if event["type"] == "execution_continuation_completed"
+        )
+        self.assertTrue(completed["executionAttempted"])
+        self.assertEqual(["edit_workspace_text"], completed["tools"])
 
     def test_cycle_one_outcome_status_does_not_terminate_recovery(self):
         statuses = (
@@ -578,6 +655,17 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertNotIn("workingState", cycle)
         self.assertNotIn("workingStateDeprecated", cycle)
         self.assertIn("Investigated without", cycle["summary"])
+        events = [
+            json.loads(line)
+            for line in (
+                Path(result.workspace_root) / "artifacts" / "events.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        requested = [event for event in events if event["type"] == "execution_continuation_requested"]
+        completed = [event for event in events if event["type"] == "execution_continuation_completed"]
+        self.assertEqual(1, len(requested))
+        self.assertEqual(1, len(completed))
+        self.assertFalse(completed[0]["executionAttempted"])
 
     def test_model_learns_questionnaires_and_exact_retry_errors_from_runtime_prompt(self):
         sessions = []

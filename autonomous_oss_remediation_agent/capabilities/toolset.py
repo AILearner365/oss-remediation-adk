@@ -24,6 +24,7 @@ class DeveloperCapabilitySet:
         self.budget = budget
         self.trace = trace
         self.journal = journal
+        self._execution_activity: dict[int, list[str]] = {}
 
     def read_workspace_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
         """Read a bounded UTF-8 text range from a repository-relative path."""
@@ -129,7 +130,20 @@ class DeveloperCapabilitySet:
         """Submit the required Problem Analysis and Solution Decision before material mutation."""
         if not self.journal:
             return self._unavailable("submit_cycle_intent", "Journal lifecycle is not configured")
-        return self.journal.submit_intent(cycle_number, answers).to_dict()
+        result = self.journal.submit_intent(cycle_number, answers)
+        response = result.to_dict()
+        if result.accepted:
+            response.update(
+                {
+                    "phase": JournalPhase.EXECUTION.value,
+                    "availableCapabilities": sorted(self.available_tool_names()),
+                    "nextAction": (
+                        "Continue solving the Task in this same cycle using the execution capabilities now "
+                        "available; implement or materially reassess the selected solution and self-validate."
+                    ),
+                }
+            )
+        return response
 
     def submit_cycle_outcome(
         self,
@@ -164,6 +178,9 @@ class DeveloperCapabilitySet:
             JournalPhase.OUTCOME_REQUIRED: {"submit_cycle_outcome"},
         }
         return frozenset(by_phase.get(self.journal.phase, set()))
+
+    def execution_activity(self, cycle: int) -> tuple[str, ...]:
+        return tuple(self._execution_activity.get(cycle, ()))
 
     def _require_phase(self, tool: str, phases: set[JournalPhase]) -> dict[str, Any] | None:
         if not self.journal or self.journal.phase in phases:
@@ -209,6 +226,14 @@ class DeveloperCapabilitySet:
         return evidence
 
     def _invoke(self, name: str, function: Any, *args: Any) -> Any:
+        if self.journal and self.journal.phase == JournalPhase.EXECUTION:
+            cycle = self.journal.active_cycle
+            self._execution_activity.setdefault(cycle, []).append(name)
+            self.trace.append_event(
+                "execution_capability_invoked",
+                cycle=cycle,
+                tool=name,
+            )
         try:
             self.budget.consume_tool_call()
             return function(*args)

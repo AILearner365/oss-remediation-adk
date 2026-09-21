@@ -261,6 +261,18 @@ def intent_retry_message(cycle: int, errors: list[str]) -> str:
     )
 
 
+def execution_continuation_message(cycle: int) -> str:
+    return (
+        f"Your Problem Analysis and Solution Decision for Cycle {cycle} has been accepted. "
+        "Execution capabilities are now available, and this same cycle is still in progress. "
+        "The preceding invocation ended without any execution-phase capability attempt. Continue solving the "
+        "original Task to Solve now: implement the selected solution, or perform the material investigation needed "
+        "to establish that it should be revised, is unnecessary, or is genuinely blocked. Adapt within this cycle "
+        "if new evidence warrants reassessment, and perform appropriate self-validation before ending execution. "
+        "Do not merely restate the accepted decision."
+    )
+
+
 def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
     return (
         f"Execution for Cycle {cycle} has ended. Repository read, edit, and shell capabilities are now unavailable. "

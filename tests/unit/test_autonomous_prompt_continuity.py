@@ -21,6 +21,7 @@ from autonomous_oss_remediation_agent.models import (
 from autonomous_oss_remediation_agent.prompt import (
     AGENT_INSTRUCTION,
     canonical_task_to_solve,
+    execution_continuation_message,
     initial_message,
     outcome_message,
     validation_feedback,
@@ -69,6 +70,15 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("WORKING_STATE", AGENT_INSTRUCTION)
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
+
+    def test_execution_continuation_keeps_accepted_decision_in_same_cycle(self):
+        message = execution_continuation_message(3)
+
+        self.assertIn("accepted", message)
+        self.assertIn("same cycle is still in progress", message)
+        self.assertIn("Execution capabilities are now available", message)
+        self.assertIn("without any execution-phase capability attempt", message)
+        self.assertIn("Do not merely restate", message)
 
     def test_failed_validation_feedback_preserves_journal_and_exposes_next_questionnaire(self):
         prior_journal = "# Task to Solve\n\nOriginal task\n\n# Cycle 1 — Problem Analysis and Solution Decision"

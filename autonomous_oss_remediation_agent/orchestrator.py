@@ -38,6 +38,7 @@ from .models import (
 )
 from .prompt import (
     canonical_task_to_solve,
+    execution_continuation_message,
     initial_message,
     intent_retry_message,
     outcome_message,
@@ -207,6 +208,13 @@ class AutonomousRemediationOrchestrator:
                         DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
                         last_validation,
                     )
+                execution_turn = await self._continue_execution_if_needed(
+                    agent_session,
+                    capabilities,
+                    trace,
+                    cycle,
+                    execution_turn,
+                )
                 summaries.append(execution_turn.text)
                 lifecycle.require_outcome()
                 changed_files = validator.changed_files(baseline.commit)
@@ -484,6 +492,32 @@ class AutonomousRemediationOrchestrator:
             message = outcome_retry_message(cycle, errors)
         return turn
 
+    async def _continue_execution_if_needed(
+        self,
+        session: AgentSession,
+        capabilities: DeveloperCapabilitySet,
+        trace: TraceStore,
+        cycle: int,
+        initial_turn: AgentTurnResult,
+    ) -> AgentTurnResult:
+        if capabilities.execution_activity(cycle):
+            return initial_turn
+        trace.append_event(
+            "execution_continuation_requested",
+            cycle=cycle,
+            initialResponseEmpty=not initial_turn.text.strip(),
+        )
+        continuation_turn = await session.run_turn(execution_continuation_message(cycle))
+        activity = capabilities.execution_activity(cycle)
+        trace.append_event(
+            "execution_continuation_completed",
+            cycle=cycle,
+            executionAttempted=bool(activity),
+            tools=list(activity),
+        )
+        summaries = [text.strip() for text in (initial_turn.text, continuation_turn.text) if text.strip()]
+        return AgentTurnResult("\n\n".join(summaries))
+
     def _deliver(
         self,
         delivery_adapter: DeliveryAdapter,
@@ -611,7 +645,14 @@ class AutonomousRemediationOrchestrator:
                             "stderrArtifact": command.get("stderrArtifact"),
                         }
                     )
-                elif event.get("type") in {"workspace_edit", "tool_error", "agent_command_blocked"}:
+                elif event.get("type") in {
+                    "workspace_edit",
+                    "tool_error",
+                    "agent_command_blocked",
+                    "execution_capability_invoked",
+                    "execution_continuation_requested",
+                    "execution_continuation_completed",
+                }:
                     events.append(event)
         return {
             "changedFiles": list(changed_files),
