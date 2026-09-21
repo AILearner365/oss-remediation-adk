@@ -91,27 +91,53 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "rather than introducing a lower-level, parallel, or redundant mechanism merely because it can work",
+            "discovering an apparently appropriate control point does not by itself complete exploration",
             message,
         )
-        self.assertIn("Finding one workable mechanism is not sufficient reason to stop investigation", message)
-        self.assertIn("materially different solution mechanisms", message)
+        self.assertIn("Finding one credible or workable mechanism is not sufficient reason to stop investigation", message)
+        self.assertIn("materially distinct intervention mechanisms", message)
         self.assertIn(
-            "Actively seek more than one materially distinct credible solution when the evidence reasonably suggests alternatives",
+            "far enough to determine whether each is viable",
             message,
         )
         self.assertIn("Candidate count is the result of investigation", message)
         self.assertIn(
-            "If multiple materially distinct solutions remain genuinely evidence-supported, preserve them as separate candidates and compare them",
+            "Preserve every materially distinct mechanism that remains viable, evidence-supported, capable of satisfying the task or providing valid constraint-compliant partial progress, and hard-constraint admissible as a separate candidate",
             message,
         )
         self.assertIn("If only one viable candidate remains, one candidate is valid", message)
         self.assertIn(
-            "briefly identify which were investigated or considered and why they were eliminated, unsupported, unavailable, infeasible, constraint-conflicting, or otherwise did not qualify as candidates",
+            "briefly identify which were investigated or considered and the evidence-based viability reason each did not qualify",
             message,
         )
-        self.assertIn("never manufacture alternatives merely to satisfy a count", message)
-        self.assertIn("keeping investigation evidence-driven and proportional", message)
+        self.assertIn("Never manufacture alternatives merely to satisfy a count", message)
+        self.assertIn("Keep exploration evidence-driven and proportional", message)
+
+    def test_viability_is_determined_before_preference_and_candidate_comparison(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "do not let an early preference for one control point end investigation or eliminate another materially distinct viable mechanism",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "Do not eliminate a mechanism merely because another already appears preferable according to engineering-quality considerations",
+            message,
+        )
+        self.assertIn("relative preference does not establish non-viability", message)
+        self.assertIn(
+            "even when another candidate already appears preferable",
+            message,
+        )
+        self.assertIn("Relative engineering preference alone is not an elimination reason", message)
+        self.assertIn(
+            "Mechanisms may be eliminated before candidate formation when evidence establishes that they are unsupported, unavailable, infeasible, incapable of satisfying the task or providing valid constraint-compliant partial progress, materially contradicted, hard-constraint conflicting, or otherwise not genuinely viable",
+            message,
+        )
+        self.assertIn(
+            "Apply these engineering preferences here, after candidate formation; do not use them to retroactively exclude a viable candidate",
+            message,
+        )
 
     def test_material_assumptions_expose_decision_dependencies_without_rationalizing(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
@@ -193,11 +219,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn("Confirm hard-constraint admissibility before applying preference", message)
-        self.assertIn("Compare only admissible candidates", message)
-        self.assertIn("These engineering qualities cannot outweigh a hard-constraint conflict", message)
-        self.assertIn("If multiple materially distinct solutions remain genuinely evidence-supported", message)
+        self.assertIn("Compare the surviving admissible candidates", message)
+        self.assertIn("These qualities cannot outweigh a hard-constraint conflict", message)
+        self.assertIn("Preserve every materially distinct mechanism that remains viable", message)
         self.assertIn("If only one viable candidate remains, one candidate is valid", message)
-        self.assertIn("never manufacture alternatives merely to satisfy a count", message)
+        self.assertIn("Never manufacture alternatives merely to satisfy a count", message)
         self.assertIn(
             "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress",
             message,

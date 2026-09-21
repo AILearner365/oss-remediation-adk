@@ -147,8 +147,8 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
         self.assertIn("approved versions=['4.0.7']", message)
 
     def test_agent_instruction_preserves_evidence_based_implementation_discretion(self):
-        self.assertIn("appropriate existing control point when evidence supports it", AGENT_INSTRUCTION)
-        self.assertIn("Repository evidence, not a universal hierarchy", AGENT_INSTRUCTION)
+        self.assertIn("Use repository evidence to evaluate which control points", AGENT_INSTRUCTION)
+        self.assertIn("Preference among viable mechanisms belongs in candidate comparison", AGENT_INSTRUCTION)
         self.assertIn("Retain, revise, extend, replace or combine solutions", AGENT_INSTRUCTION)
         self.assertIn("Do not make unnecessary or unrelated changes", AGENT_INSTRUCTION)
         self.assertNotIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)

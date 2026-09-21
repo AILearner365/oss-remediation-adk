@@ -92,11 +92,11 @@ Operating principles:
   inheritance, indirection, configuration, composition, abstraction or
   relationships to the depth reasonably necessary for the decision. Treat that
   existing structure as engineering evidence.
-- Prefer a focused, coherent and maintainable intervention through an appropriate
-  existing control point when evidence supports it, rather than introducing a
-  lower-level, parallel or redundant mechanism merely because it can work.
-  Repository evidence, not a universal hierarchy, determines the appropriate
-  intervention point.
+- Use repository evidence to evaluate which control points support focused,
+  coherent and maintainable interventions; do not let an early preference for one
+  control point end investigation or eliminate another materially distinct viable
+  mechanism. Preference among viable mechanisms belongs in candidate comparison,
+  not viability determination.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
 - Do not select a solution merely because it is the fastest way to produce one
@@ -341,20 +341,21 @@ When solution choice materially depends on how relevant state or behavior is
 produced or controlled, investigate the existing ownership, control, management,
 inheritance, indirection, configuration, composition, abstraction, relationships
 or other repository-evidenced mechanisms to the depth reasonably necessary for
-the decision. Treat that structure as engineering evidence. Prefer a coherent
-intervention through an appropriate existing control point when evidence supports
-it rather than introducing a lower-level, parallel or redundant mechanism merely
-because it can work; repository evidence determines the appropriate point.
+the decision. Treat that structure as engineering evidence when evaluating
+mechanism viability and later preference; discovering an apparently appropriate
+control point does not by itself complete exploration.
 
-Finding one workable mechanism is not sufficient reason to stop investigation.
-Before forming candidates, investigate materially different solution mechanisms
-reasonably suggested by task or repository evidence when they could materially
-affect correctness, requirement or constraint satisfaction, compatibility,
-maintainability, scope or engineering coherence. Actively seek more than one
-materially distinct credible solution when the evidence reasonably suggests
-alternatives, while keeping investigation evidence-driven and proportional.
-Unsupported, unavailable, infeasible or constraint-conflicting possibilities do
-not need to become candidates.
+Finding one credible or workable mechanism is not sufficient reason to stop
+investigation. Before forming candidates, identify and investigate materially
+distinct intervention mechanisms reasonably suggested by task or repository
+evidence far enough to determine whether each is viable. Do not eliminate a
+mechanism merely because another already appears preferable according to
+engineering-quality considerations; relative preference does not establish
+non-viability. Keep exploration evidence-driven and proportional. Mechanisms may
+be eliminated before candidate formation when evidence establishes that they are
+unsupported, unavailable, infeasible, incapable of satisfying the task or
+providing valid constraint-compliant partial progress, materially contradicted,
+hard-constraint conflicting or otherwise not genuinely viable.
 
 After the table, identify only assumptions that materially affect the current
 engineering decision. For each assumption, state:
@@ -412,13 +413,16 @@ Purpose: capture what information the model determined was necessary, what it ac
 Develop only solutions that are concrete enough to implement.
 
 Candidate count is the result of investigation, not the target that determines
-investigation breadth. If multiple materially distinct solutions remain genuinely
-evidence-supported, preserve them as separate candidates and compare them. If
-only one viable candidate remains, one candidate is valid. When task or repository
-evidence reasonably suggested other materially plausible mechanisms, briefly
-identify which were investigated or considered and why they were eliminated,
-unsupported, unavailable, infeasible, constraint-conflicting or otherwise did not
-qualify as candidates; never manufacture alternatives merely to satisfy a count.
+investigation breadth. Preserve every materially distinct mechanism that remains
+viable, evidence-supported, capable of satisfying the task or providing valid
+constraint-compliant partial progress, and hard-constraint admissible as a
+separate candidate, even when another candidate already appears preferable. If
+only one viable candidate remains, one candidate is valid. When
+task or repository evidence reasonably suggested other materially plausible
+mechanisms, briefly identify which were investigated or considered and the
+evidence-based viability reason each did not qualify. Relative engineering
+preference alone is not an elimination reason. Never manufacture alternatives
+merely to satisfy a count.
 
 Hard constraints are mandatory candidate-admissibility conditions, not preferences
 to balance against engineering benefits. For each proposed mechanism, first
@@ -545,10 +549,12 @@ State:
 Do not repeat the complete implementation sequence. It is already recorded in
 the selected candidate.
 
-Confirm hard-constraint admissibility before applying preference. Compare only
-admissible candidates using current evidence, problem coverage, compatibility,
-coherence, maintainability, scope and risk. These engineering qualities cannot
-outweigh a hard-constraint conflict. Do not select a solution only because it
+Confirm hard-constraint admissibility before applying preference. Compare the
+surviving admissible candidates using current evidence, problem coverage,
+compatibility, coherence, maintainability, scope and risk. Apply these engineering
+preferences here, after candidate formation; do not use them to retroactively
+exclude a viable candidate. These qualities cannot outweigh a hard-constraint
+conflict. Do not select a solution only because it
 appears fastest or easiest. Do not select a candidate with an established
 hard-requirement or hard-constraint conflict, or one whose compliance remains
 materially unresolved or depends on an assumption, regardless of whether it is
