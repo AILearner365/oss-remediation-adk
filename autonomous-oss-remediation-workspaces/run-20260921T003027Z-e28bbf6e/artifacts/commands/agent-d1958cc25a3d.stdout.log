@@ -1,0 +1,37 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- dependency-check:12.2.2:purge (default-cli) @ secure-multimodule-springboot-java21 ---
+[INFO] Database file purged; local copy of the NVD has been removed
+[INFO] RetireJS repo removed successfully
+[INFO] Hosted suppression file removed successfully
+[INFO] Cache directory purged
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  4.506 s]
+[INFO] task-common ........................................ SKIPPED
+[INFO] task-domain ........................................ SKIPPED
+[INFO] task-service ....................................... SKIPPED
+[INFO] task-web ........................................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.660 s
+[INFO] Finished at: 2026-09-21T00:35:58Z
+[INFO] ------------------------------------------------------------------------

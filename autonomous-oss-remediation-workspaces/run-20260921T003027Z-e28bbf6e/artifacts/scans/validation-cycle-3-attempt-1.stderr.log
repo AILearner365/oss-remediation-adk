@@ -1,0 +1,10 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository
+Starting filesystem walk for root: /
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository/task-service/pom.xml file and found 4 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository/task-common/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository/task-web/pom.xml file and found 6 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T003027Z-e28bbf6e/temp/autonomous-osv-spmz_jup/repository/task-domain/pom.xml file and found 2 packages
+End status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 13.502739ms elapsed, 13.502922ms wall time
+Filtered 6 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
