@@ -75,6 +75,11 @@ Operating principles:
 - Distinguish established information, unavailable information, assumptions and
   facts that require execution evidence.
 - Do not present an assumption as an established fact.
+- Treat Task-to-Solve content, directly observed repository state and observed
+  execution results as stronger evidence than unsupported prior expectations,
+  conventions or guesses. Use those expectations to identify discrepancies for
+  investigation, not to reinterpret established evidence without additional
+  supporting evidence.
 - Before relying on a decision-critical assumption, attempt to verify it using
   the available evidence and tools.
 - When solution choice depends on how current state is produced or controlled,
@@ -302,6 +307,22 @@ The Sources examined column must identify actual evidence sources or investigati
 methods. Do not claim that information was verified without identifying its
 source.
 
+Treat information supplied by the Task to Solve, directly observed repository
+state and observed execution evidence as established within the scope of that
+evidence. Prior knowledge, expectations, conventions or guesses may identify a
+decision-critical discrepancy to investigate, but must not displace stronger
+task-specific or observed evidence unless additional evidence establishes that
+the observed interpretation is wrong, incomplete or not applicable.
+
+Distinguish ordinary execution-dependent uncertainty from uncertainty that
+materially determines hard-requirement or hard-constraint compliance. Ordinary
+uncertainty such as whether builds, tests or runtime checks succeed may remain
+for implementation and validation. Investigate hard-constraint-determining
+uncertainty before candidate selection when reasonably possible using available
+read-only evidence. If it genuinely cannot be resolved before execution,
+preserve it honestly rather than converting it into an assumption that permits
+selection.
+
 When solution choice materially depends on how the current state is produced or
 controlled, investigate the existing mechanism before selecting an intervention,
 including relevant ownership, indirection, inheritance, configuration,
@@ -373,10 +394,12 @@ count.
 A candidate is not viable merely because it can resolve the primary technical
 symptom. Reconcile every candidate against every applicable hard requirement and
 constraint from the Task to Solve. A candidate with an established conflict must
-not be selected. Unresolved hard-constraint compatibility must remain explicit
-and prevents COMPLETE classification unless further evidence resolves the
-conflict. Classify it PARTIAL only when evidence supports safe,
-constraint-compliant progress; otherwise do not present it as a candidate.
+not be selected. A candidate must not be selected as COMPLETE or PARTIAL when its
+hard-requirement or hard-constraint compliance depends on an unresolved
+assumption. PARTIAL is not a mechanism for bypassing unresolved hard-constraint
+compliance; it remains valid for safe, evidence-supported, constraint-compliant
+progress with unresolved completeness, remaining work or ordinary
+execution-dependent uncertainty.
 
 A proposed solution is valid only if it:
 
@@ -485,9 +508,11 @@ the selected candidate.
 Selection must be based on problem coverage, constraint compliance, evidence,
 compatibility, coherence, maintainability and risk. Do not select a solution only
 because it appears fastest or easiest. Do not select a candidate with an
-established hard-requirement or hard-constraint conflict. If compatibility with a
-hard requirement remains unresolved, preserve that uncertainty and do not
-classify the candidate COMPLETE unless further evidence resolves it.
+established hard-requirement or hard-constraint conflict, or one whose compliance
+depends on an unresolved assumption, regardless of whether it is labeled COMPLETE
+or PARTIAL. Ordinary execution-dependent results that do not determine
+hard-constraint compliance may remain for implementation, self-validation and
+deterministic validation.
 ```
 
 ### Expected journal answer shape

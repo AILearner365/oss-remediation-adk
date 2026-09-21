@@ -20,6 +20,10 @@ What information was needed to develop an evidence-supported solution, and what 
 
 For each assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. State `None` when no material assumption remains.
 
+Treat Task-to-Solve information, directly observed repository state, and observed execution evidence as established within the scope of that evidence. Prior knowledge, expectations, conventions, or guesses may identify a discrepancy to investigate, but must not displace stronger task-specific or observed evidence unless additional evidence establishes that the observed interpretation is wrong, incomplete, or not applicable.
+
+Distinguish ordinary execution-dependent uncertainty from uncertainty that determines hard-requirement or hard-constraint compliance. Builds, tests, runtime checks, and other genuinely execution-dependent results may remain for implementation and validation. Investigate reasonably investigable hard-constraint-determining uncertainty before candidate selection; if it cannot be resolved, preserve it rather than converting it into an assumption that permits selection.
+
 When solution choice depends on how the current state is produced or controlled, investigate the existing ownership, indirection, inheritance, configuration, relationships, or management layers before selecting an intervention. Prefer the appropriate existing control point when evidence supports it rather than introducing a new override merely because one is possible.
 
 Investigate materially different solution mechanisms reasonably suggested by repository evidence when they could materially affect requirements, constraints, compatibility, maintainability, scope, or correctness. Possibilities eliminated by evidence do not need to become candidates.
@@ -38,7 +42,7 @@ What concrete solutions are supported by the available evidence?
 
 Include only genuinely supported candidates. One candidate is valid when investigation leaves only one concrete evidence-supported solution; never manufacture alternatives merely to satisfy a count.
 
-A candidate is not viable merely because it resolves the primary technical symptom. Reconcile every candidate against every applicable hard requirement and constraint. Do not select a candidate with an established conflict. Unresolved hard-constraint compatibility must remain explicit and prevents COMPLETE classification unless further evidence resolves it; classify it PARTIAL only when evidence supports safe constraint-compliant progress, otherwise do not present it as a candidate.
+A candidate is not viable merely because it resolves the primary technical symptom. Reconcile every candidate against every applicable hard requirement and constraint. Do not select a candidate with an established conflict or one whose hard-constraint compliance depends on an unresolved assumption, whether labeled COMPLETE or PARTIAL. PARTIAL remains valid for safe, evidence-supported, constraint-compliant progress with unresolved completeness, remaining work, or ordinary execution-dependent uncertainty.
 
 #### Candidate Solution {{identifier}} — {{specific_solution_name}}
 
@@ -67,6 +71,6 @@ Which solution is selected, and why is it preferred?
 - **Remaining risks:** {{answer}}
 - **Evidence requiring reconsideration:** {{answer}}
 
-Do not select a candidate with an established hard-requirement or hard-constraint conflict. Preserve unresolved hard-constraint compatibility as uncertainty and do not classify the candidate COMPLETE unless further evidence resolves it.
+Do not select a candidate with an established hard-requirement or hard-constraint conflict, or one whose compliance depends on an unresolved assumption, regardless of whether it is labeled COMPLETE or PARTIAL. Ordinary execution-dependent results that do not determine hard-constraint compliance may remain for implementation and validation.
 
 The selected solution is directional, not immutable. Material execution evidence may justify retaining, revising, extending, combining, or replacing it within the same cycle.

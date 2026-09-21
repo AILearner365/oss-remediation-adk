@@ -80,7 +80,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn("A candidate with an established conflict must not be selected", message)
         self.assertIn(
-            "prevents COMPLETE classification unless further evidence resolves the conflict",
+            "A candidate must not be selected as COMPLETE or PARTIAL when its hard-requirement or hard-constraint compliance depends on an unresolved assumption",
             message,
         )
         self.assertIn(
@@ -103,6 +103,42 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn("never manufacture alternatives merely to satisfy a count", message)
         self.assertIn("Possibilities eliminated by evidence do not need to become candidates", message)
+
+    def test_pre_execution_reasoning_preserves_evidence_precedence_and_uncertainty_boundaries(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "must not displace stronger task-specific or observed evidence unless additional evidence establishes",
+            message,
+        )
+        self.assertIn(
+            "may identify a decision-critical discrepancy to investigate",
+            message,
+        )
+        self.assertIn(
+            "Investigate hard-constraint-determining uncertainty before candidate selection when reasonably possible using available read-only evidence",
+            message,
+        )
+        self.assertIn(
+            "preserve it honestly rather than converting it into an assumption that permits selection",
+            message,
+        )
+        self.assertIn(
+            "Do not select a candidate with an established hard-requirement or hard-constraint conflict, or one whose compliance depends on an unresolved assumption",
+            message,
+        )
+        self.assertIn(
+            "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance",
+            message,
+        )
+        self.assertIn(
+            "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress",
+            message,
+        )
+        self.assertIn(
+            "Ordinary execution-dependent results that do not determine hard-constraint compliance may remain for implementation, self-validation, and deterministic validation",
+            message,
+        )
 
     def test_stable_reasoning_instruction_remains_technology_neutral(self):
         self.assertIn(
