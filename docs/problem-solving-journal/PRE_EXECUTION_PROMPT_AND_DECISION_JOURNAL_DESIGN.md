@@ -82,11 +82,16 @@ Operating principles:
   supporting evidence.
 - Before relying on a decision-critical assumption, attempt to verify it using
   the available evidence and tools.
-- When solution choice depends on how current state is produced or controlled,
-  investigate the existing ownership, indirection, inheritance, configuration,
-  relationships or management layers before selecting an intervention.
-- Prefer focused, coherent and maintainable changes at the appropriate ownership
-  or configuration boundary when supported by evidence.
+- When solution choice depends on how relevant state or behavior is produced or
+  controlled, investigate the existing ownership, control, management,
+  inheritance, indirection, configuration, composition, abstraction or
+  relationships to the depth reasonably necessary for the decision. Treat that
+  existing structure as engineering evidence.
+- Prefer a focused, coherent and maintainable intervention through an appropriate
+  existing control point when evidence supports it, rather than introducing a
+  lower-level, parallel or redundant mechanism merely because it can work.
+  Repository evidence, not a universal hierarchy, determines the appropriate
+  intervention point.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
 - Do not select a solution merely because it is the fastest way to produce one
@@ -323,27 +328,37 @@ read-only evidence. If it genuinely cannot be resolved before execution,
 preserve it honestly rather than converting it into an assumption that permits
 selection.
 
-When solution choice materially depends on how the current state is produced or
-controlled, investigate the existing mechanism before selecting an intervention,
-including relevant ownership, indirection, inheritance, configuration,
-relationships or management layers. Prefer the appropriate existing control
-point when evidence supports it rather than introducing a new override merely
-because one is possible.
+When solution choice materially depends on how relevant state or behavior is
+produced or controlled, investigate the existing ownership, control, management,
+inheritance, indirection, configuration, composition, abstraction, relationships
+or other repository-evidenced mechanisms to the depth reasonably necessary for
+the decision. Treat that structure as engineering evidence. Prefer a coherent
+intervention through an appropriate existing control point when evidence supports
+it rather than introducing a lower-level, parallel or redundant mechanism merely
+because it can work; repository evidence determines the appropriate point.
 
-Do not stop at the first workable mechanism. Investigate materially different
-solution mechanisms reasonably suggested by repository evidence when they could
-materially affect requirements, constraints, compatibility, maintainability,
-scope or correctness. Possibilities eliminated by evidence do not need to become
-candidates.
+Finding one workable mechanism is not sufficient reason to stop investigation.
+Before forming candidates, investigate materially different solution mechanisms
+reasonably suggested by task or repository evidence when they could materially
+affect correctness, requirement or constraint satisfaction, compatibility,
+maintainability, scope or engineering coherence. Actively seek more than one
+materially distinct credible solution when the evidence reasonably suggests
+alternatives, while keeping investigation evidence-driven and proportional.
+Unsupported, unavailable, infeasible or constraint-conflicting possibilities do
+not need to become candidates.
 
-After the table, identify every material assumption that remains necessary. For
-each assumption, state:
+After the table, identify only assumptions that materially affect the current
+engineering decision. For each assumption, state:
 
 - what is being assumed;
 - why the information could not be established;
 - what evidence was already checked;
-- why proceeding with the assumption is reasonable;
-- how the selected solution would control the risk.
+- which decision or conclusion depends on the assumption;
+- what uncertainty or risk remains.
+
+Do not introduce an assumption merely to explain unexpected evidence or justify
+proceeding. If an unresolved interpretation is not necessary to the decision,
+leave it as uncertainty rather than elevating it into a material assumption.
 
 If no material assumption is required, state: None.
 
@@ -387,9 +402,14 @@ Purpose: capture what information the model determined was necessary, what it ac
 ```text
 Develop only solutions that are concrete enough to implement.
 
-One candidate is valid when investigation leaves only one concrete,
-evidence-supported solution. Never manufacture alternatives merely to satisfy a
-count.
+Candidate count is the result of investigation, not the target that determines
+investigation breadth. If multiple materially distinct solutions remain genuinely
+evidence-supported, preserve them as separate candidates and compare them. If
+only one viable candidate remains, one candidate is valid. When task or repository
+evidence reasonably suggested other materially plausible mechanisms, briefly
+identify which were investigated or considered and why they were eliminated,
+unsupported, unavailable, infeasible, constraint-conflicting or otherwise did not
+qualify as candidates; never manufacture alternatives merely to satisfy a count.
 
 A candidate is not viable merely because it can resolve the primary technical
 symptom. Reconcile every candidate against every applicable hard requirement and

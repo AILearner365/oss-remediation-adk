@@ -39,7 +39,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             self.assertIn(f"`{section}`", outcome)
         self.assertEqual(4, len(INTENT_SECTIONS))
         self.assertEqual(3, len(OUTCOME_SECTIONS))
-        self.assertIn("One concrete evidence-supported candidate is sufficient", initial)
+        self.assertIn("Candidate count must result from investigation", initial)
         self.assertIn("never manufacture alternatives", initial)
         self.assertIn("add clearly named, decision-relevant sections", initial.lower())
         self.assertIn("Allowed `status` values", outcome)
@@ -84,25 +84,55 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "investigate the existing mechanism before selecting an intervention",
+            "to the depth reasonably necessary for the decision",
             message,
         )
         self.assertIn(
-            "ownership, indirection, inheritance, configuration, relationships, or management layers",
+            "ownership, control, management, inheritance, indirection, configuration, composition, abstraction, relationships",
             message,
         )
         self.assertIn(
-            "rather than introducing a new override merely because one is possible",
+            "rather than introducing a lower-level, parallel, or redundant mechanism merely because it can work",
             message,
         )
-        self.assertIn("Do not stop at the first workable mechanism", message)
+        self.assertIn("Finding one workable mechanism is not sufficient reason to stop investigation", message)
         self.assertIn("materially different solution mechanisms", message)
         self.assertIn(
-            "One candidate is valid when investigation leaves only one concrete evidence-supported solution",
+            "Actively seek more than one materially distinct credible solution when the evidence reasonably suggests alternatives",
+            message,
+        )
+        self.assertIn("Candidate count is the result of investigation", message)
+        self.assertIn(
+            "If multiple materially distinct solutions remain genuinely evidence-supported, preserve them as separate candidates and compare them",
+            message,
+        )
+        self.assertIn("If only one viable candidate remains, one candidate is valid", message)
+        self.assertIn(
+            "briefly identify which were investigated or considered and why they were eliminated, unsupported, unavailable, infeasible, constraint-conflicting, or otherwise did not qualify as candidates",
             message,
         )
         self.assertIn("never manufacture alternatives merely to satisfy a count", message)
-        self.assertIn("Possibilities eliminated by evidence do not need to become candidates", message)
+        self.assertIn("keeping investigation evidence-driven and proportional", message)
+
+    def test_material_assumptions_expose_decision_dependencies_without_rationalizing(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "Report only assumptions that materially affect the current engineering decision",
+            message,
+        )
+        self.assertIn("which decision or conclusion depends on it", message)
+        self.assertIn("what uncertainty or risk remains", message)
+        self.assertIn(
+            "Do not introduce an assumption merely to explain unexpected evidence or justify proceeding",
+            message,
+        )
+        self.assertIn(
+            "If an unresolved interpretation is not necessary to the decision, leave it as uncertainty rather than elevating it into a material assumption",
+            message,
+        )
+        self.assertNotIn("why proceeding is reasonable", message)
+        self.assertNotIn("how the selected solution controls the risk", message)
 
     def test_pre_execution_reasoning_preserves_evidence_precedence_and_uncertainty_boundaries(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
@@ -142,7 +172,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
 
     def test_stable_reasoning_instruction_remains_technology_neutral(self):
         self.assertIn(
-            "investigate the existing ownership, indirection, inheritance, configuration, relationships, or management layers",
+            "investigate the existing ownership, control, management, inheritance, indirection, configuration, composition, abstraction, or relationships",
             AGENT_INSTRUCTION,
         )
         for technology_specific_term in (

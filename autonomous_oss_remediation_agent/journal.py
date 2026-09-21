@@ -74,15 +74,15 @@ Use this table:
 | Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
 |---|---|---|---|---|
 
-The Sources examined column must name actual sources, tools, or methods. Then add `### Material assumptions that remain necessary`. For each necessary assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. If none remain, state `None`.
+The Sources examined column must name actual sources, tools, or methods. Then add `### Material assumptions that remain necessary`. Report only assumptions that materially affect the current engineering decision. For each, state what is assumed, why it could not be established, what evidence was checked, which decision or conclusion depends on it, and what uncertainty or risk remains. Do not introduce an assumption merely to explain unexpected evidence or justify proceeding. If an unresolved interpretation is not necessary to the decision, leave it as uncertainty rather than elevating it into a material assumption. If no material assumptions remain, state `None`.
 
 Treat information supplied by the Task to Solve, directly observed repository state, and observed execution evidence as established within the scope of that evidence. Prior knowledge, expectations, conventions, or guesses may identify a decision-critical discrepancy to investigate, but must not displace stronger task-specific or observed evidence unless additional evidence establishes that the observed interpretation is wrong, incomplete, or not applicable.
 
 Distinguish ordinary execution-dependent uncertainty from uncertainty that materially determines hard-requirement or hard-constraint compliance. Ordinary uncertainty such as whether builds, tests, or runtime checks succeed may remain for implementation and validation. Investigate hard-constraint-determining uncertainty before candidate selection when reasonably possible using available read-only evidence. If it genuinely cannot be resolved before execution, preserve it honestly rather than converting it into an assumption that permits selection.
 
-When solution choice materially depends on how the current state is produced or controlled, investigate the existing mechanism before selecting an intervention, including relevant ownership, indirection, inheritance, configuration, relationships, or management layers. Prefer the appropriate existing control point when evidence supports it rather than introducing a new override merely because one is possible.
+When solution choice materially depends on how relevant state or behavior is produced or controlled, investigate the existing ownership, control, management, inheritance, indirection, configuration, composition, abstraction, relationships, or other repository-evidenced mechanisms to the depth reasonably necessary for the decision. Treat that structure as engineering evidence. Prefer a coherent intervention through an appropriate existing control point when evidence supports it rather than introducing a lower-level, parallel, or redundant mechanism merely because it can work; repository evidence determines the appropriate point.
 
-Do not stop at the first workable mechanism. Investigate materially different solution mechanisms reasonably suggested by repository evidence when they could materially affect requirements, constraints, compatibility, maintainability, scope, or correctness. Possibilities eliminated by evidence do not need to become candidates.""",
+Finding one workable mechanism is not sufficient reason to stop investigation. Before forming candidates, investigate materially different solution mechanisms reasonably suggested by task or repository evidence when they could materially affect correctness, requirement or constraint satisfaction, compatibility, maintainability, scope, or engineering coherence. Actively seek more than one materially distinct credible solution when the evidence reasonably suggests alternatives, while keeping investigation evidence-driven and proportional. Unsupported, unavailable, infeasible, or constraint-conflicting possibilities do not need to become candidates.""",
     ),
     QuestionnaireSection(
         "Prior-cycle reassessment",
@@ -93,7 +93,7 @@ Audit all relevant accumulated history as claims against current repository stat
     ),
     QuestionnaireSection(
         "Concrete candidate solutions",
-        """What concrete solutions are supported by the available evidence? Include only implementable, constraint-compliant candidates. One candidate is valid when investigation leaves only one concrete evidence-supported solution; never manufacture alternatives merely to satisfy a count.
+        """What concrete solutions are supported by the available evidence? Include only implementable, constraint-compliant candidates. Candidate count is the result of investigation, not the target that determines investigation breadth. If multiple materially distinct solutions remain genuinely evidence-supported, preserve them as separate candidates and compare them. If only one viable candidate remains, one candidate is valid. When task or repository evidence reasonably suggested other materially plausible mechanisms, briefly identify which were investigated or considered and why they were eliminated, unsupported, unavailable, infeasible, constraint-conflicting, or otherwise did not qualify as candidates; never manufacture alternatives merely to satisfy a count.
 
 A candidate is not viable merely because it can resolve the primary technical symptom. Reconcile every candidate against every applicable hard requirement and constraint from the Task to Solve. A candidate with an established conflict must not be selected. A candidate must not be selected as COMPLETE or PARTIAL when its hard-requirement or hard-constraint compliance depends on an unresolved assumption. PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress with unresolved completeness, remaining work, or ordinary execution-dependent uncertainty.
 
@@ -593,8 +593,9 @@ def intent_questionnaire(cycle: int) -> str:
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
         "Perform read-only investigation before submission. Treat the original Task to Solve as authoritative; "
         "distinguish established information, assumptions, uncertainty, and execution-dependent evidence. Verify "
-        "avoidable decision-critical uncertainty where reasonably feasible. One concrete evidence-supported "
-        "candidate is sufficient; never manufacture alternatives. The selected solution is directional rather "
+        "avoidable decision-critical uncertainty where reasonably feasible. Candidate count must result from "
+        "investigation: preserve multiple genuinely supported candidates, while "
+        "one candidate remains valid when only one survives; never manufacture alternatives. The selected solution is directional rather "
         "than immutable and may be materially reassessed during implementation. You may add clearly named, "
         "decision-relevant sections after all required sections."
     )
