@@ -74,7 +74,11 @@ Use this table:
 | Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
 |---|---|---|---|---|
 
-The Sources examined column must name actual sources, tools, or methods. Then add `### Material assumptions that remain necessary`. For each necessary assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. If none remain, state `None`.""",
+The Sources examined column must name actual sources, tools, or methods. Then add `### Material assumptions that remain necessary`. For each necessary assumption, state what is assumed, why it could not be established, what evidence was checked, why proceeding is reasonable, and how the selected solution controls the risk. If none remain, state `None`.
+
+When solution choice materially depends on how the current state is produced or controlled, investigate the existing mechanism before selecting an intervention, including relevant ownership, indirection, inheritance, configuration, relationships, or management layers. Prefer the appropriate existing control point when evidence supports it rather than introducing a new override merely because one is possible.
+
+Do not stop at the first workable mechanism. Investigate materially different solution mechanisms reasonably suggested by repository evidence when they could materially affect requirements, constraints, compatibility, maintainability, scope, or correctness. Possibilities eliminated by evidence do not need to become candidates.""",
     ),
     QuestionnaireSection(
         "Prior-cycle reassessment",
@@ -85,7 +89,9 @@ Audit all relevant accumulated history as claims against current repository stat
     ),
     QuestionnaireSection(
         "Concrete candidate solutions",
-        """What concrete solutions are supported by the available evidence? Include only implementable, constraint-compliant candidates. One candidate is valid; never manufacture alternatives.
+        """What concrete solutions are supported by the available evidence? Include only implementable, constraint-compliant candidates. One candidate is valid when investigation leaves only one concrete evidence-supported solution; never manufacture alternatives merely to satisfy a count.
+
+A candidate is not viable merely because it can resolve the primary technical symptom. Reconcile every candidate against every applicable hard requirement and constraint from the Task to Solve. A candidate with an established conflict must not be selected. Unresolved hard-constraint compatibility must remain explicit and prevents COMPLETE classification unless further evidence resolves the conflict; classify it PARTIAL only when evidence supports safe constraint-compliant progress, otherwise do not present it as a candidate.
 
 For each candidate use `#### Candidate Solution <identifier> — <specific solution name>` followed by this table:
 
@@ -109,7 +115,7 @@ A PARTIAL candidate is valid only when no supported COMPLETE solution is availab
         "Selected solution",
         """Which solution is selected, and why is it preferred?
 
-Use these fields: `Selected solution:`, `Classification:`, `Why it is preferred:`, `Comparative coverage:`, `Remaining risks:`, and `Evidence requiring reconsideration:`. Reference a submitted candidate and classify it COMPLETE or PARTIAL. Base selection on current evidence, complete-problem coverage, constraints, compatibility, coherence, maintainability, and risk—not speed, ease, or prior investment. Do not repeat the full implementation sequence. The implementation intent is directional and may be materially reassessed during this cycle when new evidence warrants it.""",
+Use these fields: `Selected solution:`, `Classification:`, `Why it is preferred:`, `Comparative coverage:`, `Remaining risks:`, and `Evidence requiring reconsideration:`. Reference a submitted candidate and classify it COMPLETE or PARTIAL. Base selection on current evidence, complete-problem coverage, constraints, compatibility, coherence, maintainability, and risk—not speed, ease, or prior investment. Do not select a candidate with an established hard-requirement or hard-constraint conflict. If compatibility with a hard requirement remains unresolved, preserve that uncertainty and do not classify the candidate COMPLETE unless further evidence resolves it. Do not repeat the full implementation sequence. The implementation intent is directional and may be materially reassessed during this cycle when new evidence warrants it.""",
     ),
 )
 OUTCOME_QUESTIONNAIRE = (

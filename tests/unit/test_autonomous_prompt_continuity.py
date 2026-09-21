@@ -71,6 +71,53 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
 
+    def test_pre_execution_reasoning_reconciles_constraints_control_and_exploration(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "Reconcile every candidate against every applicable hard requirement and constraint",
+            message,
+        )
+        self.assertIn("A candidate with an established conflict must not be selected", message)
+        self.assertIn(
+            "prevents COMPLETE classification unless further evidence resolves the conflict",
+            message,
+        )
+        self.assertIn(
+            "investigate the existing mechanism before selecting an intervention",
+            message,
+        )
+        self.assertIn(
+            "ownership, indirection, inheritance, configuration, relationships, or management layers",
+            message,
+        )
+        self.assertIn(
+            "rather than introducing a new override merely because one is possible",
+            message,
+        )
+        self.assertIn("Do not stop at the first workable mechanism", message)
+        self.assertIn("materially different solution mechanisms", message)
+        self.assertIn(
+            "One candidate is valid when investigation leaves only one concrete evidence-supported solution",
+            message,
+        )
+        self.assertIn("never manufacture alternatives merely to satisfy a count", message)
+        self.assertIn("Possibilities eliminated by evidence do not need to become candidates", message)
+
+    def test_stable_reasoning_instruction_remains_technology_neutral(self):
+        self.assertIn(
+            "investigate the existing ownership, indirection, inheritance, configuration, relationships, or management layers",
+            AGENT_INSTRUCTION,
+        )
+        for technology_specific_term in (
+            "Maven",
+            "Spring Boot",
+            "Jackson",
+            "dependencyManagement",
+            "BOM",
+        ):
+            self.assertNotIn(technology_specific_term, AGENT_INSTRUCTION)
+
     def test_execution_continuation_keeps_accepted_decision_in_same_cycle(self):
         message = execution_continuation_message(3)
 

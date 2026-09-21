@@ -29,6 +29,7 @@ Operating principles:
 - Distinguish established information, unavailable information, assumptions and facts that require execution evidence.
 - Do not present an assumption as an established fact.
 - Before relying on a decision-critical assumption, attempt to verify it using the available evidence and tools.
+- When solution choice depends on how current state is produced or controlled, investigate the existing ownership, indirection, inheritance, configuration, relationships, or management layers before selecting an intervention.
 - Prefer focused, coherent and maintainable changes at the appropriate ownership or configuration boundary when supported by evidence.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.

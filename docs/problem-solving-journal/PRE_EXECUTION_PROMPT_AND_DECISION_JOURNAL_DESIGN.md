@@ -77,6 +77,9 @@ Operating principles:
 - Do not present an assumption as an established fact.
 - Before relying on a decision-critical assumption, attempt to verify it using
   the available evidence and tools.
+- When solution choice depends on how current state is produced or controlled,
+  investigate the existing ownership, indirection, inheritance, configuration,
+  relationships or management layers before selecting an intervention.
 - Prefer focused, coherent and maintainable changes at the appropriate ownership
   or configuration boundary when supported by evidence.
 - Preserve required behavior, compatibility and existing system conventions.
@@ -299,6 +302,19 @@ The Sources examined column must identify actual evidence sources or investigati
 methods. Do not claim that information was verified without identifying its
 source.
 
+When solution choice materially depends on how the current state is produced or
+controlled, investigate the existing mechanism before selecting an intervention,
+including relevant ownership, indirection, inheritance, configuration,
+relationships or management layers. Prefer the appropriate existing control
+point when evidence supports it rather than introducing a new override merely
+because one is possible.
+
+Do not stop at the first workable mechanism. Investigate materially different
+solution mechanisms reasonably suggested by repository evidence when they could
+materially affect requirements, constraints, compatibility, maintainability,
+scope or correctness. Possibilities eliminated by evidence do not need to become
+candidates.
+
 After the table, identify every material assumption that remains necessary. For
 each assumption, state:
 
@@ -349,6 +365,18 @@ Purpose: capture what information the model determined was necessary, what it ac
 
 ```text
 Develop only solutions that are concrete enough to implement.
+
+One candidate is valid when investigation leaves only one concrete,
+evidence-supported solution. Never manufacture alternatives merely to satisfy a
+count.
+
+A candidate is not viable merely because it can resolve the primary technical
+symptom. Reconcile every candidate against every applicable hard requirement and
+constraint from the Task to Solve. A candidate with an established conflict must
+not be selected. Unresolved hard-constraint compatibility must remain explicit
+and prevents COMPLETE classification unless further evidence resolves the
+conflict. Classify it PARTIAL only when evidence supports safe,
+constraint-compliant progress; otherwise do not present it as a candidate.
 
 A proposed solution is valid only if it:
 
@@ -456,7 +484,10 @@ the selected candidate.
 
 Selection must be based on problem coverage, constraint compliance, evidence,
 compatibility, coherence, maintainability and risk. Do not select a solution only
-because it appears fastest or easiest.
+because it appears fastest or easiest. Do not select a candidate with an
+established hard-requirement or hard-constraint conflict. If compatibility with a
+hard requirement remains unresolved, preserve that uncertainty and do not
+classify the candidate COMPLETE unless further evidence resolves it.
 ```
 
 ### Expected journal answer shape
