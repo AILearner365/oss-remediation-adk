@@ -1,0 +1,1703 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-common >------------------
+[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
+[INFO]   from task-common/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-common ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-common/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-common ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-common/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-common/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-common ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-common/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-common ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-common ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-common ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-common ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-domain >------------------
+[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
+[INFO]   from task-domain/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-domain ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-domain/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-domain ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-domain/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-domain/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-domain ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-domain/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-domain ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-domain ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-domain ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-service >-----------------
+[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
+[INFO]   from task-service/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.1.1/spring-context-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.1.1/spring-context-6.1.1.pom (2.8 kB at 3.7 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.pom (2.2 kB at 65 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.pom (2.0 kB at 63 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.1/spring-core-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.1/spring-core-6.1.1.pom (2.0 kB at 59 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 1.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.pom (1.8 kB at 52 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.1 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.pom (2.1 kB at 65 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.pom
+Progress (1): 1.1 kB
+Progress (1): 3.0 kB
+Progress (1): 3.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.pom (3.8 kB at 113 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.pom
+Progress (1): 1.1 kB
+Progress (1): 2.6 kB
+Progress (1): 3.4 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.pom (3.4 kB at 100 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.1.1/spring-test-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.1.1/spring-test-6.1.1.pom (2.0 kB at 57 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.pom
+Progress (1): 944 B
+Progress (1): 2.5 kB
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.pom (3.2 kB at 89 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.1/junit-jupiter-api-5.10.1.pom
+Progress (1): 954 B
+Progress (1): 2.5 kB
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.1/junit-jupiter-api-5.10.1.pom (3.2 kB at 103 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.pom
+Progress (1): 966 B
+Progress (1): 2.5 kB
+Progress (1): 2.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.pom (2.8 kB at 91 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.pom
+Progress (1): 964 B
+Progress (1): 2.5 kB
+Progress (1): 3.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.pom (3.0 kB at 86 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.1/junit-jupiter-engine-5.10.1.pom
+Progress (1): 963 B
+Progress (1): 2.5 kB
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.1/junit-jupiter-engine-5.10.1.pom (3.2 kB at 94 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.pom
+Progress (1): 958 B
+Progress (1): 2.5 kB
+Progress (1): 3.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.pom (3.2 kB at 97 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.1.1/spring-context-6.1.1.jar
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.1/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.2/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.3/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.4/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.5/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.6/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.7/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.8/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 0.9/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.0/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.1/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.2/1.3 MB
+Progress (1): 1.3/1.3 MB
+Progress (1): 1.3/1.3 MB
+Progress (1): 1.3 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.1.1/spring-context-6.1.1.jar (1.3 MB at 4.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.1/spring-core-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.jar
+Progress (1): 4.1/414 kB
+Progress (1): 20/414 kB 
+Progress (1): 37/414 kB
+Progress (1): 53/414 kB
+Progress (1): 70/414 kB
+Progress (1): 86/414 kB
+Progress (1): 102/414 kB
+Progress (1): 119/414 kB
+Progress (1): 127/414 kB
+Progress (1): 143/414 kB
+Progress (1): 160/414 kB
+Progress (1): 176/414 kB
+Progress (1): 193/414 kB
+Progress (1): 209/414 kB
+Progress (1): 225/414 kB
+Progress (1): 242/414 kB
+Progress (1): 258/414 kB
+Progress (1): 274/414 kB
+Progress (1): 291/414 kB
+Progress (1): 307/414 kB
+Progress (1): 324/414 kB
+Progress (1): 340/414 kB
+Progress (2): 340/414 kB | 0/1.9 MB
+Progress (2): 340/414 kB | 0/1.9 MB
+Progress (3): 340/414 kB | 0/1.9 MB | 0.9/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 0.9/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 0.9/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 0.9/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 0.9/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 2.3/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 3.6/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 5.0/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 6.4/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 7.7/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 7.7/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 8.2/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 8.2/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 9.6/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 9.6/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 11/873 kB 
+Progress (3): 340/414 kB | 0/1.9 MB | 11/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 11/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 12/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 12/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 12/873 kB
+Progress (3): 340/414 kB | 0/1.9 MB | 12/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 12/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 14/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 15/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 16/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 18/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 19/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 21/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 22/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 356/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 373/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 23/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 25/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 26/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 27/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 29/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 30/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 31/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 33/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 34/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 36/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 389/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 406/414 kB | 0.1/1.9 MB | 37/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 37/873 kB    
+Progress (3): 414 kB | 0.1/1.9 MB | 38/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 38/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 40/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 41/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 41/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 42/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 44/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 44/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 45/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 47/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 48/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 49/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 51/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 52/873 kB
+Progress (3): 414 kB | 0.1/1.9 MB | 52/873 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 0.9/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 2.3/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 3.6/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 5.0/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 6.4/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 7.7/301 kB
+Progress (4): 414 kB | 0.1/1.9 MB | 52/873 kB | 9.1/301 kB
+                                                          
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.1.1/spring-aop-6.1.1.jar (414 kB at 2.0 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.jar
+Progress (3): 0.1/1.9 MB | 52/873 kB | 10/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 12/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 13/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 15/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 52/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 53/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 53/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 55/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 55/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 57/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 57/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 62/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 62/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 66/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 70/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 16/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 17/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 19/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 20/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 21/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 23/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 24/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 26/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 27/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 28/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (3): 0.1/1.9 MB | 74/873 kB | 30/301 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 0.9/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 2.3/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 3.6/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 5.0/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 6.4/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 7.7/25 kB
+Progress (4): 0.1/1.9 MB | 74/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 78/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 78/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 83/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 87/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 87/873 kB | 30/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 87/873 kB | 31/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 87/873 kB | 32/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 91/873 kB | 32/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 91/873 kB | 34/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 95/873 kB | 34/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 95/873 kB | 35/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 95/873 kB | 36/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 36/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 38/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 39/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 41/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 42/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.1/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 9.1/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 10/25 kB 
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 12/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 13/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 15/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 16/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 17/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 43/301 kB | 19/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 45/301 kB | 19/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 45/301 kB | 20/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 46/301 kB | 20/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 46/301 kB | 21/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 47/301 kB | 21/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 49/301 kB | 21/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 49/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 50/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 100/873 kB | 52/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 104/873 kB | 52/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 104/873 kB | 53/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 104/873 kB | 54/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 108/873 kB | 54/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 108/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 112/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 112/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 117/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 117/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 121/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 121/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 56/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 60/301 kB | 23/25 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 64/301 kB | 23/25 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 64/301 kB | 23/25 kB | 7.7/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 64/301 kB | 23/25 kB | 11/72 kB 
+Progress (5): 0.2/1.9 MB | 125/873 kB | 68/301 kB | 23/25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 23/25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 23/25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 24/25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 25 kB | 11/72 kB   
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 73/301 kB | 25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 77/301 kB | 25 kB | 11/72 kB
+Progress (5): 0.2/1.9 MB | 125/873 kB | 81/301 kB | 25 kB | 11/72 kB
+                                                                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.1.1/spring-jcl-6.1.1.jar (25 kB at 84 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.jar
+Progress (4): 0.2/1.9 MB | 125/873 kB | 85/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 125/873 kB | 89/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 129/873 kB | 89/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 129/873 kB | 94/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 131/873 kB | 94/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 131/873 kB | 98/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 135/873 kB | 98/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 135/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 135/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 140/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 140/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 144/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 144/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 11/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 28/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 148/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 152/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 156/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 161/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 165/873 kB | 102/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 165/873 kB | 106/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 169/873 kB | 106/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 169/873 kB | 111/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 111/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 115/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 119/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 122/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 127/301 kB | 44/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 127/301 kB | 61/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 131/301 kB | 61/72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 131/301 kB | 72 kB   
+Progress (4): 0.2/1.9 MB | 173/873 kB | 135/301 kB | 72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 139/301 kB | 72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 144/301 kB | 72 kB
+Progress (4): 0.2/1.9 MB | 173/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 173/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 178/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 178/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 182/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 182/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 186/873 kB | 148/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 186/873 kB | 152/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 190/873 kB | 152/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 190/873 kB | 156/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 195/873 kB | 156/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 195/873 kB | 160/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 199/873 kB | 160/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 199/873 kB | 165/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 199/873 kB | 169/301 kB | 72 kB
+Progress (4): 0.3/1.9 MB | 199/873 kB | 173/301 kB | 72 kB
+                                                          
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.12.0/micrometer-observation-1.12.0.jar (72 kB at 214 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.jar
+Progress (3): 0.3/1.9 MB | 199/873 kB | 173/301 kB
+Progress (3): 0.3/1.9 MB | 199/873 kB | 177/301 kB
+Progress (3): 0.3/1.9 MB | 199/873 kB | 177/301 kB
+Progress (3): 0.3/1.9 MB | 199/873 kB | 182/301 kB
+Progress (3): 0.3/1.9 MB | 203/873 kB | 182/301 kB
+Progress (3): 0.3/1.9 MB | 203/873 kB | 182/301 kB
+Progress (3): 0.3/1.9 MB | 205/873 kB | 182/301 kB
+Progress (3): 0.3/1.9 MB | 209/873 kB | 182/301 kB
+Progress (3): 0.3/1.9 MB | 209/873 kB | 186/301 kB
+Progress (3): 0.3/1.9 MB | 213/873 kB | 186/301 kB
+Progress (3): 0.3/1.9 MB | 213/873 kB | 190/301 kB
+Progress (3): 0.3/1.9 MB | 217/873 kB | 190/301 kB
+Progress (3): 0.3/1.9 MB | 217/873 kB | 194/301 kB
+Progress (3): 0.3/1.9 MB | 217/873 kB | 199/301 kB
+Progress (3): 0.3/1.9 MB | 217/873 kB | 203/301 kB
+Progress (3): 0.3/1.9 MB | 229/873 kB | 203/301 kB
+Progress (3): 0.3/1.9 MB | 229/873 kB | 207/301 kB
+Progress (3): 0.3/1.9 MB | 234/873 kB | 207/301 kB
+Progress (3): 0.3/1.9 MB | 234/873 kB | 211/301 kB
+Progress (3): 0.3/1.9 MB | 234/873 kB | 211/301 kB
+Progress (3): 0.3/1.9 MB | 250/873 kB | 211/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 211/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 211/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 215/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 220/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 224/301 kB
+Progress (3): 0.4/1.9 MB | 250/873 kB | 240/301 kB
+Progress (4): 0.4/1.9 MB | 250/873 kB | 240/301 kB | 0.9/47 kB
+Progress (4): 0.4/1.9 MB | 250/873 kB | 240/301 kB | 2.3/47 kB
+Progress (4): 0.4/1.9 MB | 250/873 kB | 240/301 kB | 3.6/47 kB
+Progress (4): 0.4/1.9 MB | 250/873 kB | 240/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 250/873 kB | 240/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 267/873 kB | 240/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 267/873 kB | 240/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 283/873 kB | 240/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 283/873 kB | 253/301 kB | 5.0/47 kB
+Progress (4): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 5.0/47 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 5.0/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 6.4/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 7.7/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 9.1/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 9.1/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 10/47 kB | 6.4 kB 
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 11/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 13/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 14/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 15/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 17/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 17/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 18/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 20/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 270/301 kB | 21/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 286/301 kB | 21/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 283/873 kB | 301 kB | 21/47 kB | 6.4 kB    
+Progress (5): 0.4/1.9 MB | 299/873 kB | 301 kB | 21/47 kB | 6.4 kB
+Progress (5): 0.4/1.9 MB | 316/873 kB | 301 kB | 21/47 kB | 6.4 kB
+Progress (5): 0.5/1.9 MB | 316/873 kB | 301 kB | 21/47 kB | 6.4 kB
+Progress (5): 0.5/1.9 MB | 316/873 kB | 301 kB | 22/47 kB | 6.4 kB
+Progress (5): 0.5/1.9 MB | 316/873 kB | 301 kB | 24/47 kB | 6.4 kB
+Progress (5): 0.5/1.9 MB | 316/873 kB | 301 kB | 25/47 kB | 6.4 kB
+                                                                  
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.jar (6.4 kB at 16 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.1/junit-jupiter-api-5.10.1.jar
+Progress (4): 0.5/1.9 MB | 316/873 kB | 301 kB | 25/47 kB
+                                                         
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.1.1/spring-expression-6.1.1.jar (301 kB at 745 kB/s)
+Progress (3): 0.5/1.9 MB | 316/873 kB | 25/47 kB
+                                                
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.jar
+Progress (3): 0.5/1.9 MB | 332/873 kB | 25/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 25/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 26/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 28/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 29/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 33/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 38/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 42/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 46/47 kB
+Progress (3): 0.5/1.9 MB | 349/873 kB | 46/47 kB
+Progress (3): 0.5/1.9 MB | 360/873 kB | 46/47 kB
+Progress (3): 0.5/1.9 MB | 360/873 kB | 46/47 kB
+Progress (3): 0.5/1.9 MB | 377/873 kB | 46/47 kB
+Progress (3): 0.5/1.9 MB | 377/873 kB | 47 kB   
+                                             
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.12.0/micrometer-commons-1.12.0.jar (47 kB at 115 kB/s)
+Progress (2): 0.5/1.9 MB | 393/873 kB
+Progress (2): 0.5/1.9 MB | 393/873 kB
+Progress (2): 0.6/1.9 MB | 393/873 kB
+                                     
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.jar
+Progress (2): 0.6/1.9 MB | 410/873 kB
+Progress (2): 0.6/1.9 MB | 410/873 kB
+Progress (2): 0.6/1.9 MB | 426/873 kB
+Progress (2): 0.6/1.9 MB | 426/873 kB
+Progress (2): 0.6/1.9 MB | 426/873 kB
+Progress (2): 0.6/1.9 MB | 442/873 kB
+Progress (2): 0.6/1.9 MB | 459/873 kB
+Progress (3): 0.6/1.9 MB | 459/873 kB | 7.7/211 kB
+Progress (3): 0.6/1.9 MB | 459/873 kB | 16/211 kB 
+Progress (4): 0.6/1.9 MB | 459/873 kB | 16/211 kB | 7.7/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 24/211 kB | 7.7/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 24/211 kB | 12/106 kB 
+Progress (4): 0.6/1.9 MB | 459/873 kB | 40/211 kB | 12/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 40/211 kB | 12/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 40/211 kB | 12/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 40/211 kB | 29/106 kB
+Progress (4): 0.6/1.9 MB | 459/873 kB | 40/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 459/873 kB | 40/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 475/873 kB | 40/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 475/873 kB | 57/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 475/873 kB | 73/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 73/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 73/211 kB | 45/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 73/211 kB | 61/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 90/211 kB | 61/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 90/211 kB | 78/106 kB
+Progress (4): 0.7/1.9 MB | 492/873 kB | 106/211 kB | 78/106 kB
+Progress (4): 0.7/1.9 MB | 508/873 kB | 106/211 kB | 78/106 kB
+Progress (4): 0.7/1.9 MB | 508/873 kB | 106/211 kB | 78/106 kB
+Progress (4): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 78/106 kB
+Progress (4): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 94/106 kB
+Progress (4): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 106 kB   
+Progress (5): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 106 kB | 3.8/586 kB
+Progress (5): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 106 kB | 4.1/586 kB
+Progress (5): 0.7/1.9 MB | 524/873 kB | 106/211 kB | 106 kB | 8.3/586 kB
+Progress (5): 0.7/1.9 MB | 541/873 kB | 106/211 kB | 106 kB | 8.3/586 kB
+Progress (5): 0.7/1.9 MB | 541/873 kB | 106/211 kB | 106 kB | 13/586 kB 
+Progress (5): 0.7/1.9 MB | 541/873 kB | 122/211 kB | 106 kB | 13/586 kB
+Progress (5): 0.7/1.9 MB | 541/873 kB | 139/211 kB | 106 kB | 13/586 kB
+Progress (5): 0.7/1.9 MB | 541/873 kB | 139/211 kB | 106 kB | 13/586 kB
+Progress (5): 0.7/1.9 MB | 557/873 kB | 139/211 kB | 106 kB | 13/586 kB
+Progress (5): 0.7/1.9 MB | 557/873 kB | 139/211 kB | 106 kB | 13/586 kB
+                                                                       
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.10.1/junit-platform-commons-1.10.1.jar (106 kB at 245 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.1/junit-jupiter-engine-5.10.1.jar
+Progress (4): 0.7/1.9 MB | 573/873 kB | 139/211 kB | 13/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 13/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 17/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 21/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 25/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 29/586 kB
+Progress (4): 0.7/1.9 MB | 590/873 kB | 139/211 kB | 34/586 kB
+Progress (4): 0.7/1.9 MB | 606/873 kB | 139/211 kB | 34/586 kB
+Progress (4): 0.7/1.9 MB | 606/873 kB | 139/211 kB | 38/586 kB
+Progress (4): 0.7/1.9 MB | 623/873 kB | 139/211 kB | 38/586 kB
+Progress (4): 0.7/1.9 MB | 623/873 kB | 155/211 kB | 38/586 kB
+Progress (4): 0.7/1.9 MB | 623/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.7/1.9 MB | 623/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.8/1.9 MB | 623/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.8/1.9 MB | 639/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.8/1.9 MB | 639/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 38/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 42/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 46/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 51/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 55/586 kB
+Progress (4): 0.8/1.9 MB | 655/873 kB | 172/211 kB | 59/586 kB
+Progress (4): 0.8/1.9 MB | 672/873 kB | 172/211 kB | 59/586 kB
+Progress (4): 0.8/1.9 MB | 672/873 kB | 172/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 672/873 kB | 172/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 672/873 kB | 172/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 688/873 kB | 172/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 688/873 kB | 188/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 688/873 kB | 204/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 705/873 kB | 204/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 721/873 kB | 204/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 63/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 68/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 72/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 76/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 80/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 84/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 204/211 kB | 89/586 kB
+Progress (4): 0.8/1.9 MB | 737/873 kB | 211 kB | 89/586 kB    
+Progress (4): 0.8/1.9 MB | 754/873 kB | 211 kB | 89/586 kB
+Progress (4): 0.8/1.9 MB | 770/873 kB | 211 kB | 89/586 kB
+                                                          
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.1/junit-jupiter-api-5.10.1.jar (211 kB at 459 kB/s)
+Progress (3): 0.8/1.9 MB | 770/873 kB | 89/586 kB
+Progress (3): 0.8/1.9 MB | 770/873 kB | 89/586 kB
+Progress (4): 0.8/1.9 MB | 770/873 kB | 89/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 89/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 93/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 97/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 101/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 106/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 110/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 786/873 kB | 114/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 803/873 kB | 114/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 803/873 kB | 118/586 kB | 7.3/245 kB
+                                                               
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.jar
+Progress (4): 0.8/1.9 MB | 819/873 kB | 118/586 kB | 7.3/245 kB
+Progress (4): 0.8/1.9 MB | 819/873 kB | 118/586 kB | 24/245 kB 
+Progress (4): 0.9/1.9 MB | 819/873 kB | 118/586 kB | 24/245 kB
+Progress (4): 0.9/1.9 MB | 819/873 kB | 118/586 kB | 40/245 kB
+Progress (4): 0.9/1.9 MB | 819/873 kB | 118/586 kB | 40/245 kB
+Progress (4): 0.9/1.9 MB | 819/873 kB | 123/586 kB | 40/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 123/586 kB | 40/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 127/586 kB | 40/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 127/586 kB | 56/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 131/586 kB | 56/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 131/586 kB | 65/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 131/586 kB | 65/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 131/586 kB | 65/245 kB
+Progress (4): 0.9/1.9 MB | 836/873 kB | 131/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 852/873 kB | 131/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 868/873 kB | 131/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 131/586 kB | 81/245 kB    
+Progress (4): 0.9/1.9 MB | 873 kB | 135/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 139/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 144/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 144/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 144/586 kB | 81/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 144/586 kB | 97/245 kB
+Progress (4): 0.9/1.9 MB | 873 kB | 144/586 kB | 114/245 kB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.1.1/spring-beans-6.1.1.jar (873 kB at 1.8 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.1.1/spring-test-6.1.1.jar
+Progress (3): 0.9/1.9 MB | 144/586 kB | 130/245 kB
+Progress (3): 0.9/1.9 MB | 160/586 kB | 130/245 kB
+Progress (3): 0.9/1.9 MB | 160/586 kB | 147/245 kB
+Progress (3): 0.9/1.9 MB | 176/586 kB | 147/245 kB
+Progress (4): 0.9/1.9 MB | 176/586 kB | 147/245 kB | 7.7/205 kB
+Progress (4): 0.9/1.9 MB | 176/586 kB | 147/245 kB | 16/205 kB 
+Progress (4): 1.0/1.9 MB | 176/586 kB | 147/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 176/586 kB | 147/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 176/586 kB | 163/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 176/586 kB | 179/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 193/586 kB | 179/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 193/586 kB | 196/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 196/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 212/245 kB | 16/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 212/245 kB | 24/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 212/245 kB | 40/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 212/245 kB | 40/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 212/245 kB | 40/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 228/245 kB | 40/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 228/245 kB | 40/205 kB
+Progress (4): 1.0/1.9 MB | 209/586 kB | 245 kB | 40/205 kB    
+                                                          
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.1/junit-jupiter-engine-5.10.1.jar (245 kB at 514 kB/s)
+Progress (3): 1.0/1.9 MB | 226/586 kB | 40/205 kB
+Progress (3): 1.0/1.9 MB | 242/586 kB | 40/205 kB
+Progress (3): 1.0/1.9 MB | 242/586 kB | 57/205 kB
+Progress (3): 1.0/1.9 MB | 242/586 kB | 73/205 kB
+Progress (3): 1.0/1.9 MB | 242/586 kB | 73/205 kB
+Progress (3): 1.0/1.9 MB | 242/586 kB | 73/205 kB
+Progress (4): 1.0/1.9 MB | 242/586 kB | 73/205 kB | 7.7/852 kB
+Progress (4): 1.0/1.9 MB | 242/586 kB | 73/205 kB | 16/852 kB 
+Progress (4): 1.0/1.9 MB | 258/586 kB | 73/205 kB | 16/852 kB
+Progress (4): 1.0/1.9 MB | 258/586 kB | 73/205 kB | 25/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 73/205 kB | 25/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 73/205 kB | 41/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 90/205 kB | 41/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 90/205 kB | 57/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 106/205 kB | 57/852 kB
+Progress (4): 1.0/1.9 MB | 266/586 kB | 106/205 kB | 57/852 kB
+Progress (4): 1.1/1.9 MB | 266/586 kB | 106/205 kB | 57/852 kB
+Progress (4): 1.1/1.9 MB | 266/586 kB | 106/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 266/586 kB | 106/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 283/586 kB | 106/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 106/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 122/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 74/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 90/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 106/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 106/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 106/852 kB
+Progress (4): 1.1/1.9 MB | 299/586 kB | 139/205 kB | 123/852 kB
+Progress (4): 1.1/1.9 MB | 315/586 kB | 139/205 kB | 123/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 139/205 kB | 123/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 139/205 kB | 131/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 155/205 kB | 131/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 155/205 kB | 147/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 147/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 164/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 164/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 164/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 180/852 kB
+Progress (4): 1.1/1.9 MB | 332/586 kB | 172/205 kB | 197/852 kB
+Progress (4): 1.1/1.9 MB | 348/586 kB | 172/205 kB | 197/852 kB
+Progress (4): 1.1/1.9 MB | 348/586 kB | 172/205 kB | 213/852 kB
+Progress (4): 1.1/1.9 MB | 365/586 kB | 172/205 kB | 213/852 kB
+Progress (4): 1.1/1.9 MB | 365/586 kB | 172/205 kB | 229/852 kB
+Progress (4): 1.1/1.9 MB | 381/586 kB | 172/205 kB | 229/852 kB
+Progress (4): 1.1/1.9 MB | 381/586 kB | 188/205 kB | 229/852 kB
+Progress (4): 1.1/1.9 MB | 381/586 kB | 204/205 kB | 229/852 kB
+Progress (4): 1.1/1.9 MB | 381/586 kB | 205 kB | 229/852 kB    
+Progress (4): 1.1/1.9 MB | 381/586 kB | 205 kB | 246/852 kB
+Progress (4): 1.2/1.9 MB | 381/586 kB | 205 kB | 246/852 kB
+Progress (4): 1.2/1.9 MB | 381/586 kB | 205 kB | 262/852 kB
+Progress (4): 1.2/1.9 MB | 381/586 kB | 205 kB | 262/852 kB
+Progress (4): 1.2/1.9 MB | 381/586 kB | 205 kB | 279/852 kB
+Progress (4): 1.2/1.9 MB | 397/586 kB | 205 kB | 279/852 kB
+Progress (4): 1.2/1.9 MB | 397/586 kB | 205 kB | 295/852 kB
+Progress (4): 1.2/1.9 MB | 414/586 kB | 205 kB | 295/852 kB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.10.1/junit-platform-engine-1.10.1.jar (205 kB at 414 kB/s)
+Progress (3): 1.2/1.9 MB | 414/586 kB | 295/852 kB
+Progress (3): 1.2/1.9 MB | 414/586 kB | 295/852 kB
+Progress (3): 1.2/1.9 MB | 414/586 kB | 311/852 kB
+Progress (3): 1.2/1.9 MB | 414/586 kB | 328/852 kB
+Progress (3): 1.2/1.9 MB | 414/586 kB | 344/852 kB
+Progress (3): 1.2/1.9 MB | 430/586 kB | 344/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 344/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 360/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 360/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 377/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 377/852 kB
+Progress (3): 1.2/1.9 MB | 446/586 kB | 393/852 kB
+Progress (3): 1.3/1.9 MB | 446/586 kB | 393/852 kB
+Progress (3): 1.3/1.9 MB | 446/586 kB | 410/852 kB
+Progress (3): 1.3/1.9 MB | 463/586 kB | 410/852 kB
+Progress (3): 1.3/1.9 MB | 463/586 kB | 426/852 kB
+Progress (3): 1.3/1.9 MB | 479/586 kB | 426/852 kB
+Progress (3): 1.3/1.9 MB | 479/586 kB | 442/852 kB
+Progress (3): 1.3/1.9 MB | 479/586 kB | 442/852 kB
+Progress (3): 1.3/1.9 MB | 479/586 kB | 459/852 kB
+Progress (3): 1.3/1.9 MB | 479/586 kB | 459/852 kB
+Progress (3): 1.3/1.9 MB | 496/586 kB | 459/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 459/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 475/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 492/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 508/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 524/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 541/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 541/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 557/852 kB
+Progress (3): 1.3/1.9 MB | 512/586 kB | 557/852 kB
+Progress (3): 1.3/1.9 MB | 528/586 kB | 557/852 kB
+Progress (3): 1.3/1.9 MB | 528/586 kB | 573/852 kB
+Progress (3): 1.3/1.9 MB | 528/586 kB | 590/852 kB
+Progress (3): 1.3/1.9 MB | 528/586 kB | 606/852 kB
+Progress (3): 1.3/1.9 MB | 528/586 kB | 606/852 kB
+Progress (3): 1.3/1.9 MB | 545/586 kB | 606/852 kB
+Progress (3): 1.3/1.9 MB | 561/586 kB | 606/852 kB
+Progress (3): 1.4/1.9 MB | 561/586 kB | 606/852 kB
+Progress (3): 1.4/1.9 MB | 561/586 kB | 623/852 kB
+Progress (3): 1.4/1.9 MB | 578/586 kB | 623/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 623/852 kB    
+Progress (3): 1.4/1.9 MB | 586 kB | 623/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 623/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 639/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 655/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 672/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 672/852 kB
+Progress (3): 1.4/1.9 MB | 586 kB | 672/852 kB
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.10.1/junit-jupiter-params-5.10.1.jar (586 kB at 1.2 MB/s)
+Progress (2): 1.4/1.9 MB | 688/852 kB
+Progress (2): 1.4/1.9 MB | 688/852 kB
+Progress (2): 1.4/1.9 MB | 705/852 kB
+Progress (2): 1.5/1.9 MB | 705/852 kB
+Progress (2): 1.5/1.9 MB | 721/852 kB
+Progress (2): 1.5/1.9 MB | 721/852 kB
+Progress (2): 1.5/1.9 MB | 737/852 kB
+Progress (2): 1.5/1.9 MB | 737/852 kB
+Progress (2): 1.5/1.9 MB | 754/852 kB
+Progress (2): 1.5/1.9 MB | 770/852 kB
+Progress (2): 1.5/1.9 MB | 770/852 kB
+Progress (2): 1.5/1.9 MB | 770/852 kB
+Progress (2): 1.5/1.9 MB | 770/852 kB
+Progress (2): 1.5/1.9 MB | 786/852 kB
+Progress (2): 1.5/1.9 MB | 803/852 kB
+Progress (2): 1.6/1.9 MB | 803/852 kB
+Progress (2): 1.6/1.9 MB | 819/852 kB
+Progress (2): 1.6/1.9 MB | 836/852 kB
+Progress (2): 1.6/1.9 MB | 836/852 kB
+Progress (2): 1.6/1.9 MB | 836/852 kB
+Progress (2): 1.6/1.9 MB | 836/852 kB
+Progress (2): 1.6/1.9 MB | 852/852 kB
+Progress (2): 1.6/1.9 MB | 852 kB    
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.1.1/spring-test-6.1.1.jar (852 kB at 1.7 MB/s)
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.9 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.1/spring-core-6.1.1.jar (1.9 MB at 3.3 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-service ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-service/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-service ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-service/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-service/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.10.1/junit-platform-launcher-1.10.1.pom
+Progress (1): 967 B
+Progress (1): 3.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.10.1/junit-platform-launcher-1.10.1.pom (3.0 kB at 76 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.10.1/junit-platform-launcher-1.10.1.jar
+Progress (1): 3.2/184 kB
+Progress (1): 20/184 kB 
+Progress (1): 28/184 kB
+Progress (1): 44/184 kB
+Progress (1): 61/184 kB
+Progress (1): 77/184 kB
+Progress (1): 93/184 kB
+Progress (1): 110/184 kB
+Progress (1): 126/184 kB
+Progress (1): 142/184 kB
+Progress (1): 159/184 kB
+Progress (1): 175/184 kB
+Progress (1): 184 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.10.1/junit-platform-launcher-1.10.1.jar (184 kB at 3.1 MB/s)
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.337 s -- in com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-service ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-service ---
+[INFO] 
+[INFO] -------------------< com.example.secureapp:task-web >-------------------
+[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
+[INFO]   from task-web/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.pom
+Progress (1): 946 B
+Progress (1): 2.4 kB
+Progress (1): 3.9 kB
+Progress (1): 6.3 kB
+Progress (1): 7.1 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.pom (7.1 kB at 202 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.1.1/spring-web-6.1.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.4 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.1.1/spring-web-6.1.1.pom (2.4 kB at 68 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.pom
+Progress (1): 1.0 kB
+Progress (1): 2.9 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.pom (2.9 kB at 80 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.12.0/micrometer-core-1.12.0.pom
+Progress (1): 997 B
+Progress (1): 5.1 kB
+Progress (1): 9.3 kB
+Progress (1): 10 kB 
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.12.0/micrometer-core-1.12.0.pom (10 kB at 283 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.12.0/micrometer-jakarta9-1.12.0.pom
+Progress (1): 1.1 kB
+Progress (1): 3.4 kB
+Progress (1): 3.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.12.0/micrometer-jakarta9-1.12.0.pom (3.8 kB at 90 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.jar
+Progress (1): 7.7/76 kB
+Progress (1): 8.2/76 kB
+Progress (1): 25/76 kB 
+Progress (1): 41/76 kB
+Progress (1): 57/76 kB
+Progress (1): 74/76 kB
+Progress (1): 76 kB   
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.15.3/jackson-annotations-2.15.3.jar (76 kB at 2.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.1.1/spring-web-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.12.0/micrometer-jakarta9-1.12.0.jar
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.12.0/micrometer-core-1.12.0.jar
+Progress (1): 7.7/32 kB
+Progress (1): 16/32 kB 
+Progress (1): 24/32 kB
+Progress (2): 24/32 kB | 0/1.0 MB
+Progress (2): 24/32 kB | 0/1.0 MB
+Progress (3): 24/32 kB | 0/1.0 MB | 7.7/882 kB
+Progress (3): 24/32 kB | 0/1.0 MB | 16/882 kB 
+Progress (3): 24/32 kB | 0/1.0 MB | 16/882 kB
+Progress (3): 32 kB | 0/1.0 MB | 16/882 kB   
+Progress (3): 32 kB | 0/1.0 MB | 16/882 kB
+Progress (3): 32 kB | 0/1.0 MB | 24/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 24/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 40/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 40/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 40/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 40/882 kB
+Progress (3): 32 kB | 0.1/1.0 MB | 40/882 kB
+Progress (4): 32 kB | 0.1/1.0 MB | 40/882 kB | 0/1.9 MB
+Progress (4): 32 kB | 0.1/1.0 MB | 40/882 kB | 0/1.9 MB
+Progress (4): 32 kB | 0.1/1.0 MB | 40/882 kB | 0/1.9 MB
+                                                       
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.12.0/micrometer-jakarta9-1.12.0.jar (32 kB at 620 kB/s)
+Progress (3): 0.1/1.0 MB | 40/882 kB | 0/1.9 MB
+Progress (3): 0.1/1.0 MB | 57/882 kB | 0/1.9 MB
+Progress (3): 0.1/1.0 MB | 73/882 kB | 0/1.9 MB
+Progress (3): 0.1/1.0 MB | 73/882 kB | 0/1.9 MB
+Progress (3): 0.2/1.0 MB | 73/882 kB | 0/1.9 MB
+Progress (3): 0.2/1.0 MB | 73/882 kB | 0/1.9 MB
+Progress (3): 0.2/1.0 MB | 73/882 kB | 0/1.9 MB
+Progress (3): 0.2/1.0 MB | 73/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 90/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 90/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 90/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 106/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 106/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 106/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 106/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 122/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 122/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 139/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 155/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 155/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 155/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 155/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 155/882 kB | 0.1/1.9 MB
+Progress (3): 0.2/1.0 MB | 172/882 kB | 0.1/1.9 MB
+Progress (3): 0.3/1.0 MB | 172/882 kB | 0.1/1.9 MB
+Progress (3): 0.3/1.0 MB | 188/882 kB | 0.1/1.9 MB
+Progress (3): 0.3/1.0 MB | 188/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 188/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 204/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 204/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 204/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 204/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 221/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 221/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 237/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 253/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 253/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 253/882 kB | 0.2/1.9 MB
+Progress (3): 0.3/1.0 MB | 253/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 270/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 270/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 286/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 286/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 286/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 286/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 303/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 319/882 kB | 0.3/1.9 MB
+Progress (3): 0.3/1.0 MB | 319/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 319/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 319/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 319/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 335/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.3/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 352/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 368/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 385/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 385/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 385/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 385/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 385/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 401/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 417/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 434/882 kB | 0.4/1.9 MB
+Progress (3): 0.4/1.0 MB | 434/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 434/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 434/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 450/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 466/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 466/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 466/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 466/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.4/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.5/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.5/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.5/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.5/1.9 MB
+Progress (3): 0.5/1.0 MB | 483/882 kB | 0.5/1.9 MB
+Progress (3): 0.5/1.0 MB | 499/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 499/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 516/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 516/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 516/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 532/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 532/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 548/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 548/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 548/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 548/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 565/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 565/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 565/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 581/882 kB | 0.5/1.9 MB
+Progress (3): 0.6/1.0 MB | 581/882 kB | 0.6/1.9 MB
+Progress (3): 0.6/1.0 MB | 581/882 kB | 0.6/1.9 MB
+Progress (3): 0.6/1.0 MB | 581/882 kB | 0.6/1.9 MB
+Progress (3): 0.6/1.0 MB | 598/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 598/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 614/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 630/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 630/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 630/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 630/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 630/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 647/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 647/882 kB | 0.6/1.9 MB
+Progress (3): 0.7/1.0 MB | 647/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 663/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 663/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 679/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 679/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 679/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 696/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 696/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 696/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 712/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 712/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 712/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 729/882 kB | 0.7/1.9 MB
+Progress (3): 0.7/1.0 MB | 729/882 kB | 0.7/1.9 MB
+Progress (3): 0.8/1.0 MB | 729/882 kB | 0.7/1.9 MB
+Progress (3): 0.8/1.0 MB | 745/882 kB | 0.7/1.9 MB
+Progress (3): 0.8/1.0 MB | 745/882 kB | 0.7/1.9 MB
+Progress (3): 0.8/1.0 MB | 745/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 761/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 778/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 778/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 778/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 778/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 778/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 794/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 794/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 811/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 811/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 811/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 811/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 827/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 827/882 kB | 0.8/1.9 MB
+Progress (3): 0.8/1.0 MB | 843/882 kB | 0.8/1.9 MB
+Progress (3): 0.9/1.0 MB | 843/882 kB | 0.8/1.9 MB
+Progress (3): 0.9/1.0 MB | 843/882 kB | 0.8/1.9 MB
+Progress (3): 0.9/1.0 MB | 843/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 843/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 860/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 876/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 876/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 876/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 876/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 876/882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 882 kB | 0.9/1.9 MB    
+Progress (3): 0.9/1.0 MB | 882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 882 kB | 0.9/1.9 MB
+Progress (3): 0.9/1.0 MB | 882 kB | 0.9/1.9 MB
+Progress (3): 1.0/1.0 MB | 882 kB | 0.9/1.9 MB
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.12.0/micrometer-core-1.12.0.jar (882 kB at 4.1 MB/s)
+Progress (2): 1.0/1.0 MB | 0.9/1.9 MB
+Progress (2): 1.0/1.0 MB | 0.9/1.9 MB
+Progress (2): 1.0/1.0 MB | 0.9/1.9 MB
+Progress (2): 1.0/1.0 MB | 0.9/1.9 MB
+Progress (2): 1.0/1.0 MB | 0.9/1.9 MB
+Progress (2): 1.0 MB | 0.9/1.9 MB    
+Progress (2): 1.0 MB | 1.0/1.9 MB
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.1.1/spring-webmvc-6.1.1.jar (1.0 MB at 4.6 MB/s)
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.0/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.1/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.2/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.3/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.4/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.5/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.6/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.7/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.8/1.9 MB
+Progress (1): 1.9/1.9 MB
+Progress (1): 1.9 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.1.1/spring-web-6.1.1.jar (1.9 MB at 6.0 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-web ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-web/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-web ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-web ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-web ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-web/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-web ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.web.TaskApplicationTest
+02:54:19.532 [main] ERROR org.springframework.boot.SpringApplication -- Application run failed
+java.lang.NoSuchFieldError: Class org.springframework.util.SystemPropertyUtils does not have member field 'java.lang.Character ESCAPE_CHARACTER'
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:54)
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:43)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:570)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:556)
+	at org.springframework.boot.context.config.ConfigDataEnvironment.<init>(ConfigDataEnvironment.java:144)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.getConfigDataEnvironment(ConfigDataEnvironmentPostProcessor.java:102)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:97)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:90)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEnvironmentPreparedEvent(EnvironmentPostProcessorApplicationListener.java:137)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEvent(EnvironmentPostProcessorApplicationListener.java:120)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:178)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:171)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:149)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.multicastInitialEvent(EventPublishingRunListener.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.environmentPrepared(EventPublishingRunListener.java:82)
+	at org.springframework.boot.SpringApplicationRunListeners.lambda$environmentPrepared$0(SpringApplicationRunListeners.java:66)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:123)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:117)
+	at org.springframework.boot.SpringApplicationRunListeners.environmentPrepared(SpringApplicationRunListeners.java:65)
+	at org.springframework.boot.SpringApplication.prepareEnvironment(SpringApplication.java:356)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46)
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465)
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130)
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191)
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130)
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:247)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$10(ClassBasedTestDescriptor.java:378)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:383)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$11(ClassBasedTestDescriptor.java:378)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:377)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:290)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:289)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:279)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:278)
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:106)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:105)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+02:54:19.548 [main] ERROR org.springframework.test.context.TestContextManager -- Caught exception while allowing TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener] to prepare test instance [com.example.secureapp.web.TaskApplicationTest@20b5f2ac]
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@2dbf4cbd testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@35841320, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@710636b0, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@5745ca0e, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@17bffc17, org.springframework.boot.test.context.SpringBootTestAnnotation@412f047a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130)
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191)
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130)
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:247)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$10(ClassBasedTestDescriptor.java:378)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:383)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$11(ClassBasedTestDescriptor.java:378)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:377)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:290)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:289)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:279)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:278)
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:106)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:105)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: java.lang.IllegalStateException: java.lang.NoSuchFieldError: Class org.springframework.util.SystemPropertyUtils does not have member field 'java.lang.Character ESCAPE_CHARACTER'
+	at org.springframework.boot.SpringApplication.handleRunFailure(SpringApplication.java:827)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:331)
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46)
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465)
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152)
+	... 74 common frames omitted
+Caused by: java.lang.NoSuchFieldError: Class org.springframework.util.SystemPropertyUtils does not have member field 'java.lang.Character ESCAPE_CHARACTER'
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:54)
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:43)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:570)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:556)
+	at org.springframework.boot.context.config.ConfigDataEnvironment.<init>(ConfigDataEnvironment.java:144)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.getConfigDataEnvironment(ConfigDataEnvironmentPostProcessor.java:102)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:97)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:90)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEnvironmentPreparedEvent(EnvironmentPostProcessorApplicationListener.java:137)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEvent(EnvironmentPostProcessorApplicationListener.java:120)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:178)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:171)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:149)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.multicastInitialEvent(EventPublishingRunListener.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.environmentPrepared(EventPublishingRunListener.java:82)
+	at org.springframework.boot.SpringApplicationRunListeners.lambda$environmentPrepared$0(SpringApplicationRunListeners.java:66)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:123)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:117)
+	at org.springframework.boot.SpringApplicationRunListeners.environmentPrepared(SpringApplicationRunListeners.java:65)
+	at org.springframework.boot.SpringApplication.prepareEnvironment(SpringApplication.java:356)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	... 83 common frames omitted
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.235 s <<< FAILURE! -- in com.example.secureapp.web.TaskApplicationTest
+[ERROR] com.example.secureapp.web.TaskApplicationTest.contextLoads -- Time elapsed: 0.041 s <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@2dbf4cbd testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@35841320, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@710636b0, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@5745ca0e, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@17bffc17, org.springframework.boot.test.context.SpringBootTestAnnotation@412f047a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130)
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191)
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130)
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:247)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735)
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalStateException: java.lang.NoSuchFieldError: Class org.springframework.util.SystemPropertyUtils does not have member field 'java.lang.Character ESCAPE_CHARACTER'
+	at org.springframework.boot.SpringApplication.handleRunFailure(SpringApplication.java:827)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:331)
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46)
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465)
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152)
+	... 17 more
+Caused by: java.lang.NoSuchFieldError: Class org.springframework.util.SystemPropertyUtils does not have member field 'java.lang.Character ESCAPE_CHARACTER'
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:54)
+	at org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver.<init>(PropertySourcesPlaceholdersResolver.java:43)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:570)
+	at org.springframework.boot.context.properties.bind.Binder.get(Binder.java:556)
+	at org.springframework.boot.context.config.ConfigDataEnvironment.<init>(ConfigDataEnvironment.java:144)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.getConfigDataEnvironment(ConfigDataEnvironmentPostProcessor.java:102)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:97)
+	at org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor.postProcessEnvironment(ConfigDataEnvironmentPostProcessor.java:90)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEnvironmentPreparedEvent(EnvironmentPostProcessorApplicationListener.java:137)
+	at org.springframework.boot.support.EnvironmentPostProcessorApplicationListener.onApplicationEvent(EnvironmentPostProcessorApplicationListener.java:120)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:178)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:171)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:149)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.multicastInitialEvent(EventPublishingRunListener.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.environmentPrepared(EventPublishingRunListener.java:82)
+	at org.springframework.boot.SpringApplicationRunListeners.lambda$environmentPrepared$0(SpringApplicationRunListeners.java:66)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:123)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:117)
+	at org.springframework.boot.SpringApplicationRunListeners.environmentPrepared(SpringApplicationRunListeners.java:65)
+	at org.springframework.boot.SpringApplication.prepareEnvironment(SpringApplication.java:356)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	... 26 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Errors: 
+[ERROR]   TaskApplicationTest.contextLoads » IllegalState Failed to load ApplicationContext for [WebMergedContextConfiguration@2dbf4cbd testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@35841320, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@710636b0, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@5745ca0e, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@17bffc17, org.springframework.boot.test.context.SpringBootTestAnnotation@412f047a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+[INFO] 
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.691 s]
+[INFO] task-common ........................................ SUCCESS [  3.523 s]
+[INFO] task-domain ........................................ SUCCESS [  0.500 s]
+[INFO] task-service ....................................... SUCCESS [  6.660 s]
+[INFO] task-web ........................................... FAILURE [  4.934 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.627 s
+[INFO] Finished at: 2026-09-21T02:54:19Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project task-web: 
+[ERROR] 
+[ERROR] See /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T025123Z-8002fd04/repository/task-web/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :task-web

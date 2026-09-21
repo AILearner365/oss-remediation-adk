@@ -1,0 +1,18 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Some problems were encountered while processing the POMs:
+[FATAL] Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T024724Z-f63e5005/repository/pom.xml: Unrecognised tag: 'dependency' (position: START_TAG seen ...</dependencies>\n            <dependency>... @58:25)  @ line 58, column 25
+ @ 
+[ERROR] The build could not read 1 project -> [Help 1]
+[ERROR]   
+[ERROR]   The project  (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T024724Z-f63e5005/repository/pom.xml) has 1 error
+[ERROR]     Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260921T024724Z-f63e5005/repository/pom.xml: Unrecognised tag: 'dependency' (position: START_TAG seen ...</dependencies>\n            <dependency>... @58:25)  @ line 58, column 25 -> [Help 2]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException
+[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/ModelParseException
