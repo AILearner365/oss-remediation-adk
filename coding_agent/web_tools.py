@@ -3,7 +3,7 @@ from __future__ import annotations
 import ipaddress
 import socket
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import quote_plus, urlparse
 
 import requests
 from google.adk.tools import FunctionTool
@@ -36,6 +36,95 @@ def _validate_public_https_url(url: str) -> str | None:
         if not ip.is_global:
             return "Private, loopback, link-local, or otherwise non-public destinations are not supported."
     return None
+
+
+def search_web(query: str, max_results: int = 5) -> dict[str, Any]:
+    """Search the public web through Google using the host's normal network/proxy settings.
+
+    This is a lightweight POC for environments where managed Google Search grounding is
+    unavailable. It respects the same corporate network controls as other local HTTP calls.
+    """
+    if not query.strip():
+        return _error("invalid_query", "Search query must not be empty.")
+
+    limit = max(1, min(max_results, 10))
+    search_url = f"https://www.google.com/search?q={quote_plus(query)}&num={limit}"
+
+    try:
+        with requests.get(
+            search_url,
+            timeout=DEFAULT_TIMEOUT_SECONDS,
+            allow_redirects=False,
+        ) as response:
+            if response.status_code in (401, 403):
+                return _error(
+                    "access_blocked",
+                    "Google Search was denied or blocked by the current network policy.",
+                    url=response.url,
+                    http_status=response.status_code,
+                    server=response.headers.get("Server"),
+                )
+            if not response.ok:
+                return _error(
+                    "http_error",
+                    f"Search request failed with status {response.status_code}.",
+                    url=response.url,
+                    http_status=response.status_code,
+                )
+
+            try:
+                from bs4 import BeautifulSoup
+            except ImportError:
+                return _error(
+                    "missing_dependency",
+                    "Search result extraction requires beautifulsoup4. Install the project dependency before using this tool.",
+                )
+
+            soup = BeautifulSoup(response.text, "html.parser")
+            results: list[dict[str, str]] = []
+            seen: set[str] = set()
+
+            for anchor in soup.select("a"):
+                href = anchor.get("href", "")
+                heading = anchor.find("h3")
+                if not heading or not href:
+                    continue
+
+                if href.startswith("/url?q="):
+                    href = href.split("/url?q=", 1)[1].split("&", 1)[0]
+                elif not href.startswith("https://"):
+                    continue
+
+                parsed = urlparse(href)
+                if parsed.scheme != "https" or not parsed.hostname:
+                    continue
+                if parsed.hostname.endswith("google.com"):
+                    continue
+                if href in seen:
+                    continue
+
+                seen.add(href)
+                results.append({
+                    "title": heading.get_text(" ", strip=True),
+                    "url": href,
+                })
+                if len(results) >= limit:
+                    break
+
+            if not results:
+                return _error(
+                    "no_results",
+                    "No structured search results could be extracted. Google may have returned a challenge or changed its HTML.",
+                    url=response.url,
+                )
+
+            return {
+                "status": "ok",
+                "query": query,
+                "results": results,
+            }
+    except requests.RequestException as exc:
+        return _error("network_error", str(exc), url=search_url)
 
 
 def fetch_web_page(url: str) -> dict[str, Any]:
@@ -136,4 +225,4 @@ def fetch_web_page(url: str) -> dict[str, Any]:
         return _error("network_error", str(exc), url=url)
 
 
-WEB_TOOLS = [FunctionTool(fetch_web_page)]
+WEB_TOOLS = [FunctionTool(search_web), FunctionTool(fetch_web_page)]
