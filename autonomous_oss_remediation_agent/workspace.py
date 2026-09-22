@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -36,9 +37,33 @@ class RunWorkspace:
             temp=root / "temp",
             tools=root / "tools",
         )
-        for directory in (workspace.artifacts, workspace.cache, workspace.temp, workspace.tools):
+        for directory in (
+            workspace.investigation,
+            workspace.artifacts,
+            workspace.cache,
+            workspace.temp,
+            workspace.tools,
+        ):
             directory.mkdir(parents=True, exist_ok=True)
         return workspace
+
+    @property
+    def investigation(self) -> Path:
+        return self.root / "investigation"
+
+    def fork_repository(self, cycle: int) -> "RepositoryWorkspace":
+        if cycle < 1:
+            raise ValueError("cycle must be positive")
+        if not self.repository.is_dir():
+            raise FileNotFoundError(self.repository)
+        target = self.investigation / f"cycle-{cycle}"
+        if target.exists():
+            raise FileExistsError(f"Cycle investigation workspace already exists: {target}")
+        shutil.copytree(self.repository, target, symlinks=True, copy_function=shutil.copy2)
+        return RepositoryWorkspace(self, target, "experimental", cycle)
+
+    def authoritative_repository(self) -> "RepositoryWorkspace":
+        return RepositoryWorkspace(self, self.repository, "authoritative", None)
 
     def repository_path(self, relative_path: str | Path, *, allow_missing: bool = True) -> Path:
         path = Path(relative_path)
@@ -61,6 +86,27 @@ class RunWorkspace:
         if not allow_missing and not candidate.exists():
             raise FileNotFoundError(candidate)
         return resolved
+
+    def repository_directory(self, relative_path: str | Path = ".") -> Path:
+        path = self.repository_path(relative_path, allow_missing=False)
+        if not path.is_dir():
+            raise WorkspaceBoundaryError(f"Working directory is not a directory: {relative_path}")
+        return path
+
+
+@dataclass(frozen=True)
+class RepositoryWorkspace:
+    run_workspace: RunWorkspace
+    repository: Path
+    kind: str
+    cycle: int | None
+
+    @property
+    def root(self) -> Path:
+        return self.run_workspace.root
+
+    def repository_path(self, relative_path: str | Path, *, allow_missing: bool = True) -> Path:
+        return _repository_path(self.repository, relative_path, allow_missing=allow_missing)
 
     def repository_directory(self, relative_path: str | Path = ".") -> Path:
         path = self.repository_path(relative_path, allow_missing=False)
@@ -115,4 +161,26 @@ def _resolve_with_missing(path: Path) -> Path:
     resolved = current.resolve(strict=True)
     for part in reversed(missing):
         resolved = resolved / part
+    return resolved
+
+
+def _repository_path(repository: Path, relative_path: str | Path, *, allow_missing: bool) -> Path:
+    path = Path(relative_path)
+    if path.is_absolute():
+        raise WorkspaceBoundaryError("Absolute paths are not allowed.")
+    if ".git" in path.parts:
+        raise WorkspaceBoundaryError("Direct .git access is not allowed.")
+    if "\x00" in str(path):
+        raise WorkspaceBoundaryError("NUL bytes are not allowed in paths.")
+    candidate = repository / path
+    resolved = _resolve_with_missing(candidate)
+    repository_root = repository.resolve(strict=True)
+    try:
+        common = Path(os.path.commonpath((str(repository_root), str(resolved))))
+    except ValueError as exc:
+        raise WorkspaceBoundaryError("Path is outside the prepared repository.") from exc
+    if common != repository_root:
+        raise WorkspaceBoundaryError("Path is outside the prepared repository.")
+    if not allow_missing and not candidate.exists():
+        raise FileNotFoundError(candidate)
     return resolved

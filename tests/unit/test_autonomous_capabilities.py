@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,6 +11,11 @@ from google.adk.models import Gemini
 
 from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
+from autonomous_oss_remediation_agent.capabilities.research import (
+    HttpResearchProvider,
+    ResearchResult,
+    ResearchStatus,
+)
 from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
 from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalStore
@@ -177,6 +184,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 "inspect_git_state",
                 "edit_workspace_text",
                 "run_workspace_shell",
+                "scan_current_repository",
+                "research_search",
+                "research_fetch",
                 "submit_cycle_intent",
                 "submit_cycle_outcome",
             },
@@ -208,6 +218,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
         journal.begin_cycle(1)
         capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
+        capabilities.begin_cycle(1)
         before = {
             path.relative_to(self.workspace.repository).as_posix(): path.read_bytes()
             for path in self.workspace.repository.rglob("*") if path.is_file()
@@ -225,9 +236,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
             for path in self.workspace.repository.rglob("*") if path.is_file()
         }
         self.assertEqual(before, after)
-        denied = capabilities.edit_workspace_text("write", "mutated.txt", content="no")
-        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+        edited = capabilities.edit_workspace_text("write", "mutated.txt", content="isolated")
+        self.assertEqual("ok", edited["status"])
         self.assertFalse((self.workspace.repository / "mutated.txt").exists())
+        self.assertTrue((self.workspace.investigation / "cycle-1" / "mutated.txt").is_file())
 
     def test_file_listing_bounds_traversal_and_continues_without_duplicates(self):
         for index in range(17):
@@ -346,36 +358,151 @@ class AutonomousCapabilityTests(unittest.TestCase):
             io._close_listing_cursor(active_cursor)
         self.assertEqual({}, io._listing_cursors)
 
-    def test_pre_intent_mutation_and_shell_are_enforced_and_late_capture_is_detected(self):
+    def test_pre_intent_mutation_and_shell_are_isolated_then_active_routing_switches(self):
         changed = False
         journal = JournalLifecycle(
             JournalStore(self.trace), self.trace, "contract", lambda: changed
         )
         journal.begin_cycle(1)
         capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
+        experiment = capabilities.begin_cycle(1)
 
-        edit = capabilities.edit_workspace_text("write", "blocked.txt", content="blocked")
-        shell = capabilities.run_workspace_shell("Set-Content bypass.txt bypass" if os.name == "nt" else "touch bypass.txt")
+        edit = capabilities.edit_workspace_text("write", "isolated.txt", content="experiment")
+        shell = capabilities.run_workspace_shell("Set-Content shell.txt experiment" if os.name == "nt" else "printf experiment > shell.txt")
 
-        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", edit["failureCode"])
-        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", shell["failureCode"])
-        self.assertFalse((self.workspace.repository / "blocked.txt").exists())
-        self.assertFalse((self.workspace.repository / "bypass.txt").exists())
-        changed = True
+        self.assertEqual("ok", edit["status"])
+        self.assertEqual(0, shell["exitCode"])
+        self.assertTrue((experiment.repository / "isolated.txt").is_file())
+        self.assertTrue((experiment.repository / "shell.txt").is_file())
+        self.assertFalse((self.workspace.repository / "isolated.txt").exists())
+        self.assertFalse((self.workspace.repository / "shell.txt").exists())
+        authoritative_target = self.workspace.repository / "absolute-escape.txt"
+        absolute_escape = capabilities.run_workspace_shell(
+            f"Set-Content '{authoritative_target}' escape"
+            if os.name == "nt"
+            else f"printf escape > '{authoritative_target}'"
+        )
+        relative_escape = capabilities.run_workspace_shell(
+            "Set-Content ../../repository/relative-escape.txt escape"
+            if os.name == "nt"
+            else "printf escape > ../../repository/relative-escape.txt"
+        )
+        self.assertTrue(absolute_escape["blocked"])
+        self.assertTrue(relative_escape["blocked"])
+        self.assertFalse(authoritative_target.exists())
+        self.assertFalse((self.workspace.repository / "relative-escape.txt").exists())
+        denied = capabilities.edit_workspace_text(
+            "write", "forbidden.txt", content="no", workspace="authoritative"
+        )
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
         answers = _valid_intent_answers()
         submission = capabilities.submit_cycle_intent(1, answers)
         self.assertEqual("accepted", submission["status"])
         self.assertEqual("EXECUTION", submission["phase"])
         self.assertIn("edit_workspace_text", submission["availableCapabilities"])
         self.assertIn("run_workspace_shell", submission["availableCapabilities"])
-        self.assertIn("same cycle", submission["nextAction"])
-        self.assertTrue(journal.cycles[1].late_intent)
+        self.assertIn("this cycle", submission["nextAction"])
+        self.assertFalse(journal.cycles[1].late_intent)
         self.assertEqual((), capabilities.execution_activity(1))
-        capabilities.read_workspace_text("pom.xml")
-        self.assertEqual(("read_workspace_text",), capabilities.execution_activity(1))
+        capabilities.edit_workspace_text("write", "authoritative.txt", content="real")
+        capabilities.edit_workspace_text(
+            "write", "further-experiment.txt", content="probe", workspace="experiment"
+        )
+        self.assertTrue((self.workspace.repository / "authoritative.txt").is_file())
+        self.assertTrue((experiment.repository / "further-experiment.txt").is_file())
+        self.assertFalse((self.workspace.repository / "further-experiment.txt").exists())
         journal.require_outcome()
+        self.assertEqual(frozenset({"submit_cycle_outcome"}), capabilities.available_tool_names())
         denied = capabilities.edit_workspace_text("write", "outcome.txt", content="blocked")
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+
+    def test_cycle_forks_preserve_exact_current_authoritative_working_state(self):
+        _git(self.workspace.repository, "init", "-b", "main")
+        (self.workspace.repository / "tracked.txt").write_text("base\n", encoding="utf-8")
+        (self.workspace.repository / "deleted.txt").write_text("remove\n", encoding="utf-8")
+        _git(self.workspace.repository, "add", ".")
+        _git(self.workspace.repository, "-c", "user.name=Test", "-c", "user.email=test@example.test", "commit", "-m", "base")
+        (self.workspace.repository / "tracked.txt").write_text("cycle-one-current\n", encoding="utf-8")
+        (self.workspace.repository / "untracked.txt").write_text("untracked\n", encoding="utf-8")
+        (self.workspace.repository / "deleted.txt").unlink()
+
+        first = self.workspace.fork_repository(1)
+        self.assertEqual("cycle-one-current\n", (first.repository / "tracked.txt").read_text(encoding="utf-8"))
+        self.assertEqual("untracked\n", (first.repository / "untracked.txt").read_text(encoding="utf-8"))
+        self.assertFalse((first.repository / "deleted.txt").exists())
+        self.assertTrue((first.repository / ".git").is_dir())
+
+        (first.repository / "tracked.txt").write_text("abandoned experiment\n", encoding="utf-8")
+        (self.workspace.repository / "tracked.txt").write_text("accepted remediation\n", encoding="utf-8")
+        second = self.workspace.fork_repository(2)
+        self.assertEqual("accepted remediation\n", (second.repository / "tracked.txt").read_text(encoding="utf-8"))
+        self.assertNotEqual(
+            (first.repository / "tracked.txt").read_text(encoding="utf-8"),
+            (second.repository / "tracked.txt").read_text(encoding="utf-8"),
+        )
+
+    def test_scanner_uses_harness_configuration_and_selected_workspace(self):
+        scanner = _RecordingScanner()
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(
+            self.io, self.runner, self.budget, self.trace, journal, scanner, ("HIGH",)
+        )
+        experiment = capabilities.begin_cycle(1)
+        before = capabilities.scan_current_repository()
+        self.assertEqual("experimental", before["workspaceKind"])
+        self.assertEqual((experiment.repository, ("HIGH",)), scanner.calls[0][:2])
+        capabilities.submit_cycle_intent(1, _valid_intent_answers())
+        after = capabilities.scan_current_repository()
+        self.assertEqual("authoritative", after["workspaceKind"])
+        self.assertEqual(self.workspace.repository, scanner.calls[1][0])
+
+    def test_research_is_replaceable_truthful_phase_gated_and_budgeted(self):
+        provider = _FakeResearchProvider()
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(
+            self.io, self.runner, self.budget, self.trace, journal,
+            research_provider=provider,
+        )
+        capabilities.begin_cycle(1)
+        search = capabilities.research_search("current advisory")
+        fetch = capabilities.research_fetch("https://example.test/advisory")
+        self.assertEqual("success", search["status"])
+        self.assertEqual("http_network_failure", fetch["status"])
+        self.assertEqual(2, self.budget.tool_calls)
+        artifacts = sorted((self.workspace.artifacts / "research").glob("*.json"))
+        self.assertEqual(2, len(artifacts))
+        events = [json.loads(line) for line in self.trace.events_path.read_text(encoding="utf-8").splitlines()]
+        research_events = [event for event in events if event["type"] == "research"]
+        self.assertEqual(2, len(research_events))
+        self.assertTrue(all(event.get("resultReference") for event in research_events))
+        capabilities.submit_cycle_intent(1, _valid_intent_answers())
+        journal.require_outcome()
+        denied = capabilities.research_search("not allowed now")
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+        self.assertEqual(["current advisory"], provider.queries)
+
+    def test_http_research_provider_reports_unavailable_and_blocked_truthfully(self):
+        unavailable = HttpResearchProvider(enabled=False).search("anything")
+        blocked = HttpResearchProvider(enabled=True).fetch("http://127.0.0.1/private")
+        self.assertEqual(ResearchStatus.UNAVAILABLE, unavailable.status)
+        self.assertIn("Network disabled", unavailable.error)
+        self.assertEqual(ResearchStatus.BLOCKED, blocked.status)
+        self.assertIn("non-public", blocked.error)
+
+    def test_research_uses_shared_tool_budget(self):
+        budget = ExecutionBudget(
+            ExecutionBudgetConfig(max_tool_calls=1, overall_timeout_seconds=30)
+        )
+        provider = _FakeResearchProvider()
+        capabilities = DeveloperCapabilitySet(
+            self.io, self.runner, budget, self.trace, research_provider=provider
+        )
+        self.assertEqual("success", capabilities.research_search("first")["status"])
+        exhausted = capabilities.research_search("second")
+        self.assertEqual("EXECUTION_BUDGET_EXCEEDED", exhausted["failureCode"])
+        self.assertEqual(["first"], provider.queries)
 
     def test_new_package_has_no_reference_agent_imports(self):
         package_root = Path(__file__).resolve().parents[2] / "autonomous_oss_remediation_agent"
@@ -424,6 +551,45 @@ None.""",
 - **Evidence requiring reconsideration:** Contradictory checks.""",
         },
     ]
+
+
+def _git(cwd: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True)
+
+
+class _RecordingScanner:
+    backend = "fake"
+
+    def __init__(self):
+        self.calls = []
+
+    def scan(self, repository, severity_scope, label):
+        from autonomous_oss_remediation_agent.models import ScanReport
+
+        self.calls.append((repository, severity_scope, label))
+        raw = repository.parent / f"{label}.json"
+        raw.write_text("{}", encoding="utf-8")
+        return ScanReport(True, (), None, str(raw), backend=self.backend)
+
+
+class _FakeResearchProvider:
+    def __init__(self):
+        self.queries = []
+
+    def search(self, query):
+        self.queries.append(query)
+        return ResearchResult(
+            ResearchStatus.SUCCESS,
+            "fake-search",
+            results=({"title": "Advisory", "url": "https://example.test/advisory"},),
+        )
+
+    def fetch(self, url):
+        return ResearchResult(
+            ResearchStatus.HTTP_NETWORK_FAILURE,
+            url,
+            error="simulated network failure",
+        )
 
 
 if __name__ == "__main__":

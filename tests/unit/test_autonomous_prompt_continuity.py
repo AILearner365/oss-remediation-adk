@@ -71,6 +71,15 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
 
+    def test_instruction_defines_workspace_and_evidence_contract_without_mandatory_sequence(self):
+        self.assertIn("isolated experimental repository snapshot", AGENT_INSTRUCTION)
+        self.assertIn("exact current authoritative working state", AGENT_INSTRUCTION)
+        self.assertIn('workspace="experiment"', AGENT_INSTRUCTION)
+        self.assertIn("experimental edits never become authoritative automatically", AGENT_INSTRUCTION)
+        self.assertIn("A failed retrieval is not evidence", AGENT_INSTRUCTION)
+        self.assertIn("without imposing irrelevant mandatory tool calls", AGENT_INSTRUCTION)
+        self.assertNotIn("must run the scanner", AGENT_INSTRUCTION.lower())
+
     def test_self_validation_claims_remain_within_each_checks_evaluated_scope(self):
         outcome = outcome_message(1, "execution summary", {})
 
@@ -167,7 +176,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn(
-            "Before forming candidates, perform decision-relevant investigation reasonably obtainable through the available read-only capabilities",
+            "Before forming candidates, perform decision-relevant investigation reasonably obtainable through the available engineering capabilities",
             AGENT_INSTRUCTION,
         )
         self.assertIn("Planned or future investigation is not evidence supporting candidate formation", AGENT_INSTRUCTION)
@@ -179,7 +188,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "If decision-relevant information is reasonably obtainable through the available read-only capabilities",
+            "If decision-relevant information is reasonably obtainable through the available experimental engineering capabilities",
             message,
         )
         self.assertIn("non-material information does not require exhaustive investigation", message)

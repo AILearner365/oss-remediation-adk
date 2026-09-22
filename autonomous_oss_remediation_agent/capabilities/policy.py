@@ -41,6 +41,10 @@ class CommandPolicy:
         (re.compile(r"\bpip(?:3)?\s+install\s+[^\r\n]*(?:--user|--prefix|--root)\b", re.IGNORECASE), "non-workspace package installation is prohibited"),
         (re.compile(r"\bnpm\s+(?:install|i)\s+(?:--global|-g)\b", re.IGNORECASE), "global package installation is prohibited"),
         (re.compile(r"\bdocker(?:\.exe)?\s+", re.IGNORECASE), "container control is outside the approved agent boundary"),
+        (
+            re.compile(r"(?:^|[\s\"'=;&|()])\.\.(?:[\\/]|$)"),
+            "parent-directory traversal is prohibited for workspace shell commands",
+        ),
     )
 
     def evaluate(self, command: str) -> tuple[bool, str | None]:

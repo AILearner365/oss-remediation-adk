@@ -87,7 +87,7 @@ Use this table:
 | Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
 |---|---|---|---|---|
 
-The table must report investigation actually performed and evidence actually obtained. The Sources examined column must name actual sources, tools, or methods. Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation. If decision-relevant information is reasonably obtainable through the available read-only capabilities and could materially affect problem understanding, mechanism discovery or applicability, control structure, viability, constraints, candidate formation, or selection, investigate it before submitting this response. Keep investigation proportional; non-material information does not require exhaustive investigation, and genuinely execution-dependent information may remain unknown.
+The table must report investigation actually performed and evidence actually obtained. The Sources examined column must name actual sources, tools, or methods. Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation. If decision-relevant information is reasonably obtainable through the available experimental engineering capabilities and could materially affect problem understanding, mechanism discovery or applicability, control structure, viability, constraints, candidate formation, or selection, investigate it before submitting this response. Keep investigation proportional; non-material information does not require exhaustive investigation, and genuinely execution-dependent information may remain unknown.
 
 Then add `### Material assumptions that remain necessary`. Report only assumptions that materially affect the current engineering decision. For each, state what is assumed, why it could not be established, what evidence was checked, which decision or conclusion depends on it, and what uncertainty or risk remains. An assumption must not substitute for reasonably obtainable repository evidence material to candidate formation or selection. Do not introduce an assumption merely to explain unexpected evidence or justify proceeding. If an unresolved interpretation is not necessary to the decision, leave it as uncertainty rather than elevating it into a material assumption. If no material assumptions remain, state `None`.
 
@@ -364,7 +364,7 @@ class JournalLifecycle:
         run_contract: str,
         repository_changed: Callable[[], bool],
         *,
-        max_checkpoint_attempts: int = 3,
+        max_checkpoint_attempts: int = 10,
         max_section_chars: int = 8_000,
         max_checkpoint_chars: int = 48_000,
         max_context_chars: int = 24_000,
@@ -776,7 +776,7 @@ def intent_questionnaire(cycle: int) -> str:
     ]
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
-        "Perform read-only investigation before submission. Treat the original Task to Solve as authoritative; "
+        "Use the isolated cycle experiment for decision-relevant investigation before submission. Treat the original Task to Solve as authoritative; "
         "distinguish established information, assumptions, uncertainty, and execution-dependent evidence. Verify "
         "avoidable decision-critical uncertainty where reasonably feasible. Candidate count must result from "
         "investigation: preserve multiple genuinely supported candidates, while "

@@ -10,7 +10,7 @@ from typing import Mapping, Sequence
 
 from ..config import ExecutionBudgetConfig, RuntimePolicy
 from ..models import CommandResult
-from ..workspace import RunWorkspace, TraceStore
+from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 from .policy import CommandPolicy, sanitized_agent_environment
 
 
@@ -73,9 +73,19 @@ class ProcessRunner:
         self.runtime_policy = runtime_policy
         self.command_policy = CommandPolicy()
 
-    def run_agent_shell(self, command: str, cwd: str = ".", timeout_seconds: int | None = None) -> CommandResult:
+    def run_agent_shell(
+        self,
+        command: str,
+        cwd: str = ".",
+        timeout_seconds: int | None = None,
+        repository_workspace: RepositoryWorkspace | None = None,
+    ) -> CommandResult:
+        target = repository_workspace or self.workspace.authoritative_repository()
         allowed, reason = self.command_policy.evaluate(command)
-        directory = self.workspace.repository_directory(cwd)
+        boundary_reason = _workspace_command_boundary_reason(command, target, self.workspace)
+        if boundary_reason:
+            allowed, reason = False, boundary_reason
+        directory = target.repository_directory(cwd)
         if not allowed:
             result = CommandResult(
                 command=[command],
@@ -84,7 +94,14 @@ class ProcessRunner:
                 stderr=reason or "Command blocked by policy",
                 blocked=True,
             )
-            self.trace.append_event("agent_command_blocked", command=command, cwd=str(directory), reason=reason)
+            self.trace.append_event(
+                "agent_command_blocked",
+                command=command,
+                cwd=str(directory),
+                reason=reason,
+                workspaceKind=target.kind,
+                cycle=target.cycle,
+            )
             return result
         shell_command = _host_shell_command(command)
         return self._run(
@@ -94,6 +111,7 @@ class ProcessRunner:
             environment=sanitized_agent_environment(self.workspace.root, self.runtime_policy.allow_network),
             source="agent",
             display_command=[command],
+            trace_metadata={"workspaceKind": target.kind, "cycle": target.cycle},
         )
 
     def run_deterministic_shell(
@@ -143,6 +161,7 @@ class ProcessRunner:
         source: str,
         display_command: list[str],
         redact_values: Sequence[str] = (),
+        trace_metadata: Mapping[str, object] | None = None,
     ) -> CommandResult:
         command_id = f"{source}-{uuid.uuid4().hex[:12]}"
         stdout_path = self.workspace.artifacts / "commands" / f"{command_id}.stdout.log"
@@ -198,7 +217,12 @@ class ProcessRunner:
             stdout_artifact=str(stdout_path),
             stderr_artifact=str(stderr_path),
         )
-        self.trace.append_event("command", source=source, result=result.to_dict())
+        self.trace.append_event(
+            "command",
+            source=source,
+            result=result.to_dict(),
+            **dict(trace_metadata or {}),
+        )
         return result
 
 
@@ -215,6 +239,27 @@ def _host_shell_command(command: str) -> list[str]:
             command,
         ]
     return ["/bin/bash", "-lc", command]
+
+
+def _workspace_command_boundary_reason(
+    command: str,
+    target: RepositoryWorkspace,
+    workspace: RunWorkspace,
+) -> str | None:
+    normalized = command.replace("\\", "/").casefold()
+    target_path = str(target.repository).replace("\\", "/").casefold()
+    authoritative_path = str(workspace.repository).replace("\\", "/").casefold()
+    investigation_path = str(workspace.investigation).replace("\\", "/").casefold()
+    if authoritative_path in normalized and target_path != authoritative_path:
+        return "workspace shell command references a repository outside the selected workspace"
+    if investigation_path in normalized and target.kind != "experimental":
+        return "workspace shell command references a repository outside the selected workspace"
+    if workspace.investigation.is_dir():
+        for cycle_workspace in workspace.investigation.iterdir():
+            cycle_path = str(cycle_workspace).replace("\\", "/").casefold()
+            if cycle_path in normalized and cycle_path != target_path:
+                return "workspace shell command references a historical experimental workspace"
+    return None
 
 
 def _deterministic_environment() -> dict[str, str]:

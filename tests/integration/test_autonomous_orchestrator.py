@@ -63,6 +63,16 @@ class _CleanAfterBaselineScanner(_FixtureScanner):
         return ScanReport(True, (), report.command_result, report.raw_report_path)
 
 
+class _RecordingFixtureScanner(_FixtureScanner):
+    def __init__(self, config, workspace, process_runner, trace):
+        super().__init__(config, workspace, process_runner, trace)
+        self.calls = []
+
+    def scan(self, repository, severity_scope, label):
+        self.calls.append((Path(repository), severity_scope, label))
+        return super().scan(repository, severity_scope, label)
+
+
 class _TwoFindingScanner(_FixtureScanner):
     def scan(self, repository, severity_scope, label):
         report = super().scan(repository, severity_scope, label)
@@ -198,6 +208,62 @@ class _ScriptedAgentSession:
         self.closed = True
 
 
+class _CycleWorkspaceSession(_ScriptedAgentSession):
+    def __init__(self, capabilities):
+        super().__init__(capabilities, [])
+        self.pre_intent_versions = []
+        self.previous_marker_reads = []
+
+    async def run_turn(self, message):
+        phase = self.capabilities.journal.phase
+        cycle = self.capabilities.journal.active_cycle
+        if phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                cycle,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "Cycle work is ready for deterministic validation.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Outcome submitted")
+        read = self.capabilities.read_workspace_text("pom.xml")
+        self.pre_intent_versions.append(read["content"])
+        if cycle == 1:
+            self.capabilities.edit_workspace_text("write", "cycle-one-only.txt", content="historical")
+        else:
+            self.previous_marker_reads.append(
+                self.capabilities.read_workspace_text("cycle-one-only.txt")
+            )
+            self.capabilities.edit_workspace_text("write", "cycle-two-only.txt", content="current")
+        self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
+        old, new = ("1.0", "1.5") if cycle == 1 else ("1.5", "2.0")
+        self.capabilities.edit_workspace_text(
+            "replace", "pom.xml",
+            old_text=f"<demo.version>{old}</demo.version>",
+            new_text=f"<demo.version>{new}</demo.version>",
+        )
+        return AgentTurnResult(f"cycle {cycle} implementation")
+
+
+class _EngineeringScanSession(_ScriptedAgentSession):
+    def __init__(self, capabilities):
+        super().__init__(capabilities, [])
+        self.scan_results = []
+
+    async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            return await super().run_turn(message)
+        cycle = self.capabilities.journal.active_cycle
+        self.scan_results.append(self.capabilities.scan_current_repository())
+        self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
+        self.capabilities.edit_workspace_text(
+            "replace", "pom.xml",
+            old_text="<demo.version>1.0</demo.version>",
+            new_text="<demo.version>2.0</demo.version>",
+        )
+        self.scan_results.append(self.capabilities.scan_current_repository())
+        return AgentTurnResult("implemented and obtained engineering scan evidence")
+
+
 class _DiagnosticArtifactSession(_ScriptedAgentSession):
     async def run_turn(self, message):
         if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
@@ -319,7 +385,7 @@ class _PromptLearningSession:
         self.intent_attempts = 0
         self.outcome_attempts = 0
         self.messages = []
-        self.denied_mutation = None
+        self.pre_intent_experiment = None
         self.intent_sections = []
         self.outcome_sections = []
 
@@ -357,7 +423,9 @@ class _PromptLearningSession:
             [{"section": section, "answer": _intent_answer(section)} for section in submitted],
         )
         if result["status"] != "accepted":
-            self.denied_mutation = self.capabilities.edit_workspace_text("write", "forbidden.txt", content="no")
+            self.pre_intent_experiment = self.capabilities.edit_workspace_text(
+                "write", "isolated-probe.txt", content="experiment only"
+            )
             return AgentTurnResult("Correcting rejected checkpoint")
         self.capabilities.edit_workspace_text(
             "replace",
@@ -732,8 +800,12 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, session.intent_attempts)
         self.assertIn("Missing required section: Model understanding", session.messages[1])
-        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", session.denied_mutation["failureCode"])
-        self.assertFalse((Path(result.baseline.repository_path) / "forbidden.txt").exists())
+        self.assertEqual("ok", session.pre_intent_experiment["status"])
+        self.assertEqual("experimental", session.pre_intent_experiment["workspaceKind"])
+        self.assertFalse((Path(result.baseline.repository_path) / "isolated-probe.txt").exists())
+        self.assertTrue(
+            (Path(result.workspace_root) / "investigation" / "cycle-1" / "isolated-probe.txt").is_file()
+        )
         self.assertIn("Cycle Outcome questionnaire", session.messages[-1])
         cycle = json.loads(
             (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
@@ -795,6 +867,54 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             )
         )
         self.assertIsNotNone(cycle_one["deterministicValidation"])
+
+    def test_each_cycle_experiment_forks_exact_current_authoritative_state(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _CycleWorkspaceSession(capabilities)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertIn("<demo.version>1.0</demo.version>", sessions[0].pre_intent_versions[0])
+        self.assertIn("<demo.version>1.5</demo.version>", sessions[0].pre_intent_versions[1])
+        self.assertEqual("TOOL_ERROR", sessions[0].previous_marker_reads[0]["failureCode"])
+        root = Path(result.workspace_root)
+        self.assertTrue((root / "investigation" / "cycle-1" / "cycle-one-only.txt").is_file())
+        self.assertFalse((root / "investigation" / "cycle-1" / "cycle-two-only.txt").exists())
+        self.assertFalse((root / "investigation" / "cycle-2" / "cycle-one-only.txt").exists())
+        self.assertTrue((root / "investigation" / "cycle-2" / "cycle-two-only.txt").is_file())
+        self.assertFalse((root / "repository" / "cycle-one-only.txt").exists())
+        self.assertFalse((root / "repository" / "cycle-two-only.txt").exists())
+
+    def test_engineering_scans_do_not_replace_deterministic_validation(self):
+        sessions = []
+        scanners = []
+
+        def scanner_factory(config, workspace, process_runner, trace):
+            scanner = _RecordingFixtureScanner(config, workspace, process_runner, trace)
+            scanners.append(scanner)
+            return scanner
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _EngineeringScanSession(capabilities)
+            ) or sessions[-1],
+            scanner_factory=scanner_factory,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        labels = [call[2] for call in scanners[0].calls]
+        self.assertEqual("baseline", labels[0])
+        self.assertTrue(any("engineering-cycle-1-experimental" in label for label in labels))
+        self.assertTrue(any("engineering-cycle-1-authoritative" in label for label in labels))
+        self.assertIn("validation-cycle-1", labels)
+        self.assertEqual("experimental", sessions[0].scan_results[0]["workspaceKind"])
+        self.assertEqual("authoritative", sessions[0].scan_results[1]["workspaceKind"])
 
     def test_complete_third_cycle_recovers_prior_intent_capture_failures_for_delivery(self):
         sessions = []

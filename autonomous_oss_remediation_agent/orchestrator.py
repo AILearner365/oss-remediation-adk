@@ -6,7 +6,13 @@ from pathlib import Path
 from typing import Callable
 
 from .agent import AgentSession, default_agent_session_factory
-from .capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
+from .capabilities import (
+    DeveloperCapabilitySet,
+    ExecutionBudget,
+    ProcessRunner,
+    ResearchProvider,
+    WorkspaceIO,
+)
 from .capabilities.execution import BudgetExceeded
 from .capabilities.policy import evaluate_runtime_boundary
 from .config import RemediationRequest, ScannerConfig
@@ -75,6 +81,7 @@ class AutonomousRemediationOrchestrator:
         delivery_adapter_factory: DeliveryAdapterFactory | None = None,
         agent_session_factory: AgentSessionFactory = default_agent_session_factory,
         scanner_factory: ScannerFactory = create_scanner,
+        research_provider: ResearchProvider | None = None,
     ):
         if delivery_adapter is not None and delivery_adapter_factory is not None:
             raise ValueError("Specify delivery_adapter or delivery_adapter_factory, not both")
@@ -83,6 +90,7 @@ class AutonomousRemediationOrchestrator:
         self.delivery_adapter_factory = delivery_adapter_factory
         self.agent_session_factory = agent_session_factory
         self.scanner_factory = scanner_factory
+        self.research_provider = research_provider
 
     def run(self) -> RunResult:
         return asyncio.run(self.run_async())
@@ -172,7 +180,14 @@ class AutonomousRemediationOrchestrator:
                 None,
             )
         capabilities = DeveloperCapabilitySet(
-            WorkspaceIO(workspace, trace), process_runner, budget, trace, lifecycle
+            WorkspaceIO(workspace, trace),
+            process_runner,
+            budget,
+            trace,
+            lifecycle,
+            scanner,
+            self._baseline_scan_scope(),
+            self.research_provider,
         )
         agent_session = self.agent_session_factory(capabilities, self.request.model)
         message = initial_message(self.request, baseline, task_to_solve)
@@ -187,6 +202,7 @@ class AutonomousRemediationOrchestrator:
             for cycle in range(1, self.request.budget.max_cycles + 1):
                 reason = "Configured remediation/validation cycle limit reached"
                 budget.ensure_time_remaining()
+                capabilities.begin_cycle(cycle)
                 validator.capture_cycle_start(cycle, baseline)
                 lifecycle.begin_cycle(cycle)
                 execution_turn = await self._run_until_intent(
@@ -657,6 +673,8 @@ class AutonomousRemediationOrchestrator:
                     events.append(
                         {
                             "type": "command",
+                            "workspaceKind": event.get("workspaceKind"),
+                            "cycle": event.get("cycle"),
                             "command": command.get("command"),
                             "exitCode": command.get("exitCode"),
                             "timedOut": command.get("timedOut"),
@@ -672,6 +690,8 @@ class AutonomousRemediationOrchestrator:
                     "execution_capability_invoked",
                     "execution_continuation_requested",
                     "execution_continuation_completed",
+                    "engineering_scan_completed",
+                    "research",
                 }:
                     events.append(event)
         return {

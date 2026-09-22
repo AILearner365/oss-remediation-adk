@@ -7,13 +7,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
 
-from ..workspace import RunWorkspace, TraceStore
+from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 
 
 class WorkspaceIO:
     def __init__(
         self,
-        workspace: RunWorkspace,
+        workspace: RunWorkspace | RepositoryWorkspace,
         trace: TraceStore,
         max_file_bytes: int = 2_000_000,
         max_active_listing_cursors: int = 8,
@@ -23,6 +23,19 @@ class WorkspaceIO:
         self.max_file_bytes = max_file_bytes
         self.max_active_listing_cursors = max(1, min(max_active_listing_cursors, 100))
         self._listing_cursors: dict[str, _ListingCursor] = {}
+
+    @property
+    def workspace_kind(self) -> str:
+        return getattr(self.workspace, "kind", "authoritative")
+
+    @property
+    def cycle(self) -> int | None:
+        return getattr(self.workspace, "cycle", None)
+
+    def _trace(self, event_type: str, **payload: Any) -> None:
+        payload.setdefault("workspaceKind", self.workspace_kind)
+        payload.setdefault("cycle", self.cycle)
+        self.trace.append_event(event_type, **payload)
 
     def read_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
         target = self.workspace.repository_path(path, allow_missing=False)
@@ -44,7 +57,9 @@ class WorkspaceIO:
             "totalLines": len(lines),
             "content": selected,
         }
-        self.trace.append_event("workspace_read", path=result["path"], startLine=start, endLine=end)
+        result["workspaceKind"] = self.workspace_kind
+        result["cycle"] = self.cycle
+        self._trace("workspace_read", path=result["path"], startLine=start, endLine=end)
         return result
 
     def list_files(
@@ -106,7 +121,7 @@ class WorkspaceIO:
         else:
             next_cursor = cursor_id
             truncation_reason = "PAGE_LIMIT" if len(entries) >= limit else "SCAN_LIMIT"
-        self.trace.append_event(
+        self._trace(
             "workspace_list",
             path=state.path,
             count=len(entries),
@@ -118,6 +133,8 @@ class WorkspaceIO:
         )
         return {
             "status": "ok",
+            "workspaceKind": self.workspace_kind,
+            "cycle": self.cycle,
             "files": entries,
             "path": state.path,
             "fileGlob": state.file_glob,
@@ -185,7 +202,7 @@ class WorkspaceIO:
                     break
             if len(results) >= result_limit:
                 break
-        self.trace.append_event(
+        self._trace(
             "workspace_search",
             path=str(path),
             query=query,
@@ -196,6 +213,8 @@ class WorkspaceIO:
         )
         return {
             "status": "ok",
+            "workspaceKind": self.workspace_kind,
+            "cycle": self.cycle,
             "query": query,
             "results": results,
             "searchedFiles": searched_files,
@@ -241,13 +260,15 @@ class WorkspaceIO:
         after = target.read_bytes() if target.exists() else b""
         result = {
             "status": "ok",
+            "workspaceKind": self.workspace_kind,
+            "cycle": self.cycle,
             "action": normalized_action,
             "path": path.replace("\\", "/"),
             "beforeSha256": _sha256(before),
             "afterSha256": _sha256(after) if target.exists() else None,
             "bytes": len(after),
         }
-        self.trace.append_event("workspace_edit", **result)
+        self._trace("workspace_edit", **result)
         return result
 
     def _write(self, target: Path, content: bytes) -> None:

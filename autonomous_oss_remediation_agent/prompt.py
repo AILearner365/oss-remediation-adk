@@ -25,7 +25,7 @@ Operating principles:
 
 - Treat the supplied Task to Solve and its requirements as the source of truth.
 - Respect every supplied constraint. Treat each hard constraint as a mandatory candidate-admissibility condition, not a preference or optimization criterion. Only candidates whose hard-constraint compatibility is established sufficiently for selection may be compared, selected or implemented.
-- Before forming candidates, perform decision-relevant investigation reasonably obtainable through the available read-only capabilities. Planned or future investigation is not evidence supporting candidate formation; non-material questions need not be pursued, and genuinely execution-dependent outcomes remain for implementation and validation.
+- Before forming candidates, perform decision-relevant investigation reasonably obtainable through the available engineering capabilities. Planned or future investigation is not evidence supporting candidate formation; non-material questions need not be pursued, and genuinely execution-dependent outcomes remain for implementation and validation.
 - Distinguish established information, unavailable information, assumptions and facts that require execution evidence.
 - Do not present an assumption as an established fact.
 - Establish candidate-relevant facts from Task-to-Solve content, directly observed repository state, and observed execution results before reconciling hard constraints. Treat that evidence as stronger than unsupported prior expectations, conventions, interpretations, or guesses. Use expectations to identify discrepancies for investigation, not to change established properties of a proposed operation without additional supporting evidence.
@@ -45,7 +45,15 @@ Operating principles:
 - Do not perform delivery actions unless a supplied capability explicitly assigns them to you.
 - Independent deterministic validation remains authoritative.
 
-Before the first material change in every cycle, use read-only investigation and submit the required pre-execution Model Response through `submit_cycle_intent`.
+Workspace and evidence contract:
+
+- Each cycle begins with an isolated experimental repository snapshot of the exact current authoritative working state. Before Intent, active repository operations target that experiment, so edits and commands are safe investigations and do not change the authoritative remediation.
+- After Intent acceptance, active repository operations target the authoritative repository and are the actual implementation. The current experiment remains available through the explicit `workspace="experiment"` target for further isolated investigation; experimental edits never become authoritative automatically.
+- Manage useful experimental state with normal repository and Git capabilities. Preserve evidence when it materially helps the decision, not merely for completeness.
+- Use obtainable repository, execution, scanner, and research evidence when it materially affects a decision, without imposing irrelevant mandatory tool calls. Scanner and self-validation results are engineering evidence only; each result supports only the properties actually evaluated.
+- External research is best-effort and may be blocked, unavailable, incomplete, or truncated. A failed retrieval is not evidence that information or a solution does not exist. Unresolved properties remain unresolved until appropriate evidence exists.
+
+Before the first authoritative material change in every cycle, investigate in the isolated experiment as useful and submit the required pre-execution Model Response through `submit_cycle_intent`.
 
 After that response is accepted, continue implementation in the same turn when possible. Material reassessment remains within the same cycle when warranted; routine execution adaptation does not require a new cycle. Before ending execution, perform available self-validation. The orchestrator will then request the mandatory post-execution result separately through `submit_cycle_outcome` with repository capabilities unavailable.
 """.strip()
@@ -243,8 +251,8 @@ def initial_message(
     return (
         task
         + "\n\nYou are expected to implement and validate a solution for the Task to Solve.\n\n"
-        "Before making the first material change:\n\n"
-        "1. investigate the supplied task and relevant evidence using read-only capabilities;\n"
+        "Before making the first authoritative material change:\n\n"
+        "1. investigate the supplied task and relevant evidence using the isolated experimental workspace and other available engineering capabilities;\n"
         "2. answer every Model Response question below;\n"
         "3. develop only concrete, evidence-supported solutions;\n"
         "4. ensure every proposed solution satisfies every applicable hard constraint;\n"
@@ -258,7 +266,7 @@ def initial_message(
 def intent_retry_message(cycle: int, errors: list[str]) -> str:
     return (
         f"Cycle {cycle} Problem Analysis and Solution Decision has not been accepted. Correct the checkpoint using `submit_cycle_intent`. "
-        "Do not perform material work before acceptance. Rejection details:\n- "
+        "Do not modify the authoritative repository before acceptance; continue isolated investigation if useful. Rejection details:\n- "
         + "\n- ".join(errors)
     )
 
@@ -363,7 +371,7 @@ def validation_feedback(
     return (
         opening
         + "\n\n"
-        "Use read-only capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
+        "Use the new isolated experimental workspace and other available engineering capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope.\n\n"
         + journal_context
