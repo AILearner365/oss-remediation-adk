@@ -6,6 +6,8 @@ from typing import Any
 from urllib.parse import quote_plus, urlparse
 
 import requests
+import trafilatura
+from bs4 import BeautifulSoup
 from google.adk.tools import FunctionTool
 
 
@@ -72,15 +74,7 @@ def search_web(query: str, max_results: int = 5) -> dict[str, Any]:
                     http_status=response.status_code,
                 )
 
-            try:
-                from bs4 import BeautifulSoup
-            except ImportError:
-                return _error(
-                    "missing_dependency",
-                    "Search result extraction requires beautifulsoup4. Install the project dependency before using this tool.",
-                )
-
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(response.text, "lxml")
             results: list[dict[str, str]] = []
             seen: set[str] = set()
 
@@ -212,12 +206,14 @@ def fetch_web_page(url: str) -> dict[str, Any]:
                 text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())
             else:
                 title = None
+                extraction_method = "direct"
 
             return {
                 "status": "ok",
                 "url": response.url,
                 "title": title,
                 "content_type": content_type,
+                "extraction_method": extraction_method,
                 "content": text[:MAX_CONTENT_CHARS],
                 "truncated": len(text) > MAX_CONTENT_CHARS,
             }
