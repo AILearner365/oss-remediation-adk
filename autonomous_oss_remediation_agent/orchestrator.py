@@ -224,7 +224,7 @@ class AutonomousRemediationOrchestrator:
                 validation_status = _validation_status(last_validation)
                 last_delivery = _delivery_eligibility(
                     last_validation,
-                    lifecycle.run_capture_status,
+                    lifecycle.run_capture_status_for(last_validation),
                     lifecycle.outcome_status(cycle),
                     delivery_preflight.eligible,
                 )
@@ -366,7 +366,7 @@ class AutonomousRemediationOrchestrator:
                     validation_status = _validation_status(last_validation)
                     last_delivery = _delivery_eligibility(
                         last_validation,
-                        lifecycle.run_capture_status,
+                        lifecycle.run_capture_status_for(last_validation),
                         lifecycle.outcome_status(cycle),
                         delivery_preflight.eligible,
                     )

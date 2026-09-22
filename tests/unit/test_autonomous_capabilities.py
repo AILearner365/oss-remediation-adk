@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from google.adk.models import Gemini
+
 from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
@@ -184,6 +186,14 @@ class AutonomousCapabilityTests(unittest.TestCase):
     def test_one_primary_adk_agent_uses_capability_surface(self):
         agent = create_remediation_agent(self.capabilities, "gemini-2.5-flash")
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
+        self.assertIsInstance(agent.model, Gemini)
+        self.assertEqual("gemini-2.5-flash", agent.model.model)
+        self.assertEqual(3, agent.model.retry_options.attempts)
+        self.assertEqual(1.0, agent.model.retry_options.initial_delay)
+        self.assertEqual(8.0, agent.model.retry_options.max_delay)
+        self.assertEqual(2.0, agent.model.retry_options.exp_base)
+        self.assertEqual(1.0, agent.model.retry_options.jitter)
+        self.assertIsNone(agent.model.retry_options.http_status_codes)
         names = {tool.name for tool in agent.tools}
         self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
 

@@ -397,6 +397,21 @@ class _MissingFirstIntentSession(_ScriptedAgentSession):
         return await super().run_turn(message)
 
 
+class _MissingInitialIntentsSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits, failed_cycles):
+        super().__init__(capabilities, edits)
+        self.failed_cycles = frozenset(failed_cycles)
+
+    async def run_turn(self, message):
+        if (
+            self.capabilities.journal.phase == JournalPhase.INTENT_REQUIRED
+            and self.capabilities.journal.active_cycle in self.failed_cycles
+        ):
+            self.messages.append(message)
+            return AgentTurnResult("Intent not submitted")
+        return await super().run_turn(message)
+
+
 class _FutureOutcomeThenCorrectSession(_ScriptedAgentSession):
     def __init__(self, capabilities, edits):
         super().__init__(capabilities, edits)
@@ -744,7 +759,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(2, session.outcome_attempts)
         self.assertIn("Missing required section: Implementation Result", session.messages[-1])
 
-    def test_incomplete_cycle_one_capture_is_not_hidden_by_complete_cycle_two(self):
+    def test_complete_later_cycle_recovers_prior_outcome_capture_failure_for_delivery(self):
         sessions = []
         adapter = _RecordingDeliveryAdapter()
         result = AutonomousRemediationOrchestrator(
@@ -759,10 +774,11 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         ).run()
 
         self.assertTrue(result.validation.passed)
-        self.assertEqual("INCOMPLETE", result.capture_status)
+        self.assertEqual(Outcome.SUCCESS, result.outcome)
+        self.assertEqual("COMPLETE", result.capture_status)
         self.assertIn("Cycle 1 capture is INCOMPLETE", result.capture_warnings)
-        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
-        self.assertEqual([], adapter.contexts)
+        self.assertEqual("FULL_AUTOMATIC_DELIVERY", result.delivery_eligibility)
+        self.assertEqual(1, len(adapter.contexts))
         self.assertEqual(10, sessions[0].outcome_attempts[1])
         cycle_one = json.loads(
             (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
@@ -779,6 +795,51 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             )
         )
         self.assertIsNotNone(cycle_one["deterministicValidation"])
+
+    def test_complete_third_cycle_recovers_prior_intent_capture_failures_for_delivery(self):
+        sessions = []
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=3),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _MissingInitialIntentsSession(
+                    capabilities, [("1.0", "2.0")], failed_cycles={1, 2}
+                )
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertEqual(Outcome.SUCCESS, result.outcome)
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("FULLY_VALIDATED", result.remediation_outcome)
+        self.assertEqual("COMPLETE", result.capture_status)
+        self.assertEqual("FULL_AUTOMATIC_DELIVERY", result.delivery_eligibility)
+        self.assertEqual(3, result.cycles_completed)
+        self.assertEqual(1, len(adapter.contexts))
+        self.assertIn("Cycle 1 capture is INCOMPLETE", result.capture_warnings)
+        self.assertIn("Cycle 2 capture is INCOMPLETE", result.capture_warnings)
+
+        workspace = Path(result.workspace_root)
+        for cycle in (1, 2):
+            artifact = json.loads(
+                (workspace / "artifacts" / "agent" / f"cycle-{cycle}.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual("INCOMPLETE", artifact["captureStatus"])
+            self.assertEqual("FAILED", artifact["lifecycle"]["intent"]["status"])
+            self.assertEqual("NOT_EXECUTED", artifact["lifecycle"]["implementation"]["status"])
+            self.assertEqual("NOT_REQUESTED", artifact["lifecycle"]["outcome"]["status"])
+            self.assertIsNotNone(artifact["deterministicValidation"])
+        cycle_three = json.loads(
+            (workspace / "artifacts" / "agent" / "cycle-3.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual("COMPLETE", cycle_three["captureStatus"])
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("# Cycle 1", journal)
+        self.assertIn("# Cycle 2", journal)
+        self.assertIn("# Cycle 3", journal)
 
     def test_fully_validated_cycle_with_failed_outcome_continues_with_truthful_context(self):
         sessions = []

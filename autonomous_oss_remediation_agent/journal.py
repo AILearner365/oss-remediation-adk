@@ -407,6 +407,11 @@ class JournalLifecycle:
 
     @property
     def run_capture_status(self) -> CaptureStatus:
+        return self.run_capture_status_for()
+
+    def run_capture_status_for(
+        self, final_validation: ValidationReport | None = None
+    ) -> CaptureStatus:
         if not self.cycles:
             return CaptureStatus.MISSING
         trust = {
@@ -415,7 +420,32 @@ class JournalLifecycle:
             CaptureStatus.LATE: 2,
             CaptureStatus.COMPLETE: 3,
         }
-        return min((capture.status for capture in self.cycles.values()), key=trust.__getitem__)
+        historical_status = min(
+            (capture.status for capture in self.cycles.values()), key=trust.__getitem__
+        )
+        if historical_status == CaptureStatus.COMPLETE:
+            return historical_status
+
+        latest_cycle = max(self.cycles)
+        latest_capture = self.cycles[latest_cycle]
+        validation = final_validation or latest_capture.validation_report
+        if (
+            latest_capture.status != CaptureStatus.COMPLETE
+            or validation is None
+            or validation.cycle != latest_cycle
+            or not validation.passed
+        ):
+            return historical_status
+
+        earlier_captures = (
+            self.cycles[cycle] for cycle in sorted(self.cycles) if cycle < latest_cycle
+        )
+        if all(
+            capture.capture_recovery_required and capture.validation_report is not None
+            for capture in earlier_captures
+        ):
+            return CaptureStatus.COMPLETE
+        return historical_status
 
     def capture_warnings(self) -> tuple[str, ...]:
         if not self.cycles:

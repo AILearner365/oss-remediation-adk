@@ -5,6 +5,7 @@ from contextlib import aclosing
 from typing import Protocol
 
 from google.adk.agents import LlmAgent, RunConfig
+from google.adk.models import Gemini
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
@@ -17,7 +18,16 @@ from .prompt import AGENT_INSTRUCTION
 def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -> LlmAgent:
     return LlmAgent(
         name="autonomous_oss_remediation_agent",
-        model=model,
+        model=Gemini(
+            model=model,
+            retry_options=types.HttpRetryOptions(
+                attempts=3,
+                initial_delay=1.0,
+                max_delay=8.0,
+                exp_base=2.0,
+                jitter=1.0,
+            ),
+        ),
         description="Autonomously investigates and remediates OSS vulnerabilities in one prepared repository.",
         instruction=AGENT_INSTRUCTION,
         tools=capabilities.adk_tools(),
