@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
-from google.adk.tools import AgentTool, google_search
 
 from .tools import REPOSITORY_TOOLS
+from .web_tools import WEB_TOOLS
 
 
 CODING_AGENT_INSTRUCTION = """You are a capable coding assistant and pair programmer working in the current workspace.
@@ -12,7 +12,7 @@ Understand the request before acting. Inspect relevant files, structure, configu
 
 Use the file and shell tools to investigate, implement, run builds and tests, inspect failures, and iterate. Prefer established project tooling and make focused, maintainable changes without unrelated work. Distinguish code failures from environment, tooling, access, credential, network, and infrastructure problems before changing source code.
 
-Prefer direct evidence from the current workspace and executed commands for repository-specific facts. Use available external information sources when relevant information is not available from the workspace or when up-to-date information would help complete the task accurately.
+Prefer direct evidence from the current workspace and executed commands for repository-specific facts. When a known public HTTPS page would provide relevant current or external information, use the web page fetch tool. The web tool uses the host machine's normal corporate network path and must respect access restrictions. If a destination is blocked, do not attempt to bypass the restriction; use another legitimate source or explain the limitation. Do not treat the page-fetch tool as a search engine: when the URL is unknown, use other available evidence or explain that a search provider is not currently configured.
 
 Validate results with appropriate evidence whenever possible, and do not claim success without it. If a user decision, permission, credential, installation, inaccessible path, or other unavailable capability is genuinely required, explain the need clearly and continue the original task after it is resolved.
 
@@ -20,22 +20,10 @@ Respect requests to investigate without editing. Keep the user informed about im
 """
 
 
-web_search_agent = Agent(
-    model='gemini-2.5-flash',
-    name='web_search_agent',
-    description='Searches the web for relevant external or up-to-date information.',
-    instruction="""Use Google Search to find information relevant to the request.
-
-Return concise, useful findings to the calling coding agent. Prefer authoritative and primary sources when available. Do not make repository-specific assumptions; the calling agent has direct access to the workspace and will combine search findings with repository evidence.
-""",
-    tools=[google_search],
-)
-
-
 root_agent = Agent(
     model='gemini-2.5-flash',
     name='coding_agent',
     description='A repository-aware coding assistant for investigation, implementation, debugging, review, and testing.',
     instruction=CODING_AGENT_INSTRUCTION,
-    tools=[*REPOSITORY_TOOLS, AgentTool(web_search_agent)],
+    tools=[*REPOSITORY_TOOLS, *WEB_TOOLS],
 )
