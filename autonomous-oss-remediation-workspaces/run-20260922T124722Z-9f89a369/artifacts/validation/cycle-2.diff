@@ -1,0 +1,47 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..bb10aa2 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -32,6 +32,10 @@
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+ 
++        <spring-framework.version>7.0.8</spring-framework.version>
++        <micrometer.version>1.16.6</micrometer.version>
++        <tomcat.version>11.0.25</tomcat.version>
++
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+         <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>
+@@ -54,18 +58,29 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++            <!-- Jackson dependencyManagement for vulnerability fixes -->
++            <dependency>
++                <groupId>com.fasterxml.jackson.core</groupId>
++                <artifactId>jackson-core</artifactId>
++                <version>3.1.4</version>
++            </dependency>
++            <dependency>
++                <groupId>com.fasterxml.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>3.1.4</version>
++            </dependency>
+         </dependencies>
+     </dependencyManagement>
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
++            <version>1.10.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
++            <version>20231013</version>
+         </dependency>
+     </dependencies>
+     <build>

@@ -1,0 +1,69 @@
+{
+  "captureStatus": "COMPLETE",
+  "deterministicValidation": {
+    "capturedAt": "2026-09-22T12:56:42.253691+00:00",
+    "contentHash": "899531388d984f5f2542d1318285aa46f68915597bec3f2281ed74414b9f3b91",
+    "cycle": 1,
+    "endOffset": 48074,
+    "kind": "deterministic_validation",
+    "startOffset": 44587
+  },
+  "intent": {
+    "capturedAt": "2026-09-22T12:51:23.478763+00:00",
+    "contentHash": "730b2dab209b289654486ee41df8b1042185882f2e858859da7d6037c82afc90",
+    "cycle": 1,
+    "endOffset": 37212,
+    "kind": "intent",
+    "startOffset": 26352
+  },
+  "journalPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T124722Z-9f89a369/artifacts/agent/decision-journal.md",
+  "lifecycle": {
+    "implementation": {
+      "message": null,
+      "status": "EXECUTED"
+    },
+    "intent": {
+      "answers": {
+        "Concrete candidate solutions": {
+          "status": "CAPTURED"
+        },
+        "Information, investigation and remaining uncertainty": {
+          "status": "CAPTURED"
+        },
+        "Model understanding": {
+          "status": "CAPTURED"
+        },
+        "Selected solution": {
+          "status": "CAPTURED"
+        }
+      },
+      "message": null,
+      "status": "CAPTURED"
+    },
+    "outcome": {
+      "answers": {
+        "Cycle Intent vs. Implementation": {
+          "status": "CAPTURED"
+        },
+        "Implementation Result": {
+          "status": "CAPTURED"
+        },
+        "Implementation Trail": {
+          "status": "CAPTURED"
+        }
+      },
+      "message": null,
+      "status": "CAPTURED"
+    }
+  },
+  "outcome": {
+    "capturedAt": "2026-09-22T12:56:15.803831+00:00",
+    "contentHash": "306260dde165bfa18f97c0dd532d4bae6ec48f49c549dbb6af0c3eed886cc429",
+    "cycle": 1,
+    "endOffset": 44587,
+    "kind": "outcome",
+    "startOffset": 37212
+  },
+  "outcomeCaptureResponse": "",
+  "summary": ""
+}
