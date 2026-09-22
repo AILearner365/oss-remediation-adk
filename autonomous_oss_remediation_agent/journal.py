@@ -29,6 +29,19 @@ class CaptureStatus(str, Enum):
     MISSING = "MISSING"
 
 
+class CheckpointCaptureStatus(str, Enum):
+    PENDING = "PENDING"
+    CAPTURED = "CAPTURED"
+    FAILED = "FAILED"
+    NOT_REQUESTED = "NOT_REQUESTED"
+
+
+class ImplementationStatus(str, Enum):
+    PENDING = "PENDING"
+    EXECUTED = "EXECUTED"
+    NOT_EXECUTED = "NOT_EXECUTED"
+
+
 class RemediationOutcome(str, Enum):
     FULLY_VALIDATED = "FULLY_VALIDATED"
     PARTIALLY_REMEDIATED = "PARTIALLY_REMEDIATED"
@@ -170,6 +183,19 @@ BASELINE_CONTRACT_DESCRIPTION = (
     "information used to construct the canonical Task to Solve and evaluate subsequent changes."
 )
 
+INTENT_CAPTURE_FAILURE_MESSAGE = (
+    "The required Cycle Intent was not successfully captured within the allowed retry attempts."
+)
+IMPLEMENTATION_NOT_EXECUTED_MESSAGE = (
+    "Implementation was not executed because the required Cycle Intent was not successfully captured."
+)
+OUTCOME_NOT_REQUESTED_MESSAGE = (
+    "Cycle Outcome was not requested because implementation was not executed."
+)
+OUTCOME_CAPTURE_FAILURE_MESSAGE = (
+    "The required Cycle Outcome was not successfully captured within the allowed retry attempts."
+)
+
 
 @dataclass(frozen=True)
 class JournalSection:
@@ -219,14 +245,65 @@ class CycleCapture:
     last_intent_errors: tuple[str, ...] = ()
     last_outcome_errors: tuple[str, ...] = ()
     validation_report: ValidationReport | None = None
+    intent_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
+    implementation_status: ImplementationStatus = ImplementationStatus.PENDING
+    outcome_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
 
     @property
     def status(self) -> CaptureStatus:
         if self.intent and self.outcome:
             return CaptureStatus.LATE if self.late_intent else CaptureStatus.COMPLETE
-        if self.intent or self.outcome:
+        if self.intent or self.outcome or self.capture_recovery_required:
             return CaptureStatus.INCOMPLETE
         return CaptureStatus.MISSING
+
+    @property
+    def capture_recovery_required(self) -> bool:
+        return (
+            self.intent_capture_status == CheckpointCaptureStatus.FAILED
+            or self.outcome_capture_status == CheckpointCaptureStatus.FAILED
+        )
+
+    def lifecycle_state(self, cycle: int) -> dict[str, Any]:
+        intent_sections = (*INTENT_SECTIONS, *PRIOR_CYCLE_INTENT_SECTIONS) if cycle > 1 else INTENT_SECTIONS
+        intent_reason = (
+            "Cycle Intent capture failed."
+            if self.intent_capture_status == CheckpointCaptureStatus.FAILED
+            else None
+        )
+        outcome_reason = (
+            "Cycle Outcome capture failed."
+            if self.outcome_capture_status == CheckpointCaptureStatus.FAILED
+            else "Cycle Outcome was not requested."
+            if self.outcome_capture_status == CheckpointCaptureStatus.NOT_REQUESTED
+            else None
+        )
+        return {
+            "intent": {
+                "status": self.intent_capture_status.value,
+                "message": INTENT_CAPTURE_FAILURE_MESSAGE if intent_reason else None,
+                "answers": _answer_capture_states(intent_sections, self.intent is not None, intent_reason),
+            },
+            "implementation": {
+                "status": self.implementation_status.value,
+                "message": (
+                    IMPLEMENTATION_NOT_EXECUTED_MESSAGE
+                    if self.implementation_status == ImplementationStatus.NOT_EXECUTED
+                    else None
+                ),
+            },
+            "outcome": {
+                "status": self.outcome_capture_status.value,
+                "message": (
+                    OUTCOME_CAPTURE_FAILURE_MESSAGE
+                    if self.outcome_capture_status == CheckpointCaptureStatus.FAILED
+                    else OUTCOME_NOT_REQUESTED_MESSAGE
+                    if self.outcome_capture_status == CheckpointCaptureStatus.NOT_REQUESTED
+                    else None
+                ),
+                "answers": _answer_capture_states(OUTCOME_SECTIONS, self.outcome is not None, outcome_reason),
+            },
+        }
 
 
 class JournalStore:
@@ -379,6 +456,7 @@ class JournalLifecycle:
         capture.intent_answers = {
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
         }
+        capture.intent_capture_status = CheckpointCaptureStatus.CAPTURED
         capture.late_intent = late
         capture.last_intent_errors = ()
         self.phase = JournalPhase.EXECUTION
@@ -391,8 +469,42 @@ class JournalLifecycle:
         return CheckpointResult(True, metadata=capture.intent)
 
     def require_outcome(self) -> None:
+        capture = self.cycles.setdefault(self.active_cycle, CycleCapture())
+        capture.implementation_status = ImplementationStatus.EXECUTED
         self.phase = JournalPhase.OUTCOME_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=self.active_cycle, phase=self.phase.value)
+
+    def fail_intent_capture(self, cycle: int) -> None:
+        capture = self.cycles.setdefault(cycle, CycleCapture())
+        if capture.intent is not None:
+            raise RuntimeError(f"Cycle {cycle} intent has already been accepted")
+        capture.intent_capture_status = CheckpointCaptureStatus.FAILED
+        capture.implementation_status = ImplementationStatus.NOT_EXECUTED
+        capture.outcome_capture_status = CheckpointCaptureStatus.NOT_REQUESTED
+        self.phase = JournalPhase.DETERMINISTIC_VALIDATION
+        self.trace.append_event(
+            "intent_capture_failed",
+            cycle=cycle,
+            message=INTENT_CAPTURE_FAILURE_MESSAGE,
+        )
+        self.trace.append_event(
+            "journal_phase_changed", cycle=cycle, phase=self.phase.value
+        )
+
+    def fail_outcome_capture(self, cycle: int) -> None:
+        capture = self.cycles.setdefault(cycle, CycleCapture())
+        if capture.outcome is not None:
+            raise RuntimeError(f"Cycle {cycle} outcome has already been accepted")
+        capture.outcome_capture_status = CheckpointCaptureStatus.FAILED
+        self.phase = JournalPhase.DETERMINISTIC_VALIDATION
+        self.trace.append_event(
+            "outcome_capture_failed",
+            cycle=cycle,
+            message=OUTCOME_CAPTURE_FAILURE_MESSAGE,
+        )
+        self.trace.append_event(
+            "journal_phase_changed", cycle=cycle, phase=self.phase.value
+        )
 
     def submit_outcome(
         self,
@@ -423,6 +535,7 @@ class JournalLifecycle:
         capture.outcome_answers = {
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
         }
+        capture.outcome_capture_status = CheckpointCaptureStatus.CAPTURED
         capture.outcome_status = normalized_status
         capture.last_outcome_errors = ()
         self.phase = JournalPhase.DETERMINISTIC_VALIDATION
@@ -441,7 +554,7 @@ class JournalLifecycle:
         delivery: DeliveryEligibility,
     ) -> JournalSection:
         capture = self.cycles.setdefault(report.cycle, CycleCapture())
-        rendered = render_validation(report, status, delivery, capture.outcome_status)
+        rendered = render_validation(report, status, delivery, capture.outcome_status, capture)
         errors = validate_rendered_markdown(rendered, f"Cycle {report.cycle} — Deterministic Validation")
         if errors:
             raise RuntimeError("Invalid deterministic validation journal section: " + "; ".join(errors))
@@ -469,6 +582,9 @@ class JournalLifecycle:
         selected_cycle = cycle or self.active_cycle
         capture = self.cycles.get(selected_cycle)
         return capture.outcome_status if capture else None
+
+    def cycle_state(self, cycle: int) -> dict[str, Any]:
+        return self.cycles.setdefault(cycle, CycleCapture()).lifecycle_state(cycle)
 
     def context(self) -> str:
         content = self.store.read()
@@ -851,17 +967,60 @@ def _markdown_structure(content: str) -> tuple[list[str], list[tuple[int, str]]]
     return errors, headings
 
 
+def _answer_capture_states(
+    sections: Iterable[str],
+    captured: bool,
+    reason: str | None,
+) -> dict[str, dict[str, str]]:
+    result: dict[str, dict[str, str]] = {}
+    for section in sections:
+        state = {"status": "CAPTURED" if captured else "NOT_CAPTURED"}
+        if not captured and reason:
+            state["reason"] = reason
+        result[section] = state
+    return result
+
+
+def _render_cycle_lifecycle_state(capture: CycleCapture, cycle: int) -> list[str]:
+    state = capture.lifecycle_state(cycle)
+    lines: list[str] = []
+    for label, key in (
+        ("Cycle Intent", "intent"),
+        ("Implementation", "implementation"),
+        ("Cycle Outcome", "outcome"),
+    ):
+        item = state[key]
+        suffix = f" — {item['message']}" if item.get("message") else ""
+        lines.append(f"- **{label}:** `{item['status']}`{suffix}")
+    for label, key in (
+        ("Cycle Intent questionnaire answers", "intent"),
+        ("Cycle Outcome questionnaire answers", "outcome"),
+    ):
+        if all(item["status"] == "CAPTURED" for item in state[key]["answers"].values()):
+            continue
+        lines.extend(("", f"### {label}", ""))
+        for section, answer_state in state[key]["answers"].items():
+            suffix = f" — {answer_state['reason']}" if answer_state.get("reason") else ""
+            lines.append(f"- **{section}:** `{answer_state['status']}`{suffix}")
+    return lines
+
+
 def render_validation(
     report: ValidationReport,
     status: ValidationStatus,
     delivery: DeliveryEligibility,
     outcome_status: str | None,
+    capture: CycleCapture,
 ) -> str:
     failed = [check for check in report.checks if not check.passed]
     passed = [check for check in report.checks if check.passed]
     diagnostics = list(report.diagnostic_artifacts)
     lines = [
         f"# Cycle {report.cycle} — Deterministic Validation",
+        "",
+        "## Cycle lifecycle state",
+        "",
+        *_render_cycle_lifecycle_state(capture, report.cycle),
         "",
         "## Validation result",
         "",
@@ -925,7 +1084,13 @@ def render_validation(
             "",
             "## Next-cycle requirement",
             "",
-            "Not applicable." if report.passed else "Address failed checks and unresolved requirements without replacing the original run contract.",
+            (
+                "A later cycle may reassess the current validated repository state and complete its own required checkpoints; checkpoint failure alone does not require another repository change."
+                if report.passed and capture.capture_recovery_required
+                else "Not applicable."
+                if report.passed
+                else "Address failed checks and unresolved requirements without replacing the original run contract."
+            ),
         ]
     )
     return "\n".join(lines)
@@ -1076,10 +1241,12 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
         return "- No remediation cycle was captured."
     lines: list[str] = []
     for cycle, capture in sorted(cycles.items()):
-        selected = capture.intent_answers.get("Selected solution", "Not captured")
-        final = capture.outcome_answers.get("Implementation Result", "Not captured")
-        deviations = capture.outcome_answers.get("Cycle Intent vs. Implementation", "Not captured")
-        trail = capture.outcome_answers.get("Implementation Trail", "Not captured")
+        selected = _captured_answer_or_state(capture, cycle, "intent", "Selected solution")
+        final = _captured_answer_or_state(capture, cycle, "outcome", "Implementation Result")
+        deviations = _captured_answer_or_state(
+            capture, cycle, "outcome", "Cycle Intent vs. Implementation"
+        )
+        trail = _captured_answer_or_state(capture, cycle, "outcome", "Implementation Trail")
         report = capture.validation_report
         if report:
             failed = [check.name for check in report.checks if not check.passed]
@@ -1100,6 +1267,20 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
             )
         )
     return "\n".join(lines)
+
+
+def _captured_answer_or_state(
+    capture: CycleCapture,
+    cycle: int,
+    checkpoint: str,
+    section: str,
+) -> str:
+    answers = capture.intent_answers if checkpoint == "intent" else capture.outcome_answers
+    if section in answers:
+        return answers[section]
+    state = capture.lifecycle_state(cycle)[checkpoint]["answers"][section]
+    reason = state.get("reason")
+    return f"{state['status']} — {reason}" if reason else state["status"]
 
 
 def _inline(content: str, limit: int = 600) -> str:

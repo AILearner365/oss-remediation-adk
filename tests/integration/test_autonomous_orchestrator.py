@@ -372,12 +372,28 @@ class _PromptLearningSession:
 
 
 class _MissingFirstOutcomeSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits, outcome_status="READY_FOR_INDEPENDENT_VALIDATION"):
+        super().__init__(capabilities, edits, outcome_status)
+        self.outcome_attempts = {}
+
     async def run_turn(self, message):
         if (
             self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED
             and self.capabilities.journal.active_cycle == 1
         ):
+            self.outcome_attempts[1] = self.outcome_attempts.get(1, 0) + 1
             return AgentTurnResult("Outcome not submitted")
+        return await super().run_turn(message)
+
+
+class _MissingFirstIntentSession(_ScriptedAgentSession):
+    async def run_turn(self, message):
+        if (
+            self.capabilities.journal.phase == JournalPhase.INTENT_REQUIRED
+            and self.capabilities.journal.active_cycle == 1
+        ):
+            self.messages.append(message)
+            return AgentTurnResult("Intent not submitted")
         return await super().run_turn(message)
 
 
@@ -684,6 +700,14 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", session.denied_mutation["failureCode"])
         self.assertFalse((Path(result.baseline.repository_path) / "forbidden.txt").exists())
         self.assertIn("Cycle Outcome questionnaire", session.messages[-1])
+        cycle = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("CAPTURED", cycle["lifecycle"]["intent"]["status"])
+        self.assertEqual("EXECUTED", cycle["lifecycle"]["implementation"]["status"])
+        self.assertEqual("CAPTURED", cycle["lifecycle"]["outcome"]["status"])
 
     def test_outcome_retry_contains_exact_structural_error(self):
         sessions = []
@@ -701,12 +725,15 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("Missing required section: Implementation Result", session.messages[-1])
 
     def test_incomplete_cycle_one_capture_is_not_hidden_by_complete_cycle_two(self):
+        sessions = []
         adapter = _RecordingDeliveryAdapter()
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=2),
-            agent_session_factory=lambda capabilities, model: _MissingFirstOutcomeSession(
-                capabilities, [("1.0", "1.5"), ("1.5", "2.0")]
-            ),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _MissingFirstOutcomeSession(
+                    capabilities, [("1.0", "1.5"), ("1.5", "2.0")]
+                )
+            ) or sessions[-1],
             scanner_factory=_FixtureScanner,
             delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
         ).run()
@@ -716,6 +743,79 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("Cycle 1 capture is INCOMPLETE", result.capture_warnings)
         self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
         self.assertEqual([], adapter.contexts)
+        self.assertEqual(10, sessions[0].outcome_attempts[1])
+        cycle_one = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("CAPTURED", cycle_one["lifecycle"]["intent"]["status"])
+        self.assertEqual("EXECUTED", cycle_one["lifecycle"]["implementation"]["status"])
+        self.assertEqual("FAILED", cycle_one["lifecycle"]["outcome"]["status"])
+        self.assertTrue(
+            all(
+                item["status"] == "NOT_CAPTURED"
+                for item in cycle_one["lifecycle"]["outcome"]["answers"].values()
+            )
+        )
+        self.assertIsNotNone(cycle_one["deterministicValidation"])
+
+    def test_fully_validated_cycle_with_failed_outcome_continues_with_truthful_context(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _MissingFirstOutcomeSession(capabilities, [("1.0", "2.0")])
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(2, result.cycles_completed)
+        self.assertEqual(10, sessions[0].outcome_attempts[1])
+        continuation = sessions[0].messages[1]
+        self.assertIn("Deterministic validation established success", continuation)
+        self.assertIn("checkpoint failure alone is not evidence that another repository change is needed", continuation)
+        self.assertIn("**Cycle Intent:** `CAPTURED`", continuation)
+        self.assertIn("**Implementation:** `EXECUTED`", continuation)
+        self.assertIn("**Cycle Outcome:** `FAILED`", continuation)
+        self.assertIn("All authoritative checks passed", continuation)
+        self.assertIn('"status": "FAILED"', continuation)
+        self.assertIn("**Implementation Result:** `NOT_CAPTURED`", continuation)
+        cycle_one = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertTrue(cycle_one["deterministicValidation"])
+        self.assertEqual("FAILED", cycle_one["lifecycle"]["outcome"]["status"])
+        events = [
+            json.loads(line)
+            for line in (
+                Path(result.workspace_root) / "artifacts" / "events.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        cycle_one_execution = [
+            event
+            for event in events
+            if event["type"] == "execution_capability_invoked" and event.get("cycle") == 1
+        ]
+        self.assertEqual(1, len(cycle_one_execution))
+
+    def test_final_fully_validated_cycle_with_failed_outcome_remains_manual_review(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: _MissingFirstOutcomeSession(
+                capabilities, [("1.0", "2.0")]
+            ),
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("INCOMPLETE", result.capture_status)
+        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
+        self.assertEqual(1, result.cycles_completed)
 
     def test_cycle_evidence_identifies_preserved_and_repeated_repository_state(self):
         sessions = []
@@ -892,6 +992,76 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             sessions[0].messages[1],
         )
         self.assertNotIn("No Cycle Intent submission", sessions[0].messages[1])
+        self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
+        self.assertEqual("INCOMPLETE", result.capture_status)
+        self.assertIsNotNone(result.validation)
+        self.assertEqual(1, result.cycles_completed)
+        cycle = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("FAILED", cycle["lifecycle"]["intent"]["status"])
+        self.assertEqual("NOT_EXECUTED", cycle["lifecycle"]["implementation"]["status"])
+        self.assertEqual("NOT_REQUESTED", cycle["lifecycle"]["outcome"]["status"])
+        self.assertTrue(
+            all(
+                item["status"] == "NOT_CAPTURED"
+                for item in cycle["lifecycle"]["intent"]["answers"].values()
+            )
+        )
+        self.assertTrue(
+            all(
+                item["status"] == "NOT_CAPTURED"
+                for item in cycle["lifecycle"]["outcome"]["answers"].values()
+            )
+        )
+        self.assertIsNone(cycle["intent"])
+        self.assertIsNone(cycle["outcome"])
+        self.assertIsNotNone(cycle["deterministicValidation"])
+
+    def test_failed_intent_runs_validation_and_allows_next_cycle(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _MissingFirstIntentSession(capabilities, [("1.0", "2.0")])
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(2, result.cycles_completed)
+        continuation = sessions[0].messages[10]
+        self.assertIn("**Cycle Intent:** `FAILED`", continuation)
+        self.assertIn("**Implementation:** `NOT_EXECUTED`", continuation)
+        self.assertIn("**Cycle Outcome:** `NOT_REQUESTED`", continuation)
+        self.assertIn("**Model understanding:** `NOT_CAPTURED`", continuation)
+        self.assertIn("**Implementation Result:** `NOT_CAPTURED`", continuation)
+        self.assertIn("# Cycle 1 — Deterministic Validation", continuation)
+        cycle_one = json.loads(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("", cycle_one["summary"])
+        self.assertEqual("", cycle_one["outcomeCaptureResponse"])
+        self.assertEqual("FAILED", cycle_one["lifecycle"]["intent"]["status"])
+        self.assertEqual("NOT_EXECUTED", cycle_one["lifecycle"]["implementation"]["status"])
+        self.assertEqual("NOT_REQUESTED", cycle_one["lifecycle"]["outcome"]["status"])
+        self.assertIsNotNone(cycle_one["deterministicValidation"])
+        events = [
+            json.loads(line)
+            for line in (
+                Path(result.workspace_root) / "artifacts" / "events.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        self.assertFalse(
+            any(
+                event["type"] == "execution_capability_invoked" and event.get("cycle") == 1
+                for event in events
+            )
+        )
 
     def test_execution_failure_still_requests_outcome_and_runs_validation(self):
         result = AutonomousRemediationOrchestrator(

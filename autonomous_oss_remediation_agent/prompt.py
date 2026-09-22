@@ -298,7 +298,14 @@ def outcome_retry_message(cycle: int, errors: list[str]) -> str:
     )
 
 
-def validation_feedback(report: ValidationReport, journal_context: str, next_cycle: int) -> str:
+def validation_feedback(
+    report: ValidationReport,
+    journal_context: str,
+    next_cycle: int,
+    *,
+    capture_recovery: bool = False,
+    cycle_state: dict | None = None,
+) -> str:
     failed_checks = []
     for check in report.checks:
         if check.passed:
@@ -340,6 +347,7 @@ def validation_feedback(report: ValidationReport, journal_context: str, next_cyc
         }
     evidence = {
         "cycle": report.cycle,
+        "cycleLifecycle": cycle_state,
         "failedChecks": failed_checks,
         "changedFiles": list(report.changed_files),
         "cumulativeDiffPath": report.diff_path,
@@ -347,8 +355,14 @@ def validation_feedback(report: ValidationReport, journal_context: str, next_cyc
         "cycleEvidence": report.cycle_evidence.to_dict() if report.cycle_evidence else None,
         "scan": scan,
     }
+    opening = (
+        "Deterministic validation established success for the evaluated engineering requirements, but required lifecycle capture remains incomplete. Continue in the same repository and ADK session using the original canonical Task to Solve. Reassess the current validated repository state and complete this cycle's normal checkpoints; checkpoint failure alone is not evidence that another repository change is needed."
+        if report.passed and capture_recovery
+        else "Deterministic validation did not establish success. Continue solving the original canonical Task to Solve in the same repository and ADK session. The validation is authoritative evidence about progress, not a replacement objective, and no prior solution receives authority merely because it was previously selected or implemented."
+    )
     return (
-        "Deterministic validation did not establish success. Continue solving the original canonical Task to Solve in the same repository and ADK session. The validation is authoritative evidence about progress, not a replacement objective, and no prior solution receives authority merely because it was previously selected or implemented.\n\n"
+        opening
+        + "\n\n"
         "Use read-only capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
         "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope.\n\n"

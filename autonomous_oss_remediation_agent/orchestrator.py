@@ -181,50 +181,44 @@ class AutonomousRemediationOrchestrator:
         last_delivery = DeliveryEligibility.NOT_DELIVERY_ELIGIBLE
         last_remediation = RemediationOutcome.INCONCLUSIVE
         agent_closed = False
+        cycles_completed = 0
         reason = "Configured remediation/validation cycle limit reached"
         try:
             for cycle in range(1, self.request.budget.max_cycles + 1):
+                reason = "Configured remediation/validation cycle limit reached"
                 budget.ensure_time_remaining()
                 validator.capture_cycle_start(cycle, baseline)
                 lifecycle.begin_cycle(cycle)
                 execution_turn = await self._run_until_intent(
                     agent_session, lifecycle, cycle, message
                 )
+                outcome_turn = AgentTurnResult("")
                 if not lifecycle.cycles[cycle].intent:
                     reason = "CYCLE_INTENT_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
-                    return self._finish_with_journal(
+                    lifecycle.fail_intent_capture(cycle)
+                    execution_summary = ""
+                else:
+                    execution_turn = await self._continue_execution_if_needed(
+                        agent_session,
+                        capabilities,
                         trace,
-                        lifecycle,
-                        RunResult(
-                            Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED,
-                            reason,
-                            str(workspace.root),
-                            baseline=baseline,
-                            cycles_completed=cycle - 1,
-                            agent_summaries=tuple(summaries),
-                        ),
-                        RemediationOutcome.INCONCLUSIVE,
-                        ValidationStatus.INCOMPLETE,
-                        DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
-                        last_validation,
+                        cycle,
+                        execution_turn,
                     )
-                execution_turn = await self._continue_execution_if_needed(
-                    agent_session,
-                    capabilities,
-                    trace,
-                    cycle,
-                    execution_turn,
-                )
-                summaries.append(execution_turn.text)
-                lifecycle.require_outcome()
-                changed_files = validator.changed_files(baseline.commit)
-                outcome_turn = await self._run_until_outcome(
-                    agent_session,
-                    lifecycle,
-                    cycle,
-                    execution_turn.text,
-                    self._execution_evidence(trace, budget, changed_files),
-                )
+                    execution_summary = execution_turn.text
+                    summaries.append(execution_summary)
+                    lifecycle.require_outcome()
+                    changed_files = validator.changed_files(baseline.commit)
+                    outcome_turn = await self._run_until_outcome(
+                        agent_session,
+                        lifecycle,
+                        cycle,
+                        execution_summary,
+                        self._execution_evidence(trace, budget, changed_files),
+                    )
+                    if not lifecycle.cycles[cycle].outcome:
+                        reason = "CYCLE_OUTCOME_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
+                        lifecycle.fail_outcome_capture(cycle)
                 capture = lifecycle.cycles[cycle]
                 last_validation = validator.validate(cycle, baseline)
                 validation_status = _validation_status(last_validation)
@@ -235,12 +229,14 @@ class AutonomousRemediationOrchestrator:
                     delivery_preflight.eligible,
                 )
                 lifecycle.append_validation(last_validation, validation_status, last_delivery)
+                cycles_completed = cycle
                 trace.write_json(
                     f"agent/cycle-{cycle}.json",
                     {
-                        "summary": execution_turn.text,
+                        "summary": execution_summary,
                         "outcomeCaptureResponse": outcome_turn.text,
                         "captureStatus": capture.status.value,
+                        "lifecycle": lifecycle.cycle_state(cycle),
                         "journalPath": str(lifecycle.store.path),
                         "intent": capture.intent.to_dict() if capture.intent else None,
                         "outcome": capture.outcome.to_dict() if capture.outcome else None,
@@ -262,6 +258,24 @@ class AutonomousRemediationOrchestrator:
                     scan = last_validation.scan
                     reason = f"VALIDATION_SCANNER_FAILURE: {scan.effective_outcome.value}: {scan.error}"
                     break
+                operational_budget_remaining = (
+                    budget.tool_calls < self.request.budget.max_tool_calls
+                    and budget.remaining_seconds > 0
+                )
+                if (
+                    last_validation.passed
+                    and capture.capture_recovery_required
+                    and cycle < self.request.budget.max_cycles
+                    and operational_budget_remaining
+                ):
+                    message = validation_feedback(
+                        last_validation,
+                        lifecycle.context(),
+                        cycle + 1,
+                        capture_recovery=True,
+                        cycle_state=lifecycle.cycle_state(cycle),
+                    )
+                    continue
                 if last_validation.passed:
                     if not last_validation.changed_files:
                         reason = "No repository change requires delivery"
@@ -310,10 +324,15 @@ class AutonomousRemediationOrchestrator:
                         last_delivery,
                         last_validation,
                     )
-                if budget.tool_calls >= self.request.budget.max_tool_calls or budget.remaining_seconds <= 0:
+                if not operational_budget_remaining:
                     reason = "Configured operational budget reached"
                     break
-                message = validation_feedback(last_validation, lifecycle.context(), cycle + 1)
+                message = validation_feedback(
+                    last_validation,
+                    lifecycle.context(),
+                    cycle + 1,
+                    cycle_state=lifecycle.cycle_state(cycle),
+                )
         except BudgetExceeded as exc:
             reason = str(exc)
         except Exception as exc:
@@ -359,6 +378,7 @@ class AutonomousRemediationOrchestrator:
                             "summary": interrupted_summary,
                             "outcomeCaptureResponse": outcome_turn.text,
                             "captureStatus": capture.status.value,
+                            "lifecycle": lifecycle.cycle_state(cycle),
                             "journalPath": str(lifecycle.store.path),
                             "intent": capture.intent.to_dict() if capture.intent else None,
                             "outcome": capture.outcome.to_dict() if capture.outcome else None,
@@ -406,7 +426,7 @@ class AutonomousRemediationOrchestrator:
                 str(workspace.root),
                 baseline=baseline,
                 validation=last_validation,
-                cycles_completed=len(summaries),
+                cycles_completed=cycles_completed,
                 agent_summaries=tuple(summaries),
             ),
             last_remediation,

@@ -126,6 +126,40 @@ class DecisionJournalTests(unittest.TestCase):
         )
         self.assertEqual(CaptureStatus.LATE, self.lifecycle.capture_status())
 
+    def test_failed_intent_records_unexecuted_and_unrequested_cycle_state(self):
+        self.lifecycle.fail_intent_capture(1)
+
+        state = self.lifecycle.cycle_state(1)
+        self.assertEqual("FAILED", state["intent"]["status"])
+        self.assertEqual("NOT_EXECUTED", state["implementation"]["status"])
+        self.assertEqual("NOT_REQUESTED", state["outcome"]["status"])
+        self.assertTrue(
+            all(item["status"] == "NOT_CAPTURED" for item in state["intent"]["answers"].values())
+        )
+        self.assertTrue(
+            all(item["status"] == "NOT_CAPTURED" for item in state["outcome"]["answers"].values())
+        )
+        self.assertEqual({}, self.lifecycle.cycles[1].intent_answers)
+        self.assertEqual({}, self.lifecycle.cycles[1].outcome_answers)
+        self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.capture_status())
+        self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.lifecycle.phase)
+
+    def test_failed_outcome_preserves_intent_and_execution_state_without_answers(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.require_outcome()
+        self.lifecycle.fail_outcome_capture(1)
+
+        state = self.lifecycle.cycle_state(1)
+        self.assertEqual("CAPTURED", state["intent"]["status"])
+        self.assertEqual("EXECUTED", state["implementation"]["status"])
+        self.assertEqual("FAILED", state["outcome"]["status"])
+        self.assertTrue(
+            all(item["status"] == "NOT_CAPTURED" for item in state["outcome"]["answers"].values())
+        )
+        self.assertNotEqual({}, self.lifecycle.cycles[1].intent_answers)
+        self.assertEqual({}, self.lifecycle.cycles[1].outcome_answers)
+        self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.lifecycle.phase)
+
     def test_every_outcome_status_is_structurally_accepted(self):
         for status in OUTCOME_STATUSES:
             with self.subTest(status=status):
