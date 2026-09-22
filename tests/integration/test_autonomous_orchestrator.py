@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import json
 import hashlib
+import os
 import re
 from dataclasses import replace
 from pathlib import Path
@@ -213,6 +214,7 @@ class _CycleWorkspaceSession(_ScriptedAgentSession):
         super().__init__(capabilities, [])
         self.pre_intent_versions = []
         self.previous_marker_reads = []
+        self.historical_shell_attempts = []
 
     async def run_turn(self, message):
         phase = self.capabilities.journal.phase
@@ -232,6 +234,15 @@ class _CycleWorkspaceSession(_ScriptedAgentSession):
         else:
             self.previous_marker_reads.append(
                 self.capabilities.read_workspace_text("cycle-one-only.txt")
+            )
+            self.historical_shell_attempts.append(
+                self.capabilities.run_workspace_shell(
+                    "try { Set-Content ../cycle-1/cycle-one-only.txt changed -ErrorAction Stop } "
+                    "catch { Set-Content historical-shell-ran.txt caught }"
+                    if os.name == "nt"
+                    else "(printf changed > ../cycle-1/cycle-one-only.txt) || "
+                    "printf caught > historical-shell-ran.txt"
+                )
             )
             self.capabilities.edit_workspace_text("write", "cycle-two-only.txt", content="current")
         self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
@@ -885,8 +896,16 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         root = Path(result.workspace_root)
         self.assertTrue((root / "investigation" / "cycle-1" / "cycle-one-only.txt").is_file())
         self.assertFalse((root / "investigation" / "cycle-1" / "cycle-two-only.txt").exists())
+        self.assertEqual(
+            "historical",
+            (root / "investigation" / "cycle-1" / "cycle-one-only.txt").read_text(
+                encoding="utf-8"
+            ),
+        )
         self.assertFalse((root / "investigation" / "cycle-2" / "cycle-one-only.txt").exists())
         self.assertTrue((root / "investigation" / "cycle-2" / "cycle-two-only.txt").is_file())
+        self.assertTrue((root / "investigation" / "cycle-2" / "historical-shell-ran.txt").is_file())
+        self.assertFalse(sessions[0].historical_shell_attempts[0]["blocked"])
         self.assertFalse((root / "repository" / "cycle-one-only.txt").exists())
         self.assertFalse((root / "repository" / "cycle-two-only.txt").exists())
 

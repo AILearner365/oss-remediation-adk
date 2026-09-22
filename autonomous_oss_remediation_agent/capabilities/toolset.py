@@ -45,6 +45,7 @@ class DeveloperCapabilitySet:
         if not isinstance(run_workspace, RunWorkspace):
             run_workspace = run_workspace.run_workspace
         experimental = run_workspace.fork_repository(cycle)
+        self.process_runner.prepare_experimental_workspace(experimental)
         self._experimental_workspace = experimental
         self._experimental_io = WorkspaceIO(
             experimental,

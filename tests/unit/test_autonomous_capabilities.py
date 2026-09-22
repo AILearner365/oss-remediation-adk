@@ -31,7 +31,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.budget = ExecutionBudget(
             ExecutionBudgetConfig(
                 max_cycles=2,
-                max_tool_calls=8,
+                max_tool_calls=20,
                 command_timeout_seconds=15,
                 overall_timeout_seconds=30,
                 max_returned_output_chars=2000,
@@ -376,7 +376,17 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertTrue((experiment.repository / "shell.txt").is_file())
         self.assertFalse((self.workspace.repository / "isolated.txt").exists())
         self.assertFalse((self.workspace.repository / "shell.txt").exists())
+        tooling = capabilities.run_workspace_shell(
+            "python -c \"from pathlib import Path; Path('tooling.txt').write_text('ok')\"; "
+            "git init; git config user.name Experiment"
+        )
+        self.assertEqual(0, tooling["exitCode"])
+        self.assertEqual("ok", (experiment.repository / "tooling.txt").read_text(encoding="utf-8"))
+        self.assertTrue((experiment.repository / ".git" / "config").is_file())
+        self.assertFalse((self.workspace.repository / "tooling.txt").exists())
+        self.assertFalse((self.workspace.repository / ".git").exists())
         authoritative_target = self.workspace.repository / "absolute-escape.txt"
+        authoritative_target.write_text("authoritative\n", encoding="utf-8")
         absolute_escape = capabilities.run_workspace_shell(
             f"Set-Content '{authoritative_target}' escape"
             if os.name == "nt"
@@ -387,10 +397,23 @@ class AutonomousCapabilityTests(unittest.TestCase):
             if os.name == "nt"
             else "printf escape > ../../repository/relative-escape.txt"
         )
-        self.assertTrue(absolute_escape["blocked"])
-        self.assertTrue(relative_escape["blocked"])
-        self.assertFalse(authoritative_target.exists())
+        indirect_escape = capabilities.run_workspace_shell(
+            "$parts = @('..', '..', 'repository', 'indirect-escape.txt'); "
+            "$target = [IO.Path]::GetFullPath((Join-Path $PWD ($parts -join '\\'))); "
+            "try { Set-Content $target escape -ErrorAction Stop } "
+            "catch { Set-Content indirect-attempt-ran.txt caught }"
+            if os.name == "nt"
+            else "python -c \"from pathlib import Path; p=Path.cwd(); "
+            "target=p.joinpath(*(['..']*2+['repository','indirect-escape.txt'])).resolve(); "
+            "\ntry: target.write_text('escape')\nexcept PermissionError: (p/'indirect-attempt-ran.txt').write_text('caught')\""
+        )
+        self.assertFalse(absolute_escape["blocked"])
+        self.assertFalse(relative_escape["blocked"])
+        self.assertFalse(indirect_escape["blocked"])
+        self.assertEqual("authoritative\n", authoritative_target.read_text(encoding="utf-8"))
         self.assertFalse((self.workspace.repository / "relative-escape.txt").exists())
+        self.assertFalse((self.workspace.repository / "indirect-escape.txt").exists())
+        self.assertTrue((experiment.repository / "indirect-attempt-ran.txt").is_file())
         denied = capabilities.edit_workspace_text(
             "write", "forbidden.txt", content="no", workspace="authoritative"
         )
@@ -404,6 +427,22 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertIn("this cycle", submission["nextAction"])
         self.assertFalse(journal.cycles[1].late_intent)
         self.assertEqual((), capabilities.execution_activity(1))
+        authoritative_shell = capabilities.run_workspace_shell(
+            "Set-Content authoritative-shell.txt real"
+            if os.name == "nt"
+            else "printf real > authoritative-shell.txt"
+        )
+        experimental_shell = capabilities.run_workspace_shell(
+            "Set-Content execution-experiment.txt probe"
+            if os.name == "nt"
+            else "printf probe > execution-experiment.txt",
+            workspace="experiment",
+        )
+        self.assertEqual(0, authoritative_shell["exitCode"])
+        self.assertEqual(0, experimental_shell["exitCode"])
+        self.assertTrue((self.workspace.repository / "authoritative-shell.txt").is_file())
+        self.assertTrue((experiment.repository / "execution-experiment.txt").is_file())
+        self.assertFalse((self.workspace.repository / "execution-experiment.txt").exists())
         capabilities.edit_workspace_text("write", "authoritative.txt", content="real")
         capabilities.edit_workspace_text(
             "write", "further-experiment.txt", content="probe", workspace="experiment"
@@ -415,6 +454,70 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(frozenset({"submit_cycle_outcome"}), capabilities.available_tool_names())
         denied = capabilities.edit_workspace_text("write", "outcome.txt", content="blocked")
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+        denied_shell = capabilities.run_workspace_shell(
+            "Set-Content outcome-shell.txt blocked"
+            if os.name == "nt"
+            else "printf blocked > outcome-shell.txt"
+        )
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied_shell["failureCode"])
+
+    def test_current_experimental_shell_cannot_mutate_historical_cycle_workspace(self):
+        if not self.runner.experimental_isolation.available:
+            self.skipTest("No experimental process isolation backend on this platform")
+        first = self.workspace.fork_repository(1)
+        self.runner.prepare_experimental_workspace(first)
+        historical_file = first.repository / "historical.txt"
+        historical_file.write_text("cycle-one\n", encoding="utf-8")
+        second = self.workspace.fork_repository(2)
+        self.runner.prepare_experimental_workspace(second)
+
+        result = self.runner.run_agent_shell(
+            "try { Set-Content ../cycle-1/historical.txt changed -ErrorAction Stop } "
+            "catch { Set-Content historical-attempt-ran.txt caught }"
+            if os.name == "nt"
+            else "(printf changed > ../cycle-1/historical.txt) || printf caught > historical-attempt-ran.txt",
+            repository_workspace=second,
+        )
+
+        self.assertFalse(result.blocked)
+        self.assertTrue((second.repository / "historical-attempt-ran.txt").is_file())
+        self.assertEqual("cycle-one\n", historical_file.read_text(encoding="utf-8"))
+
+    def test_experimental_shell_cannot_mutate_authoritative_file_through_symlink_or_reparse_point(self):
+        if not self.runner.experimental_isolation.available:
+            self.skipTest("No experimental process isolation backend on this platform")
+        experiment = self.workspace.fork_repository(1)
+        self.runner.prepare_experimental_workspace(experiment)
+        authoritative_directory = self.workspace.repository / "symlink-target"
+        authoritative_directory.mkdir()
+        authoritative_target = authoritative_directory / "target.txt"
+        authoritative_target.write_text("authoritative\n", encoding="utf-8")
+        symlink_path = experiment.repository / "authoritative-link"
+        if os.name == "nt":
+            created = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(symlink_path), str(authoritative_directory)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if created.returncode != 0:
+                self.skipTest("Directory reparse-point creation is unavailable on this host")
+        else:
+            try:
+                os.symlink(authoritative_directory, symlink_path, target_is_directory=True)
+            except OSError:
+                self.skipTest("Symlink creation is unavailable on this host")
+
+        result = self.runner.run_agent_shell(
+            "python -c \"from pathlib import Path; "
+            "target=Path('authoritative-link/target.txt'); marker=Path('symlink-attempt-ran.txt'); "
+            "\ntry: target.write_text('escape')\nexcept PermissionError: marker.write_text('caught')\"",
+            repository_workspace=experiment,
+        )
+
+        self.assertFalse(result.blocked)
+        self.assertTrue((experiment.repository / "symlink-attempt-ran.txt").is_file())
+        self.assertEqual("authoritative\n", authoritative_target.read_text(encoding="utf-8"))
 
     def test_cycle_forks_preserve_exact_current_authoritative_working_state(self):
         _git(self.workspace.repository, "init", "-b", "main")

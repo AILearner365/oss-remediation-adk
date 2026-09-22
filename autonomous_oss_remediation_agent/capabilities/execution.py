@@ -11,6 +11,7 @@ from typing import Mapping, Sequence
 from ..config import ExecutionBudgetConfig, RuntimePolicy
 from ..models import CommandResult
 from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
+from .isolation import ExperimentalProcessIsolation
 from .policy import CommandPolicy, sanitized_agent_environment
 
 
@@ -72,6 +73,31 @@ class ProcessRunner:
         self.budget = budget
         self.runtime_policy = runtime_policy
         self.command_policy = CommandPolicy()
+        self.experimental_isolation = ExperimentalProcessIsolation(workspace.root)
+        self._experimental_runtime: dict[int, Path] = {}
+
+    def prepare_experimental_workspace(self, target: RepositoryWorkspace) -> None:
+        if target.kind != "experimental" or target.cycle is None:
+            raise ValueError("Only cycle experimental workspaces can be prepared for isolation")
+        historical = tuple(
+            path
+            for path in self.workspace.investigation.iterdir()
+            if path.is_dir() and path != target.repository
+        )
+        runtime = self.experimental_isolation.prepare(
+            target.repository,
+            target.cycle,
+            historical,
+        )
+        self._experimental_runtime[target.cycle] = runtime
+        self.trace.append_event(
+            "experimental_shell_boundary_prepared",
+            cycle=target.cycle,
+            workspaceKind=target.kind,
+            repository=str(target.repository),
+            historicalRepositories=[str(path) for path in historical],
+            backend=self.experimental_isolation.backend,
+        )
 
     def run_agent_shell(
         self,
@@ -82,9 +108,6 @@ class ProcessRunner:
     ) -> CommandResult:
         target = repository_workspace or self.workspace.authoritative_repository()
         allowed, reason = self.command_policy.evaluate(command)
-        boundary_reason = _workspace_command_boundary_reason(command, target, self.workspace)
-        if boundary_reason:
-            allowed, reason = False, boundary_reason
         directory = target.repository_directory(cwd)
         if not allowed:
             result = CommandResult(
@@ -104,15 +127,97 @@ class ProcessRunner:
             )
             return result
         shell_command = _host_shell_command(command)
+        environment = sanitized_agent_environment(
+            self.workspace.root, self.runtime_policy.allow_network
+        )
+        if target.kind == "experimental":
+            if target.cycle is None or target.cycle not in self._experimental_runtime:
+                return CommandResult(
+                    command=[command],
+                    cwd=str(directory),
+                    exit_code=126,
+                    stderr="Experimental shell boundary is not prepared",
+                    blocked=True,
+                )
+            runtime = self._experimental_runtime[target.cycle]
+            environment.update(
+                {
+                    "HOME": str(runtime / "home"),
+                    "USERPROFILE": str(runtime / "home"),
+                    "TEMP": str(runtime / "temp"),
+                    "TMP": str(runtime / "temp"),
+                }
+            )
+            for path in (runtime / "home", runtime / "temp"):
+                path.mkdir(parents=True, exist_ok=True)
+            return self._run_isolated_agent_shell(
+                shell_command,
+                cwd=directory,
+                timeout_seconds=self.budget.effective_timeout(timeout_seconds),
+                environment=environment,
+                display_command=[command],
+                target=target,
+            )
         return self._run(
             shell_command,
             cwd=directory,
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
-            environment=sanitized_agent_environment(self.workspace.root, self.runtime_policy.allow_network),
+            environment=environment,
             source="agent",
             display_command=[command],
             trace_metadata={"workspaceKind": target.kind, "cycle": target.cycle},
         )
+
+    def _run_isolated_agent_shell(
+        self,
+        command: list[str],
+        *,
+        cwd: Path,
+        timeout_seconds: int,
+        environment: dict[str, str],
+        display_command: list[str],
+        target: RepositoryWorkspace,
+    ) -> CommandResult:
+        command_id = f"agent-{uuid.uuid4().hex[:12]}"
+        stdout_path = self.workspace.artifacts / "commands" / f"{command_id}.stdout.log"
+        stderr_path = self.workspace.artifacts / "commands" / f"{command_id}.stderr.log"
+        stdout_path.parent.mkdir(parents=True, exist_ok=True)
+        started = time.monotonic()
+        isolated = self.experimental_isolation.run(
+            command,
+            cwd=cwd,
+            environment=environment,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            timeout_seconds=timeout_seconds,
+        )
+        stdout = stdout_path.read_text(encoding="utf-8", errors="replace") if stdout_path.exists() else ""
+        stderr = stderr_path.read_text(encoding="utf-8", errors="replace") if stderr_path.exists() else ""
+        if isolated.error:
+            stderr = (stderr + "\n" if stderr else "") + isolated.error
+        if isolated.timed_out:
+            stderr = (stderr + "\n" if stderr else "") + f"Command timed out after {timeout_seconds}s"
+        limit = self.budget.config.max_returned_output_chars
+        result = CommandResult(
+            command=display_command,
+            cwd=str(cwd),
+            exit_code=isolated.exit_code,
+            stdout=_tail(stdout, limit),
+            stderr=_tail(stderr, limit),
+            duration_seconds=time.monotonic() - started,
+            timed_out=isolated.timed_out,
+            stdout_artifact=str(stdout_path),
+            stderr_artifact=str(stderr_path),
+        )
+        self.trace.append_event(
+            "command",
+            source="agent",
+            result=result.to_dict(),
+            workspaceKind=target.kind,
+            cycle=target.cycle,
+            isolationBackend=self.experimental_isolation.backend,
+        )
+        return result
 
     def run_deterministic_shell(
         self,
@@ -239,27 +344,6 @@ def _host_shell_command(command: str) -> list[str]:
             command,
         ]
     return ["/bin/bash", "-lc", command]
-
-
-def _workspace_command_boundary_reason(
-    command: str,
-    target: RepositoryWorkspace,
-    workspace: RunWorkspace,
-) -> str | None:
-    normalized = command.replace("\\", "/").casefold()
-    target_path = str(target.repository).replace("\\", "/").casefold()
-    authoritative_path = str(workspace.repository).replace("\\", "/").casefold()
-    investigation_path = str(workspace.investigation).replace("\\", "/").casefold()
-    if authoritative_path in normalized and target_path != authoritative_path:
-        return "workspace shell command references a repository outside the selected workspace"
-    if investigation_path in normalized and target.kind != "experimental":
-        return "workspace shell command references a repository outside the selected workspace"
-    if workspace.investigation.is_dir():
-        for cycle_workspace in workspace.investigation.iterdir():
-            cycle_path = str(cycle_workspace).replace("\\", "/").casefold()
-            if cycle_path in normalized and cycle_path != target_path:
-                return "workspace shell command references a historical experimental workspace"
-    return None
 
 
 def _deterministic_environment() -> dict[str, str]:
