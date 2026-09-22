@@ -199,11 +199,29 @@ def fetch_web_page(url: str) -> dict[str, Any]:
                         "HTML extraction requires beautifulsoup4. Install the project dependency before using this tool.",
                         url=response.url,
                     )
-                soup = BeautifulSoup(text, "html.parser")
-                for element in soup(["script", "style", "noscript", "svg"]):
-                    element.decompose()
+                soup = BeautifulSoup(text, "lxml")
                 title = soup.title.get_text(" ", strip=True) if soup.title else None
-                text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())
+
+                extracted = trafilatura.extract(
+                    text,
+                    output_format="markdown",
+                    include_links=True,
+                    include_tables=True,
+                    include_formatting=True,
+                    favor_precision=True,
+                )
+                if extracted and extracted.strip():
+                    text = extracted.strip()
+                    extraction_method = "trafilatura"
+                else:
+                    for element in soup(["script", "style", "noscript", "svg"]):
+                        element.decompose()
+                    text = "\n".join(
+                        line.strip()
+                        for line in soup.get_text("\n").splitlines()
+                        if line.strip()
+                    )
+                    extraction_method = "beautifulsoup"
             else:
                 title = None
                 extraction_method = "direct"
