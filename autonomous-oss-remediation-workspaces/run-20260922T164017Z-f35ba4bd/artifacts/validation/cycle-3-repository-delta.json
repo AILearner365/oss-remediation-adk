@@ -1,0 +1,36 @@
+{
+  "after": {
+    "captured": true,
+    "changedFiles": [
+      "pom.xml"
+    ],
+    "fileDigests": {
+      "pom.xml": "bc3ee3edf588dd21319762963a823ac997e11d6212c7089a9983b320a3ca35fb"
+    },
+    "stateDigest": "915bbdc10c705c1fa0d7ee43a5fc17d0efe9830b8dea2742504f0dbde68d0f84"
+  },
+  "before": {
+    "captured": true,
+    "changedFiles": [
+      "pom.xml",
+      "task-web/pom.xml"
+    ],
+    "fileDigests": {
+      "pom.xml": "73d1338706197fcc28855a3880092a64a74819dfaee4436e0a30567b56e92bb6",
+      "task-web/pom.xml": "9b4eb488e9a87c88522231f5a1ec3e180fdb5467aac7f7bc87acd4e42affad83"
+    },
+    "stateDigest": "0b9f36289eef1cb799505549f3cb99352af7cd50715f9b52430aa36498549314"
+  },
+  "cycle": 3,
+  "delta": {
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [],
+    "pathsModifiedSinceCycleStart": [
+      "pom.xml"
+    ],
+    "pathsRemovedFromChangeSet": [
+      "task-web/pom.xml"
+    ],
+    "repositoryStateChanged": true
+  }
+}

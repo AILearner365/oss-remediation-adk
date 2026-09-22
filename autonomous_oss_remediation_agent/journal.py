@@ -364,7 +364,7 @@ class JournalLifecycle:
         run_contract: str,
         repository_changed: Callable[[], bool],
         *,
-        max_checkpoint_attempts: int = 10,
+        max_checkpoint_attempts: int = 3,
         max_section_chars: int = 8_000,
         max_checkpoint_chars: int = 48_000,
         max_context_chars: int = 24_000,

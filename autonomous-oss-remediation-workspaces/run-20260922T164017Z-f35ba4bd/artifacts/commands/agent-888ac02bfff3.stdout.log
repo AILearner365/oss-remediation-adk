@@ -1,0 +1,122 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/3.3.3/spring-boot-starter-parent-3.3.3.pom
+Progress (1): 1.1 kB
+Progress (1): 2.6 kB
+Progress (1): 6.5 kB
+Progress (1): 11 kB 
+Progress (1): 13 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/3.3.3/spring-boot-starter-parent-3.3.3.pom (13 kB at 13 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/3.3.3/spring-boot-dependencies-3.3.3.pom
+Progress (1): 995 B
+Progress (1): 2.3 kB
+Progress (1): 4.3 kB
+Progress (1): 6.5 kB
+Progress (1): 8.2 kB
+Progress (1): 10 kB 
+Progress (1): 14 kB
+Progress (1): 20 kB
+Progress (1): 29 kB
+Progress (1): 37 kB
+Progress (1): 42 kB
+Progress (1): 50 kB
+Progress (1): 60 kB
+Progress (1): 68 kB
+Progress (1): 79 kB
+Progress (1): 86 kB
+Progress (1): 90 kB
+Progress (1): 98 kB
+Progress (1): 100 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/3.3.3/spring-boot-dependencies-3.3.3.pom (100 kB at 1.2 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/activemq/activemq-bom/6.1.3/activemq-bom-6.1.3.pom
+Progress (1): 799 B
+Progress (1): 1.9 kB
+Progress (1): 7.9 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/activemq/activemq-bom/6.1.3/activemq-bom-6.1.3.pom (7.9 kB at 188 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-bom/15.0.7.Final/infinispan-bom-15.0.7.Final.pom
+Progress (1): 1.1 kB
+Progress (1): 3.1 kB
+Progress (1): 17 kB 
+Progress (1): 18 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-bom/15.0.7.Final/infinispan-bom-15.0.7.Final.pom (18 kB at 413 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-build-configuration-parent/15.0.7.Final/infinispan-build-configuration-parent-15.0.7.Final.pom
+Progress (1): 1.0 kB
+Progress (1): 2.7 kB
+Progress (1): 4.8 kB
+Progress (1): 6.9 kB
+Progress (1): 8.4 kB
+Progress (1): 11 kB 
+Progress (1): 13 kB
+Progress (1): 15 kB
+Progress (1): 18 kB
+Progress (1): 19 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-build-configuration-parent/15.0.7.Final/infinispan-build-configuration-parent-15.0.7.Final.pom (19 kB at 411 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-bom/1.13.3/micrometer-bom-1.13.3.pom
+Progress (1): 1.0 kB
+Progress (1): 7.2 kB
+Progress (1): 8.6 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-bom/1.13.3/micrometer-bom-1.13.3.pom (8.6 kB at 204 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-tracing-bom/1.3.3/micrometer-tracing-bom-1.3.3.pom
+Progress (1): 1.0 kB
+Progress (1): 3.4 kB
+Progress (1): 4.5 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-tracing-bom/1.3.3/micrometer-tracing-bom-1.3.3.pom (4.5 kB at 102 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/pulsar/pulsar-bom/3.2.4/pulsar-bom-3.2.4.pom
+Progress (1): 794 B
+Progress (1): 1.8 kB
+Progress (1): 3.8 kB
+Progress (1): 9.5 kB
+Progress (1): 19 kB 
+Progress (1): 26 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/pulsar/pulsar-bom/3.2.4/pulsar-bom-3.2.4.pom (26 kB at 603 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-bom/2024.0.3/spring-data-bom-2024.0.3.pom
+Progress (1): 963 B
+Progress (1): 1.9 kB
+Progress (1): 5.5 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-bom/2024.0.3/spring-data-bom-2024.0.3.pom (5.5 kB at 138 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/integration/spring-integration-bom/6.3.3/spring-integration-bom-6.3.3.pom
+Progress (1): 961 B
+Progress (1): 2.5 kB
+Progress (1): 10 kB 
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/integration/spring-integration-bom/6.3.3/spring-integration-bom-6.3.3.pom (10 kB at 270 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/pulsar/spring-pulsar-bom/1.1.3/spring-pulsar-bom-1.1.3.pom
+Progress (1): 959 B
+Progress (1): 2.9 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/pulsar/spring-pulsar-bom/1.1.3/spring-pulsar-bom-1.1.3.pom (2.9 kB at 83 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-bom/6.3.3/spring-security-bom-6.3.3.pom
+Progress (1): 973 B
+Progress (1): 5.0 kB
+Progress (1): 5.3 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-bom/6.3.3/spring-security-bom-6.3.3.pom (5.3 kB at 127 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/session/spring-session-bom/3.3.2/spring-session-bom-3.3.2.pom
+Progress (1): 1.0 kB
+Progress (1): 2.9 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/session/spring-session-bom/3.3.2/spring-session-bom-3.3.2.pom (2.9 kB at 83 kB/s)
+[ERROR] [ERROR] Some problems were encountered while processing the POMs:
+[ERROR] 'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 26, column 17
+ @ 
+[ERROR] The build could not read 1 project -> [Help 1]
+[ERROR]   
+[ERROR]   The project com.example.secureapp:task-web:1.0.0-SNAPSHOT (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 26, column 17
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException

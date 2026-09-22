@@ -1,0 +1,346 @@
+{
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "checks": [
+    {
+      "evidence": {
+        "blocked": false,
+        "command": [
+          "git",
+          "merge-base",
+          "--is-ancestor",
+          "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+          "HEAD"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository",
+        "durationSeconds": 0.007523163999849203,
+        "exitCode": 0,
+        "stderr": "",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/validation_3_git_base-eae42bea3206.stderr.log",
+        "stdout": "",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/validation_3_git_base-eae42bea3206.stdout.log",
+        "timedOut": false
+      },
+      "message": "Repository remains based on the recorded baseline",
+      "name": "baseline_ancestry",
+      "passed": true
+    },
+    {
+      "evidence": {},
+      "message": "Git status and full diff were captured",
+      "name": "git_change_evidence",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "results": [
+          {
+            "blocked": false,
+            "command": [
+              "mvn clean verify"
+            ],
+            "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository",
+            "durationSeconds": 3.688429909000206,
+            "exitCode": 1,
+            "stderr": "",
+            "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/validation_build_1-e19f16680c9e.stderr.log",
+            "stdout": "Welcome to Cloud Shell! Type \"help\" to get started.\nTo set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.\nYou can view your projects by running `gcloud projects list`.\n[INFO] Scanning for projects...\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[FATAL] Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/pom.xml: end tag name </configuration> must match start tag name <bannedDependencies> from line 133 (position: TEXT seen ...</message>\\n                                </configuration>... @145:49)  @ line 145, column 49\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project  (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/pom.xml) has 1 error\n[ERROR]     Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/pom.xml: end tag name </configuration> must match start tag name <bannedDependencies> from line 133 (position: TEXT seen ...</message>\\n                                </configuration>... @145:49)  @ line 145, column 49 -> [Help 2]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/ModelParseException\n",
+            "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/validation_build_1-e19f16680c9e.stdout.log",
+            "timedOut": false
+          }
+        ]
+      },
+      "message": "A required build/test/startup command failed",
+      "name": "build_test_startup",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "attempts": [
+          {
+            "attemptNumber": 1,
+            "backoffSeconds": null,
+            "command": [
+              "/home/kavya_parivarababu/bin/osv-scanner",
+              "scan",
+              "source",
+              "-r",
+              "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+              "--format",
+              "json",
+              "--data-source=native",
+              "--maven-registry=http://127.0.0.1:37107/"
+            ],
+            "commandResult": {
+              "blocked": false,
+              "command": [
+                "/home/kavya_parivarababu/bin/osv-scanner",
+                "scan",
+                "source",
+                "-r",
+                "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+                "--format",
+                "json",
+                "--data-source=native",
+                "--maven-registry=http://127.0.0.1:37107/"
+              ],
+              "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+              "durationSeconds": 0.13185950999968554,
+              "exitCode": 128,
+              "stderr": "Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository\nStarting filesystem walk for root: /\nfailed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\ncould not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nEnd status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 14.771579ms elapsed, 14.771682ms wall time\nError during extraction: (extracting as java/pomxml) \n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: could not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nNo package sources found, --help for usage information.\n",
+              "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stderr.log",
+              "stdout": "",
+              "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stdout.log",
+              "timedOut": false
+            },
+            "exitCode": 128,
+            "failureReason": "NO_PACKAGE_SOURCES: OSV Scanner found no package sources",
+            "outcome": "INCOMPLETE_FATAL_FAILURE",
+            "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.json",
+            "retryScheduled": false,
+            "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.stderr.log",
+            "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.stdout.log"
+          }
+        ],
+        "backend": "osv",
+        "commandResult": {
+          "blocked": false,
+          "command": [
+            "/home/kavya_parivarababu/bin/osv-scanner",
+            "scan",
+            "source",
+            "-r",
+            "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+            "--format",
+            "json",
+            "--data-source=native",
+            "--maven-registry=http://127.0.0.1:37107/"
+          ],
+          "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+          "durationSeconds": 0.13185950999968554,
+          "exitCode": 128,
+          "stderr": "Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository\nStarting filesystem walk for root: /\nfailed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\ncould not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nEnd status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 14.771579ms elapsed, 14.771682ms wall time\nError during extraction: (extracting as java/pomxml) \n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: could not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nNo package sources found, --help for usage information.\n",
+          "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stderr.log",
+          "stdout": "",
+          "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stdout.log",
+          "timedOut": false
+        },
+        "error": "NO_PACKAGE_SOURCES: OSV Scanner found no package sources",
+        "evidence": {},
+        "failureKind": "CONFIGURATION",
+        "findings": [],
+        "outcome": "INCOMPLETE_FATAL_FAILURE",
+        "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3.json",
+        "succeeded": false
+      },
+      "message": "Fresh vulnerability scan incomplete: INCOMPLETE_FATAL_FAILURE",
+      "name": "fresh_vulnerability_scan",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "baselineTargetCount": 19,
+        "comparisonComplete": false,
+        "remaining": [],
+        "resolved": []
+      },
+      "message": "Target comparison unavailable because the fresh scan did not complete",
+      "name": "target_findings_improved",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "comparisonComplete": false,
+        "remaining": []
+      },
+      "message": "Target comparison unavailable because the fresh scan did not complete",
+      "name": "target_findings_resolved",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "comparisonComplete": false,
+        "newFindings": []
+      },
+      "message": "New prohibited finding comparison unavailable because the fresh scan did not complete",
+      "name": "no_new_prohibited_findings",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "baseline": [
+          "java.version=21",
+          "maven.compiler.release=21"
+        ],
+        "current": [],
+        "expected": [
+          "java.version=21",
+          "maven.compiler.release=21"
+        ]
+      },
+      "message": "Java version configuration violates the protected value",
+      "name": "protected_java_version",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "applicable_policy": {
+          "allow_downgrade": false,
+          "allow_major": false,
+          "allow_minor": true,
+          "allow_patch": true,
+          "approved_versions": [],
+          "required_version": null,
+          "source": "version_policies.spring_boot"
+        },
+        "baseline_version": "4.0.6",
+        "component": "spring_boot",
+        "detected_change_type": "configuration_changed",
+        "evaluations": [
+          {
+            "baseline_version": "4.0.6",
+            "comparable": false,
+            "detected_change_type": "configuration_changed",
+            "final_version": null,
+            "source": "parent"
+          }
+        ],
+        "final_version": null,
+        "passed": false,
+        "reason": "Spring Boot version movement is rejected by policy: configuration_changed"
+      },
+      "message": "Spring Boot version movement is rejected by policy: configuration_changed",
+      "name": "spring_boot_version_policy",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "addedSuppressionLines": [],
+        "changedSuppressionFiles": []
+      },
+      "message": "No prohibited suppression change detected",
+      "name": "suppression_policy",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "diagnosticArtifacts": []
+      },
+      "message": "No newly changed likely investigation-only artifacts were detected",
+      "name": "delivery_diff_hygiene",
+      "passed": true
+    }
+  ],
+  "cycle": 3,
+  "cycleEvidence": {
+    "afterChangedFiles": [
+      "pom.xml"
+    ],
+    "afterStateCaptured": true,
+    "afterStateDigest": "915bbdc10c705c1fa0d7ee43a5fc17d0efe9830b8dea2742504f0dbde68d0f84",
+    "beforeChangedFiles": [
+      "pom.xml",
+      "task-web/pom.xml"
+    ],
+    "beforeStateCaptured": true,
+    "beforeStateDigest": "0b9f36289eef1cb799505549f3cb99352af7cd50715f9b52430aa36498549314",
+    "deltaPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/validation/cycle-3-repository-delta.json",
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [],
+    "pathsModifiedSinceCycleStart": [
+      "pom.xml"
+    ],
+    "pathsRemovedFromChangeSet": [
+      "task-web/pom.xml"
+    ],
+    "repositoryStateChanged": true
+  },
+  "deliveryEligible": true,
+  "diagnosticArtifacts": [],
+  "diffPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/validation/cycle-3.diff",
+  "passed": false,
+  "remainingTargetFindings": [],
+  "resolvedTargetFindings": [],
+  "scan": {
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "backoffSeconds": null,
+        "command": [
+          "/home/kavya_parivarababu/bin/osv-scanner",
+          "scan",
+          "source",
+          "-r",
+          "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+          "--format",
+          "json",
+          "--data-source=native",
+          "--maven-registry=http://127.0.0.1:37107/"
+        ],
+        "commandResult": {
+          "blocked": false,
+          "command": [
+            "/home/kavya_parivarababu/bin/osv-scanner",
+            "scan",
+            "source",
+            "-r",
+            "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+            "--format",
+            "json",
+            "--data-source=native",
+            "--maven-registry=http://127.0.0.1:37107/"
+          ],
+          "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+          "durationSeconds": 0.13185950999968554,
+          "exitCode": 128,
+          "stderr": "Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository\nStarting filesystem walk for root: /\nfailed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\ncould not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nEnd status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 14.771579ms elapsed, 14.771682ms wall time\nError during extraction: (extracting as java/pomxml) \n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: could not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nNo package sources found, --help for usage information.\n",
+          "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stderr.log",
+          "stdout": "",
+          "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stdout.log",
+          "timedOut": false
+        },
+        "exitCode": 128,
+        "failureReason": "NO_PACKAGE_SOURCES: OSV Scanner found no package sources",
+        "outcome": "INCOMPLETE_FATAL_FAILURE",
+        "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.json",
+        "retryScheduled": false,
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.stderr.log",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3-attempt-1.stdout.log"
+      }
+    ],
+    "backend": "osv",
+    "commandResult": {
+      "blocked": false,
+      "command": [
+        "/home/kavya_parivarababu/bin/osv-scanner",
+        "scan",
+        "source",
+        "-r",
+        "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+        "--format",
+        "json",
+        "--data-source=native",
+        "--maven-registry=http://127.0.0.1:37107/"
+      ],
+      "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository",
+      "durationSeconds": 0.13185950999968554,
+      "exitCode": 128,
+      "stderr": "Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository\nStarting filesystem walk for root: /\nfailed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\ncould not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nfailed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nEnd status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 14.771579ms elapsed, 14.771682ms wall time\nError during extraction: (extracting as java/pomxml) \n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: could not extract pom from home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/pom.xml: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to merge parents for task-domain in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-domain/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to merge parents for task-service in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-service/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to merge parents for task-common in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-common/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\n\thome/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to merge parents for task-web in home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to load parent at home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/temp/autonomous-osv-xg1ty04t/repository/task-web/pom.xml: failed to unmarshal project: XML syntax error on line 145: element <bannedDependencies> closed by </configuration>\nNo package sources found, --help for usage information.\n",
+      "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stderr.log",
+      "stdout": "",
+      "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/commands/osv_validation-cycle-3_attempt_1-baff50db44fd.stdout.log",
+      "timedOut": false
+    },
+    "error": "NO_PACKAGE_SOURCES: OSV Scanner found no package sources",
+    "evidence": {},
+    "failureKind": "CONFIGURATION",
+    "findings": [],
+    "outcome": "INCOMPLETE_FATAL_FAILURE",
+    "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/artifacts/scans/validation-cycle-3.json",
+    "succeeded": false
+  },
+  "targetComparisonComplete": false,
+  "treeDigest": "915bbdc10c705c1fa0d7ee43a5fc17d0efe9830b8dea2742504f0dbde68d0f84",
+  "warnings": []
+}

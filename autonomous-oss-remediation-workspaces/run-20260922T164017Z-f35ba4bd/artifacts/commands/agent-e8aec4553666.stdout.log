@@ -1,0 +1,584 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- spring-boot:3.3.3:repackage (repackage) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-common >------------------
+[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
+[INFO]   from task-common/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ task-common ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-common/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-common ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-common/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-common/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ task-common ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-common/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ task-common ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ task-common ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-common ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.3.3:repackage (repackage) @ task-common ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-domain >------------------
+[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
+[INFO]   from task-domain/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ task-domain ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-domain/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-domain ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-domain/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-domain/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ task-domain ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-domain/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ task-domain ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ task-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-domain ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.3.3:repackage (repackage) @ task-domain ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-service >-----------------
+[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
+[INFO]   from task-service/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ task-service ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-service/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-service ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-service/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-service/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ task-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.354 s -- in com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-service ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.3.3:repackage (repackage) @ task-service ---
+[INFO] 
+[INFO] -------------------< com.example.secureapp:task-web >-------------------
+[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
+[INFO]   from task-web/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ task-web ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-web ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-web ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[3,32] package org.springframework.boot does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[4,46] package org.springframework.boot.autoconfigure does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[6,2] cannot find symbol
+  symbol: class SpringBootApplication
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[4,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[5,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[6,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[10,2] cannot find symbol
+  symbol: class RestController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[11,2] cannot find symbol
+  symbol: class RequestMapping
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[9,26] package jakarta.validation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[10,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[11,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[12,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[13,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[14,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[15,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[16,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[17,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[18,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[19,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[20,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[25,2] cannot find symbol
+  symbol: class RestController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[26,2] cannot find symbol
+  symbol: class RequestMapping
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[3,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[3,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[5,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[6,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[7,36] package org.springframework.web.bind does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[8,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[9,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[13,2] cannot find symbol
+  symbol: class RestControllerAdvice
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[16,12] cannot find symbol
+  symbol:   class ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[26,62] cannot find symbol
+  symbol:   class MethodArgumentNotValidException
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[26,12] cannot find symbol
+  symbol:   class ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[40,12] cannot find symbol
+  symbol:   class ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[50,12] cannot find symbol
+  symbol:   class ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[3,23] package jakarta.servlet does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[4,23] package jakarta.servlet does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[5,28] package jakarta.servlet.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[6,28] package jakarta.servlet.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[8,38] package org.springframework.web.filter does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[13,44] cannot find symbol
+  symbol: class OncePerRequestFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[16,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[17,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[18,13] cannot find symbol
+  symbol:   class FilterChain
+  location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[19,14] cannot find symbol
+  symbol:   class ServletException
+  location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[13,6] cannot find symbol
+  symbol:   class GetMapping
+  location: class com.example.secureapp.web.controller.SecurityPostureController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[34,6] cannot find symbol
+  symbol:   class GetMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[42,35] cannot find symbol
+  symbol:   class PathVariable
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[41,6] cannot find symbol
+  symbol:   class GetMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[7,10] cannot find symbol
+  symbol:   class NotBlank
+  location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[8,10] cannot find symbol
+  symbol:   class Size
+  location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[11,10] cannot find symbol
+  symbol:   class Size
+  location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[50,33] cannot find symbol
+  symbol:   class Valid
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[50,40] cannot find symbol
+  symbol:   class RequestBody
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[48,6] cannot find symbol
+  symbol:   class PostMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[49,6] cannot find symbol
+  symbol:   class ResponseStatus
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[49,21] cannot find symbol
+  symbol:   variable HttpStatus
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,40] cannot find symbol
+  symbol:   class PathVariable
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[7,10] cannot find symbol
+  symbol:   class NotBlank
+  location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[8,10] cannot find symbol
+  symbol:   class Size
+  location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[11,10] cannot find symbol
+  symbol:   class Size
+  location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,63] cannot find symbol
+  symbol:   class Valid
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,70] cannot find symbol
+  symbol:   class RequestBody
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[54,6] cannot find symbol
+  symbol:   class PutMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,39] cannot find symbol
+  symbol:   class PathVariable
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java:[7,10] cannot find symbol
+  symbol:   class NotNull
+  location: class com.example.secureapp.web.dto.UpdateTaskStatusRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,62] cannot find symbol
+  symbol:   class Valid
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,69] cannot find symbol
+  symbol:   class RequestBody
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[59,6] cannot find symbol
+  symbol:   class PatchMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[66,25] cannot find symbol
+  symbol:   class PathVariable
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[64,6] cannot find symbol
+  symbol:   class DeleteMapping
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[65,6] cannot find symbol
+  symbol:   class ResponseStatus
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[65,21] cannot find symbol
+  symbol:   variable HttpStatus
+  location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[15,6] cannot find symbol
+  symbol:   class ExceptionHandler
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[25,6] cannot find symbol
+  symbol:   class ExceptionHandler
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[25,23] cannot find symbol
+  symbol:   class MethodArgumentNotValidException
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[39,6] cannot find symbol
+  symbol:   class ExceptionHandler
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[49,6] cannot find symbol
+  symbol:   class ExceptionHandler
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[9,9] cannot find symbol
+  symbol:   variable SpringApplication
+  location: class com.example.secureapp.web.TaskApplication
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[22,38] cannot find symbol
+  symbol:   variable HttpStatus
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[22,16] cannot find symbol
+  symbol:   variable ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[36,16] cannot find symbol
+  symbol:   variable ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[46,16] cannot find symbol
+  symbol:   variable ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[56,38] cannot find symbol
+  symbol:   variable HttpStatus
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[56,16] cannot find symbol
+  symbol:   variable ResponseEntity
+  location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[14,5] method does not override or implement a method from a supertype
+[INFO] 89 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.572 s]
+[INFO] task-common ........................................ SUCCESS [  4.095 s]
+[INFO] task-domain ........................................ SUCCESS [  0.747 s]
+[INFO] task-service ....................................... SUCCESS [  3.754 s]
+[INFO] task-web ........................................... FAILURE [  1.010 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.104 s
+[INFO] Finished at: 2026-09-22T16:46:20Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project task-web: Compilation failure: Compilation failure: 
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[3,32] package org.springframework.boot does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[4,46] package org.springframework.boot.autoconfigure does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[6,2] cannot find symbol
+[ERROR]   symbol: class SpringBootApplication
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[4,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[5,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[6,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[10,2] cannot find symbol
+[ERROR]   symbol: class RestController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[11,2] cannot find symbol
+[ERROR]   symbol: class RequestMapping
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[9,26] package jakarta.validation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[10,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[11,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[12,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[13,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[14,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[15,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[16,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[17,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[18,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[19,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[20,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[25,2] cannot find symbol
+[ERROR]   symbol: class RestController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[26,2] cannot find symbol
+[ERROR]   symbol: class RequestMapping
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[3,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[3,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java:[4,38] package jakarta.validation.constraints does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[5,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[6,32] package org.springframework.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[7,36] package org.springframework.web.bind does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[8,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[9,47] package org.springframework.web.bind.annotation does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[13,2] cannot find symbol
+[ERROR]   symbol: class RestControllerAdvice
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[16,12] cannot find symbol
+[ERROR]   symbol:   class ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[26,62] cannot find symbol
+[ERROR]   symbol:   class MethodArgumentNotValidException
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[26,12] cannot find symbol
+[ERROR]   symbol:   class ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[40,12] cannot find symbol
+[ERROR]   symbol:   class ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[50,12] cannot find symbol
+[ERROR]   symbol:   class ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[3,23] package jakarta.servlet does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[4,23] package jakarta.servlet does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[5,28] package jakarta.servlet.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[6,28] package jakarta.servlet.http does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[8,38] package org.springframework.web.filter does not exist
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[13,44] cannot find symbol
+[ERROR]   symbol: class OncePerRequestFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[16,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[17,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[18,13] cannot find symbol
+[ERROR]   symbol:   class FilterChain
+[ERROR]   location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[19,14] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class com.example.secureapp.web.security.SecurityHeadersFilter
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java:[13,6] cannot find symbol
+[ERROR]   symbol:   class GetMapping
+[ERROR]   location: class com.example.secureapp.web.controller.SecurityPostureController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[34,6] cannot find symbol
+[ERROR]   symbol:   class GetMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[42,35] cannot find symbol
+[ERROR]   symbol:   class PathVariable
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[41,6] cannot find symbol
+[ERROR]   symbol:   class GetMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[7,10] cannot find symbol
+[ERROR]   symbol:   class NotBlank
+[ERROR]   location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[8,10] cannot find symbol
+[ERROR]   symbol:   class Size
+[ERROR]   location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java:[11,10] cannot find symbol
+[ERROR]   symbol:   class Size
+[ERROR]   location: class com.example.secureapp.web.dto.CreateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[50,33] cannot find symbol
+[ERROR]   symbol:   class Valid
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[50,40] cannot find symbol
+[ERROR]   symbol:   class RequestBody
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[48,6] cannot find symbol
+[ERROR]   symbol:   class PostMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[49,6] cannot find symbol
+[ERROR]   symbol:   class ResponseStatus
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[49,21] cannot find symbol
+[ERROR]   symbol:   variable HttpStatus
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,40] cannot find symbol
+[ERROR]   symbol:   class PathVariable
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[7,10] cannot find symbol
+[ERROR]   symbol:   class NotBlank
+[ERROR]   location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[8,10] cannot find symbol
+[ERROR]   symbol:   class Size
+[ERROR]   location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java:[11,10] cannot find symbol
+[ERROR]   symbol:   class Size
+[ERROR]   location: class com.example.secureapp.web.dto.UpdateTaskRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,63] cannot find symbol
+[ERROR]   symbol:   class Valid
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[55,70] cannot find symbol
+[ERROR]   symbol:   class RequestBody
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[54,6] cannot find symbol
+[ERROR]   symbol:   class PutMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,39] cannot find symbol
+[ERROR]   symbol:   class PathVariable
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java:[7,10] cannot find symbol
+[ERROR]   symbol:   class NotNull
+[ERROR]   location: class com.example.secureapp.web.dto.UpdateTaskStatusRequest
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,62] cannot find symbol
+[ERROR]   symbol:   class Valid
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[60,69] cannot find symbol
+[ERROR]   symbol:   class RequestBody
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[59,6] cannot find symbol
+[ERROR]   symbol:   class PatchMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[66,25] cannot find symbol
+[ERROR]   symbol:   class PathVariable
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[64,6] cannot find symbol
+[ERROR]   symbol:   class DeleteMapping
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[65,6] cannot find symbol
+[ERROR]   symbol:   class ResponseStatus
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java:[65,21] cannot find symbol
+[ERROR]   symbol:   variable HttpStatus
+[ERROR]   location: class com.example.secureapp.web.controller.TaskController
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[15,6] cannot find symbol
+[ERROR]   symbol:   class ExceptionHandler
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[25,6] cannot find symbol
+[ERROR]   symbol:   class ExceptionHandler
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[25,23] cannot find symbol
+[ERROR]   symbol:   class MethodArgumentNotValidException
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[39,6] cannot find symbol
+[ERROR]   symbol:   class ExceptionHandler
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[49,6] cannot find symbol
+[ERROR]   symbol:   class ExceptionHandler
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/TaskApplication.java:[9,9] cannot find symbol
+[ERROR]   symbol:   variable SpringApplication
+[ERROR]   location: class com.example.secureapp.web.TaskApplication
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[22,38] cannot find symbol
+[ERROR]   symbol:   variable HttpStatus
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[22,16] cannot find symbol
+[ERROR]   symbol:   variable ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[36,16] cannot find symbol
+[ERROR]   symbol:   variable ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[46,16] cannot find symbol
+[ERROR]   symbol:   variable ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[56,38] cannot find symbol
+[ERROR]   symbol:   variable HttpStatus
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java:[56,16] cannot find symbol
+[ERROR]   symbol:   variable ResponseEntity
+[ERROR]   location: class com.example.secureapp.web.error.GlobalExceptionHandler
+[ERROR] /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T164017Z-f35ba4bd/repository/task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java:[14,5] method does not override or implement a method from a supertype
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :task-web
