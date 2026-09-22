@@ -433,13 +433,14 @@ class JournalLifecycle:
         self.trace.append_event("journal_phase_changed", cycle=cycle, phase=self.phase.value)
 
     def submit_intent(self, cycle: int, answers: list[dict[str, str]]) -> CheckpointResult:
-        capture = self.cycles.setdefault(cycle, CycleCapture())
-        errors = self._checkpoint_errors("intent", cycle, answers, capture.intent)
+        capture = self.cycles.get(cycle)
+        errors = self._checkpoint_errors("intent", cycle, answers, capture)
         if cycle > 1:
             errors.extend(self._missing_sections(answers, PRIOR_CYCLE_INTENT_SECTIONS))
         if errors:
-            capture.rejected_intents += 1
-            return self._reject("intent", cycle, errors, capture.rejected_intents)
+            return self._reject("intent", cycle, errors, self._rejection_capture(cycle))
+        if capture is None:
+            raise RuntimeError(f"Cycle {cycle} was not begun")
         late = self._repository_changed()
         errors.extend(_intent_structure_errors(answers))
         rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", answers)
@@ -450,8 +451,7 @@ class JournalLifecycle:
             )
         )
         if errors:
-            capture.rejected_intents += 1
-            return self._reject("intent", cycle, errors, capture.rejected_intents)
+            return self._reject("intent", cycle, errors, capture)
         capture.intent = self.store.append("intent", cycle, rendered)
         capture.intent_answers = {
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
@@ -469,13 +469,13 @@ class JournalLifecycle:
         return CheckpointResult(True, metadata=capture.intent)
 
     def require_outcome(self) -> None:
-        capture = self.cycles.setdefault(self.active_cycle, CycleCapture())
+        capture = self._require_active_capture(self.active_cycle)
         capture.implementation_status = ImplementationStatus.EXECUTED
         self.phase = JournalPhase.OUTCOME_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=self.active_cycle, phase=self.phase.value)
 
     def fail_intent_capture(self, cycle: int) -> None:
-        capture = self.cycles.setdefault(cycle, CycleCapture())
+        capture = self._require_active_capture(cycle)
         if capture.intent is not None:
             raise RuntimeError(f"Cycle {cycle} intent has already been accepted")
         capture.intent_capture_status = CheckpointCaptureStatus.FAILED
@@ -492,7 +492,7 @@ class JournalLifecycle:
         )
 
     def fail_outcome_capture(self, cycle: int) -> None:
-        capture = self.cycles.setdefault(cycle, CycleCapture())
+        capture = self._require_active_capture(cycle)
         if capture.outcome is not None:
             raise RuntimeError(f"Cycle {cycle} outcome has already been accepted")
         capture.outcome_capture_status = CheckpointCaptureStatus.FAILED
@@ -513,15 +513,16 @@ class JournalLifecycle:
         status_explanation: str,
         answers: list[dict[str, str]],
     ) -> CheckpointResult:
-        capture = self.cycles.setdefault(cycle, CycleCapture())
+        capture = self.cycles.get(cycle)
         normalized_status = status.strip().upper()
-        errors = self._checkpoint_errors("outcome", cycle, answers, capture.outcome)
+        errors = self._checkpoint_errors("outcome", cycle, answers, capture)
         if normalized_status not in OUTCOME_STATUSES:
             errors.append(f"Invalid Cycle Outcome status: {status}")
         errors.extend(_answer_errors("Cycle outcome status", status_explanation, self.max_section_chars))
         if errors:
-            capture.rejected_outcomes += 1
-            return self._reject("outcome", cycle, errors, capture.rejected_outcomes)
+            return self._reject("outcome", cycle, errors, self._rejection_capture(cycle))
+        if capture is None:
+            raise RuntimeError(f"Cycle {cycle} was not begun")
         all_answers = [
             {"section": "Cycle outcome status", "answer": f"`{normalized_status}`\n\n{status_explanation.strip()}"},
             *answers,
@@ -529,8 +530,7 @@ class JournalLifecycle:
         rendered = render_checkpoint(cycle, "Outcome", all_answers)
         errors.extend(validate_rendered_markdown(rendered, f"Cycle {cycle} — Outcome"))
         if errors:
-            capture.rejected_outcomes += 1
-            return self._reject("outcome", cycle, errors, capture.rejected_outcomes)
+            return self._reject("outcome", cycle, errors, capture)
         capture.outcome = self.store.append("outcome", cycle, rendered)
         capture.outcome_answers = {
             str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
@@ -553,7 +553,7 @@ class JournalLifecycle:
         status: ValidationStatus,
         delivery: DeliveryEligibility,
     ) -> JournalSection:
-        capture = self.cycles.setdefault(report.cycle, CycleCapture())
+        capture = self._require_active_capture(report.cycle)
         rendered = render_validation(report, status, delivery, capture.outcome_status, capture)
         errors = validate_rendered_markdown(rendered, f"Cycle {report.cycle} — Deterministic Validation")
         if errors:
@@ -584,7 +584,21 @@ class JournalLifecycle:
         return capture.outcome_status if capture else None
 
     def cycle_state(self, cycle: int) -> dict[str, Any]:
-        return self.cycles.setdefault(cycle, CycleCapture()).lifecycle_state(cycle)
+        capture = self.cycles.get(cycle)
+        return (capture or CycleCapture()).lifecycle_state(cycle)
+
+    def _require_active_capture(self, cycle: int) -> CycleCapture:
+        if cycle != self.active_cycle:
+            raise RuntimeError(f"Expected active cycle {self.active_cycle}, received {cycle}")
+        capture = self.cycles.get(cycle)
+        if capture is None:
+            raise RuntimeError(f"Cycle {cycle} was not begun")
+        return capture
+
+    def _rejection_capture(self, requested_cycle: int) -> CycleCapture | None:
+        if requested_cycle == self.active_cycle:
+            return self.cycles.get(requested_cycle)
+        return self.cycles.get(self.active_cycle)
 
     def context(self) -> str:
         content = self.store.read()
@@ -630,21 +644,28 @@ class JournalLifecycle:
         kind: str,
         cycle: int,
         answers: list[dict[str, str]],
-        existing: JournalSection | None,
+        capture: CycleCapture | None,
     ) -> list[str]:
         errors: list[str] = []
         attempts = (
-            self.cycles.get(cycle, CycleCapture()).rejected_intents
-            if kind == "intent"
-            else self.cycles.get(cycle, CycleCapture()).rejected_outcomes
+            capture.rejected_intents
+            if capture is not None and kind == "intent"
+            else capture.rejected_outcomes
+            if capture is not None
+            else 0
         )
         if attempts >= self.max_checkpoint_attempts:
             errors.append(f"Cycle {cycle} {kind} retry limit is exhausted")
         if cycle != self.active_cycle:
             errors.append(f"Expected active cycle {self.active_cycle}, received {cycle}")
+        if capture is None:
+            errors.append(f"Cycle {cycle} was not begun")
         expected_phase = JournalPhase.INTENT_REQUIRED if kind == "intent" else JournalPhase.OUTCOME_REQUIRED
         if self.phase != expected_phase:
             errors.append(f"Expected phase {expected_phase.value}, current phase is {self.phase.value}")
+        existing = capture.intent if capture is not None and kind == "intent" else (
+            capture.outcome if capture is not None else None
+        )
         if existing:
             errors.append(f"Cycle {cycle} {kind} has already been accepted")
         required = INTENT_SECTIONS if kind == "intent" else OUTCOME_SECTIONS
@@ -675,15 +696,27 @@ class JournalLifecycle:
         supplied = {str(item.get("section", "")).strip().casefold() for item in answers}
         return [f"Missing required section: {section}" for section in required if section.casefold() not in supplied]
 
-    def _reject(self, kind: str, cycle: int, errors: list[str], attempt: int) -> CheckpointResult:
-        capture = self.cycles.setdefault(cycle, CycleCapture())
-        if kind == "intent":
+    def _reject(
+        self,
+        kind: str,
+        cycle: int,
+        errors: list[str],
+        capture: CycleCapture | None,
+    ) -> CheckpointResult:
+        if capture is not None and kind == "intent":
+            capture.rejected_intents += 1
             capture.last_intent_errors = tuple(errors)
-        else:
+            attempt = capture.rejected_intents
+        elif capture is not None:
+            capture.rejected_outcomes += 1
             capture.last_outcome_errors = tuple(errors)
+            attempt = capture.rejected_outcomes
+        else:
+            attempt = 1
         self.trace.append_event(
             f"{kind}_submission_rejected",
             cycle=cycle,
+            activeCycle=self.active_cycle,
             attempt=attempt,
             retryAllowed=attempt < self.max_checkpoint_attempts,
             errors=errors,

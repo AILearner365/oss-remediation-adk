@@ -160,6 +160,54 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertEqual({}, self.lifecycle.cycles[1].outcome_answers)
         self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.lifecycle.phase)
 
+    def test_future_outcome_rejection_does_not_create_cycle(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.require_outcome()
+
+        rejected = self.lifecycle.submit_outcome(
+            2,
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            "Incorrect future cycle.",
+            self._outcome_answers(),
+        )
+
+        self.assertFalse(rejected.accepted)
+        self.assertIn("Expected active cycle 1, received 2", rejected.errors)
+        self.assertEqual({1}, set(self.lifecycle.cycles))
+        self.assertNotIn(2, self.lifecycle.cycles)
+
+        accepted = self.lifecycle.submit_outcome(
+            1,
+            "READY_FOR_INDEPENDENT_VALIDATION",
+            "Correct active cycle.",
+            self._outcome_answers(),
+        )
+        self.assertTrue(accepted.accepted)
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.capture_status(1))
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.run_capture_status)
+
+    def test_future_intent_rejection_does_not_create_cycle(self):
+        rejected = self.lifecycle.submit_intent(2, self._intent_answers())
+
+        self.assertFalse(rejected.accepted)
+        self.assertIn("Expected active cycle 1, received 2", rejected.errors)
+        self.assertEqual({1}, set(self.lifecycle.cycles))
+        self.assertNotIn(2, self.lifecycle.cycles)
+
+    def test_cycle_state_query_is_non_mutating_but_begun_cycle_is_authoritative(self):
+        before = dict(self.lifecycle.cycles)
+
+        state = self.lifecycle.cycle_state(2)
+
+        self.assertEqual(before, self.lifecycle.cycles)
+        self.assertNotIn(2, self.lifecycle.cycles)
+        self.assertEqual("PENDING", state["intent"]["status"])
+
+        self.lifecycle.begin_cycle(2)
+        self.assertIn(2, self.lifecycle.cycles)
+        self.assertEqual(CaptureStatus.MISSING, self.lifecycle.run_capture_status)
+        self.assertIn("Cycle 2 capture is MISSING", self.lifecycle.capture_warnings())
+
     def test_every_outcome_status_is_structurally_accepted(self):
         for status in OUTCOME_STATUSES:
             with self.subTest(status=status):

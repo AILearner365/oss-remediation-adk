@@ -397,6 +397,26 @@ class _MissingFirstIntentSession(_ScriptedAgentSession):
         return await super().run_turn(message)
 
 
+class _FutureOutcomeThenCorrectSession(_ScriptedAgentSession):
+    def __init__(self, capabilities, edits):
+        super().__init__(capabilities, edits)
+        self.invalid_outcome_result = None
+
+    async def run_turn(self, message):
+        if (
+            self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED
+            and self.invalid_outcome_result is None
+        ):
+            cycle = self.capabilities.journal.active_cycle
+            self.invalid_outcome_result = self.capabilities.submit_cycle_outcome(
+                cycle + 1,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "Incorrect future-cycle Outcome.",
+                _outcome_answers(),
+            )
+        return await super().run_turn(message)
+
+
 class _CommittingAgentSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -816,6 +836,37 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual("INCOMPLETE", result.capture_status)
         self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
         self.assertEqual(1, result.cycles_completed)
+
+    def test_rejected_future_outcome_does_not_create_phantom_cycle_or_block_delivery(self):
+        sessions = []
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _FutureOutcomeThenCorrectSession(capabilities, [("1.0", "2.0")])
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda workspace, process_runner, trace: adapter,
+        ).run()
+
+        self.assertEqual("rejected", sessions[0].invalid_outcome_result["status"])
+        self.assertIn(
+            "Expected active cycle 1, received 2",
+            sessions[0].invalid_outcome_result["errors"],
+        )
+        self.assertEqual(Outcome.SUCCESS, result.outcome)
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("COMPLETE", result.capture_status)
+        self.assertEqual("FULL_AUTOMATIC_DELIVERY", result.delivery_eligibility)
+        self.assertEqual(1, len(adapter.contexts))
+        self.assertEqual(1, result.cycles_completed)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("# Cycle 1 — Outcome", journal)
+        self.assertNotIn("# Cycle 2 —", journal)
+        self.assertNotIn("**Cycle 2", journal)
+        self.assertFalse(
+            (Path(result.workspace_root) / "artifacts" / "agent" / "cycle-2.json").exists()
+        )
 
     def test_cycle_evidence_identifies_preserved_and_repeated_repository_state(self):
         sessions = []
