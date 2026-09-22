@@ -1,0 +1,18 @@
+0 verbose cli /usr/local/nvm/versions/node/v24.21.0/bin/node /usr/local/nvm/versions/node/v24.21.0/bin/npm
+1 info using npm@12.0.2
+2 info using node@v24.21.0
+3 silly config load:file:/usr/local/nvm/versions/node/v24.21.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T040132Z-df974968/repository/.npmrc
+5 silly config load:file:/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T040132Z-df974968/temp/agent-home/.npmrc
+6 silly config load:file:/usr/local/nvm/versions/node/v24.21.0/etc/npmrc
+7 verbose title npm config get prefix
+8 verbose argv "config" "--loglevel" "warn" "get" "prefix"
+9 verbose logfile logs-max:10 dir:/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T040132Z-df974968/temp/agent-home/.npm/_logs/2026-09-22T04_06_29_556Z-
+10 verbose logfile /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T040132Z-df974968/temp/agent-home/.npm/_logs/2026-09-22T04_06_29_556Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260922T040132Z-df974968/repository
+13 verbose os Linux 6.6.153+
+14 verbose node v24.21.0
+15 verbose npm  v12.0.2
+16 verbose exit 0
+17 info ok
