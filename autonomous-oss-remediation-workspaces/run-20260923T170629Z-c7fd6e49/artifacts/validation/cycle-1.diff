@@ -1,0 +1,75 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..4f6cf3f 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -7,7 +7,7 @@
+     <parent>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-parent</artifactId>
+-        <version>4.0.6</version>
++        <version>4.0.7</version>
+         <relativePath/>
+     </parent>
+ 
+@@ -35,6 +35,10 @@
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+         <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>
++        <spring-framework.version>7.0.8</spring-framework.version>
++        <tomcat.version>11.0.25</tomcat.version>
++        <micrometer.version>1.16.6</micrometer.version>
++        <jackson.version>3.1.5</jackson.version>
+     </properties>
+ 
+     <dependencyManagement>
+@@ -54,18 +58,48 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-expression</artifactId>
++                <version>${spring-framework.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>org.springframework</groupId>
++                <artifactId>spring-webmvc</artifactId>
++                <version>${spring-framework.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>org.apache.tomcat.embed</groupId>
++                <artifactId>tomcat-embed-core</artifactId>
++                <version>${tomcat.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>io.micrometer</groupId>
++                <artifactId>micrometer-core</artifactId>
++                <version>${micrometer.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-core</artifactId>
++                <version>${jackson.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>${jackson.version}</version>
++            </dependency>
+         </dependencies>
+     </dependencyManagement>
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
++            <version>1.10.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
++            <version>20231013</version>
+         </dependency>
+     </dependencies>
+     <build>
