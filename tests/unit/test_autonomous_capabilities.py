@@ -6,11 +6,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from google.adk.models import Gemini
 
 from autonomous_oss_remediation_agent.agent import create_remediation_agent
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
+from autonomous_oss_remediation_agent.capabilities import isolation as isolation_module
 from autonomous_oss_remediation_agent.capabilities.research import (
     HttpResearchProvider,
     ResearchResult,
@@ -59,6 +61,28 @@ class AutonomousCapabilityTests(unittest.TestCase):
         )
         self.assertTrue(approved.approved)
         self.assertIn("no hard shell containment", approved.reason)
+
+    def test_linux_isolation_backend_selection_fails_closed(self):
+        with (
+            patch.object(isolation_module.sys, "platform", "linux"),
+            patch.object(isolation_module, "_linux_landlock_abi", return_value=0),
+            patch.object(isolation_module, "_linux_mount_namespace_usable", return_value=False),
+        ):
+            self.assertIsNone(isolation_module._linux_isolation_backend())
+        with (
+            patch.object(isolation_module.sys, "platform", "linux"),
+            patch.object(isolation_module, "_linux_landlock_abi", return_value=0),
+            patch.object(isolation_module, "_linux_mount_namespace_usable", return_value=True),
+        ):
+            self.assertEqual(
+                "linux-user-mount-namespace", isolation_module._linux_isolation_backend()
+            )
+        with (
+            patch.object(isolation_module.sys, "platform", "linux"),
+            patch.object(isolation_module, "_linux_landlock_abi", return_value=6),
+            patch.object(isolation_module, "_linux_mount_namespace_usable", return_value=True),
+        ):
+            self.assertEqual("linux-landlock", isolation_module._linux_isolation_backend())
 
     def test_read_edit_and_path_boundary(self):
         result = self.capabilities.edit_workspace_text("write", "pom.xml", content="<project/>\n")
@@ -360,6 +384,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
 
     def test_pre_intent_mutation_and_shell_are_isolated_then_active_routing_switches(self):
         changed = False
+        (self.workspace.repository / "existing-shell.txt").write_text(
+            "authoritative\n", encoding="utf-8"
+        )
         journal = JournalLifecycle(
             JournalStore(self.trace), self.trace, "contract", lambda: changed
         )
@@ -368,14 +395,26 @@ class AutonomousCapabilityTests(unittest.TestCase):
         experiment = capabilities.begin_cycle(1)
 
         edit = capabilities.edit_workspace_text("write", "isolated.txt", content="experiment")
-        shell = capabilities.run_workspace_shell("Set-Content shell.txt experiment" if os.name == "nt" else "printf experiment > shell.txt")
+        shell = capabilities.run_workspace_shell(
+            "Set-Content shell.txt experiment; Set-Content existing-shell.txt modified"
+            if os.name == "nt"
+            else "printf experiment > shell.txt; printf modified > existing-shell.txt"
+        )
 
         self.assertEqual("ok", edit["status"])
         self.assertEqual(0, shell["exitCode"])
         self.assertTrue((experiment.repository / "isolated.txt").is_file())
         self.assertTrue((experiment.repository / "shell.txt").is_file())
+        self.assertEqual(
+            "modified",
+            (experiment.repository / "existing-shell.txt").read_text(encoding="utf-8").strip(),
+        )
         self.assertFalse((self.workspace.repository / "isolated.txt").exists())
         self.assertFalse((self.workspace.repository / "shell.txt").exists())
+        self.assertEqual(
+            "authoritative\n",
+            (self.workspace.repository / "existing-shell.txt").read_text(encoding="utf-8"),
+        )
         tooling = capabilities.run_workspace_shell(
             "python -c \"from pathlib import Path; Path('tooling.txt').write_text('ok')\"; "
             "git init; git config user.name Experiment"
@@ -518,6 +557,67 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertFalse(result.blocked)
         self.assertTrue((experiment.repository / "symlink-attempt-ran.txt").is_file())
         self.assertEqual("authoritative\n", authoritative_target.read_text(encoding="utf-8"))
+
+    def test_linux_mount_namespace_backend_runs_real_tools_and_blocks_proc_root_alias(self):
+        if self.runner.experimental_isolation.backend != "linux-user-mount-namespace":
+            self.skipTest("Linux user and mount namespace backend is not selected on this host")
+        experiment = self.workspace.fork_repository(1)
+        existing = experiment.repository / "existing.txt"
+        existing.write_text("before\n", encoding="utf-8")
+        authoritative = self.workspace.repository / "protected.txt"
+        authoritative.write_text("authoritative\n", encoding="utf-8")
+        self.runner.prepare_experimental_workspace(experiment)
+
+        child_script = experiment.repository / "child.py"
+        child_script.write_text(
+            "import os\n"
+            "from pathlib import Path\n"
+            "Path('existing.txt').write_text('after\\n')\n"
+            "Path('child-created.txt').write_text('child\\n')\n"
+            "Path(os.environ['TMPDIR'], 'child-temp.txt').write_text('temp\\n')\n",
+            encoding="utf-8",
+        )
+        proc_alias = Path("/proc/1/root") / authoritative.relative_to("/")
+        (experiment.repository / "attack.py").write_text(
+            "import os\n"
+            "from pathlib import Path\n"
+            f"targets = [Path({str(authoritative)!r}), Path({str(proc_alias)!r})]\n"
+            "denied = 0\n"
+            "for target in targets:\n"
+            "    try:\n"
+            "        target.write_text('escape')\n"
+            "    except OSError:\n"
+            "        denied += 1\n"
+            "if denied != len(targets):\n"
+            "    raise SystemExit(1)\n"
+            f"try:\n    os.link({str(authoritative)!r}, 'hardlink-alias')\n"
+            "except OSError:\n    pass\n"
+            "else:\n    raise SystemExit(1)\n"
+            "Path('attacks-denied.txt').write_text('denied\\n')\n",
+            encoding="utf-8",
+        )
+        command = "python child.py && git init && git status --short && python attack.py"
+        result = self.runner.run_agent_shell(command, repository_workspace=experiment)
+
+        self.assertEqual(0, result.exit_code)
+        self.assertEqual("after\n", existing.read_text(encoding="utf-8"))
+        self.assertEqual(
+            "child\n",
+            (experiment.repository / "child-created.txt").read_text(encoding="utf-8"),
+        )
+        self.assertTrue((experiment.repository / ".git").is_dir())
+        self.assertTrue((experiment.repository / "attacks-denied.txt").is_file())
+        self.assertFalse((experiment.repository / "hardlink-alias").exists())
+        self.assertTrue(
+            (
+                self.workspace.temp
+                / "experimental-runtime"
+                / "cycle-1"
+                / "temp"
+                / "child-temp.txt"
+            ).is_file()
+        )
+        self.assertEqual("authoritative\n", authoritative.read_text(encoding="utf-8"))
 
     def test_cycle_forks_preserve_exact_current_authoritative_working_state(self):
         _git(self.workspace.repository, "init", "-b", "main")

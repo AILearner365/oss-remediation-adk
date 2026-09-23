@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import ctypes
+import errno
 import os
 import signal
+import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Mapping, Sequence
 
@@ -28,20 +32,19 @@ class ExperimentalProcessIsolation:
 
     @property
     def available(self) -> bool:
-        return os.name == "nt" or (sys.platform.startswith("linux") and _linux_landlock_abi() > 0)
+        return os.name == "nt" or _linux_isolation_backend() is not None
 
     @property
     def backend(self) -> str:
         if os.name == "nt":
             return "windows-low-integrity"
-        if sys.platform.startswith("linux") and _linux_landlock_abi() > 0:
-            return "linux-landlock"
-        return "unavailable"
+        return _linux_isolation_backend() or "unavailable"
 
     def prepare(self, repository: Path, cycle: int, historical_repositories: Sequence[Path]) -> Path:
         if not self.available:
             raise ExperimentalIsolationUnavailable(
-                "Experimental shell isolation requires Windows mandatory integrity control or Linux Landlock"
+                "Experimental shell isolation requires Windows mandatory integrity control, "
+                "Linux Landlock, or usable Linux user and mount namespaces"
             )
         runtime = self.run_root / "temp" / "experimental-runtime" / f"cycle-{cycle}"
         runtime.mkdir(parents=True, exist_ok=True)
@@ -89,7 +92,18 @@ class ExperimentalProcessIsolation:
                 stderr_path=stderr_path,
                 timeout_seconds=timeout_seconds,
             )
-        return _run_linux_landlock(
+        if _linux_isolation_backend() == "linux-landlock":
+            return _run_linux_landlock(
+                command,
+                repository=repository,
+                runtime=runtime,
+                cwd=cwd,
+                environment=environment,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
+                timeout_seconds=timeout_seconds,
+            )
+        return _run_linux_mount_namespace(
             command,
             repository=repository,
             runtime=runtime,
@@ -384,6 +398,16 @@ def _linux_landlock_abi() -> int:
     return int(result) if result >= 1 else 0
 
 
+def _linux_isolation_backend() -> str | None:
+    if not sys.platform.startswith("linux"):
+        return None
+    if _linux_landlock_abi() > 0:
+        return "linux-landlock"
+    if _linux_mount_namespace_usable():
+        return "linux-user-mount-namespace"
+    return None
+
+
 def _linux_handled_access(abi: int) -> int:
     access = _LANDLOCK_WRITE_ACCESS
     if abi >= 2:
@@ -480,5 +504,328 @@ def _landlock_exec_main(arguments: list[str]) -> int:
     return 127
 
 
-if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--landlock-exec":
-    raise SystemExit(_landlock_exec_main(sys.argv[2:]))
+@lru_cache(maxsize=1)
+def _linux_mount_namespace_usable() -> bool:
+    if not sys.platform.startswith("linux"):
+        return False
+    unshare = shutil.which("unshare")
+    if unshare is None:
+        return False
+    try:
+        with tempfile.TemporaryDirectory(prefix="oss-remediation-namespace-probe-") as temporary:
+            root = Path(temporary)
+            repository = root / "repository"
+            runtime = root / "runtime"
+            protected = root / "protected"
+            for directory in (repository, runtime, protected):
+                directory.mkdir()
+            (runtime / "temp").mkdir()
+            (repository / "existing.txt").write_text("before\n", encoding="utf-8")
+            (protected / "protected.txt").write_text("original\n", encoding="utf-8")
+            command = _linux_mount_namespace_command(
+                unshare,
+                repository,
+                runtime,
+                [
+                    sys.executable,
+                    str(Path(__file__).resolve()),
+                    "--namespace-probe-child",
+                    str(repository),
+                    str(protected),
+                ],
+            )
+            completed = subprocess.run(
+                command,
+                cwd=repository,
+                env=os.environ.copy(),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=10,
+                check=False,
+            )
+            return (
+                completed.returncode == 0
+                and (repository / "existing.txt").read_text(encoding="utf-8") == "changed\n"
+                and (repository / "created.txt").read_text(encoding="utf-8") == "created\n"
+                and (repository / "mount-denied.txt").is_file()
+                and (protected / "protected.txt").read_text(encoding="utf-8") == "original\n"
+            )
+    except (OSError, subprocess.SubprocessError, FileNotFoundError):
+        return False
+
+
+def _linux_mount_namespace_command(
+    unshare: str,
+    repository: Path,
+    runtime: Path,
+    command: Sequence[str],
+) -> list[str]:
+    return [
+        unshare,
+        "--user",
+        "--map-root-user",
+        "--mount",
+        "--pid",
+        "--fork",
+        "--mount-proc",
+        sys.executable,
+        str(Path(__file__).resolve()),
+        "--namespace-exec",
+        str(repository),
+        str(runtime),
+        "--",
+        *command,
+    ]
+
+
+def _run_linux_mount_namespace(
+    command: Sequence[str],
+    *,
+    repository: Path,
+    runtime: Path,
+    cwd: Path,
+    environment: Mapping[str, str],
+    stdout_path: Path,
+    stderr_path: Path,
+    timeout_seconds: int,
+) -> IsolatedProcessResult:
+    unshare = shutil.which("unshare")
+    if unshare is None or not _linux_mount_namespace_usable():
+        return IsolatedProcessResult(126, False, "Linux mount namespace isolation is unavailable")
+    return _run_linux_subprocess(
+        _linux_mount_namespace_command(unshare, repository, runtime, command),
+        cwd=cwd,
+        environment=environment,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+        timeout_seconds=timeout_seconds,
+    )
+
+
+def _run_linux_subprocess(
+    command: Sequence[str],
+    *,
+    cwd: Path,
+    environment: Mapping[str, str],
+    stdout_path: Path,
+    stderr_path: Path,
+    timeout_seconds: int,
+) -> IsolatedProcessResult:
+    stdout_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with stdout_path.open("wb") as stdout_handle, stderr_path.open("wb") as stderr_handle:
+            process = subprocess.Popen(
+                command,
+                cwd=str(cwd),
+                env=dict(environment),
+                stdin=subprocess.DEVNULL,
+                stdout=stdout_handle,
+                stderr=stderr_handle,
+                start_new_session=True,
+            )
+            try:
+                exit_code = process.wait(timeout=timeout_seconds)
+                return IsolatedProcessResult(exit_code, False)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait()
+                return IsolatedProcessResult(124, True)
+    except OSError as exc:
+        return IsolatedProcessResult(127, False, str(exc))
+
+
+_MS_BIND = 4096
+_MS_REC = 16384
+_MS_PRIVATE = 1 << 18
+_AT_FDCWD = -100
+_AT_RECURSIVE = 0x8000
+_MOUNT_ATTR_RDONLY = 0x1
+_SYS_MOUNT_SETATTR = 442
+
+
+def _apply_linux_mount_namespace(repository: Path, runtime: Path) -> None:
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.mount.argtypes = [
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_ulong,
+        ctypes.c_void_p,
+    ]
+    libc.mount.restype = ctypes.c_int
+    _mount(libc, None, Path("/"), _MS_REC | _MS_PRIVATE)
+    _set_mount_readonly(libc, Path("/"), readonly=True, recursive=True)
+    for writable in dict.fromkeys((repository.resolve(), runtime.resolve())):
+        _mount(libc, writable, writable, _MS_BIND)
+        _set_mount_readonly(libc, writable, readonly=False)
+    system_temp = Path("/tmp")
+    if not _path_within(repository, system_temp) and not _path_within(runtime, system_temp):
+        _mount(libc, runtime / "temp", system_temp, _MS_BIND)
+        _set_mount_readonly(libc, system_temp, readonly=False)
+
+
+def _path_within(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _mount(libc, source: Path | None, target: Path, flags: int) -> None:
+    source_bytes = os.fsencode(source) if source is not None else None
+    if libc.mount(source_bytes, os.fsencode(target), None, flags, None) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"mount operation failed for {target}: {os.strerror(error)}")
+
+
+def _set_mount_readonly(
+    libc,
+    target: Path,
+    *,
+    readonly: bool,
+    recursive: bool = False,
+) -> None:
+    class MountAttr(ctypes.Structure):
+        _fields_ = [
+            ("attr_set", ctypes.c_uint64),
+            ("attr_clr", ctypes.c_uint64),
+            ("propagation", ctypes.c_uint64),
+            ("userns_fd", ctypes.c_uint64),
+        ]
+
+    attributes = MountAttr()
+    if readonly:
+        attributes.attr_set = _MOUNT_ATTR_RDONLY
+    else:
+        attributes.attr_clr = _MOUNT_ATTR_RDONLY
+    flags = _AT_RECURSIVE if recursive else 0
+    result = libc.syscall(
+        _SYS_MOUNT_SETATTR,
+        _AT_FDCWD,
+        os.fsencode(target),
+        flags,
+        ctypes.byref(attributes),
+        ctypes.sizeof(attributes),
+    )
+    if result != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"mount_setattr failed for {target}: {os.strerror(error)}")
+
+
+def _drop_linux_namespace_privileges() -> None:
+    libc = ctypes.CDLL(None, use_errno=True)
+    for capability in range(64):
+        result = libc.prctl(24, capability, 0, 0, 0)
+        if result != 0 and ctypes.get_errno() not in {errno.EINVAL}:
+            error = ctypes.get_errno()
+            raise OSError(error, f"PR_CAPBSET_DROP failed: {os.strerror(error)}")
+    if libc.prctl(28, 0xF, 0, 0, 0) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"PR_SET_SECUREBITS failed: {os.strerror(error)}")
+    if libc.prctl(47, 4, 0, 0, 0) != 0 and ctypes.get_errno() not in {errno.EINVAL}:
+        error = ctypes.get_errno()
+        raise OSError(error, f"PR_CAP_AMBIENT_CLEAR_ALL failed: {os.strerror(error)}")
+    if libc.prctl(38, 1, 0, 0, 0) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"PR_SET_NO_NEW_PRIVS failed: {os.strerror(error)}")
+
+    class CapHeader(ctypes.Structure):
+        _fields_ = [("version", ctypes.c_uint32), ("pid", ctypes.c_int)]
+
+    class CapData(ctypes.Structure):
+        _fields_ = [
+            ("effective", ctypes.c_uint32),
+            ("permitted", ctypes.c_uint32),
+            ("inheritable", ctypes.c_uint32),
+        ]
+
+    header = CapHeader(0x20080522, 0)
+    data = (CapData * 2)()
+    if libc.capset(ctypes.byref(header), ctypes.byref(data)) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"capset failed: {os.strerror(error)}")
+
+
+def _namespace_exec_main(arguments: list[str]) -> int:
+    separator = arguments.index("--")
+    repository = Path(arguments[0]).resolve()
+    runtime = Path(arguments[1]).resolve()
+    command = arguments[separator + 1 :]
+    _apply_linux_mount_namespace(repository, runtime)
+    _drop_linux_namespace_privileges()
+    os.execvpe(command[0], command, os.environ)
+    return 127
+
+
+def _namespace_probe_child(arguments: list[str]) -> int:
+    repository = Path(arguments[0])
+    protected = Path(arguments[1])
+    (repository / "existing.txt").write_text("changed\n", encoding="utf-8")
+    (repository / "created.txt").write_text("created\n", encoding="utf-8")
+    protected_write_failed = False
+    try:
+        (protected / "protected.txt").write_text("changed\n", encoding="utf-8")
+    except OSError:
+        protected_write_failed = True
+    mount_target = repository / "mount-target"
+    mount_target.mkdir()
+    libc = ctypes.CDLL(None, use_errno=True)
+    mount_failed = libc.mount(
+        os.fsencode(protected), os.fsencode(mount_target), None, _MS_BIND, None
+    ) != 0
+    if mount_failed:
+        (repository / "mount-denied.txt").write_text("denied\n", encoding="utf-8")
+    nested_target = repository / "nested-root"
+    nested_target.mkdir()
+    unshare = shutil.which("unshare")
+    nested = subprocess.run(
+        [
+            unshare,
+            "--user",
+            "--map-root-user",
+            "--mount",
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "--namespace-nested-probe",
+            str(nested_target),
+            str(protected / "protected.txt"),
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        timeout=5,
+        check=False,
+    ) if unshare is not None else None
+    nested_escape_failed = nested is not None and nested.returncode in {10, 11, 12}
+    return 0 if protected_write_failed and mount_failed and nested_escape_failed else 1
+
+
+def _namespace_nested_probe(arguments: list[str]) -> int:
+    target = Path(arguments[0])
+    protected = Path(arguments[1])
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.mount(os.fsencode("/"), os.fsencode(target), None, _MS_BIND, None) != 0:
+        return 10
+    try:
+        _set_mount_readonly(libc, target, readonly=False)
+    except OSError:
+        return 11
+    escaped = target / protected.relative_to("/")
+    try:
+        escaped.write_text("changed\n", encoding="utf-8")
+    except OSError:
+        return 12
+    return 0
+
+
+if __name__ == "__main__" and len(sys.argv) > 1:
+    if sys.argv[1] == "--landlock-exec":
+        raise SystemExit(_landlock_exec_main(sys.argv[2:]))
+    if sys.argv[1] == "--namespace-exec":
+        raise SystemExit(_namespace_exec_main(sys.argv[2:]))
+    if sys.argv[1] == "--namespace-probe-child":
+        raise SystemExit(_namespace_probe_child(sys.argv[2:]))
+    if sys.argv[1] == "--namespace-nested-probe":
+        raise SystemExit(_namespace_nested_probe(sys.argv[2:]))

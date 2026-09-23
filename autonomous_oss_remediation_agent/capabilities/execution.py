@@ -146,6 +146,7 @@ class ProcessRunner:
                     "USERPROFILE": str(runtime / "home"),
                     "TEMP": str(runtime / "temp"),
                     "TMP": str(runtime / "temp"),
+                    "TMPDIR": str(runtime / "temp"),
                 }
             )
             for path in (runtime / "home", runtime / "temp"):
