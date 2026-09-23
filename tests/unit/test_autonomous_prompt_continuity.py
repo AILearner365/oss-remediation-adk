@@ -193,13 +193,33 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn("non-material information does not require exhaustive investigation", message)
         self.assertIn(
-            "General technical knowledge may suggest a mechanism to investigate, but does not by itself establish repository-specific applicability or viability",
+            "candidate viability or selection materially depends on a repository-specific premise",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "controls, changes, resolves, produces, or otherwise affects relevant state or behavior",
             message,
         )
-        self.assertIn("that the mechanism exists or applies in the current context", message)
-        self.assertIn("participates in controlling or producing the relevant state or behavior", message)
-        self.assertIn("has a reasonable evidence-supported basis for the intended effect", message)
-        self.assertIn("This does not require proving implementation or validation outcomes in advance", message)
+        self.assertIn(
+            "available isolated investigation capabilities can reasonably test that premise",
+            message,
+        )
+        self.assertIn(
+            "obtain sufficient evidence before treating the premise as established or the candidate as sufficiently supported for selection",
+            message,
+        )
+        self.assertIn(
+            "General technical knowledge may suggest the mechanism or premise to investigate, but does not by itself establish repository-specific applicability or viability",
+            message,
+        )
+        self.assertIn("not exhaustive pre-execution proof", message)
+        self.assertIn("experimentally testing every candidate", message)
+        self.assertIn("running every validation", message)
+        self.assertIn("proving final task success", message)
+        self.assertIn(
+            "genuinely execution-dependent outcomes may remain for implementation and validation",
+            message,
+        )
         self.assertIn(
             "candidate formation requires an evidence-supported basis for trying a mechanism, not pre-execution proof of those outcomes",
             message,
@@ -214,6 +234,18 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn(
             "Planned investigation or general technical plausibility alone does not establish repository-specific applicability or viability",
+            message,
+        )
+        self.assertIn(
+            "do not defer a decision-critical, reasonably testable repository-specific premise until implementation",
+            message,
+        )
+        self.assertIn(
+            "If new evidence weakens or invalidates the selected solution, reassess the complete unresolved task",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "implementation intent is directional and may be materially reassessed during this cycle when new evidence warrants it",
             message,
         )
 
@@ -249,7 +281,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "Investigate hard-constraint-determining uncertainty before candidate selection when reasonably possible using available read-only evidence",
+            "Investigate hard-constraint-determining uncertainty before candidate selection when reasonably possible using the available investigation capabilities",
             message,
         )
         self.assertIn(
