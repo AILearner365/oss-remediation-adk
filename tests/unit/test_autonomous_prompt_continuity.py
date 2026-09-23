@@ -330,8 +330,18 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
 
         self.assertIn("accepted", message)
         self.assertIn("same cycle is still in progress", message)
-        self.assertIn("Execution capabilities are now available", message)
+        self.assertIn("now in authoritative implementation", message)
         self.assertIn("without any execution-phase capability attempt", message)
+        self.assertIn("exist only in the isolated experimental workspace", message)
+        self.assertIn("have not modified the authoritative repository", message)
+        self.assertIn('`workspace="active"` now targets the authoritative repository', message)
+        self.assertIn('`workspace="experiment"` remains available', message)
+        self.assertIn("not evidence that authoritative implementation has occurred", message)
+        self.assertIn("materially reassess within this cycle", message)
+        self.assertIn("self-validation after authoritative implementation", message)
+        self.assertIn("no authoritative change is legitimately necessary", message)
+        self.assertIn("genuinely blocked", message)
+        self.assertIn("rather than making an artificial mutation", message)
         self.assertIn("Do not merely restate", message)
 
     def test_failed_validation_feedback_preserves_journal_and_exposes_next_questionnaire(self):

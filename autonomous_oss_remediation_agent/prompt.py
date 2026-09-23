@@ -274,12 +274,17 @@ def intent_retry_message(cycle: int, errors: list[str]) -> str:
 def execution_continuation_message(cycle: int) -> str:
     return (
         f"Your Problem Analysis and Solution Decision for Cycle {cycle} has been accepted. "
-        "Execution capabilities are now available, and this same cycle is still in progress. "
-        "The preceding invocation ended without any execution-phase capability attempt. Continue solving the "
-        "original Task to Solve now: implement the selected solution, or perform the material investigation needed "
-        "to establish that it should be revised, is unnecessary, or is genuinely blocked. Adapt within this cycle "
-        "if new evidence warrants reassessment, and perform appropriate self-validation before ending execution. "
-        "Do not merely restate the accepted decision."
+        "This same cycle is still in progress and is now in authoritative implementation. The preceding invocation "
+        "ended without any execution-phase capability attempt. Repository changes made before Intent acceptance "
+        "exist only in the isolated experimental workspace; they have not modified the authoritative repository. "
+        "`workspace=\"active\"` now targets the authoritative repository. Implement the accepted solution there "
+        "before treating execution as complete. `workspace=\"experiment\"` remains available for further isolated "
+        "investigation or reassessment. Successful experimental builds, tests, or scans are evidence about the "
+        "experiment, not evidence that authoritative implementation has occurred. Continue solving the original "
+        "Task to Solve now, materially reassess within this cycle if new evidence warrants it, and perform "
+        "appropriate self-validation after authoritative implementation. If evidence establishes that no "
+        "authoritative change is legitimately necessary or that work is genuinely blocked, report that honestly "
+        "rather than making an artificial mutation. Do not merely restate the accepted decision."
     )
 
 

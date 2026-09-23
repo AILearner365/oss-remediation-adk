@@ -311,6 +311,11 @@ class _IntentThenContinuationSession:
         self.capabilities = capabilities
         self.messages = []
         self.execution_tools = frozenset()
+        self.pre_intent_activity = None
+        self.pre_intent_edit = None
+        self.pre_intent_shell = None
+        self.authoritative_before_execution = None
+        self.experiment_during_execution = None
 
     async def run_turn(self, message):
         self.messages.append(message)
@@ -325,9 +330,25 @@ class _IntentThenContinuationSession:
             )
             return AgentTurnResult("Outcome submitted")
         if phase == JournalPhase.INTENT_REQUIRED:
+            self.pre_intent_edit = self.capabilities.edit_workspace_text(
+                "replace",
+                "pom.xml",
+                old_text="<demo.version>1.0</demo.version>",
+                new_text="<demo.version>1.5</demo.version>",
+            )
+            self.pre_intent_shell = self.capabilities.run_workspace_shell(
+                "Set-Content experimental-build.txt passed"
+                if os.name == "nt"
+                else "printf passed > experimental-build.txt"
+            )
+            self.pre_intent_activity = self.capabilities.execution_activity(cycle)
             self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
             return AgentTurnResult("")
         self.execution_tools = self.capabilities.available_tool_names()
+        self.authoritative_before_execution = self.capabilities.read_workspace_text("pom.xml")
+        self.experiment_during_execution = self.capabilities.read_workspace_text(
+            "pom.xml", workspace="experiment"
+        )
         self.capabilities.edit_workspace_text(
             "replace",
             "pom.xml",
@@ -672,6 +693,39 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(1, result.cycles_completed)
         self.assertEqual(3, len(sessions[0].messages))
         self.assertIn("same cycle is still in progress", sessions[0].messages[1])
+        self.assertIn("now in authoritative implementation", sessions[0].messages[1])
+        self.assertIn(
+            "exist only in the isolated experimental workspace", sessions[0].messages[1]
+        )
+        self.assertIn(
+            "have not modified the authoritative repository", sessions[0].messages[1]
+        )
+        self.assertIn(
+            '`workspace="active"` now targets the authoritative repository',
+            sessions[0].messages[1],
+        )
+        self.assertIn('`workspace="experiment"` remains available', sessions[0].messages[1])
+        self.assertIn(
+            "not evidence that authoritative implementation has occurred",
+            sessions[0].messages[1],
+        )
+        self.assertEqual((), sessions[0].pre_intent_activity)
+        self.assertEqual("experimental", sessions[0].pre_intent_edit["workspaceKind"])
+        self.assertEqual(
+            Path(result.workspace_root) / "investigation" / "cycle-1",
+            Path(sessions[0].pre_intent_shell["cwd"]),
+        )
+        self.assertIn(
+            "<demo.version>1.0</demo.version>",
+            sessions[0].authoritative_before_execution["content"],
+        )
+        self.assertIn(
+            "<demo.version>1.5</demo.version>",
+            sessions[0].experiment_during_execution["content"],
+        )
+        self.assertEqual(
+            "experimental", sessions[0].experiment_during_execution["workspaceKind"]
+        )
         self.assertIn("edit_workspace_text", sessions[0].execution_tools)
         self.assertIn("run_workspace_shell", sessions[0].execution_tools)
         self.assertIn('"executionAttempted": true', sessions[0].messages[2])
@@ -695,7 +749,10 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             event for event in events if event["type"] == "execution_continuation_completed"
         )
         self.assertTrue(completed["executionAttempted"])
-        self.assertEqual(["edit_workspace_text"], completed["tools"])
+        self.assertEqual(
+            ["read_workspace_text", "read_workspace_text", "edit_workspace_text"],
+            completed["tools"],
+        )
 
     def test_cycle_one_outcome_status_does_not_terminate_recovery(self):
         statuses = (
