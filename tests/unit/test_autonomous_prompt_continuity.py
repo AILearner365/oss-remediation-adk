@@ -130,7 +130,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("Finding one credible or workable mechanism is not sufficient reason to stop investigation", message)
         self.assertIn("materially distinct intervention mechanisms", message)
         self.assertIn(
-            "far enough to determine whether each is viable",
+            "investigate them far enough to distinguish",
             message,
         )
         self.assertIn("Candidate count is the result of investigation", message)
@@ -150,11 +150,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn(
-            "do not let an early preference for one control point end investigation or eliminate another materially distinct viable mechanism",
+            "Do not let an early preference end investigation or eliminate another materially distinct viable mechanism",
             AGENT_INSTRUCTION,
         )
         self.assertIn(
-            "Do not eliminate a mechanism merely because another already appears preferable according to engineering-quality considerations",
+            "eliminate a mechanism merely because another already appears preferable",
             message,
         )
         self.assertIn("relative preference does not establish non-viability", message)
@@ -172,6 +172,57 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
 
+    def test_current_information_discovers_project_applicable_solution_space(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn("unsupported or potentially stale prior expectations", AGENT_INSTRUCTION)
+        self.assertIn(
+            "When a material decision depends on information that may have changed outside the repository",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn("obtain reasonably available current authoritative evidence", message)
+        self.assertIn(
+            "discover the actual available and potentially applicable solution space, not merely to confirm the first preferred solution",
+            message,
+        )
+        self.assertIn("what options currently exist", message)
+        self.assertIn("which can satisfy the required outcome and constraints", message)
+        self.assertIn("which are applicable and compatible enough to remain viable for this project", message)
+        self.assertIn("preference among the survivors", message)
+        self.assertIn("Do not treat the newest option as automatically correct", message)
+        self.assertIn("Preserve each materially distinct viable mechanism as a separate candidate", message)
+        self.assertIn("while allowing one candidate when evidence eliminates the others", message)
+        self.assertIn(
+            "current external research is not required when such information is immaterial",
+            message,
+        )
+        self.assertIn(
+            "Failed, blocked, incomplete, or inconclusive research is not evidence that an option or mechanism does not exist",
+            message,
+        )
+        self.assertIn(
+            "Current external evidence may establish what options exist, what outcome they provide",
+            message,
+        )
+        self.assertIn(
+            "repository and execution evidence establish what applies to and happens in this project",
+            message,
+        )
+        self.assertIn(
+            "investigate the discrepancy rather than declaring the observed project state invalid",
+            message,
+        )
+        self.assertIn(
+            "repository or experimental evidence to establish which mechanisms are applicable",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "candidate viability or selection materially depends on a repository-specific premise",
+            AGENT_INSTRUCTION,
+        )
+        self.assertNotIn("always choose the latest", message.lower())
+        self.assertNotIn("must perform external research", message.lower())
+
     def test_candidate_formation_requires_completed_repository_specific_investigation(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
@@ -188,7 +239,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "If decision-relevant information is reasonably obtainable through the available experimental engineering capabilities",
+            "If decision-relevant information is reasonably obtainable through the available engineering capabilities",
             message,
         )
         self.assertIn("non-material information does not require exhaustive investigation", message)
@@ -277,7 +328,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "must not displace stronger task-specific or observed evidence unless additional evidence establishes",
+            "Neither unsupported prior knowledge nor general external information may displace stronger task-specific or observed project evidence",
             message,
         )
         self.assertIn(
