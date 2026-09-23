@@ -531,6 +531,7 @@ def _linux_mount_namespace_usable() -> bool:
                     str(Path(__file__).resolve()),
                     "--namespace-probe-child",
                     str(repository),
+                    str(runtime),
                     str(protected),
                 ],
             )
@@ -548,6 +549,7 @@ def _linux_mount_namespace_usable() -> bool:
                 completed.returncode == 0
                 and (repository / "existing.txt").read_text(encoding="utf-8") == "changed\n"
                 and (repository / "created.txt").read_text(encoding="utf-8") == "created\n"
+                and (runtime / "temp" / "probe.txt").read_text(encoding="utf-8") == "runtime\n"
                 and (repository / "mount-denied.txt").is_file()
                 and (protected / "protected.txt").read_text(encoding="utf-8") == "original\n"
             )
@@ -641,6 +643,11 @@ _MS_PRIVATE = 1 << 18
 _AT_FDCWD = -100
 _AT_RECURSIVE = 0x8000
 _MOUNT_ATTR_RDONLY = 0x1
+_OPEN_TREE_CLONE = 0x1
+_OPEN_TREE_CLOEXEC = 0x80000
+_MOVE_MOUNT_F_EMPTY_PATH = 0x4
+_SYS_OPEN_TREE = 428
+_SYS_MOVE_MOUNT = 429
 _SYS_MOUNT_SETATTR = 442
 
 
@@ -655,10 +662,16 @@ def _apply_linux_mount_namespace(repository: Path, runtime: Path) -> None:
     ]
     libc.mount.restype = ctypes.c_int
     _mount(libc, None, Path("/"), _MS_REC | _MS_PRIVATE)
-    _set_mount_readonly(libc, Path("/"), readonly=True, recursive=True)
-    for writable in dict.fromkeys((repository.resolve(), runtime.resolve())):
-        _mount(libc, writable, writable, _MS_BIND)
-        _set_mount_readonly(libc, writable, readonly=False)
+    writable_mounts: list[tuple[Path, int]] = []
+    try:
+        for writable in dict.fromkeys((repository.resolve(), runtime.resolve())):
+            writable_mounts.append((writable, _clone_detached_mount(libc, writable)))
+        _set_mount_readonly(libc, Path("/"), readonly=True, recursive=True)
+        for writable, mount_fd in writable_mounts:
+            _attach_detached_mount(libc, mount_fd, writable)
+    finally:
+        for _, mount_fd in writable_mounts:
+            os.close(mount_fd)
     system_temp = Path("/tmp")
     if not _path_within(repository, system_temp) and not _path_within(runtime, system_temp):
         _mount(libc, runtime / "temp", system_temp, _MS_BIND)
@@ -678,6 +691,35 @@ def _mount(libc, source: Path | None, target: Path, flags: int) -> None:
     if libc.mount(source_bytes, os.fsencode(target), None, flags, None) != 0:
         error = ctypes.get_errno()
         raise OSError(error, f"mount operation failed for {target}: {os.strerror(error)}")
+
+
+def _clone_detached_mount(libc, source: Path) -> int:
+    libc.syscall.restype = ctypes.c_long
+    mount_fd = libc.syscall(
+        _SYS_OPEN_TREE,
+        _AT_FDCWD,
+        ctypes.c_char_p(os.fsencode(source)),
+        _OPEN_TREE_CLONE | _OPEN_TREE_CLOEXEC,
+    )
+    if mount_fd < 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"open_tree failed for {source}: {os.strerror(error)}")
+    return int(mount_fd)
+
+
+def _attach_detached_mount(libc, mount_fd: int, target: Path) -> None:
+    libc.syscall.restype = ctypes.c_long
+    result = libc.syscall(
+        _SYS_MOVE_MOUNT,
+        mount_fd,
+        ctypes.c_char_p(b""),
+        _AT_FDCWD,
+        ctypes.c_char_p(os.fsencode(target)),
+        _MOVE_MOUNT_F_EMPTY_PATH,
+    )
+    if result != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, f"move_mount failed for {target}: {os.strerror(error)}")
 
 
 def _set_mount_readonly(
@@ -753,7 +795,9 @@ def _namespace_exec_main(arguments: list[str]) -> int:
     repository = Path(arguments[0]).resolve()
     runtime = Path(arguments[1]).resolve()
     command = arguments[separator + 1 :]
+    working_directory = Path.cwd()
     _apply_linux_mount_namespace(repository, runtime)
+    os.chdir(working_directory)
     _drop_linux_namespace_privileges()
     os.execvpe(command[0], command, os.environ)
     return 127
@@ -761,9 +805,11 @@ def _namespace_exec_main(arguments: list[str]) -> int:
 
 def _namespace_probe_child(arguments: list[str]) -> int:
     repository = Path(arguments[0])
-    protected = Path(arguments[1])
-    (repository / "existing.txt").write_text("changed\n", encoding="utf-8")
-    (repository / "created.txt").write_text("created\n", encoding="utf-8")
+    runtime = Path(arguments[1])
+    protected = Path(arguments[2])
+    Path("existing.txt").write_text("changed\n", encoding="utf-8")
+    Path("created.txt").write_text("created\n", encoding="utf-8")
+    (runtime / "temp" / "probe.txt").write_text("runtime\n", encoding="utf-8")
     protected_write_failed = False
     try:
         (protected / "protected.txt").write_text("changed\n", encoding="utf-8")
