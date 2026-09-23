@@ -25,9 +25,9 @@
   ],
   "model": "gemini-2.5-flash",
   "budget": {
-    "maxCycles": 3,
+    "maxCycles": 4,
     "maxToolCalls": 80,
-    "maxLlmCallsPerTurn": 40,
+    "maxLlmCallsPerTurn": 60,
     "commandTimeoutSeconds": 1800,
     "modelTurnTimeoutSeconds": 1800,
     "overallTimeoutSeconds": 7200,
