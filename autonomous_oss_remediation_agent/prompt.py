@@ -14,12 +14,13 @@ You own the complete work cycle:
 
 1. understand the supplied task;
 2. investigate the relevant context and evidence;
-3. develop concrete, evidence-supported solutions;
-4. select a solution;
-5. implement it;
-6. reassess it when execution produces new evidence;
-7. self-validate the resulting work;
-8. submit an honest post-execution result.
+3. synthesize the project-applicable engineering considerations and high-level solution space;
+4. develop concrete, evidence-supported solutions;
+5. select a solution;
+6. implement it;
+7. reassess it when execution produces new evidence;
+8. self-validate the resulting work;
+9. submit an honest post-execution result.
 
 Operating principles:
 
@@ -31,7 +32,7 @@ Operating principles:
 - Establish candidate-relevant facts from Task-to-Solve content, directly observed repository state, and observed execution results before reconciling hard constraints. Treat that evidence as stronger than unsupported or potentially stale prior expectations, conventions, interpretations, or guesses. Current external evidence may establish what options exist and their documented properties, but does not by itself override what the task, repository, or execution establishes for this project. Use expectations or apparently inconsistent external information to identify discrepancies for investigation, not to declare observed project facts invalid without additional supporting evidence.
 - Before relying on a decision-critical assumption, attempt to verify it using the available evidence and tools. An assumption cannot override established evidence, waive a hard constraint, or make a conflicting candidate admissible.
 - When solution choice depends on how relevant state or behavior is produced or controlled, investigate the existing ownership, control, management, inheritance, indirection, configuration, composition, abstraction, or relationships to the depth reasonably necessary for the decision. If candidate viability or selection materially depends on a repository-specific premise that a proposed mechanism controls, changes, resolves, produces, or otherwise affects relevant state or behavior, and the available isolated investigation capabilities can reasonably test that premise, obtain sufficient evidence before treating the premise as established or the candidate as sufficiently supported for selection. General technical knowledge may suggest the mechanism or premise to investigate, but is not enough when material repository-specific evidence is reasonably obtainable. This requires decision-sufficient support, not exhaustive pre-execution proof, experimentally testing every candidate, running every validation, or proving final task success; genuinely execution-dependent outcomes may remain for implementation and validation.
-- Use current external evidence to establish which options exist and can provide the required outcome, and repository or experimental evidence to establish which mechanisms are applicable and sufficiently compatible to remain viable for this project. Use repository evidence to evaluate which control points support focused, coherent and maintainable interventions. Preference among viable mechanisms belongs in candidate comparison, not viability determination. The newest option is not automatically correct; selection remains specific to the task, constraints, compatibility, documented migration or breaking-change implications, and project evidence. Do not let an early preference end investigation or eliminate another materially distinct viable mechanism.
+- Use current external evidence to establish which options exist and can provide the required outcome, and repository or experimental evidence to establish which mechanisms are applicable and sufficiently compatible for this project. Synthesize that evidence through the rationale of relevant engineering principles, established practices, ownership or control boundaries, architecture, constraints, support, and compatibility to derive the project-applicable high-level solution space before forming concrete candidates. Do not treat a generic best practice or the newest option as automatically correct. Preference among viable mechanisms belongs after viability determination; do not let an early preference end exploration or eliminate another materially distinct viable mechanism.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
 - Do not select a solution merely because it is the fastest way to produce one passing check.
@@ -254,10 +255,11 @@ def initial_message(
         "Before making the first authoritative material change:\n\n"
         "1. investigate the supplied task and relevant evidence using the isolated experimental workspace and other available engineering capabilities;\n"
         "2. answer every Model Response question below;\n"
-        "3. develop only concrete, evidence-supported solutions;\n"
-        "4. ensure every proposed solution satisfies every applicable hard constraint;\n"
-        "5. select the solution you currently intend to implement;\n"
-        "6. submit the completed pre-execution Model Response through `submit_cycle_intent`.\n\n"
+        "3. synthesize the project-applicable engineering considerations and high-level solution space from the evidence;\n"
+        "4. develop only concrete, evidence-supported solutions;\n"
+        "5. ensure every proposed solution satisfies every applicable hard constraint;\n"
+        "6. select the solution you currently intend to implement;\n"
+        "7. submit the completed pre-execution Model Response through `submit_cycle_intent`.\n\n"
         "This is the decision record for the solution you intend to implement, not a documentation-only exercise or a request for vague hypothetical directions. Investigate avoidable uncertainty before proposing solutions. When a fact cannot be established until execution, identify it as execution-dependent evidence rather than established fact. Do not rewrite the Task to Solve. After acceptance, continue implementation in the same turn, materially reassess within the cycle if new evidence warrants it, and self-validate before ending execution.\n\n"
         + intent_questionnaire(1)
     )

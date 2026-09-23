@@ -411,8 +411,8 @@ class DecisionJournalTests(unittest.TestCase):
     def _intent_answers():
         return [
             {
-                "section": "Model understanding",
-                "answer": "Resolve the complete supplied task within every applicable requirement and constraint.",
+                "section": "Problem understanding in project context",
+                "answer": "Resolve the complete supplied task within every applicable requirement and constraint in the observed project context, without asserting an unsupported shared root cause.",
             },
             {
                 "section": "Information, investigation and remaining uncertainty",
@@ -423,6 +423,10 @@ class DecisionJournalTests(unittest.TestCase):
 ### Material assumptions that remain necessary
 
 None.""",
+            },
+            {
+                "section": "Project-applicable engineering synthesis and high-level solution space",
+                "answer": "The observed ownership boundary should be retained because it centralizes control for this project. A focused change through that boundary is the one supported high-level approach; no minimum approach count applies.",
             },
             {
                 "section": "Concrete candidate solutions",

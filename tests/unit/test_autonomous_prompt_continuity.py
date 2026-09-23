@@ -7,6 +7,7 @@ from autonomous_oss_remediation_agent.journal import (
     INTENT_SECTIONS,
     OUTCOME_SECTIONS,
     PRIOR_CYCLE_INTENT_SECTIONS,
+    intent_questionnaire,
 )
 from autonomous_oss_remediation_agent.models import (
     CommandResult,
@@ -37,9 +38,9 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             self.assertIn(f"`{section}`", initial)
         for section in OUTCOME_SECTIONS:
             self.assertIn(f"`{section}`", outcome)
-        self.assertEqual(4, len(INTENT_SECTIONS))
+        self.assertEqual(5, len(INTENT_SECTIONS))
         self.assertEqual(3, len(OUTCOME_SECTIONS))
-        self.assertIn("Candidate count must result from investigation", initial)
+        self.assertIn("Candidate count must result from investigation and synthesis", initial)
         self.assertIn("never manufacture alternatives", initial)
         self.assertIn("add clearly named, decision-relevant sections", initial.lower())
         self.assertIn("Allowed `status` values", outcome)
@@ -70,6 +71,15 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("WORKING_STATE", AGENT_INSTRUCTION)
         self.assertNotIn("model-owned working state", AGENT_INSTRUCTION)
         self.assertIn("Do not expose hidden chain-of-thought", AGENT_INSTRUCTION)
+
+    def test_problem_understanding_is_project_contextual_without_premature_root_cause(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn("Problem understanding in project context", INTENT_SECTIONS)
+        self.assertIn("What engineering problem is currently established in the context of this project?", message)
+        self.assertIn("material relationships among symptoms or components when supported by available evidence", message)
+        self.assertIn("Do not require or assert a shared or higher-level root cause before the evidence supports one", message)
+        self.assertIn("Do not propose solutions, enumerate approaches, select mechanisms", message)
 
     def test_instruction_defines_workspace_and_evidence_contract_without_mandatory_sequence(self):
         self.assertIn("isolated experimental repository snapshot", AGENT_INSTRUCTION)
@@ -127,34 +137,41 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             "Discovering an apparently appropriate control point does not by itself complete exploration",
             message,
         )
-        self.assertIn("Finding one credible or workable mechanism is not sufficient reason to stop investigation", message)
+        self.assertIn("Finding one credible or workable mechanism is not sufficient reason to stop exploration", message)
         self.assertIn("materially distinct intervention mechanisms", message)
+        self.assertIn("Candidate count is the result of investigation and synthesis", message)
         self.assertIn(
-            "investigate them far enough to distinguish",
+            "preserve them as separate concrete candidates when appropriate",
             message,
         )
-        self.assertIn("Candidate count is the result of investigation", message)
-        self.assertIn(
-            "Preserve every materially distinct mechanism that remains viable, evidence-supported, capable of satisfying the task or providing valid constraint-compliant partial progress, and hard-constraint admissible as a separate candidate",
-            message,
-        )
-        self.assertIn("If only one viable candidate remains, one candidate is valid", message)
-        self.assertIn(
-            "briefly identify which were investigated or considered and the evidence-based viability reason each did not qualify",
-            message,
-        )
+        self.assertIn("If only one viable candidate remains after evidence-based approach elimination, one candidate is valid", message)
         self.assertIn("Never manufacture alternatives merely to satisfy a count", message)
-        self.assertIn("Keep exploration evidence-driven and proportional", message)
+        self.assertIn("Keep the synthesis proportional and decision-relevant", message)
+
+    def test_engineering_synthesis_owns_project_applicability_and_high_level_solution_space(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn("Project-applicable engineering synthesis and high-level solution space", INTENT_SECTIONS)
+        self.assertIn("Explain why the rationale behind each consideration matters to this problem and project", message)
+        self.assertIn("should be retained as-is, adapted, rejected for this project, or left uncertain", message)
+        self.assertIn("derive the materially distinct high-level solution approaches", message)
+        self.assertIn("Record evidence-based elimination or unresolved viability", message)
+        self.assertIn("There is no required approach count", message)
+        self.assertIn("A simple isolated problem may require only a short synthesis", message)
+        self.assertIn("Do not manufacture approaches", message)
+        self.assertIn("Do not repeat the investigation log", message)
+        self.assertIn("specify exact file, version, or configuration edits", message)
+        self.assertIn("compare concrete candidates, select a solution", message)
 
     def test_viability_is_determined_before_preference_and_candidate_comparison(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn(
-            "Do not let an early preference end investigation or eliminate another materially distinct viable mechanism",
+            "do not let an early preference end exploration or eliminate another materially distinct viable mechanism",
             AGENT_INSTRUCTION,
         )
         self.assertIn(
-            "eliminate a mechanism merely because another already appears preferable",
+            "do not eliminate an approach merely because another already appears preferable",
             message,
         )
         self.assertIn("relative preference does not establish non-viability", message)
@@ -164,7 +181,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn("Relative engineering preference alone is not an elimination reason", message)
         self.assertIn(
-            "Mechanisms may be eliminated before candidate formation when evidence establishes that they are unsupported, unavailable, infeasible, incapable of satisfying the task or providing valid constraint-compliant partial progress, materially contradicted, hard-constraint conflicting, or otherwise not genuinely viable",
+            "Approaches may be eliminated when evidence establishes that they are unsupported, unavailable, infeasible, incapable of satisfying the task or providing valid constraint-compliant partial progress, materially contradicted, hard-constraint conflicting, or otherwise not genuinely viable",
             message,
         )
         self.assertIn(
@@ -185,13 +202,10 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             "discover the actual available and potentially applicable solution space, not merely to confirm the first preferred solution",
             message,
         )
-        self.assertIn("what options currently exist", message)
-        self.assertIn("which can satisfy the required outcome and constraints", message)
-        self.assertIn("which are applicable and compatible enough to remain viable for this project", message)
-        self.assertIn("preference among the survivors", message)
-        self.assertIn("Do not treat the newest option as automatically correct", message)
-        self.assertIn("Preserve each materially distinct viable mechanism as a separate candidate", message)
-        self.assertIn("while allowing one candidate when evidence eliminates the others", message)
+        self.assertIn("what options exist, what outcome they provide", message)
+        self.assertIn("what applies to and happens in this project", message)
+        self.assertIn("The newest option is not automatically correct", message)
+        self.assertIn("one high-level approach is valid when evidence eliminates the others", message)
         self.assertIn(
             "current external research is not required when such information is immaterial",
             message,
@@ -242,6 +256,10 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             "If decision-relevant information is reasonably obtainable through the available engineering capabilities",
             message,
         )
+        self.assertIn(
+            "Record the evidence about those boundaries here; the engineering conclusion derived from it belongs in the synthesis section",
+            message,
+        )
         self.assertIn("non-material information does not require exhaustive investigation", message)
         self.assertIn(
             "candidate viability or selection materially depends on a repository-specific premise",
@@ -280,7 +298,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
-            "Form candidates only from decision-relevant investigation actually performed and evidence actually obtained",
+            "Form candidates only from decision-relevant investigation actually performed, evidence actually obtained, and the project-applicable synthesis above",
             message,
         )
         self.assertIn(
@@ -382,8 +400,8 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("Confirm hard-constraint admissibility before applying preference", message)
         self.assertIn("Compare the surviving admissible candidates", message)
         self.assertIn("These qualities cannot outweigh a hard-constraint conflict", message)
-        self.assertIn("Preserve every materially distinct mechanism that remains viable", message)
-        self.assertIn("If only one viable candidate remains, one candidate is valid", message)
+        self.assertIn("When several materially distinct high-level approaches remain viable", message)
+        self.assertIn("If only one viable candidate remains after evidence-based approach elimination, one candidate is valid", message)
         self.assertIn("Never manufacture alternatives merely to satisfy a count", message)
         self.assertIn(
             "PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress",
@@ -395,6 +413,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
 
     def test_stable_reasoning_instruction_remains_technology_neutral(self):
+        questionnaire = intent_questionnaire(1)
         self.assertIn(
             "investigate the existing ownership, control, management, inheritance, indirection, configuration, composition, abstraction, or relationships",
             AGENT_INSTRUCTION,
@@ -407,6 +426,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             "BOM",
         ):
             self.assertNotIn(technology_specific_term, AGENT_INSTRUCTION)
+            self.assertNotIn(technology_specific_term, questionnaire)
 
     def test_execution_continuation_keeps_accepted_decision_in_same_cycle(self):
         message = execution_continuation_message(3)
@@ -451,7 +471,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertEqual(("Prior-cycle reassessment",), PRIOR_CYCLE_INTENT_SECTIONS)
         self.assertLess(
             feedback.index("`Prior-cycle reassessment`"),
-            feedback.index("`Concrete candidate solutions`"),
+            feedback.index("`Project-applicable engineering synthesis and high-level solution space`"),
         )
 
     def test_empty_fixed_versions_remain_normalized_evidence(self):

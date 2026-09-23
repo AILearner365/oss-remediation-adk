@@ -21,7 +21,7 @@ Create one model session
         ↓
 Send the first cycle request
         ↓
-Perform read-only investigation
+Perform investigation in the isolated cycle experiment
         ↓
 Submit the required pre-execution analysis and solution decision
         ↓
@@ -58,12 +58,13 @@ You own the complete work cycle:
 
 1. understand the supplied task;
 2. investigate the relevant context and evidence;
-3. develop concrete, evidence-supported solutions;
-4. select a solution;
-5. implement it;
-6. reassess it when execution produces new evidence;
-7. self-validate the resulting work;
-8. submit an honest post-execution result.
+3. synthesize the project-applicable engineering considerations and high-level solution space;
+4. develop concrete, evidence-supported solutions;
+5. select a solution;
+6. implement it;
+7. reassess it when execution produces new evidence;
+8. self-validate the resulting work;
+9. submit an honest post-execution result.
 
 Operating principles:
 
@@ -73,19 +74,25 @@ Operating principles:
   Only candidates whose hard-constraint compatibility is established sufficiently
   for selection may be compared, selected or implemented.
 - Before forming candidates, perform decision-relevant investigation reasonably
-  obtainable through the available read-only capabilities. Planned or future
-  investigation is not evidence supporting candidate formation; non-material
-  questions need not be pursued, and genuinely execution-dependent outcomes
-  remain for implementation and validation.
+  obtainable through the available engineering capabilities. When a material
+  decision depends on information that may have changed outside the repository,
+  obtain reasonably available current authoritative evidence and use it to
+  discover the actual available and potentially applicable solution space, not
+  merely to confirm the first preferred solution. Planned or future investigation
+  is not evidence supporting candidate formation; non-material questions need not
+  be pursued, and genuinely execution-dependent outcomes remain for implementation
+  and validation.
 - Distinguish established information, unavailable information, assumptions and
   facts that require execution evidence.
 - Do not present an assumption as an established fact.
 - Establish candidate-relevant facts from Task-to-Solve content, directly
   observed repository state and observed execution results before reconciling
-  hard constraints. Treat that evidence as stronger than unsupported prior
-  expectations, conventions, interpretations or guesses. Use expectations to
-  identify discrepancies for investigation, not to change established properties
-  of a proposed operation without additional supporting evidence.
+  hard constraints. Treat that evidence as stronger than unsupported or
+  potentially stale prior expectations, conventions, interpretations or guesses.
+  Current external evidence may establish what options exist and their documented
+  properties, but does not by itself override what the task, repository or
+  execution establishes for this project. Use discrepancies to direct further
+  investigation rather than to invalidate observed project facts without evidence.
 - Before relying on a decision-critical assumption, attempt to verify it using
   the available evidence and tools. An assumption cannot override established
   evidence, waive a hard constraint or make a conflicting candidate admissible.
@@ -97,11 +104,15 @@ Operating principles:
   repository-specific evidence is material and reasonably obtainable, establish
   that the mechanism applies, participates in controlling the relevant state and
   has an evidence-supported basis for the intended effect.
-- Use repository evidence to evaluate which control points support focused,
-  coherent and maintainable interventions; do not let an early preference for one
-  control point end investigation or eliminate another materially distinct viable
-  mechanism. Preference among viable mechanisms belongs in candidate comparison,
-  not viability determination.
+- Use current external evidence to establish which options exist and can provide
+  the required outcome, and repository or experimental evidence to establish which
+  mechanisms are applicable and sufficiently compatible for this project.
+  Synthesize that evidence through the rationale of relevant engineering
+  principles, established practices, ownership or control boundaries, architecture,
+  constraints, support and compatibility to derive the project-applicable
+  high-level solution space before concrete candidates. Do not treat a generic
+  best practice or the newest option as automatically correct. Preference among
+  viable mechanisms belongs after viability determination.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
 - Do not select a solution merely because it is the fastest way to produce one
@@ -236,7 +247,7 @@ This is the decision record for the solution you intend to implement. It is not
 a documentation-only exercise and it is not a request for vague or hypothetical
 directions.
 
-Use read-only investigation before submission. Investigate avoidable uncertainty
+Use the isolated cycle experiment and other available engineering capabilities before submission. Investigate avoidable uncertainty
 before proposing solutions. When a fact cannot be established until execution,
 identify it explicitly as execution-dependent evidence rather than presenting it
 as established.
@@ -249,45 +260,48 @@ task, available context and evidence.
 
 # 5. Model Response questionnaire
 
-The model must answer the following four questions in this order.
+The model must answer the following five questions in this order. The answers capture the final pre-selection decision state; their order is a diagnostic boundary, not a rigid reasoning waterfall.
 
 ---
 
-## Question 1 — Model understanding
+## Question 1 — Problem understanding in project context
 
 ### Question supplied to the model
 
 ```markdown
-### 1. What does the model understand it has been asked to accomplish?
+### 1. What engineering problem is currently established in the context of this project?
 ```
 
 ### Answer instructions supplied to the model
 
 ```text
-Explain:
+Explain proportionally:
 
 - the requested result;
 - the target scope;
-- the requirements that materially govern the work;
+- the requirements and constraints that materially govern the work;
+- project characteristics material to understanding the problem;
+- material relationships among symptoms or components when supported by evidence;
 - what constitutes complete resolution.
 
 Use your own concise wording so that your understanding can be compared with the
 Task to Solve.
 
-Do not propose or select a solution in this answer.
+Do not require or assert a shared or higher-level root cause before the evidence supports one.
+Do not propose solutions, enumerate approaches or select mechanisms in this answer.
 Do not replace, narrow or expand the authoritative task.
 ```
 
 ### Expected journal answer shape
 
 ```markdown
-### 1. What does the model understand it has been asked to accomplish?
+### 1. What engineering problem is currently established in the context of this project?
 
-<Model answer describing the requested result, scope, governing requirements and
-meaning of complete resolution>
+<Model answer describing the requested result, scope, governing requirements,
+material project context and meaning of complete resolution>
 ```
 
-Purpose: make misunderstanding visible before solution selection without allowing the model's interpretation to replace the canonical task.
+Purpose: make project-context problem misunderstanding visible before solution selection without requiring a premature root-cause conclusion or allowing the model's interpretation to replace the canonical task.
 
 ---
 
@@ -323,13 +337,18 @@ obtained. The Sources examined column must identify actual evidence sources or
 investigation methods. Planned, intended, future or not-yet-performed investigation
 is not a finding and is not evidence supporting candidate formation. If
 decision-relevant information is reasonably obtainable through the available
-read-only capabilities and could materially affect problem understanding,
+engineering capabilities and could materially affect problem understanding,
 mechanism discovery or applicability, control structure, viability, constraints,
 candidate formation or selection, investigate it before submitting this response.
-Keep investigation proportional; non-material information does not require
-exhaustive investigation, and genuinely execution-dependent information may
-remain unknown. Do not claim that information was verified without identifying
-its source.
+When that information may have changed outside the repository, obtain reasonably
+available current authoritative evidence and use it to discover the actual
+available and potentially applicable solution space rather than merely confirming
+the first preferred solution. Current external evidence may establish what options
+and documented properties currently exist; repository and execution evidence
+establish what applies to and happens in this project. Failed, blocked, incomplete
+or inconclusive research is not evidence of absence. Keep investigation
+proportional; non-material information does not require exhaustive investigation,
+and genuinely execution-dependent information may remain unknown.
 
 Before reconciling candidates with hard constraints, establish candidate-relevant
 facts from the Task to Solve, directly observed repository state and observed
@@ -348,7 +367,7 @@ uncertainty such as whether builds, tests or runtime checks succeed may remain
 for implementation and validation; candidate formation requires an
 evidence-supported basis for trying a mechanism, not pre-execution proof of those
 outcomes. Investigate hard-constraint-determining uncertainty before candidate
-selection when reasonably possible using available read-only evidence. If it
+selection when reasonably possible using the available investigation capabilities. If it
 cannot be resolved sufficiently for selection, preserve it honestly: the affected
 candidate is not yet admissible and the uncertainty must not be converted into an
 assumption that permits selection.
@@ -357,27 +376,17 @@ When solution choice materially depends on how relevant state or behavior is
 produced or controlled, investigate the existing ownership, control, management,
 inheritance, indirection, configuration, composition, abstraction, relationships
 or other repository-evidenced mechanisms to the depth reasonably necessary for
-the decision. General technical knowledge may suggest a mechanism to investigate,
-but does not by itself establish repository-specific applicability or viability
-when relevant repository evidence is reasonably obtainable. Before candidate
-formation, establish from repository-specific evidence, when material and
-reasonably obtainable, that the mechanism exists or applies in the current
-context, participates in controlling or producing the relevant state or behavior,
-and has a reasonable evidence-supported basis for the intended effect. This does
-not require proving implementation or validation outcomes in advance. Discovering
-an apparently appropriate control point does not by itself complete exploration.
-
-Finding one credible or workable mechanism is not sufficient reason to stop
-investigation. Before forming candidates, identify and investigate materially
-distinct intervention mechanisms reasonably suggested by task or repository
-evidence far enough to determine whether each is viable. Do not eliminate a
-mechanism merely because another already appears preferable according to
-engineering-quality considerations; relative preference does not establish
-non-viability. Keep exploration evidence-driven and proportional. Mechanisms may
-be eliminated before candidate formation when evidence establishes that they are
-unsupported, unavailable, infeasible, incapable of satisfying the task or
-providing valid constraint-compliant partial progress, materially contradicted,
-hard-constraint conflicting or otherwise not genuinely viable.
+the decision. Record evidence about those boundaries here; the engineering
+conclusion derived from it belongs in Question 3. If candidate viability or
+selection materially depends on a repository-specific premise that a proposed
+mechanism controls, changes, resolves, produces or otherwise affects relevant
+state or behavior, and the available isolated investigation capabilities can
+reasonably test that premise, obtain sufficient evidence before treating it as
+established or sufficiently supported for selection. General technical knowledge
+may suggest the premise to investigate, but does not establish repository-specific
+applicability when material project evidence is reasonably obtainable. This
+requires decision-sufficient support, not exhaustive pre-execution proof, testing
+every candidate, running every validation or proving final task success.
 
 After the table, identify only assumptions that materially affect the current
 engineering decision. For each assumption, state:
@@ -424,18 +433,68 @@ Purpose: capture what information the model determined was necessary, what it ac
 
 ---
 
-## Question 3 — Concrete candidate solutions
+## Question 3 — Project-applicable engineering synthesis and high-level solution space
 
 ### Question supplied to the model
 
 ```markdown
-### 3. What concrete solutions are supported by the available evidence?
+### 3. What project-applicable engineering synthesis and high-level solution space follow from the established evidence?
 ```
 
 ### Answer instructions supplied to the model
 
 ```text
-Develop only solutions that are concrete enough to implement.
+Identify only the engineering principles, established practices, ownership or
+control boundaries, architectural relationships, support or compatibility
+boundaries and other considerations that materially shape this decision.
+
+Explain why the rationale behind each consideration matters to this problem and
+project. Do not invoke generic best practice as an unconditional rule. Use the
+project architecture, ownership and control evidence, constraints, current
+authoritative information when material, and repository or experimental evidence
+to determine whether a generally applicable consideration should be retained
+as-is, adapted, rejected for this project or left uncertain. The newest option is
+not automatically correct.
+
+From that synthesis, derive the materially distinct high-level solution approaches
+reasonably supported by the evidence. Distinguish viability from preference. Do
+not eliminate an approach merely because another appears preferable. Record
+evidence-based elimination or unresolved viability of materially relevant
+approaches when useful. One approach is valid when evidence eliminates the others;
+there is no minimum approach count and alternatives must not be manufactured.
+
+Keep the answer proportional. Do not repeat the investigation log, list generic
+practices without project-specific rationale, exhaustively catalog theoretical
+solutions, specify exact file/version/configuration edits, provide an
+implementation plan or candidate-level validation, compare concrete candidates,
+select a solution or expose private chain-of-thought.
+```
+
+### Expected journal answer shape
+
+```markdown
+### 3. What project-applicable engineering synthesis and high-level solution space follow from the established evidence?
+
+<Concise project-applicable synthesis, followed by the materially distinct
+high-level approaches and any material evidence-based elimination or uncertainty>
+```
+
+Purpose: expose how established evidence was transformed into the project-applicable solution space without recording private chain-of-thought or prematurely specifying implementation details.
+
+---
+
+## Question 4 — Concrete candidate solutions
+
+### Question supplied to the model
+
+```markdown
+### 4. What concrete solutions translate the surviving high-level approaches into implementable changes?
+```
+
+### Answer instructions supplied to the model
+
+```text
+Translate the surviving high-level approaches into solutions concrete enough to implement.
 
 Form candidates only from decision-relevant investigation actually performed and
 evidence actually obtained. Planned investigation or general technical
@@ -445,17 +504,14 @@ repository evidence must support that the proposed mechanism applies to or
 controls the relevant state and has a reasonable basis for producing the intended
 effect.
 
-Candidate count is the result of investigation, not the target that determines
-investigation breadth. Preserve every materially distinct mechanism that remains
-viable, evidence-supported, capable of satisfying the task or providing valid
-constraint-compliant partial progress, and hard-constraint admissible as a
-separate candidate, even when another candidate already appears preferable. If
-only one viable candidate remains, one candidate is valid. When
-task or repository evidence reasonably suggested other materially plausible
-mechanisms, briefly identify which were investigated or considered and the
-evidence-based viability reason each did not qualify. Relative engineering
-preference alone is not an elimination reason. Never manufacture alternatives
-merely to satisfy a count.
+Candidate count is the result of investigation and synthesis, not a target that
+determines their breadth. Preserve materially distinct surviving high-level
+approaches as separate concrete candidates when appropriate and admissible, even
+when another candidate appears preferable. If only one viable candidate remains
+after evidence-based approach elimination, one candidate is valid. Do not repeat
+high-level elimination reasoning here unless it is necessary for a candidate-
+specific admissibility decision. Relative preference alone is not an elimination
+reason. Never manufacture alternatives merely to satisfy a count.
 
 Hard constraints are mandatory candidate-admissibility conditions, not preferences
 to balance against engineering benefits. For each proposed mechanism, first
@@ -534,7 +590,7 @@ concrete solutions genuinely supported by the evidence.
 ### Expected journal answer shape
 
 ```markdown
-### 3. What concrete solutions are supported by the available evidence?
+### 4. What concrete solutions translate the surviving high-level approaches into implementable changes?
 
 #### Candidate Solution A — <specific solution name>
 
@@ -559,12 +615,12 @@ Purpose: require definitive proposed solutions rather than high-level directions
 
 ---
 
-## Question 4 — Selected solution
+## Question 5 — Selected solution
 
 ### Question supplied to the model
 
 ```markdown
-### 4. Which solution is selected, and why is it preferred?
+### 5. Which solution is selected, and why is it preferred?
 ```
 
 ### Answer instructions supplied to the model
@@ -599,7 +655,7 @@ self-validation and deterministic validation.
 ### Expected journal answer shape
 
 ```markdown
-### 4. Which solution is selected, and why is it preferred?
+### 5. Which solution is selected, and why is it preferred?
 
 - **Selected solution:** <candidate identifier and name>
 - **Classification:** COMPLETE or PARTIAL
@@ -617,7 +673,7 @@ Purpose: record the decision without repeating the candidate's detailed solution
 
 The following is the complete agreed template for the first record in a cycle.
 
-The orchestrator renders the `Task to Solve` from the canonical task data. The model supplies the four accepted answers. Both are placed in the same journal document.
+The orchestrator renders the `Task to Solve` from the canonical task data. The model supplies the five accepted answers. Both are placed in the same journal document. The maintained standalone template is `cycle-intent-template.md`; the abbreviated shape below shows the same required ordering.
 
 ```markdown
 # Cycle <N> — Problem Analysis and Solution Decision
@@ -632,7 +688,8 @@ The orchestrator renders the `Task to Solve` from the canonical task data. The m
 >
 > Keeping both sections in one record allows the model, later validation, later
 > cycles and human reviewers to compare the original requirement with the
-> model's understanding and decision.
+> model's project-context understanding, evidence, engineering synthesis,
+> concrete candidates and decision.
 
 ## Task to Solve
 
@@ -642,7 +699,7 @@ The orchestrator renders the `Task to Solve` from the canonical task data. The m
 
 ## Model Response
 
-### 1. What does the model understand it has been asked to accomplish?
+### 1. What engineering problem is currently established in the context of this project?
 
 <Model answer>
 
@@ -657,7 +714,11 @@ and what did the model find?
 
 <Model answer or None>
 
-### 3. What concrete solutions are supported by the available evidence?
+### 3. What project-applicable engineering synthesis and high-level solution space follow from the established evidence?
+
+<Model answer deriving the project-applicable high-level approaches>
+
+### 4. What concrete solutions translate the surviving high-level approaches into implementable changes?
 
 #### Candidate Solution A — <specific solution name>
 
@@ -677,7 +738,7 @@ and what did the model find?
 
 <Repeat only for other evidence-supported candidates>
 
-### 4. Which solution is selected, and why is it preferred?
+### 5. Which solution is selected, and why is it preferred?
 
 - **Selected solution:** <candidate identifier and name>
 - **Classification:** COMPLETE or PARTIAL
@@ -694,8 +755,9 @@ and what did the model find?
 The pre-execution record must satisfy these structural rules:
 
 - The canonical `Task to Solve` is system-rendered and cannot be overwritten by the model.
-- All four Model Response questions are required.
+- All five Model Response questions are required.
 - Question 2 must identify actual evidence sources or investigation methods.
+- Question 3 is a proportional engineering-synthesis and high-level solution-space artifact, not an implementation plan or deterministic semantic score.
 - Every material assumption must be explicit, or the answer must state `None`.
 - Every candidate must contain all required candidate fields.
 - Every candidate must satisfy all applicable hard constraints.
@@ -715,7 +777,7 @@ The existing implementation already:
 - creates one persistent model session;
 - sends stable instructions through the agent definition;
 - constructs a run-specific first message;
-- restricts initial capabilities to read-only investigation;
+- routes initial engineering capabilities to an isolated cycle experiment;
 - requires a pre-execution submission;
 - unlocks material capabilities after accepted submission;
 - renders the accepted data into `decision-journal.md`.

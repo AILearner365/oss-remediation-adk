@@ -728,7 +728,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
 
 def _valid_intent_answers():
     return [
-        {"section": "Model understanding", "answer": "Resolve the supplied Task to Solve completely."},
+        {"section": "Problem understanding in project context", "answer": "Resolve the supplied Task to Solve completely in the observed project context."},
         {
             "section": "Information, investigation and remaining uncertainty",
             "answer": """| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
@@ -738,6 +738,10 @@ def _valid_intent_answers():
 ### Material assumptions that remain necessary
 
 None.""",
+        },
+        {
+            "section": "Project-applicable engineering synthesis and high-level solution space",
+            "answer": "Repository evidence identifies one project-applicable control boundary and one supported high-level approach; no alternative is manufactured.",
         },
         {
             "section": "Concrete candidate solutions",

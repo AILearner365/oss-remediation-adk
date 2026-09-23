@@ -867,7 +867,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         session = sessions[0]
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, session.intent_attempts)
-        self.assertIn("Missing required section: Model understanding", session.messages[1])
+        self.assertIn("Missing required section: Problem understanding in project context", session.messages[1])
         self.assertEqual("ok", session.pre_intent_experiment["status"])
         self.assertEqual("experimental", session.pre_intent_experiment["workspaceKind"])
         self.assertFalse((Path(result.baseline.repository_path) / "isolated-probe.txt").exists())
@@ -1344,7 +1344,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("**Cycle Intent:** `FAILED`", continuation)
         self.assertIn("**Implementation:** `NOT_EXECUTED`", continuation)
         self.assertIn("**Cycle Outcome:** `NOT_REQUESTED`", continuation)
-        self.assertIn("**Model understanding:** `NOT_CAPTURED`", continuation)
+        self.assertIn("**Problem understanding in project context:** `NOT_CAPTURED`", continuation)
         self.assertIn("**Implementation Result:** `NOT_CAPTURED`", continuation)
         self.assertIn("# Cycle 1 — Deterministic Validation", continuation)
         cycle_one = json.loads(
@@ -1553,8 +1553,9 @@ def _finding():
 
 def _intent_answers(cycle):
     sections = [
-        "Model understanding",
+        "Problem understanding in project context",
         "Information, investigation and remaining uncertainty",
+        "Project-applicable engineering synthesis and high-level solution space",
         "Concrete candidate solutions",
         "Selected solution",
     ]
@@ -1587,6 +1588,8 @@ None."""
 | What risks or unknowns remain? | Runtime evidence remains execution-dependent. |
 | How will the result be validated? | Build, test, startup, and scan checks. |
 | Is it a COMPLETE or PARTIAL solution? | COMPLETE, subject to validation. |"""
+    if section == "Project-applicable engineering synthesis and high-level solution space":
+        return "The observed ownership boundary should be retained for this project because it centrally controls the relevant state. It yields one supported focused high-level approach; no alternative is manufactured after evidence-based elimination."
     if section == "Selected solution":
         return """- **Selected solution:** Candidate A — Update the owning property
 - **Classification:** COMPLETE
