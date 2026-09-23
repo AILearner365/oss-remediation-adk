@@ -450,9 +450,11 @@ class AutonomousCapabilityTests(unittest.TestCase):
             "try { Set-Content $target escape -ErrorAction Stop } "
             "catch { Set-Content indirect-attempt-ran.txt caught }"
             if os.name == "nt"
-            else "python -c \"from pathlib import Path; p=Path.cwd(); "
+            else "python -c \"import errno; from pathlib import Path; p=Path.cwd(); "
             "target=p.joinpath(*(['..']*2+['repository','indirect-escape.txt'])).resolve(); "
-            "\ntry: target.write_text('escape')\nexcept PermissionError: (p/'indirect-attempt-ran.txt').write_text('caught')\""
+            "\ntry: target.write_text('escape')\nexcept OSError as error:\n "
+            "if not isinstance(error, PermissionError) and error.errno != errno.EROFS: raise\n "
+            "(p/'indirect-attempt-ran.txt').write_text(str(error.errno))\""
         )
         self.assertFalse(absolute_escape["blocked"])
         self.assertFalse(relative_escape["blocked"])
@@ -556,9 +558,11 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 self.skipTest("Symlink creation is unavailable on this host")
 
         result = self.runner.run_agent_shell(
-            "python -c \"from pathlib import Path; "
+            "python -c \"import errno; from pathlib import Path; "
             "target=Path('authoritative-link/target.txt'); marker=Path('symlink-attempt-ran.txt'); "
-            "\ntry: target.write_text('escape')\nexcept PermissionError: marker.write_text('caught')\"",
+            "\ntry: target.write_text('escape')\nexcept OSError as error:\n "
+            "if not isinstance(error, PermissionError) and error.errno != errno.EROFS: raise\n "
+            "marker.write_text(str(error.errno))\"",
             repository_workspace=experiment,
         )
 
