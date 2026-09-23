@@ -649,6 +649,10 @@ _MOVE_MOUNT_F_EMPTY_PATH = 0x4
 _SYS_OPEN_TREE = 428
 _SYS_MOVE_MOUNT = 429
 _SYS_MOUNT_SETATTR = 442
+_CLONE_NEWNS = 0x00020000
+_CLONE_NEWUSER = 0x10000000
+_NESTED_NAMESPACE_CREATION_DENIED = 20
+_SAFE_NESTED_PROBE_RESULTS = frozenset({10, 11, 12, _NESTED_NAMESPACE_CREATION_DENIED})
 
 
 def _apply_linux_mount_namespace(repository: Path, runtime: Path) -> None:
@@ -825,16 +829,11 @@ def _namespace_probe_child(arguments: list[str]) -> int:
         (repository / "mount-denied.txt").write_text("denied\n", encoding="utf-8")
     nested_target = repository / "nested-root"
     nested_target.mkdir()
-    unshare = shutil.which("unshare")
     nested = subprocess.run(
         [
-            unshare,
-            "--user",
-            "--map-root-user",
-            "--mount",
             sys.executable,
             str(Path(__file__).resolve()),
-            "--namespace-nested-probe",
+            "--namespace-nested-enter",
             str(nested_target),
             str(protected / "protected.txt"),
         ],
@@ -843,9 +842,25 @@ def _namespace_probe_child(arguments: list[str]) -> int:
         stderr=subprocess.DEVNULL,
         timeout=5,
         check=False,
-    ) if unshare is not None else None
-    nested_escape_failed = nested is not None and nested.returncode in {10, 11, 12}
+    )
+    nested_escape_failed = _nested_namespace_escape_denied(nested.returncode)
     return 0 if protected_write_failed and mount_failed and nested_escape_failed else 1
+
+
+def _nested_namespace_escape_denied(returncode: int) -> bool:
+    return returncode in _SAFE_NESTED_PROBE_RESULTS
+
+
+def _namespace_nested_enter(arguments: list[str]) -> int:
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.unshare.argtypes = [ctypes.c_int]
+    libc.unshare.restype = ctypes.c_int
+    if libc.unshare(_CLONE_NEWUSER | _CLONE_NEWNS) != 0:
+        error = ctypes.get_errno()
+        if error in {errno.EACCES, errno.EPERM}:
+            return _NESTED_NAMESPACE_CREATION_DENIED
+        return 1
+    return _namespace_nested_probe(arguments)
 
 
 def _namespace_nested_probe(arguments: list[str]) -> int:
@@ -873,5 +888,7 @@ if __name__ == "__main__" and len(sys.argv) > 1:
         raise SystemExit(_namespace_exec_main(sys.argv[2:]))
     if sys.argv[1] == "--namespace-probe-child":
         raise SystemExit(_namespace_probe_child(sys.argv[2:]))
+    if sys.argv[1] == "--namespace-nested-enter":
+        raise SystemExit(_namespace_nested_enter(sys.argv[2:]))
     if sys.argv[1] == "--namespace-nested-probe":
         raise SystemExit(_namespace_nested_probe(sys.argv[2:]))

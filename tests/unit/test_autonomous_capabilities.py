@@ -84,6 +84,14 @@ class AutonomousCapabilityTests(unittest.TestCase):
         ):
             self.assertEqual("linux-landlock", isolation_module._linux_isolation_backend())
 
+    def test_nested_namespace_probe_result_classification_is_fail_closed(self):
+        for returncode in (10, 11, 12, 20):
+            with self.subTest(returncode=returncode):
+                self.assertTrue(isolation_module._nested_namespace_escape_denied(returncode))
+        for returncode in (0, 1, 2, 13, 19, 21, 126, 127, -9):
+            with self.subTest(returncode=returncode):
+                self.assertFalse(isolation_module._nested_namespace_escape_denied(returncode))
+
     def test_read_edit_and_path_boundary(self):
         result = self.capabilities.edit_workspace_text("write", "pom.xml", content="<project/>\n")
         self.assertEqual("ok", result["status"])
