@@ -885,3 +885,75 @@ The final result must satisfy every applicable requirement below.
 
 A passing command or partial improvement does not, by itself, constitute complete resolution.
 
+# Final Resolution
+
+## Final outcome
+
+INCONCLUSIVE
+
+## Original problem
+
+The canonical Task to Solve recorded earlier in this journal remains the original run-level problem contract.
+
+## Final interpreted resolution
+
+Deterministic validation status and capture quality are reported separately. Run-level capture status: `MISSING`.
+
+## Final implemented approach
+
+No accepted Cycle Outcome described the implementation result.
+
+## How the approach evolved
+
+- **Cycle 1 selected direction:** NOT_CAPTURED
+- **Cycle 1 final approach:** NOT_CAPTURED
+- **Cycle 1 material deviations:** NOT_CAPTURED
+- **Cycle 1 implementation trail:** NOT_CAPTURED
+- **Cycle 1 validation learning:** deterministic validation was not completed.
+
+## Final requirement coverage
+
+### Satisfied
+
+- None established.
+
+- Model-reported coverage remains part of the accepted Implementation Result; only explicitly mapped deterministic checks are authoritative.
+
+### Conditional
+
+- Any model-reported conditional or unverified coverage remains non-authoritative pending deterministic evidence.
+
+### Unresolved
+
+- None established.
+
+### Not applicable
+
+- None established beyond the accepted model report and deterministic checks.
+
+## Final evidence
+
+- Deterministic validation did not run.
+
+## Constraints and known risks
+
+Run-level capture quality `MISSING`; delivery eligibility `NOT_DELIVERY_ELIGIBLE`.
+
+Model-reported constraint, compatibility, regression, and risk information remains in the accepted Implementation Result above; deterministic checks remain authoritative within their stated scope.
+
+## Partial-remediation disclosure
+
+Not applicable.
+
+## Delivery result
+
+No automatic delivery was performed.
+
+## Remaining limitations
+
+Restart/resume reconstruction is not implemented; machine events and the append-only journal remain available for audit.
+
+## Final conclusion
+
+Final outcome is `INCONCLUSIVE`; this does not override the separate deterministic validation, capture, or delivery states.
+
