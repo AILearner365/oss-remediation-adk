@@ -1,0 +1,13 @@
+{
+  "cycle": 3,
+  "operation": "search",
+  "query": "com.fasterxml.jackson.core jackson-core maven repository",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=com.fasterxml.jackson.core+jackson-core+maven+repository",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}

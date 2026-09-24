@@ -1,0 +1,10 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository
+Starting filesystem walk for root: /
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository/task-service/pom.xml file and found 4 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository/task-common/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository/task-web/pom.xml file and found 6 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260924T002337Z-3166ba0e/temp/autonomous-osv-igob2s4g/repository/task-domain/pom.xml file and found 2 packages
+End status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 13.224577ms elapsed, 13.224824ms wall time
+Filtered 6 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
