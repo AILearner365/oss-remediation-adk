@@ -180,8 +180,14 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn("Relative engineering preference alone is not an elimination reason", message)
+        self.assertIn("Uncertainty is not evidence", message)
         self.assertIn(
-            "Approaches may be eliminated when evidence establishes that they are unsupported, unavailable, infeasible, incapable of satisfying the task or providing valid constraint-compliant partial progress, materially contradicted, hard-constraint conflicting, or otherwise not genuinely viable",
+            "Do not materially eliminate a plausible approach when the deciding reason is an unsupported expectation, convention, potentially stale prior, unresolved assumption, or absence of evidence",
+            message,
+        )
+        self.assertIn("preserve its unresolved viability instead", message)
+        self.assertIn(
+            "An approach may be eliminated when observed task, repository, or execution evidence, current authoritative information, or a hard task constraint materially establishes",
             message,
         )
         self.assertIn(
@@ -193,6 +199,10 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 
         self.assertIn("unsupported or potentially stale prior expectations", AGENT_INSTRUCTION)
+        self.assertIn(
+            "current evidence takes precedence over unsupported prior knowledge",
+            AGENT_INSTRUCTION,
+        )
         self.assertIn(
             "When a material decision depends on information that may have changed outside the repository",
             AGENT_INSTRUCTION,
@@ -226,6 +236,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             "investigate the discrepancy rather than declaring the observed project state invalid",
             message,
         )
+        self.assertIn("Uncertainty is not evidence for or against an approach", message)
         self.assertIn(
             "repository or experimental evidence to establish which mechanisms are applicable",
             AGENT_INSTRUCTION,
@@ -278,6 +289,14 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
         self.assertIn(
+            "If sufficient evidence cannot reasonably be obtained, record the premise and the affected approach as unresolved",
+            message,
+        )
+        self.assertIn(
+            "that uncertainty neither supports the candidate nor establishes that the mechanism is non-viable",
+            message,
+        )
+        self.assertIn(
             "General technical knowledge may suggest the mechanism or premise to investigate, but does not by itself establish repository-specific applicability or viability",
             message,
         )
@@ -307,6 +326,11 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn(
             "do not defer a decision-critical, reasonably testable repository-specific premise until implementation",
+            message,
+        )
+        self.assertIn("or COMPLETE classification", message)
+        self.assertIn(
+            "do not promote the premise into candidate support, and do not treat the unresolved premise as evidence that the approach is non-viable",
             message,
         )
         self.assertIn(
@@ -347,6 +371,14 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         )
         self.assertIn(
             "Neither unsupported prior knowledge nor general external information may displace stronger task-specific or observed project evidence",
+            message,
+        )
+        self.assertIn(
+            "Do not use an unsupported expectation, convention, potentially stale prior, unresolved assumption, or absence of evidence as positive support or as a material reason to eliminate a plausible approach",
+            message,
+        )
+        self.assertIn(
+            "Q2's evidence record is the evidentiary boundary for this synthesis; do not invent missing support here",
             message,
         )
         self.assertIn(

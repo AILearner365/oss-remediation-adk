@@ -343,21 +343,28 @@ candidate formation or selection, investigate it before submitting this response
 When that information may have changed outside the repository, obtain reasonably
 available current authoritative evidence and use it to discover the actual
 available and potentially applicable solution space rather than merely confirming
-the first preferred solution. Current external evidence may establish what options
-and documented properties currently exist; repository and execution evidence
-establish what applies to and happens in this project. Failed, blocked, incomplete
-or inconclusive research is not evidence of absence. Keep investigation
+the first preferred solution. Prefer current primary or authoritative sources
+when reasonably available for material externally changing claims; when obtained,
+that evidence takes precedence over unsupported or potentially stale prior
+knowledge about the changing fact. Current external evidence may establish what
+options and documented properties currently exist; repository and execution
+evidence establish what applies to and happens in this project. Failed, blocked,
+incomplete or inconclusive research is not evidence of absence. Uncertainty is
+not evidence for or against an approach; preserve it honestly. Keep investigation
 proportional; non-material information does not require exhaustive investigation,
 and genuinely execution-dependent information may remain unknown.
 
 Before reconciling candidates with hard constraints, establish candidate-relevant
 facts from the Task to Solve, directly observed repository state and observed
 execution evidence. Distinguish those established facts from interpretations,
-unresolved uncertainty, prior knowledge, expectations, conventions or guesses.
+unresolved uncertainty, assumptions, prior knowledge, expectations, conventions
+or guesses.
 The latter may identify a decision-critical discrepancy to investigate, but must
 not displace stronger task-specific or observed evidence unless additional
 evidence establishes that the observed interpretation is wrong, incomplete or not
-applicable. The established properties of a proposed change govern constraint
+applicable. Do not use an unsupported expectation, convention, potentially stale
+prior, unresolved assumption or absence of evidence as positive support or as a
+material reason to eliminate a plausible approach. The established properties of a proposed change govern constraint
 reconciliation; describing or rationalizing the change differently does not alter
 those properties.
 
@@ -384,7 +391,10 @@ state or behavior, and the available isolated investigation capabilities can
 reasonably test that premise, obtain sufficient evidence before treating it as
 established or sufficiently supported for selection. General technical knowledge
 may suggest the premise to investigate, but does not establish repository-specific
-applicability when material project evidence is reasonably obtainable. This
+applicability when material project evidence is reasonably obtainable. If
+sufficient evidence cannot reasonably be obtained, record the premise and the
+affected approach as unresolved; that uncertainty neither supports the candidate
+nor establishes that the mechanism is non-viable. This
 requires decision-sufficient support, not exhaustive pre-execution proof, testing
 every candidate, running every validation or proving final task success.
 
@@ -457,11 +467,18 @@ as-is, adapted, rejected for this project or left uncertain. The newest option i
 not automatically correct.
 
 From that synthesis, derive the materially distinct high-level solution approaches
-reasonably supported by the evidence. Distinguish viability from preference. Do
-not eliminate an approach merely because another appears preferable. Record
-evidence-based elimination or unresolved viability of materially relevant
-approaches when useful. One approach is valid when evidence eliminates the others;
-there is no minimum approach count and alternatives must not be manufactured.
+reasonably supported by the evidence. Question 2's evidence record is the
+evidentiary boundary for this synthesis; do not invent missing support here.
+Distinguish viability from preference. Do not eliminate an approach merely because
+another appears preferable. Uncertainty is not evidence. Do not materially
+eliminate a plausible approach when the deciding reason is an unsupported
+expectation, convention, potentially stale prior, unresolved assumption or absence
+of evidence; preserve its unresolved viability instead. An approach may be
+eliminated when observed task, repository or execution evidence, current
+authoritative information or a hard task constraint materially establishes the
+reason. Record evidence-based elimination or unresolved viability when material.
+One approach is valid when evidence eliminates the others; there is no
+minimum approach count and alternatives must not be manufactured.
 
 Keep the answer proportional. Do not repeat the investigation log, list generic
 practices without project-specific rationale, exhaustively catalog theoretical
@@ -499,10 +516,14 @@ Translate the surviving high-level approaches into solutions concrete enough to 
 Form candidates only from decision-relevant investigation actually performed and
 evidence actually obtained. Planned investigation or general technical
 plausibility alone does not establish repository-specific applicability or
-viability. When material and reasonably obtainable before implementation,
-repository evidence must support that the proposed mechanism applies to or
-controls the relevant state and has a reasonable basis for producing the intended
-effect.
+viability. If candidate viability or COMPLETE classification materially depends
+on a repository-specific premise that isolated investigation can reasonably test,
+obtain sufficient evidence before treating the premise as established. If
+sufficient evidence cannot reasonably be obtained, preserve the premise and
+high-level approach as unresolved; do not promote the premise into candidate
+support, and do not treat it as evidence that the approach is non-viable. This is
+a decision-sufficient standard, not a requirement to prove final success or test
+every candidate experimentally.
 
 Candidate count is the result of investigation and synthesis, not a target that
 determines their breadth. Preserve materially distinct surviving high-level

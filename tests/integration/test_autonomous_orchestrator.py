@@ -867,6 +867,24 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         session = sessions[0]
         self.assertTrue(result.validation.passed)
         self.assertEqual(2, session.intent_attempts)
+        self.assertIn("Uncertainty is not evidence", session.messages[0])
+        self.assertIn(
+            "do not invent missing support here",
+            session.messages[0],
+        )
+        self.assertIn(
+            "do not defer a decision-critical, reasonably testable repository-specific premise until implementation",
+            session.messages[0],
+        )
+        self.assertIn(
+            "do not promote the premise into candidate support",
+            session.messages[0],
+        )
+        self.assertIn(
+            "one candidate is valid",
+            session.messages[0],
+        )
+        self.assertIn("Never manufacture alternatives", session.messages[0])
         self.assertIn("Missing required section: Problem understanding in project context", session.messages[1])
         self.assertEqual("ok", session.pre_intent_experiment["status"])
         self.assertEqual("experimental", session.pre_intent_experiment["workspaceKind"])
