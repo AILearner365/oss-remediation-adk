@@ -1,0 +1,880 @@
+{
+  "registryUrl": "http://127.0.0.1:41417/",
+  "requests": [
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-parent/4.0.6/spring-boot-starter-parent-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-parent/4.0.6/spring-boot-starter-parent-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-dependencies/4.0.6/spring-boot-dependencies-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-dependencies/4.0.6/spring-boot-dependencies-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/activemq/activemq-bom/6.1.8/activemq-bom-6.1.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/activemq/activemq-bom/6.1.8/activemq-bom-6.1.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/activemq/artemis-bom/2.43.0/artemis-bom-2.43.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/activemq/artemis-bom/2.43.0/artemis-bom-2.43.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/activemq/artemis-project/2.43.0/artemis-project-2.43.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/activemq/artemis-project/2.43.0/artemis-project-2.43.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/apache/35/apache-35.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/apache/35/apache-35.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/assertj/assertj-bom/3.27.7/assertj-bom-3.27.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/assertj/assertj-bom/3.27.7/assertj-bom-3.27.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/zipkin/reporter2/zipkin-reporter-bom/3.5.3/zipkin-reporter-bom-3.5.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/zipkin/reporter2/zipkin-reporter-bom/3.5.3/zipkin-reporter-bom-3.5.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/zipkin/brave/brave-bom/6.3.1/brave-bom-6.3.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/zipkin/brave/brave-bom/6.3.1/brave-bom-6.3.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/cassandra/java-driver-bom/4.19.2/java-driver-bom-4.19.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/cassandra/java-driver-bom/4.19.2/java-driver-bom-4.19.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/groovy/groovy-bom/5.0.5/groovy-bom-5.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/groovy/groovy-bom/5.0.5/groovy-bom-5.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/infinispan/infinispan-bom/15.2.6.Final/infinispan-bom-15.2.6.Final.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/infinispan/infinispan-bom/15.2.6.Final/infinispan-bom-15.2.6.Final.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/infinispan/infinispan-build-configuration-parent/15.2.6.Final/infinispan-build-configuration-parent-15.2.6.Final.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/infinispan/infinispan-build-configuration-parent/15.2.6.Final/infinispan-build-configuration-parent-15.2.6.Final.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/jackson/jackson-bom/2.21.2/jackson-bom-2.21.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/jackson/jackson-bom/2.21.2/jackson-bom-2.21.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/jackson/jackson-parent/2.21/jackson-parent-2.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/jackson/jackson-parent/2.21/jackson-parent-2.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/oss-parent/75/oss-parent-75.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/oss-parent/75/oss-parent-75.pom"
+    },
+    {
+      "found": true,
+      "path": "/tools/jackson/jackson-bom/3.1.2/jackson-bom-3.1.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/tools/jackson/jackson-bom/3.1.2/jackson-bom-3.1.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/oss-parent/79/oss-parent-79.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/oss-parent/79/oss-parent-79.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/glassfish/jersey/jersey-bom/4.0.2/jersey-bom-4.0.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/glassfish/jersey/jersey-bom/4.0.2/jersey-bom-4.0.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/eclipse/ee4j/project/1.0.9/project-1.0.9.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/eclipse/ee4j/project/1.0.9/project-1.0.9.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/eclipse/jetty/ee11/jetty-ee11-bom/12.1.8/jetty-ee11-bom-12.1.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/eclipse/jetty/ee11/jetty-ee11-bom/12.1.8/jetty-ee11-bom-12.1.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/eclipse/jetty/jetty-bom/12.1.8/jetty-bom-12.1.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/eclipse/jetty/jetty-bom/12.1.8/jetty-bom-12.1.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jooq/jooq-bom/3.19.32/jooq-bom-3.19.32.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jooq/jooq-bom/3.19.32/jooq-bom-3.19.32.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/junit-bom/6.0.3/junit-bom-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/junit-bom/6.0.3/junit-bom-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jetbrains/kotlin/kotlin-bom/2.2.21/kotlin-bom-2.2.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jetbrains/kotlin/kotlin-bom/2.2.21/kotlin-bom-2.2.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.10.2/kotlinx-coroutines-bom-1.10.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.10.2/kotlinx-coroutines-bom-1.10.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jetbrains/kotlinx/kotlinx-serialization-bom/1.9.0/kotlinx-serialization-bom-1.9.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jetbrains/kotlinx/kotlinx-serialization-bom/1.9.0/kotlinx-serialization-bom-1.9.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/logging/log4j/log4j-bom/2.25.4/log4j-bom-2.25.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/logging/log4j/log4j-bom/2.25.4/log4j-bom-2.25.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/micrometer/micrometer-bom/1.16.5/micrometer-bom-1.16.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/micrometer/micrometer-bom/1.16.5/micrometer-bom-1.16.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/mockito/mockito-bom/5.20.0/mockito-bom-5.20.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/mockito/mockito-bom/5.20.0/mockito-bom-5.20.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/mongodb/mongodb-driver-bom/5.6.5/mongodb-driver-bom-5.6.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/mongodb/mongodb-driver-bom/5.6.5/mongodb-driver-bom-5.6.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/neo4j/driver/neo4j-java-driver-bom/6.0.5/neo4j-java-driver-bom-6.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/neo4j/driver/neo4j-java-driver-bom/6.0.5/neo4j-java-driver-bom-6.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/neo4j/bolt/neo4j-bolt-connection-bom/11.0.1/neo4j-bolt-connection-bom-11.0.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/neo4j/bolt/neo4j-bolt-connection-bom/11.0.1/neo4j-bolt-connection-bom-11.0.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/netty/netty-bom/4.2.12.Final/netty-bom-4.2.12.Final.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/netty/netty-bom/4.2.12.Final/netty-bom-4.2.12.Final.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/sonatype/oss/oss-parent/7/oss-parent-7.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/opentelemetry/opentelemetry-bom/1.55.0/opentelemetry-bom-1.55.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/opentelemetry/opentelemetry-bom/1.55.0/opentelemetry-bom-1.55.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/prometheus/prometheus-metrics-bom/1.4.3/prometheus-metrics-bom-1.4.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/prometheus/prometheus-metrics-bom/1.4.3/prometheus-metrics-bom-1.4.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/prometheus/client_java_parent/1.4.3/client_java_parent-1.4.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/prometheus/client_java_parent/1.4.3/client_java_parent-1.4.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/prometheus/simpleclient_bom/0.16.0/simpleclient_bom-0.16.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/prometheus/simpleclient_bom/0.16.0/simpleclient_bom-0.16.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/prometheus/parent/0.16.0/parent-0.16.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/prometheus/parent/0.16.0/parent-0.16.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/pulsar/pulsar-bom/4.1.3/pulsar-bom-4.1.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/pulsar/pulsar-bom/4.1.3/pulsar-bom-4.1.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/querydsl/querydsl-bom/5.1.0/querydsl-bom-5.1.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/querydsl/querydsl-bom/5.1.0/querydsl-bom-5.1.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/projectreactor/reactor-bom/2025.0.5/reactor-bom-2025.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/projectreactor/reactor-bom/2025.0.5/reactor-bom-2025.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/rsocket/rsocket-bom/1.1.5/rsocket-bom-1.1.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/rsocket/rsocket-bom/1.1.5/rsocket-bom-1.1.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/seleniumhq/selenium/selenium-bom/4.37.0/selenium-bom-4.37.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/seleniumhq/selenium/selenium-bom/4.37.0/selenium-bom-4.37.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/amqp/spring-amqp-bom/4.0.3/spring-amqp-bom-4.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/amqp/spring-amqp-bom/4.0.3/spring-amqp-bom-4.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/batch/spring-batch-bom/6.0.3/spring-batch-bom-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/batch/spring-batch-bom/6.0.3/spring-batch-bom-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/data/spring-data-bom/2025.1.5/spring-data-bom-2025.1.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/data/spring-data-bom/2025.1.5/spring-data-bom-2025.1.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-framework-bom/7.0.7/spring-framework-bom-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-framework-bom/7.0.7/spring-framework-bom-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/integration/spring-integration-bom/7.0.4/spring-integration-bom-7.0.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/integration/spring-integration-bom/7.0.4/spring-integration-bom-7.0.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/pulsar/spring-pulsar-bom/2.0.5/spring-pulsar-bom-2.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/pulsar/spring-pulsar-bom/2.0.5/spring-pulsar-bom-2.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/restdocs/spring-restdocs-bom/4.0.0/spring-restdocs-bom-4.0.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/restdocs/spring-restdocs-bom/4.0.0/spring-restdocs-bom-4.0.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/security/spring-security-bom/7.0.5/spring-security-bom-7.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/security/spring-security-bom/7.0.5/spring-security-bom-7.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/session/spring-session-bom/4.0.3/spring-session-bom-4.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/session/spring-session-bom/4.0.3/spring-session-bom-4.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/ws/spring-ws-bom/5.0.1/spring-ws-bom-5.0.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/ws/spring-ws-bom/5.0.1/spring-ws-bom-5.0.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/testcontainers/testcontainers-bom/2.0.5/testcontainers-bom-2.0.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/testcontainers/testcontainers-bom/2.0.5/testcontainers-bom-2.0.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/commons/commons-text/1.9/commons-text-1.9.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/commons/commons-text/1.9/commons-text-1.9.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/json/json/20230227/json-20230227.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/json/json/20230227/json-20230227.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/commons/commons-parent/51/commons-parent-51.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/commons/commons-parent/51/commons-parent-51.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/apache/23/apache-23.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/apache/23/apache-23.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/sonatype/oss/oss-parent/9/oss-parent-9.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/sonatype/oss/oss-parent/9/oss-parent-9.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/commons/commons-parent/88/commons-parent-88.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/commons/commons-parent/88/commons-parent-88.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/junit-bom/5.13.4/junit-bom-5.13.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/junit-bom/5.13.4/junit-bom-5.13.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-context/7.0.7/spring-context-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-context/7.0.7/spring-context-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-core/7.0.7/spring-core-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-core/7.0.7/spring-core-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/net/minidev/json-smart/2.6.0/json-smart-2.6.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/net/minidev/json-smart/2.6.0/json-smart-2.6.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/hamcrest/hamcrest/3.0/hamcrest-3.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/hamcrest/hamcrest/3.0/hamcrest-3.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-test/7.0.7/spring-test-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-test/7.0.7/spring-test-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/xml/bind/jakarta.xml.bind-api-parent/4.0.4/jakarta.xml.bind-api-parent-4.0.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api-parent/4.0.4/jakarta.xml.bind-api-parent-4.0.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/awaitility/awaitility-parent/4.3.0/awaitility-parent-4.3.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/awaitility/awaitility-parent/4.3.0/awaitility-parent-4.3.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/objenesis/objenesis/3.3/objenesis-3.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/xmlunit/xmlunit-parent/2.10.4/xmlunit-parent-2.10.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/xmlunit/xmlunit-parent/2.10.4/xmlunit-parent-2.10.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/commons/commons-parent/97/commons-parent-97.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/commons/commons-parent/97/commons-parent-97.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/apache/37/apache-37.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/apache/37/apache-37.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/junit-bom/5.14.2/junit-bom-5.14.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/junit-bom/5.14.2/junit-bom-5.14.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/ow2/asm/asm/9.7.1/asm-9.7.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/net/bytebuddy/byte-buddy-parent/1.17.8/byte-buddy-parent-1.17.8.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/net/bytebuddy/byte-buddy-parent/1.17.8/byte-buddy-parent-1.17.8.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/objenesis/objenesis-parent/3.3/objenesis-parent-3.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/objenesis/objenesis-parent/3.3/objenesis-parent-3.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/ch/qos/logback/logback-parent/1.5.32/logback-parent-1.5.32.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/ch/qos/logback/logback-parent/1.5.32/logback-parent-1.5.32.pom"
+    },
+    {
+      "found": true,
+      "path": "/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/logging/log4j/log4j/2.25.4/log4j-2.25.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/logging/log4j/log4j/2.25.4/log4j-2.25.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/groovy/groovy-bom/4.0.27/groovy-bom-4.0.27.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/groovy/groovy-bom/4.0.27/groovy-bom-4.0.27.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/jackson/jackson-bom/2.19.1/jackson-bom-2.19.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/jackson/jackson-bom/2.19.1/jackson-bom-2.19.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/jackson/jackson-parent/2.19.2/jackson-parent-2.19.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/jackson/jackson-parent/2.19.2/jackson-parent-2.19.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/oss-parent/68/oss-parent-68.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/oss-parent/68/oss-parent-68.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/platform/jakarta.jakartaee-bom/9.1.0/jakarta.jakartaee-bom-9.1.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/platform/jakarta.jakartaee-bom/9.1.0/jakarta.jakartaee-bom-9.1.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/platform/jakartaee-api-parent/9.1.0/jakartaee-api-parent-9.1.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/platform/jakartaee-api-parent/9.1.0/jakartaee-api-parent-9.1.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/eclipse/ee4j/project/1.0.7/project-1.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/eclipse/ee4j/project/1.0.7/project-1.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/junit/junit-bom/5.13.2/junit-bom-5.13.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/junit/junit-bom/5.13.2/junit-bom-5.13.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/mockito/mockito-bom/4.11.0/mockito-bom-4.11.0.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/mockito/mockito-bom/4.11.0/mockito-bom-4.11.0.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-framework-bom/5.3.39/spring-framework-bom-5.3.39.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-framework-bom/5.3.39/spring-framework-bom-5.3.39.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/ow2/ow2/1.5.1/ow2-1.5.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/ow2/ow2/1.5.1/ow2-1.5.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-web/7.0.7/spring-web-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-web/7.0.7/spring-web-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.pom"
+    },
+    {
+      "found": true,
+      "path": "/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/classmate/1.7.3/classmate-1.7.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/classmate/1.7.3/classmate-1.7.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.pom"
+    },
+    {
+      "found": true,
+      "path": "/tools/jackson/jackson-base/3.1.2/jackson-base-3.1.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/tools/jackson/jackson-base/3.1.2/jackson-base-3.1.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.pom"
+    },
+    {
+      "found": true,
+      "path": "/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.pom"
+    },
+    {
+      "found": true,
+      "path": "/org/jboss/jboss-parent/52/jboss-parent-52.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/org/jboss/jboss-parent/52/jboss-parent-52.pom"
+    },
+    {
+      "found": true,
+      "path": "/com/fasterxml/oss-parent/74/oss-parent-74.pom",
+      "resolvedPath": "/home/kavya_parivarababu/.m2/repository/com/fasterxml/oss-parent/74/oss-parent-74.pom"
+    }
+  ]
+}

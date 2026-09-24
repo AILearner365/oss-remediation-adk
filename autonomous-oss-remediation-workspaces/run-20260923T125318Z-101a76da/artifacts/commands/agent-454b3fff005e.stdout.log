@@ -1,6 +1,0 @@
-Welcome to Cloud Shell! Type "help" to get started.
-To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
-You can view your projects by running `gcloud projects list`.
-[1;33mYour home disk usage is at 97%.
-You can find suggestions to clear space at https://cloud.google.com/shell/docs/quotas-limits#clearing_disk_space.
-Upgrade to Cloud Workstations for a secure development environment without these limits: https://cloud.google.com/workstations.[0m
