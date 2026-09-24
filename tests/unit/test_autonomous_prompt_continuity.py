@@ -248,6 +248,47 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertNotIn("always choose the latest", message.lower())
         self.assertNotIn("must perform external research", message.lower())
 
+    def test_failed_evidence_mechanism_requires_proportional_source_recovery(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+
+        self.assertIn(
+            "Select evidence mechanisms according to the proposition being established rather than treating any single capability as the universal research mechanism",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "Failure, unavailability, inconclusive output, or unusable output from one mechanism does not establish the proposition or its absence",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "must not be replaced by unsupported prior knowledge",
+            AGENT_INSTRUCTION,
+        )
+        self.assertIn(
+            "Distinguish failure, unavailability, inconclusive results, and unusable output from evidence that establishes the investigated fact or establishes absence",
+            message,
+        )
+        self.assertIn(
+            "If the unresolved fact is decision-critical and another appropriate evidence mechanism available through the existing engineering capabilities could materially resolve it",
+            message,
+        )
+        self.assertIn(
+            "investigate through a reasonable alternative before candidate selection",
+            message,
+        )
+        self.assertIn(
+            "This does not require trying every mechanism, following a fixed fallback sequence, or redundantly confirming a fact after sufficient decision-relevant evidence exists",
+            message,
+        )
+        self.assertIn(
+            "If no reasonable available mechanism can obtain sufficient evidence, preserve the uncertainty honestly",
+            message,
+        )
+        self.assertIn(
+            "Q2's evidence record is the evidentiary boundary for this synthesis",
+            message,
+        )
+        self.assertNotIn("research_search", message)
+
     def test_candidate_formation_requires_completed_repository_specific_investigation(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 

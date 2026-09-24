@@ -869,6 +869,18 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(2, session.intent_attempts)
         self.assertIn("Uncertainty is not evidence", session.messages[0])
         self.assertIn(
+            "A failed or inconclusive mechanism leaves the fact unresolved",
+            session.messages[0],
+        )
+        self.assertIn(
+            "another appropriate evidence mechanism available through the existing engineering capabilities",
+            session.messages[0],
+        )
+        self.assertIn(
+            "This does not require trying every mechanism, following a fixed fallback sequence",
+            session.messages[0],
+        )
+        self.assertIn(
             "do not invent missing support here",
             session.messages[0],
         )

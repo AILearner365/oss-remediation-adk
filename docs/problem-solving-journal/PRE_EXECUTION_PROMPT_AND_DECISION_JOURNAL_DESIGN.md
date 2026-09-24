@@ -335,8 +335,21 @@ Use this table:
 The table must report investigation actually performed and evidence actually
 obtained. The Sources examined column must identify actual evidence sources or
 investigation methods. Planned, intended, future or not-yet-performed investigation
-is not a finding and is not evidence supporting candidate formation. If
-decision-relevant information is reasonably obtainable through the available
+is not a finding and is not evidence supporting candidate formation. Select
+evidence sources and mechanisms according to the proposition being established
+rather than treating any single capability as the universal research mechanism.
+Distinguish failure, unavailability, inconclusive results and unusable output from
+evidence that establishes the investigated fact or establishes absence. A failed
+or inconclusive mechanism leaves the fact unresolved: it is not evidence for or
+against the proposition and does not justify substituting unsupported prior
+knowledge, convention, expectation or assumption. If the unresolved fact is
+decision-critical and another appropriate mechanism available through the existing
+engineering capabilities could materially resolve it, investigate through a
+reasonable alternative before candidate selection. This does not require trying
+every mechanism, following a fixed fallback sequence or redundantly confirming a
+fact after sufficient decision-relevant evidence exists.
+
+If decision-relevant information is reasonably obtainable through the available
 engineering capabilities and could materially affect problem understanding,
 mechanism discovery or applicability, control structure, viability, constraints,
 candidate formation or selection, investigate it before submitting this response.
@@ -350,7 +363,8 @@ knowledge about the changing fact. Current external evidence may establish what
 options and documented properties currently exist; repository and execution
 evidence establish what applies to and happens in this project. Failed, blocked,
 incomplete or inconclusive research is not evidence of absence. Uncertainty is
-not evidence for or against an approach; preserve it honestly. Keep investigation
+not evidence for or against an approach. If no reasonable available mechanism can
+obtain sufficient evidence, preserve the uncertainty honestly. Keep investigation
 proportional; non-material information does not require exhaustive investigation,
 and genuinely execution-dependent information may remain unknown.
 
