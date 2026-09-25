@@ -35,3 +35,13 @@
   - pre-existing baseline failure,
   - project-policy/manual-review blocker,
   - PR delivery failure.
+
+## Autonomous Agent Experimental Backlog
+
+- **IN EVALUATION — highest priority:** Premature convergence / insufficient challenge before commitment. Experiment 1 is frozen at `e92837d4498c6bb8ebcafefb19cfd4acf2394b06`; research, hypothesis, run-evaluation protocol, and chronological decisions are maintained in [Experiment 1 — Challenge Before Commitment](EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md).
+- **OPEN — separate concern:** Evidence-source recovery and unsupported-prior substitution.
+- **OPEN — separate concern:** Research and source-discovery reliability.
+- **OPEN — separate concern:** Investigation depth before candidate selection.
+- **OPEN — separate concern:** Stale/current knowledge handling.
+
+Do not mark the separate concerns resolved because Experiment 1 exists. Update experiment status only from model-backed evidence recorded chronologically in the experiment record.
