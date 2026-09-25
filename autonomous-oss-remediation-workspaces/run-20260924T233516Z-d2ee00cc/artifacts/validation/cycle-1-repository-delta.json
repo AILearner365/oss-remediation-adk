@@ -1,0 +1,34 @@
+{
+  "after": {
+    "captured": true,
+    "changedFiles": [
+      "dependency_tree.txt",
+      "dependency_tree_after_reapply.txt",
+      "pom.xml"
+    ],
+    "fileDigests": {
+      "dependency_tree.txt": "84fbd48dd7246d34f997a3578ea3dac87c77f734cccaed9ee9b52d306fad12a5",
+      "dependency_tree_after_reapply.txt": "05a8ded163ed5207439b07b81257c36d4ad40fb72a4dd087116aa97885abb5fd",
+      "pom.xml": "fff8adc6ccc8cd80936337b32957a988f23d073da44d5d27cd08151fa8871a32"
+    },
+    "stateDigest": "ac0c2e7e6736eed00225f1cc06fd9ed8f02c2e7b2a8c6b07b0f312b686e0277b"
+  },
+  "before": {
+    "captured": true,
+    "changedFiles": [],
+    "fileDigests": {},
+    "stateDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "cycle": 1,
+  "delta": {
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [
+      "dependency_tree.txt",
+      "dependency_tree_after_reapply.txt",
+      "pom.xml"
+    ],
+    "pathsModifiedSinceCycleStart": [],
+    "pathsRemovedFromChangeSet": [],
+    "repositoryStateChanged": true
+  }
+}
