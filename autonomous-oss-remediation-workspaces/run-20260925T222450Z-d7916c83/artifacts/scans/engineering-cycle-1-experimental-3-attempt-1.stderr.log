@@ -1,0 +1,18 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository
+Starting filesystem walk for root: /
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-service/pom.xml file and found 4 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-common/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-web/pom.xml file and found 6 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-domain/pom.xml file and found 2 packages
+End status: 53 dirs visited, 84 inodes visited, 5 Extract calls, 13.18212ms elapsed, 13.182269ms wall time
+Filtered 6 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
+failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-service/pom.xml: failed resolving {Maven:com.example.secureapp:task-service[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project ch.qos.logback:logback-classic@1.5.33:
+API query failed: Maven registry http://127.0.0.1:33617/ch/qos/logback/logback-classic/1.5.33/logback-classic-1.5.33.pom query status: 404
+failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-web/pom.xml: failed resolving {Maven:com.example.secureapp:task-web[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project ch.qos.logback:logback-classic@1.5.33:
+API query failed: Maven registry http://127.0.0.1:33617/ch/qos/logback/logback-classic/1.5.33/logback-classic-1.5.33.pom query status: 404
+Error during extraction: (extracting as transitivedependency/pomxml) failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-service/pom.xml: failed resolving {Maven:com.example.secureapp:task-service[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project ch.qos.logback:logback-classic@1.5.33:
+API query failed: Maven registry http://127.0.0.1:33617/ch/qos/logback/logback-classic/1.5.33/logback-classic-1.5.33.pom query status: 404
+failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260925T222450Z-d7916c83/temp/autonomous-osv-36ivzpom/repository/task-web/pom.xml: failed resolving {Maven:com.example.secureapp:task-web[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project ch.qos.logback:logback-classic@1.5.33:
+API query failed: Maven registry http://127.0.0.1:33617/ch/qos/logback/logback-classic/1.5.33/logback-classic-1.5.33.pom query status: 404
