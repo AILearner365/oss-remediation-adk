@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/eclipse/jetty/jetty-bom/12.1.10/jetty-bom-12.1.10.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

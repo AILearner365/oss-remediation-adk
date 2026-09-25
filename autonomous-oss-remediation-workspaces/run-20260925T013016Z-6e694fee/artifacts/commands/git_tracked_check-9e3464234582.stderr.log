@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

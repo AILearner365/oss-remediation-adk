@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

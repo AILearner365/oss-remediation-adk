@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/infinispan/infinispan-bom/15.2.6.Final/infinispan-bom-15.2.6.Final.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

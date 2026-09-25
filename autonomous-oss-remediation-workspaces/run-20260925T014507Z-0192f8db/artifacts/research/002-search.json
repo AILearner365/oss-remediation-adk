@@ -1,0 +1,13 @@
+{
+  "cycle": 1,
+  "operation": "search",
+  "query": "latest spring boot 3.x version",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=latest+spring+boot+3.x+version",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}

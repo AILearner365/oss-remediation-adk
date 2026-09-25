@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/com/fasterxml/oss-parent/68/oss-parent-68.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

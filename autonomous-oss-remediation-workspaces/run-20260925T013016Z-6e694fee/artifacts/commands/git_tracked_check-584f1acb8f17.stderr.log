@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

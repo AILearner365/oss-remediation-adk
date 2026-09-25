@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

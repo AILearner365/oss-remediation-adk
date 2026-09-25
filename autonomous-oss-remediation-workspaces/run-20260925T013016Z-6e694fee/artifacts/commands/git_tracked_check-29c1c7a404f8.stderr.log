@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/plugins/maven-jar-plugin/3.4.2/maven-jar-plugin-3.4.2.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/com/fasterxml/jackson/jackson-bom/2.19.1/jackson-bom-2.19.1.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

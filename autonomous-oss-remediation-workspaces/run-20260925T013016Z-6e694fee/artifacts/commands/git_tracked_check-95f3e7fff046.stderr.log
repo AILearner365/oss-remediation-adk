@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

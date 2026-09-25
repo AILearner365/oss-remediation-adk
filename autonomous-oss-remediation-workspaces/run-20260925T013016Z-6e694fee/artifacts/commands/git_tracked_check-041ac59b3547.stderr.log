@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/io/micrometer/micrometer-commons/1.16.6/micrometer-commons-1.16.6.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

@@ -1,0 +1,46 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..a64e419 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -31,6 +31,10 @@
+         <maven.compiler.release>21</maven.compiler.release>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
++        <spring-framework.version>7.0.8</spring-framework.version>
++        <tomcat.version>11.0.25</tomcat.version>
++        <micrometer.version>1.16.6</micrometer.version>
++        <jackson.version>3.1.4</jackson.version>
+ 
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+@@ -54,18 +58,28 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-core</artifactId>
++                <version>3.1.4</version>
++            </dependency>
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>3.1.4</version>
++            </dependency>
+         </dependencies>
+     </dependencyManagement>
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
++            <version>1.10.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
++            <version>20231013</version>
+         </dependency>
+     </dependencies>
+     <build>

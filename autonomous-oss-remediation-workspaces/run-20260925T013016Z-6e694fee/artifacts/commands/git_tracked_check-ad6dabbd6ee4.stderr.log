@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/com/thoughtworks/qdox/qdox/2.2.0/qdox-2.2.0.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

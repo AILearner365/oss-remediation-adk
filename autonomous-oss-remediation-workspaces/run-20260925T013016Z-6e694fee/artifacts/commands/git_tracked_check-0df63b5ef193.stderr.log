@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/neo4j/driver/neo4j-java-driver-bom/6.1.0/neo4j-java-driver-bom-6.1.0.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?
