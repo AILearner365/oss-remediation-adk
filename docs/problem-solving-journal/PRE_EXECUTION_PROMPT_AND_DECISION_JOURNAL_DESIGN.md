@@ -115,8 +115,12 @@ Operating principles:
   viable mechanisms belongs after viability determination.
 - Preserve required behavior, compatibility and existing system conventions.
 - Do not make unnecessary or unrelated changes.
-- Do not select a solution merely because it is the fastest way to produce one
-  passing check.
+- Before final selection, challenge whether the leading candidate is merely
+  workable or is the strongest project-fit solution reasonably supported by the
+  available evidence. Investigate and reconsider when a materially unresolved
+  decision issue and reasonably obtainable evidence could materially change
+  selection; otherwise proceed without exhaustive exploration or proof of a
+  global optimum.
 - Do not claim complete resolution based only on a passing build, partial
   improvement or unverified expectation.
 - Inspect failures and continue adapting while time and operational budget remain.
@@ -670,6 +674,24 @@ State:
 - its material remaining risks;
 - the evidence that would require reconsidering the selection.
 
+Before committing, challenge whether the leading candidate is merely workable or
+is the strongest project-fit solution reasonably supported by the available
+evidence. Recheck whether project evidence, structure, constraints or engineering
+synthesis imply a materially distinct plausible approach that was not reasonably
+considered, and whether unsupported assumptions, expectations, conventions,
+potentially stale priors, unresolved facts or absence of evidence were used to
+eliminate an approach. If this reveals a materially unresolved decision issue and
+reasonably obtainable investigation could materially change selection, investigate
+and revise the synthesis or candidates before completing selection. Otherwise
+proceed.
+
+This is a proportional search-sufficiency check, not a requirement to prove a
+global optimum, exhaustively explore, manufacture or score alternatives, or submit
+multiple candidates. One candidate remains valid when evidence genuinely
+eliminates the alternatives. Concisely explain the important approaches considered
+or eliminated, the evidence supporting material eliminations, and why remaining
+uncertainty does not require further pre-selection investigation.
+
 Do not repeat the complete implementation sequence. It is already recorded in
 the selected candidate.
 
@@ -678,8 +700,7 @@ surviving admissible candidates using current evidence, problem coverage,
 compatibility, coherence, maintainability, scope and risk. Apply these engineering
 preferences here, after candidate formation; do not use them to retroactively
 exclude a viable candidate. These qualities cannot outweigh a hard-constraint
-conflict. Do not select a solution only because it
-appears fastest or easiest. Do not select a candidate with an established
+conflict. Do not select a candidate with an established
 hard-requirement or hard-constraint conflict, or one whose compliance remains
 materially unresolved or depends on an assumption, regardless of whether it is
 labeled COMPLETE or PARTIAL. Ordinary execution-dependent results that do not
@@ -700,7 +721,7 @@ self-validation and deterministic validation.
 - **Evidence requiring reconsideration:** <answer>
 ```
 
-Purpose: record the decision without repeating the candidate's detailed solution and implementation plan.
+Purpose: challenge whether exploration is sufficient, then record the final decision without repeating the candidate's detailed solution and implementation plan. This remains part of Question 5 rather than a new lifecycle phase.
 
 ---
 
@@ -774,6 +795,13 @@ and what did the model find?
 <Repeat only for other evidence-supported candidates>
 
 ### 5. Which solution is selected, and why is it preferred?
+
+Before committing, challenge whether the leading candidate is merely workable or
+is the strongest project-fit solution reasonably supported by the available
+evidence. Investigate and reconsider only when a materially unresolved decision
+issue and reasonably obtainable evidence could materially change selection. This
+does not require exhaustive exploration, manufactured alternatives, or multiple
+candidates; one candidate remains valid after evidence-based elimination.
 
 - **Selected solution:** <candidate identifier and name>
 - **Classification:** COMPLETE or PARTIAL

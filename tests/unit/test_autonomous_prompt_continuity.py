@@ -195,6 +195,28 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
             message,
         )
 
+    def test_final_selection_challenges_search_sufficiency_before_commitment(self):
+        message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
+        questionnaire = intent_questionnaire(1)
+
+        self.assertIn("Before committing, challenge whether the leading candidate is merely workable", message)
+        self.assertIn("strongest project-fit solution reasonably supported by the available evidence", message)
+        self.assertIn("project evidence, structure, constraints, or engineering synthesis", message)
+        self.assertIn("materially distinct plausible approach that was not reasonably considered", message)
+        self.assertIn("unsupported assumption, expectation, convention, potentially stale prior, unresolved fact, or absence of evidence", message)
+        self.assertIn("reasonably obtainable investigation could materially change selection", message)
+        self.assertIn("investigate and revise the synthesis or candidates as needed before completing this selection", message)
+        self.assertIn("not a requirement to prove a global optimum, exhaustively explore", message)
+        self.assertIn("manufacture or score alternatives, or submit multiple candidates", message)
+        self.assertIn("One candidate remains valid when evidence genuinely eliminates the alternatives", message)
+        self.assertIn("why remaining uncertainty does not require further pre-selection investigation", message)
+        self.assertEqual("Selected solution", INTENT_SECTIONS[-1])
+        self.assertEqual(5, len(INTENT_SECTIONS))
+        self.assertNotIn("Challenge before commitment", INTENT_SECTIONS)
+        self.assertNotIn("minimum number of candidates", questionnaire.lower())
+        for technology_specific_term in ("Maven", "Spring Boot", "dependencyManagement", "research_search"):
+            self.assertNotIn(technology_specific_term, questionnaire)
+
     def test_current_information_discovers_project_applicable_solution_space(self):
         message = initial_message(RemediationRequest(repository_url="repo"), _baseline())
 

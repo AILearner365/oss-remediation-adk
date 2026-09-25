@@ -897,6 +897,22 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             session.messages[0],
         )
         self.assertIn("Never manufacture alternatives", session.messages[0])
+        self.assertIn(
+            "Before committing, challenge whether the leading candidate is merely workable",
+            session.messages[0],
+        )
+        self.assertIn(
+            "reasonably obtainable investigation could materially change selection",
+            session.messages[0],
+        )
+        self.assertIn(
+            "not a requirement to prove a global optimum, exhaustively explore",
+            session.messages[0],
+        )
+        self.assertIn(
+            "One candidate remains valid when evidence genuinely eliminates the alternatives",
+            session.messages[0],
+        )
         self.assertIn("Missing required section: Problem understanding in project context", session.messages[1])
         self.assertEqual("ok", session.pre_intent_experiment["status"])
         self.assertEqual("experimental", session.pre_intent_experiment["workspaceKind"])

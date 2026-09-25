@@ -81,6 +81,8 @@ Which solution is selected, and why is it preferred?
 - **Remaining risks:** {{answer}}
 - **Evidence requiring reconsideration:** {{answer}}
 
-Confirm hard-constraint admissibility before applying preference. Compare surviving admissible candidates using evidence, coverage, compatibility, coherence, maintainability, scope, and risk. Preference cannot outweigh a hard-constraint conflict or retroactively make a viable alternative non-viable.
+Before committing, challenge whether the leading candidate is merely workable or is the strongest project-fit solution reasonably supported by the available evidence. Recheck materially distinct plausible approaches implied by project evidence, structure, constraints, or engineering synthesis, including any eliminated through unsupported assumptions or unresolved facts. Investigate and reconsider before selection only when a materially unresolved issue and reasonably obtainable evidence could materially change the decision. This is a proportional search-sufficiency check, not a requirement for global optimality, exhaustive exploration, manufactured alternatives, scoring, or multiple candidates; one candidate remains valid when evidence genuinely eliminates the alternatives.
+
+Confirm hard-constraint admissibility before applying preference. Compare surviving admissible candidates using evidence, coverage, compatibility, coherence, maintainability, scope, and risk. Preference cannot outweigh a hard-constraint conflict or retroactively make a viable alternative non-viable. Concisely record the important approaches considered or eliminated, the evidence supporting material eliminations, and why remaining uncertainty does not require further pre-selection investigation.
 
 The selected solution is directional, not immutable. Material execution evidence may justify retaining, revising, extending, combining, or replacing it within the same cycle.
