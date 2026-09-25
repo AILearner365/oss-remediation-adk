@@ -21,9 +21,9 @@ def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -
         model=Gemini(
             model=model,
             retry_options=types.HttpRetryOptions(
-                attempts=3,
-                initial_delay=1.0,
-                max_delay=8.0,
+                attempts=7,
+                initial_delay=2.0,
+                max_delay=30.0,
                 exp_base=2.0,
                 jitter=1.0,
             ),
