@@ -19,10 +19,7 @@ from autonomous_oss_remediation_agent.capabilities.research import (
     ResearchResult,
     ResearchStatus,
 )
-from autonomous_oss_remediation_agent.capabilities.policy import (
-    evaluate_runtime_boundary,
-    isolated_runtime_environment,
-)
+from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
 from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore, WorkspaceBoundaryError
@@ -275,7 +272,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
         edited = capabilities.edit_workspace_text("write", "mutated.txt", content="isolated")
         self.assertEqual("ok", edited["status"])
         self.assertFalse((self.workspace.repository / "mutated.txt").exists())
-        self.assertTrue((self.workspace.investigation / "cycle-1" / "mutated.txt").is_file())
+        self.assertTrue(
+            (self.workspace.investigation / "cycle-1" / "repository" / "mutated.txt").is_file()
+        )
 
     def test_file_listing_bounds_traversal_and_continues_without_duplicates(self):
         for index in range(17):
@@ -368,73 +367,19 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual([".mvn/maven.config", "module/visible.txt"], files)
         self.assertFalse(any(part == ".git" for path in files for part in Path(path).parts))
 
-    def test_authoritative_and_deterministic_runtime_state_is_outside_repository(self):
+    def test_authoritative_runtime_state_is_outside_repository(self):
         script = (
             "import json,os; print(json.dumps({name: os.environ.get(name) "
-            "for name in ('HOME','USERPROFILE','TEMP','TMPDIR','MAVEN_USER_HOME','MAVEN_OPTS')}))"
+            "for name in ('HOME','USERPROFILE','TEMP','TMPDIR')}))"
         )
         authoritative = self.runner.run_agent_shell(f'{sys.executable} -c "{script}"')
-        deterministic = self.runner.run_argv([sys.executable, "-c", script])
 
-        for result in (authoritative, deterministic):
-            self.assertTrue(result.succeeded, result.stderr)
-            environment = json.loads(result.stdout)
-            for name in ("HOME", "USERPROFILE", "TEMP", "TMPDIR", "MAVEN_USER_HOME"):
-                value = Path(environment[name]).resolve()
-                self.assertNotEqual(self.workspace.repository.resolve(), value)
-                self.assertNotIn(self.workspace.repository.resolve(), value.parents)
-            self.assertIn("maven.repo.local", environment["MAVEN_OPTS"])
-            self.assertNotIn(str(self.workspace.repository), environment["MAVEN_OPTS"])
-
-    def test_runtime_environment_adds_one_isolated_maven_repository_option(self):
-        runtime = self.workspace.temp / "runtime-without-override"
-
-        environment = isolated_runtime_environment({"MAVEN_OPTS": "-Xmx2g"}, runtime)
-
-        expected_repository = runtime / "home" / ".m2" / "repository"
-        self.assertEqual(
-            f'-Xmx2g -Dmaven.repo.local="{expected_repository}"',
-            environment["MAVEN_OPTS"],
-        )
-        self.assertEqual(1, environment["MAVEN_OPTS"].count("maven.repo.local"))
-
-    def test_runtime_environment_replaces_inherited_maven_repository_option(self):
-        runtime = self.workspace.temp / "runtime-with-override"
-        existing = '-Xmx2g -Dmaven.repo.local=/old/cache -Dfoo=bar -Dmessage="a  b"'
-
-        environment = isolated_runtime_environment({"MAVEN_OPTS": existing}, runtime)
-
-        expected_repository = runtime / "home" / ".m2" / "repository"
-        self.assertIn("-Xmx2g", environment["MAVEN_OPTS"])
-        self.assertIn("-Dfoo=bar", environment["MAVEN_OPTS"])
-        self.assertIn('-Dmessage="a  b"', environment["MAVEN_OPTS"])
-        self.assertNotIn("/old/cache", environment["MAVEN_OPTS"])
-        self.assertEqual(1, environment["MAVEN_OPTS"].count("maven.repo.local"))
-        self.assertIn(
-            f'-Dmaven.repo.local="{expected_repository}"',
-            environment["MAVEN_OPTS"],
-        )
-
-    def test_deterministic_execution_replaces_inherited_maven_repository_option(self):
-        script = "import os; print(os.environ['MAVEN_OPTS'])"
-        inherited = "-Xmx2g -Dmaven.repo.local=/old/cache -Dfoo=bar"
-
-        with patch.dict(os.environ, {"MAVEN_OPTS": inherited}):
-            result = self.runner.run_argv([sys.executable, "-c", script])
-
-        self.assertTrue(result.succeeded, result.stderr)
-        self.assertIn("-Xmx2g", result.stdout)
-        self.assertIn("-Dfoo=bar", result.stdout)
-        self.assertNotIn("/old/cache", result.stdout)
-        self.assertEqual(1, result.stdout.count("maven.repo.local"))
-        expected_repository = (
-            self.workspace.temp
-            / "deterministic-runtime"
-            / "home"
-            / ".m2"
-            / "repository"
-        )
-        self.assertIn(str(expected_repository), result.stdout)
+        self.assertTrue(authoritative.succeeded, authoritative.stderr)
+        environment = json.loads(authoritative.stdout)
+        for name in ("HOME", "USERPROFILE", "TEMP", "TMPDIR"):
+            value = Path(environment[name]).resolve()
+            self.assertNotEqual(self.workspace.repository.resolve(), value)
+            self.assertNotIn(self.workspace.repository.resolve(), value.parents)
 
     def test_listing_cursor_completion_and_eviction_close_resources(self):
         for index in range(5):
@@ -488,7 +433,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         (experiment.repository / "capture_environment.py").write_text(
             "import json, os\n"
             "from pathlib import Path\n"
-            "names = ('HOME', 'TMPDIR', 'MAVEN_USER_HOME', 'MAVEN_OPTS')\n"
+            "names = ('HOME', 'TMPDIR')\n"
             "Path('runtime-environment.json').write_text(json.dumps({name: os.environ[name] for name in names}))\n",
             encoding="utf-8",
         )
@@ -528,8 +473,6 @@ class AutonomousCapabilityTests(unittest.TestCase):
             (experimental_runtime / "temp").resolve(),
             Path(experimental_environment["TMPDIR"]).resolve(),
         )
-        self.assertIn("maven.repo.local", experimental_environment["MAVEN_OPTS"])
-        self.assertNotIn(str(experiment.repository), experimental_environment["MAVEN_OPTS"])
         tooling = capabilities.run_workspace_shell(
             "python -c \"from pathlib import Path; Path('tooling.txt').write_text('ok')\"; "
             "git init; git config user.name Experiment"
@@ -628,10 +571,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.runner.prepare_experimental_workspace(second)
 
         result = self.runner.run_agent_shell(
-            "try { Set-Content ../cycle-1/historical.txt changed -ErrorAction Stop } "
+            "try { Set-Content ../../cycle-1/repository/historical.txt changed -ErrorAction Stop } "
             "catch { Set-Content historical-attempt-ran.txt caught }"
             if os.name == "nt"
-            else "(printf changed > ../cycle-1/historical.txt) || printf caught > historical-attempt-ran.txt",
+            else "(printf changed > ../../cycle-1/repository/historical.txt) || printf caught > historical-attempt-ran.txt",
             repository_workspace=second,
         )
 
@@ -749,6 +692,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
         (self.workspace.repository / "deleted.txt").unlink()
 
         first = self.workspace.fork_repository(1)
+        self.assertEqual(
+            self.workspace.investigation / "cycle-1" / "repository",
+            first.repository,
+        )
         self.assertEqual("cycle-one-current\n", (first.repository / "tracked.txt").read_text(encoding="utf-8"))
         self.assertEqual("untracked\n", (first.repository / "untracked.txt").read_text(encoding="utf-8"))
         self.assertFalse((first.repository / "deleted.txt").exists())

@@ -12,7 +12,7 @@ from ..config import ExecutionBudgetConfig, RuntimePolicy
 from ..models import CommandResult
 from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 from .isolation import ExperimentalProcessIsolation
-from .policy import CommandPolicy, isolated_runtime_environment, sanitized_agent_environment
+from .policy import CommandPolicy, sanitized_agent_environment
 
 
 class BudgetExceeded(RuntimeError):
@@ -80,9 +80,9 @@ class ProcessRunner:
         if target.kind != "experimental" or target.cycle is None:
             raise ValueError("Only cycle experimental workspaces can be prepared for isolation")
         historical = tuple(
-            path
+            path / "repository"
             for path in self.workspace.investigation.iterdir()
-            if path.is_dir() and path != target.repository
+            if (path / "repository").is_dir() and path / "repository" != target.repository
         )
         runtime = self.experimental_isolation.prepare(
             target.repository,
@@ -127,6 +127,9 @@ class ProcessRunner:
             )
             return result
         shell_command = _host_shell_command(command)
+        environment = sanitized_agent_environment(
+            self.workspace.root, self.runtime_policy.allow_network
+        )
         if target.kind == "experimental":
             if target.cycle is None or target.cycle not in self._experimental_runtime:
                 return CommandResult(
@@ -137,11 +140,17 @@ class ProcessRunner:
                     blocked=True,
                 )
             runtime = self._experimental_runtime[target.cycle]
-            environment = sanitized_agent_environment(
-                self.workspace.root,
-                self.runtime_policy.allow_network,
-                runtime,
+            environment.update(
+                {
+                    "HOME": str(runtime / "home"),
+                    "USERPROFILE": str(runtime / "home"),
+                    "TEMP": str(runtime / "temp"),
+                    "TMP": str(runtime / "temp"),
+                    "TMPDIR": str(runtime / "temp"),
+                }
             )
+            for path in (runtime / "home", runtime / "temp"):
+                path.mkdir(parents=True, exist_ok=True)
             return self._run_isolated_agent_shell(
                 shell_command,
                 cwd=directory,
@@ -150,10 +159,6 @@ class ProcessRunner:
                 display_command=[command],
                 target=target,
             )
-        environment = sanitized_agent_environment(
-            self.workspace.root,
-            self.runtime_policy.allow_network,
-        )
         return self._run(
             shell_command,
             cwd=directory,
@@ -227,7 +232,7 @@ class ProcessRunner:
             _host_shell_command(command),
             cwd=Path(cwd),
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
-            environment=dict(environment) if environment is not None else self._deterministic_environment(),
+            environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
             display_command=[command],
         )
@@ -246,7 +251,7 @@ class ProcessRunner:
             list(command),
             cwd=Path(cwd) if cwd else self.workspace.root,
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
-            environment=dict(environment) if environment is not None else self._deterministic_environment(),
+            environment=dict(environment) if environment is not None else _deterministic_environment(),
             source=source,
             display_command=list(display_command) if display_command is not None else list(command),
             redact_values=redact_values,
@@ -325,13 +330,6 @@ class ProcessRunner:
             **dict(trace_metadata or {}),
         )
         return result
-
-    def _deterministic_environment(self) -> dict[str, str]:
-        return isolated_runtime_environment(
-            _deterministic_environment(),
-            self.workspace.temp / "deterministic-runtime",
-        )
-
 
 def _host_shell_command(command: str) -> list[str]:
     if os.name == "nt":

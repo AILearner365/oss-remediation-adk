@@ -237,10 +237,10 @@ class _CycleWorkspaceSession(_ScriptedAgentSession):
             )
             self.historical_shell_attempts.append(
                 self.capabilities.run_workspace_shell(
-                    "try { Set-Content ../cycle-1/cycle-one-only.txt changed -ErrorAction Stop } "
+                    "try { Set-Content ../../cycle-1/repository/cycle-one-only.txt changed -ErrorAction Stop } "
                     "catch { Set-Content historical-shell-ran.txt caught }"
                     if os.name == "nt"
-                    else "(printf changed > ../cycle-1/cycle-one-only.txt) || "
+                    else "(printf changed > ../../cycle-1/repository/cycle-one-only.txt) || "
                     "printf caught > historical-shell-ran.txt"
                 )
             )
@@ -712,7 +712,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual((), sessions[0].pre_intent_activity)
         self.assertEqual("experimental", sessions[0].pre_intent_edit["workspaceKind"])
         self.assertEqual(
-            Path(result.workspace_root) / "investigation" / "cycle-1",
+            Path(result.workspace_root) / "investigation" / "cycle-1" / "repository",
             Path(sessions[0].pre_intent_shell["cwd"]),
         )
         self.assertIn(
@@ -918,7 +918,13 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual("experimental", session.pre_intent_experiment["workspaceKind"])
         self.assertFalse((Path(result.baseline.repository_path) / "isolated-probe.txt").exists())
         self.assertTrue(
-            (Path(result.workspace_root) / "investigation" / "cycle-1" / "isolated-probe.txt").is_file()
+            (
+                Path(result.workspace_root)
+                / "investigation"
+                / "cycle-1"
+                / "repository"
+                / "isolated-probe.txt"
+            ).is_file()
         )
         self.assertIn("Cycle Outcome questionnaire", session.messages[-1])
         cycle = json.loads(
@@ -997,17 +1003,27 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("<demo.version>1.5</demo.version>", sessions[0].pre_intent_versions[1])
         self.assertEqual("TOOL_ERROR", sessions[0].previous_marker_reads[0]["failureCode"])
         root = Path(result.workspace_root)
-        self.assertTrue((root / "investigation" / "cycle-1" / "cycle-one-only.txt").is_file())
-        self.assertFalse((root / "investigation" / "cycle-1" / "cycle-two-only.txt").exists())
+        self.assertTrue(
+            (root / "investigation" / "cycle-1" / "repository" / "cycle-one-only.txt").is_file()
+        )
+        self.assertFalse(
+            (root / "investigation" / "cycle-1" / "repository" / "cycle-two-only.txt").exists()
+        )
         self.assertEqual(
             "historical",
-            (root / "investigation" / "cycle-1" / "cycle-one-only.txt").read_text(
+            (root / "investigation" / "cycle-1" / "repository" / "cycle-one-only.txt").read_text(
                 encoding="utf-8"
             ),
         )
-        self.assertFalse((root / "investigation" / "cycle-2" / "cycle-one-only.txt").exists())
-        self.assertTrue((root / "investigation" / "cycle-2" / "cycle-two-only.txt").is_file())
-        self.assertTrue((root / "investigation" / "cycle-2" / "historical-shell-ran.txt").is_file())
+        self.assertFalse(
+            (root / "investigation" / "cycle-2" / "repository" / "cycle-one-only.txt").exists()
+        )
+        self.assertTrue(
+            (root / "investigation" / "cycle-2" / "repository" / "cycle-two-only.txt").is_file()
+        )
+        self.assertTrue(
+            (root / "investigation" / "cycle-2" / "repository" / "historical-shell-ran.txt").is_file()
+        )
         self.assertFalse(sessions[0].historical_shell_attempts[0]["blocked"])
         self.assertFalse((root / "repository" / "cycle-one-only.txt").exists())
         self.assertFalse((root / "repository" / "cycle-two-only.txt").exists())

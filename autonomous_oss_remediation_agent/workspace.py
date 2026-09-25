@@ -56,9 +56,11 @@ class RunWorkspace:
             raise ValueError("cycle must be positive")
         if not self.repository.is_dir():
             raise FileNotFoundError(self.repository)
-        target = self.investigation / f"cycle-{cycle}"
-        if target.exists():
-            raise FileExistsError(f"Cycle investigation workspace already exists: {target}")
+        cycle_root = self.investigation / f"cycle-{cycle}"
+        target = cycle_root / "repository"
+        if cycle_root.exists():
+            raise FileExistsError(f"Cycle investigation workspace already exists: {cycle_root}")
+        cycle_root.mkdir(parents=True)
         shutil.copytree(self.repository, target, symlinks=True, copy_function=shutil.copy2)
         return RepositoryWorkspace(self, target, "experimental", cycle)
 
