@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/surefire/common-java5/3.5.5/common-java5-3.5.5.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

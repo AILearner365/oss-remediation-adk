@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/springframework/ws/spring-ws-bom/5.0.1/spring-ws-bom-5.0.1.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

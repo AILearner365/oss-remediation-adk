@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

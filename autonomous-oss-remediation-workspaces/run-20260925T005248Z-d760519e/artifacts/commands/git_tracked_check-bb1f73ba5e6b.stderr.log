@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

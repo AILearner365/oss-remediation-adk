@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/codehaus/plexus/plexus-io/3.4.2/_remote.repositories' did not match any file(s) known to git
+Did you forget to 'git add'?

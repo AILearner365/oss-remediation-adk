@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/eclipse/sisu/sisu-inject/0.9.0.M4/sisu-inject-0.9.0.M4.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/shared/maven-dependency-analyzer/1.16.0/maven-dependency-analyzer-1.16.0.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

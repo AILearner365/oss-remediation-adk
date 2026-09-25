@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/jooq/jooq-bom/3.19.32/jooq-bom-3.19.32.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

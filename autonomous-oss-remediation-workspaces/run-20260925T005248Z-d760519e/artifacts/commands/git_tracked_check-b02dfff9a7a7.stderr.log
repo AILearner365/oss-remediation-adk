@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/io/opentelemetry/opentelemetry-bom/1.55.0/opentelemetry-bom-1.55.0.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

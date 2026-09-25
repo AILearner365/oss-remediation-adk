@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/shared/maven-shared-components/44/maven-shared-components-44.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

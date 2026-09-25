@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/sonatype/sisu/sisu-inject-plexus/1.4.2/_remote.repositories' did not match any file(s) known to git
+Did you forget to 'git add'?

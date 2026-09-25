@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

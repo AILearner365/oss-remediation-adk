@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar' did not match any file(s) known to git
+Did you forget to 'git add'?

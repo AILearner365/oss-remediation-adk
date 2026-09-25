@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/com/github/luben/zstd-jni/1.5.7-4/zstd-jni-1.5.7-4.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

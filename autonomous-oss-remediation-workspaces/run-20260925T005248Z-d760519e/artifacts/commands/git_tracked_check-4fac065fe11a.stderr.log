@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/plugins/maven-compiler-plugin/3.14.1/maven-compiler-plugin-3.14.1.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

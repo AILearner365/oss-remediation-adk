@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/resolver/maven-resolver/1.9.24/_remote.repositories' did not match any file(s) known to git
+Did you forget to 'git add'?

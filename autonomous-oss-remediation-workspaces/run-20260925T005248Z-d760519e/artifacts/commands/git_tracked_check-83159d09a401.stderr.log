@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/springframework/pulsar/spring-pulsar-bom/2.0.5/spring-pulsar-bom-2.0.5.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

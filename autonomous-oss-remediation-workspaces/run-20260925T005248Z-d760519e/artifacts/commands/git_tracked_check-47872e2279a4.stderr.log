@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

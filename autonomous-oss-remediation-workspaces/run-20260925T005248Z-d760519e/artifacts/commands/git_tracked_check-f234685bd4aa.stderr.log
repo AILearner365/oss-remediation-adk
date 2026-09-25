@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/apache/maven/resolver/maven-resolver/1.4.1/maven-resolver-1.4.1.pom.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?

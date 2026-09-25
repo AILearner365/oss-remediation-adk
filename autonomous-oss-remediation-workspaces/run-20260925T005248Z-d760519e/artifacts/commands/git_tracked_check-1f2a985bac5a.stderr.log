@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/seleniumhq/selenium/selenium-bom/4.37.0/selenium-bom-4.37.0.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

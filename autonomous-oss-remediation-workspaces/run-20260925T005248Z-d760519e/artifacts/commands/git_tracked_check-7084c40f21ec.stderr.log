@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom' did not match any file(s) known to git
+Did you forget to 'git add'?

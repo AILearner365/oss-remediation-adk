@@ -1,0 +1,2 @@
+error: pathspec '.m2_repo/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar.sha1' did not match any file(s) known to git
+Did you forget to 'git add'?
