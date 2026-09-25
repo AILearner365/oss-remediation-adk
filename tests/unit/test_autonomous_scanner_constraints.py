@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -10,13 +11,20 @@ import zipfile
 from pathlib import Path
 
 from autonomous_oss_remediation_agent.capabilities import ExecutionBudget, ProcessRunner
-from autonomous_oss_remediation_agent.config import ConstraintSpec, ExecutionBudgetConfig, RuntimePolicy, ScannerConfig
+from autonomous_oss_remediation_agent.config import (
+    ConstraintSpec,
+    ExecutionBudgetConfig,
+    RemediationRequest,
+    RuntimePolicy,
+    ScannerConfig,
+)
 from autonomous_oss_remediation_agent.deterministic.constraints import ConstraintEvaluator
 from autonomous_oss_remediation_agent.deterministic.osv import (
     OsvScanner,
     ScannerPreflightError,
     normalize_osv_findings,
 )
+from autonomous_oss_remediation_agent.deterministic.validation import DeterministicValidator
 from autonomous_oss_remediation_agent.models import CommandResult, ScanOutcome, ScannerHandle
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
@@ -59,6 +67,22 @@ class _SequenceScannerRunner:
             timed_out=result.timed_out,
             blocked=result.blocked,
         )
+
+
+class _StagingScannerRunner:
+    def __init__(self):
+        self.staged_files = ()
+
+    def run_argv(self, command, **kwargs):
+        staged = Path(kwargs["cwd"])
+        self.staged_files = tuple(
+            sorted(
+                path.relative_to(staged).as_posix()
+                for path in staged.rglob("*")
+                if path.is_file()
+            )
+        )
+        return CommandResult(list(command), str(staged), 0, stdout='{"results": []}')
 
 
 class AutonomousScannerConstraintTests(unittest.TestCase):
@@ -127,6 +151,100 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(digest, handle.sha256)
         self.assertFalse(handle.provisioned)
         self.assertEqual(handle, scanner.verify())
+
+    def test_osv_staging_excludes_generated_state_but_keeps_project_configuration(self):
+        (self.workspace.repository / "pom.xml").write_text("<project/>\n", encoding="utf-8")
+        (self.workspace.repository / "src").mkdir()
+        (self.workspace.repository / "src" / "App.java").write_text(
+            "class App {}\n", encoding="utf-8"
+        )
+        (self.workspace.repository / ".mvn").mkdir()
+        (self.workspace.repository / ".mvn" / "maven.config").write_text(
+            "-T1C\n", encoding="utf-8"
+        )
+        for directory in (".git", ".gradle", ".m2", ".m2_repo", "node_modules", "target"):
+            generated = self.workspace.repository / directory
+            generated.mkdir()
+            (generated / "generated.pom").write_text("cache\n", encoding="utf-8")
+        runner = _StagingScannerRunner()
+        scanner = OsvScanner(
+            self.workspace,
+            runner,
+            self.trace,
+            retry_backoff_seconds=(),
+            maven_repository=Path(self.temp.name) / "missing-maven-repository",
+        )
+        executable = Path(sys.executable)
+        scanner.handle = ScannerHandle(
+            str(executable),
+            "osv-scanner version 2.4.0",
+            hashlib.sha256(executable.read_bytes()).hexdigest(),
+            False,
+        )
+
+        report = scanner.scan(self.workspace.repository, ("HIGH",), "evidence-hygiene")
+
+        self.assertTrue(report.succeeded)
+        self.assertEqual(
+            (".mvn/maven.config", "pom.xml", "src/App.java"),
+            runner.staged_files,
+        )
+
+    def test_changed_file_evidence_omits_untracked_generated_state(self):
+        repository = self.workspace.repository
+        (repository / "pom.xml").write_text("<project/>\n", encoding="utf-8")
+        tracked_target = repository / "target" / "owned.txt"
+        tracked_target.parent.mkdir()
+        tracked_target.write_text("before\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "init", "-b", "main"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "add", "pom.xml"], cwd=repository, check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "add", "-f", "target/owned.txt"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            [
+                "git",
+                "-c",
+                "user.name=Test",
+                "-c",
+                "user.email=test@example.test",
+                "commit",
+                "-m",
+                "base",
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+        )
+        tracked_target.write_text("after\n", encoding="utf-8")
+        (repository / "src").mkdir()
+        (repository / "src" / "New.java").write_text("class New {}\n", encoding="utf-8")
+        for directory in (".m2", ".m2_repo"):
+            cache = repository / directory / "org" / "example"
+            cache.mkdir(parents=True)
+            (cache / "cached.pom").write_text("cache\n", encoding="utf-8")
+        validator = DeterministicValidator(
+            RemediationRequest.from_dict({"repositoryUrl": "https://example.test/repo"}),
+            self.workspace,
+            self.runner,
+            object(),
+            ConstraintEvaluator(),
+            self.trace,
+        )
+
+        changed = validator.changed_files("HEAD")
+
+        self.assertEqual(("src/New.java", "target/owned.txt"), changed)
 
     def test_configured_scanner_missing_fails_closed(self):
         scanner = OsvScanner(self.workspace, self.runner, self.trace)

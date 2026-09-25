@@ -8,6 +8,7 @@ from typing import Iterable
 
 from ..capabilities.execution import ProcessRunner
 from ..config import RemediationRequest
+from ..evidence import is_generated_evidence_path
 from ..models import (
     RepositoryBaseline,
     RepositoryCycleEvidence,
@@ -362,7 +363,9 @@ class DeterministicValidator:
                 continue
             status = record[:2]
             path = record[3:]
-            paths.append(path.replace("\\", "/"))
+            normalized_path = path.replace("\\", "/")
+            if status != "??" or not is_generated_evidence_path(normalized_path):
+                paths.append(normalized_path)
             if "R" in status or "C" in status:
                 index += 1
         baseline_diff = self.process_runner.run_argv(

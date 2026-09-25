@@ -22,6 +22,7 @@ from typing import Any, Callable, Iterable, Iterator
 
 from ..capabilities.execution import ProcessRunner
 from ..config import ScannerConfig
+from ..evidence import is_generated_evidence_path, scanner_copy_ignore
 from ..models import CommandResult, ScanFailureKind, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
 from ..workspace import RunWorkspace, TraceStore, sha256_file
 from .scanner import ScannerPreflightError
@@ -156,7 +157,7 @@ class OsvScanner:
             shutil.copytree(
                 repository,
                 staged,
-                ignore=shutil.ignore_patterns(".git", "target", ".gradle", "node_modules"),
+                ignore=scanner_copy_ignore,
             )
             if registry_roots:
                 with _serve_maven_repository(registry_roots) as (registry_url, requests):
@@ -296,7 +297,12 @@ def _default_maven_repository() -> Path:
 
 
 def _verify_maven_scanner_compatibility(version_text: str, repository: Path) -> None:
-    if len(tuple(repository.rglob("pom.xml"))) < 2:
+    project_poms = tuple(
+        path
+        for path in repository.rglob("pom.xml")
+        if not is_generated_evidence_path(path.relative_to(repository))
+    )
+    if len(project_poms) < 2:
         return
     match = re.search(r"\b(\d+)\.(\d+)\.(\d+)\b", version_text)
     if not match:

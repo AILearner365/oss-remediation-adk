@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
 
+from ..evidence import EVIDENCE_EXCLUDED_DIRECTORIES, is_generated_evidence_path
 from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 
 
@@ -176,7 +177,10 @@ class WorkspaceIO:
             if searched_files >= file_limit:
                 truncated = True
                 break
-            if ".git" in candidate.parts or not candidate.is_file():
+            if (
+                is_generated_evidence_path(candidate.relative_to(self.workspace.repository))
+                or not candidate.is_file()
+            ):
                 continue
             if file_glob and not candidate.match(file_glob):
                 continue
@@ -301,7 +305,7 @@ def _walk_repository_entries(directory: Path) -> Iterator[tuple[Path, bool]]:
             except StopIteration:
                 iterators.pop().close()
                 continue
-            if entry.name == ".git":
+            if entry.name in EVIDENCE_EXCLUDED_DIRECTORIES:
                 continue
             candidate = Path(entry.path)
             is_directory = entry.is_dir(follow_symlinks=False)

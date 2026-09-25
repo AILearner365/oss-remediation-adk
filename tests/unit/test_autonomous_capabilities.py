@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -339,6 +340,18 @@ class AutonomousCapabilityTests(unittest.TestCase):
         module.mkdir()
         (module / ".git").write_text("gitdir: ../metadata", encoding="utf-8")
         (module / "visible.txt").write_text("visible", encoding="utf-8")
+        (self.workspace.repository / ".m2" / "repository").mkdir(parents=True)
+        (self.workspace.repository / ".m2" / "repository" / "cached.pom").write_text(
+            "cache", encoding="utf-8"
+        )
+        (self.workspace.repository / "target").mkdir()
+        (self.workspace.repository / "target" / "generated.txt").write_text(
+            "generated", encoding="utf-8"
+        )
+        (self.workspace.repository / ".mvn").mkdir()
+        (self.workspace.repository / ".mvn" / "maven.config").write_text(
+            "-T1C\n", encoding="utf-8"
+        )
 
         files = []
         cursor = None
@@ -349,8 +362,26 @@ class AutonomousCapabilityTests(unittest.TestCase):
             if cursor is None:
                 break
 
-        self.assertEqual(["module/visible.txt"], files)
+        self.assertEqual([".mvn/maven.config", "module/visible.txt"], files)
         self.assertFalse(any(part == ".git" for path in files for part in Path(path).parts))
+
+    def test_authoritative_and_deterministic_runtime_state_is_outside_repository(self):
+        script = (
+            "import json,os; print(json.dumps({name: os.environ.get(name) "
+            "for name in ('HOME','USERPROFILE','TEMP','TMPDIR','MAVEN_USER_HOME','MAVEN_OPTS')}))"
+        )
+        authoritative = self.runner.run_agent_shell(f'{sys.executable} -c "{script}"')
+        deterministic = self.runner.run_argv([sys.executable, "-c", script])
+
+        for result in (authoritative, deterministic):
+            self.assertTrue(result.succeeded, result.stderr)
+            environment = json.loads(result.stdout)
+            for name in ("HOME", "USERPROFILE", "TEMP", "TMPDIR", "MAVEN_USER_HOME"):
+                value = Path(environment[name]).resolve()
+                self.assertNotEqual(self.workspace.repository.resolve(), value)
+                self.assertNotIn(self.workspace.repository.resolve(), value.parents)
+            self.assertIn("maven.repo.local", environment["MAVEN_OPTS"])
+            self.assertNotIn(str(self.workspace.repository), environment["MAVEN_OPTS"])
 
     def test_listing_cursor_completion_and_eviction_close_resources(self):
         for index in range(5):
@@ -401,6 +432,13 @@ class AutonomousCapabilityTests(unittest.TestCase):
         journal.begin_cycle(1)
         capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
         experiment = capabilities.begin_cycle(1)
+        (experiment.repository / "capture_environment.py").write_text(
+            "import json, os\n"
+            "from pathlib import Path\n"
+            "names = ('HOME', 'TMPDIR', 'MAVEN_USER_HOME', 'MAVEN_OPTS')\n"
+            "Path('runtime-environment.json').write_text(json.dumps({name: os.environ[name] for name in names}))\n",
+            encoding="utf-8",
+        )
 
         edit = capabilities.edit_workspace_text("write", "isolated.txt", content="experiment")
         shell = capabilities.run_workspace_shell(
@@ -423,6 +461,22 @@ class AutonomousCapabilityTests(unittest.TestCase):
             "authoritative\n",
             (self.workspace.repository / "existing-shell.txt").read_text(encoding="utf-8"),
         )
+        environment_result = capabilities.run_workspace_shell("python capture_environment.py")
+        self.assertEqual(0, environment_result["exitCode"])
+        experimental_environment = json.loads(
+            (experiment.repository / "runtime-environment.json").read_text(encoding="utf-8")
+        )
+        experimental_runtime = self.workspace.temp / "experimental-runtime" / "cycle-1"
+        self.assertEqual(
+            (experimental_runtime / "home").resolve(),
+            Path(experimental_environment["HOME"]).resolve(),
+        )
+        self.assertEqual(
+            (experimental_runtime / "temp").resolve(),
+            Path(experimental_environment["TMPDIR"]).resolve(),
+        )
+        self.assertIn("maven.repo.local", experimental_environment["MAVEN_OPTS"])
+        self.assertNotIn(str(experiment.repository), experimental_environment["MAVEN_OPTS"])
         tooling = capabilities.run_workspace_shell(
             "python -c \"from pathlib import Path; Path('tooling.txt').write_text('ok')\"; "
             "git init; git config user.name Experiment"

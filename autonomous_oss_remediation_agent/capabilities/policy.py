@@ -50,7 +50,11 @@ class CommandPolicy:
         return True, None
 
 
-def sanitized_agent_environment(run_root: Path, allow_network: bool) -> dict[str, str]:
+def sanitized_agent_environment(
+    run_root: Path,
+    allow_network: bool,
+    runtime: Path | None = None,
+) -> dict[str, str]:
     preserved = {
         "PATH",
         "PATHEXT",
@@ -64,14 +68,23 @@ def sanitized_agent_environment(run_root: Path, allow_network: bool) -> dict[str
         "PROCESSOR_ARCHITECTURE",
     }
     environment = {name: value for name, value in os.environ.items() if name.upper() in preserved}
-    home = run_root / "temp" / "agent-home"
-    home.mkdir(parents=True, exist_ok=True)
+    runtime_root = runtime or run_root / "temp" / "agent-runtime"
+    home = runtime_root / "home"
+    temp = runtime_root / "temp"
+    maven_user_home = home / ".m2"
+    for directory in (home, temp, maven_user_home / "repository"):
+        directory.mkdir(parents=True, exist_ok=True)
     environment.update(
         {
             "HOME": str(home),
             "USERPROFILE": str(home),
-            "TEMP": str(run_root / "temp"),
-            "TMP": str(run_root / "temp"),
+            "TEMP": str(temp),
+            "TMP": str(temp),
+            "TMPDIR": str(temp),
+            "MAVEN_USER_HOME": str(maven_user_home),
+            "MAVEN_OPTS": _maven_opts(
+                environment.get("MAVEN_OPTS", ""), maven_user_home / "repository"
+            ),
             "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": "NUL" if os.name == "nt" else "/dev/null",
             "GIT_TERMINAL_PROMPT": "0",
@@ -80,3 +93,31 @@ def sanitized_agent_environment(run_root: Path, allow_network: bool) -> dict[str
         }
     )
     return environment
+
+
+def isolated_runtime_environment(base: dict[str, str], runtime: Path) -> dict[str, str]:
+    environment = dict(base)
+    home = runtime / "home"
+    temp = runtime / "temp"
+    maven_user_home = home / ".m2"
+    for directory in (home, temp, maven_user_home / "repository"):
+        directory.mkdir(parents=True, exist_ok=True)
+    environment.update(
+        {
+            "HOME": str(home),
+            "USERPROFILE": str(home),
+            "TEMP": str(temp),
+            "TMP": str(temp),
+            "TMPDIR": str(temp),
+            "MAVEN_USER_HOME": str(maven_user_home),
+            "MAVEN_OPTS": _maven_opts(
+                environment.get("MAVEN_OPTS", ""), maven_user_home / "repository"
+            ),
+        }
+    )
+    return environment
+
+
+def _maven_opts(existing: str, repository: Path) -> str:
+    repository_option = f'-Dmaven.repo.local="{repository}"'
+    return " ".join(value for value in (existing.strip(), repository_option) if value)
