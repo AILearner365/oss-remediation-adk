@@ -19,7 +19,10 @@ from autonomous_oss_remediation_agent.capabilities.research import (
     ResearchResult,
     ResearchStatus,
 )
-from autonomous_oss_remediation_agent.capabilities.policy import evaluate_runtime_boundary
+from autonomous_oss_remediation_agent.capabilities.policy import (
+    evaluate_runtime_boundary,
+    isolated_runtime_environment,
+)
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
 from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore, WorkspaceBoundaryError
@@ -382,6 +385,56 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 self.assertNotIn(self.workspace.repository.resolve(), value.parents)
             self.assertIn("maven.repo.local", environment["MAVEN_OPTS"])
             self.assertNotIn(str(self.workspace.repository), environment["MAVEN_OPTS"])
+
+    def test_runtime_environment_adds_one_isolated_maven_repository_option(self):
+        runtime = self.workspace.temp / "runtime-without-override"
+
+        environment = isolated_runtime_environment({"MAVEN_OPTS": "-Xmx2g"}, runtime)
+
+        expected_repository = runtime / "home" / ".m2" / "repository"
+        self.assertEqual(
+            f'-Xmx2g -Dmaven.repo.local="{expected_repository}"',
+            environment["MAVEN_OPTS"],
+        )
+        self.assertEqual(1, environment["MAVEN_OPTS"].count("maven.repo.local"))
+
+    def test_runtime_environment_replaces_inherited_maven_repository_option(self):
+        runtime = self.workspace.temp / "runtime-with-override"
+        existing = '-Xmx2g -Dmaven.repo.local=/old/cache -Dfoo=bar -Dmessage="a  b"'
+
+        environment = isolated_runtime_environment({"MAVEN_OPTS": existing}, runtime)
+
+        expected_repository = runtime / "home" / ".m2" / "repository"
+        self.assertIn("-Xmx2g", environment["MAVEN_OPTS"])
+        self.assertIn("-Dfoo=bar", environment["MAVEN_OPTS"])
+        self.assertIn('-Dmessage="a  b"', environment["MAVEN_OPTS"])
+        self.assertNotIn("/old/cache", environment["MAVEN_OPTS"])
+        self.assertEqual(1, environment["MAVEN_OPTS"].count("maven.repo.local"))
+        self.assertIn(
+            f'-Dmaven.repo.local="{expected_repository}"',
+            environment["MAVEN_OPTS"],
+        )
+
+    def test_deterministic_execution_replaces_inherited_maven_repository_option(self):
+        script = "import os; print(os.environ['MAVEN_OPTS'])"
+        inherited = "-Xmx2g -Dmaven.repo.local=/old/cache -Dfoo=bar"
+
+        with patch.dict(os.environ, {"MAVEN_OPTS": inherited}):
+            result = self.runner.run_argv([sys.executable, "-c", script])
+
+        self.assertTrue(result.succeeded, result.stderr)
+        self.assertIn("-Xmx2g", result.stdout)
+        self.assertIn("-Dfoo=bar", result.stdout)
+        self.assertNotIn("/old/cache", result.stdout)
+        self.assertEqual(1, result.stdout.count("maven.repo.local"))
+        expected_repository = (
+            self.workspace.temp
+            / "deterministic-runtime"
+            / "home"
+            / ".m2"
+            / "repository"
+        )
+        self.assertIn(str(expected_repository), result.stdout)
 
     def test_listing_cursor_completion_and_eviction_close_resources(self):
         for index in range(5):

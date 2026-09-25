@@ -1,0 +1,64 @@
+{
+  "authoritativeSourceM2ExistsAfterVerification": false,
+  "cacheSearchResults": [],
+  "deterministicChangedFilesWithGeneratedStatePresent": [
+    "src/main/java/New.java"
+  ],
+  "deterministicExitCode": 0,
+  "deterministicExpectedRepository": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\deterministic-runtime\\home\\.m2\\repository",
+  "deterministicRepositoryArtifactCount": 268,
+  "deterministicSourceM2Exists": false,
+  "deterministicStderr": "",
+  "deterministicStdout": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\deterministic-runtime\\home\\.m2\\repository",
+  "experimentalCommand": "mvn -q test help:evaluate \"-Dexpression=settings.localRepository\" -DforceStdout",
+  "experimentalExitCode": 0,
+  "experimentalExpectedRepository": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\experimental-runtime\\cycle-1\\home\\.m2\\repository",
+  "experimentalMavenOptsEvidence": "-Dmaven.repo.local=\"C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\experimental-runtime\\cycle-1\\home\\.m2\\repository\"",
+  "experimentalMavenOptsEvidenceExitCode": 0,
+  "experimentalRepositoryArtifactCount": 607,
+  "experimentalRuntime": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\experimental-runtime\\cycle-1",
+  "experimentalSourceM2Exists": false,
+  "experimentalSourceM2ExistsAfterVerification": false,
+  "experimentalStderr": "",
+  "experimentalStdout": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\temp\\experimental-runtime\\cycle-1\\home\\.m2\\repository",
+  "experimentalWorkspace": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z\\investigation\\cycle-1",
+  "listingFiles": [
+    ".mvn/maven.config",
+    "pom.xml",
+    "src/main/java/App.java"
+  ],
+  "listingFilesWithGeneratedStatePresent": [
+    ".mvn/maven.config",
+    "pom.xml",
+    "src/main/java/App.java"
+  ],
+  "listingIncludesGeneratedState": false,
+  "listingIncludesMavenConfig": true,
+  "listingIncludesPom": true,
+  "listingIncludesSource": true,
+  "listingIncludesTarget": false,
+  "runRoot": "C:\\Users\\Kavya\\PycharmProjects\\oss-remediation-adk\\autonomous-oss-remediation-workspaces\\verification-maven-hygiene-20260925T203515Z",
+  "scannerStagedFiles": [
+    ".mvn/maven.config",
+    "pom.xml",
+    "src/main/java/App.java"
+  ],
+  "scannerStagingIncludesGeneratedState": false,
+  "scannerStagingIncludesMavenConfig": true,
+  "scannerStagingIncludesPom": true,
+  "scannerStagingIncludesSource": true,
+  "searchResults": [
+    {
+      "line": 1,
+      "path": "src/main/java/App.java",
+      "text": "class App {}"
+    }
+  ],
+  "sourceSearchResults": [
+    {
+      "line": 1,
+      "path": "src/main/java/App.java",
+      "text": "class App {}"
+    }
+  ]
+}

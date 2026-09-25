@@ -119,5 +119,19 @@ def isolated_runtime_environment(base: dict[str, str], runtime: Path) -> dict[st
 
 
 def _maven_opts(existing: str, repository: Path) -> str:
+    existing = _MAVEN_REPOSITORY_OPTION.sub("", existing).strip()
     repository_option = f'-Dmaven.repo.local="{repository}"'
-    return " ".join(value for value in (existing.strip(), repository_option) if value)
+    return " ".join(value for value in (existing, repository_option) if value)
+
+
+_MAVEN_REPOSITORY_OPTION = re.compile(
+    r'''(?ix)
+    (?<!\S)
+    (?:
+        ["']-Dmaven\.repo\.local(?:=[^"']*)?["']
+        |
+        -Dmaven\.repo\.local(?:=(?:"[^"]*"|'[^']*'|\S+))?
+    )
+    (?:\s+|$)
+    '''
+)
