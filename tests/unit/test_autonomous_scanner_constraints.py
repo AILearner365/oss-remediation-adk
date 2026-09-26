@@ -342,11 +342,16 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
             resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
             provenance="harness-prepared-experimental-runtime",
         )
-        runner.run_agent_shell = lambda command, **kwargs: CommandResult(
-            [command], str(experiment.repository), 0, stdout=str(standard),
-        )
+        commands = []
+
+        def maven_probe(command, **kwargs):
+            commands.append(command)
+            return CommandResult([command], str(experiment.repository), 0, stdout=str(standard))
+
+        runner.run_agent_shell = maven_probe
         runner.resolve_experimental_runtime_resource = lambda target, path: Path(path).resolve()
         self.assertEqual((standard.resolve(),), scanner._registry_roots(experiment.repository))
+        self.assertIn("'-Dexpression=settings.localRepository'", commands[0])
         self.assertTrue(scanner.scan(experiment.repository, ("HIGH",), "standard-default").succeeded)
         self.assertIn("--data-source=native", runner.commands[0][0])
 

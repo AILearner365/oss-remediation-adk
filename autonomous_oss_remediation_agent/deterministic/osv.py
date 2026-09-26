@@ -182,7 +182,7 @@ class OsvScanner:
                 raise ValueError(f"Maven configuration cannot establish a local repository: {exc}") from exc
             quoted = f'& "{executable}"' if os.name == "nt" else shlex.quote(executable)
             result = self.process_runner.run_agent_shell(
-                f"{quoted} -q help:evaluate -Dexpression=settings.localRepository -DforceStdout",
+                f"{quoted} -q help:evaluate '-Dexpression=settings.localRepository' -DforceStdout",
                 repository_workspace=target,
                 source="osv_maven_repository_probe",
             )

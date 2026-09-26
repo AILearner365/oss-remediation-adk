@@ -729,6 +729,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("experimental-runtime", sessions[0].messages[0])
         self.assertIn('"HOME"', sessions[0].messages[0])
         self.assertIn('"TMPDIR"', sessions[0].messages[0])
+        self.assertIn("Keep acquired experimental resources within this cycle runtime", sessions[0].messages[0])
         self.assertIn("same cycle is still in progress", sessions[0].messages[1])
         self.assertIn("now in authoritative implementation", sessions[0].messages[1])
         self.assertIn(

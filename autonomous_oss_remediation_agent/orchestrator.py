@@ -210,6 +210,9 @@ class AutonomousRemediationOrchestrator:
                 cycle_message = (
                     message + "\n\nCurrent experimental execution environment: "
                     + json.dumps(capabilities.experimental_environment_for_model(), sort_keys=True)
+                    + "\nThese HOME/TEMP locations are conventional working locations. "
+                    "Keep acquired experimental resources within this cycle runtime, "
+                    "and provide their path when a capability needs them."
                 )
                 validator.capture_cycle_start(cycle, baseline)
                 lifecycle.begin_cycle(cycle)
