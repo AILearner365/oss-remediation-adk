@@ -25,7 +25,7 @@ from autonomous_oss_remediation_agent.deterministic.osv import (
     normalize_osv_findings,
 )
 from autonomous_oss_remediation_agent.deterministic.validation import DeterministicValidator
-from autonomous_oss_remediation_agent.models import CommandResult, ScanOutcome, ScannerHandle
+from autonomous_oss_remediation_agent.models import CommandResult, ScanFailureKind, ScanOutcome, ScannerHandle
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
@@ -308,8 +308,9 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertIn("--data-source=deps.dev", runner.commands[0][0])
         self.assertFalse(any(value.startswith("--maven-registry=") for value in runner.commands[0][0]))
 
-    def test_declared_experimental_runtime_is_adapter_input_not_authoritative_state(self):
-        scanner = self._scanner(_SequenceScannerRunner([]))
+    def test_explicit_runtime_resource_is_used_without_cache_discovery(self):
+        runner = _SequenceScannerRunner([])
+        scanner = self._scanner(runner)
         experiment = self.workspace.fork_repository(1)
         runtime = Path(self.temp.name) / "isolated-runtime"
         cache = runtime / "temp" / "chosen-cache"
@@ -321,9 +322,85 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
             resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
             provenance="harness-prepared-experimental-runtime",
         )
-        self.assertIn(cache.resolve(), scanner._registry_roots(experiment.repository))
-        self.assertNotIn(cache.resolve(), scanner._registry_roots(self.workspace.repository))
+        runner.resolve_experimental_runtime_resource = lambda target, path: Path(path).resolve()
+        self.assertEqual((cache.resolve(),), scanner._registry_roots(experiment.repository, cache))
+        self.assertEqual((self.maven_repository,), scanner._registry_roots(self.workspace.repository))
         self.assertFalse((self.workspace.repository / "org").exists())
+
+    def test_standard_experimental_maven_repository_comes_from_maven_not_temp_search(self):
+        runner = _SequenceScannerRunner([CommandResult(["scanner"], ".", 0, stdout='{"results": []}')])
+        scanner = self._scanner(runner)
+        experiment = self.workspace.fork_repository(1)
+        runtime = Path(self.temp.name) / "isolated-runtime"
+        standard = runtime / "home" / ".m2" / "repository"
+        standard.mkdir(parents=True)
+        guessed = runtime / "temp" / "maven-shaped"
+        guessed.mkdir(parents=True)
+        (guessed / "artifact.pom").write_text("<project/>", encoding="utf-8")
+        self.trace.record_execution_environment(
+            experiment.repository, workspace_kind="experimental", cycle=1,
+            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            provenance="harness-prepared-experimental-runtime",
+        )
+        runner.run_agent_shell = lambda command, **kwargs: CommandResult(
+            [command], str(experiment.repository), 0, stdout=str(standard),
+        )
+        runner.resolve_experimental_runtime_resource = lambda target, path: Path(path).resolve()
+        self.assertEqual((standard.resolve(),), scanner._registry_roots(experiment.repository))
+        self.assertTrue(scanner.scan(experiment.repository, ("HIGH",), "standard-default").succeeded)
+        self.assertIn("--data-source=native", runner.commands[0][0])
+
+    def test_explicit_maven_resource_reaches_registry_without_default_fallback(self):
+        experiment = self.workspace.fork_repository(1)
+        runtime = Path(self.temp.name) / "isolated-runtime"
+        selected = runtime / "temp" / "selected"
+        pom = selected / "org" / "example" / "demo" / "1.0" / "demo-1.0.pom"
+        pom.parent.mkdir(parents=True)
+        pom.write_text("<project/>", encoding="utf-8")
+        self.trace.record_execution_environment(
+            experiment.repository, workspace_kind="experimental", cycle=1,
+            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            provenance="harness-prepared-experimental-runtime",
+        )
+        runner = _SequenceScannerRunner(
+            [CommandResult(["scanner"], ".", 0, stdout='{"results": []}')],
+            registry_probe="org/example/demo/1.0/demo-1.0.pom",
+        )
+        runner.resolve_experimental_runtime_resource = lambda target, path: Path(path).resolve()
+        scanner = self._scanner(runner)
+        report = scanner.scan(experiment.repository, ("HIGH",), "explicit", runtime_resource=selected)
+        self.assertTrue(report.succeeded)
+        self.assertEqual("<project/>", runner.registry_probe_content)
+        self.assertEqual(1, len(runner.commands))
+        self.assertIn("--data-source=native", runner.commands[0][0])
+
+        empty = runtime / "temp" / "empty"
+        empty.mkdir()
+        failed = scanner.scan(experiment.repository, ("HIGH",), "empty", runtime_resource=empty)
+        self.assertFalse(failed.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, failed.effective_outcome)
+        self.assertEqual(1, len(runner.commands))
+
+    def test_failed_default_maven_resolution_does_not_guess_temp_cache(self):
+        experiment = self.workspace.fork_repository(1)
+        runtime = Path(self.temp.name) / "isolated-runtime"
+        guessed = runtime / "temp" / "looks-like-maven"
+        guessed.mkdir(parents=True)
+        (guessed / "artifact.pom").write_text("<project/>", encoding="utf-8")
+        self.trace.record_execution_environment(
+            experiment.repository, workspace_kind="experimental", cycle=1,
+            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            provenance="harness-prepared-experimental-runtime",
+        )
+        runner = _SequenceScannerRunner([])
+        runner.run_agent_shell = lambda command, **kwargs: CommandResult(
+            [command], str(experiment.repository), 1, stderr="Maven unavailable",
+        )
+        scanner = self._scanner(runner)
+        report = scanner.scan(experiment.repository, ("HIGH",), "no-guess")
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanFailureKind.DEPENDENCY_RESOLUTION, report.failure_kind)
+        self.assertEqual([], runner.commands)
 
     def test_repeated_429_exhausts_retries_and_fails_closed(self):
         failure = CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP status 429")

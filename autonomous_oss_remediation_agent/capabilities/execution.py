@@ -100,12 +100,52 @@ class ProcessRunner:
         )
         return runtime
 
+    def experimental_environment(self, target: RepositoryWorkspace) -> dict[str, str]:
+        if target.kind != "experimental" or target.cycle not in self._experimental_runtime:
+            raise ValueError("Current-cycle experimental runtime is unavailable")
+        runtime = self._experimental_runtime[target.cycle]
+        return {
+            "HOME": str(runtime / "home"), "USERPROFILE": str(runtime / "home"),
+            "TEMP": str(runtime / "temp"), "TMP": str(runtime / "temp"),
+            "TMPDIR": str(runtime / "temp"),
+        }
+
+    def resolve_experimental_runtime_resource(
+        self, target: RepositoryWorkspace, logical_path: str,
+    ) -> Path:
+        environment = self.experimental_environment(target)
+        runtime = self._experimental_runtime[target.cycle].resolve(strict=True)
+        supplied = logical_path.strip()
+        if not supplied or "\x00" in supplied:
+            raise ValueError("Runtime resource path is empty or invalid")
+        if supplied == "/tmp" or supplied.startswith("/tmp/"):
+            if self.experimental_isolation.backend != "linux-user-mount-namespace":
+                raise ValueError("/tmp is not mapped into this experimental runtime; use the reported TEMP path")
+            relative = supplied.removeprefix("/tmp").lstrip("/")
+            candidate = Path(environment["TMPDIR"]) / relative
+        elif supplied == "~" or supplied.startswith("~/"):
+            candidate = Path(environment["HOME"]) / ("" if supplied == "~" else supplied.removeprefix("~/"))
+        else:
+            candidate = Path(supplied)
+            if not candidate.is_absolute():
+                raise ValueError("Runtime resource path must be absolute, /tmp-relative, or HOME-relative")
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (OSError, RuntimeError) as exc:
+            raise ValueError(f"Runtime resource does not exist or cannot be resolved: {supplied}") from exc
+        if not resolved.is_relative_to(runtime):
+            raise ValueError("Runtime resource is outside the current experimental cycle runtime")
+        if not resolved.is_dir() or not os.access(resolved, os.R_OK | os.X_OK):
+            raise ValueError("Runtime resource is not an accessible directory")
+        return resolved
+
     def run_agent_shell(
         self,
         command: str,
         cwd: str = ".",
         timeout_seconds: int | None = None,
         repository_workspace: RepositoryWorkspace | None = None,
+        source: str = "agent",
     ) -> CommandResult:
         target = repository_workspace or self.workspace.authoritative_repository()
         allowed, reason = self.command_policy.evaluate(command)
@@ -140,18 +180,7 @@ class ProcessRunner:
                     stderr="Experimental shell boundary is not prepared",
                     blocked=True,
                 )
-            runtime = self._experimental_runtime[target.cycle]
-            environment.update(
-                {
-                    "HOME": str(runtime / "home"),
-                    "USERPROFILE": str(runtime / "home"),
-                    "TEMP": str(runtime / "temp"),
-                    "TMP": str(runtime / "temp"),
-                    "TMPDIR": str(runtime / "temp"),
-                }
-            )
-            for path in (runtime / "home", runtime / "temp"):
-                path.mkdir(parents=True, exist_ok=True)
+            environment.update(self.experimental_environment(target))
             return self._run_isolated_agent_shell(
                 shell_command,
                 cwd=directory,
@@ -159,13 +188,14 @@ class ProcessRunner:
                 environment=environment,
                 display_command=[command],
                 target=target,
+                source=source,
             )
         return self._run(
             shell_command,
             cwd=directory,
             timeout_seconds=self.budget.effective_timeout(timeout_seconds),
             environment=environment,
-            source="agent",
+            source=source,
             display_command=[command],
             trace_metadata={"workspaceKind": target.kind, "cycle": target.cycle},
         )
@@ -179,6 +209,7 @@ class ProcessRunner:
         environment: dict[str, str],
         display_command: list[str],
         target: RepositoryWorkspace,
+        source: str,
     ) -> CommandResult:
         command_id = f"agent-{uuid.uuid4().hex[:12]}"
         stdout_path = self.workspace.artifacts / "commands" / f"{command_id}.stdout.log"
@@ -213,7 +244,7 @@ class ProcessRunner:
         )
         self.trace.append_event(
             "command",
-            source="agent",
+            source=source,
             result=result.to_dict(),
             workspaceKind=target.kind,
             cycle=target.cycle,

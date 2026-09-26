@@ -5,6 +5,7 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
 import stat
 import tarfile
@@ -21,10 +22,11 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator
 
 from ..capabilities.execution import ProcessRunner
-from ..config import ScannerConfig
+from ..config import MavenConfig, ScannerConfig
 from ..evidence import is_generated_evidence_path, scanner_copy_ignore
 from ..models import CommandResult, ScanFailureKind, ScanOutcome, ScanReport, ScannerHandle, VulnerabilityFinding
-from ..workspace import RunWorkspace, TraceStore, sha256_file
+from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore, sha256_file
+from .maven import MavenExecutionPolicyError, MavenService
 from .scanner import ScannerPreflightError
 
 
@@ -40,6 +42,7 @@ class OsvScanner:
         retry_backoff_seconds: tuple[float, ...] = (5.0, 15.0),
         sleep: Callable[[float], None] = time.sleep,
         maven_repository: Path | None = None,
+        maven_config: MavenConfig | None = None,
     ):
         self.workspace = workspace
         self.process_runner = process_runner
@@ -47,6 +50,7 @@ class OsvScanner:
         self.retry_backoff_seconds = retry_backoff_seconds
         self.sleep = sleep
         self.maven_repository = maven_repository or _default_maven_repository()
+        self.maven_config = maven_config or MavenConfig()
         self.handle: ScannerHandle | None = None
 
     def preflight(self, config: ScannerConfig) -> ScannerHandle:
@@ -75,15 +79,22 @@ class OsvScanner:
             raise ScannerPreflightError("Resolved OSV Scanner integrity changed after preflight")
         return self.handle
 
-    def scan(self, repository: Path, severity_scope: tuple[str, ...], label: str) -> ScanReport:
+    def scan(
+        self, repository: Path, severity_scope: tuple[str, ...], label: str,
+        *, runtime_resource: Path | None = None,
+    ) -> ScanReport:
         handle = self.verify()
         _verify_maven_scanner_compatibility(handle.version, repository)
+        try:
+            registry_roots = self._registry_roots(repository, runtime_resource)
+        except ValueError as exc:
+            return self._resource_failure(label, str(exc))
         attempts: list[dict[str, Any]] = []
         max_attempts = len(self.retry_backoff_seconds) + 1
-        registry_roots = self._registry_roots(repository)
         self.trace.append_event("scanner_dependency_environment", label=label,
                                 repository=str(repository), roots=[str(root) for root in registry_roots],
-                                executionEnvironment=self.trace.execution_environment(repository))
+                                executionEnvironment=self.trace.execution_environment(repository),
+                                explicitRuntimeResource=runtime_resource is not None)
         for attempt_number in range(1, max_attempts + 1):
             result = self._execute_scan(handle, repository, label, attempt_number, registry_roots)
             raw_stdout = _full_output(result.stdout, result.stdout_artifact)
@@ -147,29 +158,57 @@ class OsvScanner:
         self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
         return report
 
-    def _registry_roots(self, repository: Path) -> tuple[Path, ...]:
-        roots = [self.maven_repository] if self.maven_repository.is_dir() else []
+    def _registry_roots(
+        self, repository: Path, runtime_resource: Path | None = None,
+    ) -> tuple[Path, ...]:
+        if runtime_resource is not None:
+            evidence = self.trace.execution_environment(repository)
+            if not evidence or evidence.get("workspaceKind") != "experimental":
+                raise ValueError("Explicit runtime resources require the current experimental cycle")
+            target = RepositoryWorkspace(self.workspace, repository, "experimental", evidence["cycle"])
+            try:
+                selected = self.process_runner.resolve_experimental_runtime_resource(target, str(runtime_resource))
+            except ValueError as exc:
+                raise ValueError(f"Selected Maven runtime resource is invalid: {exc}") from exc
+            if not any(selected.iterdir()):
+                raise ValueError("Selected Maven runtime resource is not a usable repository directory")
+            return (selected,)
         evidence = self.trace.execution_environment(repository)
-        if evidence:
-            for resource in evidence["resources"]:
-                if resource.get("kind") != "isolated-runtime-root":
-                    continue
-                runtime = Path(resource["path"]).resolve()
-                if evidence.get("workspaceKind") != "experimental" or not runtime.is_dir():
-                    continue
-                # The adapter discovers Maven-shaped resources inside the declared
-                # isolated runtime. Their contents are scanner input, not validation proof.
-                candidates = [runtime / "home" / ".m2" / "repository"]
-                temp = runtime / "temp"
-                if temp.is_dir():
-                    candidates.extend(path for path in temp.iterdir() if path.is_dir())
-                for candidate in candidates:
-                    resolved = candidate.resolve()
-                    if not resolved.is_relative_to(runtime) or not resolved.is_dir():
-                        continue
-                    if next(resolved.rglob("*.pom"), None) is not None:
-                        roots.insert(0, resolved)
-        return tuple(dict.fromkeys(roots))
+        if evidence and evidence.get("workspaceKind") == "experimental":
+            target = RepositoryWorkspace(self.workspace, repository, "experimental", evidence["cycle"])
+            try:
+                executable = MavenService(repository, self.process_runner, self.maven_config).maven_executable()
+            except MavenExecutionPolicyError as exc:
+                raise ValueError(f"Maven configuration cannot establish a local repository: {exc}") from exc
+            quoted = f'& "{executable}"' if os.name == "nt" else shlex.quote(executable)
+            result = self.process_runner.run_agent_shell(
+                f"{quoted} -q help:evaluate -Dexpression=settings.localRepository -DforceStdout",
+                repository_workspace=target,
+                source="osv_maven_repository_probe",
+            )
+            if not result.succeeded:
+                raise ValueError("Maven could not establish its effective local repository in the experimental environment")
+            lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+            candidate = lines[-1] if lines else ""
+            if not candidate or not Path(candidate).is_absolute():
+                raise ValueError("Maven did not report an absolute effective local repository")
+            try:
+                return (self.process_runner.resolve_experimental_runtime_resource(target, candidate),)
+            except ValueError as exc:
+                raise ValueError("Maven reported no usable local repository inside the experimental runtime") from exc
+        return (self.maven_repository,) if self.maven_repository.is_dir() else ()
+
+    def _resource_failure(self, label: str, reason: str) -> ScanReport:
+        path = self.trace.write_text(f"scans/{label}.json", "{}\n")
+        report = ScanReport(
+            succeeded=False, findings=(), command_result=None, raw_report_path=str(path),
+            error=f"RUNTIME_RESOURCE_UNAVAILABLE: {reason}",
+            outcome=ScanOutcome.INCOMPLETE_FATAL_FAILURE,
+            backend=self.backend, failure_kind=ScanFailureKind.DEPENDENCY_RESOLUTION,
+        )
+        self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
+        self.trace.append_event("scanner_runtime_resource_failed", label=label, error=report.error)
+        return report
 
     def _execute_scan(
         self,

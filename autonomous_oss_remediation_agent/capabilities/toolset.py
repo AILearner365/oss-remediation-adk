@@ -48,7 +48,11 @@ class DeveloperCapabilitySet:
         runtime = self.process_runner.prepare_experimental_workspace(experimental)
         self.trace.record_execution_environment(
             experimental.repository, workspace_kind="experimental", cycle=cycle,
-            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            resources=[
+                {"kind": "isolated-runtime-root", "path": str(runtime)},
+                {"kind": "standard-home", "path": str(runtime / "home")},
+                {"kind": "standard-temp", "path": str(runtime / "temp")},
+            ],
             provenance="harness-prepared-experimental-runtime",
         )
         self._experimental_workspace = experimental
@@ -66,6 +70,16 @@ class DeveloperCapabilitySet:
             sourceRepository=str(run_workspace.repository),
         )
         return experimental
+
+    def experimental_environment_for_model(self) -> dict[str, Any]:
+        target = self._experimental_workspace
+        if target is None:
+            return {}
+        return {
+            "cycle": target.cycle,
+            "variables": self.process_runner.experimental_environment(target),
+            "logicalTempPath": "/tmp" if self.process_runner.experimental_isolation.backend == "linux-user-mount-namespace" else None,
+        }
 
     def read_workspace_text(
         self,
@@ -183,8 +197,10 @@ class DeveloperCapabilitySet:
         )
         return result.to_dict() if hasattr(result, "to_dict") else result
 
-    def scan_current_repository(self, workspace: str = "active") -> dict[str, Any]:
-        """Run the configured scanner with harness-owned settings as non-authoritative engineering evidence."""
+    def scan_current_repository(
+        self, workspace: str = "active", runtime_resource_path: str | None = None,
+    ) -> dict[str, Any]:
+        """Scan active state; optionally use a verified current-cycle runtime resource."""
         denied = self._require_phase("scan_current_repository", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -194,13 +210,36 @@ class DeveloperCapabilitySet:
         if isinstance(selected, dict):
             return selected
         io, target = selected
+        runtime_resource = None
+        if runtime_resource_path is not None:
+            try:
+                runtime_resource = self.process_runner.resolve_experimental_runtime_resource(
+                    target, runtime_resource_path,
+                )
+            except ValueError as exc:
+                failure = {
+                    "status": "error", "failureCode": "RUNTIME_RESOURCE_INVALID",
+                    "outcome": "INCOMPLETE_FATAL_FAILURE", "failureKind": "CONFIGURATION",
+                    "error": str(exc), "runtimeResourcePath": runtime_resource_path,
+                    "workspaceKind": target.kind, "cycle": target.cycle,
+                }
+                self.trace.append_event("scan_runtime_resource_rejected", **failure)
+                return self._invoke("scan_current_repository", lambda: failure, workspace_io=io)
         self._scan_invocations += 1
         cycle = self.journal.active_cycle if self.journal else 0
         label = f"engineering-cycle-{cycle}-{target.kind}-{self._scan_invocations}"
-        report = self._invoke(
-            "scan_current_repository", self.scanner.scan, target.repository,
-            self.scanner_severity_scope, label, workspace_io=io,
-        )
+        if runtime_resource is None:
+            report = self._invoke(
+                "scan_current_repository", self.scanner.scan, target.repository,
+                self.scanner_severity_scope, label, workspace_io=io,
+            )
+        else:
+            report = self._invoke(
+                "scan_current_repository",
+                lambda: self.scanner.scan(target.repository, self.scanner_severity_scope, label,
+                                          runtime_resource=runtime_resource),
+                workspace_io=io,
+            )
         if isinstance(report, dict):
             return report
         payload = report.to_dict()

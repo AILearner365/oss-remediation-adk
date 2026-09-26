@@ -48,6 +48,8 @@ class ExperimentalProcessIsolation:
             )
         runtime = self.run_root / "temp" / "experimental-runtime" / f"cycle-{cycle}"
         runtime.mkdir(parents=True, exist_ok=True)
+        (runtime / "home").mkdir(exist_ok=True)
+        (runtime / "temp").mkdir(exist_ok=True)
         if os.name == "nt":
             for historical in historical_repositories:
                 _set_integrity_level(historical, "M")

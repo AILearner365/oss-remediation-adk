@@ -207,13 +207,17 @@ class AutonomousRemediationOrchestrator:
                 reason = "Configured remediation/validation cycle limit reached"
                 budget.ensure_time_remaining()
                 capabilities.begin_cycle(cycle)
+                cycle_message = (
+                    message + "\n\nCurrent experimental execution environment: "
+                    + json.dumps(capabilities.experimental_environment_for_model(), sort_keys=True)
+                )
                 validator.capture_cycle_start(cycle, baseline)
                 lifecycle.begin_cycle(cycle)
                 outcome_turn = AgentTurnResult("")
                 execution_summary = ""
                 recreate_session = False
                 try:
-                    execution_turn = await self._run_until_intent(agent_session, lifecycle, cycle, message)
+                    execution_turn = await self._run_until_intent(agent_session, lifecycle, cycle, cycle_message)
                     if not lifecycle.cycles[cycle].intent:
                         reason = "CYCLE_INTENT_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
                         lifecycle.fail_intent_capture(cycle)

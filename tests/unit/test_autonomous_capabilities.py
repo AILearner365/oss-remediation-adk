@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 from google.adk.models import Gemini
 
@@ -231,9 +231,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("autonomous_oss_remediation_agent", agent.name)
         self.assertIsInstance(agent.model, Gemini)
         self.assertEqual("gemini-2.5-flash", agent.model.model)
-        self.assertEqual(3, agent.model.retry_options.attempts)
-        self.assertEqual(1.0, agent.model.retry_options.initial_delay)
-        self.assertEqual(8.0, agent.model.retry_options.max_delay)
+        self.assertEqual(7, agent.model.retry_options.attempts)
+        self.assertEqual(2.0, agent.model.retry_options.initial_delay)
+        self.assertEqual(30.0, agent.model.retry_options.max_delay)
         self.assertEqual(2.0, agent.model.retry_options.exp_base)
         self.assertEqual(1.0, agent.model.retry_options.jitter)
         self.assertIsNone(agent.model.retry_options.http_status_codes)
@@ -726,6 +726,62 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("authoritative", after["workspaceKind"])
         self.assertEqual(self.workspace.repository, scanner.calls[1][0])
 
+    def test_standard_cycle_environment_is_prepared_retained_and_reported(self):
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace)
+        experiment = capabilities.begin_cycle(1)
+        reported = capabilities.experimental_environment_for_model()
+        variables = reported["variables"]
+        runtime = self.workspace.temp / "experimental-runtime" / "cycle-1"
+        self.assertEqual(runtime / "home", Path(variables["HOME"]))
+        self.assertEqual(runtime / "temp", Path(variables["TMPDIR"]))
+        self.assertTrue((runtime / "home").is_dir())
+        self.assertTrue((runtime / "temp").is_dir())
+        self.assertEqual(variables, self.runner.experimental_environment(experiment))
+        evidence = self.trace.execution_environment(experiment.repository)
+        self.assertEqual({"isolated-runtime-root", "standard-home", "standard-temp"},
+                         {resource["kind"] for resource in evidence["resources"]})
+
+    def test_explicit_scan_resource_is_confined_and_never_replaced(self):
+        scanner = _RecordingScanner()
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal, scanner)
+        experiment = capabilities.begin_cycle(1)
+        runtime = self.workspace.temp / "experimental-runtime" / "cycle-1"
+        selected = runtime / "temp" / "chosen-cache"
+        selected.mkdir()
+        (selected / "marker").write_text("resource", encoding="utf-8")
+        valid = capabilities.scan_current_repository(runtime_resource_path=str(selected))
+        self.assertEqual("ok", valid["status"])
+        self.assertEqual(selected.resolve(), scanner.calls[-1][3])
+        call_count = len(scanner.calls)
+        missing = capabilities.scan_current_repository(runtime_resource_path=str(runtime / "temp" / "missing"))
+        self.assertEqual("RUNTIME_RESOURCE_INVALID", missing["failureCode"])
+        outside = capabilities.scan_current_repository(runtime_resource_path=str(self.workspace.repository))
+        self.assertEqual("RUNTIME_RESOURCE_INVALID", outside["failureCode"])
+        capabilities.submit_cycle_intent(1, _valid_intent_answers())
+        authoritative = capabilities.scan_current_repository(runtime_resource_path=str(selected))
+        self.assertEqual("RUNTIME_RESOURCE_INVALID", authoritative["failureCode"])
+        self.assertEqual(call_count, len(scanner.calls))
+        self.assertFalse((self.workspace.repository / "marker").exists())
+        self.assertEqual(experiment.repository, scanner.calls[0][0])
+
+    def test_logical_tmp_scan_resource_maps_to_current_cycle_only(self):
+        scanner = _RecordingScanner()
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal, scanner)
+        first = capabilities.begin_cycle(1)
+        selected = self.workspace.temp / "experimental-runtime" / "cycle-1" / "temp" / "chosen-cache"
+        selected.mkdir()
+        with patch.object(type(self.runner.experimental_isolation), "backend", new_callable=PropertyMock, return_value="linux-user-mount-namespace"):
+            self.assertEqual(selected.resolve(), self.runner.resolve_experimental_runtime_resource(first, "/tmp/chosen-cache"))
+            self.assertEqual("ok", capabilities.scan_current_repository(runtime_resource_path="/tmp/chosen-cache")["status"])
+            self.assertEqual(selected.resolve(), scanner.calls[-1][3])
+            second = capabilities.begin_cycle(2)
+            with self.assertRaisesRegex(ValueError, "does not exist"):
+                self.runner.resolve_experimental_runtime_resource(second, "/tmp/chosen-cache")
+
     def test_research_is_replaceable_truthful_phase_gated_and_budgeted(self):
         provider = _FakeResearchProvider()
         journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
@@ -836,10 +892,10 @@ class _RecordingScanner:
     def __init__(self):
         self.calls = []
 
-    def scan(self, repository, severity_scope, label):
+    def scan(self, repository, severity_scope, label, *, runtime_resource=None):
         from autonomous_oss_remediation_agent.models import ScanReport
 
-        self.calls.append((repository, severity_scope, label))
+        self.calls.append((repository, severity_scope, label, runtime_resource))
         raw = repository.parent / f"{label}.json"
         raw.write_text("{}", encoding="utf-8")
         return ScanReport(True, (), None, str(raw), backend=self.backend)

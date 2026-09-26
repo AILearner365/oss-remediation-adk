@@ -19,7 +19,10 @@ class VulnerabilityScanner(Protocol):
     def preflight(self, config: ScannerConfig) -> object:
         ...
 
-    def scan(self, repository: Path, severity_scope: tuple[str, ...], label: str) -> ScanReport:
+    def scan(
+        self, repository: Path, severity_scope: tuple[str, ...], label: str,
+        *, runtime_resource: Path | None = None,
+    ) -> ScanReport:
         ...
 
 
@@ -35,7 +38,7 @@ def create_scanner(
     from .xray import XrayScanner
 
     if config.backend == "osv":
-        return OsvScanner(workspace, process_runner, trace)
+        return OsvScanner(workspace, process_runner, trace, maven_config=maven_config)
     if config.backend == "xray":
         return XrayScanner(
             workspace,

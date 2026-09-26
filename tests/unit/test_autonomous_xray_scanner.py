@@ -159,6 +159,20 @@ class AutonomousXrayScannerTests(unittest.TestCase):
         self.assertIsInstance(xray, XrayScanner)
         self.assertEqual("system", xray.maven_config.mode)
 
+    def test_xray_dependency_adapter_uses_explicit_runtime_resource(self):
+        runner = _TgfRunner(self.tgf)
+        scanner = XrayScanner(
+            self.workspace, runner, self.trace, maven_config=MavenConfig(mode="system"),
+        )
+        selected = self.workspace.temp / "selected-runtime-resource"
+        selected.mkdir()
+        graph, result, _, _, error = scanner._resolve_graph(
+            self.workspace.repository, "explicit-resource", selected,
+        )
+        self.assertIsNone(error)
+        self.assertIsNotNone(graph)
+        self.assertIn(f"-Dmaven.repo.local={selected}", runner.commands[0][0])
+
     def test_graph_generation_supports_multiple_reactor_modules(self):
         graph = build_xray_graph(
             self.tgf

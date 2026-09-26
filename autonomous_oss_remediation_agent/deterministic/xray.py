@@ -4,6 +4,7 @@ import base64
 import json
 import os
 import re
+import shlex
 import shutil
 import time
 from dataclasses import dataclass
@@ -15,7 +16,7 @@ import requests
 from ..capabilities.execution import ProcessRunner
 from ..config import MavenConfig, ScannerConfig, XrayScannerConfig
 from ..models import CommandResult, ScanFailureKind, ScanOutcome, ScanReport, VulnerabilityFinding
-from ..workspace import RunWorkspace, TraceStore
+from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 from .maven import MavenService
 from .scanner import ScannerPreflightError
 
@@ -74,14 +75,38 @@ class XrayScanner:
         self.trace.append_event("scanner_preflight", **evidence)
         return evidence
 
-    def scan(self, repository: Path, severity_scope: tuple[str, ...], label: str) -> ScanReport:
+    def scan(
+        self, repository: Path, severity_scope: tuple[str, ...], label: str,
+        *, runtime_resource: Path | None = None,
+    ) -> ScanReport:
         config = self._verified_config()
         scans_dir = self.workspace.artifacts / "scans"
         scans_dir.mkdir(parents=True, exist_ok=True)
         raw_path = scans_dir / f"{label}.json"
+        if runtime_resource is not None:
+            evidence = self.trace.execution_environment(repository)
+            try:
+                if not evidence or evidence.get("workspaceKind") != "experimental":
+                    raise ValueError("Explicit runtime resources require the current experimental cycle")
+                target = RepositoryWorkspace(self.workspace, repository, "experimental", evidence["cycle"])
+                runtime_resource = self.process_runner.resolve_experimental_runtime_resource(
+                    target, str(runtime_resource),
+                )
+                if not any(runtime_resource.iterdir()):
+                    raise ValueError("Selected Maven runtime resource is empty")
+            except ValueError as exc:
+                raw_path.write_text("{}\n", encoding="utf-8")
+                return self._finish_report(label, ScanReport(
+                    succeeded=False, findings=(), command_result=None,
+                    raw_report_path=str(raw_path),
+                    error=f"RUNTIME_RESOURCE_UNAVAILABLE: {exc}",
+                    outcome=ScanOutcome.INCOMPLETE_FATAL_FAILURE,
+                    backend=self.backend, failure_kind=ScanFailureKind.DEPENDENCY_RESOLUTION,
+                ))
         graph, command_result, dependency_path, graph_path, resolution_error = self._resolve_graph(
             repository,
             label,
+            runtime_resource,
         )
         base_evidence = {
             "dependencyTreePath": str(dependency_path),
@@ -448,8 +473,15 @@ class XrayScanner:
         self,
         repository: Path,
         label: str,
+        runtime_resource: Path | None = None,
     ) -> tuple[dict[str, Any] | None, CommandResult, Path, Path | None, str | None]:
-        temp_path = self.workspace.temp / f"xray-{label}-dependencies.tgf"
+        environment = self.trace.execution_environment(repository)
+        experimental = bool(environment and environment.get("workspaceKind") == "experimental")
+        runtime_temp = next(
+            (Path(resource["path"]) for resource in environment["resources"]
+             if resource.get("kind") == "standard-temp"), None,
+        ) if experimental else None
+        temp_path = (runtime_temp or self.workspace.temp) / f"xray-{label}-dependencies.tgf"
         temp_path.unlink(missing_ok=True)
         dependency_path = self.workspace.artifacts / "scans" / f"{label}.dependencies.tgf"
         dependency_path.parent.mkdir(parents=True, exist_ok=True)
@@ -466,7 +498,21 @@ class XrayScanner:
             "-DappendOutput=true",
             f"-DoutputFile={temp_path}",
         ]
-        result = self.process_runner.run_argv(command, cwd=repository, source=f"xray_{label}_dependency_tree")
+        if runtime_resource is not None:
+            command.append(f"-Dmaven.repo.local={runtime_resource}")
+        if experimental:
+            if runtime_temp is None or not runtime_temp.is_dir():
+                return None, CommandResult(command, str(repository), 127), dependency_path, None, "Experimental standard temp is unavailable"
+            target = RepositoryWorkspace(self.workspace, repository, "experimental", environment["cycle"])
+            shell_command = (
+                "& " + " ".join("'" + argument.replace("'", "''") + "'" for argument in command)
+                if os.name == "nt" else shlex.join(command)
+            )
+            result = self.process_runner.run_agent_shell(
+                shell_command, repository_workspace=target, source=f"xray_{label}_dependency_tree",
+            )
+        else:
+            result = self.process_runner.run_argv(command, cwd=repository, source=f"xray_{label}_dependency_tree")
         if temp_path.is_file():
             shutil.copyfile(temp_path, dependency_path)
         else:
