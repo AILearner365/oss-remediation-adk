@@ -38,6 +38,7 @@ class CheckpointCaptureStatus(str, Enum):
 
 class ImplementationStatus(str, Enum):
     PENDING = "PENDING"
+    ATTEMPTED = "ATTEMPTED"
     EXECUTED = "EXECUTED"
     NOT_EXECUTED = "NOT_EXECUTED"
 
@@ -261,6 +262,8 @@ class CycleCapture:
     validation_report: ValidationReport | None = None
     intent_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
     implementation_status: ImplementationStatus = ImplementationStatus.PENDING
+    authoritative_activity: list[str] = field(default_factory=list)
+    authoritative_state_changed: bool | None = None
     outcome_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
 
     @property
@@ -300,8 +303,14 @@ class CycleCapture:
             },
             "implementation": {
                 "status": self.implementation_status.value,
+                "authoritativeActivity": list(self.authoritative_activity),
+                "authoritativeStateChanged": self.authoritative_state_changed,
                 "message": (
-                    IMPLEMENTATION_NOT_EXECUTED_MESSAGE
+                    (
+                        IMPLEMENTATION_NOT_EXECUTED_MESSAGE
+                        if self.intent is None
+                        else "No authoritative implementation activity was recorded after accepted Intent."
+                    )
                     if self.implementation_status == ImplementationStatus.NOT_EXECUTED
                     else None
                 ),
@@ -376,7 +385,7 @@ class JournalLifecycle:
         store: JournalStore,
         trace: TraceStore,
         run_contract: str,
-        repository_changed: Callable[[], bool],
+        repository_changed: Callable[[], bool | None],
         *,
         max_checkpoint_attempts: int = 10,
         max_section_chars: int = 8_000,
@@ -416,7 +425,7 @@ class JournalLifecycle:
         self.task_to_solve = task_to_solve.strip()
         return self.store.append("task_to_solve", None, self.task_to_solve)
 
-    def set_repository_changed_probe(self, repository_changed: Callable[[], bool]) -> None:
+    def set_repository_changed_probe(self, repository_changed: Callable[[], bool | None]) -> None:
         self._repository_changed = repository_changed
 
     @property
@@ -485,7 +494,7 @@ class JournalLifecycle:
             return self._reject("intent", cycle, errors, self._rejection_capture(cycle))
         if capture is None:
             raise RuntimeError(f"Cycle {cycle} was not begun")
-        late = self._repository_changed()
+        late = self._repository_changed() is not False
         errors.extend(_intent_structure_errors(answers))
         rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", answers)
         errors.extend(
@@ -514,9 +523,24 @@ class JournalLifecycle:
 
     def require_outcome(self) -> None:
         capture = self._require_active_capture(self.active_cycle)
-        capture.implementation_status = ImplementationStatus.EXECUTED
+        self.record_authoritative_state(self._repository_changed())
+        capture.implementation_status = (
+            ImplementationStatus.ATTEMPTED if capture.authoritative_activity
+            else ImplementationStatus.NOT_EXECUTED
+        )
         self.phase = JournalPhase.OUTCOME_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=self.active_cycle, phase=self.phase.value)
+
+    def record_authoritative_activity(self, tool: str) -> None:
+        capture = self._require_active_capture(self.active_cycle)
+        capture.authoritative_activity.append(tool)
+        capture.implementation_status = ImplementationStatus.ATTEMPTED
+        self.trace.append_event("authoritative_implementation_attempted", cycle=self.active_cycle, tool=tool)
+
+    def record_authoritative_state(self, changed: bool | None) -> None:
+        capture = self._require_active_capture(self.active_cycle)
+        capture.authoritative_state_changed = changed
+        self.trace.append_event("authoritative_state_observed", cycle=self.active_cycle, changed=changed)
 
     def fail_intent_capture(self, cycle: int) -> None:
         capture = self._require_active_capture(cycle)
@@ -559,9 +583,18 @@ class JournalLifecycle:
     ) -> CheckpointResult:
         capture = self.cycles.get(cycle)
         normalized_status = status.strip().upper()
+        if capture is not None and cycle == self.active_cycle and self.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.record_authoritative_state(self._repository_changed())
         errors = self._checkpoint_errors("outcome", cycle, answers, capture)
         if normalized_status not in OUTCOME_STATUSES:
             errors.append(f"Invalid Cycle Outcome status: {status}")
+        if capture is not None and normalized_status == "READY_FOR_INDEPENDENT_VALIDATION":
+            if not capture.authoritative_activity:
+                errors.append("Authoritative implementation was not attempted after Intent; experimental work cannot establish implementation")
+            elif capture.authoritative_state_changed is None:
+                errors.append("Authoritative repository state has not been observed")
+        if capture is not None and normalized_status == "PARTIALLY_REMEDIATED" and not capture.authoritative_activity:
+            errors.append("No authoritative implementation was attempted; report BLOCKED, FAILED, or INCONCLUSIVE instead of remediation")
         errors.extend(_answer_errors("Cycle outcome status", status_explanation, self.max_section_chars))
         if errors:
             return self._reject("outcome", cycle, errors, self._rejection_capture(cycle))
@@ -581,6 +614,8 @@ class JournalLifecycle:
         }
         capture.outcome_capture_status = CheckpointCaptureStatus.CAPTURED
         capture.outcome_status = normalized_status
+        if normalized_status == "READY_FOR_INDEPENDENT_VALIDATION":
+            capture.implementation_status = ImplementationStatus.EXECUTED
         capture.last_outcome_errors = ()
         self.phase = JournalPhase.DETERMINISTIC_VALIDATION
         self.trace.append_event(

@@ -121,6 +121,19 @@ class TraceStore:
     def __init__(self, workspace: RunWorkspace):
         self.workspace = workspace
         self.events_path = workspace.artifacts / "events.jsonl"
+        self._execution_environments: dict[str, dict[str, Any]] = {}
+
+    def record_execution_environment(
+        self, repository: Path, *, workspace_kind: str, cycle: int | None,
+        resources: list[dict[str, str]], provenance: str,
+    ) -> None:
+        evidence = {"repository": str(repository.resolve()), "workspaceKind": workspace_kind,
+                    "cycle": cycle, "resources": resources, "provenance": provenance}
+        self._execution_environments[str(repository.resolve())] = evidence
+        self.append_event("execution_environment_declared", **evidence)
+
+    def execution_environment(self, repository: Path) -> dict[str, Any] | None:
+        return self._execution_environments.get(str(repository.resolve()))
 
     def write_json(self, relative_path: str, value: Any) -> Path:
         path = self.workspace.artifacts / relative_path

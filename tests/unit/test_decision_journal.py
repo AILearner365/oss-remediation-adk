@@ -114,6 +114,7 @@ class DecisionJournalTests(unittest.TestCase):
     def test_late_intent_and_incomplete_outcome_are_separate_capture_states(self):
         self.changed = True
         self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.record_authoritative_activity("edit_workspace_text")
         self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.capture_status())
         self.lifecycle.require_outcome()
         self.assertTrue(
@@ -144,6 +145,55 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.capture_status())
         self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.lifecycle.phase)
 
+    def test_experimental_work_cannot_support_authoritative_completion(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.require_outcome()
+        rejected = self.lifecycle.submit_outcome(
+            1, "READY_FOR_INDEPENDENT_VALIDATION", "Experimental edits passed checks.", self._outcome_answers(),
+        )
+        self.assertFalse(rejected.accepted)
+        state = self.lifecycle.cycle_state(1)["implementation"]
+        self.assertEqual("NOT_EXECUTED", state["status"])
+        self.assertFalse(state["authoritativeStateChanged"])
+        self.assertTrue(self.lifecycle.submit_outcome(
+            1, "BLOCKED", "Only experimental evidence exists.", self._outcome_answers(),
+        ).accepted)
+
+    def test_authoritative_attempt_and_repository_delta_are_independent(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.record_authoritative_activity("edit_workspace_text")
+        self.lifecycle.require_outcome()
+        state = self.lifecycle.cycle_state(1)["implementation"]
+        self.assertEqual("ATTEMPTED", state["status"])
+        self.assertFalse(state["authoritativeStateChanged"])
+        self.assertTrue(self.lifecycle.submit_outcome(
+            1, "PARTIALLY_REMEDIATED", "Attempted the authoritative change, but it produced no final improvement.",
+            self._outcome_answers(),
+        ).accepted)
+
+    def test_attempted_no_change_completion_can_reach_independent_validation(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.record_authoritative_activity("run_workspace_shell")
+        self.lifecycle.require_outcome()
+        self.assertFalse(self.lifecycle.cycle_state(1)["implementation"]["authoritativeStateChanged"])
+        self.assertTrue(self.lifecycle.submit_outcome(
+            1, "READY_FOR_INDEPENDENT_VALIDATION",
+            "Authoritative verification established that no final source change is required; independent validation must confirm this.",
+            self._outcome_answers(),
+        ).accepted)
+        self.assertEqual("EXECUTED", self.lifecycle.cycle_state(1)["implementation"]["status"])
+
+    def test_unknown_authoritative_state_cannot_support_completion(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.record_authoritative_activity("run_workspace_shell")
+        self.lifecycle.set_repository_changed_probe(lambda: None)
+        self.lifecycle.require_outcome()
+        self.assertIsNone(self.lifecycle.cycle_state(1)["implementation"]["authoritativeStateChanged"])
+        result = self.lifecycle.submit_outcome(
+            1, "READY_FOR_INDEPENDENT_VALIDATION", "Unable to inspect repository state.", self._outcome_answers(),
+        )
+        self.assertFalse(result.accepted)
+
     def test_failed_outcome_preserves_intent_and_execution_state_without_answers(self):
         self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
         self.lifecycle.require_outcome()
@@ -151,7 +201,7 @@ class DecisionJournalTests(unittest.TestCase):
 
         state = self.lifecycle.cycle_state(1)
         self.assertEqual("CAPTURED", state["intent"]["status"])
-        self.assertEqual("EXECUTED", state["implementation"]["status"])
+        self.assertEqual("NOT_EXECUTED", state["implementation"]["status"])
         self.assertEqual("FAILED", state["outcome"]["status"])
         self.assertTrue(
             all(item["status"] == "NOT_CAPTURED" for item in state["outcome"]["answers"].values())
@@ -178,7 +228,7 @@ class DecisionJournalTests(unittest.TestCase):
 
         accepted = self.lifecycle.submit_outcome(
             1,
-            "READY_FOR_INDEPENDENT_VALIDATION",
+            "INCONCLUSIVE",
             "Correct active cycle.",
             self._outcome_answers(),
         )
@@ -214,9 +264,10 @@ class DecisionJournalTests(unittest.TestCase):
                 workspace = RunWorkspace.create(self.temp.name)
                 workspace.repository.mkdir()
                 trace = TraceStore(workspace)
-                lifecycle = JournalLifecycle(JournalStore(trace), trace, "contract", lambda: False)
+                lifecycle = JournalLifecycle(JournalStore(trace), trace, "contract", lambda: True)
                 lifecycle.begin_cycle(1)
                 self.assertTrue(lifecycle.submit_intent(1, self._intent_answers()).accepted)
+                lifecycle.record_authoritative_activity("edit_workspace_text")
                 lifecycle.require_outcome()
                 self.assertTrue(
                     lifecycle.submit_outcome(
@@ -226,6 +277,7 @@ class DecisionJournalTests(unittest.TestCase):
 
     def test_three_outcome_answers_represent_material_execution_history(self):
         self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.record_authoritative_activity("edit_workspace_text")
         self.lifecycle.require_outcome()
         answers = [
             {
@@ -285,6 +337,8 @@ class DecisionJournalTests(unittest.TestCase):
             },
         ]
         self.assertTrue(self.lifecycle.submit_intent(2, answers).accepted)
+        self.lifecycle.record_authoritative_activity("edit_workspace_text")
+        self.changed = True
         self.lifecycle.require_outcome()
         self.assertTrue(
             self.lifecycle.submit_outcome(

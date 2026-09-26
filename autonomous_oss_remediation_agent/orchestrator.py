@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Callable
 
-from .agent import AgentSession, default_agent_session_factory
+from .agent import AgentSession, IrrecoverableAgentSessionError, default_agent_session_factory
 from .capabilities import (
     DeveloperCapabilitySet,
     ExecutionBudget,
@@ -146,6 +146,10 @@ class AutonomousRemediationOrchestrator:
             )
 
         constraint_evaluator = ConstraintEvaluator()
+        trace.record_execution_environment(
+            workspace.repository, workspace_kind="authoritative", cycle=None,
+            resources=[], provenance="harness-prepared-authoritative-repository",
+        )
         validator = DeterministicValidator(
             self.request, workspace, process_runner, scanner, constraint_evaluator, trace
         )
@@ -205,36 +209,56 @@ class AutonomousRemediationOrchestrator:
                 capabilities.begin_cycle(cycle)
                 validator.capture_cycle_start(cycle, baseline)
                 lifecycle.begin_cycle(cycle)
-                execution_turn = await self._run_until_intent(
-                    agent_session, lifecycle, cycle, message
-                )
                 outcome_turn = AgentTurnResult("")
-                if not lifecycle.cycles[cycle].intent:
-                    reason = "CYCLE_INTENT_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
-                    lifecycle.fail_intent_capture(cycle)
-                    execution_summary = ""
-                else:
-                    execution_turn = await self._continue_execution_if_needed(
-                        agent_session,
-                        capabilities,
-                        trace,
-                        cycle,
-                        execution_turn,
-                    )
-                    execution_summary = execution_turn.text
+                execution_summary = ""
+                recreate_session = False
+                try:
+                    execution_turn = await self._run_until_intent(agent_session, lifecycle, cycle, message)
+                    if not lifecycle.cycles[cycle].intent:
+                        reason = "CYCLE_INTENT_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
+                        lifecycle.fail_intent_capture(cycle)
+                    else:
+                        execution_turn = await self._continue_execution_if_needed(
+                            agent_session, capabilities, trace, cycle, execution_turn,
+                        )
+                        execution_summary = execution_turn.text
+                        summaries.append(execution_summary)
+                        lifecycle.require_outcome()
+                        changed_files = validator.changed_files(baseline.commit)
+                        outcome_turn = await self._run_until_outcome(
+                            agent_session, lifecycle, cycle, execution_summary,
+                            self._execution_evidence(trace, budget, changed_files),
+                        )
+                        if not lifecycle.cycles[cycle].outcome:
+                            reason = "CYCLE_OUTCOME_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
+                            lifecycle.fail_outcome_capture(cycle)
+                except BudgetExceeded:
+                    raise
+                except IrrecoverableAgentSessionError:
+                    raise
+                except Exception as exc:
+                    trace.append_event("agent_turn_failed", cycle=cycle, error=str(exc), recoverable=True)
+                    execution_summary = f"Agent turn failed: {exc}"
                     summaries.append(execution_summary)
-                    lifecycle.require_outcome()
-                    changed_files = validator.changed_files(baseline.commit)
-                    outcome_turn = await self._run_until_outcome(
-                        agent_session,
-                        lifecycle,
-                        cycle,
-                        execution_summary,
-                        self._execution_evidence(trace, budget, changed_files),
-                    )
-                    if not lifecycle.cycles[cycle].outcome:
-                        reason = "CYCLE_OUTCOME_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
-                        lifecycle.fail_outcome_capture(cycle)
+                    if lifecycle.phase == JournalPhase.INTENT_REQUIRED:
+                        lifecycle.fail_intent_capture(cycle)
+                        recreate_session = True
+                    elif lifecycle.phase == JournalPhase.EXECUTION:
+                        lifecycle.require_outcome()
+                    if lifecycle.phase == JournalPhase.OUTCOME_REQUIRED:
+                        try:
+                            changed_files = validator.changed_files(baseline.commit)
+                            outcome_turn = await self._run_until_outcome(
+                                agent_session, lifecycle, cycle, execution_summary,
+                                {**self._execution_evidence(trace, budget, changed_files), "executionError": str(exc)},
+                            )
+                        except Exception as outcome_exc:
+                            if isinstance(outcome_exc, IrrecoverableAgentSessionError):
+                                raise
+                            trace.append_event("outcome_capture_failed", cycle=cycle, error=str(outcome_exc))
+                            recreate_session = True
+                        if lifecycle.phase == JournalPhase.OUTCOME_REQUIRED:
+                            lifecycle.fail_outcome_capture(cycle)
                 capture = lifecycle.cycles[cycle]
                 last_validation = validator.validate(cycle, baseline)
                 validation_status = _validation_status(last_validation)
@@ -278,6 +302,14 @@ class AutonomousRemediationOrchestrator:
                     budget.tool_calls < self.request.budget.max_tool_calls
                     and budget.remaining_seconds > 0
                 )
+                if (recreate_session and cycle < self.request.budget.max_cycles
+                        and operational_budget_remaining):
+                    try:
+                        await agent_session.close()
+                        agent_session = self.agent_session_factory(capabilities, self.request.model)
+                    except Exception as exc:
+                        raise IrrecoverableAgentSessionError(f"Agent session recreation failed: {exc}") from exc
+                    trace.append_event("agent_session_recreated", afterCycle=cycle)
                 if (
                     last_validation.passed
                     and capture.capture_recovery_required
@@ -351,6 +383,9 @@ class AutonomousRemediationOrchestrator:
                 )
         except BudgetExceeded as exc:
             reason = str(exc)
+        except IrrecoverableAgentSessionError as exc:
+            reason = f"IRRECOVERABLE_AGENT_SESSION_FAILURE: {exc}"
+            trace.append_event("agent_session_failed", error=str(exc), terminal=True)
         except Exception as exc:
             reason = f"AGENT_RUNTIME_FAILURE: {exc}"
             if lifecycle.phase == JournalPhase.EXECUTION:
@@ -429,6 +464,7 @@ class AutonomousRemediationOrchestrator:
             if (
                 last_remediation in {RemediationOutcome.PARTIALLY_REMEDIATED, RemediationOutcome.BLOCKED, RemediationOutcome.FAILED}
                 or reason.startswith("AGENT_RUNTIME_FAILURE:")
+                or reason.startswith("IRRECOVERABLE_AGENT_SESSION_FAILURE:")
                 or reason.startswith("VALIDATION_SCANNER_FAILURE:")
             )
             else Outcome.EXECUTION_LIMIT_REACHED

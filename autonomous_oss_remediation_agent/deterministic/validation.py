@@ -45,13 +45,13 @@ class DeterministicValidator:
         changed_files, captured = self._capture_changed_files(baseline.commit)
         self._cycle_starts[cycle] = self._repository_state(changed_files, captured)
 
-    def repository_changed_since_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> bool:
+    def repository_changed_since_cycle_start(self, cycle: int, baseline: RepositoryBaseline) -> bool | None:
         before = self._cycle_starts.get(cycle)
         if before is None or not before.captured:
-            return True
+            return None
         changed_files, captured = self._capture_changed_files(baseline.commit)
         after = self._repository_state(changed_files, captured)
-        return not captured or before.file_digests != after.file_digests
+        return before.file_digests != after.file_digests if captured else None
 
     def validate(self, cycle: int, baseline: RepositoryBaseline) -> ValidationReport:
         checks: list[ValidationCheck] = []

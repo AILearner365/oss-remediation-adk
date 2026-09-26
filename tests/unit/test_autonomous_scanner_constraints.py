@@ -308,6 +308,23 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertIn("--data-source=deps.dev", runner.commands[0][0])
         self.assertFalse(any(value.startswith("--maven-registry=") for value in runner.commands[0][0]))
 
+    def test_declared_experimental_runtime_is_adapter_input_not_authoritative_state(self):
+        scanner = self._scanner(_SequenceScannerRunner([]))
+        experiment = self.workspace.fork_repository(1)
+        runtime = Path(self.temp.name) / "isolated-runtime"
+        cache = runtime / "temp" / "chosen-cache"
+        pom = cache / "org" / "example" / "demo" / "1.0" / "demo-1.0.pom"
+        pom.parent.mkdir(parents=True)
+        pom.write_text("<project/>", encoding="utf-8")
+        self.trace.record_execution_environment(
+            experiment.repository, workspace_kind="experimental", cycle=1,
+            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            provenance="harness-prepared-experimental-runtime",
+        )
+        self.assertIn(cache.resolve(), scanner._registry_roots(experiment.repository))
+        self.assertNotIn(cache.resolve(), scanner._registry_roots(self.workspace.repository))
+        self.assertFalse((self.workspace.repository / "org").exists())
+
     def test_repeated_429_exhausts_retries_and_fails_closed(self):
         failure = CommandResult(["scanner"], ".", 1, stdout='{"results": []}', stderr="HTTP status 429")
         runner = _SequenceScannerRunner([failure, failure, failure])

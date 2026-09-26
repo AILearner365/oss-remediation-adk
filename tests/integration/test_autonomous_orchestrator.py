@@ -9,6 +9,7 @@ import os
 import re
 from dataclasses import replace
 from pathlib import Path
+from autonomous_oss_remediation_agent.agent import IrrecoverableAgentSessionError
 
 from autonomous_oss_remediation_agent.config import (
     DeliveryConfig,
@@ -294,6 +295,14 @@ class _FailingAgentSession:
         return None
 
 
+class _FatalAgentSession:
+    async def run_turn(self, message):
+        raise IrrecoverableAgentSessionError("session store unavailable")
+
+    async def close(self):
+        return None
+
+
 class _MissingIntentSession:
     def __init__(self):
         self.messages = []
@@ -379,6 +388,30 @@ class _ExecutionFailingSession:
             _intent_answers(self.capabilities.journal.active_cycle),
         )
         raise RuntimeError("model failed during execution")
+
+    async def close(self):
+        return None
+
+
+class _RecoverableTurnSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+
+    async def run_turn(self, message):
+        cycle = self.capabilities.journal.active_cycle
+        phase = self.capabilities.journal.phase
+        if phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                cycle, "BLOCKED", "The previous model turn failed; no authoritative implementation was completed.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Failure recorded")
+        if phase == JournalPhase.INTENT_REQUIRED:
+            self.capabilities.submit_cycle_intent(cycle, _intent_answers(cycle))
+            if cycle == 1:
+                raise RuntimeError("Tool 'unavailable_tool' not found")
+            return AgentTurnResult("Cycle 2 intent accepted")
+        return AgentTurnResult("Cycle 2 continues")
 
     async def close(self):
         return None
@@ -978,7 +1011,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             )
         )
         self.assertEqual("CAPTURED", cycle_one["lifecycle"]["intent"]["status"])
-        self.assertEqual("EXECUTED", cycle_one["lifecycle"]["implementation"]["status"])
+        self.assertEqual("ATTEMPTED", cycle_one["lifecycle"]["implementation"]["status"])
         self.assertEqual("FAILED", cycle_one["lifecycle"]["outcome"]["status"])
         self.assertTrue(
             all(
@@ -1116,7 +1149,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("Deterministic validation established success", continuation)
         self.assertIn("checkpoint failure alone is not evidence that another repository change is needed", continuation)
         self.assertIn("**Cycle Intent:** `CAPTURED`", continuation)
-        self.assertIn("**Implementation:** `EXECUTED`", continuation)
+        self.assertIn("**Implementation:** `ATTEMPTED`", continuation)
         self.assertIn("**Cycle Outcome:** `FAILED`", continuation)
         self.assertIn("All authoritative checks passed", continuation)
         self.assertIn('"status": "FAILED"', continuation)
@@ -1344,7 +1377,20 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner_factory=_FixtureScanner,
         ).run()
         self.assertEqual(Outcome.PARTIAL_MANUAL_REVIEW_REQUIRED, result.outcome)
-        self.assertIn("AGENT_RUNTIME_FAILURE", result.reason)
+        self.assertEqual(2, result.cycles_completed)
+        self.assertIn("cycle limit", result.reason)
+        events = [json.loads(line) for line in (Path(result.workspace_root) / "artifacts" / "events.jsonl").read_text().splitlines()]
+        self.assertEqual([1, 2], [event["cycle"] for event in events if event["type"] == "agent_turn_failed"])
+        self.assertTrue(any(event["type"] == "agent_session_recreated" and event["afterCycle"] == 1 for event in events))
+
+    def test_irrecoverable_session_failure_is_terminal_and_explicit(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: _FatalAgentSession(),
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertIn("IRRECOVERABLE_AGENT_SESSION_FAILURE", result.reason)
+        self.assertEqual(0, result.cycles_completed)
 
     def test_missing_pre_execution_submission_uses_current_stage_terminology(self):
         sessions = []
@@ -1454,6 +1500,18 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         )
         self.assertNotIn("workingState", cycle)
         self.assertNotIn("workingStateDeprecated", cycle)
+
+    def test_recoverable_turn_failure_reaches_second_cycle_after_failed_validation(self):
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda capabilities, model: _RecoverableTurnSession(capabilities),
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertEqual(2, result.cycles_completed)
+        events = [json.loads(line) for line in (Path(result.workspace_root) / "artifacts" / "events.jsonl").read_text().splitlines()]
+        self.assertTrue(any(event["type"] == "agent_turn_failed" and event["cycle"] == 1 for event in events))
+        self.assertTrue(any(event["type"] == "validation" and event["cycle"] == 1 and not event["passed"] for event in events))
+        self.assertTrue(any(event["type"] == "intent_submission_accepted" and event["cycle"] == 2 for event in events))
 
     def test_missing_explicit_vulnerability_stops_before_agent(self):
         invoked = []

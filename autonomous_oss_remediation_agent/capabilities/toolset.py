@@ -45,7 +45,12 @@ class DeveloperCapabilitySet:
         if not isinstance(run_workspace, RunWorkspace):
             run_workspace = run_workspace.run_workspace
         experimental = run_workspace.fork_repository(cycle)
-        self.process_runner.prepare_experimental_workspace(experimental)
+        runtime = self.process_runner.prepare_experimental_workspace(experimental)
+        self.trace.record_execution_environment(
+            experimental.repository, workspace_kind="experimental", cycle=cycle,
+            resources=[{"kind": "isolated-runtime-root", "path": str(runtime)}],
+            provenance="harness-prepared-experimental-runtime",
+        )
         self._experimental_workspace = experimental
         self._experimental_io = WorkspaceIO(
             experimental,
@@ -384,6 +389,12 @@ class DeveloperCapabilitySet:
         if self.journal and self.journal.phase == JournalPhase.EXECUTION:
             cycle = self.journal.active_cycle
             self._execution_activity.setdefault(cycle, []).append(name)
+            if (
+                workspace_io is not None
+                and workspace_io.workspace_kind == "authoritative"
+                and name in {"edit_workspace_text", "run_workspace_shell"}
+            ):
+                self.journal.record_authoritative_activity(name)
             self.trace.append_event(
                 "execution_capability_invoked", cycle=cycle, tool=name,
                 workspaceKind=workspace_io.workspace_kind if workspace_io else None,

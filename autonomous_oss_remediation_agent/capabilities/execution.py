@@ -76,7 +76,7 @@ class ProcessRunner:
         self.experimental_isolation = ExperimentalProcessIsolation(workspace.root)
         self._experimental_runtime: dict[int, Path] = {}
 
-    def prepare_experimental_workspace(self, target: RepositoryWorkspace) -> None:
+    def prepare_experimental_workspace(self, target: RepositoryWorkspace) -> Path:
         if target.kind != "experimental" or target.cycle is None:
             raise ValueError("Only cycle experimental workspaces can be prepared for isolation")
         historical = tuple(
@@ -98,6 +98,7 @@ class ProcessRunner:
             historicalRepositories=[str(path) for path in historical],
             backend=self.experimental_isolation.backend,
         )
+        return runtime
 
     def run_agent_shell(
         self,

@@ -80,7 +80,10 @@ class OsvScanner:
         _verify_maven_scanner_compatibility(handle.version, repository)
         attempts: list[dict[str, Any]] = []
         max_attempts = len(self.retry_backoff_seconds) + 1
-        registry_roots = (self.maven_repository,) if self.maven_repository.is_dir() else ()
+        registry_roots = self._registry_roots(repository)
+        self.trace.append_event("scanner_dependency_environment", label=label,
+                                repository=str(repository), roots=[str(root) for root in registry_roots],
+                                executionEnvironment=self.trace.execution_environment(repository))
         for attempt_number in range(1, max_attempts + 1):
             result = self._execute_scan(handle, repository, label, attempt_number, registry_roots)
             raw_stdout = _full_output(result.stdout, result.stdout_artifact)
@@ -143,6 +146,30 @@ class OsvScanner:
             raise AssertionError("OSV retry loop did not produce a report")
         self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
         return report
+
+    def _registry_roots(self, repository: Path) -> tuple[Path, ...]:
+        roots = [self.maven_repository] if self.maven_repository.is_dir() else []
+        evidence = self.trace.execution_environment(repository)
+        if evidence:
+            for resource in evidence["resources"]:
+                if resource.get("kind") != "isolated-runtime-root":
+                    continue
+                runtime = Path(resource["path"]).resolve()
+                if evidence.get("workspaceKind") != "experimental" or not runtime.is_dir():
+                    continue
+                # The adapter discovers Maven-shaped resources inside the declared
+                # isolated runtime. Their contents are scanner input, not validation proof.
+                candidates = [runtime / "home" / ".m2" / "repository"]
+                temp = runtime / "temp"
+                if temp.is_dir():
+                    candidates.extend(path for path in temp.iterdir() if path.is_dir())
+                for candidate in candidates:
+                    resolved = candidate.resolve()
+                    if not resolved.is_relative_to(runtime) or not resolved.is_dir():
+                        continue
+                    if next(resolved.rglob("*.pom"), None) is not None:
+                        roots.insert(0, resolved)
+        return tuple(dict.fromkeys(roots))
 
     def _execute_scan(
         self,
@@ -256,7 +283,7 @@ class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
             return str(self.repositories[0] / "__invalid_path__")
         for repository in self.repositories:
             candidate = repository / relative
-            if candidate.exists():
+            if candidate.resolve().is_relative_to(repository.resolve()) and candidate.exists():
                 self.requests.append(
                     {"path": f"/{relative.as_posix()}", "resolvedPath": str(candidate), "found": True}
                 )

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import unittest
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from autonomous_oss_remediation_agent.agent import GoogleAdkAgentSession
 from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceeded, ExecutionBudget
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig
+from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
 class _RecordingRunner:
@@ -61,6 +64,46 @@ class GoogleAdkAgentSessionTests(unittest.IsolatedAsyncioTestCase):
 
         with self.assertRaisesRegex(BudgetExceeded, "Agent model turn exceeded"):
             await session.run_turn("inspect the repository")
+
+    async def test_adk_interactions_preserve_order_calls_responses_and_error(self):
+        call = SimpleNamespace(text="considering", function_call=None, function_response=None)
+        function = SimpleNamespace(text=None, function_call=SimpleNamespace(name="missing_tool", args={"x": 1}), function_response=None)
+        response = SimpleNamespace(text=None, function_call=None, function_response=SimpleNamespace(name="missing_tool", response={"error": "unavailable"}))
+        runner = _RecordingRunner(events=[
+            SimpleNamespace(id="e1", content=SimpleNamespace(role="model", parts=[call, function])),
+            SimpleNamespace(id="e2", content=SimpleNamespace(role="tool", parts=[response])),
+        ])
+        with tempfile.TemporaryDirectory() as directory:
+            trace = TraceStore(RunWorkspace.create(directory))
+            with patch("autonomous_oss_remediation_agent.agent.InMemoryRunner", return_value=runner):
+                session = GoogleAdkAgentSession(MagicMock(), self._budget(), trace=trace, cycle_provider=lambda: 2)
+            result = await session.run_turn("continue")
+            import json
+            records = [json.loads(line) for line in trace.events_path.read_text().splitlines()]
+            interactions = [r for r in records if r["type"] == "adk_interaction"]
+            self.assertEqual(sorted(r["sequence"] for r in interactions), [r["sequence"] for r in interactions])
+            self.assertEqual(["turn_started", "model_continuation", "tool_call", "tool_response", "turn_completed"],
+                             [r["interactionType"] for r in interactions])
+            self.assertEqual("missing_tool", interactions[2]["name"])
+            self.assertEqual({"x": 1}, interactions[2]["arguments"])
+            self.assertEqual({"error": "unavailable"}, interactions[3]["response"])
+            self.assertEqual(2, interactions[2]["cycle"])
+            self.assertEqual("considering", result.text)
+
+    async def test_large_response_is_referenced_once(self):
+        response = SimpleNamespace(text=None, function_call=None, function_response=SimpleNamespace(name="scan", response={"data": "x" * 20000}))
+        runner = _RecordingRunner(events=[SimpleNamespace(id="e", content=SimpleNamespace(role="tool", parts=[response]))])
+        with tempfile.TemporaryDirectory() as directory:
+            trace = TraceStore(RunWorkspace.create(directory))
+            with patch("autonomous_oss_remediation_agent.agent.InMemoryRunner", return_value=runner):
+                session = GoogleAdkAgentSession(MagicMock(), self._budget(), trace=trace)
+            await session.run_turn("continue")
+            import json
+            records = [json.loads(line) for line in trace.events_path.read_text().splitlines()]
+            item = next(r for r in records if r.get("interactionType") == "tool_response")
+            self.assertIn("artifact", item)
+            self.assertNotIn("response", item)
+            self.assertTrue(Path(item["artifact"]).is_file())
 
     @staticmethod
     def _budget(**overrides) -> ExecutionBudget:
