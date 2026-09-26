@@ -447,6 +447,40 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(1, len(report.findings))
         self.assertEqual(1, len(report.attempts))
 
+    def test_out_of_scope_raw_vulnerabilities_complete_clean_with_raw_evidence(self):
+        payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0002","database_specific":{"severity":"LOW"}}]}]}]}'
+        for exit_code in (0, 1):
+            with self.subTest(exit_code=exit_code):
+                runner = _SequenceScannerRunner([
+                    CommandResult(["scanner"], ".", exit_code, stdout=payload),
+                ])
+                scanner = self._scanner(runner)
+
+                report = scanner.scan(self.workspace.repository, ("HIGH",), f"out-of-scope-{exit_code}")
+
+                self.assertTrue(report.succeeded)
+                self.assertEqual(ScanOutcome.COMPLETED_CLEAN, report.effective_outcome)
+                self.assertEqual((), report.findings)
+                self.assertEqual(ScanOutcome.COMPLETED_CLEAN.value, report.attempts[0]["outcome"])
+                self.assertEqual(payload, Path(report.raw_report_path).read_text(encoding="utf-8"))
+                self.assertEqual(payload, Path(report.attempts[0]["rawReportPath"]).read_text(encoding="utf-8"))
+
+    def test_successful_scan_outcome_matches_normalized_findings(self):
+        for severity, expected_outcome in (
+            ("LOW", ScanOutcome.COMPLETED_CLEAN),
+            ("HIGH", ScanOutcome.COMPLETED_WITH_FINDINGS),
+        ):
+            with self.subTest(severity=severity):
+                payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"' + severity + '"}}]}]}]}'
+                runner = _SequenceScannerRunner([
+                    CommandResult(["scanner"], ".", 1, stdout=payload),
+                ])
+                report = self._scanner(runner).scan(self.workspace.repository, ("HIGH",), f"normalized-{severity}")
+
+                self.assertTrue(report.succeeded)
+                self.assertEqual(expected_outcome, report.effective_outcome)
+                self.assertEqual(bool(report.findings), report.effective_outcome == ScanOutcome.COMPLETED_WITH_FINDINGS)
+
     def test_partial_findings_with_resolution_errors_are_incomplete(self):
         payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
         runner = _SequenceScannerRunner([
@@ -461,6 +495,18 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         scanner = self._scanner(runner)
 
         report = scanner.scan(self.workspace.repository, ("HIGH",), "partial-resolution")
+
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
+        self.assertEqual((), report.findings)
+
+    def test_out_of_scope_raw_vulnerability_does_not_mask_resolution_failure(self):
+        payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0002","database_specific":{"severity":"LOW"}}]}]}]}'
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 1, stdout=payload, stderr="failed resolution for local module"),
+        ])
+
+        report = self._scanner(runner).scan(self.workspace.repository, ("HIGH",), "out-of-scope-resolution")
 
         self.assertFalse(report.succeeded)
         self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)

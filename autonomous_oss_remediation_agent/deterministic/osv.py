@@ -109,7 +109,9 @@ class OsvScanner:
             payload = _parse_payload(raw_stdout)
             recognizable = _is_recognizable_report(payload)
             findings = tuple(normalize_osv_findings(payload or {}, severity_scope)) if recognizable else ()
-            outcome, failure_reason = _classify_attempt(result, payload, raw_stdout, raw_stderr)
+            outcome, failure_reason = _classify_attempt(
+                result, payload, raw_stdout, raw_stderr, has_in_scope_findings=bool(findings)
+            )
             retry_scheduled = (
                 outcome == ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE
                 and attempt_number < max_attempts
@@ -407,6 +409,8 @@ def _classify_attempt(
     payload: Any,
     raw_stdout: str,
     raw_stderr: str,
+    *,
+    has_in_scope_findings: bool,
 ) -> tuple[ScanOutcome, str | None]:
     combined_output = "\n".join((raw_stderr, raw_stdout))
     recognizable = _is_recognizable_report(payload)
@@ -429,10 +433,11 @@ def _classify_attempt(
         detail = raw_stderr.strip() or "OSV Scanner did not produce a recognizable JSON report"
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"UNRECOGNIZABLE_REPORT: {detail}"
     if result.exit_code == 0:
-        outcome = ScanOutcome.COMPLETED_WITH_FINDINGS if has_vulnerabilities else ScanOutcome.COMPLETED_CLEAN
+        outcome = ScanOutcome.COMPLETED_WITH_FINDINGS if has_in_scope_findings else ScanOutcome.COMPLETED_CLEAN
         return outcome, None
     if result.exit_code == 1 and has_vulnerabilities:
-        return ScanOutcome.COMPLETED_WITH_FINDINGS, None
+        outcome = ScanOutcome.COMPLETED_WITH_FINDINGS if has_in_scope_findings else ScanOutcome.COMPLETED_CLEAN
+        return outcome, None
     detail = raw_stderr.strip() or f"OSV Scanner exited with code {result.exit_code}"
     return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"NON_SUCCESSFUL_EXECUTION: {detail}"
 
