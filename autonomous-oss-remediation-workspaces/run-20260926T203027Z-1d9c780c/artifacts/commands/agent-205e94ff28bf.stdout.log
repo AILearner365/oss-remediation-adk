@@ -1,0 +1,7 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:test
+[INFO] |  |  |  |  \- ch.qos.logback:logback-core:jar:1.5.32:test
+[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile
+[INFO] |  |  |  |  \- ch.qos.logback:logback-core:jar:1.5.32:compile
