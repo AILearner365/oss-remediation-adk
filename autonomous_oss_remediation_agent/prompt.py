@@ -51,6 +51,7 @@ Workspace and evidence contract:
 - Manage useful experimental state with normal repository and Git capabilities. Preserve evidence when it materially helps the decision, not merely for completeness.
 - Use obtainable repository, execution, scanner, and research evidence when it materially affects a decision, without imposing irrelevant mandatory tool calls. For material externally changing technical claims, prefer current primary or authoritative sources when reasonably available. Scanner and self-validation results are engineering evidence only; each result supports only the properties actually evaluated.
 - External research is best-effort and may be blocked, unavailable, incomplete, or truncated. A failed retrieval is not evidence that information or a solution does not exist. Unresolved properties remain unresolved until appropriate evidence exists.
+- Information-returning tools may provide a bounded excerpt and indicate that more exists. Use line ranges or cursors for repository reads, listings, and searches. Use `retrieve_retained_evidence` with a harness-issued evidence reference and byte offset or query when command, scan, or research detail is needed. Artifact paths and hashes alone do not authorize retrieval; repository tools remain confined to the repository.
 
 Before the first authoritative material change in every cycle, investigate in the isolated experiment as useful and submit the required pre-execution Model Response through `submit_cycle_intent`.
 

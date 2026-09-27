@@ -122,6 +122,33 @@ class TraceStore:
         self.workspace = workspace
         self.events_path = workspace.artifacts / "events.jsonl"
         self._execution_environments: dict[str, dict[str, Any]] = {}
+        self._evidence_references: dict[str, tuple[Path, str]] = {}
+
+    def issue_evidence_reference(self, path: str | Path) -> str:
+        """Issue a content-bound reference to an existing retained artifact."""
+        artifact_root = self.workspace.artifacts.resolve(strict=True)
+        candidate = Path(path).resolve(strict=True)
+        if not candidate.is_relative_to(artifact_root) or not candidate.is_file():
+            raise WorkspaceBoundaryError("Evidence must be a retained artifact file")
+        digest = sha256_file(candidate)
+        relative = candidate.relative_to(artifact_root).as_posix()
+        reference = "evidence:" + hashlib.sha256(f"{relative}\0{digest}".encode()).hexdigest()
+        self._evidence_references[reference] = (candidate, digest)
+        return reference
+
+    def resolve_evidence_reference(self, reference: str) -> Path:
+        issued = self._evidence_references.get(reference)
+        if issued is None:
+            raise ValueError("Unknown or expired evidence reference")
+        path, digest = issued
+        try:
+            resolved = path.resolve(strict=True)
+            if (not resolved.is_relative_to(self.workspace.artifacts.resolve(strict=True))
+                    or not resolved.is_file() or sha256_file(resolved) != digest):
+                raise ValueError("Evidence reference expired or artifact changed")
+        except (OSError, RuntimeError) as exc:
+            raise ValueError("Evidence reference expired or artifact unavailable") from exc
+        return resolved
 
     def record_execution_environment(
         self, repository: Path, *, workspace_kind: str, cycle: int | None,

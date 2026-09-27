@@ -113,6 +113,24 @@ class AutonomousCapabilityTests(unittest.TestCase):
         with self.assertRaises(WorkspaceBoundaryError):
             self.io.edit_text("write", ".git/config", content="bad")
 
+    def test_read_and_search_continue_without_large_responses(self):
+        (self.workspace.repository / "long.txt").write_text("X" * 12000 + "\nneedle\nneedle\n",
+                                                          encoding="utf-8")
+        first = self.capabilities.read_workspace_text("long.txt")
+        self.assertEqual(8000, len(first["content"]))
+        self.assertFalse(first["complete"])
+        continuation = self.capabilities.read_workspace_text(
+            "long.txt", start_line=first["nextStartLine"],
+            start_column=first["nextStartColumn"])
+        self.assertTrue(continuation["content"].startswith("X" * 4000))
+        first_search = self.capabilities.search_workspace_text("needle", max_results=1)
+        self.assertTrue(first_search["moreExists"])
+        second_search = self.capabilities.search_workspace_text("needle", max_results=1,
+                                                                cursor=first_search["nextCursor"])
+        self.assertEqual(3, second_search["results"][0]["line"])
+        invalid = self.capabilities.search_workspace_text("different", cursor=second_search["nextCursor"])
+        self.assertEqual("TOOL_ERROR", invalid["failureCode"])
+
     def test_symlink_escape_is_rejected_when_supported(self):
         outside = Path(self.temp.name) / "outside"
         outside.mkdir()
@@ -132,6 +150,59 @@ class AutonomousCapabilityTests(unittest.TestCase):
         blocked = self.capabilities.run_workspace_shell("git push origin main")
         self.assertTrue(blocked["blocked"])
         self.assertEqual(126, blocked["exitCode"])
+
+    def test_shell_retains_large_output_and_retrieves_bounded_evidence(self):
+        command = "Write-Output ('A' * 12000)" if os.name == "nt" else "python -c \"print('A'*12000)\""
+        result = self.capabilities.run_workspace_shell(command)
+        self.assertFalse(result["stdoutComplete"])
+        self.assertLess(len(result["stdout"]), 2200)
+        self.assertGreater(Path(result["stdoutArtifact"]).stat().st_size, 12000)
+        reference = result["stdoutReference"]
+        first = self.capabilities.retrieve_retained_evidence(reference, max_bytes=100)
+        self.assertEqual("A" * 100, first["content"])
+        self.assertFalse(first["complete"])
+        second = self.capabilities.retrieve_retained_evidence(reference, start_offset=first["nextOffset"], max_bytes=100)
+        self.assertEqual("A" * 100, second["content"])
+        matches = self.capabilities.retrieve_retained_evidence(reference, query="AAAA", max_bytes=100)
+        self.assertTrue(matches["matches"])
+        self.assertEqual("TOOL_ERROR", self.capabilities.retrieve_retained_evidence("evidence:unknown")["failureCode"])
+        self.assertIn("Unknown or expired", self.capabilities.retrieve_retained_evidence("evidence:unknown")["error"])
+        outside = Path(self.temp.name) / "outside.txt"
+        outside.write_text("secret", encoding="utf-8")
+        with self.assertRaises(WorkspaceBoundaryError):
+            self.trace.issue_evidence_reference(outside)
+        Path(result["stdoutArtifact"]).write_text("changed", encoding="utf-8")
+        self.assertIn("expired", self.capabilities.retrieve_retained_evidence(reference)["error"])
+
+    def test_scanner_model_payload_is_compact_and_evidence_is_retrievable(self):
+        from autonomous_oss_remediation_agent.models import ScanReport, VulnerabilityFinding
+
+        class LargeScanner:
+            backend = "fake"
+
+            def scan(_, repository, severity_scope, label, *, runtime_resource=None):
+                raw = self.workspace.artifacts / "scans" / f"{label}.json"
+                raw.parent.mkdir(parents=True, exist_ok=True)
+                raw.write_text("RAW-SCAN-" + "Z" * 20000, encoding="utf-8")
+                finding = VulnerabilityFinding("CVE-TEST", (), "HIGH", "g", "a", "g:a", "1",
+                                               summary="S" * 4000, backend_evidence={"raw": "Z" * 10000})
+                return ScanReport(True, (finding,), None, str(raw), attempts=({"outcome": "COMPLETED_WITH_FINDINGS",
+                                   "commandResult": {"stdout": "Z" * 20000}},), backend="fake")
+
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                               scanner=LargeScanner())
+        result = capabilities.scan_current_repository()
+        self.assertEqual("COMPLETED_WITH_FINDINGS", result["outcome"])
+        self.assertEqual("CVE-TEST", result["findings"][0]["vulnerabilityId"])
+        self.assertNotIn("backendEvidence", result["findings"][0])
+        self.assertLess(len(json.dumps(result)), 3000)
+        self.assertEqual(1, result["attemptSummary"]["count"])
+        raw = capabilities.retrieve_retained_evidence(result["rawEvidenceReference"], max_bytes=50)
+        self.assertEqual("RAW-SCAN-", raw["content"][:9])
+        self.assertFalse(raw["complete"])
+        detail = capabilities.retrieve_retained_evidence(result["evidenceReference"], query="backendEvidence")
+        self.assertTrue(detail["matches"])
+        self.assertGreater(len((self.workspace.artifacts / "scans" / "engineering-cycle-0-authoritative-1.json").read_text()), 20000)
 
     def test_shell_supports_discovery_and_strips_credential_environment(self):
         (self.workspace.repository / "nested").mkdir()
@@ -218,6 +289,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 "edit_workspace_text",
                 "run_workspace_shell",
                 "scan_current_repository",
+                "retrieve_retained_evidence",
                 "research_search",
                 "research_fetch",
                 "submit_cycle_intent",
@@ -225,6 +297,12 @@ class AutonomousCapabilityTests(unittest.TestCase):
             },
             {tool.name for tool in tools},
         )
+        declarations = {tool.name: tool._get_declaration() for tool in tools}
+        retrieval_schema = declarations["retrieve_retained_evidence"].parameters_json_schema
+        self.assertTrue({"reference", "start_offset", "max_bytes", "query"}.issubset(
+            retrieval_schema["properties"]))
+        self.assertIn("cursor", declarations["search_workspace_text"].parameters_json_schema["properties"])
+        self.assertIn("start_column", declarations["read_workspace_text"].parameters_json_schema["properties"])
 
     def test_one_primary_adk_agent_uses_capability_surface(self):
         agent = create_remediation_agent(self.capabilities, "gemini-2.5-flash")
@@ -796,6 +874,8 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual("success", search["status"])
         self.assertEqual("http_network_failure", fetch["status"])
         self.assertEqual(2, self.budget.tool_calls)
+        self.assertTrue(search["complete"])
+        self.assertEqual("{", capabilities.retrieve_retained_evidence(search["resultReference"], max_bytes=1)["content"])
         artifacts = sorted((self.workspace.artifacts / "research").glob("*.json"))
         self.assertEqual(2, len(artifacts))
         events = [json.loads(line) for line in self.trace.events_path.read_text(encoding="utf-8").splitlines()]
@@ -828,6 +908,29 @@ class AutonomousCapabilityTests(unittest.TestCase):
         exhausted = capabilities.research_search("second")
         self.assertEqual("EXECUTION_BUDGET_EXCEEDED", exhausted["failureCode"])
         self.assertEqual(["first"], provider.queries)
+
+    def test_research_retains_full_extracted_result_while_returning_excerpt(self):
+        class LargeProvider:
+            def search(self, query):
+                return ResearchResult(ResearchStatus.SUCCESS, "research",
+                                      results=tuple({"title": str(i), "url": f"https://example.test/{i}"}
+                                                    for i in range(25)))
+
+            def fetch(self, url):
+                return ResearchResult(ResearchStatus.SUCCESS, url, content="Q" * 12000)
+
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                               research_provider=LargeProvider())
+        search = capabilities.research_search("advisory")
+        fetch = capabilities.research_fetch("https://example.test")
+        self.assertEqual(10, len(search["results"]))
+        self.assertFalse(search["complete"])
+        self.assertEqual(4000, len(fetch["content"]))
+        self.assertTrue(fetch["moreExists"])
+        search_detail = capabilities.retrieve_retained_evidence(search["resultReference"], query='"title": "24"')
+        self.assertTrue(search_detail["matches"])
+        fetch_detail = capabilities.retrieve_retained_evidence(fetch["resultReference"], query="QQQQ")
+        self.assertTrue(fetch_detail["matches"])
 
     def test_new_package_has_no_reference_agent_imports(self):
         package_root = Path(__file__).resolve().parents[2] / "autonomous_oss_remediation_agent"
@@ -896,7 +999,8 @@ class _RecordingScanner:
         from autonomous_oss_remediation_agent.models import ScanReport
 
         self.calls.append((repository, severity_scope, label, runtime_resource))
-        raw = repository.parent / f"{label}.json"
+        raw = next(parent / "artifacts" / f"{label}.json"
+                   for parent in repository.parents if (parent / "artifacts").is_dir())
         raw.write_text("{}", encoding="utf-8")
         return ScanReport(True, (), None, str(raw), backend=self.backend)
 

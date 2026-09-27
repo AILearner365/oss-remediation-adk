@@ -24,6 +24,7 @@ class WorkspaceIO:
         self.max_file_bytes = max_file_bytes
         self.max_active_listing_cursors = max(1, min(max_active_listing_cursors, 100))
         self._listing_cursors: dict[str, _ListingCursor] = {}
+        self._search_cursors: dict[str, tuple[str, str, str | None, str, int]] = {}
 
     @property
     def workspace_kind(self) -> str:
@@ -38,7 +39,8 @@ class WorkspaceIO:
         payload.setdefault("cycle", self.cycle)
         self.trace.append_event(event_type, **payload)
 
-    def read_text(self, path: str, start_line: int = 1, end_line: int | None = None) -> dict[str, Any]:
+    def read_text(self, path: str, start_line: int = 1, end_line: int | None = None,
+                  start_column: int = 1) -> dict[str, Any]:
         target = self.workspace.repository_path(path, allow_missing=False)
         if not target.is_file():
             raise ValueError(f"Not a file: {path}")
@@ -48,15 +50,39 @@ class WorkspaceIO:
         text = target.read_text(encoding="utf-8")
         lines = text.splitlines()
         start = max(1, start_line)
+        if start_column < 1:
+            raise ValueError("start_column must be positive")
         end = min(len(lines), end_line if end_line is not None else len(lines))
-        selected = "\n".join(lines[start - 1 : end])
+        requested_end = end
+        selected_lines: list[str] = []
+        chars = 0
+        line_truncated = False
+        for index, line in enumerate(lines[start - 1 : end]):
+            if index == 0:
+                line = line[start_column - 1:]
+            if selected_lines and chars + len(line) + 1 > 8000:
+                break
+            if len(line) > 8000:
+                selected_lines.append(line[:8000])
+                chars += 8000
+                line_truncated = True
+                break
+            selected_lines.append(line)
+            chars += len(line) + 1
+        end = start + len(selected_lines) - 1
+        selected = "\n".join(selected_lines)
         result = {
             "status": "ok",
             "path": path.replace("\\", "/"),
             "startLine": start,
+            "startColumn": start_column,
             "endLine": end,
             "totalLines": len(lines),
             "content": selected,
+            "complete": not line_truncated and end >= (requested_end if requested_end is not None else len(lines)),
+            "moreExists": line_truncated or end < len(lines),
+            "nextStartLine": end if line_truncated else (end + 1 if end < len(lines) else None),
+            "nextStartColumn": start_column + 8000 if line_truncated else 1,
         }
         result["workspaceKind"] = self.workspace_kind
         result["cycle"] = self.cycle
@@ -164,14 +190,25 @@ class WorkspaceIO:
         file_glob: str | None = None,
         max_results: int = 100,
         max_files: int = 5_000,
+        cursor: str | None = None,
     ) -> dict[str, Any]:
         if not query or len(query) > 500:
             raise ValueError("query must contain 1-500 characters")
         directory = self.workspace.repository_directory(path)
+        relative_root = directory.relative_to(self.workspace.repository).as_posix()
+        previous_path = ""
+        previous_line = 0
+        if cursor is not None:
+            state = self._search_cursors.pop(cursor, None)
+            if state is None or state[:3] != (query, relative_root, file_glob):
+                raise ValueError("Unknown, expired, or mismatched search cursor")
+            previous_path, previous_line = state[3:]
         result_limit = max(1, min(max_results, 500))
         file_limit = max(1, min(max_files, 20_000))
         results: list[dict[str, Any]] = []
         searched_files = 0
+        last_scanned_path = previous_path
+        last_scanned_line = previous_line
         truncated = False
         for candidate in sorted(directory.rglob("*")):
             if searched_files >= file_limit:
@@ -184,14 +221,23 @@ class WorkspaceIO:
                 continue
             if file_glob and not candidate.match(file_glob):
                 continue
+            relative = candidate.relative_to(self.workspace.repository).as_posix()
+            if relative < previous_path:
+                continue
             if candidate.stat().st_size > self.max_file_bytes:
                 continue
-            searched_files += 1
             try:
                 lines = candidate.read_text(encoding="utf-8").splitlines()
             except (UnicodeDecodeError, OSError):
                 continue
+            if relative == previous_path and previous_line >= len(lines):
+                continue
+            searched_files += 1
+            last_scanned_path = relative
+            last_scanned_line = len(lines)
             for line_number, line in enumerate(lines, start=1):
+                if relative == previous_path and line_number <= previous_line:
+                    continue
                 if query.casefold() not in line.casefold():
                     continue
                 results.append(
@@ -223,7 +269,21 @@ class WorkspaceIO:
             "results": results,
             "searchedFiles": searched_files,
             "truncated": truncated,
+            "complete": not truncated,
+            "moreExists": truncated,
+            "nextCursor": self._issue_search_cursor(query, relative_root, file_glob,
+                                                      results[-1]["path"] if results and len(results) >= result_limit else last_scanned_path,
+                                                      results[-1]["line"] if results and len(results) >= result_limit else last_scanned_line)
+                          if truncated else None,
         }
+
+    def _issue_search_cursor(self, query: str, path: str, file_glob: str | None,
+                             last_path: str, last_line: int) -> str:
+        if len(self._search_cursors) >= 8:
+            self._search_cursors.pop(next(iter(self._search_cursors)))
+        token = uuid.uuid4().hex
+        self._search_cursors[token] = (query, path, file_glob, last_path, last_line)
+        return token
 
     def edit_text(
         self,

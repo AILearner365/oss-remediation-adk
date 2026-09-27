@@ -72,8 +72,8 @@ class HttpResearchProvider:
         return ResearchResult(
             ResearchStatus.SUCCESS,
             url,
-            results=tuple(parser.results[:10]),
-            truncated=fetched.truncated or len(parser.results) > 10,
+            results=tuple(parser.results),
+            truncated=fetched.truncated,
         )
 
     def fetch(self, url: str) -> ResearchResult:
