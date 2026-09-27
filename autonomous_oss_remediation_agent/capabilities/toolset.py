@@ -313,7 +313,9 @@ class DeveloperCapabilitySet:
             normalized_path = self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
         findings = [finding.to_dict() for finding in report.findings]
         compact_findings = []
+        finding_details_omitted = False
         for finding in findings[:25]:
+            original = finding.copy()
             finding.pop("backendEvidence", None)
             finding["summary"] = finding["summary"][:300]
             finding["aliases"] = [str(value)[:100] for value in finding["aliases"][:5]]
@@ -322,13 +324,19 @@ class DeveloperCapabilitySet:
                 finding[key] = str(finding[key])[:100]
             finding["dependency"] = {key: str(value)[:100] if value is not None else None
                                      for key, value in finding["dependency"].items()}
+            finding_details_omitted |= bool(original.get("backendEvidence")) or finding != {
+                key: value for key, value in original.items() if key != "backendEvidence"
+            }
             compact_findings.append(finding)
+        findings_complete = len(findings) <= 25
+        model_complete = (findings_complete and not finding_details_omitted
+                          and (report.error is None or len(report.error) <= 1000))
         payload = {
             "status": "ok" if report.succeeded else "error",
             "succeeded": report.succeeded, "outcome": report.effective_outcome.value,
             "backend": report.backend, "findings": compact_findings,
-            "findingCount": len(findings), "findingsComplete": len(findings) <= 25,
-            "findingDetailsOmitted": True,
+            "findingCount": len(findings), "findingsComplete": findings_complete,
+            "findingDetailsOmitted": finding_details_omitted,
             "error": report.error[:1000] if report.error else None,
             "failureKind": report.failure_kind.value if report.failure_kind else None,
             "attemptSummary": {
@@ -339,7 +347,7 @@ class DeveloperCapabilitySet:
             "workspaceKind": target.kind, "cycle": target.cycle,
             "evidenceReference": self.trace.issue_evidence_reference(normalized_path),
             "rawEvidenceReference": self.trace.issue_evidence_reference(report.raw_report_path),
-            "complete": False, "moreExists": True,
+            "complete": model_complete, "moreExists": not model_complete,
         }
         self.trace.append_event(
             "engineering_scan_completed",

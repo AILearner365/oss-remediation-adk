@@ -193,6 +193,11 @@ class AutonomousCapabilityTests(unittest.TestCase):
                                                scanner=LargeScanner())
         result = capabilities.scan_current_repository()
         self.assertEqual("COMPLETED_WITH_FINDINGS", result["outcome"])
+        self.assertEqual(1, result["findingCount"])
+        self.assertTrue(result["findingsComplete"])
+        self.assertTrue(result["findingDetailsOmitted"])
+        self.assertFalse(result["complete"])
+        self.assertTrue(result["moreExists"])
         self.assertEqual("CVE-TEST", result["findings"][0]["vulnerabilityId"])
         self.assertNotIn("backendEvidence", result["findings"][0])
         self.assertLess(len(json.dumps(result)), 3000)
@@ -203,6 +208,65 @@ class AutonomousCapabilityTests(unittest.TestCase):
         detail = capabilities.retrieve_retained_evidence(result["evidenceReference"], query="backendEvidence")
         self.assertTrue(detail["matches"])
         self.assertGreater(len((self.workspace.artifacts / "scans" / "engineering-cycle-0-authoritative-1.json").read_text()), 20000)
+
+    def test_scan_completeness_for_small_and_over_limit_findings(self):
+        from autonomous_oss_remediation_agent.models import ScanReport, VulnerabilityFinding
+
+        class FindingsScanner:
+            backend = "fake"
+
+            def __init__(self, count):
+                self.count = count
+
+            def scan(scanner, repository, severity_scope, label, *, runtime_resource=None):
+                raw = self.workspace.artifacts / "scans" / f"{label}.json"
+                raw.parent.mkdir(parents=True, exist_ok=True)
+                raw.write_text("{}", encoding="utf-8")
+                findings = tuple(
+                    VulnerabilityFinding(f"CVE-{index}", (), "HIGH", "g", f"a{index}",
+                                         f"g:a{index}", "1", summary="brief")
+                    for index in range(scanner.count)
+                )
+                report = ScanReport(True, findings, None, str(raw), backend="fake")
+                self.trace.write_json(f"scans/{label}.normalized.json", report.to_dict())
+                return report
+
+        for count in (1, 27):
+            with self.subTest(count=count):
+                capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                                       scanner=FindingsScanner(count))
+                result = capabilities.scan_current_repository()
+                self.assertEqual(count, result["findingCount"])
+                self.assertEqual(min(count, 25), len(result["findings"]))
+                self.assertEqual(count <= 25, result["findingsComplete"])
+                self.assertFalse(result["findingDetailsOmitted"])
+                self.assertEqual(count <= 25, result["complete"])
+                self.assertEqual(count > 25, result["moreExists"])
+                self.assertEqual("COMPLETED_WITH_FINDINGS", result["outcome"])
+                self.assertIsNotNone(result["rawEvidenceReference"])
+                if count > 25:
+                    detail = capabilities.retrieve_retained_evidence(result["evidenceReference"],
+                                                                      query="CVE-26")
+                    self.assertTrue(detail["matches"])
+
+    def test_evidence_references_are_isolated_between_runs(self):
+        other_workspace = RunWorkspace.create(self.temp.name, "other-run")
+        other_workspace.repository.mkdir()
+        other_trace = TraceStore(other_workspace)
+        same_relative = "commands/same.log"
+        first = self.trace.write_text(same_relative, "same evidence")
+        second = other_trace.write_text(same_relative, "same evidence")
+        reference_a = self.trace.issue_evidence_reference(first)
+        reference_b = other_trace.issue_evidence_reference(second)
+        self.assertNotEqual(reference_a, reference_b)
+        other_io = WorkspaceIO(other_workspace, other_trace)
+        other_runner = ProcessRunner(other_workspace, other_trace, self.budget,
+                                     self.runner.runtime_policy)
+        other_capabilities = DeveloperCapabilitySet(other_io, other_runner, self.budget, other_trace)
+        rejected = other_capabilities.retrieve_retained_evidence(reference_a)
+        self.assertEqual("TOOL_ERROR", rejected["failureCode"])
+        self.assertIn("Unknown or expired", rejected["error"])
+        self.assertEqual("same evidence", other_capabilities.retrieve_retained_evidence(reference_b)["content"])
 
     def test_shell_supports_discovery_and_strips_credential_environment(self):
         (self.workspace.repository / "nested").mkdir()
@@ -798,6 +862,15 @@ class AutonomousCapabilityTests(unittest.TestCase):
         experiment = capabilities.begin_cycle(1)
         before = capabilities.scan_current_repository()
         self.assertEqual("experimental", before["workspaceKind"])
+        self.assertEqual("COMPLETED_CLEAN", before["outcome"])
+        self.assertEqual(0, before["findingCount"])
+        self.assertEqual([], before["findings"])
+        self.assertTrue(before["findingsComplete"])
+        self.assertFalse(before["findingDetailsOmitted"])
+        self.assertTrue(before["complete"])
+        self.assertFalse(before["moreExists"])
+        self.assertIsNotNone(before["evidenceReference"])
+        self.assertIsNotNone(before["rawEvidenceReference"])
         self.assertEqual((experiment.repository, ("HIGH",)), scanner.calls[0][:2])
         capabilities.submit_cycle_intent(1, _valid_intent_answers())
         after = capabilities.scan_current_repository()

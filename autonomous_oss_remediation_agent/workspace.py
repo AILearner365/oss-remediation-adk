@@ -132,7 +132,9 @@ class TraceStore:
             raise WorkspaceBoundaryError("Evidence must be a retained artifact file")
         digest = sha256_file(candidate)
         relative = candidate.relative_to(artifact_root).as_posix()
-        reference = "evidence:" + hashlib.sha256(f"{relative}\0{digest}".encode()).hexdigest()
+        reference = "evidence:" + hashlib.sha256(
+            f"{self.workspace.root.resolve()}\0{relative}\0{digest}".encode()
+        ).hexdigest()
         self._evidence_references[reference] = (candidate, digest)
         return reference
 
