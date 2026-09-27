@@ -1,0 +1,8 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260927T013334Z-1592cc2a/temp/autonomous-osv-yrz4yuxg/repository
+Starting filesystem walk for root: /
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260927T013334Z-1592cc2a/temp/autonomous-osv-yrz4yuxg/repository/task-service/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260927T013334Z-1592cc2a/temp/autonomous-osv-yrz4yuxg/repository/task-common/pom.xml file and found 0 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260927T013334Z-1592cc2a/temp/autonomous-osv-yrz4yuxg/repository/task-web/pom.xml file and found 4 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260927T013334Z-1592cc2a/temp/autonomous-osv-yrz4yuxg/repository/task-domain/pom.xml file and found 0 packages
+End status: 53 dirs visited, 82 inodes visited, 4 Extract calls, 5.905969ms elapsed, 5.906111ms wall time
+Filtered 6 local/unscannable package/s from the scan.

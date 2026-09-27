@@ -1,0 +1,38 @@
+{
+  "after": {
+    "captured": true,
+    "changedFiles": [
+      "pom.xml",
+      "task-service/pom.xml",
+      "task-web/pom.xml"
+    ],
+    "fileDigests": {
+      "pom.xml": "c44f8762084077963e6ccdbb8c2be2ca31451935254e3f3afa70ab37842d75b0",
+      "task-service/pom.xml": "aa0ff036c3a28927e71e43547d551f31199c048131c80c11025feba64759710d",
+      "task-web/pom.xml": "c9a3e978a71a9f975d10ed3cce377eb58458a7b4dd26b9c8d350a1d43611e1a7"
+    },
+    "stateDigest": "bff0c279331c5078ab006fc378f747b0cb967f40b5f51eb8feb7419ae24b073c"
+  },
+  "before": {
+    "captured": true,
+    "changedFiles": [
+      "pom.xml",
+      "task-service/pom.xml",
+      "task-web/pom.xml"
+    ],
+    "fileDigests": {
+      "pom.xml": "c44f8762084077963e6ccdbb8c2be2ca31451935254e3f3afa70ab37842d75b0",
+      "task-service/pom.xml": "aa0ff036c3a28927e71e43547d551f31199c048131c80c11025feba64759710d",
+      "task-web/pom.xml": "c9a3e978a71a9f975d10ed3cce377eb58458a7b4dd26b9c8d350a1d43611e1a7"
+    },
+    "stateDigest": "bff0c279331c5078ab006fc378f747b0cb967f40b5f51eb8feb7419ae24b073c"
+  },
+  "cycle": 4,
+  "delta": {
+    "matchesPriorCycle": 3,
+    "pathsAddedToChangeSet": [],
+    "pathsModifiedSinceCycleStart": [],
+    "pathsRemovedFromChangeSet": [],
+    "repositoryStateChanged": false
+  }
+}

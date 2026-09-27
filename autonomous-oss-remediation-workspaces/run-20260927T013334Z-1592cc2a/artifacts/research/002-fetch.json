@@ -1,0 +1,13 @@
+{
+  "cycle": 1,
+  "operation": "fetch",
+  "result": {
+    "content": "",
+    "error": "Response contained no extractable text",
+    "results": [],
+    "source": "https://spring.io/projects/spring-boot",
+    "status": "extraction_failure",
+    "truncated": true
+  },
+  "url": "https://spring.io/projects/spring-boot"
+}
