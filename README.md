@@ -6,6 +6,8 @@ This repository contains an ADK-based OSS vulnerability remediation workflow for
 
 The approved independent single-agent POC is implemented in `autonomous_oss_remediation_agent`. Its operating instructions and fail-closed deployment requirements are in `autonomous_oss_remediation_agent/README.md`; implementation evidence and remaining deployment prerequisites are in `docs/AUTONOMOUS_OSS_REMEDIATION_IMPLEMENTATION_REVIEW.md`. The frozen research hypothesis and evaluation protocol for Challenge Before Commitment are in `docs/EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md`.
 
+Development-project continuity for this autonomous POC is in [`docs/project-memory/PROJECT-DIRECTION.md`](docs/project-memory/PROJECT-DIRECTION.md), [`WORK-STATE.md`](docs/project-memory/WORK-STATE.md), [`DECISION-LOG.md`](docs/project-memory/DECISION-LOG.md), and [`START-NEW-CHAT.md`](docs/project-memory/START-NEW-CHAT.md). These human-maintained bookmarks are not Autonomous Agent runtime inputs.
+
 ## Architecture Documentation
 
 The finalized architecture, artifact contracts, deterministic tool APIs, AI agent specifications, workflow orchestration, and implementation plan are documented here:
