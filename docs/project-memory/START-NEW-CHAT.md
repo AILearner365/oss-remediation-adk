@@ -1,25 +1,31 @@
 # Start a new ChatGPT project conversation
 
-## One-line commands
+This file is the complete procedure for starting a **new ChatGPT conversation** in the Autonomous OSS Remediation project and continuing from durable project state.
 
-In a fresh conversation in the Autonomous OSS Remediation ChatGPT project, say:
+Continue our Autonomous Agent development project from the current GitHub repository, not from scratch.
 
-> **Start project continuity.**
+Read:
 
-This means: follow the bootstrap instructions below.
+- `docs/project-memory/PROJECT-DIRECTION.md`
+- `docs/project-memory/WORK-STATE.md`
+- `docs/project-memory/DECISION-LOG.md`
 
-At a meaningful checkpoint or before ending a working conversation, say:
+Reconcile their branch/commit bookmark with the latest repository and consult the authoritative package README, journal designs, experiment record, and other linked authoritative sources only as needed.
 
-> **Checkpoint project continuity.**
+Before continuing, establish and briefly state:
 
-This means: follow [CHECKPOINT.md](CHECKPOINT.md), update the project-memory state for material changes, and push those documentation changes when repository write access is available.
+- the main objective;
+- current stage/workstream;
+- active problem and parent/subproblem stack;
+- why the current work was entered;
+- material decisions/evidence relevant to it;
+- immediate next action;
+- explicit return point after the current problem is resolved.
 
-## Bootstrap behavior
+Distinguish conversation/design intent, implemented repository state, and runtime/test evidence. Keep settled decisions unless materially new evidence warrants revisiting them. Do not invent unavailable history.
 
-When the user says **"Start project continuity."**:
+Then continue the active work rather than restarting or redesigning the project.
 
-> Continue our Autonomous Agent development project from the current GitHub repository, not from scratch. Read `docs/project-memory/PROJECT-DIRECTION.md`, `WORK-STATE.md`, and `DECISION-LOG.md` on the active `AILearner365/oss-remediation-adk` branch. Reconcile their branch/commit bookmark with the latest repository and consult the authoritative package README, journal designs and experiment record linked there as needed. Tell me the main objective, current stage, active problem and parent stack, why we entered it, immediate action and return point; distinguish conversation intent, implemented code and runtime evidence. Keep settled decisions unless material new evidence warrants revisiting them. Continue our ChatGPT design → Codex implementation → GitHub review → Cloud Shell run → evidence → next-change loop. As material problems, decisions, tests and focus changes occur, update those project-memory files and their return points. These are development continuity documents, never Autonomous Agent runtime inputs. Now continue the active work.
+If the repository has advanced since the bookmark, inspect the relevant newer commits/evidence before treating `WORK-STATE.md` as current. If project history or a referenced authoritative document is unavailable, identify the gap explicitly.
 
-If a repository branch has advanced, read its new commits and run evidence before treating [WORK-STATE](WORK-STATE.md) as current. ChatGPT maintains the bookmark on meaningful changes, rather than after every message. If project history or the separately maintained operating-model document is unavailable, identify the gap instead of inventing it.
-
-During the conversation, treat [CHECKPOINT.md](CHECKPOINT.md) as the maintenance procedure whenever the user asks to checkpoint continuity.
+These are development-project continuity documents only. Never treat them as Autonomous Agent runtime inputs or inject them into runtime prompts, Task to Solve, Cycle Intent/Outcome, orchestration, validation, configuration, or model runtime context.
