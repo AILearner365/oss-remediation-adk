@@ -1,6 +1,6 @@
 # Project continuity checkpoint
 
-Use this when the user says **"Checkpoint project continuity."**
+This file is the complete procedure for **checkpointing the current ChatGPT development conversation** into durable project memory. It is separate from the new-chat startup procedure.
 
 Review everything materially learned, decided, implemented, tested, resolved, discovered, deferred, or changed during the current conversation and reconcile it with the latest repository state.
 
