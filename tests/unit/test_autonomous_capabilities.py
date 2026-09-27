@@ -497,6 +497,39 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(len(names), len({path for page in pages for path in page["files"]}))
         self.assertTrue(pages[-1]["complete"])
 
+    def test_listing_oversized_single_path_is_bounded_and_cursor_progresses(self):
+        oversized_name = "x" * 8_100 + ".txt"
+        for name in ("first.txt", "later.txt", "last.txt"):
+            (self.workspace.repository / name).write_text("x", encoding="utf-8")
+        entries = [(self.workspace.repository / name, True)
+                   for name in ("first.txt", oversized_name, "later.txt", "last.txt")]
+        with patch("autonomous_oss_remediation_agent.capabilities.workspace_io._walk_repository_entries",
+                   side_effect=lambda directory: iter(entries)):
+            pages = []
+            cursor = None
+            for _ in range(5):
+                page = self.io.list_files(max_entries=2, cursor=cursor, file_glob="*.txt")
+                pages.append(page)
+                self.assertLess(len(json.dumps(page)), 8_000)
+                cursor = page["nextCursor"]
+                if cursor is None:
+                    break
+            else:
+                self.fail("Oversized path prevented listing cursor progress")
+
+        first = pages[0]
+        self.assertEqual(["first.txt"], first["files"])
+        self.assertEqual(1, len(first["oversizedEntries"]))
+        summary = first["oversizedEntries"][0]
+        self.assertTrue(summary["pathTruncated"])
+        self.assertEqual(len(oversized_name), summary["pathChars"])
+        self.assertEqual(1, summary["resultIndex"])
+        self.assertTrue(first["pathDetailsOmitted"])
+        self.assertTrue(first["moreExists"])
+        self.assertEqual(["first.txt", "later.txt", "last.txt"],
+                         [name for page in pages for name in page["files"]])
+        self.assertEqual(4, pages[-1]["totalMatches"])
+
     def test_search_response_budget_preserves_every_match_across_pages(self):
         path = self.workspace.repository / "matches.txt"
         path.write_text("\n".join(f"needle-{index:03d}-" + "x" * 490

@@ -124,11 +124,12 @@ class WorkspaceIO:
                 )
 
         entries: list[str] = []
+        oversized_entries: list[dict[str, Any]] = []
         result_chars = 0
         scanned_entries = 0
         exhausted = False
         response_budget_hit = False
-        while scanned_entries < scan_limit and len(entries) < limit:
+        while scanned_entries < scan_limit and len(entries) + len(oversized_entries) < limit:
             try:
                 if state.pending is not None:
                     candidate, is_file = state.pending
@@ -150,13 +151,24 @@ class WorkspaceIO:
                 continue
             entry_chars = len(json.dumps(relative))
             if entry_chars > _MODEL_RESULT_BUDGET_CHARS:
-                self._close_listing_cursor(cursor_id)
-                raise ValueError("Repository path exceeds listing response budget")
+                display_entry = {
+                    "resultIndex": len(entries) + len(oversized_entries),
+                    "pathPrefix": relative[:160], "pathSuffix": relative[-80:],
+                    "pathChars": len(relative),
+                    "pathSha256": hashlib.sha256(relative.encode("utf-8", errors="surrogatepass")).hexdigest(),
+                    "pathTruncated": True,
+                }
+                entry_chars = len(json.dumps(display_entry))
+            else:
+                display_entry = None
             if result_chars + entry_chars > _MODEL_RESULT_BUDGET_CHARS:
                 state.pending = (candidate, is_file)
                 response_budget_hit = True
                 break
-            entries.append(relative)
+            if display_entry is None:
+                entries.append(relative)
+            else:
+                oversized_entries.append(display_entry)
             result_chars += entry_chars
             state.matched_entries += 1
 
@@ -167,11 +179,12 @@ class WorkspaceIO:
         else:
             next_cursor = cursor_id
             truncation_reason = ("RESPONSE_BUDGET" if response_budget_hit else
-                                 "PAGE_LIMIT" if len(entries) >= limit else "SCAN_LIMIT")
+                                 "PAGE_LIMIT" if len(entries) + len(oversized_entries) >= limit else "SCAN_LIMIT")
         self._trace(
             "workspace_list",
             path=state.path,
-            count=len(entries),
+            count=len(entries) + len(oversized_entries),
+            oversizedCount=len(oversized_entries),
             cursor=cursor_id,
             nextCursor=next_cursor,
             fileGlob=state.file_glob,
@@ -183,6 +196,8 @@ class WorkspaceIO:
             "workspaceKind": self.workspace_kind,
             "cycle": self.cycle,
             "files": entries,
+            "oversizedEntries": oversized_entries,
+            "pathDetailsOmitted": bool(oversized_entries),
             "path": state.path,
             "fileGlob": state.file_glob,
             "cursor": cursor_id,
