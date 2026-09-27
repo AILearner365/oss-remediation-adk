@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import uuid
 from dataclasses import dataclass
@@ -9,6 +10,9 @@ from typing import Any, Iterator
 
 from ..evidence import EVIDENCE_EXCLUDED_DIRECTORIES, is_generated_evidence_path
 from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
+
+
+_MODEL_RESULT_BUDGET_CHARS = 8_000
 
 
 class WorkspaceIO:
@@ -120,25 +124,40 @@ class WorkspaceIO:
                 )
 
         entries: list[str] = []
+        result_chars = 0
         scanned_entries = 0
         exhausted = False
+        response_budget_hit = False
         while scanned_entries < scan_limit and len(entries) < limit:
             try:
-                candidate, is_file = next(state.iterator)
+                if state.pending is not None:
+                    candidate, is_file = state.pending
+                    state.pending = None
+                else:
+                    candidate, is_file = next(state.iterator)
+                    scanned_entries += 1
+                    state.scanned_entries += 1
             except StopIteration:
                 exhausted = True
                 break
             except Exception:
                 self._close_listing_cursor(cursor_id)
                 raise
-            scanned_entries += 1
-            state.scanned_entries += 1
             if not is_file:
                 continue
             relative = candidate.relative_to(self.workspace.repository).as_posix()
             if state.file_glob and not Path(relative).match(state.file_glob):
                 continue
+            entry_chars = len(json.dumps(relative))
+            if entry_chars > _MODEL_RESULT_BUDGET_CHARS:
+                self._close_listing_cursor(cursor_id)
+                raise ValueError("Repository path exceeds listing response budget")
+            if result_chars + entry_chars > _MODEL_RESULT_BUDGET_CHARS:
+                state.pending = (candidate, is_file)
+                response_budget_hit = True
+                break
             entries.append(relative)
+            result_chars += entry_chars
             state.matched_entries += 1
 
         if exhausted:
@@ -147,7 +166,8 @@ class WorkspaceIO:
             truncation_reason = None
         else:
             next_cursor = cursor_id
-            truncation_reason = "PAGE_LIMIT" if len(entries) >= limit else "SCAN_LIMIT"
+            truncation_reason = ("RESPONSE_BUDGET" if response_budget_hit else
+                                 "PAGE_LIMIT" if len(entries) >= limit else "SCAN_LIMIT")
         self._trace(
             "workspace_list",
             path=state.path,
@@ -172,6 +192,8 @@ class WorkspaceIO:
             "scannedEntries": scanned_entries,
             "cumulativeScannedEntries": state.scanned_entries,
             "truncated": not exhausted,
+            "complete": exhausted,
+            "moreExists": not exhausted,
             "truncationReason": truncation_reason,
         }
 
@@ -206,13 +228,16 @@ class WorkspaceIO:
         result_limit = max(1, min(max_results, 500))
         file_limit = max(1, min(max_files, 20_000))
         results: list[dict[str, Any]] = []
+        result_chars = 0
         searched_files = 0
         last_scanned_path = previous_path
         last_scanned_line = previous_line
         truncated = False
+        truncation_reason = None
         for candidate in sorted(directory.rglob("*")):
             if searched_files >= file_limit:
                 truncated = True
+                truncation_reason = "FILE_LIMIT"
                 break
             if (
                 is_generated_evidence_path(candidate.relative_to(self.workspace.repository))
@@ -240,17 +265,21 @@ class WorkspaceIO:
                     continue
                 if query.casefold() not in line.casefold():
                     continue
-                results.append(
-                    {
-                        "path": candidate.relative_to(self.workspace.repository).as_posix(),
-                        "line": line_number,
-                        "text": line[:500],
-                    }
-                )
+                match = {"path": relative, "line": line_number, "text": line[:500]}
+                match_chars = len(json.dumps(match))
+                if match_chars > _MODEL_RESULT_BUDGET_CHARS:
+                    raise ValueError("Search match exceeds response budget")
+                if result_chars + match_chars > _MODEL_RESULT_BUDGET_CHARS:
+                    truncated = True
+                    truncation_reason = "RESPONSE_BUDGET"
+                    break
+                results.append(match)
+                result_chars += match_chars
                 if len(results) >= result_limit:
                     truncated = True
+                    truncation_reason = "RESULT_LIMIT"
                     break
-            if len(results) >= result_limit:
+            if truncation_reason in {"RESPONSE_BUDGET", "RESULT_LIMIT"}:
                 break
         self._trace(
             "workspace_search",
@@ -269,11 +298,12 @@ class WorkspaceIO:
             "results": results,
             "searchedFiles": searched_files,
             "truncated": truncated,
+            "truncationReason": truncation_reason,
             "complete": not truncated,
             "moreExists": truncated,
             "nextCursor": self._issue_search_cursor(query, relative_root, file_glob,
-                                                      results[-1]["path"] if results and len(results) >= result_limit else last_scanned_path,
-                                                      results[-1]["line"] if results and len(results) >= result_limit else last_scanned_line)
+                                                      results[-1]["path"] if results and truncation_reason in {"RESPONSE_BUDGET", "RESULT_LIMIT"} else last_scanned_path,
+                                                      results[-1]["line"] if results and truncation_reason in {"RESPONSE_BUDGET", "RESULT_LIMIT"} else last_scanned_line)
                           if truncated else None,
         }
 
@@ -354,6 +384,7 @@ class _ListingCursor:
     file_glob: str | None
     scanned_entries: int = 0
     matched_entries: int = 0
+    pending: tuple[Path, bool] | None = None
 
 
 def _walk_repository_entries(directory: Path) -> Iterator[tuple[Path, bool]]:

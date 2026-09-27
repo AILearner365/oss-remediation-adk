@@ -476,6 +476,66 @@ class AutonomousCapabilityTests(unittest.TestCase):
         }
         self.assertEqual(before, after)
 
+    def test_listing_response_budget_preserves_every_path_across_pages(self):
+        names = [f"file-{index:03d}-{'p' * 90}.txt" for index in range(110)]
+        for name in names:
+            (self.workspace.repository / name).write_text("x", encoding="utf-8")
+        pages = []
+        cursor = None
+        while True:
+            page = self.io.list_files(max_entries=500, cursor=cursor)
+            pages.append(page)
+            self.assertLessEqual(sum(len(json.dumps(path))
+                                     for path in page["files"]), 8_000)
+            cursor = page["nextCursor"]
+            if cursor is None:
+                break
+        self.assertEqual("RESPONSE_BUDGET", pages[0]["truncationReason"])
+        self.assertFalse(pages[0]["complete"])
+        self.assertTrue(pages[0]["moreExists"])
+        self.assertEqual(names, sorted(path for page in pages for path in page["files"]))
+        self.assertEqual(len(names), len({path for page in pages for path in page["files"]}))
+        self.assertTrue(pages[-1]["complete"])
+
+    def test_search_response_budget_preserves_every_match_across_pages(self):
+        path = self.workspace.repository / "matches.txt"
+        path.write_text("\n".join(f"needle-{index:03d}-" + "x" * 490
+                                  for index in range(35)), encoding="utf-8")
+        second_path = self.workspace.repository / "z-matches.txt"
+        second_path.write_text("\n".join(f"needle-{index:03d}-" + "y" * 490
+                                         for index in range(20)), encoding="utf-8")
+        pages = []
+        cursor = None
+        while True:
+            page = self.io.search_text("needle", max_results=100, cursor=cursor)
+            pages.append(page)
+            self.assertLessEqual(sum(len(json.dumps(match))
+                                     for match in page["results"]), 8_000)
+            cursor = page["nextCursor"]
+            if cursor is None:
+                break
+        self.assertEqual("RESPONSE_BUDGET", pages[0]["truncationReason"])
+        self.assertFalse(pages[0]["complete"])
+        self.assertTrue(pages[0]["moreExists"])
+        self.assertEqual(([('matches.txt', line) for line in range(1, 36)] +
+                          [('z-matches.txt', line) for line in range(1, 21)]),
+                         [(match["path"], match["line"]) for page in pages
+                          for match in page["results"]])
+        self.assertTrue(pages[-1]["complete"])
+
+    def test_small_listing_and_search_remain_complete(self):
+        (self.workspace.repository / "small.txt").write_text("needle\n", encoding="utf-8")
+        listing = self.io.list_files()
+        search = self.io.search_text("needle")
+        self.assertEqual(["small.txt"], listing["files"])
+        self.assertIsNone(listing["nextCursor"])
+        self.assertTrue(listing["complete"])
+        self.assertFalse(listing["moreExists"])
+        self.assertEqual(1, len(search["results"]))
+        self.assertIsNone(search["nextCursor"])
+        self.assertTrue(search["complete"])
+        self.assertFalse(search["moreExists"])
+
     def test_file_listing_excludes_git_files_and_directories(self):
         git_directory = self.workspace.repository / ".git"
         git_directory.mkdir()
@@ -1004,6 +1064,33 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertTrue(search_detail["matches"])
         fetch_detail = capabilities.retrieve_retained_evidence(fetch["resultReference"], query="QQQQ")
         self.assertTrue(fetch_detail["matches"])
+
+    def test_research_search_bounds_long_fields_but_retains_them(self):
+        long_title = "T" * 5000 + "TITLE-END"
+        long_url = "https://example.test/" + "u" * 5000 + "URL-END"
+
+        class LongFieldProvider:
+            def search(self, query):
+                return ResearchResult(ResearchStatus.SUCCESS, "research",
+                                      results=({"title": long_title, "url": long_url},
+                                               {"title": "界" * 1000, "url": "https://example.test/" + "界" * 1000}))
+
+            def fetch(self, url):
+                raise AssertionError("fetch was not requested")
+
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                               research_provider=LongFieldProvider())
+        result = capabilities.research_search("advisory")
+        self.assertEqual(200, len(result["results"][0]["title"]))
+        self.assertEqual(500, len(result["results"][0]["url"]))
+        self.assertLessEqual(len(json.dumps(result["results"][1]["title"])), 202)
+        self.assertLessEqual(len(json.dumps(result["results"][1]["url"])), 502)
+        self.assertTrue(result["resultFieldsOmitted"])
+        self.assertFalse(result["complete"])
+        self.assertTrue(result["moreExists"])
+        retained = self.trace.resolve_evidence_reference(result["resultReference"]).read_text(encoding="utf-8")
+        self.assertIn(long_title, retained)
+        self.assertIn(long_url, retained)
 
     def test_new_package_has_no_reference_agent_imports(self):
         package_root = Path(__file__).resolve().parents[2] / "autonomous_oss_remediation_agent"

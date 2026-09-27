@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from google.adk.tools.function_tool import FunctionTool
@@ -379,8 +380,17 @@ class DeveloperCapabilitySet:
             resultReference=result_reference,
         )
         results = payload.get("results", [])
-        return {**payload, "results": results[:10], "complete": not payload.get("truncated", False) and len(results) <= 10,
-                "moreExists": payload.get("truncated", False) or len(results) > 10,
+        first_page = []
+        fields_omitted = False
+        for result in results[:10]:
+            compact = {"title": _bounded_research_field(result.get("title", ""), 202),
+                       "url": _bounded_research_field(result.get("url", ""), 502)}
+            fields_omitted |= compact != result
+            first_page.append(compact)
+        more_exists = payload.get("truncated", False) or len(results) > 10 or fields_omitted
+        return {**payload, "results": first_page, "complete": not more_exists,
+                "moreExists": more_exists,
+                "resultFieldsOmitted": fields_omitted,
                 "resultReference": self.trace.issue_evidence_reference(result_reference),
                 "sourceTruncated": payload.get("truncated", False)}
 
@@ -567,3 +577,15 @@ class DeveloperCapabilitySet:
         except Exception as exc:
             self.trace.append_event("tool_error", tool=name, error=str(exc))
             return {"status": "error", "error": str(exc), "failureCode": "TOOL_ERROR"}
+
+
+def _bounded_research_field(value: Any, json_char_limit: int) -> str:
+    text = str(value)
+    low, high = 0, len(text)
+    while low < high:
+        middle = (low + high + 1) // 2
+        if len(json.dumps(text[:middle])) <= json_char_limit:
+            low = middle
+        else:
+            high = middle - 1
+    return text[:low]
