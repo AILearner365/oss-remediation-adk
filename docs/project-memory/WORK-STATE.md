@@ -12,7 +12,7 @@
 
 **Current return point:** do **not** change Q1–Q5 or the frozen Challenge Before Commitment wording yet. P2.1 and P2.3 are implemented and locally verified; P2.2 has deterministic handoff coverage. Next obtain a clean targeted model-backed runtime-resource trace, then return to repeated P1.1 evaluation.
 
-**Harness cleanup checkpoint (2026-09-27):** The current branch now separates text replacement from explicit whole-file deletion, gives rejected Intent submissions targeted structural repair guidance, and stops orchestrator retries after four identical Intent error sets. The existing current-cycle runtime-resource resolver was retained; a command-created resource was handed to an experimental scanner consumer in an integration-style unit test. A clean model-backed experiment → build/resource → experimental scan → Intent trace is still required before broad P1.1 reruns. The sections below preserve the audit's original return sequence and historical findings.
+**Harness cleanup checkpoint (2026-09-27):** The current branch separates text replacement from explicit whole-file deletion and gives rejected Intent submissions targeted structural repair guidance. A P2.3 follow-up removed the four-identical-error early stop: error labels do not prove lack of progress, and the existing ten-turn/ten-submission checkpoint limits bound recovery. The existing current-cycle runtime-resource resolver was retained; a command-created resource was handed to an experimental scanner consumer in an integration-style unit test. A clean model-backed experiment → build/resource → experimental scan → Intent trace is still required before broad P1.1 reruns. The sections below preserve the audit's original return sequence and historical findings.
 
 ## Immediate next sequence
 
@@ -53,7 +53,7 @@ Rejected Intent submissions in the recent runs were primarily structural capture
 
 The repeated retries did not represent useful additional engineering search. Investigate the smallest harness/schema recovery improvement that helps the model correct the same structural failure efficiently without adding domain reasoning or changing Q1–Q5.
 
-Implemented: rejected submissions expose focused structural repair instructions; retry prompts use the same instructions; four identical error sets end orchestrator checkpoint retries. Valid and substantive Intent rules are unchanged.
+Implemented: rejected submissions expose focused structural repair instructions; retry prompts use the same instructions. The follow-up removed the identical-error stop and relies on the existing checkpoint turn and submission limits. Orchestration stops immediately when submissions are exhausted within one turn. Valid and substantive Intent rules are unchanged.
 
 ### Step 5 — freeze and rerun comparable benchmark runs
 After Steps 2–4 are implemented/verified, run the same benchmark repeatedly from equivalent starting conditions. Keep task success separate from engineering decision quality.

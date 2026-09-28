@@ -262,7 +262,6 @@ class CycleCapture:
     outcome_answers: dict[str, str] = field(default_factory=dict)
     outcome_status: str | None = None
     last_intent_errors: tuple[str, ...] = ()
-    repeated_intent_errors: int = 0
     last_outcome_errors: tuple[str, ...] = ()
     validation_report: ValidationReport | None = None
     intent_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
@@ -789,11 +788,6 @@ class JournalLifecycle:
     ) -> CheckpointResult:
         if capture is not None and kind == "intent":
             capture.rejected_intents += 1
-            signature = tuple(errors)
-            capture.repeated_intent_errors = (
-                capture.repeated_intent_errors + 1
-                if signature == capture.last_intent_errors else 1
-            )
             capture.last_intent_errors = tuple(errors)
             attempt = capture.rejected_intents
         elif capture is not None:
@@ -802,9 +796,7 @@ class JournalLifecycle:
             attempt = capture.rejected_outcomes
         else:
             attempt = 1
-        retry_allowed = attempt < self.max_checkpoint_attempts and not (
-            kind == "intent" and capture is not None and capture.repeated_intent_errors >= 4
-        )
+        retry_allowed = attempt < self.max_checkpoint_attempts
         self.trace.append_event(
             f"{kind}_submission_rejected",
             cycle=cycle,

@@ -90,21 +90,36 @@ class DecisionJournalTests(unittest.TestCase):
 
         self.assertNotIn("# Cycle 1 — Problem Analysis and Solution Decision", self.lifecycle.store.read())
 
-    def test_intent_structural_repair_feedback_and_repeated_failure_bound(self):
+    def test_intent_structural_repair_feedback_allows_recovery_after_repeated_error(self):
         answers = self._intent_answers()
         self._replace(answers, INTENT_SECTIONS[1],
                       next(item["answer"] for item in answers if item["section"] == INTENT_SECTIONS[1]).split("### Material assumptions")[0])
         for attempt in range(4):
+            self._replace(answers, INTENT_SECTIONS[0],
+                          f"Observed problem analysis revision {attempt}; structural repair still pending.")
             rejected = self.lifecycle.submit_intent(1, answers)
             self.assertFalse(rejected.accepted)
             self.assertTrue(any("material-assumptions subsection" in error for error in rejected.errors))
             self.assertTrue(any("### Material assumptions that remain necessary" in hint
                                 for hint in rejected.repair_instructions))
-            self.assertEqual(attempt < 3, rejected.retry_allowed)
-        self.assertEqual(4, self.lifecycle.cycles[1].repeated_intent_errors)
+            self.assertTrue(rejected.retry_allowed)
+            self.assertNotIn("# Cycle 1 — Problem Analysis and Solution Decision", self.lifecycle.store.read())
         repaired = self._intent_answers()
         self.assertTrue(self.lifecycle.submit_intent(1, repaired).accepted)
         self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
+
+    def test_intent_checkpoint_limit_rejects_even_a_later_valid_submission(self):
+        answers = self._intent_answers()
+        self._replace(answers, INTENT_SECTIONS[1], "Investigation answer lacks required structure.")
+        for attempt in range(self.lifecycle.max_checkpoint_attempts):
+            rejected = self.lifecycle.submit_intent(1, answers)
+            self.assertFalse(rejected.accepted)
+            self.assertEqual(attempt + 1 < self.lifecycle.max_checkpoint_attempts,
+                             rejected.retry_allowed)
+        exhausted = self.lifecycle.submit_intent(1, self._intent_answers())
+        self.assertFalse(exhausted.accepted)
+        self.assertTrue(any("retry limit is exhausted" in error for error in exhausted.errors))
+        self.assertEqual(JournalPhase.INTENT_REQUIRED, self.lifecycle.phase)
 
     def test_additional_subsection_is_accepted_and_prior_content_is_immutable(self):
         answers = self._intent_answers() + [

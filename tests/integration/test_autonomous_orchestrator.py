@@ -316,21 +316,62 @@ class _MissingIntentSession:
 
 
 class _RepeatedMalformedIntentSession:
-    def __init__(self, capabilities):
+    def __init__(self, capabilities, recover_after=None):
         self.capabilities = capabilities
+        self.recover_after = recover_after
         self.messages = []
         self.responses = []
 
     async def run_turn(self, message):
+        if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+            self.capabilities.submit_cycle_outcome(
+                self.capabilities.journal.active_cycle,
+                "READY_FOR_INDEPENDENT_VALIDATION",
+                "The accepted solution was implemented and checked.",
+                _outcome_answers(),
+            )
+            return AgentTurnResult("Outcome submitted")
         self.messages.append(message)
+        answers = _intent_answers(self.capabilities.journal.active_cycle)
+        if self.recover_after is None or len(self.messages) <= self.recover_after:
+            for item in answers:
+                if item["section"] == "Information, investigation and remaining uncertainty":
+                    item["answer"] = item["answer"].split("### Material assumptions")[0]
+                elif item["section"] == "Problem understanding in project context":
+                    item["answer"] += f" Revision {len(self.messages)}."
+        response = self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle, answers,
+        )
+        self.responses.append(response)
+        if response["status"] == "accepted":
+            self.capabilities.edit_workspace_text(
+                "replace", "pom.xml",
+                old_text="<demo.version>1.0</demo.version>",
+                new_text="<demo.version>2.0</demo.version>",
+            )
+        return AgentTurnResult("Malformed Intent repeated")
+
+    async def close(self):
+        return None
+
+
+class _ExhaustIntentWithinTurnSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+        self.turns = 0
+        self.responses = []
+
+    async def run_turn(self, message):
+        self.turns += 1
         answers = _intent_answers(self.capabilities.journal.active_cycle)
         for item in answers:
             if item["section"] == "Information, investigation and remaining uncertainty":
-                item["answer"] = item["answer"].split("### Material assumptions")[0]
-        self.responses.append(self.capabilities.submit_cycle_intent(
-            self.capabilities.journal.active_cycle, answers,
-        ))
-        return AgentTurnResult("Malformed Intent repeated")
+                item["answer"] = "Missing required structure."
+        for _ in range(self.capabilities.journal.max_checkpoint_attempts):
+            self.responses.append(self.capabilities.submit_cycle_intent(
+                self.capabilities.journal.active_cycle, answers,
+            ))
+        return AgentTurnResult("Checkpoint submissions exhausted")
 
     async def close(self):
         return None
@@ -1462,7 +1503,25 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIsNone(cycle["outcome"])
         self.assertIsNotNone(cycle["deterministicValidation"])
 
-    def test_identical_intent_structure_rejections_stop_after_four_turns(self):
+    def test_repeated_intent_structure_errors_can_recover_on_fifth_turn(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _RepeatedMalformedIntentSession(capabilities, recover_after=4)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertEqual(5, len(sessions[0].messages))
+        self.assertTrue(all(response["status"] == "rejected" for response in sessions[0].responses[:4]))
+        self.assertEqual(1, len({tuple(response["errors"]) for response in sessions[0].responses[:4]}))
+        self.assertTrue(all(response["retryAllowed"] for response in sessions[0].responses[:4]))
+        self.assertEqual("accepted", sessions[0].responses[4]["status"])
+        self.assertEqual("COMPLETE", result.capture_status)
+        self.assertIn("### Material assumptions that remain necessary",
+                      sessions[0].messages[1])
+
+    def test_repeated_intent_structure_rejections_stop_at_checkpoint_limit(self):
         sessions = []
         result = AutonomousRemediationOrchestrator(
             self._request(max_cycles=1),
@@ -1472,10 +1531,25 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
             scanner_factory=_FixtureScanner,
         ).run()
         self.assertIn("CYCLE_INTENT_CAPTURE_INCOMPLETE", result.reason)
-        self.assertEqual(4, len(sessions[0].messages))
+        self.assertEqual(10, len(sessions[0].messages))
+        self.assertTrue(all(response["status"] == "rejected" for response in sessions[0].responses))
         self.assertFalse(sessions[0].responses[-1]["retryAllowed"])
         self.assertIn("### Material assumptions that remain necessary",
                       sessions[0].messages[1])
+
+    def test_intent_submissions_exhausted_within_one_turn_do_not_request_another(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _ExhaustIntentWithinTurnSession(capabilities)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertIn("CYCLE_INTENT_CAPTURE_INCOMPLETE", result.reason)
+        self.assertEqual(1, sessions[0].turns)
+        self.assertEqual(10, len(sessions[0].responses))
+        self.assertFalse(sessions[0].responses[-1]["retryAllowed"])
 
     def test_failed_intent_runs_validation_and_allows_next_cycle(self):
         sessions = []
