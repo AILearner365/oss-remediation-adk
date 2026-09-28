@@ -1,64 +1,127 @@
 # Autonomous Agent — Work State
 
-**Updated:** 2026-09-27. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
+**Updated:** 2026-09-28. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
 
 ## Active stack and return point
 
 1. **Main objective:** reliable, general autonomous problem solving, first evaluated on OSS remediation.
 2. **S3 / P1:** engineering decision quality varies; a valid remediation can still reflect premature elimination of a better project-native control point.
 3. **P1.1:** evaluate the frozen Challenge Before Commitment behavior at Q5 using the [experiment record](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md), baseline `e92837d`.
-4. **P1.1a — completed:** durable project continuity under `docs/project-memory/`.
-5. **P1.1b / P2 — evidence audit sufficiently complete:** the six recent runs were reconciled across pre-Intent reasoning/tool use, authoritative implementation, scanner/runtime behavior, deterministic validation, and Intent retry evidence. The audit localized specific harness/runtime/capture defects and separated them from genuine reasoning variance.
+4. **P2 support work:** remove independent harness/tool/capture contamination before judging P1.1.
+5. **P2.1 — resolved for now:** explicit whole-file delete capability replaced ambiguous text-delete semantics.
+6. **P2.3 — resolved for now:** targeted structural repair feedback retained; arbitrary four-identical-error cutoff removed; existing bounded retry limits remain.
+7. **P2.2 — current active subproblem:** harness/runtime-resource handoff is implemented and tested, but live model-backed pre-Intent experimental scanner use is still not demonstrated.
 
-**Current return point:** do **not** change Q1–Q5 or the frozen Challenge Before Commitment wording yet. P2.1 and P2.3 are implemented and locally verified; P2.2 has deterministic handoff coverage. Next obtain a clean targeted model-backed runtime-resource trace, then return to repeated P1.1 evaluation.
+**Current return point:** decide how to close P2.2 acceptance. Either run one intentionally targeted live scenario that naturally requires experimental scan evidence, or explicitly accept that the model may choose other evidence paths and record P2.2 as harness-capability verified but not behaviorally exercised. Then return to repeated frozen P1.1 evaluation. Do not change Q1–Q5 while making this decision.
 
-**Harness cleanup checkpoint (2026-09-27):** The current branch separates text replacement from explicit whole-file deletion and gives rejected Intent submissions targeted structural repair guidance. A P2.3 follow-up removed the four-identical-error early stop: error labels do not prove lack of progress, and the existing ten-turn/ten-submission checkpoint limits bound recovery. The existing current-cycle runtime-resource resolver was retained; a command-created resource was handed to an experimental scanner consumer in an integration-style unit test. A clean model-backed experiment → build/resource → experimental scan → Intent trace is still required before broad P1.1 reruns. The sections below preserve the audit's original return sequence and historical findings.
+## Post-fix implementation and runtime evidence
 
-## Immediate next sequence
+### P2.1 — destructive editing
+Commit `1eed9914881282e81f06da4aa62e116e2386e80a` implemented:
+- `edit_workspace_text` write/replace only;
+- text removal through replacement with empty string;
+- explicit `delete_workspace_file` for whole-file deletion.
 
-### Step 2 — make destructive editing unambiguous (implemented)
-The latest bad run deleted the entire root `pom.xml` because `edit_workspace_text(action="delete")` maps to file unlinking while the model used it as if it meant delete text. The model-facing contract does not clearly say that `delete` deletes the whole file.
+Latest live runs did not reproduce the earlier accidental root-`pom.xml` unlink failure. This is evidence that the specific ambiguity no longer appeared, not proof of global harness stability.
 
-Preferred direction:
-- keep text edits on explicit `write` / `replace`;
-- use `replace(old_text, "")` for text removal;
-- make whole-file deletion a clearly named destructive capability such as `delete_workspace_file`, or otherwise remove the ambiguous action.
+### P2.3 — Intent recovery
+Commit `23e872b1a12f5290faa66d7600bc8d06c2fdf77c` removed the fixed “four identical validation errors → stop” rule. Targeted repair instructions remain; recovery is bounded by existing checkpoint turn/submission/time/model-call limits.
 
-Treat this as a harness/tool-contract fix, not a reasoning-prompt fix.
+Live evidence:
+- `run-20260928T010505Z-b4bbe021`: 2 rejected Intent submissions, then accepted.
+- `run-20260928T014926Z-28562938`: 5 rejected submissions, then accepted and final success.
+- `run-20260928T015654Z-1640abc0`: 1 rejected submission, then accepted and final success.
 
-Implemented: `edit_workspace_text` accepts write/replace only, including empty-string replacement for text removal. `delete_workspace_file` names whole-file deletion and follows the same phase/workspace routing.
+Conclusion: recovery works, but structural capture overhead can still be material. Treat this as cost evidence, not as engineering search depth.
 
-### Step 3 — prove experimental Maven → scanner runtime-resource handoff (model acceptance pending)
-Current code supports `scan_current_repository(runtime_resource_path=...)`, and each cycle tells the model its experimental HOME/TEMP/logical `/tmp` plus that acquired resources should be passed to capabilities that need them.
+### P2.2 — runtime-resource handoff
+The implementation supports `scan_current_repository(runtime_resource_path=...)` and declares each cycle’s experimental HOME/TEMP/logical `/tmp`. Integration coverage demonstrates a command-created current-cycle runtime directory can reach an experimental scanner consumer outside repository source state.
 
-What remains unproven is a clean model-backed path:
+Live evidence remains incomplete:
+- `run-20260928T010505Z-b4bbe021`: experimental Maven initially failed against `/root/.m2/repository`, then the model adapted to `-Dmaven.repo.local=/tmp/m2-repo` and reused that path for Maven commands. It did **not** call `scan_current_repository` experimentally before Intent. The only scanner call was authoritative after Intent and returned clean.
+- `run-20260928T014926Z-28562938`: no pre-Intent scanner calls. After Intent, authoritative scans progressed 19 findings → 3 → 0 and the run delivered Draft PR #195.
+- `run-20260928T015654Z-1640abc0`: no pre-Intent scanner calls. After Intent, authoritative scans progressed 3 findings → 0 and the run delivered Draft PR #196.
+
+Therefore the exact acceptance path remains unproven:
 
 ```text
-experimental edit
-→ Maven build/resource creation
+experimental edit/build
+→ current-cycle Maven runtime resource
 → scan_current_repository(workspace="experiment", runtime_resource_path=...)
 → successful experimental scan
 → Intent
 ```
 
-This is acceptance evidence for the existing P2 runtime-resource design, not a new architecture.
+The missing evidence is now mainly **model choice/use**, not known scanner wiring failure.
 
-Current verification: a command-created current-cycle runtime directory reaches an experimental scanner consumer outside repository source state. Existing resolver tests cover missing, foreign-cycle and out-of-bound paths. The exact model-backed Maven → scanner → Intent trace remains unproven.
+## Latest run outcomes
 
-### Step 4 — reduce Intent capture/schema retry friction (implemented)
-Rejected Intent submissions in the recent runs were primarily structural capture errors, especially:
-- required material-assumptions subsection missing;
-- candidate heading/required field missing;
-- COMPLETE/PARTIAL classification missing.
+### `run-20260928T010505Z-b4bbe021`
+- Cycle 1 completed successfully.
+- Deterministic validation passed.
+- Draft PR delivered.
+- No Cycle 2 was expected because Cycle 1 reached validated success.
+- No experimental scanner call before Intent.
+- Reasoning still called Spring Boot `4.0.6` “custom or non-public” and eliminated parent upgrade on that basis.
 
-The repeated retries did not represent useful additional engineering search. Investigate the smallest harness/schema recovery improvement that helps the model correct the same structural failure efficiently without adding domain reasoning or changing Q1–Q5.
+### `run-20260928T011300Z-9fbd5b83`
+- Final outcome: `PARTIAL / MANUAL REVIEW REQUIRED`.
+- `cyclesCompleted = 2`, `captureStatus = INCOMPLETE`, `validationStatus = PARTIAL`, no delivery.
+- Reason: configured operational budget reached.
+- The model spent substantial effort on the unsupported premise that Spring Boot `4.0.6` was invalid/typo, attempted a `3.2.0` path, later reverted, and ended with remaining `spring-webmvc` findings. No PR was correctly created because full success was not validated.
 
-Implemented: rejected submissions expose focused structural repair instructions; retry prompts use the same instructions. The follow-up removed the identical-error stop and relies on the existing checkpoint turn and submission limits. Orchestration stops immediately when submissions are exhausted within one turn. Valid and substantive Intent rules are unchanged.
+### `run-20260928T014926Z-28562938`
+- Final outcome: SUCCESS.
+- One cycle; deterministic validation PASSED.
+- Draft PR #195.
+- Five rejected Intent submissions before acceptance.
+- No pre-Intent experimental scanner call.
+- Authoritative scan progression after Intent: 19 → 3 → 0 findings.
 
-### Step 5 — freeze and rerun comparable benchmark runs
-After Steps 2–4 are implemented/verified, run the same benchmark repeatedly from equivalent starting conditions. Keep task success separate from engineering decision quality.
+### `run-20260928T015654Z-1640abc0`
+- Final outcome: SUCCESS.
+- One cycle; deterministic validation PASSED.
+- Draft PR #196.
+- One rejected Intent submission before acceptance.
+- No pre-Intent experimental scanner call.
+- Authoritative scan progression after Intent: 3 → 0 findings.
+- Reasoning was less destructive than earlier stale-prior traces: it treated `4.0.6` as intentional/custom and kept it, but still relied on an assumption instead of first establishing the parent’s actual management/control behavior.
 
-Compare:
+## Reasoning-quality evidence still active
+
+Do not conflate final success with decision quality.
+
+Observed variance:
+- Earlier and some newer runs treat Spring Boot `4.0.6` as non-standard/custom/invalid and use that assumption to eliminate or distort parent-level strategies.
+- `011309` previously found `4.0.6 → 4.0.7` as a valid patch-level parent strategy and then reassessed from scanner evidence.
+- `015654` preserved `4.0.6`, which is less harmful, but still did not establish decision-critical parent-management facts before commitment.
+
+This keeps P4 / #18 / #22 / #25 active: stale-prior substitution, insufficient decision-critical investigation, and inconsistent synthesis of project-native control points.
+
+## Harness-boundary evidence calls / insufficient-data question
+
+No clean post-fix live trace yet establishes that the **retained-evidence retrieval path** was invoked specifically because a bounded harness response omitted decision-critical information. The recent runs primarily show direct read/search/shell use and authoritative scanning. Therefore do **not** claim that the harness’s “bounded response → retrieve retained evidence on insufficient data” recovery behavior has been behaviorally demonstrated by these latest runs unless a trace explicitly shows `retrieve_retained_evidence` or an equivalent recovery call driven by omitted evidence.
+
+This remains a separate acceptance question from P2.2 scanner runtime-resource handoff.
+
+## Immediate next action
+
+Make one explicit choice:
+
+1. **Targeted P2.2 acceptance run:** construct a scenario where a pre-Intent experimental vulnerability scan is naturally decision-relevant, then verify actual trace:
+   `experimental command/resource → experimental scanner with same resource → successful scan → Intent`.
+   If successful, close P2.2 acceptance and return to Step 5.
+
+or
+
+2. **Accept non-use as model choice:** record that the capability is harness-verified but not mandatory; stop treating scanner-before-Intent as an acceptance gate. Then return immediately to repeated frozen P1.1 runs.
+
+Do not silently mix the two positions.
+
+## Return after P2.2 decision
+
+Run repeated comparable P1.1 benchmarks from equivalent starting conditions and compare:
+
 ```text
 Q2 investigation/evidence
 → Q3 ownership/control points and solution space
@@ -69,73 +132,4 @@ Q2 investigation/evidence
 → deterministic validation
 ```
 
-### Step 6 — decide Experiment 1 from clean evidence
-Use the experiment protocol:
-- `PROMOTE` only if repeated clean runs show materially more consistent project-fit selection with proportionate cost;
-- `REFINE` if a narrow evidence-backed adjustment is needed;
-- `ADVANCE` if same-model challenge helps but remains insufficient;
-- `REJECT` if it adds cost/text without useful improvement;
-- otherwise `CONTINUE` for more clean evidence.
-
-Current decision remains **CONTINUE**. Do not promote, refine, advance, or reject based on the contaminated recent final outcomes alone.
-
-## Evidence audit conclusions
-
-### What the six recent runs established
-- None of the six demonstrated a **successful experimental vulnerability scan before Intent**.
-- `010345` attempted the experimental scanner twice, but both failed with `RUNTIME_RESOURCE_UNAVAILABLE` after Maven succeeded using `-Dmaven.repo.local=/tmp/.m2_repo`. It later succeeded on an authoritative scan.
-- The other five committed without a successful pre-Intent scanner result.
-- Therefore recent runs do **not** establish that compact scanner responses caused reasoning degradation, and they do **not** behaviorally prove pre-Intent scanner compaction/retrieval behavior.
-- Successful runs used different investigation depths; scanner-before-Intent was not uniformly present even when final task success was achieved.
-
-### Genuine reasoning evidence remains
-Multiple runs still let unsupported or stale prior expectations materially influence selection:
-- `203027` / `204425` treated Spring Boot `4.0.6` as non-standard/custom and eliminated the parent path too early.
-- `013334` effectively reinterpreted `4.0.6` as a hypothetical/erroneous 3.x value and selected `3.2.5`.
-- `015136` similarly treated `4.0.6` as invalid/custom and selected a 3.x parent.
-- `011309`, on the same project class, instead treated `4.0.6 → 4.0.7` as an allowed patch move and found the higher-level parent control point, then reassessed from scanner evidence during implementation.
-
-This keeps #18 / #22 / #25 active: stale-prior substitution, insufficient investigation before commitment, and inconsistent project-native control-point synthesis.
-
-### Same-cycle reassessment remains a strength
-`011309` showed the desired behavior:
-```text
-initial parent-level strategy
-→ authoritative scan leaves Tomcat findings
-→ parent version revised
-→ explicit Tomcat override added
-→ clean scan
-```
-Do not constrain this mechanism.
-
-### Destructive edit failure is classified
-The root `pom.xml` disappearance in `015136` is explained by tool semantics, not mysterious state corruption:
-`edit_workspace_text(action="delete", path="pom.xml")` unlinked the whole file. The model-facing description was not explicit enough about that destructive meaning. Final BLOCKED/FAILED outcome is therefore contaminated by a harness/tool-contract defect and cannot be treated as pure strategy-quality evidence.
-
-### Intent retry failures are classified
-Repeated rejected `submit_cycle_intent` responses were mostly schema/format enforcement, not repeated engineering reconsideration. They should be counted as capture/overhead evidence, not as useful search depth.
-
-## Repository state and boundaries
-
-The branch contains `autonomous_oss_remediation_agent`, journal designs and Experiment 1. `prompt.py` / `journal.py` contain Q5 Challenge Before Commitment and the no-forced-candidate-count rule. `toolset.py` contains bounded scanner responses, retained-evidence retrieval, explicit experimental workspace selection, and optional scanner `runtime_resource_path`. `orchestrator.py` injects current experimental HOME/TEMP/logical `/tmp` into each cycle message.
-
-Stable boundaries:
-- one candidate remains valid when evidence genuinely eliminates alternatives;
-- do not force candidate counts;
-- do not add Maven/Spring-specific solution recipes;
-- failed retrieval preserves uncertainty;
-- deterministic validation stays authoritative within the validity of its observed environment/state;
-- bounded + recoverable evidence remains the intended architecture;
-- do not infer a prompt defect from a harness/runtime/capture defect;
-- do not change Q1–Q5 while Steps 2–4 are being cleaned up.
-
-## Open questions after the audit
-
-- Can the model successfully exercise current-cycle Maven runtime-resource handoff into an experimental scanner?
-- What is the smallest safe tool-contract change that removes ambiguous whole-file deletion?
-- What is the smallest capture/recovery change that avoids repeated identical Intent schema retries?
-- After those are clean, does Q5 actually reduce stale-prior elimination/premature convergence across repeated comparable runs?
-- Does N+1 correctly distinguish strategy failure from harness/environment/validation failure?
-- The separately discussed `autonomous-problem-solving-operating-model.md` is still not located on this branch; reconcile it before relying on exact wording.
-
-After targeted model-backed runtime-resource acceptance, make Step 5 the active focus. After clean repeated runs, return directly to P1.1 Experiment 1 disposition.
+Keep task success separate from reasoning quality. Experiment 1 remains **CONTINUE** until clean repeated evidence supports a stronger disposition.
