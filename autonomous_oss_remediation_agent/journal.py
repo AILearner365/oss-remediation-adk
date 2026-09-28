@@ -237,12 +237,16 @@ class CheckpointResult:
     accepted: bool
     errors: tuple[str, ...] = ()
     metadata: JournalSection | None = None
+    repair_instructions: tuple[str, ...] = ()
+    retry_allowed: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "status": "accepted" if self.accepted else "rejected",
             "errors": list(self.errors),
             "metadata": self.metadata.to_dict() if self.metadata else None,
+            "repairInstructions": list(self.repair_instructions),
+            "retryAllowed": self.retry_allowed,
         }
 
 
@@ -258,6 +262,7 @@ class CycleCapture:
     outcome_answers: dict[str, str] = field(default_factory=dict)
     outcome_status: str | None = None
     last_intent_errors: tuple[str, ...] = ()
+    repeated_intent_errors: int = 0
     last_outcome_errors: tuple[str, ...] = ()
     validation_report: ValidationReport | None = None
     intent_capture_status: CheckpointCaptureStatus = CheckpointCaptureStatus.PENDING
@@ -784,6 +789,11 @@ class JournalLifecycle:
     ) -> CheckpointResult:
         if capture is not None and kind == "intent":
             capture.rejected_intents += 1
+            signature = tuple(errors)
+            capture.repeated_intent_errors = (
+                capture.repeated_intent_errors + 1
+                if signature == capture.last_intent_errors else 1
+            )
             capture.last_intent_errors = tuple(errors)
             attempt = capture.rejected_intents
         elif capture is not None:
@@ -792,15 +802,37 @@ class JournalLifecycle:
             attempt = capture.rejected_outcomes
         else:
             attempt = 1
+        retry_allowed = attempt < self.max_checkpoint_attempts and not (
+            kind == "intent" and capture is not None and capture.repeated_intent_errors >= 4
+        )
         self.trace.append_event(
             f"{kind}_submission_rejected",
             cycle=cycle,
             activeCycle=self.active_cycle,
             attempt=attempt,
-            retryAllowed=attempt < self.max_checkpoint_attempts,
+            retryAllowed=retry_allowed,
             errors=errors,
         )
-        return CheckpointResult(False, tuple(errors))
+        return CheckpointResult(
+            False, tuple(errors),
+            repair_instructions=intent_repair_instructions(errors) if kind == "intent" else (),
+            retry_allowed=retry_allowed,
+        )
+
+
+def intent_repair_instructions(errors: Iterable[str]) -> tuple[str, ...]:
+    """Give only the structural shape needed for the rejected Intent sections."""
+    errors = tuple(errors)
+    hints = ["Resubmit the complete ordered answers array using the exact required section names; preserve valid content."]
+    if any("material-assumptions subsection" in error for error in errors):
+        hints.append("In the investigation answer, add `### Material assumptions that remain necessary` followed by the actual assumptions or `None`.")
+    if any("required evidence table" in error for error in errors):
+        hints.append("In the investigation answer, include the questionnaire's five-column evidence table with a header, separator, and at least one actual information row.")
+    if any("Candidate Solution" in error or "Candidate " in error for error in errors):
+        hints.append("In the candidate answer, use `#### Candidate Solution <identifier> — <name>`; under each heading include every required question label from the questionnaire and an explicit COMPLETE or PARTIAL classification.")
+    if any(error.startswith("Selected solution:") for error in errors):
+        hints.append("In the selected-solution answer, include all six required field labels, a submitted candidate identifier, and COMPLETE or PARTIAL.")
+    return tuple(hints)
 
 
 def render_run_contract(run_contract: str, *, preliminary: bool = False) -> str:

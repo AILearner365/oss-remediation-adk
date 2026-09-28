@@ -315,6 +315,27 @@ class _MissingIntentSession:
         return None
 
 
+class _RepeatedMalformedIntentSession:
+    def __init__(self, capabilities):
+        self.capabilities = capabilities
+        self.messages = []
+        self.responses = []
+
+    async def run_turn(self, message):
+        self.messages.append(message)
+        answers = _intent_answers(self.capabilities.journal.active_cycle)
+        for item in answers:
+            if item["section"] == "Information, investigation and remaining uncertainty":
+                item["answer"] = item["answer"].split("### Material assumptions")[0]
+        self.responses.append(self.capabilities.submit_cycle_intent(
+            self.capabilities.journal.active_cycle, answers,
+        ))
+        return AgentTurnResult("Malformed Intent repeated")
+
+    async def close(self):
+        return None
+
+
 class _IntentThenContinuationSession:
     def __init__(self, capabilities):
         self.capabilities = capabilities
@@ -1440,6 +1461,21 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIsNone(cycle["intent"])
         self.assertIsNone(cycle["outcome"])
         self.assertIsNotNone(cycle["deterministicValidation"])
+
+    def test_identical_intent_structure_rejections_stop_after_four_turns(self):
+        sessions = []
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda capabilities, model: sessions.append(
+                _RepeatedMalformedIntentSession(capabilities)
+            ) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertIn("CYCLE_INTENT_CAPTURE_INCOMPLETE", result.reason)
+        self.assertEqual(4, len(sessions[0].messages))
+        self.assertFalse(sessions[0].responses[-1]["retryAllowed"])
+        self.assertIn("### Material assumptions that remain necessary",
+                      sessions[0].messages[1])
 
     def test_failed_intent_runs_validation_and_allows_next_cycle(self):
         sessions = []

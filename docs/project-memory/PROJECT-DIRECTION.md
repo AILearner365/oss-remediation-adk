@@ -26,16 +26,16 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1.1 | P1 | Active; frozen behavior | Evaluate Challenge Before Commitment using clean comparable runs; task success and engineering decision quality are separate. Current decision: `CONTINUE`. |
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
 | P1.1b | P1.1 + P2 | **Audit sufficiently complete; cleanup/acceptance next** | Six-run audit separated genuine reasoning variance from harness/runtime/capture contamination. Next sequence is Steps 2–4 in WORK-STATE, then return to clean P1.1 runs. |
-| P2.1 | P2 | **Next** | Make destructive file deletion unambiguous. Current `edit_workspace_text(action="delete")` unlinks the entire file and caused root `pom.xml` loss when used as text deletion. Fix tool contract rather than reasoning prompt. |
-| P2.2 | P2 | **Next** | Prove model-backed experimental Maven → scanner runtime-resource handoff using current `runtime_resource_path` support. Mechanism exists; successful clean trace is not yet demonstrated. |
-| P2.3 | P2 | **Next** | Reduce repeated Intent schema/capture retries without adding domain reasoning or changing Q1–Q5. |
+| P2.1 | P2 | Implemented; test verification complete | Text edit now exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. |
+| P2.2 | P2 | Harness handoff tested; model acceptance next | A command-created current-cycle resource reaches an experimental scanner consumer; clean model-backed Maven → scanner → Intent evidence is still needed. |
+| P2.3 | P2 | Implemented; test verification complete | Structural rejection feedback includes focused repair instructions; four identical Intent error sets stop orchestrator retries. Substantive validation remains unchanged. |
 | P2 | S4 | Implemented architecture; behavioral acceptance incomplete | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces. |
 | P3 | S4 | Backlog | Evidence-backed N+1 recovery and first meaningful failure localization; avoid failed-strategy momentum and distinguish strategy vs environment/harness/validation failure. |
 | P4 | S3/S4 | Backlog / observed concern | Research/source recovery, stale-prior substitution and decision-critical investigation depth. Recent traces continue to show #18/#22/#25 behavior. |
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S3 with S4 cleanup supporting it. The broad P1.1b investigation is no longer the immediate task. The next work is narrowly scoped harness cleanup/acceptance (**P2.1 → P2.2 → P2.3**), followed by frozen repeated P1.1 runs. Do not modify Q1–Q5 while cleaning these independent defects.
+**Current position:** S3 with S4 cleanup supporting it. P2.1 and P2.3 fixes are implemented; P2.2 has deterministic handoff coverage. The next gate is targeted model-backed runtime-resource acceptance, followed by frozen repeated P1.1 runs if that path is clean. Do not modify Q1–Q5 while cleaning these independent defects.
 
 ## Stable reasoning/evidence boundaries
 

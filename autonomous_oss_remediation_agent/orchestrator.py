@@ -544,6 +544,8 @@ class AutonomousRemediationOrchestrator:
             if lifecycle.phase == JournalPhase.EXECUTION:
                 return turn
             capture = lifecycle.cycles[cycle]
+            if capture.repeated_intent_errors >= 4:
+                return turn
             errors = list(capture.last_intent_errors) or [
                 "No Problem Analysis and Solution Decision submission was received in the previous turn"
             ]

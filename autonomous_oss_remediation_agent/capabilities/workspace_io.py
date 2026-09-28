@@ -359,13 +359,8 @@ class WorkspaceIO:
             if occurrences != expected_occurrences:
                 raise ValueError(f"Expected {expected_occurrences} occurrences, found {occurrences}")
             self._write(target, current.replace(old_text, new_text).encode("utf-8"))
-        elif normalized_action == "delete":
-            if target.exists():
-                if not target.is_file():
-                    raise ValueError("Only file deletion is supported")
-                target.unlink()
         else:
-            raise ValueError("action must be write, replace, or delete")
+            raise ValueError("action must be write or replace; use delete_workspace_file to remove an entire file")
         after = target.read_bytes() if target.exists() else b""
         result = {
             "status": "ok",
@@ -376,6 +371,23 @@ class WorkspaceIO:
             "beforeSha256": _sha256(before),
             "afterSha256": _sha256(after) if target.exists() else None,
             "bytes": len(after),
+        }
+        self._trace("workspace_edit", **result)
+        return result
+
+    def delete_file(self, path: str) -> dict[str, Any]:
+        """Remove one entire repository file; never interpret this as a text edit."""
+        target = self.workspace.repository_path(path, allow_missing=False)
+        if not target.is_file():
+            raise ValueError(f"File does not exist: {path}")
+        if target.stat().st_size > self.max_file_bytes:
+            raise ValueError(f"File exceeds {self.max_file_bytes} byte edit limit: {path}")
+        before = target.read_bytes()
+        target.unlink()
+        result = {
+            "status": "ok", "workspaceKind": self.workspace_kind, "cycle": self.cycle,
+            "action": "delete_file", "path": path.replace("\\", "/"),
+            "beforeSha256": _sha256(before), "afterSha256": None, "bytes": 0,
         }
         self._trace("workspace_edit", **result)
         return result

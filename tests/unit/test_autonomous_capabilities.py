@@ -106,6 +106,17 @@ class AutonomousCapabilityTests(unittest.TestCase):
             expected_occurrences=1,
         )
         self.assertNotEqual(replaced["beforeSha256"], replaced["afterSha256"])
+        removed_text = self.capabilities.edit_workspace_text(
+            "replace", "pom.xml", old_text="model", new_text="",
+        )
+        self.assertEqual("ok", removed_text["status"])
+        self.assertEqual("</>\n", (self.workspace.repository / "pom.xml").read_text(encoding="utf-8"))
+        mistaken_delete = self.capabilities.edit_workspace_text("delete", "pom.xml")
+        self.assertEqual("error", mistaken_delete["status"])
+        self.assertTrue((self.workspace.repository / "pom.xml").is_file())
+        deleted = self.capabilities.delete_workspace_file("pom.xml")
+        self.assertEqual("delete_file", deleted["action"])
+        self.assertFalse((self.workspace.repository / "pom.xml").exists())
         with self.assertRaises(WorkspaceBoundaryError):
             self.io.read_text("../outside.txt")
         with self.assertRaises(WorkspaceBoundaryError):
@@ -351,6 +362,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
                 "search_workspace_text",
                 "inspect_git_state",
                 "edit_workspace_text",
+                "delete_workspace_file",
                 "run_workspace_shell",
                 "scan_current_repository",
                 "retrieve_retained_evidence",
@@ -362,6 +374,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
             {tool.name for tool in tools},
         )
         declarations = {tool.name: tool._get_declaration() for tool in tools}
+        self.assertEqual(
+            ["write", "replace"],
+            declarations["edit_workspace_text"].parameters_json_schema["properties"]["action"]["enum"],
+        )
         retrieval_schema = declarations["retrieve_retained_evidence"].parameters_json_schema
         self.assertTrue({"reference", "start_offset", "max_bytes", "query"}.issubset(
             retrieval_schema["properties"]))
@@ -674,6 +690,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
         )
 
         edit = capabilities.edit_workspace_text("write", "isolated.txt", content="experiment")
+        deleted_experiment = capabilities.delete_workspace_file("existing-shell.txt")
+        self.assertEqual("experimental", deleted_experiment["workspaceKind"])
+        self.assertTrue((self.workspace.repository / "existing-shell.txt").is_file())
+        capabilities.edit_workspace_text("write", "existing-shell.txt", content="restored")
         shell = capabilities.run_workspace_shell(
             "Set-Content shell.txt experiment; Set-Content existing-shell.txt modified"
             if os.name == "nt"
@@ -1009,6 +1029,45 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(call_count, len(scanner.calls))
         self.assertFalse((self.workspace.repository / "marker").exists())
         self.assertEqual(experiment.repository, scanner.calls[0][0])
+
+    def test_command_created_runtime_resource_reaches_experimental_scan(self):
+        scanner = _RecordingScanner()
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal, scanner)
+        experiment = capabilities.begin_cycle(1)
+        script = experiment.repository / "create_runtime.py"
+        script.write_text(
+            "import os\nfrom pathlib import Path\n"
+            "p = Path(os.environ['TMPDIR']) / 'created-cache'\n"
+            "p.mkdir()\n(p / 'marker').write_text('ready')\n",
+            encoding="utf-8",
+        )
+        command = capabilities.run_workspace_shell("python create_runtime.py")
+        self.assertEqual(0, command["exitCode"], command)
+        resource = Path(capabilities.experimental_environment_for_model()["variables"]["TMPDIR"]) / "created-cache"
+        result = capabilities.scan_current_repository(runtime_resource_path=str(resource))
+        self.assertEqual("ok", result["status"])
+        self.assertEqual(resource.resolve(), scanner.calls[-1][3])
+        self.assertFalse(resource.is_relative_to(experiment.repository))
+        self.assertFalse(resource.is_relative_to(self.workspace.repository))
+        self.assertEqual("ready", (resource / "marker").read_text(encoding="utf-8"))
+
+    def test_explicit_file_deletion_routes_to_authoritative_only_after_intent(self):
+        (self.workspace.repository / "remove.txt").write_text("authoritative", encoding="utf-8")
+        journal = JournalLifecycle(JournalStore(self.trace), self.trace, "contract", lambda: False)
+        journal.begin_cycle(1)
+        capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace, journal)
+        experiment = capabilities.begin_cycle(1)
+        before = capabilities.delete_workspace_file("remove.txt")
+        self.assertEqual("experimental", before["workspaceKind"])
+        self.assertFalse((experiment.repository / "remove.txt").exists())
+        self.assertTrue((self.workspace.repository / "remove.txt").exists())
+        self.assertEqual("accepted", capabilities.submit_cycle_intent(1, _valid_intent_answers())["status"])
+        after = capabilities.delete_workspace_file("remove.txt")
+        self.assertEqual("authoritative", after["workspaceKind"])
+        self.assertFalse((self.workspace.repository / "remove.txt").exists())
+        self.assertIn("delete_workspace_file", journal.cycles[1].authoritative_activity)
 
     def test_logical_tmp_scan_resource_maps_to_current_cycle_only(self):
         scanner = _RecordingScanner()

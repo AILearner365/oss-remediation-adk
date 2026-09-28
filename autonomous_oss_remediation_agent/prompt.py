@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from .config import RemediationRequest
-from .journal import intent_questionnaire, outcome_questionnaire
+from .journal import intent_questionnaire, intent_repair_instructions, outcome_questionnaire
 from .models import RepositoryBaseline, ValidationReport
 
 
@@ -269,6 +269,8 @@ def intent_retry_message(cycle: int, errors: list[str]) -> str:
         f"Cycle {cycle} Problem Analysis and Solution Decision has not been accepted. Correct the checkpoint using `submit_cycle_intent`. "
         "Do not modify the authoritative repository before acceptance; continue isolated investigation if useful. Rejection details:\n- "
         + "\n- ".join(errors)
+        + "\nRepair instructions:\n- "
+        + "\n- ".join(intent_repair_instructions(errors))
     )
 
 

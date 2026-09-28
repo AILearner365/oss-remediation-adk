@@ -10,11 +10,13 @@
 4. **P1.1a — completed:** durable project continuity under `docs/project-memory/`.
 5. **P1.1b / P2 — evidence audit sufficiently complete:** the six recent runs were reconciled across pre-Intent reasoning/tool use, authoritative implementation, scanner/runtime behavior, deterministic validation, and Intent retry evidence. The audit localized specific harness/runtime/capture defects and separated them from genuine reasoning variance.
 
-**Current return point:** do **not** change Q1–Q5 or the frozen Challenge Before Commitment wording yet. First execute the proven harness cleanup/verification sequence below, then return to clean repeated P1.1 evaluation.
+**Current return point:** do **not** change Q1–Q5 or the frozen Challenge Before Commitment wording yet. P2.1 and P2.3 are implemented and locally verified; P2.2 has deterministic handoff coverage. Next obtain a clean targeted model-backed runtime-resource trace, then return to repeated P1.1 evaluation.
+
+**Harness cleanup checkpoint (2026-09-27):** The current branch now separates text replacement from explicit whole-file deletion, gives rejected Intent submissions targeted structural repair guidance, and stops orchestrator retries after four identical Intent error sets. The existing current-cycle runtime-resource resolver was retained; a command-created resource was handed to an experimental scanner consumer in an integration-style unit test. A clean model-backed experiment → build/resource → experimental scan → Intent trace is still required before broad P1.1 reruns. The sections below preserve the audit's original return sequence and historical findings.
 
 ## Immediate next sequence
 
-### Step 2 — make destructive editing unambiguous
+### Step 2 — make destructive editing unambiguous (implemented)
 The latest bad run deleted the entire root `pom.xml` because `edit_workspace_text(action="delete")` maps to file unlinking while the model used it as if it meant delete text. The model-facing contract does not clearly say that `delete` deletes the whole file.
 
 Preferred direction:
@@ -24,7 +26,9 @@ Preferred direction:
 
 Treat this as a harness/tool-contract fix, not a reasoning-prompt fix.
 
-### Step 3 — prove experimental Maven → scanner runtime-resource handoff
+Implemented: `edit_workspace_text` accepts write/replace only, including empty-string replacement for text removal. `delete_workspace_file` names whole-file deletion and follows the same phase/workspace routing.
+
+### Step 3 — prove experimental Maven → scanner runtime-resource handoff (model acceptance pending)
 Current code supports `scan_current_repository(runtime_resource_path=...)`, and each cycle tells the model its experimental HOME/TEMP/logical `/tmp` plus that acquired resources should be passed to capabilities that need them.
 
 What remains unproven is a clean model-backed path:
@@ -39,13 +43,17 @@ experimental edit
 
 This is acceptance evidence for the existing P2 runtime-resource design, not a new architecture.
 
-### Step 4 — reduce Intent capture/schema retry friction
+Current verification: a command-created current-cycle runtime directory reaches an experimental scanner consumer outside repository source state. Existing resolver tests cover missing, foreign-cycle and out-of-bound paths. The exact model-backed Maven → scanner → Intent trace remains unproven.
+
+### Step 4 — reduce Intent capture/schema retry friction (implemented)
 Rejected Intent submissions in the recent runs were primarily structural capture errors, especially:
 - required material-assumptions subsection missing;
 - candidate heading/required field missing;
 - COMPLETE/PARTIAL classification missing.
 
 The repeated retries did not represent useful additional engineering search. Investigate the smallest harness/schema recovery improvement that helps the model correct the same structural failure efficiently without adding domain reasoning or changing Q1–Q5.
+
+Implemented: rejected submissions expose focused structural repair instructions; retry prompts use the same instructions; four identical error sets end orchestrator checkpoint retries. Valid and substantive Intent rules are unchanged.
 
 ### Step 5 — freeze and rerun comparable benchmark runs
 After Steps 2–4 are implemented/verified, run the same benchmark repeatedly from equivalent starting conditions. Keep task success separate from engineering decision quality.
@@ -130,4 +138,4 @@ Stable boundaries:
 - Does N+1 correctly distinguish strategy failure from harness/environment/validation failure?
 - The separately discussed `autonomous-problem-solving-operating-model.md` is still not located on this branch; reconcile it before relying on exact wording.
 
-When Steps 2–4 are complete, checkpoint again and make Step 5 the active focus. After clean repeated runs, return directly to P1.1 Experiment 1 disposition.
+After targeted model-backed runtime-resource acceptance, make Step 5 the active focus. After clean repeated runs, return directly to P1.1 Experiment 1 disposition.

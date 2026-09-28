@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Literal
 
 from google.adk.tools.function_tool import FunctionTool
 
@@ -159,7 +159,7 @@ class DeveloperCapabilitySet:
 
     def edit_workspace_text(
         self,
-        action: str,
+        action: Literal["write", "replace"],
         path: str,
         content: str | None = None,
         old_text: str | None = None,
@@ -167,7 +167,7 @@ class DeveloperCapabilitySet:
         expected_occurrences: int = 1,
         workspace: str = "active",
     ) -> dict[str, Any]:
-        """Edit the experiment before Intent; after Intent edit authoritative state unless experiment is explicit."""
+        """Write text or replace matching text (new_text='' removes text). This never deletes a file. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
         denied = self._require_phase("edit_workspace_text", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -179,6 +179,17 @@ class DeveloperCapabilitySet:
             "edit_workspace_text", io.edit_text, action, path, content, old_text, new_text,
             expected_occurrences, workspace_io=io,
         )
+
+    def delete_workspace_file(self, path: str, workspace: str = "active") -> dict[str, Any]:
+        """Delete the ENTIRE file at path. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
+        denied = self._require_phase("delete_workspace_file", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
+        if denied:
+            return denied
+        selected = self._select_workspace("delete_workspace_file", workspace)
+        if isinstance(selected, dict):
+            return selected
+        io, _ = selected
+        return self._invoke("delete_workspace_file", io.delete_file, path, workspace_io=io)
 
     def run_workspace_shell(
         self,
@@ -267,7 +278,7 @@ class DeveloperCapabilitySet:
     def scan_current_repository(
         self, workspace: str = "active", runtime_resource_path: str | None = None,
     ) -> dict[str, Any]:
-        """Scan active state; optionally use a verified current-cycle runtime resource."""
+        """Scan active source state. For an experimental scan needing command-created runtime state outside source files, pass its current-cycle absolute, HOME-relative, or mapped /tmp directory as runtime_resource_path; the directory is verified and handed to the scanner. Omit it when no runtime resource is needed."""
         denied = self._require_phase("scan_current_repository", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -459,7 +470,8 @@ class DeveloperCapabilitySet:
         return [
             FunctionTool(self.read_workspace_text), FunctionTool(self.list_workspace_files),
             FunctionTool(self.search_workspace_text), FunctionTool(self.inspect_git_state),
-            FunctionTool(self.edit_workspace_text), FunctionTool(self.run_workspace_shell),
+            FunctionTool(self.edit_workspace_text), FunctionTool(self.delete_workspace_file),
+            FunctionTool(self.run_workspace_shell),
             FunctionTool(self.scan_current_repository), FunctionTool(self.retrieve_retained_evidence),
             FunctionTool(self.research_search),
             FunctionTool(self.research_fetch), FunctionTool(self.submit_cycle_intent),
@@ -469,7 +481,7 @@ class DeveloperCapabilitySet:
     def available_tool_names(self) -> frozenset[str]:
         engineering = {
             "read_workspace_text", "list_workspace_files", "search_workspace_text",
-            "inspect_git_state", "edit_workspace_text", "run_workspace_shell",
+            "inspect_git_state", "edit_workspace_text", "delete_workspace_file", "run_workspace_shell",
             "scan_current_repository", "retrieve_retained_evidence", "research_search", "research_fetch",
         }
         if not self.journal:
@@ -561,7 +573,7 @@ class DeveloperCapabilitySet:
             if (
                 workspace_io is not None
                 and workspace_io.workspace_kind == "authoritative"
-                and name in {"edit_workspace_text", "run_workspace_shell"}
+                and name in {"edit_workspace_text", "delete_workspace_file", "run_workspace_shell"}
             ):
                 self.journal.record_authoritative_activity(name)
             self.trace.append_event(

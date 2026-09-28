@@ -90,6 +90,22 @@ class DecisionJournalTests(unittest.TestCase):
 
         self.assertNotIn("# Cycle 1 — Problem Analysis and Solution Decision", self.lifecycle.store.read())
 
+    def test_intent_structural_repair_feedback_and_repeated_failure_bound(self):
+        answers = self._intent_answers()
+        self._replace(answers, INTENT_SECTIONS[1],
+                      next(item["answer"] for item in answers if item["section"] == INTENT_SECTIONS[1]).split("### Material assumptions")[0])
+        for attempt in range(4):
+            rejected = self.lifecycle.submit_intent(1, answers)
+            self.assertFalse(rejected.accepted)
+            self.assertTrue(any("material-assumptions subsection" in error for error in rejected.errors))
+            self.assertTrue(any("### Material assumptions that remain necessary" in hint
+                                for hint in rejected.repair_instructions))
+            self.assertEqual(attempt < 3, rejected.retry_allowed)
+        self.assertEqual(4, self.lifecycle.cycles[1].repeated_intent_errors)
+        repaired = self._intent_answers()
+        self.assertTrue(self.lifecycle.submit_intent(1, repaired).accepted)
+        self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
+
     def test_additional_subsection_is_accepted_and_prior_content_is_immutable(self):
         answers = self._intent_answers() + [
             {"section": "Repository-specific observation", "answer": "The parent owns dependency versions."}
