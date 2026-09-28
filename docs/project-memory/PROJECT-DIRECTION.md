@@ -1,6 +1,6 @@
 # Autonomous Agent — Project Direction
 
-**Updated:** 2026-09-27. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
+**Updated:** 2026-09-28. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
 
 ## Objective and direction
 
@@ -15,7 +15,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | S1 | OSS workflow discovery and early ADK prototypes | Completed historical foundation | Project moved from multi-agent/exact-patch workflow to one autonomous engineering actor. |
 | S2 | Independent autonomous POC and deterministic envelope | Implemented; hardening active | CLI/request, one ADK model/session, engineering tools, scanners, policy validation, cycles, journal and gated Draft PR delivery. |
 | S3 | Evidence-grounded decision quality | Active | Q1–Q5 implemented. P1 studies premature commitment/project-fit selection. P1.1 Challenge Before Commitment remains frozen and under evaluation. |
-| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | P2 bounded/recoverable evidence architecture is implemented. Latest audit localized tool-contract, runtime-resource acceptance and Intent-capture issues that must be cleaned before clean P1.1 comparison. P3 remains open. |
+| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | P2.1 destructive-edit ambiguity and P2.3 arbitrary identical-error cutoff were fixed. P2.2 harness handoff has deterministic coverage, but live model-backed experimental scanner use before Intent is still unproven. |
 | S5 | Deployment and broader generalization | Upcoming / conditional | Repeatable evaluation, runner/credential isolation, provider reliability, portability and later deployment integration remain. |
 
 ## Meaningful backlog
@@ -25,17 +25,17 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1 | S3 | Active | Improve consistency of project-fit solution selection without prescribing a dependency layer or candidate count. |
 | P1.1 | P1 | Active; frozen behavior | Evaluate Challenge Before Commitment using clean comparable runs; task success and engineering decision quality are separate. Current decision: `CONTINUE`. |
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
-| P1.1b | P1.1 + P2 | **Audit sufficiently complete; cleanup/acceptance next** | Six-run audit separated genuine reasoning variance from harness/runtime/capture contamination. Next sequence is Steps 2–4 in WORK-STATE, then return to clean P1.1 runs. |
-| P2.1 | P2 | Implemented; test verification complete | Text edit now exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. |
-| P2.2 | P2 | Harness handoff tested; model acceptance next | A command-created current-cycle resource reaches an experimental scanner consumer; clean model-backed Maven → scanner → Intent evidence is still needed. |
-| P2.3 | P2 | Follow-up implemented; test verification complete | Structural rejection feedback includes focused repair instructions. Existing checkpoint turn/submission limits bound recovery; repeated error labels alone do not stop it. Substantive validation remains unchanged. |
+| P1.1b | P1.1 + P2 | Audit complete enough to act; live acceptance gap remains | Historical audit separated reasoning defects from harness contamination. Post-fix runs now provide clean end-to-end success evidence, but still do not show pre-Intent experimental scanner use. |
+| P2.1 | P2 | Resolved for now | Text edit exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. Latest successful runs did not reproduce the accidental file-unlink failure. |
+| P2.2 | P2 | Harness capability verified; behavioral acceptance still open | Current-cycle runtime-resource handoff is implemented and tested. Multiple post-fix live runs did not invoke `scan_current_repository` in the experimental workspace before Intent, so the exact Maven/resource → experimental scanner → Intent path is still unproven. |
+| P2.3 | P2 | Resolved for now; overhead still observed | Targeted structural repair feedback is active; repeated identical labels no longer force early termination. Live runs recovered to accepted Intent, including after multiple rejections, but capture cost can still be high. |
 | P2 | S4 | Implemented architecture; behavioral acceptance incomplete | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces. |
 | P3 | S4 | Backlog | Evidence-backed N+1 recovery and first meaningful failure localization; avoid failed-strategy momentum and distinguish strategy vs environment/harness/validation failure. |
-| P4 | S3/S4 | Backlog / observed concern | Research/source recovery, stale-prior substitution and decision-critical investigation depth. Recent traces continue to show #18/#22/#25 behavior. |
+| P4 | S3/S4 | Active observed concern | Stale-prior substitution and decision-critical investigation depth remain visible. Recent runs vary: some still call Spring Boot `4.0.6` custom/non-public; another treats it as intentional/custom and preserves it, but without first establishing the parent control point from authoritative evidence. |
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S3 with S4 cleanup supporting it. P2.1 and P2.3 fixes are implemented; P2.2 has deterministic handoff coverage. The next gate is targeted model-backed runtime-resource acceptance, followed by frozen repeated P1.1 runs if that path is clean. Do not modify Q1–Q5 while cleaning these independent defects.
+**Current position:** S3 with S4 supporting work. P2.1 and P2.3 are resolved enough to stop active redesign. P2.2 remains the only open harness-boundary acceptance item: the model has not yet chosen to use the experimental scanner with the same current-cycle runtime resource before Intent. After deciding whether to force one targeted P2.2 acceptance scenario or accept model-chosen evidence paths, return to clean repeated P1.1 evaluation. Do not change Q1–Q5 meanwhile.
 
 ## Stable reasoning/evidence boundaries
 
@@ -48,11 +48,11 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 - Deterministic validation is authoritative only for what its observed environment/state validly establishes.
 - Same-cycle reassessment remains allowed and valuable.
 - Avoid prompt accumulation and case-specific Maven/Spring recipes.
-- Freeze Experiment 1 while P2.1–P2.3 are fixed/verified so later causal evaluation remains interpretable.
+- Successful delivery does not prove pre-Intent investigation quality or P2.2 acceptance.
 
 ## Current experimental conclusion
 
-Recent evidence supports continuing Experiment 1 but does **not** support promotion. Q5 wording identifies the right search-sufficiency concern, yet multiple runs still allowed stale/unsupported priors about Spring Boot `4.0.6` to influence elimination/selection. Because recent final failures are contaminated by tool/runtime/capture defects, do not refine or advance the reasoning mechanism until clean comparable runs are available.
+Recent post-fix runs improve confidence in end-to-end execution but do not settle Experiment 1. Two newest runs (`20260928T014926Z`, `20260928T015654Z`) both passed deterministic validation and delivered Draft PRs (#195, #196), yet neither performed an experimental scanner call before Intent. Reasoning variance also remains: stale/unsupported assumptions about Spring Boot `4.0.6` still influence some traces. Experiment 1 therefore remains `CONTINUE`, not `PROMOTE`.
 
 ## Maintenance
 
