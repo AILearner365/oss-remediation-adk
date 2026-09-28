@@ -1,0 +1,13 @@
+{
+  "cycle": 1,
+  "operation": "search",
+  "query": "spring-boot-starter-parent 4.0.6",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=spring-boot-starter-parent+4.0.6",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}
