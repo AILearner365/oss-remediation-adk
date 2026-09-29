@@ -1,0 +1,13 @@
+{
+  "cycle": 2,
+  "operation": "search",
+  "query": "latest stable spring-boot-starter-parent version",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=latest+stable+spring-boot-starter-parent+version",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "cycle": 2,
+  "operation": "search",
+  "query": "spring-boot-starter-parent maven repository",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=spring-boot-starter-parent+maven+repository",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}
