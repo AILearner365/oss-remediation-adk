@@ -1,0 +1,13 @@
+{
+  "cycle": 1,
+  "operation": "search",
+  "query": "Spring Boot versions list official",
+  "result": {
+    "content": "",
+    "error": "Search response contained no extractable results",
+    "results": [],
+    "source": "https://html.duckduckgo.com/html/?q=Spring+Boot+versions+list+official",
+    "status": "extraction_failure",
+    "truncated": false
+  }
+}

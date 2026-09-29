@@ -1,274 +1,0 @@
-Welcome to Cloud Shell! Type "help" to get started.
-To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
-You can view your projects by running `gcloud projects list`.
-[1;33mYour home disk usage is at 97%.
-You can find suggestions to clear space at https://cloud.google.com/shell/docs/quotas-limits#clearing_disk_space.
-Upgrade to Cloud Workstations for a secure development environment without these limits: https://cloud.google.com/workstations.[0m
-[INFO] Scanning for projects...
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Build Order:
-[INFO] 
-[INFO] secure-multimodule-springboot-java21                               [pom]
-[INFO] task-common                                                        [jar]
-[INFO] task-domain                                                        [jar]
-[INFO] task-service                                                       [jar]
-[INFO] task-web                                                           [jar]
-[INFO] 
-[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
-[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
-[INFO]   from pom.xml
-[INFO] --------------------------------[ pom ]---------------------------------
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.pom
-Progress (1): 742 BProgress (1): 1.7 kBProgress (1): 3.4 kBProgress (1): 6.2 kBProgress (1): 7.8 kBProgress (1): 11 kB Progress (1): 15 kBProgress (1): 17 kBProgress (1): 19 kBProgress (1): 21 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.pom (21 kB at 25 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/54/commons-parent-54.pom
-Progress (1): 706 BProgress (1): 1.6 kBProgress (1): 2.8 kBProgress (1): 4.2 kBProgress (1): 5.3 kBProgress (1): 7.3 kBProgress (1): 8.7 kBProgress (1): 10 kB Progress (1): 13 kBProgress (1): 15 kBProgress (1): 16 kBProgress (1): 19 kBProgress (1): 22 kBProgress (1): 23 kBProgress (1): 26 kBProgress (1): 30 kBProgress (1): 32 kBProgress (1): 36 kBProgress (1): 40 kBProgress (1): 42 kBProgress (1): 45 kBProgress (1): 48 kBProgress (1): 49 kBProgress (1): 52 kBProgress (1): 55 kBProgress (1): 58 kBProgress (1): 60 kBProgress (1): 63 kBProgress (1): 66 kBProgress (1): 69 kBProgress (1): 75 kBProgress (1): 77 kBProgress (1): 80 kBProgress (1): 82 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/54/commons-parent-54.pom (82 kB at 853 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.9.1/junit-bom-5.9.1.pom
-Progress (1): 907 BProgress (1): 2.2 kBProgress (1): 5.6 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.9.1/junit-bom-5.9.1.pom (5.6 kB at 108 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/json/json/20231013/json-20231013.pom
-Progress (1): 924 BProgress (1): 2.3 kBProgress (1): 6.2 kBProgress (1): 6.6 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/json/json/20231013/json-20231013.pom (6.6 kB at 173 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar
-Progress (1): 0.9/238 kBProgress (1): 2.3/238 kBProgress (1): 3.6/238 kBProgress (1): 5.0/238 kBProgress (1): 6.4/238 kBProgress (1): 7.7/238 kBProgress (1): 9.1/238 kBProgress (1): 10/238 kB Progress (1): 12/238 kBProgress (1): 13/238 kBProgress (1): 15/238 kBProgress (1): 16/238 kBProgress (1): 17/238 kBProgress (1): 19/238 kBProgress (1): 20/238 kBProgress (1): 21/238 kBProgress (1): 23/238 kBProgress (1): 27/238 kBProgress (1): 31/238 kBProgress (1): 35/238 kBProgress (1): 40/238 kBProgress (1): 44/238 kBProgress (1): 48/238 kBProgress (1): 52/238 kBProgress (1): 57/238 kBProgress (1): 61/238 kBProgress (1): 65/238 kBProgress (1): 69/238 kBProgress (1): 74/238 kBProgress (1): 78/238 kBProgress (1): 82/238 kBProgress (1): 86/238 kBProgress (1): 90/238 kBProgress (1): 95/238 kBProgress (1): 99/238 kBProgress (1): 103/238 kBProgress (1): 107/238 kBProgress (1): 112/238 kBProgress (1): 116/238 kBProgress (1): 120/238 kBProgress (1): 124/238 kBProgress (1): 129/238 kBProgress (1): 131/238 kBProgress (1): 135/238 kBProgress (1): 139/238 kBProgress (1): 143/238 kBProgress (1): 147/238 kBProgress (1): 152/238 kBProgress (1): 156/238 kBProgress (1): 160/238 kBProgress (1): 164/238 kBProgress (1): 169/238 kBProgress (1): 173/238 kBProgress (1): 177/238 kBProgress (1): 181/238 kBProgress (1): 185/238 kBProgress (1): 190/238 kBProgress (1): 206/238 kBProgress (1): 222/238 kBProgress (1): 238 kB                        Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar (238 kB at 2.7 MB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/json/json/20231013/json-20231013.jar
-Progress (1): 7.7/75 kBProgress (1): 11/75 kB Progress (1): 28/75 kBProgress (1): 44/75 kBProgress (1): 60/75 kBProgress (1): 75 kB                      Downloaded from central: https://repo.maven.apache.org/maven2/org/json/json/20231013/json-20231013.jar (75 kB at 1.2 MB/s)
-[INFO] 
-[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
-[INFO] 
-[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
-[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
-[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
-[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
-[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
-[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
-[INFO] 
-[INFO] --- spring-boot:4.0.6:repackage (repackage) @ secure-multimodule-springboot-java21 ---
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-common >------------------
-[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
-[INFO]   from task-common/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] --- clean:3.5.0:clean (default-clean) @ task-common ---
-[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-common/target
-[INFO] 
-[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-common ---
-[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
-[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
-[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ task-common ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-common/src/main/resources
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-common/src/main/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:compile (default-compile) @ task-common ---
-[INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
-[INFO] 
-[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-common ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-common/src/test/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-common ---
-[INFO] No sources to compile
-[INFO] 
-[INFO] --- surefire:3.5.5:test (default-test) @ task-common ---
-[INFO] No tests to run.
-[INFO] 
-[INFO] --- jar:3.4.2:jar (default-jar) @ task-common ---
-[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar
-[INFO] 
-[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-common ---
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-domain >------------------
-[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
-[INFO]   from task-domain/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] --- clean:3.5.0:clean (default-clean) @ task-domain ---
-[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-domain/target
-[INFO] 
-[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-domain ---
-[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
-[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
-[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ task-domain ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-domain/src/main/resources
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-domain/src/main/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:compile (default-compile) @ task-domain ---
-[INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
-[INFO] 
-[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-domain ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-domain/src/test/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-domain ---
-[INFO] No sources to compile
-[INFO] 
-[INFO] --- surefire:3.5.5:test (default-test) @ task-domain ---
-[INFO] No tests to run.
-[INFO] 
-[INFO] --- jar:3.4.2:jar (default-jar) @ task-domain ---
-[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar
-[INFO] 
-[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-domain ---
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-service >-----------------
-[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
-[INFO]   from task-service/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.8/spring-expression-7.0.8.pom
-Progress (1): 1.1 kBProgress (1): 2.1 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.8/spring-expression-7.0.8.pom (2.1 kB at 39 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.8/spring-expression-7.0.8.jar
-Progress (1): 7.7/326 kBProgress (1): 8.2/326 kBProgress (1): 25/326 kB Progress (1): 41/326 kBProgress (1): 57/326 kBProgress (1): 74/326 kBProgress (1): 90/326 kBProgress (1): 106/326 kBProgress (1): 123/326 kBProgress (1): 131/326 kBProgress (1): 147/326 kBProgress (1): 164/326 kBProgress (1): 180/326 kBProgress (1): 188/326 kBProgress (1): 205/326 kBProgress (1): 213/326 kBProgress (1): 229/326 kBProgress (1): 246/326 kBProgress (1): 262/326 kBProgress (1): 279/326 kBProgress (1): 295/326 kBProgress (1): 311/326 kBProgress (1): 326 kB                        Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.8/spring-expression-7.0.8.jar (326 kB at 4.5 MB/s)
-[INFO] 
-[INFO] --- clean:3.5.0:clean (default-clean) @ task-service ---
-[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-service/target
-[INFO] 
-[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-service ---
-[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
-[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
-[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ task-service ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-service/src/main/resources
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-service/src/main/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:compile (default-compile) @ task-service ---
-[INFO] Recompiling the module because of changed dependency.
-[INFO] Compiling 3 source files with javac [debug parameters release 21] to target/classes
-[INFO] 
-[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-service ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-service/src/test/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-service ---
-[INFO] Recompiling the module because of changed dependency.
-[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
-[INFO] 
-[INFO] --- surefire:3.5.5:test (default-test) @ task-service ---
-[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
-[INFO] 
-[INFO] -------------------------------------------------------
-[INFO]  T E S T S
-[INFO] -------------------------------------------------------
-[INFO] Running com.example.secureapp.service.InMemoryTaskServiceTest
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.604 s -- in com.example.secureapp.service.InMemoryTaskServiceTest
-[INFO] 
-[INFO] Results:
-[INFO] 
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
-[INFO] 
-[INFO] 
-[INFO] --- jar:3.4.2:jar (default-jar) @ task-service ---
-[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar
-[INFO] 
-[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-service ---
-[INFO] 
-[INFO] -------------------< com.example.secureapp:task-web >-------------------
-[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
-[INFO]   from task-web/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.4/jackson-databind-3.1.4.pom
-Progress (1): 961 BProgress (1): 2.4 kBProgress (1): 3.7 kBProgress (1): 5.7 kBProgress (1): 7.8 kBProgress (1): 10 kB Progress (1): 12 kBProgress (1): 14 kBProgress (1): 16 kBProgress (1): 18 kBProgress (1): 18 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.4/jackson-databind-3.1.4.pom (18 kB at 328 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.4/jackson-base-3.1.4.pom
-Progress (1): 923 BProgress (1): 2.4 kBProgress (1): 4.5 kBProgress (1): 6.5 kBProgress (1): 9.1 kBProgress (1): 11 kB Progress (1): 14 kBProgress (1): 16 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.4/jackson-base-3.1.4.pom (16 kB at 335 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.4/jackson-bom-3.1.4.pom
-Progress (1): 895 BProgress (1): 2.7 kBProgress (1): 4.7 kBProgress (1): 14 kB Progress (1): 19 kBProgress (1): 20 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.4/jackson-bom-3.1.4.pom (20 kB at 423 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.4/jackson-core-3.1.4.pom
-Progress (1): 950 BProgress (1): 3.3 kBProgress (1): 7.5 kBProgress (1): 10 kB Progress (1): 11 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.4/jackson-core-3.1.4.pom (11 kB at 232 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.25/tomcat-embed-core-11.0.25.pom
-Progress (1): 852 BProgress (1): 1.8 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.25/tomcat-embed-core-11.0.25.pom (1.8 kB at 47 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.8/spring-webmvc-7.0.8.pom
-Progress (1): 1.0 kBProgress (1): 3.0 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.8/spring-webmvc-7.0.8.pom (3.0 kB at 67 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.6/micrometer-core-1.16.6.pom
-Progress (1): 986 BProgress (1): 5.1 kBProgress (1): 9.7 kBProgress (1): 11 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.6/micrometer-core-1.16.6.pom (11 kB at 232 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.4/jackson-databind-3.1.4.jar
-Progress (1): 0/1.9 MBProgress (1): 0/1.9 MBProgress (1): 0/1.9 MBProgress (1): 0/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.1/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.2/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.3/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.4/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.5/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.6/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.7/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.8/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 0.9/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.0/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.1/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.2/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.3/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.4/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.5/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.6/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.7/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.8/1.9 MBProgress (1): 1.9/1.9 MBProgress (1): 1.9/1.9 MBProgress (1): 1.9/1.9 MBProgress (1): 1.9/1.9 MBProgress (1): 1.9/1.9 MBProgress (1): 1.9 MB                        Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.4/jackson-databind-3.1.4.jar (1.9 MB at 6.5 MB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.4/jackson-core-3.1.4.jar
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.25/tomcat-embed-core-11.0.25.jar
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.8/spring-webmvc-7.0.8.jar
-Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.6/micrometer-core-1.16.6.jar
-Progress (1): 7.7/599 kBProgress (1): 7.7/599 kBProgress (1): 24/599 kB Progress (1): 40/599 kBProgress (1): 57/599 kBProgress (1): 73/599 kBProgress (1): 82/599 kBProgress (1): 98/599 kBProgress (1): 106/599 kBProgress (1): 115/599 kBProgress (1): 131/599 kBProgress (1): 147/599 kBProgress (1): 164/599 kBProgress (1): 180/599 kBProgress (1): 197/599 kBProgress (1): 213/599 kBProgress (1): 229/599 kBProgress (1): 246/599 kBProgress (1): 262/599 kBProgress (1): 279/599 kBProgress (1): 295/599 kBProgress (1): 311/599 kBProgress (1): 328/599 kBProgress (2): 328/599 kB | 0/3.6 MBProgress (2): 328/599 kB | 0/3.6 MBProgress (2): 328/599 kB | 0/3.6 MBProgress (2): 344/599 kB | 0/3.6 MBProgress (2): 344/599 kB | 0/3.6 MBProgress (2): 360/599 kB | 0/3.6 MBProgress (2): 360/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 377/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 393/599 kB | 0/3.6 MBProgress (2): 410/599 kB | 0/3.6 MBProgress (2): 410/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0/3.6 MBProgress (2): 426/599 kB | 0.1/3.6 MBProgress (2): 442/599 kB | 0.1/3.6 MBProgress (2): 459/599 kB | 0.1/3.6 MBProgress (2): 459/599 kB | 0.1/3.6 MBProgress (2): 459/599 kB | 0.1/3.6 MBProgress (2): 459/599 kB | 0.1/3.6 MBProgress (2): 459/599 kB | 0.1/3.6 MBProgress (3): 459/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 459/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 459/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 459/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 459/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 475/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 492/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 508/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 508/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 508/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 508/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 524/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 541/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (3): 557/599 kB | 0.1/3.6 MB | 0/1.1 MBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 0.9/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 2.3/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 3.6/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 5.0/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 6.4/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 7.7/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 9.1/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 10/911 kB Progress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 12/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 13/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.1/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 557/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 573/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 15/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 16/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 16/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 17/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 19/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 20/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 20/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 21/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 23/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 23/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 24/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 26/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 26/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 27/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 28/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 28/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 30/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 31/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 32/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 32/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 590/599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kB    Progress (4): 599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kBProgress (4): 599 kB | 0.2/3.6 MB | 0.1/1.1 MB | 34/911 kB                                                          Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.4/jackson-core-3.1.4.jar (599 kB at 3.5 MB/s)
-Progress (3): 0.2/3.6 MB | 0.1/1.1 MB | 35/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 36/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 38/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 39/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 41/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 42/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 43/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 45/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 46/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 47/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 49/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 49/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 50/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 52/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 52/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 53/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 54/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 56/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 57/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 57/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 61/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 61/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 65/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 70/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.2/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 74/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 78/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 82/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 86/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 86/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 86/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.1/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 91/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 95/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 95/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 99/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 99/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 103/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 103/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 108/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 108/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 112/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 116/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 116/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 120/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 120/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 120/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 125/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 125/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 129/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 129/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 133/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 137/911 kBProgress (3): 0.3/3.6 MB | 0.2/1.1 MB | 137/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 137/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 137/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 141/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 146/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 150/911 kBProgress (3): 0.4/3.6 MB | 0.2/1.1 MB | 154/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 154/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 154/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 158/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 163/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 167/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 167/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 171/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 175/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 180/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 184/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 188/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 188/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.3/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 192/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 196/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 201/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 205/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 209/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 213/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 218/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 218/911 kBProgress (3): 0.4/3.6 MB | 0.4/1.1 MB | 218/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 218/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 218/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 222/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 222/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 238/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 238/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 238/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 238/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 255/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 271/911 kBProgress (3): 0.5/3.6 MB | 0.4/1.1 MB | 287/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 287/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 287/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 287/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 287/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 304/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 304/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 319/911 kBProgress (3): 0.5/3.6 MB | 0.5/1.1 MB | 319/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 319/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 319/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 319/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 335/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 335/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 335/911 kBProgress (3): 0.6/3.6 MB | 0.5/1.1 MB | 352/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 352/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 352/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 352/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 368/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 385/911 kBProgress (3): 0.6/3.6 MB | 0.6/1.1 MB | 401/911 kBProgress (3): 0.6/3.6 MB | 0.7/1.1 MB | 401/911 kBProgress (3): 0.6/3.6 MB | 0.7/1.1 MB | 401/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 401/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 401/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 401/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 417/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 434/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 434/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 434/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 434/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 434/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 450/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 450/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 466/911 kBProgress (3): 0.7/3.6 MB | 0.7/1.1 MB | 466/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 466/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 466/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 483/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.7/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 499/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 516/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 516/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 516/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 532/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 532/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 548/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 548/911 kBProgress (3): 0.8/3.6 MB | 0.8/1.1 MB | 548/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 548/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 565/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 581/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 598/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 598/911 kBProgress (3): 0.8/3.6 MB | 0.9/1.1 MB | 614/911 kBProgress (3): 0.9/3.6 MB | 0.9/1.1 MB | 614/911 kBProgress (3): 0.9/3.6 MB | 0.9/1.1 MB | 614/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 614/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 630/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 647/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 647/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 647/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 647/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 647/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 663/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 663/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 663/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 663/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 663/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 679/911 kBProgress (3): 0.9/3.6 MB | 1.0/1.1 MB | 696/911 kBProgress (3): 0.9/3.6 MB | 1.1/1.1 MB | 696/911 kBProgress (3): 0.9/3.6 MB | 1.1/1.1 MB | 696/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 696/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 696/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 712/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 712/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 712/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 712/911 kBProgress (3): 1.0/3.6 MB | 1.1/1.1 MB | 712/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 712/911 kB    Progress (3): 1.0/3.6 MB | 1.1 MB | 729/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 729/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 745/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 745/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 761/911 kBProgress (3): 1.0/3.6 MB | 1.1 MB | 778/911 kB                                              Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.8/spring-webmvc-7.0.8.jar (1.1 MB at 3.2 MB/s)
-Progress (2): 1.0/3.6 MB | 794/911 kBProgress (2): 1.0/3.6 MB | 794/911 kBProgress (2): 1.0/3.6 MB | 811/911 kBProgress (2): 1.1/3.6 MB | 811/911 kBProgress (2): 1.1/3.6 MB | 811/911 kBProgress (2): 1.1/3.6 MB | 827/911 kBProgress (2): 1.1/3.6 MB | 843/911 kBProgress (2): 1.1/3.6 MB | 860/911 kBProgress (2): 1.1/3.6 MB | 860/911 kBProgress (2): 1.1/3.6 MB | 876/911 kBProgress (2): 1.1/3.6 MB | 876/911 kBProgress (2): 1.1/3.6 MB | 892/911 kBProgress (2): 1.1/3.6 MB | 909/911 kBProgress (2): 1.1/3.6 MB | 911 kB    Progress (2): 1.1/3.6 MB | 911 kBProgress (2): 1.1/3.6 MB | 911 kB                                 Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.6/micrometer-core-1.16.6.jar (911 kB at 2.5 MB/s)
-Progress (1): 1.2/3.6 MBProgress (1): 1.2/3.6 MBProgress (1): 1.2/3.6 MBProgress (1): 1.2/3.6 MBProgress (1): 1.2/3.6 MBProgress (1): 1.2/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.3/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.4/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.5/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.6/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.7/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.8/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 1.9/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.0/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.1/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.2/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.3/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.4/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.5/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.6/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.7/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.8/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 2.9/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.0/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.1/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.2/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.3/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.4/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.5/3.6 MBProgress (1): 3.6/3.6 MBProgress (1): 3.6/3.6 MBProgress (1): 3.6/3.6 MBProgress (1): 3.6/3.6 MBProgress (1): 3.6/3.6 MBProgress (1): 3.6 MB                        Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.25/tomcat-embed-core-11.0.25.jar (3.6 MB at 6.2 MB/s)
-[INFO] 
-[INFO] --- clean:3.5.0:clean (default-clean) @ task-web ---
-[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web/target
-[INFO] 
-[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-web ---
-[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
-[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
-[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ task-web ---
-[INFO] Copying 1 resource from src/main/resources to target/classes
-[INFO] Copying 0 resource from src/main/resources to target/classes
-[INFO] 
-[INFO] --- compiler:3.14.1:compile (default-compile) @ task-web ---
-[INFO] Recompiling the module because of changed dependency.
-[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
-[INFO] 
-[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-web ---
-[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web/src/test/resources
-[INFO] 
-[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-web ---
-[INFO] Recompiling the module because of changed dependency.
-[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
-[INFO] 
-[INFO] --- surefire:3.5.5:test (default-test) @ task-web ---
-[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
-[INFO] 
-[INFO] -------------------------------------------------------
-[INFO]  T E S T S
-[INFO] -------------------------------------------------------
-[INFO] Running com.example.secureapp.web.TaskApplicationTest
-
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
-
- :: Spring Boot ::                (v4.0.6)
-
-2026-09-28T01:07:40.541Z  WARN 458 --- [secure-multimodule-springboot-java21] [           main] ory$DuplicateJsonObjectContextCustomizer : 
-
-Found multiple occurrences of org.json.JSONObject on the class path:
-
-	jar:file:/tmp/m2-repo/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
-	jar:file:/tmp/m2-repo/org/json/json/20231013/json-20231013.jar!/org/json/JSONObject.class
-
-You may wish to exclude one of them to ensure predictable runtime behavior
-
-2026-09-28T01:07:40.570Z  INFO 458 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : Starting TaskApplicationTest using Java 21.0.12 with PID 458 (started by root in /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web)
-2026-09-28T01:07:40.574Z  INFO 458 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : No active profile set, falling back to 1 default profile: "default"
-2026-09-28T01:07:45.529Z  INFO 458 --- [secure-multimodule-springboot-java21] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
-2026-09-28T01:07:45.705Z  INFO 458 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : Started TaskApplicationTest in 6.167 seconds (process running for 8.806)
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.446 s -- in com.example.secureapp.web.TaskApplicationTest
-[INFO] 
-[INFO] Results:
-[INFO] 
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
-[INFO] 
-[INFO] 
-[INFO] --- jar:3.4.2:jar (default-jar) @ task-web ---
-[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar
-[INFO] 
-[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-web ---
-[INFO] Replacing main artifact /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
-[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260928T010505Z-b4bbe021/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
-[INFO] 
-[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  3.395 s]
-[INFO] task-common ........................................ SUCCESS [  3.706 s]
-[INFO] task-domain ........................................ SUCCESS [  0.682 s]
-[INFO] task-service ....................................... SUCCESS [  4.453 s]
-[INFO] task-web ........................................... SUCCESS [ 14.193 s]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  27.501 s
-[INFO] Finished at: 2026-09-28T01:07:47Z
-[INFO] ------------------------------------------------------------------------

@@ -1,0 +1,32 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Some problems were encountered while processing the POMs:
+[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25
+[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25
+[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25
+[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25
+[ERROR] 'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 26, column 17
+ @ 
+[ERROR] The build could not read 4 projects -> [Help 1]
+[ERROR]   
+[ERROR]   The project com.example.secureapp:task-common:1.0.0-SNAPSHOT (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/task-common/pom.xml) has 1 error
+[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25 -> [Help 2]
+[ERROR]   
+[ERROR]   The project com.example.secureapp:task-domain:1.0.0-SNAPSHOT (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/task-domain/pom.xml) has 1 error
+[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25 -> [Help 2]
+[ERROR]   
+[ERROR]   The project com.example.secureapp:task-service:1.0.0-SNAPSHOT (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/task-service/pom.xml) has 1 error
+[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25 -> [Help 2]
+[ERROR]   
+[ERROR]   The project com.example.secureapp:task-web:1.0.0-SNAPSHOT (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/task-web/pom.xml) has 2 errors
+[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT (absent): Could not find artifact org.springframework.boot:spring-boot-dependencies:pom:1.0.0-SNAPSHOT @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T014035Z-52ad10a5/investigation/cycle-1/repository/pom.xml, line 57, column 25 -> [Help 2]
+[ERROR]     'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 26, column 17
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException
+[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/UnresolvableModelException
