@@ -753,6 +753,12 @@ class JournalLifecycle:
             errors.append(f"Cycle {cycle} {kind} has already been accepted")
         required = INTENT_SECTIONS if kind == "intent" else OUTCOME_SECTIONS
         errors.extend(self._missing_sections(answers, required))
+        missing_answer_fields = sum("answer" not in item for item in answers)
+        if missing_answer_fields:
+            errors.append(
+                f"{missing_answer_fields} answer object(s) missing required 'answer' field; "
+                "use {'section': <name>, 'answer': <text>}. 'content' is not recognized."
+            )
         seen: set[str] = set()
         total = 0
         for item in answers:
@@ -765,6 +771,8 @@ class JournalLifecycle:
             if key in seen:
                 errors.append(f"Duplicate section: {section}")
             seen.add(key)
+            if "answer" not in item:
+                continue
             total += len(answer)
             errors.extend(_answer_errors(section, answer, self.max_section_chars))
             errors.extend(validate_answer_markdown(answer, section))
@@ -815,7 +823,9 @@ class JournalLifecycle:
 def intent_repair_instructions(errors: Iterable[str]) -> tuple[str, ...]:
     """Give only the structural shape needed for the rejected Intent sections."""
     errors = tuple(errors)
-    hints = ["Resubmit the complete ordered answers array using the exact required section names; preserve valid content."]
+    hints = ["Resubmit the complete ordered answers array using the exact required section names; preserve already valid section text."]
+    if any("missing required 'answer' field" in error for error in errors):
+        hints.append("Each answers item must use `section` and `answer`; move text from `content` into `answer` and keep substantive answers.")
     if any("material-assumptions subsection" in error for error in errors):
         hints.append("In the investigation answer, add `### Material assumptions that remain necessary` followed by the actual assumptions or `None`.")
     if any("required evidence table" in error for error in errors):
@@ -849,6 +859,7 @@ def intent_questionnaire(cycle: int) -> str:
     ]
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
+        "Each `answers` item uses `section` and `answer`; put the section's substantive text in `answer`. "
         "Use the isolated cycle experiment for decision-relevant investigation before submission. Treat the original Task to Solve as authoritative; "
         "distinguish established information, assumptions, uncertainty, and execution-dependent evidence. Verify "
         "avoidable decision-critical uncertainty where reasonably feasible. The ordered answers describe the final pre-selection decision state, not a rigid reasoning waterfall; investigation may revise problem understanding, applicable engineering considerations, or the solution space before submission. Candidate count must result from "

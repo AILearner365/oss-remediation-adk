@@ -1,6 +1,6 @@
 # Autonomous Agent — Work State
 
-**Updated:** 2026-09-28. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
+**Updated:** 2026-09-29. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
 
 ## Active stack and return point
 
@@ -9,10 +9,11 @@
 3. **P1.1:** evaluate the frozen Challenge Before Commitment behavior at Q5 using the [experiment record](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md), baseline `e92837d`.
 4. **P2 support work:** remove independent harness/tool/capture contamination before judging P1.1.
 5. **P2.1 — resolved for now:** explicit whole-file delete capability replaced ambiguous text-delete semantics.
-6. **P2.3 — resolved for now:** targeted structural repair feedback retained; arbitrary four-identical-error cutoff removed; existing bounded retry limits remain.
-7. **P2.2 — tracked capability question:** harness/runtime-resource handoff is implemented and tested, but live model-backed pre-Intent experimental scanner use is still not demonstrated. It is not a prerequisite for P1.1 evaluation.
+6. **P2.3 — capture fix tested:** `011744` exposed an Intent argument contract gap (`content` supplied, `answer` required), causing repeated empty-answer rejections. The narrow schema/feedback fix passes focused and broader tests; live recovery remains unobserved.
+7. **P2.4 — next separate exercise:** observe truncation → retained-evidence retrieval → use of the retrieved fact in a live trace.
+8. **P2.2 — separate tracked capability question:** experimental scanner runtime-resource handoff remains unobserved model-backed and is not a scanner-use requirement for P1.1.
 
-**Current return point:** resume repeated frozen P1.1 evaluation from equivalent starting conditions. P2.2 remains capability-covered but not model-backed accepted; return to targeted P2.2 acceptance if an attempted experimental scan reveals a possible handoff defect, or if a P1.1 decision materially depends on proving that path. Do not change Q1–Q5.
+**Current return point:** conduct the separate P2.4 live retrieval exercise; return to repeated frozen P1.1 evaluation from equivalent starting conditions after that harness question is resolved. Keep P2.2 separate. Do not change Q1–Q5.
 
 ## Post-fix implementation and runtime evidence
 
@@ -33,6 +34,18 @@ Live evidence:
 - `run-20260928T015654Z-1640abc0`: 1 rejected submission, then accepted and final success.
 
 Conclusion: recovery works, but structural capture overhead can still be material. Treat this as cost evidence, not as engineering search depth.
+
+### September 29 P2.3 capture-contract regression
+
+On branch head `99694d45`, `run-20260929T011744Z-4982d887` made ten `submit_cycle_intent` calls across cycles 1–3. All 63 answer objects used `section` and `content`, with no `answer` key. The ADK declaration exposed each item as an arbitrary string map; the questionnaire named `section` but did not identify `answer` as the text key. Journal validation read only `answer`, reported empty answers, and the rejection guidance did not identify the key mismatch. Model continuations show it repeatedly tried to populate `content` and then treated the tool as broken. No Intent was accepted in four cycles, and the final reason was `CYCLE_INTENT_CAPTURE_INCOMPLETE`. This is capture/tool-contract contamination, not a clean P1.1 strategy outcome.
+
+The narrow fix gives the ADK tool a required `section`/`answer` item schema, identifies a missing `answer` field in validation and repair feedback, and clarifies the questionnaire's submission shape. Focused and broader relevant tests pass. Substantive answers and Q1–Q5 reasoning requirements remain the model's responsibility. The previous post-fix successful captures remain evidence for those runs; they did not expose this variant of the interface failure. Live recovery from this specific malformed submission has not yet been observed.
+
+### September 29 bounded-output evidence boundary
+
+Both `011744` and `run-20260929T014035Z-52ad10a5` used a 3,000-character shell response limit. Respectively, 11 and 5 shell stdout responses were truncated, and each carried a retained stdout artifact/reference. Root `pom.xml` reads also exposed line continuation (4 and 11 responses with `moreExists`). Neither run called `retrieve_retained_evidence`. Source-file continuation and retained shell artifacts are distinct mechanisms. The traces do not establish that truncation caused either final outcome or that the retained-evidence recovery path works model-backed.
+
+`011744` had no model engineering-scan calls; deterministic validation scans succeeded with 20 findings rather than failing. In `014035`, deterministic validation cycle 1 failed to resolve `org.springframework.boot:spring-boot-starter-webmvc:3.2.5` (registry 404), and correctly classified the scan as `INCOMPLETE_FATAL_FAILURE` / `DEPENDENCY_RESOLUTION`; validation remained `INCOMPLETE`, not clean. That scanner failure is separate from the `011744` Intent field mismatch and from the unobserved experimental handoff.
 
 ### P2.2 — runtime-resource handoff
 The implementation supports `scan_current_repository(runtime_resource_path=...)` and declares each cycle’s experimental HOME/TEMP/logical `/tmp`. Integration coverage demonstrates a command-created current-cycle runtime directory can reach an experimental scanner consumer outside repository source state.
@@ -104,11 +117,13 @@ No clean post-fix live trace yet establishes that the **retained-evidence retrie
 
 This remains a separate acceptance question from P2.2 scanner runtime-resource handoff.
 
-## P2.2 decision and immediate next action
+## Immediate next action and return to P1.1
 
 **Decision:** treat pre-Intent experimental scanning as an optional model evidence path, not a gate before frozen P1.1 evaluation. This does not claim live acceptance of the complete Maven/runtime-resource → experimental scanner → Intent path. The implementation and tests establish controlled handoff; four post-fix runs from target commit `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` contain no experimental scanner attempt before Intent. The frozen Experiment 1 protocol asks for decision-sufficient investigation and evidence-backed challenge, without prescribing a scanner call. Forcing one would test a separate capability and change the investigation setting for that run.
 
-**Next:** run the next comparable P1.1 batch from the same prepared target commit and equivalent request/model/scanner configuration, on one fixed harness code revision with Q5 unchanged. For each run, record the Experiment 1 per-run Q1–Q5 and self-evaluation fields, actual evidence/tool chronology, Intent rejection cost, implementation reassessment, deterministic validation, and task success separately from decision quality. Mark scanner non-use as non-use; do not score it as a P2.2 pass or failure. If a run invokes the experimental scanner and encounters a handoff/resource failure, investigate its cause; if a capability defect withheld decision-critical evidence, set aside the affected P1.1 inference and open targeted P2.2 acceptance.
+**Immediate next:** run a separately scoped live exercise showing a bounded/truncated output, a `retrieve_retained_evidence` call, and use of a fact obtained from that retrieval. Keep experimental scanner handoff outside that exercise.
+
+**Return to P1.1:** run the next comparable batch from the same prepared target commit and equivalent request/model/scanner configuration, on one fixed harness code revision with Q5 unchanged. For each run, record the Experiment 1 per-run Q1–Q5 and self-evaluation fields, actual evidence/tool chronology, Intent rejection cost, implementation reassessment, deterministic validation, and task success separately from decision quality. Mark scanner non-use as non-use; do not score it as a P2.2 pass or failure. If a run invokes the experimental scanner and encounters a handoff/resource failure, investigate its cause; if a capability defect withheld decision-critical evidence, set aside the affected P1.1 inference and open targeted P2.2 acceptance.
 
 Compare:
 

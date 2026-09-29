@@ -108,6 +108,22 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertTrue(self.lifecycle.submit_intent(1, repaired).accepted)
         self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
 
+    def test_content_field_is_rejected_with_exact_answer_key_repair(self):
+        valid = self._intent_answers()
+        malformed = [
+            {"section": item["section"], "content": item["answer"]}
+            for item in valid
+        ]
+        rejected = self.lifecycle.submit_intent(1, malformed)
+        self.assertFalse(rejected.accepted)
+        self.assertTrue(any("missing required 'answer' field" in error for error in rejected.errors))
+        self.assertTrue(any("content" in error for error in rejected.errors))
+        self.assertTrue(any("move text from `content` into `answer`" in hint
+                            for hint in rejected.repair_instructions))
+        self.assertNotIn("# Cycle 1 — Problem Analysis and Solution Decision", self.lifecycle.store.read())
+        self.assertTrue(self.lifecycle.submit_intent(1, valid).accepted)
+        self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
+
     def test_intent_checkpoint_limit_rejects_even_a_later_valid_submission(self):
         answers = self._intent_answers()
         self._replace(answers, INTENT_SECTIONS[1], "Investigation answer lacks required structure.")

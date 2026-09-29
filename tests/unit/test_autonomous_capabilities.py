@@ -374,6 +374,12 @@ class AutonomousCapabilityTests(unittest.TestCase):
             {tool.name for tool in tools},
         )
         declarations = {tool.name: tool._get_declaration() for tool in tools}
+        for checkpoint_tool in ("submit_cycle_intent", "submit_cycle_outcome"):
+            schema = declarations[checkpoint_tool].parameters_json_schema
+            answer_ref = schema["properties"]["answers"]["items"]["$ref"].split("/")[-1]
+            answer_schema = schema["$defs"][answer_ref]
+            self.assertEqual({"section", "answer"}, set(answer_schema["required"]))
+            self.assertEqual({"section", "answer"}, set(answer_schema["properties"]))
         self.assertEqual(
             ["write", "replace"],
             declarations["edit_workspace_text"].parameters_json_schema["properties"]["action"]["enum"],

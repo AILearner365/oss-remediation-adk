@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict
 
 from google.adk.tools.function_tool import FunctionTool
 
@@ -11,6 +11,11 @@ from ..workspace import RepositoryWorkspace, RunWorkspace, TraceStore
 from .execution import BudgetExceeded, ExecutionBudget, ProcessRunner
 from .research import HttpResearchProvider, ResearchProvider
 from .workspace_io import WorkspaceIO
+
+
+class CheckpointAnswer(TypedDict):
+    section: str
+    answer: str
 
 
 class DeveloperCapabilitySet:
@@ -438,8 +443,8 @@ class DeveloperCapabilitySet:
         )
         return str(path)
 
-    def submit_cycle_intent(self, cycle_number: int, answers: list[dict[str, str]]) -> dict[str, Any]:
-        """Submit the required Problem Analysis and Solution Decision before authoritative mutation."""
+    def submit_cycle_intent(self, cycle_number: int, answers: list[CheckpointAnswer]) -> dict[str, Any]:
+        """Submit the required Problem Analysis and Solution Decision before authoritative mutation. Each answers item needs section and answer text fields."""
         if not self.journal:
             return self._unavailable("submit_cycle_intent", "Journal lifecycle is not configured")
         result = self.journal.submit_intent(cycle_number, answers)
@@ -459,7 +464,7 @@ class DeveloperCapabilitySet:
 
     def submit_cycle_outcome(
         self, cycle_number: int, status: str, status_explanation: str,
-        answers: list[dict[str, str]],
+        answers: list[CheckpointAnswer],
     ) -> dict[str, Any]:
         """Submit the required metadata-only Cycle Outcome after execution."""
         if not self.journal:
