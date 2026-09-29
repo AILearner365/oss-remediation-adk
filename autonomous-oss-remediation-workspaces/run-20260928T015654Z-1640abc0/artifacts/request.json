@@ -3,7 +3,7 @@
     "command_timeout_seconds": 1800,
     "max_cycles": 4,
     "max_llm_calls_per_turn": 60,
-    "max_returned_output_chars": 30000,
+    "max_returned_output_chars": 3000,
     "max_tool_calls": 80,
     "model_turn_timeout_seconds": 1800,
     "overall_timeout_seconds": 7200

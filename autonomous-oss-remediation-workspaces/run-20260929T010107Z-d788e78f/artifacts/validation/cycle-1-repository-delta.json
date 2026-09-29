@@ -1,0 +1,28 @@
+{
+  "after": {
+    "captured": true,
+    "changedFiles": [
+      "pom.xml"
+    ],
+    "fileDigests": {
+      "pom.xml": "db298ba9b8e8472e69852643d054722b25fddf20d29906daaef0434b3d5f4a82"
+    },
+    "stateDigest": "e870ad7f004ddd8a5b39a04f603510afa6b447d7113e00c6f6736343ac27bf16"
+  },
+  "before": {
+    "captured": true,
+    "changedFiles": [],
+    "fileDigests": {},
+    "stateDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "cycle": 1,
+  "delta": {
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [
+      "pom.xml"
+    ],
+    "pathsModifiedSinceCycleStart": [],
+    "pathsRemovedFromChangeSet": [],
+    "repositoryStateChanged": true
+  }
+}

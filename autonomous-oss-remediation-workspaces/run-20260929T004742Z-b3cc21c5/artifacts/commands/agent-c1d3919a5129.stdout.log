@@ -1,0 +1,1590 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/6.2.19/spring-framework-bom-6.2.19.pom
+Progress (1): 975 B
+Progress (1): 4.9 kB
+Progress (1): 5.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/6.2.19/spring-framework-bom-6.2.19.pom (5.8 kB at 6.8 kB/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-common >------------------
+[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
+[INFO]   from task-common/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-common ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-common/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-common ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-common/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-common/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-common ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-common/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-common ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-common ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-common ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-common ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-domain >------------------
+[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
+[INFO]   from task-domain/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-domain ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-domain/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-domain ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-domain/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-domain/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-domain ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-domain/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-domain ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-domain ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-domain ---
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-service >-----------------
+[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
+[INFO]   from task-service/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.pom
+Progress (1): 1.0 kB
+Progress (1): 2.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.pom (2.8 kB at 65 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 2.2 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.pom (2.2 kB at 45 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 2.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.pom (2.0 kB at 48 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 2.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.pom (2.0 kB at 56 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 1.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.pom (1.8 kB at 51 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.2.19/spring-expression-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 2.1 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.2.19/spring-expression-6.2.19.pom (2.1 kB at 49 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.19/spring-test-6.2.19.pom
+Progress (1): 1.1 kB
+Progress (1): 2.1 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.19/spring-test-6.2.19.pom (2.1 kB at 56 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.jar
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.1/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.2/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.3/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.4/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.5/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.6/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.7/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.8/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 0.9/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.0/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.1/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.2/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.3/1.4 MB
+Progress (1): 1.4/1.4 MB
+Progress (1): 1.4 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.jar (1.4 MB at 2.6 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.2.19/spring-expression-6.2.19.jar
+Progress (1): 7.7/420 kB
+Progress (1): 16/420 kB 
+Progress (1): 32/420 kB
+Progress (1): 49/420 kB
+Progress (1): 57/420 kB
+Progress (1): 73/420 kB
+Progress (1): 90/420 kB
+Progress (1): 106/420 kB
+Progress (2): 106/420 kB | 0.9/892 kB
+Progress (2): 106/420 kB | 2.3/892 kB
+Progress (2): 106/420 kB | 3.6/892 kB
+Progress (2): 106/420 kB | 5.0/892 kB
+Progress (2): 122/420 kB | 5.0/892 kB
+Progress (3): 122/420 kB | 5.0/892 kB | 0.9/321 kB
+Progress (3): 122/420 kB | 5.0/892 kB | 2.3/321 kB
+Progress (3): 122/420 kB | 5.0/892 kB | 3.6/321 kB
+Progress (3): 122/420 kB | 5.0/892 kB | 5.0/321 kB
+Progress (3): 122/420 kB | 5.0/892 kB | 6.4/321 kB
+Progress (3): 122/420 kB | 6.4/892 kB | 6.4/321 kB
+Progress (3): 122/420 kB | 7.7/892 kB | 6.4/321 kB
+Progress (3): 122/420 kB | 9.1/892 kB | 6.4/321 kB
+Progress (3): 122/420 kB | 9.1/892 kB | 7.7/321 kB
+Progress (3): 122/420 kB | 9.1/892 kB | 9.1/321 kB
+Progress (3): 122/420 kB | 9.1/892 kB | 10/321 kB 
+Progress (3): 122/420 kB | 9.1/892 kB | 12/321 kB
+Progress (3): 122/420 kB | 9.1/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 9.1/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 10/892 kB | 13/321 kB 
+Progress (3): 139/420 kB | 12/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 13/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 15/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 13/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 15/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 16/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 17/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 19/321 kB
+Progress (3): 139/420 kB | 16/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 17/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 19/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 20/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 21/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 23/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 20/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 21/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 23/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 24/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 25/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 26/321 kB
+Progress (3): 139/420 kB | 24/892 kB | 27/321 kB
+Progress (3): 155/420 kB | 24/892 kB | 27/321 kB
+Progress (3): 155/420 kB | 24/892 kB | 29/321 kB
+Progress (3): 155/420 kB | 25/892 kB | 29/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 29/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 30/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 31/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 33/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 34/321 kB
+Progress (3): 155/420 kB | 27/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 27/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 28/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 30/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 31/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 32/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 34/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 35/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 36/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 38/892 kB | 36/321 kB
+Progress (3): 172/420 kB | 39/892 kB | 36/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 36/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 37/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 38/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 40/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 41/321 kB
+Progress (3): 188/420 kB | 39/892 kB | 42/321 kB
+Progress (3): 188/420 kB | 41/892 kB | 42/321 kB
+Progress (3): 188/420 kB | 42/892 kB | 42/321 kB
+Progress (3): 188/420 kB | 43/892 kB | 42/321 kB
+Progress (3): 188/420 kB | 45/892 kB | 42/321 kB
+Progress (4): 188/420 kB | 45/892 kB | 42/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 42/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 44/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 45/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 46/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 48/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 49/321 kB | 0.9/24 kB
+Progress (4): 188/420 kB | 46/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 46/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 47/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 49/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 50/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 51/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 53/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 51/321 kB | 0.9/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 51/321 kB | 2.3/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 52/321 kB | 2.3/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 53/321 kB | 2.3/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 53/321 kB | 3.2/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 55/321 kB | 3.2/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 55/321 kB | 4.5/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 55/321 kB | 5.9/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 55/321 kB | 7.3/24 kB
+Progress (4): 204/420 kB | 54/892 kB | 59/321 kB | 7.3/24 kB
+Progress (4): 221/420 kB | 54/892 kB | 59/321 kB | 7.3/24 kB
+Progress (4): 221/420 kB | 54/892 kB | 59/321 kB | 8.6/24 kB
+Progress (4): 221/420 kB | 56/892 kB | 59/321 kB | 8.6/24 kB
+Progress (4): 221/420 kB | 56/892 kB | 59/321 kB | 10/24 kB 
+Progress (4): 221/420 kB | 56/892 kB | 59/321 kB | 11/24 kB
+Progress (4): 221/420 kB | 60/892 kB | 59/321 kB | 11/24 kB
+Progress (4): 221/420 kB | 60/892 kB | 59/321 kB | 13/24 kB
+Progress (4): 221/420 kB | 60/892 kB | 59/321 kB | 14/24 kB
+Progress (4): 221/420 kB | 60/892 kB | 59/321 kB | 15/24 kB
+Progress (4): 221/420 kB | 64/892 kB | 59/321 kB | 15/24 kB
+Progress (4): 221/420 kB | 64/892 kB | 63/321 kB | 15/24 kB
+Progress (4): 221/420 kB | 64/892 kB | 67/321 kB | 15/24 kB
+Progress (5): 221/420 kB | 64/892 kB | 67/321 kB | 15/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 15/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 15/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 17/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 17/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 18/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 18/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 20/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 20/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 64/892 kB | 67/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 68/892 kB | 67/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 73/892 kB | 67/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 73/892 kB | 72/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 237/420 kB | 73/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 73/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 77/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 81/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 21/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 76/321 kB | 22/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 80/321 kB | 22/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 80/321 kB | 24/24 kB | 0/2.0 MB
+Progress (5): 253/420 kB | 85/892 kB | 80/321 kB | 24 kB | 0/2.0 MB   
+Progress (5): 270/420 kB | 85/892 kB | 80/321 kB | 24 kB | 0/2.0 MB
+                                                                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.jar (24 kB at 101 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.19/spring-test-6.2.19.jar
+Progress (4): 270/420 kB | 85/892 kB | 84/321 kB | 0/2.0 MB
+Progress (4): 270/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 270/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 270/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 89/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 93/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 85/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 89/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 286/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 97/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 101/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 94/892 kB | 105/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 98/892 kB | 105/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 102/892 kB | 105/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 102/892 kB | 110/321 kB | 0/2.0 MB
+Progress (4): 303/420 kB | 102/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 102/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 106/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 111/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 319/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 115/892 kB | 114/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 115/892 kB | 118/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 115/892 kB | 122/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 115/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 119/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (4): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB
+Progress (5): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 335/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 123/892 kB | 127/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 123/892 kB | 131/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 123/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 123/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 127/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 127/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 127/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 132/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 132/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 132/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 352/420 kB | 136/892 kB | 135/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 136/892 kB | 135/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 136/892 kB | 139/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 136/892 kB | 144/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 136/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 140/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 140/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 144/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 144/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 144/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 144/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 368/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 148/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 152/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 152/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 152/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 156/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 156/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 156/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 149/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 153/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 155/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 385/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 160/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 164/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 168/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 159/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 164/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 168/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 401/420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 417/420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB    
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 173/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 177/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 172/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 176/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 181/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (5): 420 kB | 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+                                                                        
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.jar (420 kB at 1.2 MB/s)
+Progress (4): 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 181/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 185/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 189/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 185/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 189/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 193/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 194/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 198/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 198/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 198/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 197/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 202/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 202/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 206/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 202/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 210/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 214/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 219/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 206/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 211/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 215/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 219/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.1/1.0 MB
+Progress (4): 223/892 kB | 223/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 223/892 kB | 240/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.1/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 239/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 240/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 256/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 256/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 272/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 272/892 kB | 272/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 286/892 kB | 272/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 286/892 kB | 272/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 286/892 kB | 272/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 286/892 kB | 287/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 286/892 kB | 287/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 287/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 287/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 287/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 303/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 303/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 303/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 303/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 319/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 319/321 kB | 0.2/2.0 MB | 0.2/1.0 MB
+Progress (4): 303/892 kB | 321 kB | 0.2/2.0 MB | 0.2/1.0 MB    
+Progress (4): 303/892 kB | 321 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (4): 319/892 kB | 321 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (4): 319/892 kB | 321 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (4): 319/892 kB | 321 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (4): 319/892 kB | 321 kB | 0.2/2.0 MB | 0.3/1.0 MB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/6.2.19/spring-expression-6.2.19.jar (321 kB at 752 kB/s)
+Progress (3): 335/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 335/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 335/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 352/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 352/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 352/892 kB | 0.2/2.0 MB | 0.3/1.0 MB
+Progress (3): 352/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 352/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 368/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 385/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 385/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 385/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 401/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 401/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 401/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 417/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 417/892 kB | 0.3/2.0 MB | 0.3/1.0 MB
+Progress (3): 417/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 417/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 434/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 434/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 450/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 450/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 450/892 kB | 0.3/2.0 MB | 0.4/1.0 MB
+Progress (3): 450/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 450/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 466/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 466/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 466/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 483/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 485/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 485/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 499/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 499/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 516/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 516/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 516/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.4/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 532/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 548/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 548/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 565/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 565/892 kB | 0.4/2.0 MB | 0.5/1.0 MB
+Progress (3): 565/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 581/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 581/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 581/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 598/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 598/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 598/892 kB | 0.5/2.0 MB | 0.5/1.0 MB
+Progress (3): 598/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 598/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 614/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 616/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 616/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 616/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 616/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 633/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 633/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 649/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 649/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 665/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 665/892 kB | 0.5/2.0 MB | 0.6/1.0 MB
+Progress (3): 665/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 665/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 665/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 682/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 682/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 682/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 698/892 kB | 0.6/2.0 MB | 0.6/1.0 MB
+Progress (3): 698/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 698/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 715/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 715/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 715/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 731/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 747/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 747/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 747/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 747/892 kB | 0.6/2.0 MB | 0.7/1.0 MB
+Progress (3): 747/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 764/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 764/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 780/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 780/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 780/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 796/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 796/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 796/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 813/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 813/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.7/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 829/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 846/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 862/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 862/892 kB | 0.7/2.0 MB | 0.8/1.0 MB
+Progress (3): 862/892 kB | 0.8/2.0 MB | 0.8/1.0 MB
+Progress (3): 878/892 kB | 0.8/2.0 MB | 0.8/1.0 MB
+Progress (3): 878/892 kB | 0.8/2.0 MB | 0.8/1.0 MB
+Progress (3): 878/892 kB | 0.8/2.0 MB | 0.8/1.0 MB
+Progress (3): 892 kB | 0.8/2.0 MB | 0.8/1.0 MB    
+Progress (3): 892 kB | 0.8/2.0 MB | 0.8/1.0 MB
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.jar (892 kB at 1.3 MB/s)
+Progress (2): 0.8/2.0 MB | 0.8/1.0 MB
+Progress (2): 0.8/2.0 MB | 0.8/1.0 MB
+Progress (2): 0.8/2.0 MB | 0.8/1.0 MB
+Progress (2): 0.8/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.8/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 0.9/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 0.9/1.0 MB
+Progress (2): 1.0/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.0/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.0/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.1/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0/1.0 MB
+Progress (2): 1.2/2.0 MB | 1.0 MB    
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/6.2.19/spring-test-6.2.19.jar (1.0 MB at 1.4 MB/s)
+Progress (1): 1.2/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.3/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.4/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.5/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.6/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.7/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.8/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 1.9/2.0 MB
+Progress (1): 2.0/2.0 MB
+Progress (1): 2.0/2.0 MB
+Progress (1): 2.0 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.jar (2.0 MB at 2.2 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-service ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-service/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-service ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-service/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-service/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.748 s -- in com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-service ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-service ---
+[INFO] 
+[INFO] -------------------< com.example.secureapp:task-web >-------------------
+[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
+[INFO]   from task-web/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.2.19/spring-web-6.2.19.pom
+Progress (1): 1.0 kB
+Progress (1): 2.4 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.2.19/spring-web-6.2.19.pom (2.4 kB at 33 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.2.19/spring-webmvc-6.2.19.pom
+Progress (1): 1.0 kB
+Progress (1): 3.0 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.2.19/spring-webmvc-6.2.19.pom (3.0 kB at 47 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.2.19/spring-web-6.2.19.jar
+Progress (1): 0/2.1 MB
+Progress (1): 0/2.1 MB
+Progress (1): 0/2.1 MB
+Progress (1): 0/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.1/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.2/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.3/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.4/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.5/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.6/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.7/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.8/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 0.9/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.0/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.1/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.2/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.3/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.4/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.5/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.6/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.7/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.8/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 1.9/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.0/2.1 MB
+Progress (1): 2.1/2.1 MB
+Progress (1): 2.1/2.1 MB
+Progress (1): 2.1/2.1 MB
+Progress (1): 2.1 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/6.2.19/spring-web-6.2.19.jar (2.1 MB at 5.8 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.2.19/spring-webmvc-6.2.19.jar
+Progress (1): 0/1.1 MB
+Progress (1): 0/1.1 MB
+Progress (1): 0/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.1/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.2/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.3/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.4/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.5/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.6/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.7/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.8/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 0.9/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.0/1.1 MB
+Progress (1): 1.1/1.1 MB
+Progress (1): 1.1/1.1 MB
+Progress (1): 1.1/1.1 MB
+Progress (1): 1.1 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/6.2.19/spring-webmvc-6.2.19.jar (1.1 MB at 7.6 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-web ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-web/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-web ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-web ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-web ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-web/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-web ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.web.TaskApplicationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-09-29T00:50:08.081Z  WARN 3545 --- [secure-multimodule-springboot-java21] [           main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/home/kavya_parivarababu/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/home/kavya_parivarababu/.m2/repository/org/json/json/20231013/json-20231013.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2026-09-29T00:50:08.145Z  INFO 3545 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : Starting TaskApplicationTest using Java 21.0.12 with PID 3545 (started by kavya_parivarababu in /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-web)
+2026-09-29T00:50:08.148Z  INFO 3545 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : No active profile set, falling back to 1 default profile: "default"
+2026-09-29T00:50:10.391Z  WARN 3545 --- [secure-multimodule-springboot-java21] [           main] o.s.w.c.s.GenericWebApplicationContext   : Exception encountered during context initialization - cancelling refresh attempt: java.lang.IllegalStateException: Error processing condition on org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+2026-09-29T00:50:10.420Z  INFO 3545 --- [secure-multimodule-springboot-java21] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-09-29T00:50:10.442Z ERROR 3545 --- [secure-multimodule-springboot-java21] [           main] o.s.boot.SpringApplication               : Application run failed
+
+java.lang.IllegalStateException: Error processing condition on org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:60) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.context.annotation.ConditionEvaluator.shouldSkip(ConditionEvaluator.java:99) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForBeanMethod(ConfigurationClassBeanDefinitionReader.java:191) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForConfigurationClass(ConfigurationClassBeanDefinitionReader.java:144) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(ConfigurationClassBeanDefinitionReader.java:120) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:430) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:290) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:349) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:118) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:792) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:610) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:200) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:139) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:159) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$1(ClassBasedTestDescriptor.java:423) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:428) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$0(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$0(ClassBasedTestDescriptor.java:334) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:333) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$1(ClassBasedTestDescriptor.java:322) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$0(ClassBasedTestDescriptor.java:321) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:27) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:127) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:126) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$0(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:110) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.5.jar:3.5.5]
+Caused by: java.lang.IllegalStateException: @ConditionalOnMissingBean did not specify a bean using type, name or annotation and the attempt to deduce the bean's type failed
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.validate(OnBeanCondition.java:657) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:603) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition.getMatchOutcome(OnBeanCondition.java:147) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:47) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 106 common frames omitted
+Caused by: org.springframework.boot.autoconfigure.condition.OnBeanCondition$BeanTypeDeductionException: Failed to deduce bean type for org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:686) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanType(OnBeanCondition.java:676) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:596) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 108 common frames omitted
+Caused by: java.lang.IllegalStateException: Failed to introspect Class [org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@639fee48]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:483) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:238) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:218) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.findBeanMethod(OnBeanCondition.java:715) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getMethodReturnType(OnBeanCondition.java:710) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getReturnType(OnBeanCondition.java:694) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:683) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 110 common frames omitted
+Caused by: java.lang.NoClassDefFoundError: org/springframework/http/converter/HttpMessageConverters$ServerBuilder
+	at java.base/java.lang.Class.getDeclaredMethods0(Native Method) ~[na:na]
+	at java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3580) ~[na:na]
+	at java.base/java.lang.Class.getDeclaredMethods(Class.java:2678) ~[na:na]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465) ~[spring-core-6.2.19.jar:6.2.19]
+	... 116 common frames omitted
+Caused by: java.lang.ClassNotFoundException: org.springframework.http.converter.HttpMessageConverters$ServerBuilder
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641) ~[na:na]
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188) ~[na:na]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[na:na]
+	... 120 common frames omitted
+
+2026-09-29T00:50:10.472Z  WARN 3545 --- [secure-multimodule-springboot-java21] [           main] o.s.test.context.TestContextManager      : Caught exception while allowing TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener] to prepare test instance [com.example.secureapp.web.TaskApplicationTest@777d0bc3]
+
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@48a663e9 testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@75b25825, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@1cbf6e72, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@a5bd950, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@7756c3cd, org.springframework.test.context.support.DynamicPropertiesContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@552c921a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:200) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:139) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:159) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$1(ClassBasedTestDescriptor.java:423) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:428) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$0(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$0(ClassBasedTestDescriptor.java:334) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:333) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$1(ClassBasedTestDescriptor.java:322) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$0(ClassBasedTestDescriptor.java:321) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:27) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:127) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:126) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$0(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:110) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.5.jar:3.5.5]
+Caused by: java.lang.IllegalStateException: Error processing condition on org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:60) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.context.annotation.ConditionEvaluator.shouldSkip(ConditionEvaluator.java:99) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForBeanMethod(ConfigurationClassBeanDefinitionReader.java:191) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForConfigurationClass(ConfigurationClassBeanDefinitionReader.java:144) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(ConfigurationClassBeanDefinitionReader.java:120) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:430) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:290) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:349) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:118) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:792) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:610) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465) ~[spring-boot-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114) ~[spring-boot-test-4.0.6.jar:4.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.2.19.jar:6.2.19]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.2.19.jar:6.2.19]
+	... 84 common frames omitted
+Caused by: java.lang.IllegalStateException: @ConditionalOnMissingBean did not specify a bean using type, name or annotation and the attempt to deduce the bean's type failed
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.validate(OnBeanCondition.java:657) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:603) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition.getMatchOutcome(OnBeanCondition.java:147) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:47) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 106 common frames omitted
+Caused by: org.springframework.boot.autoconfigure.condition.OnBeanCondition$BeanTypeDeductionException: Failed to deduce bean type for org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:686) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanType(OnBeanCondition.java:676) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:596) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 108 common frames omitted
+Caused by: java.lang.IllegalStateException: Failed to introspect Class [org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@639fee48]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:483) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:238) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:218) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.findBeanMethod(OnBeanCondition.java:715) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getMethodReturnType(OnBeanCondition.java:710) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getReturnType(OnBeanCondition.java:694) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:683) ~[spring-boot-autoconfigure-4.0.6.jar:4.0.6]
+	... 110 common frames omitted
+Caused by: java.lang.NoClassDefFoundError: org/springframework/http/converter/HttpMessageConverters$ServerBuilder
+	at java.base/java.lang.Class.getDeclaredMethods0(Native Method) ~[na:na]
+	at java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3580) ~[na:na]
+	at java.base/java.lang.Class.getDeclaredMethods(Class.java:2678) ~[na:na]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465) ~[spring-core-6.2.19.jar:6.2.19]
+	... 116 common frames omitted
+Caused by: java.lang.ClassNotFoundException: org.springframework.http.converter.HttpMessageConverters$ServerBuilder
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641) ~[na:na]
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188) ~[na:na]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[na:na]
+	... 120 common frames omitted
+
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 4.261 s <<< FAILURE! -- in com.example.secureapp.web.TaskApplicationTest
+[ERROR] com.example.secureapp.web.TaskApplicationTest.contextLoads -- Time elapsed: 0.041 s <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@48a663e9 testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@75b25825, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@1cbf6e72, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@a5bd950, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@7756c3cd, org.springframework.test.context.support.DynamicPropertiesContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@552c921a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130)
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:200)
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:139)
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:159)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalStateException: Error processing condition on org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:60)
+	at org.springframework.context.annotation.ConditionEvaluator.shouldSkip(ConditionEvaluator.java:99)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForBeanMethod(ConfigurationClassBeanDefinitionReader.java:191)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForConfigurationClass(ConfigurationClassBeanDefinitionReader.java:144)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(ConfigurationClassBeanDefinitionReader.java:120)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:430)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:290)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:349)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:118)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:792)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:610)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46)
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465)
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152)
+	... 19 more
+Caused by: java.lang.IllegalStateException: @ConditionalOnMissingBean did not specify a bean using type, name or annotation and the attempt to deduce the bean's type failed
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.validate(OnBeanCondition.java:657)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:603)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition.getMatchOutcome(OnBeanCondition.java:147)
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:47)
+	... 41 more
+Caused by: org.springframework.boot.autoconfigure.condition.OnBeanCondition$BeanTypeDeductionException: Failed to deduce bean type for org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.defaultViewResolver
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:686)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanType(OnBeanCondition.java:676)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.<init>(OnBeanCondition.java:596)
+	... 43 more
+Caused by: java.lang.IllegalStateException: Failed to introspect Class [org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@639fee48]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:483)
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:238)
+	at org.springframework.util.ReflectionUtils.findMethod(ReflectionUtils.java:218)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.findBeanMethod(OnBeanCondition.java:715)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getMethodReturnType(OnBeanCondition.java:710)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.getReturnType(OnBeanCondition.java:694)
+	at org.springframework.boot.autoconfigure.condition.OnBeanCondition$Spec.deducedBeanTypeForBeanMethod(OnBeanCondition.java:683)
+	... 45 more
+Caused by: java.lang.NoClassDefFoundError: org/springframework/http/converter/HttpMessageConverters$ServerBuilder
+	at java.base/java.lang.Class.getDeclaredMethods0(Native Method)
+	at java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3580)
+	at java.base/java.lang.Class.getDeclaredMethods(Class.java:2678)
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)
+	... 51 more
+Caused by: java.lang.ClassNotFoundException: org.springframework.http.converter.HttpMessageConverters$ServerBuilder
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	... 55 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Errors: 
+[ERROR]   TaskApplicationTest.contextLoads » IllegalState Failed to load ApplicationContext for [WebMergedContextConfiguration@48a663e9 testClass = com.example.secureapp.web.TaskApplicationTest, locations = [], classes = [com.example.secureapp.web.TaskApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@75b25825, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@1cbf6e72, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@a5bd950, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@7756c3cd, org.springframework.test.context.support.DynamicPropertiesContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@552c921a], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+[INFO] 
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  1.835 s]
+[INFO] task-common ........................................ SUCCESS [  3.273 s]
+[INFO] task-domain ........................................ SUCCESS [  0.722 s]
+[INFO] task-service ....................................... SUCCESS [  7.420 s]
+[INFO] task-web ........................................... FAILURE [  8.677 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  24.513 s
+[INFO] Finished at: 2026-09-29T00:50:10Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project task-web: 
+[ERROR] 
+[ERROR] See /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20260929T004742Z-b3cc21c5/repository/task-web/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :task-web
