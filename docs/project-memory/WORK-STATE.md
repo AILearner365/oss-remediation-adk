@@ -10,9 +10,9 @@
 4. **P2 support work:** remove independent harness/tool/capture contamination before judging P1.1.
 5. **P2.1 — resolved for now:** explicit whole-file delete capability replaced ambiguous text-delete semantics.
 6. **P2.3 — resolved for now:** targeted structural repair feedback retained; arbitrary four-identical-error cutoff removed; existing bounded retry limits remain.
-7. **P2.2 — current active subproblem:** harness/runtime-resource handoff is implemented and tested, but live model-backed pre-Intent experimental scanner use is still not demonstrated.
+7. **P2.2 — tracked capability question:** harness/runtime-resource handoff is implemented and tested, but live model-backed pre-Intent experimental scanner use is still not demonstrated. It is not a prerequisite for P1.1 evaluation.
 
-**Current return point:** decide how to close P2.2 acceptance. Either run one intentionally targeted live scenario that naturally requires experimental scan evidence, or explicitly accept that the model may choose other evidence paths and record P2.2 as harness-capability verified but not behaviorally exercised. Then return to repeated frozen P1.1 evaluation. Do not change Q1–Q5 while making this decision.
+**Current return point:** resume repeated frozen P1.1 evaluation from equivalent starting conditions. P2.2 remains capability-covered but not model-backed accepted; return to targeted P2.2 acceptance if an attempted experimental scan reveals a possible handoff defect, or if a P1.1 decision materially depends on proving that path. Do not change Q1–Q5.
 
 ## Post-fix implementation and runtime evidence
 
@@ -52,7 +52,7 @@ experimental edit/build
 → Intent
 ```
 
-The missing evidence is now mainly **model choice/use**, not known scanner wiring failure.
+The missing evidence is **model choice/use and real end-to-end scanner acceptance**, not a known post-fix scanner wiring failure. The protocol does not require the model to use this scanner before Intent. An unattempted path cannot by itself turn an otherwise interpretable Q2–Q5 trace into a scanner failure. If an attempted experimental scan fails, inspect whether the cause is resource handoff, unusable dependency state, model invocation, or another condition. A confirmed capability failure that withholds decision-critical evidence contaminates the affected P1.1 inference and warrants separate P2.2 investigation. A model's failure to investigate a material uncertainty remains an engineering-decision question, judged against all reasonably available evidence mechanisms rather than scanner use alone.
 
 ## Latest run outcomes
 
@@ -104,23 +104,13 @@ No clean post-fix live trace yet establishes that the **retained-evidence retrie
 
 This remains a separate acceptance question from P2.2 scanner runtime-resource handoff.
 
-## Immediate next action
+## P2.2 decision and immediate next action
 
-Make one explicit choice:
+**Decision:** treat pre-Intent experimental scanning as an optional model evidence path, not a gate before frozen P1.1 evaluation. This does not claim live acceptance of the complete Maven/runtime-resource → experimental scanner → Intent path. The implementation and tests establish controlled handoff; four post-fix runs from target commit `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` contain no experimental scanner attempt before Intent. The frozen Experiment 1 protocol asks for decision-sufficient investigation and evidence-backed challenge, without prescribing a scanner call. Forcing one would test a separate capability and change the investigation setting for that run.
 
-1. **Targeted P2.2 acceptance run:** construct a scenario where a pre-Intent experimental vulnerability scan is naturally decision-relevant, then verify actual trace:
-   `experimental command/resource → experimental scanner with same resource → successful scan → Intent`.
-   If successful, close P2.2 acceptance and return to Step 5.
+**Next:** run the next comparable P1.1 batch from the same prepared target commit and equivalent request/model/scanner configuration, on one fixed harness code revision with Q5 unchanged. For each run, record the Experiment 1 per-run Q1–Q5 and self-evaluation fields, actual evidence/tool chronology, Intent rejection cost, implementation reassessment, deterministic validation, and task success separately from decision quality. Mark scanner non-use as non-use; do not score it as a P2.2 pass or failure. If a run invokes the experimental scanner and encounters a handoff/resource failure, investigate its cause; if a capability defect withheld decision-critical evidence, set aside the affected P1.1 inference and open targeted P2.2 acceptance.
 
-or
-
-2. **Accept non-use as model choice:** record that the capability is harness-verified but not mandatory; stop treating scanner-before-Intent as an acceptance gate. Then return immediately to repeated frozen P1.1 runs.
-
-Do not silently mix the two positions.
-
-## Return after P2.2 decision
-
-Run repeated comparable P1.1 benchmarks from equivalent starting conditions and compare:
+Compare:
 
 ```text
 Q2 investigation/evidence
@@ -132,4 +122,4 @@ Q2 investigation/evidence
 → deterministic validation
 ```
 
-Keep task success separate from reasoning quality. Experiment 1 remains **CONTINUE** until clean repeated evidence supports a stronger disposition.
+Keep task success separate from reasoning quality. Experiment 1 remains **CONTINUE** until clean repeated evidence supports a stronger disposition. The explicit return point for the optional P2.2 path is an attempted scan with a possible handoff defect, or a decision that depends on proving its live availability.

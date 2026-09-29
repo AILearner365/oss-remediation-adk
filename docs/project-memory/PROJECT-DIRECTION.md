@@ -15,7 +15,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | S1 | OSS workflow discovery and early ADK prototypes | Completed historical foundation | Project moved from multi-agent/exact-patch workflow to one autonomous engineering actor. |
 | S2 | Independent autonomous POC and deterministic envelope | Implemented; hardening active | CLI/request, one ADK model/session, engineering tools, scanners, policy validation, cycles, journal and gated Draft PR delivery. |
 | S3 | Evidence-grounded decision quality | Active | Q1–Q5 implemented. P1 studies premature commitment/project-fit selection. P1.1 Challenge Before Commitment remains frozen and under evaluation. |
-| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | P2.1 destructive-edit ambiguity and P2.3 arbitrary identical-error cutoff were fixed. P2.2 harness handoff has deterministic coverage, but live model-backed experimental scanner use before Intent is still unproven. |
+| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | P2.1 destructive-edit ambiguity and P2.3 arbitrary identical-error cutoff were fixed. P2.2 handoff has implementation and test coverage; model-backed experimental scanner use before Intent remains unobserved and is tracked separately from the P1.1 gate. |
 | S5 | Deployment and broader generalization | Upcoming / conditional | Repeatable evaluation, runner/credential isolation, provider reliability, portability and later deployment integration remain. |
 
 ## Meaningful backlog
@@ -25,17 +25,17 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1 | S3 | Active | Improve consistency of project-fit solution selection without prescribing a dependency layer or candidate count. |
 | P1.1 | P1 | Active; frozen behavior | Evaluate Challenge Before Commitment using clean comparable runs; task success and engineering decision quality are separate. Current decision: `CONTINUE`. |
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
-| P1.1b | P1.1 + P2 | Audit complete enough to act; live acceptance gap remains | Historical audit separated reasoning defects from harness contamination. Post-fix runs now provide clean end-to-end success evidence, but still do not show pre-Intent experimental scanner use. |
+| P1.1b | P1.1 + P2 | Audit complete; comparable evaluation next | Historical audit separated reasoning defects from harness contamination. Post-fix runs provide end-to-end evidence; no current trace shows a pre-Intent experimental scanner attempt or a resulting handoff failure. |
 | P2.1 | P2 | Resolved for now | Text edit exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. Latest successful runs did not reproduce the accidental file-unlink failure. |
-| P2.2 | P2 | Harness capability verified; behavioral acceptance still open | Current-cycle runtime-resource handoff is implemented and tested. Multiple post-fix live runs did not invoke `scan_current_repository` in the experimental workspace before Intent, so the exact Maven/resource → experimental scanner → Intent path is still unproven. |
+| P2.2 | P2 | Capability covered; optional live path unobserved | Current-cycle runtime-resource handoff is implemented and tested. The exact model-backed Maven/resource → experimental scanner → Intent path remains unproven. Its non-use is not a P1.1 evaluation gate; investigate a failed attempt's cause separately or test the path when a decision depends on its availability. |
 | P2.3 | P2 | Resolved for now; overhead still observed | Targeted structural repair feedback is active; repeated identical labels no longer force early termination. Live runs recovered to accepted Intent, including after multiple rejections, but capture cost can still be high. |
-| P2 | S4 | Implemented architecture; behavioral acceptance incomplete | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces. |
+| P2 | S4 | Implemented architecture; some live paths unobserved | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces or make optional evidence methods mandatory for P1.1. |
 | P3 | S4 | Backlog | Evidence-backed N+1 recovery and first meaningful failure localization; avoid failed-strategy momentum and distinguish strategy vs environment/harness/validation failure. |
 | P4 | S3/S4 | Active observed concern | Stale-prior substitution and decision-critical investigation depth remain visible. Recent runs vary: some still call Spring Boot `4.0.6` custom/non-public; another treats it as intentional/custom and preserves it, but without first establishing the parent control point from authoritative evidence. |
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S3 with S4 supporting work. P2.1 and P2.3 are resolved enough to stop active redesign. P2.2 remains the only open harness-boundary acceptance item: the model has not yet chosen to use the experimental scanner with the same current-cycle runtime resource before Intent. After deciding whether to force one targeted P2.2 acceptance scenario or accept model-chosen evidence paths, return to clean repeated P1.1 evaluation. Do not change Q1–Q5 meanwhile.
+**Current position:** S3/P1.1 evaluation resumes. P2.1 and P2.3 are resolved enough to stop active redesign. P2.2's model-backed pre-Intent scanner path remains an unobserved capability question, not a required P1.1 acceptance gate. Run comparable frozen P1.1 evaluations now; investigate any actual scanner/runtime failure before classifying its cause, and pursue targeted P2.2 acceptance if that path becomes decision-critical. Do not change Q1–Q5 meanwhile.
 
 ## Stable reasoning/evidence boundaries
 
@@ -49,6 +49,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 - Same-cycle reassessment remains allowed and valuable.
 - Avoid prompt accumulation and case-specific Maven/Spring recipes.
 - Successful delivery does not prove pre-Intent investigation quality or P2.2 acceptance.
+- A successful experimental scanner call is one possible evidence path, not a required step in the frozen P1.1 protocol. Evaluate whether the model obtained sufficient decision-relevant evidence through the paths it actually used.
 
 ## Current experimental conclusion
 
