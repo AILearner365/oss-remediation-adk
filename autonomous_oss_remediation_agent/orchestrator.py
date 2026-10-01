@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Callable
 
-from .agent import AgentSession, IrrecoverableAgentSessionError, default_agent_session_factory
+from .agent import AgentSession, IntentToolRecoveryExhausted, IrrecoverableAgentSessionError, default_agent_session_factory
 from .capabilities import (
     DeveloperCapabilitySet,
     ExecutionBudget,
@@ -250,6 +250,8 @@ class AutonomousRemediationOrchestrator:
                     if lifecycle.phase == JournalPhase.INTENT_REQUIRED:
                         lifecycle.fail_intent_capture(cycle)
                         recreate_session = True
+                        if isinstance(exc, IntentToolRecoveryExhausted):
+                            reason = "CYCLE_INTENT_CAPTURE_INCOMPLETE: unregistered tool recovery exhausted"
                     elif lifecycle.phase == JournalPhase.EXECUTION:
                         lifecycle.require_outcome()
                     if lifecycle.phase == JournalPhase.OUTCOME_REQUIRED:

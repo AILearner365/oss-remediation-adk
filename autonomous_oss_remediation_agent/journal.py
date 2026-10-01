@@ -826,6 +826,8 @@ def intent_repair_instructions(errors: Iterable[str]) -> tuple[str, ...]:
     hints = ["Resubmit the complete ordered answers array using the exact required section names; preserve already valid section text."]
     if any("missing required 'answer' field" in error for error in errors):
         hints.append("Each answers item must use `section` and `answer`; move text from `content` into `answer` and keep substantive answers.")
+    if any(error.startswith("Section exceeds ") or error.startswith("Checkpoint content exceeds ") for error in errors):
+        hints.append("Shorten the named section or total answers below the stated character limit, preserving substantive reasoning, then resubmit with `submit_cycle_intent`.")
     if any("material-assumptions subsection" in error for error in errors):
         hints.append("In the investigation answer, add `### Material assumptions that remain necessary` followed by the actual assumptions or `None`.")
     if any("required evidence table" in error for error in errors):
@@ -1446,7 +1448,7 @@ def _answer_errors(section: str, answer: str, max_chars: int) -> list[str]:
     elif placeholder_candidate in PLACEHOLDERS:
         errors.append(f"Placeholder-only answer for section: {section}")
     if len(answer) > max_chars:
-        errors.append(f"Section exceeds {max_chars} characters: {section}")
+        errors.append(f"Section exceeds {max_chars} characters ({len(answer)}): {section}")
     return errors
 
 

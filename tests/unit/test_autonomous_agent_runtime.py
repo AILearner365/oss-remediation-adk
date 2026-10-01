@@ -105,6 +105,31 @@ class GoogleAdkAgentSessionTests(unittest.IsolatedAsyncioTestCase):
             self.assertNotIn("response", item)
             self.assertTrue(Path(item["artifact"]).is_file())
 
+    async def test_recreated_session_keeps_interaction_artifacts_distinct(self):
+        response = SimpleNamespace(
+            text=None, function_call=None,
+            function_response=SimpleNamespace(name="scan", response={"data": "x" * 20000}),
+        )
+        runner = _RecordingRunner(events=[SimpleNamespace(
+            id="e", content=SimpleNamespace(role="tool", parts=[response]),
+        )])
+        with tempfile.TemporaryDirectory() as directory:
+            trace = TraceStore(RunWorkspace.create(directory))
+            with patch("autonomous_oss_remediation_agent.agent.InMemoryRunner", return_value=runner):
+                first = GoogleAdkAgentSession(MagicMock(), self._budget(), trace=trace)
+                await first.run_turn("first")
+                await first.close()
+                second = GoogleAdkAgentSession(MagicMock(), self._budget(), trace=trace)
+                await second.run_turn("second")
+                await second.close()
+            import json
+            records = [json.loads(line) for line in trace.events_path.read_text().splitlines()]
+            artifacts = [Path(item["artifact"]) for item in records
+                         if item.get("interactionType") == "tool_response"]
+            self.assertEqual(2, len(artifacts))
+            self.assertNotEqual(artifacts[0], artifacts[1])
+            self.assertTrue(all(path.is_file() for path in artifacts))
+
     @staticmethod
     def _budget(**overrides) -> ExecutionBudget:
         values = {

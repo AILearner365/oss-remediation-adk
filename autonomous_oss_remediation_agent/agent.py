@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import json
 import re
+import uuid
 from contextlib import aclosing
 from typing import Callable, Protocol
 
@@ -15,12 +16,54 @@ from google.genai import types
 from .capabilities.execution import BudgetExceeded, ExecutionBudget
 from .capabilities.toolset import DeveloperCapabilitySet
 from .models import AgentTurnResult
+from .journal import JournalPhase
 from .prompt import AGENT_INSTRUCTION
 from .workspace import TraceStore
 
 
 class IrrecoverableAgentSessionError(RuntimeError):
     """The ADK session cannot safely accept another turn."""
+
+
+class IntentToolRecoveryExhausted(RuntimeError):
+    """Unregistered checkpoint tool calls exhausted the cycle's recovery allowance."""
+
+
+def intent_tool_error_callback(capabilities: DeveloperCapabilitySet):
+    """Return an ADK tool error response only for unknown calls during Intent capture."""
+    cycle = 0
+    unknown_calls = 0
+    registered = {tool.name for tool in capabilities.adk_tools()}
+
+    def on_error(tool, args, tool_context, error):
+        nonlocal cycle, unknown_calls
+        journal = capabilities.journal
+        if (journal is None or journal.phase != JournalPhase.INTENT_REQUIRED
+                or tool.name in registered or not isinstance(error, ValueError)
+                or tool.description != "Tool not found"):
+            return None
+        if cycle != journal.active_cycle:
+            cycle, unknown_calls = journal.active_cycle, 0
+        unknown_calls += 1
+        capture = journal.cycles.get(cycle)
+        rejected = capture.rejected_intents if capture else 0
+        if unknown_calls + rejected >= journal.max_checkpoint_attempts:
+            raise IntentToolRecoveryExhausted(
+                f"Cycle {cycle} Intent tool recovery exhausted after {unknown_calls} unregistered calls"
+            )
+        return {
+            "status": "rejected",
+            "error": f"'{tool.name}' is not a registered tool; no action was executed.",
+            "repairInstructions": (
+                "Call the registered `submit_cycle_intent` tool directly with "
+                "`cycle_number` and `answers`, an array of objects each containing "
+                "`section` and substantive `answer` text. Do not call another tool to submit Intent."
+            ),
+            "cycle_number": cycle,
+            "retryAllowed": True,
+        }
+
+    return on_error
 
 
 def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -> LlmAgent:
@@ -39,6 +82,7 @@ def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -
         description="Autonomously investigates and remediates OSS vulnerabilities in one prepared repository.",
         instruction=AGENT_INSTRUCTION,
         tools=capabilities.adk_tools(),
+        on_tool_error_callback=intent_tool_error_callback(capabilities),
         mode="chat",
     )
 
@@ -68,6 +112,7 @@ class GoogleAdkAgentSession:
         self.cycle_provider = cycle_provider or (lambda: 0)
         self._turn_number = 0
         self._interaction_number = 0
+        self._artifact_namespace = uuid.uuid4().hex
 
     async def run_turn(self, message: str) -> AgentTurnResult:
         timeout_seconds = self.budget.model_turn_timeout()
@@ -136,7 +181,7 @@ class GoogleAdkAgentSession:
         encoded = json.dumps(detail, sort_keys=True, default=str).encode("utf-8")
         if len(encoded) > 16_384:
             reference = str(self.trace.write_json(
-                f"agent/interactions/{self._interaction_number:06d}.json", detail,
+                f"agent/interactions/{self._artifact_namespace}-{self._interaction_number:06d}.json", detail,
             ))
             detail = {"artifact": reference, "bytes": len(encoded),
                       "sha256": hashlib.sha256(encoded).hexdigest()}

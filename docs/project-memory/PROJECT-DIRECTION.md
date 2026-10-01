@@ -1,6 +1,6 @@
 # Autonomous Agent — Project Direction
 
-**Updated:** 2026-09-29. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
+**Updated:** 2026-10-01. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
 
 ## Objective and direction
 
@@ -15,7 +15,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | S1 | OSS workflow discovery and early ADK prototypes | Completed historical foundation | Project moved from multi-agent/exact-patch workflow to one autonomous engineering actor. |
 | S2 | Independent autonomous POC and deterministic envelope | Implemented; hardening active | CLI/request, one ADK model/session, engineering tools, scanners, policy validation, cycles, journal and gated Draft PR delivery. |
 | S3 | Evidence-grounded decision quality | Active | Q1–Q5 implemented. P1 studies premature commitment/project-fit selection. P1.1 Challenge Before Commitment remains frozen and under evaluation. |
-| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | The P2.3 capture-contract defect in `011744` is fixed and tested: ADK exposed arbitrary answer dictionaries, while the journal required `answer` and the model repeatedly sent `content`. P2.2 handoff remains separate. Retained-evidence retrieval under truncation is the next live acceptance question. |
+| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | The `section`/`answer` fix is committed. A separate P2.3 failure occurs when an unregistered tool call aborts ADK during Intent capture; bounded same-session correction is implemented. Retained-evidence retrieval under truncation remains a separate live acceptance question. |
 | S5 | Deployment and broader generalization | Upcoming / conditional | Repeatable evaluation, runner/credential isolation, provider reliability, portability and later deployment integration remain. |
 
 ## Meaningful backlog
@@ -25,10 +25,10 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1 | S3 | Active | Improve consistency of project-fit solution selection without prescribing a dependency layer or candidate count. |
 | P1.1 | P1 | Active; frozen behavior | Evaluate Challenge Before Commitment using clean comparable runs; task success and engineering decision quality are separate. Current decision: `CONTINUE`. |
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
-| P1.1b | P1.1 + P2 | Evaluation paused for capture cleanup | Historical audit separated reasoning defects from harness contamination. `011744` ended without accepted Intent because of a field-name contract mismatch; do not score that outcome as reasoning-strategy evidence. |
+| P1.1b | P1.1 + P2 | Evaluation paused for capture cleanup | Historical audit separated reasoning defects from harness contamination. `011744` had the now-fixed answer-field mismatch; `022558` lost Intent cycles after unregistered ADK tool calls. Neither capture failure is clean P1.1 strategy evidence. |
 | P2.1 | P2 | Resolved for now | Text edit exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. Latest successful runs did not reproduce the accidental file-unlink failure. |
 | P2.2 | P2 | Capability covered; optional live path unobserved | Current-cycle runtime-resource handoff is implemented and tested. The exact model-backed Maven/resource → experimental scanner → Intent path remains unproven. Its non-use is not a P1.1 evaluation gate; investigate a failed attempt's cause separately or test the path when a decision depends on its availability. |
-| P2.3 | P2 | Capture-contract fix implemented and tested; live recovery unobserved | The ten `011744` Intent calls used `section`/`content`; journal validation required `section`/`answer` and feedback did not identify the key mismatch. The tool schema now requires both fields and rejection explicitly identifies missing `answer`, preserving substantive validation. |
+| P2.3 | P2 | Unregistered-tool recovery tested; live acceptance pending | The earlier `section`/`answer` mismatch was fixed in `3a415f61`. In `022558`, unknown ADK calls during Intent capture caused turn exceptions and lost cycles, including after an oversized-section rejection. ADK now returns a bounded correction at its tool-error boundary; section-size repair feedback is explicit. Substantive validation remains intact. |
 | P2.4 | P2 | Next separate live acceptance | Two 3,000-character runs had truncated shell output retained with references and file-read continuation, but neither called `retrieve_retained_evidence`. Test truncation → retrieval → use of the retrieved fact separately after P2.3 is clean. |
 | P2 | S4 | Implemented architecture; some live paths unobserved | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces or make optional evidence methods mandatory for P1.1. |
 | P3 | S4 | Backlog | Evidence-backed N+1 recovery and first meaningful failure localization; avoid failed-strategy momentum and distinguish strategy vs environment/harness/validation failure. |
@@ -36,7 +36,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S4/P2.3 capture-contract fix has focused and broader test coverage but no new live recovery trace. Next run the separate P2.4 live retained-evidence exercise, then return to comparable frozen P1.1 runs. P2.2 experimental scanner handoff remains an independent unobserved path, not a required scanner-use gate. Do not change Q1–Q5 meanwhile.
+**Current position:** S4/P2.3 unregistered-tool recovery has focused ADK tests but no live model acceptance. Next seek a small live trace showing invalid tool call, explicit correction, valid Intent, and authoritative execution in one cycle. Then return to the separate P2.4 retained-evidence exercise and comparable frozen P1.1 runs. P2.2 experimental scanner handoff remains independent. Do not change Q1-Q5 meanwhile.
 
 ## Stable reasoning/evidence boundaries
 

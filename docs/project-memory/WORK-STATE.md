@@ -1,6 +1,6 @@
 # Autonomous Agent — Work State
 
-**Updated:** 2026-09-29. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
+**Updated:** 2026-10-01. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
 
 ## Active stack and return point
 
@@ -9,13 +9,19 @@
 3. **P1.1:** evaluate the frozen Challenge Before Commitment behavior at Q5 using the [experiment record](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md), baseline `e92837d`.
 4. **P2 support work:** remove independent harness/tool/capture contamination before judging P1.1.
 5. **P2.1 — resolved for now:** explicit whole-file delete capability replaced ambiguous text-delete semantics.
-6. **P2.3 — capture fix tested:** `011744` exposed an Intent argument contract gap (`content` supplied, `answer` required), causing repeated empty-answer rejections. The narrow schema/feedback fix passes focused and broader tests; live recovery remains unobserved.
+6. **P2.3 - current follow-up:** `3a415f61` fixed the distinct `content`/`answer` mismatch. `022558` now exposes an unregistered ADK tool call aborting Intent capture, plus a size rejection followed by another unregistered call. Bounded tool-error recovery and size guidance are tested; live acceptance is the current boundary.
 7. **P2.4 — next separate exercise:** observe truncation → retained-evidence retrieval → use of the retrieved fact in a live trace.
 8. **P2.2 — separate tracked capability question:** experimental scanner runtime-resource handoff remains unobserved model-backed and is not a scanner-use requirement for P1.1.
 
-**Current return point:** conduct the separate P2.4 live retrieval exercise; return to repeated frozen P1.1 evaluation from equivalent starting conditions after that harness question is resolved. Keep P2.2 separate. Do not change Q1–Q5.
+**Current return point:** seek targeted live same-cycle recovery, then conduct the separate P2.4 live retrieval exercise and return to repeated frozen P1.1 evaluation from equivalent starting conditions. Keep P2.2 separate. Do not change Q1-Q5.
 
 ## Post-fix implementation and runtime evidence
+
+### October 1 P2.3 unregistered-tool failure
+
+The prior bookmark preceded `3a415f61` (the `section`/`answer` contract fix) and `d931c3fc` (new saved runs). `run-20260929T022558Z-6343141c` shows cycle 1 calling unregistered `SubmitCycleIntentAnswers` and `google:python_interpreter` without an accepted Intent. ADK raised "Tool not found"; the orchestrator failed Intent capture and recreated the session after the cycle. In cycle 2, `submit_cycle_intent` was structurally rejected because `Concrete candidate solutions` exceeded 8,000 characters. A subsequent unregistered `google:python_interpreter` call again aborted the turn and lost that cycle. Cycles 3 and 4 later submitted accepted Intents. The older `run-20260928T011300Z-9fbd5b83` artifact is not present in this checkout; its reported invented Python call and 30,000-character output limit remain user-provided trace evidence rather than independently re-read artifacts here. Large payloads/retries correlate with the failures but do not prove why those tool names were generated.
+
+ADK has a tool-error callback for missing registrations. The tested fix returns an explicit `submit_cycle_intent(cycle_number, answers=[{section, answer}, ...])` correction in the same ADK session without running or aliasing the invented call. Unknown calls and rejected submissions share the existing ten-attempt checkpoint allowance; exhaustion still fails capture and permits ordinary session recreation for a later cycle. Oversized-section feedback now states the actual length and how to shorten and resubmit via the registered tool. The saved trace references `agent/interactions/000001.json` from three different ADK sessions, so earlier payloads could be overwritten; interaction artifacts now use a per-session namespace to prevent that collision. This is harness behavior, not an engineering or Q1-Q5 change. Live model recovery remains unobserved.
 
 ### P2.1 — destructive editing
 Commit `1eed9914881282e81f06da4aa62e116e2386e80a` implemented:
@@ -121,7 +127,7 @@ This remains a separate acceptance question from P2.2 scanner runtime-resource h
 
 **Decision:** treat pre-Intent experimental scanning as an optional model evidence path, not a gate before frozen P1.1 evaluation. This does not claim live acceptance of the complete Maven/runtime-resource → experimental scanner → Intent path. The implementation and tests establish controlled handoff; four post-fix runs from target commit `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` contain no experimental scanner attempt before Intent. The frozen Experiment 1 protocol asks for decision-sufficient investigation and evidence-backed challenge, without prescribing a scanner call. Forcing one would test a separate capability and change the investigation setting for that run.
 
-**Immediate next:** run a separately scoped live exercise showing a bounded/truncated output, a `retrieve_retained_evidence` call, and use of a fact obtained from that retrieval. Keep experimental scanner handoff outside that exercise.
+**Immediate next:** obtain a targeted live trace of unregistered tool call -> explicit ADK correction -> valid `submit_cycle_intent` accepted -> authoritative execution in the same cycle. Then run a separately scoped live exercise showing bounded/truncated output, a `retrieve_retained_evidence` call, and use of a fact obtained from that retrieval. Keep experimental scanner handoff outside these exercises.
 
 **Return to P1.1:** run the next comparable batch from the same prepared target commit and equivalent request/model/scanner configuration, on one fixed harness code revision with Q5 unchanged. For each run, record the Experiment 1 per-run Q1–Q5 and self-evaluation fields, actual evidence/tool chronology, Intent rejection cost, implementation reassessment, deterministic validation, and task success separately from decision quality. Mark scanner non-use as non-use; do not score it as a P2.2 pass or failure. If a run invokes the experimental scanner and encounters a handoff/resource failure, investigate its cause; if a capability defect withheld decision-critical evidence, set aside the affected P1.1 inference and open targeted P2.2 acceptance.
 
