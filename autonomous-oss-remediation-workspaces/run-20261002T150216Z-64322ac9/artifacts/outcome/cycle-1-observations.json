@@ -1,0 +1,48 @@
+[
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify"
+    ],
+    "cycle": 1,
+    "exitCode": 1,
+    "stateRelation": "historical_later_authoritative_action_observed",
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T150216Z-64322ac9/artifacts/commands/agent-1241c47d5c1e.stderr.log",
+    "stderrReference": "evidence:96066f5b22a1a54bd80c85c4f2f6349ee984f9c3253e6bd67c4f59a1c8267f1f",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T150216Z-64322ac9/artifacts/commands/agent-1241c47d5c1e.stdout.log",
+    "stdoutReference": "evidence:61f6aeca89ef65b9e08d7435a8b52b3829dbe00bef3d54440960e6aa942452d8",
+    "timedOut": false,
+    "timestamp": "2026-10-02T15:05:02.259154+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stateRelation": "latest_observed_action_no_repository_digest_at_check",
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T150216Z-64322ac9/artifacts/commands/agent-8ecce88d2417.stderr.log",
+    "stderrReference": "evidence:77aa47e9c54f75248a51d1c9e75cc8aaf1e9c84711ac3e31a6483d255766d058",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T150216Z-64322ac9/artifacts/commands/agent-8ecce88d2417.stdout.log",
+    "stdoutReference": "evidence:7c10aa6406bd8a403882bbfeb5b219c35a4fbd82639a569e7005889269f4e727",
+    "timedOut": false,
+    "timestamp": "2026-10-02T15:06:19.612980+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:ebe6e4894907c43b0603647fdcfdfedbd6dc43e92739284f34c56ae22ab7cf36",
+    "findingCount": 0,
+    "outcome": "COMPLETED_CLEAN",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T150216Z-64322ac9/artifacts/scans/engineering-cycle-1-authoritative-1.json",
+    "stateRelation": "latest_observed_action_no_repository_digest_at_check",
+    "timestamp": "2026-10-02T15:06:25.706490+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "authoritative"
+  }
+]

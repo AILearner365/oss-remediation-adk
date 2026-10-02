@@ -1,0 +1,51 @@
+{
+  "baselineCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "captureSucceeded": true,
+  "capturedAt": "2026-10-02T15:06:31.070234+00:00",
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "changedFilesComplete": true,
+  "cycle": 1,
+  "diff": "diff --git a/pom.xml b/pom.xml\nindex 91b8c15..12c087b 100644\n--- a/pom.xml\n+++ b/pom.xml\n@@ -54,18 +54,48 @@\n                 <artifactId>task-service</artifactId>\n                 <version>${project.version}</version>\n             </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-expression</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>io.micrometer</groupId>\n+                <artifactId>micrometer-core</artifactId>\n+                <version>1.16.6</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.apache.tomcat.embed</groupId>\n+                <artifactId>tomcat-embed-core</artifactId>\n+                <version>11.0.25</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-webmvc</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-core</artifactId>\n+                <version>3.2.3</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-databind</artifactId>\n+                <version>3.2.3</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n     <dependencies>\n         <dependency>\n             <groupId>org.apache.commons</groupId>\n             <artifactId>commons-text</artifactId>\n-            <version>1.9</version>\n+            <version>1.10.0</version>\n         </dependency>\n         <dependency>\n             <groupId>org.json</groupId>\n             <artifactId>json</artifactId>\n-            <version>20230227</version>\n+            <version>20231013</version>\n         </dependency>\n     </dependencies>\n     <build>\n",
+  "diffComplete": true,
+  "diffReference": "evidence:9bc9d5269061761a7c609088417b122b1dba5e33c4e3bb2e8c70ec7802f713b4",
+  "diffSha256": "b5e99654deff734fbed130445c228bb37add0481f2a5b8da52867bdfd141746c",
+  "independentValidationAtCapture": "not yet run",
+  "lineChangeParsingComplete": true,
+  "lineChanges": [
+    {
+      "addedCount": 32,
+      "addedExcerpts": [
+        "            <dependency>",
+        "                <groupId>org.springframework</groupId>",
+        "                <artifactId>spring-expression</artifactId>",
+        "                <version>7.0.8</version>",
+        "            </dependency>",
+        "            <dependency>",
+        "                <groupId>io.micrometer</groupId>",
+        "                <artifactId>micrometer-core</artifactId>",
+        "                <version>1.16.6</version>",
+        "            </dependency>",
+        "            <dependency>",
+        "                <groupId>org.apache.tomcat.embed</groupId>"
+      ],
+      "addedExcerptsClippedLines": 0,
+      "addedExcerptsComplete": false,
+      "countsComplete": true,
+      "file": "pom.xml",
+      "removedCount": 2,
+      "removedExcerpts": [
+        "            <version>1.9</version>",
+        "            <version>20230227</version>"
+      ],
+      "removedExcerptsClippedLines": 0,
+      "removedExcerptsComplete": true,
+      "summaryStatus": "parsed"
+    }
+  ],
+  "lineChangesComplete": true,
+  "summaryRecovery": "For incomplete or unsupported summaries, retrieve diffReference for the full captured diff; snapshotReference retains all file summaries. Check captureSucceeded before treating the captured diff as complete repository evidence.",
+  "treeDigest": "4c53ba6690f30a44da7b61becce9e4e79c0697d5d2cf65e017b46bc4ba61fa07",
+  "workspaceKind": "authoritative"
+}

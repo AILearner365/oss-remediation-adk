@@ -1,0 +1,14 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository
+Starting filesystem walk for root: /
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-service/pom.xml file and found 4 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-common/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-web/pom.xml file and found 6 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/pom.xml file and found 2 packages
+Scanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-domain/pom.xml file and found 2 packages
+End status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 7.851626ms elapsed, 7.851796ms wall time
+Filtered 5 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
+failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-web/pom.xml: failed resolving {Maven:com.example.secureapp:task-web[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project org.springframework.boot:spring-boot-starter-webmvc@3.3.13:
+API query failed: Maven registry http://127.0.0.1:42019/org/springframework/boot/spring-boot-starter-webmvc/3.3.13/spring-boot-starter-webmvc-3.3.13.pom query status: 404
+Error during extraction: (extracting as transitivedependency/pomxml) failed resolution for home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T151338Z-40448060/temp/autonomous-osv-e0ecnykg/repository/task-web/pom.xml: failed resolving {Maven:com.example.secureapp:task-web[Concrete:1.0.0-SNAPSHOT] {}}: failed to fetch Maven project org.springframework.boot:spring-boot-starter-webmvc@3.3.13:
+API query failed: Maven registry http://127.0.0.1:42019/org/springframework/boot/spring-boot-starter-webmvc/3.3.13/spring-boot-starter-webmvc-3.3.13.pom query status: 404
