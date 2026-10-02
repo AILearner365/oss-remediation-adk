@@ -123,6 +123,12 @@ class WorkspaceIO:
         result.update({"fileComplete": start == 1 and start_column == 1 and not result["moreExists"],
                        "readCoverageComplete": covered, "fileSha256": revision,
                        "readReceipt": self._read_receipts.get(key)})
+        result["handleGuidance"] = (
+            "fileSha256 is a revision checksum, not a readReceipt or retained-evidence reference. "
+            "For an existing-file rewrite, use readReceipt only after complete current-revision "
+            "coverage; continue this read at nextStartLine/nextStartColumn when moreExists. "
+            "This read does not issue a retrieve_retained_evidence reference."
+        )
         result["workspaceKind"] = self.workspace_kind
         result["cycle"] = self.cycle
         self._trace("workspace_read", path=result["path"], startLine=start, endLine=end)
@@ -388,7 +394,9 @@ class WorkspaceIO:
                 raise ValueError(
                     "Existing-file write requires read_receipt from complete current-file read coverage. "
                     "Continue read_workspace_text at nextStartLine/nextStartColumn until readCoverageComplete, "
-                    "then retry with its readReceipt; or use replace for a targeted edit."
+                    "then retry with its readReceipt; or use replace for a targeted edit. "
+                    "A fileSha256 checksum or an evidence reference (with or without its prefix) "
+                    "cannot substitute for the issued readReceipt."
                 )
             encoded = content.encode("utf-8")
             self._write(target, encoded)

@@ -141,7 +141,13 @@ class TraceStore:
     def resolve_evidence_reference(self, reference: str) -> Path:
         issued = self._evidence_references.get(reference)
         if issued is None:
-            raise ValueError("Unknown or expired evidence reference")
+            raise ValueError(
+                "Unknown or expired evidence reference. Use an exact harness-issued *Reference value "
+                "from a retained command, scan, research, or Outcome artifact. fileSha256 is a file "
+                "revision checksum and readReceipt authorizes a complete-read rewrite; neither can be "
+                "converted into an evidence reference. For repository content, continue "
+                "read_workspace_text at nextStartLine/nextStartColumn or use search_workspace_text."
+            )
         path, digest = issued
         try:
             resolved = path.resolve(strict=True)

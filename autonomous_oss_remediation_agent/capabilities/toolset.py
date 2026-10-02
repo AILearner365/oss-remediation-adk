@@ -126,7 +126,7 @@ class DeveloperCapabilitySet:
         workspace: str = "active",
         start_column: int = 1,
     ) -> dict[str, Any]:
-        """Read text from the phase-active repository, or the current experiment when explicitly selected."""
+        """Read text from the active repository or current experiment. fileSha256 is only a revision checksum. Follow nextStartLine/nextStartColumn for incomplete reads; readReceipt is issued after complete current-revision coverage for an existing-file rewrite. File reads do not issue retained-evidence references."""
         denied = self._require_phase("read_workspace_text", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -204,7 +204,7 @@ class DeveloperCapabilitySet:
         workspace: str = "active",
         read_receipt: str | None = None,
     ) -> dict[str, Any]:
-        """Write a new file, replace a targeted span, or rewrite an existing file with a complete-current-read receipt. This never deletes a file. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
+        """Write a new file, replace a targeted span, or rewrite an existing file using the exact readReceipt returned after complete current-revision read coverage. fileSha256 and retained-evidence references are not read receipts. This never deletes a file. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
         denied = self._require_phase("edit_workspace_text", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -285,7 +285,7 @@ class DeveloperCapabilitySet:
         self, reference: str, start_offset: int = 0, max_bytes: int = 4000,
         query: str | None = None,
     ) -> dict[str, Any]:
-        """Read a known byte range or search a harness-issued retained artifact. For a large log, prefer query (1-200 characters) to locate relevant text without paging from offset zero. Search scans at most 256,000 bytes per call and returns at most 20 bounded contexts; if moreExists, resume at nextOffset. start_offset and max_bytes control byte-range reads (max 8,000 bytes), with UTF-8 byte offsets. Each call uses one shared run tool allowance."""
+        """Read a known byte range or search a retained artifact using an exact harness-issued *Reference value. A fileSha256 checksum or readReceipt is not a reference; do not construct one by adding evidence:. For a large log, prefer query (1-200 characters) to locate relevant text without paging from offset zero. Search scans at most 256,000 bytes per call and returns at most 20 bounded contexts; if moreExists, resume at nextOffset. start_offset and max_bytes control byte-range reads (max 8,000 bytes), with UTF-8 byte offsets. Each call uses one shared run tool allowance."""
         denied = self._require_phase("retrieve_retained_evidence", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION, JournalPhase.OUTCOME_REQUIRED})
         if denied:
             return denied

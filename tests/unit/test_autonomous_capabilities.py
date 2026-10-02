@@ -155,6 +155,8 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertFalse(first["fileComplete"])
         self.assertFalse(first["readCoverageComplete"])
         self.assertIsNone(first["readReceipt"])
+        self.assertIn("revision checksum", first["handleGuidance"])
+        self.assertIn("nextStartLine/nextStartColumn", first["handleGuidance"])
         prefix_reconstruction = self.capabilities.edit_workspace_text(
             "replace", "settings.conf", old_text=first["content"],
             new_text=first["content"].replace("version=1", "version=2") + "\n[reconstructed-end]",
@@ -164,6 +166,19 @@ class AutonomousCapabilityTests(unittest.TestCase):
         no_receipt = self.capabilities.edit_workspace_text("write", "settings.conf", content="version=2\n")
         self.assertEqual("error", no_receipt["status"])
         self.assertIn("read_receipt", no_receipt["error"])
+        checksum_as_receipt = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=2\n", read_receipt=first["fileSha256"])
+        self.assertEqual("error", checksum_as_receipt["status"])
+        self.assertIn("fileSha256 checksum", checksum_as_receipt["error"])
+        retained_path = self.workspace.artifacts / "commands" / "handle-test.log"
+        retained_path.parent.mkdir(parents=True, exist_ok=True)
+        retained_path.write_text("retained", encoding="utf-8")
+        issued_reference = self.trace.issue_evidence_reference(retained_path)
+        reference_as_receipt = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=2\n",
+            read_receipt=issued_reference.removeprefix("evidence:"))
+        self.assertEqual("error", reference_as_receipt["status"])
+        self.assertIn("evidence reference", reference_as_receipt["error"])
         targeted = self.capabilities.edit_workspace_text(
             "replace", "settings.conf", old_text="version=1", new_text="version=2")
         self.assertEqual("ok", targeted["status"])
@@ -221,6 +236,16 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(self.budget.config.max_tool_calls - self.budget.tool_calls,
                          result["remainingToolCalls"])
         reference = result["stdoutReference"]
+        source = self.workspace.repository / "source.txt"
+        source.write_text("repository content", encoding="utf-8")
+        read = self.capabilities.read_workspace_text("source.txt")
+        fabricated = self.capabilities.retrieve_retained_evidence("evidence:" + read["fileSha256"])
+        self.assertEqual("TOOL_ERROR", fabricated["failureCode"])
+        self.assertIn("fileSha256", fabricated["error"])
+        self.assertIn("nextStartLine/nextStartColumn", fabricated["error"])
+        receipt_as_reference = self.capabilities.retrieve_retained_evidence(read["readReceipt"])
+        self.assertEqual("TOOL_ERROR", receipt_as_reference["failureCode"])
+        self.assertIn("readReceipt", receipt_as_reference["error"])
         first = self.capabilities.retrieve_retained_evidence(reference, max_bytes=100)
         self.assertEqual("A" * 100, first["content"])
         self.assertFalse(first["complete"])
@@ -466,6 +491,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertTrue({"reference", "start_offset", "max_bytes", "query"}.issubset(
             retrieval_schema["properties"]))
         self.assertIn("prefer query", declarations["retrieve_retained_evidence"].description)
+        self.assertIn("fileSha256", declarations["read_workspace_text"].description)
+        self.assertIn("readReceipt", declarations["edit_workspace_text"].description)
+        self.assertIn("do not construct", declarations["retrieve_retained_evidence"].description)
         self.assertIn("cursor", declarations["search_workspace_text"].parameters_json_schema["properties"])
         self.assertIn("start_column", declarations["read_workspace_text"].parameters_json_schema["properties"])
 
