@@ -12,15 +12,11 @@ Explain the requested result, target scope, materially governing requirements an
 
 What decision-relevant information was needed, what investigation was actually performed, what evidence was obtained, and what remains unresolved?
 
-| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
-|---|---|---|---|---|
-| {{information}} | {{reason}} | {{actual_sources_or_methods}} | {{finding}} | {{remaining_gap}} |
+The `evidence` field contains records with `question`, `source`, `finding`, and `uncertainty`. The harness renders these records below the section answer.
 
 Report actual investigation and evidence, not planned work. Select evidence sources and mechanisms according to the proposition being established rather than treating one capability as universal. Failure, unavailability, inconclusive results, and unusable output are different from evidence establishing the fact or its absence. A failed or inconclusive mechanism leaves the fact unresolved and does not justify substituting unsupported prior knowledge, convention, expectation, or assumption. When an unresolved fact is decision-critical and another appropriate mechanism available through the existing engineering capabilities could materially resolve it, investigate through a reasonable alternative before candidate selection. This requires neither every mechanism, a fixed fallback sequence, nor redundant confirmation after sufficient evidence exists.
 
 Investigate reasonably obtainable information when it could materially affect problem understanding, mechanism discovery or applicability, control structure, viability, constraints, candidate formation, or selection. When a material decision depends on information that may have changed outside the repository, obtain reasonably available current authoritative evidence and use it to discover the actual available and potentially applicable solution space, not merely to confirm a preferred solution. Prefer current primary or authoritative technical sources when reasonably available; when obtained, that evidence takes precedence over unsupported or potentially stale prior knowledge about the changing fact. Current external evidence may establish what options and documented properties currently exist; repository and execution evidence establish what applies to and happens in this project. Failed, blocked, incomplete, or inconclusive research is not evidence that an option does not exist. If no reasonable available mechanism can obtain sufficient evidence, preserve the uncertainty honestly. Uncertainty is not evidence for or against an approach.
-
-### Material assumptions that remain necessary
 
 Report only assumptions that materially affect the current engineering decision. For each, state what is assumed, why it could not be established, what evidence was checked, which decision or conclusion depends on it, and what uncertainty or risk remains. An assumption must not substitute for reasonably obtainable repository evidence or override stronger task, repository, or execution evidence. State `None` when no material assumption remains.
 
@@ -54,32 +50,13 @@ Form candidates only from investigation actually performed, evidence actually ob
 
 Hard constraints are mandatory admissibility conditions. Establish each candidate's constraint-relevant properties from task and observed evidence, then reconcile them against every applicable hard requirement and constraint. Do not select a candidate with an established conflict or materially unresolved hard-constraint compliance. PARTIAL remains available only for safe, evidence-supported, constraint-compliant progress.
 
-#### Candidate Solution {{identifier}} — {{specific_solution_name}}
-
-| Question | Model answer |
-|---|---|
-| What exact solution is proposed? | {{answer}} |
-| Why were these exact changes selected? | {{answer}} |
-| What evidence supports the expected result? | {{answer}} |
-| Which parts of the problem will it resolve? | {{answer}} |
-| Does it satisfy every applicable requirement? | {{answer}} |
-| How will it be implemented? | {{ordered_directional_sequence}} |
-| How will compatibility be preserved? | {{answer}} |
-| Why is the result coherent and maintainable? | {{answer}} |
-| What risks or unknowns remain? | {{answer}} |
-| How will the result be validated? | {{answer}} |
-| Is it a COMPLETE or PARTIAL solution? | {{classification_and_justification}} |
+Each `candidates` entry has `id`, `name`, `solution`, `evidence`, `constraints`, `validation`, and `classification` (`COMPLETE` or `PARTIAL`). The harness renders candidate headings and labels. The section answer explains material tradeoffs.
 
 ## Selected solution
 
 Which solution is selected, and why is it preferred?
 
-- **Selected solution:** {{candidate_identifier_and_name}}
-- **Classification:** COMPLETE or PARTIAL
-- **Why it is preferred:** {{answer}}
-- **Comparative coverage:** {{answer}}
-- **Remaining risks:** {{answer}}
-- **Evidence requiring reconsideration:** {{answer}}
+The `selection` object has `candidate_id`, `rationale`, and `challenge`. The candidate identifier must match a submitted candidate. The section answer explains material risks and comparative coverage.
 
 Before committing, challenge whether the leading candidate is merely workable or is the strongest project-fit solution reasonably supported by the available evidence. Recheck materially distinct plausible approaches implied by project evidence, structure, constraints, or engineering synthesis, including any eliminated through unsupported assumptions or unresolved facts. Investigate and reconsider before selection only when a materially unresolved issue and reasonably obtainable evidence could materially change the decision. This is a proportional search-sufficiency check, not a requirement for global optimality, exhaustive exploration, manufactured alternatives, scoring, or multiple candidates; one candidate remains valid when evidence genuinely eliminates the alternatives.
 

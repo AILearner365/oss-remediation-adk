@@ -36,7 +36,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S4/P2.3 unregistered-tool recovery has focused ADK tests but no live model acceptance. Next seek a small live trace showing invalid tool call, explicit correction, valid Intent, and authoritative execution in one cycle. Then return to the separate P2.4 retained-evidence exercise and comparable frozen P1.1 runs. P2.2 experimental scanner handoff remains independent. Do not change Q1-Q5 meanwhile.
+**Current position:** S4 responsibility-boundary cleanup is implemented on this branch and under offline verification. Intent decision facts now use typed evidence/candidate/selection records with localized repair; Outcome action chronology is event-derived. Phase-visible tools, bounded unknown-call recovery, retained references across session replacement, and general textual/XML research acquisition are included. This changes Q1–Q5 serialization and duplicated submission guidance while retaining their evidence-backed selection and Challenge Before Commitment semantics. Live model acceptance remains open. Next use a small live recovery/retrieval trace, then return to separate P2.4 and comparable frozen P1.1 evaluation. P2.2 experimental scanner handoff remains independent.
 
 ## Stable reasoning/evidence boundaries
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from tests.checkpoint_fixtures import typed_intent_answers
 
 import subprocess
 import tempfile
@@ -336,7 +337,7 @@ class _RepeatedMalformedIntentSession:
         if self.recover_after is None or len(self.messages) <= self.recover_after:
             for item in answers:
                 if item["section"] == "Information, investigation and remaining uncertainty":
-                    item["answer"] = item["answer"].split("### Material assumptions")[0]
+                    item.pop("evidence")
                 elif item["section"] == "Problem understanding in project context":
                     item["answer"] += f" Revision {len(self.messages)}."
         response = self.capabilities.submit_cycle_intent(
@@ -366,7 +367,7 @@ class _ExhaustIntentWithinTurnSession:
         answers = _intent_answers(self.capabilities.journal.active_cycle)
         for item in answers:
             if item["section"] == "Information, investigation and remaining uncertainty":
-                item["answer"] = "Missing required structure."
+                item.pop("evidence")
         for _ in range(self.capabilities.journal.max_checkpoint_attempts):
             self.responses.append(self.capabilities.submit_cycle_intent(
                 self.capabilities.journal.active_cycle, answers,
@@ -547,7 +548,7 @@ class _PromptLearningSession:
         submitted = sections[1:] if self.reject_first_intent and self.intent_attempts == 1 else sections
         result = self.capabilities.submit_cycle_intent(
             cycle,
-            [{"section": section, "answer": _intent_answer(section)} for section in submitted],
+            typed_intent_answers([{"section": section, "answer": _intent_answer(section)} for section in submitted]),
         )
         if result["status"] != "accepted":
             self.pre_intent_experiment = self.capabilities.edit_workspace_text(
@@ -1518,7 +1519,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertTrue(all(response["retryAllowed"] for response in sessions[0].responses[:4]))
         self.assertEqual("accepted", sessions[0].responses[4]["status"])
         self.assertEqual("COMPLETE", result.capture_status)
-        self.assertIn("### Material assumptions that remain necessary",
+        self.assertIn("evidence records",
                       sessions[0].messages[1])
 
     def test_repeated_intent_structure_rejections_stop_at_checkpoint_limit(self):
@@ -1534,7 +1535,7 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertEqual(10, len(sessions[0].messages))
         self.assertTrue(all(response["status"] == "rejected" for response in sessions[0].responses))
         self.assertFalse(sessions[0].responses[-1]["retryAllowed"])
-        self.assertIn("### Material assumptions that remain necessary",
+        self.assertIn("evidence records",
                       sessions[0].messages[1])
 
     def test_intent_submissions_exhausted_within_one_turn_do_not_request_another(self):
@@ -1796,7 +1797,7 @@ def _intent_answers(cycle):
     ]
     if cycle > 1:
         sections[2:2] = ["Prior-cycle reassessment"]
-    return [{"section": section, "answer": _intent_answer(section)} for section in sections]
+    return typed_intent_answers([{"section": section, "answer": _intent_answer(section)} for section in sections])
 
 
 def _intent_answer(section):

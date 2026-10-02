@@ -140,6 +140,55 @@ class IntentToolRecoveryTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual("<demo.version>1.0</demo.version>\n", self.pom.read_text(encoding="utf-8"))
         self.assertEqual(1, self.journal.cycles[1].rejected_intents)
 
+    async def test_phase_toolset_and_unknown_call_after_intent(self):
+        answers = test_decision_journal.DecisionJournalTests._intent_answers()
+        model = self._session([
+            ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                       "status_explanation": "premature", "answers": []}),
+            ("submit_cycle_intent", {"cycle_number": 1, "answers": answers}),
+            ("invented_execution_tool", {}),
+            "Continue implementation",
+        ])
+        visible_before = {tool.name for tool in await self.session.agent.tools[0].get_tools()}
+        self.assertIn("submit_cycle_intent", visible_before)
+        self.assertNotIn("submit_cycle_outcome", visible_before)
+        await self.session.run_turn("Investigate and submit")
+        visible_after = {tool.name for tool in await self.session.agent.tools[0].get_tools()}
+        self.assertNotIn("submit_cycle_intent", visible_after)
+        responses = self._interactions("tool_response")
+        self.assertIn("unavailable", responses[0]["response"]["error"])
+        self.assertEqual("accepted", responses[1]["response"]["status"])
+        self.assertIn("not a registered tool", responses[2]["response"]["error"])
+        self.assertEqual(4, len(model._requests))
+        self.assertIn("submit_cycle_intent", model._requests[0].tools_dict)
+        self.assertNotIn("submit_cycle_outcome", model._requests[0].tools_dict)
+        self.journal.require_outcome()
+        model._steps.extend([
+            ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                       "status_explanation": "No authoritative edit was attempted.",
+                                       "answers": test_decision_journal.DecisionJournalTests._outcome_answers()[:2]}),
+            "Outcome recorded",
+        ])
+        await self.session.run_turn("Record Outcome")
+        self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.journal.phase)
+        self.assertEqual({"submit_cycle_outcome"}, set(model._requests[4].tools_dict))
+
+    async def test_malformed_answer_object_recovers_in_same_session(self):
+        valid = test_decision_journal.DecisionJournalTests._intent_answers()
+        malformed = [dict(item) for item in valid]
+        malformed[0].pop("answer")
+        malformed[0]["content"] = "Wrong key"
+        self._session([
+            ("submit_cycle_intent", {"cycle_number": 1, "answers": malformed}),
+            ("submit_cycle_intent", {"cycle_number": 1, "answers": valid}),
+            "Intent accepted",
+        ])
+        await self.session.run_turn("Submit Intent")
+        responses = self._interactions("tool_response")
+        self.assertIn("answer", str(responses[0]["response"]))
+        self.assertEqual("accepted", responses[1]["response"]["status"])
+        self.assertEqual(JournalPhase.EXECUTION, self.journal.phase)
+
 
 if __name__ == "__main__":
     unittest.main()

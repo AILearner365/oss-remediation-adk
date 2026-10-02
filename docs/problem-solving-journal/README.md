@@ -22,6 +22,7 @@ Deterministic code appends:
 - Let deterministic code own headings, ordering, capture verification, and append operations.
 - Keep machine events and hashes as internal audit metadata.
 - Distinguish structural completeness from semantic accuracy.
+- Accept compact typed decision records; render readable Markdown in deterministic code.
 - Keep deterministic validation authoritative.
 - Preserve safe partial progress without presenting it as full resolution.
 
@@ -45,8 +46,10 @@ Deterministic code appends:
 - [final-resolution-template.md](final-resolution-template.md)
 - [CODEX_IMPLEMENTATION_PROMPT.md](CODEX_IMPLEMENTATION_PROMPT.md)
 
-## Branch note
+## Current checkpoint API
 
-This documentation branch currently points to repository commit `5d0ee3d85363604925b4d893b98bc0d189eed519`.
+`submit_cycle_intent(cycle_number, answers)` takes ordered section objects with `section` and substantive `answer`. The investigation object also has `evidence` records (`question`, `source`, `finding`, `uncertainty`). The candidate object has `candidates` records (`id`, `name`, `solution`, `evidence`, `constraints`, `validation`, `classification`). The selection object has `selection` (`candidate_id`, `rationale`, `challenge`). Classification is `COMPLETE` or `PARTIAL`. These fields carry decision facts; the prose carries material explanation and uncertainty. Q1–Q5 investigation, evidence, constraint, and challenge requirements remain in the runtime questionnaire.
 
-The previously reviewed clean autonomous-agent baseline is `336584216733292793ea888b890e44b0c889b091`. The implementation prompt requires Codex to verify that the target implementation branch contains the autonomous-agent runtime before modifying code. It must not invent missing integration points on this documentation-only branch.
+Rejected Intent does not append to the journal or open authoritative execution. Valid section objects remain in a cycle-scoped unaccepted draft; a retry may submit only corrected sections. The draft is cleared on acceptance, capture failure, or cycle transition. `submit_cycle_outcome` requires the implementation result and material Intent-versus-implementation reassessment. Observable chronology is rendered from events. The model supplies rationale and self-validation; the harness does not infer them from actions.
+
+This is a schema migration for new submissions. Historical Markdown journals and saved traces remain readable as recorded; they are not rewritten or treated as current API examples. Phase exposure uses ADK's toolset interface, while server-side phase checks remain authoritative. Unknown or unavailable invocations receive bounded same-session feedback where ADK preserves the protocol. Source evidence references remain authorized within the run and are included in concise continuation context after a failed checkpoint; when there are many, a retrievable manifest preserves the older references. Research retains raw response bytes and extracted text separately, with explicit acquisition, extraction, source truncation, and display-bounding states.

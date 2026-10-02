@@ -165,3 +165,6 @@ Independent Deterministic Validation
 ```
 
 The model must therefore report its self-validation accurately without converting those results into a claim of deterministic success.
+# Current runtime serialization (October 2026)
+
+The retrospective Outcome remains mandatory and retains implementation coverage, material Intent-versus-implementation reassessment, and scoped self-validation. The three-section Markdown submission example below is historical. Current `submit_cycle_outcome` requires `Implementation Result` and `Cycle Intent vs. Implementation`; the harness renders observable action chronology from retained events in the accepted journal. It never infers model rationale from actions. See [the journal API](README.md) and [current Outcome template](cycle-outcome-template.md). Older saved Outcomes remain readable.

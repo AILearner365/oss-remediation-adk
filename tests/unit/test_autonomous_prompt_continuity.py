@@ -39,7 +39,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         for section in OUTCOME_SECTIONS:
             self.assertIn(f"`{section}`", outcome)
         self.assertEqual(5, len(INTENT_SECTIONS))
-        self.assertEqual(3, len(OUTCOME_SECTIONS))
+        self.assertEqual(2, len(OUTCOME_SECTIONS))
         self.assertIn("Candidate count must result from investigation and synthesis", initial)
         self.assertIn("never manufacture alternatives", initial)
         self.assertIn("add clearly named, decision-relevant sections", initial.lower())
@@ -321,7 +321,7 @@ class AutonomousPromptContinuityTests(unittest.TestCase):
         self.assertIn("Planned or future investigation is not evidence supporting candidate formation", AGENT_INSTRUCTION)
         self.assertIn("non-material questions need not be pursued", AGENT_INSTRUCTION)
         self.assertIn("genuinely execution-dependent outcomes remain for implementation and validation", AGENT_INSTRUCTION)
-        self.assertIn("The table must report investigation actually performed and evidence actually obtained", message)
+        self.assertIn("The evidence records must report investigation actually performed and evidence actually obtained", message)
         self.assertIn(
             "Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation",
             message,

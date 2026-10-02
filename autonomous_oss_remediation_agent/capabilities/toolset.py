@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import base64
 import json
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, NotRequired, TypedDict
 
 from google.adk.tools.function_tool import FunctionTool
 
@@ -13,9 +14,38 @@ from .research import HttpResearchProvider, ResearchProvider
 from .workspace_io import WorkspaceIO
 
 
+class EvidenceRecord(TypedDict):
+    question: str
+    source: str
+    finding: str
+    uncertainty: str
+
+
+class CandidateRecord(TypedDict):
+    id: str
+    name: str
+    solution: str
+    evidence: str
+    constraints: str
+    validation: str
+    classification: Literal["COMPLETE", "PARTIAL"]
+
+
+class SelectionRecord(TypedDict):
+    candidate_id: str
+    rationale: str
+    challenge: str
+
+
 class CheckpointAnswer(TypedDict):
     section: str
     answer: str
+
+
+class IntentAnswer(CheckpointAnswer):
+    evidence: NotRequired[list[EvidenceRecord]]
+    candidates: NotRequired[list[CandidateRecord]]
+    selection: NotRequired[SelectionRecord]
 
 
 class DeveloperCapabilitySet:
@@ -180,10 +210,14 @@ class DeveloperCapabilitySet:
         if isinstance(selected, dict):
             return selected
         io, _ = selected
-        return self._invoke(
+        result = self._invoke(
             "edit_workspace_text", io.edit_text, action, path, content, old_text, new_text,
             expected_occurrences, workspace_io=io,
         )
+        self.trace.append_event("agent_workspace_action", cycle=self.journal.active_cycle if self.journal else None,
+                                workspaceKind=io.workspace_kind, action=action, path=path,
+                                status=result.get("status") if isinstance(result, dict) else None)
+        return result
 
     def delete_workspace_file(self, path: str, workspace: str = "active") -> dict[str, Any]:
         """Delete the ENTIRE file at path. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
@@ -194,7 +228,11 @@ class DeveloperCapabilitySet:
         if isinstance(selected, dict):
             return selected
         io, _ = selected
-        return self._invoke("delete_workspace_file", io.delete_file, path, workspace_io=io)
+        result = self._invoke("delete_workspace_file", io.delete_file, path, workspace_io=io)
+        self.trace.append_event("agent_workspace_action", cycle=self.journal.active_cycle if self.journal else None,
+                                workspaceKind=io.workspace_kind, action="delete_file", path=path,
+                                status=result.get("status") if isinstance(result, dict) else None)
+        return result
 
     def run_workspace_shell(
         self,
@@ -218,6 +256,12 @@ class DeveloperCapabilitySet:
         if not hasattr(result, "to_dict"):
             return result
         payload = result.to_dict()
+        self.trace.append_event(
+            "agent_command_evidence", cycle=self.journal.active_cycle if self.journal else None,
+            workspaceKind=target.kind, command=payload.get("command"),
+            exitCode=payload.get("exitCode"), stdoutArtifact=payload.get("stdoutArtifact"),
+            stderrArtifact=payload.get("stderrArtifact"),
+        )
         for stream in ("stdout", "stderr"):
             artifact = payload.get(f"{stream}Artifact")
             if artifact:
@@ -385,6 +429,8 @@ class DeveloperCapabilitySet:
         payload = result.to_dict() if hasattr(result, "to_dict") else result
         cycle = self.journal.active_cycle if self.journal else None
         result_reference = self._write_research_result("search", payload, cycle=cycle, query=query)
+        raw_reference = self._write_research_raw(payload, "search")
+        payload = {key: value for key, value in payload.items() if key not in {"raw_content", "raw_bytes_b64"}}
         self.trace.append_event(
             "research",
             operation="search",
@@ -394,6 +440,7 @@ class DeveloperCapabilitySet:
             source=payload.get("source"),
             truncated=payload.get("truncated", False),
             resultReference=result_reference,
+            rawEvidenceReference=raw_reference,
         )
         results = payload.get("results", [])
         first_page = []
@@ -404,10 +451,13 @@ class DeveloperCapabilitySet:
             fields_omitted |= compact != result
             first_page.append(compact)
         more_exists = payload.get("truncated", False) or len(results) > 10 or fields_omitted
-        return {**payload, "results": first_page, "complete": not more_exists,
+        return {**payload, "results": first_page, "complete": payload.get("status") == "success" and not more_exists,
                 "moreExists": more_exists,
+                "acquisitionSucceeded": bool(raw_reference),
+                "extractionSucceeded": payload.get("status") == "success",
                 "resultFieldsOmitted": fields_omitted,
                 "resultReference": self.trace.issue_evidence_reference(result_reference),
+                "rawEvidenceReference": raw_reference,
                 "sourceTruncated": payload.get("truncated", False)}
 
     def research_fetch(self, url: str) -> dict[str, Any]:
@@ -419,6 +469,8 @@ class DeveloperCapabilitySet:
         payload = result.to_dict() if hasattr(result, "to_dict") else result
         cycle = self.journal.active_cycle if self.journal else None
         result_reference = self._write_research_result("fetch", payload, cycle=cycle, url=url)
+        raw_reference = self._write_research_raw(payload, "fetch")
+        payload = {key: value for key, value in payload.items() if key not in {"raw_content", "raw_bytes_b64"}}
         self.trace.append_event(
             "research",
             operation="fetch",
@@ -427,12 +479,17 @@ class DeveloperCapabilitySet:
             status=payload.get("status"),
             truncated=payload.get("truncated", False),
             resultReference=result_reference,
+            rawEvidenceReference=raw_reference,
         )
         content = payload.get("content", "")
         return {**payload, "content": content[:4000],
-                "complete": not payload.get("truncated", False) and len(content) <= 4000,
+                "complete": payload.get("status") == "success" and not payload.get("truncated", False) and len(content) <= 4000,
                 "moreExists": payload.get("truncated", False) or len(content) > 4000,
+                "displayBounded": len(content) > 4000,
+                "acquisitionSucceeded": bool(raw_reference),
+                "extractionSucceeded": payload.get("status") == "success",
                 "resultReference": self.trace.issue_evidence_reference(result_reference),
+                "rawEvidenceReference": raw_reference,
                 "sourceTruncated": payload.get("truncated", False)}
 
     def _write_research_result(self, operation: str, payload: dict[str, Any], **request: Any) -> str:
@@ -443,8 +500,16 @@ class DeveloperCapabilitySet:
         )
         return str(path)
 
-    def submit_cycle_intent(self, cycle_number: int, answers: list[CheckpointAnswer]) -> dict[str, Any]:
-        """Submit the required Problem Analysis and Solution Decision before authoritative mutation. Each answers item needs section and answer text fields."""
+    def _write_research_raw(self, payload: dict[str, Any], operation: str) -> str | None:
+        encoded = payload.get("raw_bytes_b64")
+        if not encoded:
+            return None
+        path = self.trace.workspace.artifacts / "research" / f"{self._research_invocations:03d}-{operation}.raw"
+        path.write_bytes(base64.b64decode(encoded))
+        return self.trace.issue_evidence_reference(path)
+
+    def submit_cycle_intent(self, cycle_number: int, answers: list[IntentAnswer]) -> dict[str, Any]:
+        """Submit the pre-execution decision. Each item needs section and substantive answer. Investigation adds evidence records; candidates adds candidate records; selection adds a candidate reference, rationale, and challenge. Rejected sections can be replaced locally in this cycle."""
         if not self.journal:
             return self._unavailable("submit_cycle_intent", "Journal lifecycle is not configured")
         result = self.journal.submit_intent(cycle_number, answers)
@@ -487,8 +552,12 @@ class DeveloperCapabilitySet:
         engineering = {
             "read_workspace_text", "list_workspace_files", "search_workspace_text",
             "inspect_git_state", "edit_workspace_text", "delete_workspace_file", "run_workspace_shell",
-            "scan_current_repository", "retrieve_retained_evidence", "research_search", "research_fetch",
+            "retrieve_retained_evidence",
         }
+        if self.scanner is not None:
+            engineering.add("scan_current_repository")
+        if getattr(self.research_provider, "enabled", True):
+            engineering.update({"research_search", "research_fetch"})
         if not self.journal:
             return frozenset(engineering)
         by_phase = {
@@ -592,8 +661,11 @@ class DeveloperCapabilitySet:
             self.trace.append_event("tool_budget_exceeded", tool=name, error=str(exc))
             return {"status": "error", "error": str(exc), "failureCode": "EXECUTION_BUDGET_EXCEEDED"}
         except Exception as exc:
-            self.trace.append_event("tool_error", tool=name, error=str(exc))
-            return {"status": "error", "error": str(exc), "failureCode": "TOOL_ERROR"}
+            failure_code = ("RESEARCH_PROVIDER_ERROR" if name in {"research_search", "research_fetch"}
+                            else "SCANNER_EXECUTION_ERROR" if name == "scan_current_repository"
+                            else "TOOL_ERROR")
+            self.trace.append_event("tool_error", tool=name, error=str(exc), failureCode=failure_code)
+            return {"status": "error", "error": str(exc), "failureCode": failure_code}
 
 
 def _bounded_research_field(value: Any, json_char_limit: int) -> str:

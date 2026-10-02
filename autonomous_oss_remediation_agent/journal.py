@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -83,16 +84,13 @@ INTENT_QUESTIONNAIRE = (
         "Information, investigation and remaining uncertainty",
         """What information was needed to develop an evidence-supported solution, and what did the model find?
 
-Use this table:
+Record actual investigation in the typed `evidence` records, including the question, source, finding, and uncertainty.
 
-| Information needed | Why it was needed | Sources examined | Finding | What remains unknown or requires execution |
-|---|---|---|---|---|
-
-The table must report investigation actually performed and evidence actually obtained. The Sources examined column must name actual sources, tools, or methods. Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation. Select evidence sources and mechanisms according to the proposition being established rather than treating any single capability as the universal research mechanism. Distinguish failure, unavailability, inconclusive results, and unusable output from evidence that establishes the investigated fact or establishes absence. A failed or inconclusive mechanism leaves the fact unresolved: it is not evidence for or against the proposition and does not justify substituting unsupported prior knowledge, convention, expectation, or assumption. If the unresolved fact is decision-critical and another appropriate evidence mechanism available through the existing engineering capabilities could materially resolve it, investigate through a reasonable alternative before candidate selection. This does not require trying every mechanism, following a fixed fallback sequence, or redundantly confirming a fact after sufficient decision-relevant evidence exists.
+The evidence records must report investigation actually performed and evidence actually obtained, with sources actually examined. Planned, intended, future, or not-yet-performed investigation is not a finding and is not evidence supporting candidate formation. Select evidence sources and mechanisms according to the proposition being established rather than treating any single capability as the universal research mechanism. Distinguish failure, unavailability, inconclusive results, and unusable output from evidence that establishes the investigated fact or establishes absence. A failed or inconclusive mechanism leaves the fact unresolved: it is not evidence for or against the proposition and does not justify substituting unsupported prior knowledge, convention, expectation, or assumption. If the unresolved fact is decision-critical and another appropriate evidence mechanism available through the existing engineering capabilities could materially resolve it, investigate through a reasonable alternative before candidate selection. This does not require trying every mechanism, following a fixed fallback sequence, or redundantly confirming a fact after sufficient decision-relevant evidence exists.
 
 If decision-relevant information is reasonably obtainable through the available engineering capabilities and could materially affect problem understanding, mechanism discovery or applicability, control structure, viability, constraints, candidate formation, or selection, investigate it before submitting this response. When that information may have changed outside the repository, obtain reasonably available current authoritative evidence before candidate selection and use it to discover the actual available and potentially applicable solution space, not merely to confirm the first preferred solution. Prefer current primary or authoritative technical sources when reasonably available for material externally changing claims; when obtained, that evidence takes precedence over unsupported or potentially stale prior knowledge about the changing fact. Keep investigation proportional: current external research is not required when such information is immaterial, non-material information does not require exhaustive investigation, and genuinely execution-dependent information may remain unknown. Failed, blocked, incomplete, or inconclusive research is not evidence that an option or mechanism does not exist. If no reasonable available mechanism can obtain sufficient evidence, preserve the uncertainty honestly. Uncertainty is not evidence for or against an approach.
 
-Then add `### Material assumptions that remain necessary`. Report only assumptions that materially affect the current engineering decision. For each, state what is assumed, why it could not be established, what evidence was checked, which decision or conclusion depends on it, and what uncertainty or risk remains. An assumption must not substitute for reasonably obtainable repository evidence material to candidate formation or selection. Do not introduce an assumption merely to explain unexpected evidence or justify proceeding. If an unresolved interpretation is not necessary to the decision, leave it as uncertainty rather than elevating it into a material assumption. If no material assumptions remain, state `None`.
+Report only assumptions that materially affect the current engineering decision in the investigation answer. For each, state what is assumed, why it could not be established, what evidence was checked, which decision or conclusion depends on it, and what uncertainty or risk remains. An assumption must not substitute for reasonably obtainable repository evidence material to candidate formation or selection. Do not introduce an assumption merely to explain unexpected evidence or justify proceeding. If an unresolved interpretation is not necessary to the decision, leave it as uncertainty rather than elevating it into a material assumption. If no material assumptions remain, state `None`.
 
 Before reconciling candidates with hard constraints, establish candidate-relevant facts from the Task to Solve, directly observed repository state, and observed execution evidence. Distinguish those established facts from interpretations, unresolved uncertainty, assumptions, prior knowledge, expectations, conventions, or guesses, including potentially stale expectations about externally changing information. Current external evidence may establish what options exist, what outcome they provide, and documented support, compatibility, migration, or breaking-change properties; repository and execution evidence establish what applies to and happens in this project. Neither unsupported prior knowledge nor general external information may displace stronger task-specific or observed project evidence. If they appear inconsistent, investigate the discrepancy rather than declaring the observed project state invalid. Do not use an unsupported expectation, convention, potentially stale prior, unresolved assumption, or absence of evidence as positive support or as a material reason to eliminate a plausible approach. The established properties of a proposed change govern constraint reconciliation; describing or rationalizing the change differently does not alter those properties.
 
@@ -127,21 +125,7 @@ Hard constraints are mandatory candidate-admissibility conditions, not preferenc
 
 A constraint-conflicting mechanism may still be investigated and recorded as eliminated; investigation is not restricted to admissible solutions. Once the conflict is established, do not promote that mechanism into a selectable candidate. PARTIAL is not a mechanism for bypassing unresolved hard-constraint compliance; it remains valid for safe, evidence-supported, constraint-compliant progress with unresolved completeness, remaining work, or ordinary execution-dependent uncertainty.
 
-For each candidate use `#### Candidate Solution <identifier> — <specific solution name>` followed by this table:
-
-| Question | Model answer |
-|---|---|
-| What exact solution is proposed? | <answer> |
-| Why were these exact changes selected? | <answer> |
-| What evidence supports the expected result? | <answer> |
-| Which parts of the problem will it resolve? | <answer> |
-| Does it satisfy every applicable requirement? | <answer> |
-| How will it be implemented? | <ordered directional sequence> |
-| How will compatibility be preserved? | <answer> |
-| Why is the result coherent and maintainable? | <answer> |
-| What risks or unknowns remain? | <answer> |
-| How will the result be validated? | <answer> |
-| Is it a COMPLETE or PARTIAL solution? | <classification and justification> |
+For each candidate, provide a concise typed record of the solution, supporting evidence, constraint compatibility, validation plan, and COMPLETE or PARTIAL classification. Explain material tradeoffs in the answer.
 
 A PARTIAL candidate is valid only when no supported COMPLETE solution is available, it violates no constraint, provides safe measurable progress, preserves a route to completion, and identifies unresolved work.""",
     ),
@@ -149,7 +133,7 @@ A PARTIAL candidate is valid only when no supported COMPLETE solution is availab
         "Selected solution",
         """Which solution is selected, and why is it preferred?
 
-Use these fields: `Selected solution:`, `Classification:`, `Why it is preferred:`, `Comparative coverage:`, `Remaining risks:`, and `Evidence requiring reconsideration:`. Reference a submitted candidate and classify it COMPLETE or PARTIAL.
+Use the typed selection record to reference a submitted candidate, explain preference, and state the challenge before commitment. Explain material risks in the answer.
 
 Before committing, challenge whether the leading candidate is merely workable or is the strongest project-fit solution reasonably supported by the available evidence. Recheck whether project evidence, structure, constraints, or engineering synthesis imply a materially distinct plausible approach that was not reasonably considered, and whether any approach was eliminated because of an unsupported assumption, expectation, convention, potentially stale prior, unresolved fact, or absence of evidence. If this reveals a materially unresolved decision issue and reasonably obtainable investigation could materially change selection, investigate and revise the synthesis or candidates as needed before completing this selection. Otherwise proceed. This is a search-sufficiency check, not a requirement to prove a global optimum, exhaustively explore, manufacture or score alternatives, or submit multiple candidates. One candidate remains valid when evidence genuinely eliminates the alternatives.
 
@@ -164,10 +148,6 @@ OUTCOME_QUESTIONNAIRE = (
     QuestionnaireSection(
         "Cycle Intent vs. Implementation",
         "Did the implemented solution materially differ from the selected strategy recorded in the Cycle Intent? If yes, what changed, what evidence or findings discovered during implementation led to the material reassessment, and why was the resulting strategy or solution selected? If there was no material change from the Cycle Intent, state that directly.",
-    ),
-    QuestionnaireSection(
-        "Implementation Trail",
-        "What was the actual sequence of material implementation and investigation actions from the Cycle Intent through self-validation?",
     ),
 )
 INTENT_SECTIONS = tuple(section.name for section in INTENT_QUESTIONNAIRE if not section.after_cycle_one)
@@ -406,6 +386,7 @@ class JournalLifecycle:
         self.max_checkpoint_chars = max_checkpoint_chars
         self.max_context_chars = max_context_chars
         self.cycles: dict[int, CycleCapture] = {}
+        self._intent_drafts: dict[int, dict[str, dict[str, Any]]] = {}
         self.task_to_solve = ""
         self.store.initialize(render_run_contract(run_contract, preliminary=preliminary_contract))
         self._repository_changed = repository_changed
@@ -486,21 +467,34 @@ class JournalLifecycle:
     def begin_cycle(self, cycle: int) -> None:
         self.active_cycle = cycle
         self.cycles.setdefault(cycle, CycleCapture())
+        self._intent_drafts.clear()
         self.phase = JournalPhase.INTENT_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=cycle, phase=self.phase.value)
 
-    def submit_intent(self, cycle: int, answers: list[dict[str, str]]) -> CheckpointResult:
+    def submit_intent(self, cycle: int, answers: list[dict[str, Any]]) -> CheckpointResult:
         capture = self.cycles.get(cycle)
-        errors = self._checkpoint_errors("intent", cycle, answers, capture)
+        duplicate_sections = [str(item.get("section", "")) for item in answers
+                              if isinstance(item, dict)]
+        duplicate_errors = [f"Duplicate section: {name}" for name in set(duplicate_sections)
+                            if duplicate_sections.count(name) > 1 and name]
+        if cycle == self.active_cycle and self.phase == JournalPhase.INTENT_REQUIRED and not duplicate_errors:
+            draft = self._intent_drafts.setdefault(cycle, {})
+            for item in answers:
+                if isinstance(item, dict) and isinstance(item.get("section"), str):
+                    draft[item["section"].strip()] = item.copy()
+            merged = list(draft.values())
+        else:
+            merged = answers
+        errors = duplicate_errors + self._checkpoint_errors("intent", cycle, merged, capture)
         if cycle > 1:
-            errors.extend(self._missing_sections(answers, PRIOR_CYCLE_INTENT_SECTIONS))
+            errors.extend(self._missing_sections(merged, PRIOR_CYCLE_INTENT_SECTIONS))
+        errors.extend(_intent_structure_errors(merged))
         if errors:
             return self._reject("intent", cycle, errors, self._rejection_capture(cycle))
         if capture is None:
             raise RuntimeError(f"Cycle {cycle} was not begun")
         late = self._repository_changed() is not False
-        errors.extend(_intent_structure_errors(answers))
-        rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", answers)
+        rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", merged)
         errors.extend(
             validate_rendered_markdown(
                 rendered,
@@ -511,8 +505,9 @@ class JournalLifecycle:
             return self._reject("intent", cycle, errors, capture)
         capture.intent = self.store.append("intent", cycle, rendered)
         capture.intent_answers = {
-            str(item["section"]).strip(): str(item["answer"]).strip() for item in answers
+            str(item["section"]).strip(): str(item["answer"]).strip() for item in merged
         }
+        self._intent_drafts.pop(cycle, None)
         capture.intent_capture_status = CheckpointCaptureStatus.CAPTURED
         capture.late_intent = late
         capture.last_intent_errors = ()
@@ -547,6 +542,7 @@ class JournalLifecycle:
         self.trace.append_event("authoritative_state_observed", cycle=self.active_cycle, changed=changed)
 
     def fail_intent_capture(self, cycle: int) -> None:
+        self._intent_drafts.pop(cycle, None)
         capture = self._require_active_capture(cycle)
         if capture.intent is not None:
             raise RuntimeError(f"Cycle {cycle} intent has already been accepted")
@@ -609,6 +605,9 @@ class JournalLifecycle:
             *answers,
         ]
         rendered = render_checkpoint(cycle, "Outcome", all_answers)
+        chronology = self._event_chronology(cycle)
+        if chronology:
+            rendered += "\n\n## Observable action chronology\n\n" + chronology
         errors.extend(validate_rendered_markdown(rendered, f"Cycle {cycle} — Outcome"))
         if errors:
             return self._reject("outcome", cycle, errors, capture)
@@ -629,6 +628,20 @@ class JournalLifecycle:
             contentHash=capture.outcome.content_hash,
         )
         return CheckpointResult(True, metadata=capture.outcome)
+
+    def _event_chronology(self, cycle: int) -> str:
+        if not self.trace.events_path.exists():
+            return ""
+        lines = []
+        observable = {"agent_workspace_action", "agent_command_evidence", "engineering_scan_completed", "research",
+                      "execution_capability_invoked", "tool_error"}
+        for raw in self.trace.events_path.read_text(encoding="utf-8").splitlines():
+            event = json.loads(raw)
+            if event.get("cycle") != cycle or event.get("type") not in observable:
+                continue
+            detail = event.get("tool") or event.get("operation") or event.get("command") or event.get("source") or event.get("path") or ""
+            lines.append(f"- {event['timestamp']} — {event['type']}: {str(detail)[:180]}")
+        return "\n".join(lines[-100:])
 
     def append_validation(
         self,
@@ -773,8 +786,12 @@ class JournalLifecycle:
             seen.add(key)
             if "answer" not in item:
                 continue
-            total += len(answer)
+            structured = json.dumps({key: value for key, value in item.items()
+                                     if key not in {"section", "answer"}}, ensure_ascii=False)
+            total += len(answer) + len(structured)
             errors.extend(_answer_errors(section, answer, self.max_section_chars))
+            if len(answer) + len(structured) > self.max_section_chars:
+                errors.append(f"Section exceeds {self.max_section_chars} characters ({len(answer) + len(structured)}): {section}")
             errors.extend(validate_answer_markdown(answer, section))
         if total > self.max_checkpoint_chars:
             errors.append(
@@ -823,19 +840,17 @@ class JournalLifecycle:
 def intent_repair_instructions(errors: Iterable[str]) -> tuple[str, ...]:
     """Give only the structural shape needed for the rejected Intent sections."""
     errors = tuple(errors)
-    hints = ["Resubmit the complete ordered answers array using the exact required section names; preserve already valid section text."]
+    hints = ["Resubmit only changed answer objects with their exact section names; this cycle retains the unaccepted draft until acceptance or failure."]
     if any("missing required 'answer' field" in error for error in errors):
         hints.append("Each answers item must use `section` and `answer`; move text from `content` into `answer` and keep substantive answers.")
     if any(error.startswith("Section exceeds ") or error.startswith("Checkpoint content exceeds ") for error in errors):
         hints.append("Shorten the named section or total answers below the stated character limit, preserving substantive reasoning, then resubmit with `submit_cycle_intent`.")
-    if any("material-assumptions subsection" in error for error in errors):
-        hints.append("In the investigation answer, add `### Material assumptions that remain necessary` followed by the actual assumptions or `None`.")
-    if any("required evidence table" in error for error in errors):
-        hints.append("In the investigation answer, include the questionnaire's five-column evidence table with a header, separator, and at least one actual information row.")
-    if any("Candidate Solution" in error or "Candidate " in error for error in errors):
-        hints.append("In the candidate answer, use `#### Candidate Solution <identifier> — <name>`; under each heading include every required question label from the questionnaire and an explicit COMPLETE or PARTIAL classification.")
-    if any(error.startswith("Selected solution:") for error in errors):
-        hints.append("In the selected-solution answer, include all six required field labels, a submitted candidate identifier, and COMPLETE or PARTIAL.")
+    if any(".evidence" in error or error.startswith("evidence[") for error in errors):
+        hints.append("In the investigation answer object provide evidence records with question, source, finding, and uncertainty.")
+    if any(".candidates" in error or error.startswith("candidates[") for error in errors):
+        hints.append("In the candidate answer object provide candidate records with id, name, solution, evidence, constraints, validation, and classification.")
+    if any(error.startswith("selection") for error in errors):
+        hints.append("In the selected-solution answer object provide selection with candidate_id, rationale, and challenge.")
     return tuple(hints)
 
 
@@ -845,12 +860,25 @@ def render_run_contract(run_contract: str, *, preliminary: bool = False) -> str:
     return f"# {title}\n\n" + description + run_contract.strip()
 
 
-def render_checkpoint(cycle: int, checkpoint: str, answers: list[dict[str, str]]) -> str:
+def render_checkpoint(cycle: int, checkpoint: str, answers: list[dict[str, Any]]) -> str:
     lines = [f"# Cycle {cycle} — {checkpoint}", ""]
     for item in answers:
         section = str(item["section"]).strip()
         answer = str(item["answer"]).strip()
         lines.extend((f"## {section}", "", answer, ""))
+        for record in item.get("evidence", []):
+            lines.extend((f"- **Question:** {record['question']}", f"  **Source:** {record['source']}",
+                          f"  **Finding:** {record['finding']}", f"  **Uncertainty:** {record['uncertainty']}", ""))
+        for candidate in item.get("candidates", []):
+            lines.extend((f"### Candidate {candidate['id']} — {candidate['name']}", "",
+                          candidate["solution"], "", f"- Evidence: {candidate['evidence']}",
+                          f"- Constraints: {candidate['constraints']}",
+                          f"- Validation: {candidate['validation']}",
+                          f"- Classification: {candidate['classification']}", ""))
+        if selection := item.get("selection"):
+            lines.extend((f"- **Selected candidate:** {selection['candidate_id']}",
+                          f"- **Rationale:** {selection['rationale']}",
+                          f"- **Challenge before commitment:** {selection['challenge']}", ""))
     return "\n".join(lines).rstrip()
 
 
@@ -861,7 +889,12 @@ def intent_questionnaire(cycle: int) -> str:
     ]
     rules = (
         "Use these exact section names as `section` values in `submit_cycle_intent`. "
-        "Each `answers` item uses `section` and `answer`; put the section's substantive text in `answer`. "
+        "Each `answers` item uses `section` and substantive `answer`. The investigation item also needs "
+        "`evidence: [{question, source, finding, uncertainty}]`; the candidate item needs "
+        "`candidates: [{id, name, solution, evidence, constraints, validation, classification}]`; "
+        "the selection item needs `selection: {candidate_id, rationale, challenge}`. "
+        "Use COMPLETE or PARTIAL classification. Correct rejected fields by submitting only changed sections; "
+        "valid sections remain in this cycle's unaccepted draft. "
         "Use the isolated cycle experiment for decision-relevant investigation before submission. Treat the original Task to Solve as authoritative; "
         "distinguish established information, assumptions, uncertainty, and execution-dependent evidence. Verify "
         "avoidable decision-critical uncertainty where reasonably feasible. The ordered answers describe the final pre-selection decision state, not a rigid reasoning waterfall; investigation may revise problem understanding, applicable engineering considerations, or the solution space before submission. Candidate count must result from "
@@ -894,8 +927,7 @@ def outcome_questionnaire() -> str:
         "partial, blocked, failed, inconclusive, or no-change state when applicable. In Cycle Intent vs. "
         "Implementation, capture material deviations, causal evidence, materially attempted or reverted approaches, "
         "material assumption changes, the resulting strategy, and why it was selected when those events occurred. "
-        "In Implementation Trail, chronologically capture material implementation and investigation actions, observed "
-        "evidence, influential unsuccessful attempts, reassessment points, resulting changes, and self-validation. "
+        "The harness renders observable action chronology from retained events; explain material decisions and reassessment yourself. "
         "Self-validation is not authoritative deterministic validation. You may add clearly named, "
         "decision-relevant sections after all required sections."
     )
@@ -914,97 +946,45 @@ def _render_questionnaire(
     return "\n".join(lines)
 
 
-def _intent_structure_errors(answers: list[dict[str, str]]) -> list[str]:
-    by_section = {
-        str(item.get("section", "")).strip(): str(item.get("answer", ""))
-        for item in answers
-    }
+def _intent_structure_errors(answers: list[dict[str, Any]]) -> list[str]:
+    """Check decision facts, leaving explanations and engineering judgment to the model."""
+    by_section = {str(item.get("section", "")).strip(): item for item in answers if isinstance(item, dict)}
     errors: list[str] = []
-    investigation = by_section.get("Information, investigation and remaining uncertainty", "")
-    required_columns = (
-        "Information needed",
-        "Why it was needed",
-        "Sources examined",
-        "Finding",
-        "What remains unknown or requires execution",
-    )
-    if investigation and not all(column in investigation for column in required_columns):
-        errors.append(
-            "Information, investigation and remaining uncertainty: required evidence table columns are missing"
-        )
-    if investigation and len([line for line in investigation.splitlines() if line.lstrip().startswith("|")]) < 3:
-        errors.append(
-            "Information, investigation and remaining uncertainty: required evidence table needs at least one information row"
-        )
-    if investigation and "Material assumptions that remain necessary" not in investigation:
-        errors.append(
-            "Information, investigation and remaining uncertainty: required material-assumptions subsection is missing"
-        )
-
-    candidates = by_section.get("Concrete candidate solutions", "")
-    candidate_pattern = re.compile(
-        r"^####\s+Candidate Solution\s+([A-Za-z0-9_-]+)\s+[—-]\s+(.+)$",
-        flags=re.MULTILINE,
-    )
-    candidate_matches = list(candidate_pattern.finditer(candidates))
-    candidate_ids = [match.group(1) for match in candidate_matches]
-    if candidates and not candidate_ids:
-        errors.append(
-            "Concrete candidate solutions: at least one '#### Candidate Solution <identifier> — <name>' heading is required"
-        )
-    candidate_fields = (
-        "What exact solution is proposed?",
-        "Why were these exact changes selected?",
-        "What evidence supports the expected result?",
-        "Which parts of the problem will it resolve?",
-        "Does it satisfy every applicable requirement?",
-        "How will it be implemented?",
-        "How will compatibility be preserved?",
-        "Why is the result coherent and maintainable?",
-        "What risks or unknowns remain?",
-        "How will the result be validated?",
-        "Is it a COMPLETE or PARTIAL solution?",
-    )
-    if candidate_matches:
-        for index, match in enumerate(candidate_matches):
-            end = candidate_matches[index + 1].start() if index + 1 < len(candidate_matches) else len(candidates)
-            candidate = candidates[match.end() : end]
-            for field_name in candidate_fields:
-                if field_name in candidate:
-                    continue
-                errors.append(
-                    f"Concrete candidate solutions: Candidate {match.group(1)} is missing field: {field_name}"
-                )
-            if not re.search(r"\b(?:COMPLETE|PARTIAL)\b", candidate):
-                errors.append(
-                    f"Concrete candidate solutions: Candidate {match.group(1)} requires COMPLETE or PARTIAL classification"
-                )
-
-    selected = by_section.get("Selected solution", "")
-    selected_fields = (
-        "Selected solution:",
-        "Classification:",
-        "Why it is preferred:",
-        "Comparative coverage:",
-        "Remaining risks:",
-        "Evidence requiring reconsideration:",
-    )
-    if selected:
-        for field_name in selected_fields:
-            if field_name not in selected:
-                errors.append(f"Selected solution: required field is missing: {field_name}")
-        if not re.search(r"\b(?:COMPLETE|PARTIAL)\b", selected):
-            errors.append("Selected solution: classification must be COMPLETE or PARTIAL")
-        selected_line = next(
-            (line for line in selected.splitlines() if "Selected solution:" in line),
-            "",
-        )
-        if candidate_ids and not any(
-            re.search(rf"\b{re.escape(identifier)}\b", selected_line)
-            for identifier in candidate_ids
-        ):
-            errors.append("Selected solution: selected candidate must reference a submitted candidate identifier")
+    investigation = by_section.get("Information, investigation and remaining uncertainty", {})
+    evidence = investigation.get("evidence")
+    if not isinstance(evidence, list) or not evidence:
+        errors.append("Information, investigation and remaining uncertainty.evidence: provide at least one observed evidence record")
+    else:
+        for index, record in enumerate(evidence):
+            errors.extend(_required_text_fields(record, ("question", "source", "finding", "uncertainty"), f"evidence[{index}]"))
+    candidate_section = by_section.get("Concrete candidate solutions", {})
+    candidates = candidate_section.get("candidates")
+    ids: set[str] = set()
+    if not isinstance(candidates, list) or not candidates:
+        errors.append("Concrete candidate solutions.candidates: provide at least one supported candidate")
+    else:
+        for index, candidate in enumerate(candidates):
+            errors.extend(_required_text_fields(candidate, ("id", "name", "solution", "evidence", "constraints", "validation"), f"candidates[{index}]"))
+            if not isinstance(candidate, dict):
+                continue
+            identifier = str(candidate.get("id", "")).strip()
+            if identifier in ids:
+                errors.append(f"candidates[{index}].id: duplicate candidate identifier {identifier}")
+            ids.add(identifier)
+            if candidate.get("classification") not in {"COMPLETE", "PARTIAL"}:
+                errors.append(f"candidates[{index}].classification: use COMPLETE or PARTIAL")
+    selection = by_section.get("Selected solution", {}).get("selection")
+    errors.extend(_required_text_fields(selection, ("candidate_id", "rationale", "challenge"), "selection"))
+    if isinstance(selection, dict) and selection.get("candidate_id") not in ids:
+        errors.append("selection.candidate_id: reference a submitted candidate id")
     return errors
+
+
+def _required_text_fields(value: Any, names: tuple[str, ...], path: str) -> list[str]:
+    if not isinstance(value, dict):
+        return [f"{path}: expected an object with {', '.join(names)}"]
+    return [f"{path}.{name}: substantive text is required" for name in names
+            if not isinstance(value.get(name), str) or not value[name].strip()]
 
 
 def _bounded_sections(
@@ -1395,7 +1375,6 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
         deviations = _captured_answer_or_state(
             capture, cycle, "outcome", "Cycle Intent vs. Implementation"
         )
-        trail = _captured_answer_or_state(capture, cycle, "outcome", "Implementation Trail")
         report = capture.validation_report
         if report:
             failed = [check.name for check in report.checks if not check.passed]
@@ -1411,7 +1390,7 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
                 f"- **Cycle {cycle} selected direction:** {_inline(selected)}",
                 f"- **Cycle {cycle} final approach:** {_inline(final)}",
                 f"- **Cycle {cycle} material deviations:** {_inline(deviations)}",
-                f"- **Cycle {cycle} implementation trail:** {_inline(trail)}",
+                f"- **Cycle {cycle} observable actions:** See the event-derived chronology in the accepted Outcome and retained events.",
                 f"- **Cycle {cycle} validation learning:** {learning}.",
             )
         )

@@ -244,7 +244,12 @@ class AutonomousRemediationOrchestrator:
                 except IrrecoverableAgentSessionError:
                     raise
                 except Exception as exc:
-                    trace.append_event("agent_turn_failed", cycle=cycle, error=str(exc), recoverable=True)
+                    trace.append_event(
+                        "agent_turn_failed", cycle=cycle, error=str(exc),
+                        failureCategory=("INVOCATION_LIMIT" if isinstance(exc, IntentToolRecoveryExhausted)
+                                         else "SESSION_OR_INFRASTRUCTURE"),
+                        recoveryAttempted=True,
+                    )
                     execution_summary = f"Agent turn failed: {exc}"
                     summaries.append(execution_summary)
                     if lifecycle.phase == JournalPhase.INTENT_REQUIRED:
@@ -331,6 +336,7 @@ class AutonomousRemediationOrchestrator:
                         cycle + 1,
                         capture_recovery=True,
                         cycle_state=lifecycle.cycle_state(cycle),
+                        retained_evidence=self._retained_evidence_index(trace, cycle),
                     )
                     continue
                 if last_validation.passed:
@@ -389,6 +395,7 @@ class AutonomousRemediationOrchestrator:
                     lifecycle.context(),
                     cycle + 1,
                     cycle_state=lifecycle.cycle_state(cycle),
+                    retained_evidence=self._retained_evidence_index(trace, cycle),
                 )
         except BudgetExceeded as exc:
             reason = str(exc)
@@ -747,6 +754,39 @@ class AutonomousRemediationOrchestrator:
             "remainingToolCalls": self.request.budget.max_tool_calls - budget.tool_calls,
             "remainingSeconds": budget.remaining_seconds,
         }
+
+    @staticmethod
+    def _retained_evidence_index(trace: TraceStore, cycle: int) -> list[dict]:
+        """Give replacement sessions retrieval handles for prior source evidence."""
+        if not trace.events_path.exists():
+            return []
+        indexed = []
+        for raw in trace.events_path.read_text(encoding="utf-8").splitlines():
+            event = json.loads(raw)
+            if event.get("cycle") != cycle:
+                continue
+            paths = []
+            if event.get("type") == "agent_command_evidence":
+                paths = [event.get("stdoutArtifact"), event.get("stderrArtifact")]
+            elif event.get("type") == "research":
+                paths = [event.get("resultReference")]
+                if event.get("rawEvidenceReference"):
+                    indexed.append({"type": "research_raw", "source": event.get("source"),
+                                    "reference": event["rawEvidenceReference"]})
+            elif event.get("type") == "engineering_scan_completed":
+                paths = [event.get("resultReference")]
+            for path in filter(None, paths):
+                try:
+                    reference = trace.issue_evidence_reference(path)
+                except (OSError, ValueError):
+                    continue
+                indexed.append({"type": event["type"], "source": event.get("source") or event.get("operation"),
+                                "artifact": Path(path).name, "reference": reference})
+        if len(indexed) > 30:
+            manifest = trace.write_json(f"agent/recovery-evidence-cycle-{cycle}.json", indexed)
+            return [{"type": "evidence_manifest", "source": f"cycle {cycle}: {len(indexed)} retained sources",
+                     "reference": trace.issue_evidence_reference(manifest)}, *indexed[-29:]]
+        return indexed
 
     def _baseline_scan_scope(self) -> tuple[str, ...]:
         return tuple(sorted(set(self.request.severity_scope) | set(self.request.constraints.prohibited_new_severities)))

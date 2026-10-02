@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import ipaddress
 import socket
 from dataclasses import asdict, dataclass
@@ -27,6 +28,9 @@ class ResearchResult:
     results: tuple[dict[str, str], ...] = ()
     error: str | None = None
     truncated: bool = False
+    media_type: str | None = None
+    raw_content: str = ""
+    raw_bytes_b64: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         value = asdict(self)
@@ -56,24 +60,32 @@ class HttpResearchProvider:
         url = f"https://html.duckduckgo.com/html/?q={quote_plus(normalized)}"
         fetched = self._retrieve(url)
         if fetched.status != ResearchStatus.SUCCESS:
-            return ResearchResult(fetched.status, url, error=fetched.error, truncated=fetched.truncated)
+            return ResearchResult(fetched.status, url, error=fetched.error, truncated=fetched.truncated,
+                                  media_type=fetched.media_type, raw_content=fetched.raw_content,
+                                  raw_bytes_b64=fetched.raw_bytes_b64)
         parser = _SearchParser()
         try:
             parser.feed(fetched.content)
         except Exception as exc:
-            return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, url, error=str(exc), truncated=fetched.truncated)
+            return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, url, error=str(exc), truncated=fetched.truncated,
+                                  media_type=fetched.media_type, raw_content=fetched.raw_content,
+                                  raw_bytes_b64=fetched.raw_bytes_b64)
         if not parser.results:
             return ResearchResult(
                 ResearchStatus.EXTRACTION_FAILURE,
                 url,
                 error="Search response contained no extractable results",
                 truncated=fetched.truncated,
+                media_type=fetched.media_type, raw_content=fetched.raw_content,
+                raw_bytes_b64=fetched.raw_bytes_b64,
             )
         return ResearchResult(
             ResearchStatus.SUCCESS,
             url,
             results=tuple(parser.results),
             truncated=fetched.truncated,
+            media_type=fetched.media_type, raw_content=fetched.raw_content,
+            raw_bytes_b64=fetched.raw_bytes_b64,
         )
 
     def fetch(self, url: str) -> ResearchResult:
@@ -85,20 +97,29 @@ class HttpResearchProvider:
         fetched = self._retrieve(url)
         if fetched.status != ResearchStatus.SUCCESS:
             return fetched
-        parser = _TextParser()
-        try:
-            parser.feed(fetched.content)
-            content = parser.text()
-        except Exception as exc:
-            return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, url, error=str(exc), truncated=fetched.truncated)
+        if fetched.media_type in {"text/html", "application/xhtml+xml"}:
+            parser = _TextParser()
+            try:
+                parser.feed(fetched.content)
+                content = parser.text()
+            except Exception as exc:
+                return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, fetched.source, error=str(exc),
+                                      truncated=fetched.truncated, media_type=fetched.media_type,
+                                      raw_content=fetched.raw_content, raw_bytes_b64=fetched.raw_bytes_b64)
+        else:
+            content = fetched.content
         if not content:
             return ResearchResult(
                 ResearchStatus.EXTRACTION_FAILURE,
-                url,
+                fetched.source,
                 error="Response contained no extractable text",
                 truncated=fetched.truncated,
+                media_type=fetched.media_type, raw_content=fetched.raw_content,
+                raw_bytes_b64=fetched.raw_bytes_b64,
             )
-        return ResearchResult(ResearchStatus.SUCCESS, url, content=content, truncated=fetched.truncated)
+        return ResearchResult(ResearchStatus.SUCCESS, fetched.source, content=content,
+                              truncated=fetched.truncated, media_type=fetched.media_type,
+                              raw_content=fetched.raw_content, raw_bytes_b64=fetched.raw_bytes_b64)
 
     def _retrieve(self, url: str) -> ResearchResult:
         blocked = _public_url_error(url)
@@ -119,20 +140,27 @@ class HttpResearchProvider:
         try:
             with build_opener(_PublicRedirectHandler()).open(request, timeout=self.timeout_seconds) as response:
                 content_type = response.headers.get_content_type()
-                if content_type not in {"text/html", "text/plain", "application/xhtml+xml"}:
-                    return ResearchResult(
-                        ResearchStatus.EXTRACTION_FAILURE,
-                        response.geturl(),
-                        error=f"Unsupported public content type: {content_type}",
-                    )
                 body = response.read(self.max_response_bytes + 1)
                 truncated = len(body) > self.max_response_bytes
                 body = body[: self.max_response_bytes]
                 charset = response.headers.get_content_charset() or "utf-8"
+                raw = body.decode(charset, errors="replace")
+                supported = (content_type.startswith("text/") or content_type in {
+                    "application/xhtml+xml", "application/xml", "application/json"}
+                    or content_type.endswith("+xml") or content_type.endswith("+json"))
+                if not supported:
+                    return ResearchResult(
+                        ResearchStatus.EXTRACTION_FAILURE,
+                        response.geturl(),
+                        error=f"Unsupported public content type: {content_type}",
+                        truncated=truncated, media_type=content_type, raw_content=raw,
+                        raw_bytes_b64=base64.b64encode(body).decode("ascii"),
+                    )
                 return ResearchResult(
                     ResearchStatus.SUCCESS,
                     response.geturl(),
-                    content=body.decode(charset, errors="replace"),
+                    content=raw, raw_content=raw, media_type=content_type,
+                    raw_bytes_b64=base64.b64encode(body).decode("ascii"),
                     truncated=truncated,
                 )
         except _BlockedResearchError as exc:

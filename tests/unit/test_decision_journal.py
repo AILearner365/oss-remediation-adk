@@ -17,6 +17,7 @@ from autonomous_oss_remediation_agent.journal import (
     render_final_resolution,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
+from tests.checkpoint_fixtures import typed_intent_answers
 
 
 class DecisionJournalTests(unittest.TestCase):
@@ -49,7 +50,7 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
         content = self.lifecycle.store.read()
         self.assertIn("# Cycle 1 — Problem Analysis and Solution Decision", content)
-        self.assertEqual(1, content.count("#### Candidate Solution"))
+        self.assertEqual(1, content.count("### Candidate A"))
 
     def test_missing_empty_duplicate_placeholder_oversized_and_malformed_are_rejected(self):
         cases = []
@@ -92,15 +93,14 @@ class DecisionJournalTests(unittest.TestCase):
 
     def test_intent_structural_repair_feedback_allows_recovery_after_repeated_error(self):
         answers = self._intent_answers()
-        self._replace(answers, INTENT_SECTIONS[1],
-                      next(item["answer"] for item in answers if item["section"] == INTENT_SECTIONS[1]).split("### Material assumptions")[0])
+        next(item for item in answers if item["section"] == INTENT_SECTIONS[1]).pop("evidence")
         for attempt in range(4):
             self._replace(answers, INTENT_SECTIONS[0],
                           f"Observed problem analysis revision {attempt}; structural repair still pending.")
             rejected = self.lifecycle.submit_intent(1, answers)
             self.assertFalse(rejected.accepted)
-            self.assertTrue(any("material-assumptions subsection" in error for error in rejected.errors))
-            self.assertTrue(any("### Material assumptions that remain necessary" in hint
+            self.assertTrue(any(".evidence" in error for error in rejected.errors))
+            self.assertTrue(any("evidence records" in hint
                                 for hint in rejected.repair_instructions))
             self.assertTrue(rejected.retry_allowed)
             self.assertNotIn("# Cycle 1 — Problem Analysis and Solution Decision", self.lifecycle.store.read())
@@ -124,9 +124,39 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertTrue(self.lifecycle.submit_intent(1, valid).accepted)
         self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
 
+    def test_local_section_repair_is_atomic_and_cannot_cross_cycles(self):
+        answers = self._intent_answers()
+        candidate = next(item for item in answers if item["section"] == "Concrete candidate solutions")
+        candidate["candidates"][0]["classification"] = "UNKNOWN"
+        rejected = self.lifecycle.submit_intent(1, answers)
+        self.assertFalse(rejected.accepted)
+        self.assertIn("candidates[0].classification", str(rejected.errors))
+        self.assertNotIn("### Candidate A", self.lifecycle.store.read())
+        repaired = self._intent_answers()[3]
+        self.assertTrue(self.lifecycle.submit_intent(1, [repaired]).accepted)
+        self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
+        self.lifecycle.require_outcome()
+        self.lifecycle.fail_outcome_capture(1)
+        self.lifecycle.begin_cycle(2)
+        stale = self.lifecycle.submit_intent(2, [repaired])
+        self.assertFalse(stale.accepted)
+        self.assertIn("Missing required section", str(stale.errors))
+
+    def test_outcome_chronology_uses_observed_events_only(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.trace.append_event("agent_workspace_action", cycle=1, path="pom.xml", action="replace", status="ok")
+        self.lifecycle.require_outcome()
+        self.assertTrue(self.lifecycle.submit_outcome(
+            1, "INCONCLUSIVE", "Checks remain open.", self._outcome_answers()[:2],
+        ).accepted)
+        rendered = self.lifecycle.store.read()
+        self.assertIn("Observable action chronology", rendered)
+        self.assertIn("agent_workspace_action: pom.xml", rendered)
+        self.assertNotIn("Model inferred why", rendered)
+
     def test_intent_checkpoint_limit_rejects_even_a_later_valid_submission(self):
         answers = self._intent_answers()
-        self._replace(answers, INTENT_SECTIONS[1], "Investigation answer lacks required structure.")
+        next(item for item in answers if item["section"] == INTENT_SECTIONS[1]).pop("evidence")
         for attempt in range(self.lifecycle.max_checkpoint_attempts):
             rejected = self.lifecycle.submit_intent(1, answers)
             self.assertFalse(rejected.accepted)
@@ -352,7 +382,7 @@ class DecisionJournalTests(unittest.TestCase):
         content = self.lifecycle.store.read()
         self.assertIn("attempted override failed and was reverted", content)
         self.assertIn("compatibility, one constraint", content)
-        self.assertEqual(3, len(OUTCOME_SECTIONS))
+        self.assertEqual(2, len(OUTCOME_SECTIONS))
 
     def test_cycle_two_requires_prior_cycle_reassessment_and_context_is_bounded(self):
         self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
@@ -446,7 +476,7 @@ class DecisionJournalTests(unittest.TestCase):
 
         self.assertIn(implementation_result, rendered)
         self.assertIn("only explicitly mapped deterministic checks are authoritative", rendered)
-        self.assertIn("Cycle 1 implementation trail", rendered)
+        self.assertIn("Cycle 1 observable actions", rendered)
 
     def test_preliminary_baseline_and_task_records_preserve_underlying_data(self):
         workspace = RunWorkspace.create(self.temp.name)
@@ -510,7 +540,7 @@ class DecisionJournalTests(unittest.TestCase):
 
     @staticmethod
     def _intent_answers():
-        return [
+        return typed_intent_answers([
             {
                 "section": "Problem understanding in project context",
                 "answer": "Resolve the complete supplied task within every applicable requirement and constraint in the observed project context, without asserting an unsupported shared root cause.",
@@ -556,7 +586,7 @@ None.""",
 - **Remaining risks:** Runtime compatibility requires execution.
 - **Evidence requiring reconsideration:** Effective-model or test evidence contradicting ownership.""",
             },
-        ]
+        ])
 
     @staticmethod
     def _outcome_answers():

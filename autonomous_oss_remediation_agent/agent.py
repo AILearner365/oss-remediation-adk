@@ -11,6 +11,7 @@ from typing import Callable, Protocol
 from google.adk.agents import LlmAgent, RunConfig
 from google.adk.models import Gemini
 from google.adk.runners import InMemoryRunner
+from google.adk.tools.base_toolset import BaseToolset
 from google.genai import types
 
 from .capabilities.execution import BudgetExceeded, ExecutionBudget
@@ -29,8 +30,21 @@ class IntentToolRecoveryExhausted(RuntimeError):
     """Unregistered checkpoint tool calls exhausted the cycle's recovery allowance."""
 
 
+class PhaseToolset(BaseToolset):
+    """Expose the phase's supported tools through ADK's public toolset interface."""
+
+    def __init__(self, capabilities: DeveloperCapabilitySet):
+        super().__init__()
+        self.capabilities = capabilities
+        self._tools = capabilities.adk_tools()
+
+    async def get_tools(self, readonly_context=None):
+        available = self.capabilities.available_tool_names()
+        return [tool for tool in self._tools if tool.name in available]
+
+
 def intent_tool_error_callback(capabilities: DeveloperCapabilitySet):
-    """Return an ADK tool error response only for unknown calls during Intent capture."""
+    """Recover unknown invocations within the active phase and its bounded allowance."""
     cycle = 0
     unknown_calls = 0
     registered = {tool.name for tool in capabilities.adk_tools()}
@@ -38,27 +52,29 @@ def intent_tool_error_callback(capabilities: DeveloperCapabilitySet):
     def on_error(tool, args, tool_context, error):
         nonlocal cycle, unknown_calls
         journal = capabilities.journal
-        if (journal is None or journal.phase != JournalPhase.INTENT_REQUIRED
-                or tool.name in registered or not isinstance(error, ValueError)
+        if (journal is None or journal.phase not in {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION, JournalPhase.OUTCOME_REQUIRED}
+                or not isinstance(error, ValueError)
                 or tool.description != "Tool not found"):
             return None
         if cycle != journal.active_cycle:
             cycle, unknown_calls = journal.active_cycle, 0
         unknown_calls += 1
         capture = journal.cycles.get(cycle)
-        rejected = capture.rejected_intents if capture else 0
+        rejected = ((capture.rejected_intents if journal.phase == JournalPhase.INTENT_REQUIRED
+                     else capture.rejected_outcomes) if capture else 0)
         if unknown_calls + rejected >= journal.max_checkpoint_attempts:
             raise IntentToolRecoveryExhausted(
-                f"Cycle {cycle} Intent tool recovery exhausted after {unknown_calls} unregistered calls"
+                f"Cycle {cycle} {journal.phase.value} tool recovery exhausted after {unknown_calls} unregistered calls"
             )
+        available = sorted(capabilities.available_tool_names())
         return {
             "status": "rejected",
-            "error": f"'{tool.name}' is not a registered tool; no action was executed.",
-            "repairInstructions": (
-                "Call the registered `submit_cycle_intent` tool directly with "
-                "`cycle_number` and `answers`, an array of objects each containing "
-                "`section` and substantive `answer` text. Do not call another tool to submit Intent."
-            ),
+            "error": (f"'{tool.name}' is unavailable in {journal.phase.value}; no action was executed."
+                      if tool.name in registered else
+                      f"'{tool.name}' is not a registered tool; no action was executed."),
+            "repairInstructions": ("Use one of the available capabilities for the current phase: "
+                                   + ", ".join(f"`{name}`" for name in available) + "."),
+            "availableCapabilities": available,
             "cycle_number": cycle,
             "retryAllowed": True,
         }
@@ -81,7 +97,7 @@ def create_remediation_agent(capabilities: DeveloperCapabilitySet, model: str) -
         ),
         description="Autonomously investigates and remediates OSS vulnerabilities in one prepared repository.",
         instruction=AGENT_INSTRUCTION,
-        tools=capabilities.adk_tools(),
+        tools=[PhaseToolset(capabilities)],
         on_tool_error_callback=intent_tool_error_callback(capabilities),
         mode="chat",
     )

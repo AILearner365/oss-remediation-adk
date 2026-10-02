@@ -848,3 +848,6 @@ The existing implementation already:
 Implementation of this design should therefore replace and restructure the current Cycle Intent content without replacing the existing workflow sequence.
 
 This document intentionally stops at acceptance of the pre-execution analysis and solution decision. The later implementation/reassessment record, post-execution questionnaire, deterministic-validation presentation and next-cycle prompt are outside its current scope.
+# Current runtime serialization (October 2026)
+
+The Q1–Q5 reasoning requirements in this design remain active, including evidence-backed candidate selection and Challenge Before Commitment. The exact Markdown table, candidate heading, and selection-label examples below document the earlier submission format and are **not** the current tool contract. Current `submit_cycle_intent` uses section answers plus typed `evidence`, `candidates`, and `selection` records described in [the journal API](README.md). Deterministic code renders the readable journal. Rejected sections may be replaced locally in a cycle-scoped draft; no authoritative phase transition occurs until complete validation. Historical saved journals remain readable without rewriting them.

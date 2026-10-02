@@ -29,8 +29,6 @@ If there was no material change from the Cycle Intent, state that directly.
 
 When material change did occur, include materially attempted, rejected, reverted, or abandoned approaches; material assumption changes; the resulting strategy; and why it was selected. Do not invent reassessment or attempts that did not occur.
 
-## Implementation Trail
+## Observable action chronology
 
-What was the actual sequence of material implementation and investigation actions from the Cycle Intent through self-validation?
-
-Report only material events that actually occurred. Include observed evidence, materially influential unsuccessful or reverted attempts, actual reassessment points, resulting changes, subsequent implementation, and self-validation where applicable. Do not invent missing history, manufacture reassessment, provide a routine command diary, or treat self-validation as authoritative deterministic success.
+The harness renders observed workspace edits, commands, research, scans, and tool errors from run events. It does not infer rationale. The model explains material reassessment and self-validation in the two required Outcome answers above. Historical three-section journal records remain readable.

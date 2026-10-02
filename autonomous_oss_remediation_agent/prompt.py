@@ -321,6 +321,7 @@ def validation_feedback(
     *,
     capture_recovery: bool = False,
     cycle_state: dict | None = None,
+    retained_evidence: list[dict] | None = None,
 ) -> str:
     failed_checks = []
     for check in report.checks:
@@ -370,6 +371,7 @@ def validation_feedback(
         "currentStateDigest": report.tree_digest,
         "cycleEvidence": report.cycle_evidence.to_dict() if report.cycle_evidence else None,
         "scan": scan,
+        "retainedSourceEvidence": retained_evidence or [],
     }
     opening = (
         "Deterministic validation established success for the evaluated engineering requirements, but required lifecycle capture remains incomplete. Continue in the same repository and ADK session using the original canonical Task to Solve. Reassess the current validated repository state and complete this cycle's normal checkpoints; checkpoint failure alone is not evidence that another repository change is needed."
@@ -381,7 +383,7 @@ def validation_feedback(
         + "\n\n"
         "Use the new isolated experimental workspace and other available engineering capabilities before the next pre-execution submission to inspect current repository state and reinvestigate decision-critical claims where reasonably feasible. Critically reassess all relevant accumulated prior-cycle findings, assumptions, decisions, implementation directions, self-validation statements, and retrospective descriptions against the original Task to Solve. Treat prior model statements as claims rather than deterministic facts. Identify what remains supported, what is contradicted or incomplete, what cannot be verified and therefore remains uncertain, what implemented work is present and useful, what directions should no longer constrain the decision, and what remains unresolved. Do not automatically continue or discard previous work. Only after this evidence audit, develop current concrete candidates and select the best-supported solution now.\n\n"
         "Scanner fixed-version fields are evidence only: they are not required target versions, empty fixedVersions does not mean remediation is impossible, and ambiguous backend expressions must not be guessed into concrete versions.\n\n"
-        "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections and the separately supplied latest validation evidence are authoritative within their stated scope.\n\n"
+        "The bounded Markdown decision journal below preserves provenance across relevant prior cycles. The original Task to Solve remains the run anchor. Prior model-authored records are reasoning artifacts; deterministic validation sections are authoritative within their stated scope. Retained source references below can be read with `retrieve_retained_evidence`; their presence does not validate earlier conclusions.\n\n"
         + journal_context
         + "\n\n"
         + "Latest deterministic validation evidence:\n"

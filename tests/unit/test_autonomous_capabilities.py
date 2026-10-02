@@ -1,4 +1,5 @@
 from __future__ import annotations
+from tests.checkpoint_fixtures import typed_intent_answers
 
 import json
 import os
@@ -379,7 +380,9 @@ class AutonomousCapabilityTests(unittest.TestCase):
             answer_ref = schema["properties"]["answers"]["items"]["$ref"].split("/")[-1]
             answer_schema = schema["$defs"][answer_ref]
             self.assertEqual({"section", "answer"}, set(answer_schema["required"]))
-            self.assertEqual({"section", "answer"}, set(answer_schema["properties"]))
+            expected = ({"section", "answer", "evidence", "candidates", "selection"}
+                        if checkpoint_tool == "submit_cycle_intent" else {"section", "answer"})
+            self.assertEqual(expected, set(answer_schema["properties"]))
         self.assertEqual(
             ["write", "replace"],
             declarations["edit_workspace_text"].parameters_json_schema["properties"]["action"]["enum"],
@@ -401,7 +404,8 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(2.0, agent.model.retry_options.exp_base)
         self.assertEqual(1.0, agent.model.retry_options.jitter)
         self.assertIsNone(agent.model.retry_options.http_status_codes)
-        names = {tool.name for tool in agent.tools}
+        import asyncio
+        names = {tool.name for tool in asyncio.run(agent.tools[0].get_tools())}
         self.assertTrue({"read_workspace_text", "edit_workspace_text", "run_workspace_shell"}.issubset(names))
 
     def test_pre_intent_discovery_is_bounded_read_only_and_finds_late_files(self):
@@ -1127,6 +1131,64 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(ResearchStatus.BLOCKED, blocked.status)
         self.assertIn("non-public", blocked.error)
 
+    def test_http_research_accepts_xml_and_retains_raw_source(self):
+        from email.message import Message
+
+        class Response:
+            def __init__(self, media_type, body):
+                self.headers = Message()
+                self.headers["Content-Type"] = media_type
+                self.body = body
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def geturl(self):
+                return "https://repo.example.test/source"
+
+            def read(self, limit):
+                return self.body[:limit]
+
+        class Opener:
+            response = None
+
+            def open(self, request, timeout):
+                return self.response
+
+        opener = Opener()
+        provider = HttpResearchProvider(enabled=True)
+        with patch("autonomous_oss_remediation_agent.capabilities.research.socket.getaddrinfo",
+                   return_value=[(None, None, None, None, ("93.184.215.14", 443))]), \
+             patch("autonomous_oss_remediation_agent.capabilities.research.build_opener", return_value=opener):
+            opener.response = Response("text/xml", b"<project><version>1.2</version></project>")
+            xml = provider.fetch("https://repo.example.test/source")
+            self.assertEqual(ResearchStatus.SUCCESS, xml.status)
+            self.assertIn("<version>1.2</version>", xml.content)
+            self.assertEqual("text/xml", xml.media_type)
+            capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                                   research_provider=provider)
+            fetched = capabilities.research_fetch("https://repo.example.test/source")
+            self.assertTrue(fetched["acquisitionSucceeded"])
+            self.assertTrue(fetched["extractionSucceeded"])
+            self.assertEqual("<project><version>1.2</version></project>",
+                             capabilities.retrieve_retained_evidence(fetched["rawEvidenceReference"])["content"])
+            opener.response = Response("image/png", b"\x89PNG")
+            unsupported = provider.fetch("https://repo.example.test/source")
+            self.assertEqual(ResearchStatus.EXTRACTION_FAILURE, unsupported.status)
+            self.assertTrue(unsupported.raw_bytes_b64)
+            failed = capabilities.research_fetch("https://repo.example.test/source")
+            self.assertFalse(failed["extractionSucceeded"])
+            self.assertTrue(failed["acquisitionSucceeded"])
+            self.assertFalse(failed["complete"])
+            opener.response = Response("text/plain", b"X" * 1001)
+            limited = HttpResearchProvider(enabled=True, max_response_bytes=1000)
+            truncated = limited.fetch("https://repo.example.test/source")
+            self.assertTrue(truncated.truncated)
+            self.assertEqual(1000, len(truncated.content))
+
     def test_research_uses_shared_tool_budget(self):
         budget = ExecutionBudget(
             ExecutionBudgetConfig(max_tool_calls=1, overall_timeout_seconds=30)
@@ -1163,6 +1225,26 @@ class AutonomousCapabilityTests(unittest.TestCase):
         fetch_detail = capabilities.retrieve_retained_evidence(fetch["resultReference"], query="QQQQ")
         self.assertTrue(fetch_detail["matches"])
 
+    def test_pre_checkpoint_evidence_survives_session_replacement(self):
+        from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
+        path = self.trace.write_text("research/pre-intent.txt", "Observed source before failed checkpoint")
+        self.trace.append_event("research", cycle=1, operation="fetch", resultReference=str(path))
+        references = AutonomousRemediationOrchestrator._retained_evidence_index(self.trace, 1)
+        self.assertEqual(1, len(references))
+        replacement = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace)
+        retrieved = replacement.retrieve_retained_evidence(references[0]["reference"])
+        self.assertEqual("Observed source before failed checkpoint", retrieved["content"])
+
+    def test_recovery_manifest_keeps_older_sources_addressable(self):
+        from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
+        for index in range(31):
+            path = self.trace.write_text(f"research/source-{index}.txt", f"source {index}")
+            self.trace.append_event("research", cycle=1, operation="fetch", resultReference=str(path))
+        references = AutonomousRemediationOrchestrator._retained_evidence_index(self.trace, 1)
+        self.assertEqual(30, len(references))
+        manifest = self.capabilities.retrieve_retained_evidence(references[0]["reference"])
+        self.assertIn("source-0.txt", manifest["content"])
+
     def test_research_search_bounds_long_fields_but_retains_them(self):
         long_title = "T" * 5000 + "TITLE-END"
         long_url = "https://example.test/" + "u" * 5000 + "URL-END"
@@ -1198,7 +1280,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
             self.assertNotIn("import oss_remediation_agent", text, path)
 
 def _valid_intent_answers():
-    return [
+    return typed_intent_answers([
         {"section": "Problem understanding in project context", "answer": "Resolve the supplied Task to Solve completely in the observed project context."},
         {
             "section": "Information, investigation and remaining uncertainty",
@@ -1240,7 +1322,7 @@ None.""",
 - **Remaining risks:** Execution evidence.
 - **Evidence requiring reconsideration:** Contradictory checks.""",
         },
-    ]
+    ])
 
 
 def _git(cwd: Path, *args: str) -> None:
