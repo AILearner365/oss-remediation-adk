@@ -1,0 +1,12 @@
+{
+  "attempts": [],
+  "backend": "osv",
+  "commandResult": null,
+  "error": "RUNTIME_RESOURCE_UNAVAILABLE: Maven could not establish its effective local repository in the experimental environment",
+  "evidence": {},
+  "failureKind": "DEPENDENCY_RESOLUTION",
+  "findings": [],
+  "outcome": "INCOMPLETE_FATAL_FAILURE",
+  "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-1.json",
+  "succeeded": false
+}

@@ -1,111 +1,0 @@
-Welcome to Cloud Shell! Type "help" to get started.
-To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
-You can view your projects by running `gcloud projects list`.
-[INFO] Scanning for projects...
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Build Order:
-[INFO] 
-[INFO] secure-multimodule-springboot-java21                               [pom]
-[INFO] task-common                                                        [jar]
-[INFO] task-domain                                                        [jar]
-[INFO] task-service                                                       [jar]
-[INFO] task-web                                                           [jar]
-[INFO] 
-[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
-[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
-[INFO]   from pom.xml
-[INFO] --------------------------------[ pom ]---------------------------------
-[INFO] 
-[INFO] --- dependency:3.6.1:tree (default-cli) @ secure-multimodule-springboot-java21 ---
-[INFO] com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
-[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile
-[INFO] |  \- org.apache.commons:commons-lang3:jar:3.14.0:compile
-[INFO] \- org.json:json:jar:20231013:compile
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-common >------------------
-[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
-[INFO]   from task-common/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] --- dependency:3.6.1:tree (default-cli) @ task-common ---
-[INFO] com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT
-[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile
-[INFO] |  \- org.apache.commons:commons-lang3:jar:3.14.0:compile
-[INFO] \- org.json:json:jar:20231013:compile
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-domain >------------------
-[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
-[INFO]   from task-domain/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] --- dependency:3.6.1:tree (default-cli) @ task-domain ---
-[INFO] com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT
-[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile
-[INFO] |  \- org.apache.commons:commons-lang3:jar:3.14.0:compile
-[INFO] \- org.json:json:jar:20231013:compile
-[INFO] 
-[INFO] -----------------< com.example.secureapp:task-service >-----------------
-[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
-[INFO]   from task-service/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.pom
-Progress (1): 1.0 kBProgress (1): 2.8 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/6.2.19/spring-context-6.2.19.pom (2.8 kB at 3.8 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.pom
-Progress (1): 1.1 kBProgress (1): 2.2 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/6.2.19/spring-aop-6.2.19.pom (2.2 kB at 67 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.pom
-Progress (1): 1.1 kBProgress (1): 2.0 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/6.2.19/spring-beans-6.2.19.pom (2.0 kB at 60 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.pom
-Progress (1): 1.1 kBProgress (1): 2.0 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.2.19/spring-core-6.2.19.pom (2.0 kB at 61 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.pom
-Progress (1): 1.1 kBProgress (1): 1.8 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.2.19/spring-jcl-6.2.19.pom (1.8 kB at 58 kB/s)
-[INFO] 
-[INFO] --- dependency:3.6.1:tree (default-cli) @ task-service ---
-[INFO] com.example.secureapp:task-service:jar:1.0.0-SNAPSHOT
-[INFO] +- com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT:compile
-[INFO] +- org.springframework:spring-context:jar:6.2.19:compile
-[INFO] |  +- org.springframework:spring-aop:jar:6.2.19:compile
-[INFO] |  +- org.springframework:spring-beans:jar:6.2.19:compile
-[INFO] |  +- org.springframework:spring-core:jar:6.2.19:compile
-[INFO] |  |  \- org.springframework:spring-jcl:jar:6.2.19:compile
-[INFO] |  +- org.springframework:spring-expression:jar:6.2.19:compile
-[INFO] |  \- io.micrometer:micrometer-observation:jar:1.13.4:compile
-[INFO] |     \- io.micrometer:micrometer-commons:jar:1.13.4:compile
-[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile
-[INFO] |  \- org.apache.commons:commons-lang3:jar:3.14.0:compile
-[INFO] \- org.json:json:jar:20231013:compile
-[INFO] 
-[INFO] -------------------< com.example.secureapp:task-web >-------------------
-[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
-[INFO]   from task-web/pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] --- dependency:3.6.1:tree (default-cli) @ task-web ---
-[INFO] com.example.secureapp:task-web:jar:1.0.0-SNAPSHOT
-[INFO] +- com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT:compile
-[INFO] +- com.example.secureapp:task-domain:jar:1.0.0-SNAPSHOT:compile
-[INFO] +- com.example.secureapp:task-service:jar:1.0.0-SNAPSHOT:compile
-[INFO] |  \- org.springframework:spring-context:jar:6.2.19:compile
-[INFO] |     +- org.springframework:spring-aop:jar:6.2.19:compile
-[INFO] |     +- org.springframework:spring-beans:jar:6.2.19:compile
-[INFO] |     +- org.springframework:spring-core:jar:6.2.19:compile
-[INFO] |     |  \- org.springframework:spring-jcl:jar:6.2.19:compile
-[INFO] |     +- org.springframework:spring-expression:jar:6.2.19:compile
-[INFO] |     \- io.micrometer:micrometer-observation:jar:1.13.4:compile
-[INFO] |        \- io.micrometer:micrometer-commons:jar:1.13.4:compile
-[INFO] +- org.apache.commons:commons-text:jar:1.10.0:compile
-[INFO] |  \- org.apache.commons:commons-lang3:jar:3.14.0:compile
-[INFO] \- org.json:json:jar:20231013:compile
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
-[INFO] 
-[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  2.590 s]
-[INFO] task-common ........................................ SUCCESS [  0.030 s]
-[INFO] task-domain ........................................ SUCCESS [  0.025 s]
-[INFO] task-service ....................................... SUCCESS [  1.448 s]
-[INFO] task-web ........................................... SUCCESS [  0.051 s]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  5.294 s
-[INFO] Finished at: 2026-09-29T02:32:08Z
-[INFO] ------------------------------------------------------------------------

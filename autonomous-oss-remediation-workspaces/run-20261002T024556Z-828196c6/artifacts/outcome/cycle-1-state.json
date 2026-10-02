@@ -1,0 +1,13 @@
+{
+  "baselineCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "captureSucceeded": true,
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "cycle": 1,
+  "diff": "diff --git a/pom.xml b/pom.xml\nindex 91b8c15..4ac6b74 100644\n--- a/pom.xml\n+++ b/pom.xml\n@@ -54,18 +54,48 @@\n                 <artifactId>task-service</artifactId>\n                 <version>${project.version}</version>\n             </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-expression</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-webmvc</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>io.micrometer</groupId>\n+                <artifactId>micrometer-core</artifactId>\n+                <version>1.16.6</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.apache.tomcat.embed</groupId>\n+                <artifactId>tomcat-embed-core</artifactId>\n+                <version>11.0.25</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-core</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-databind</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n     <dependencies>\n         <dependency>\n             <groupId>org.apache.commons</groupId>\n             <artifactId>commons-text</artifactId>\n-            <version>1.9</version>\n+            <version>1.10.0</version>\n         </dependency>\n         <dependency>\n             <groupId>org.json</groupId>\n             <artifactId>json</artifactId>\n-            <version>20230227</version>\n+            <version>20231013</version>\n         </dependency>\n     </dependencies>\n     <build>\n",
+  "diffReference": "evidence:db76a76d62ee118d2b1b65d42129c4bb8e2cdfbf19da42f0bd2e14209f03e851",
+  "diffSha256": "4ad82354be0e41b8e4a190c9d7decc227f4606aa3748a156355a0b93fc5444cd",
+  "independentValidationAtCapture": "not yet run",
+  "workspaceKind": "authoritative"
+}

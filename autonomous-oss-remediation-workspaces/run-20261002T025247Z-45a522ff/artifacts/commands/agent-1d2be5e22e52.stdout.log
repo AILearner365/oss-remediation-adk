@@ -1,0 +1,18 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Some problems were encountered while processing the POMs:
+[FATAL] Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/repository/pom.xml: start tag not allowed in epilog but got g (position: END_TAG seen ...</profiles>\n</project>\n                                <g... @186:35)  @ line 186, column 35
+ @ 
+[ERROR] The build could not read 1 project -> [Help 1]
+[ERROR]   
+[ERROR]   The project  (/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/repository/pom.xml) has 1 error
+[ERROR]     Non-parseable POM /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/repository/pom.xml: start tag not allowed in epilog but got g (position: END_TAG seen ...</profiles>\n</project>\n                                <g... @186:35)  @ line 186, column 35 -> [Help 2]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException
+[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/ModelParseException

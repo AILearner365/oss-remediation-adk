@@ -1,0 +1,277 @@
+[
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify"
+    ],
+    "cycle": 1,
+    "exitCode": 1,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-22e3b660478a.stderr.log",
+    "stderrReference": "evidence:c0a3d6c84a2a84c961f0363a9c69012bf5467f59729a7d01238bd82a4db14781",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-22e3b660478a.stdout.log",
+    "stdoutReference": "evidence:16617d1155041fff4e2da657fe360aee2849fdbe7d7af8b28f261f63791a8397",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:54:37.036026+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-c277022b0267.stderr.log",
+    "stderrReference": "evidence:1d994b5362a799785a7971dee839bd5d8af59177d314e5cdcbe4a606ee212d78",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-c277022b0267.stdout.log",
+    "stdoutReference": "evidence:ccc5867f2c6d567a07de995113e72a0d823ca3a64bba69dc27764833ddd264c3",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:55:27.830077+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:956019f06543a7a2a1bae016b9ed7bc542fb40a2121272e81aa9cbcf61b17a2c",
+    "findingCount": 0,
+    "outcome": "INCOMPLETE_FATAL_FAILURE",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-1.json",
+    "timestamp": "2026-10-02T02:55:35.249953+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "experimental"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:7d0af82a357da04720ca93ed45c216f60883ca71df76043fd7cc4c9128e66b8e",
+    "findingCount": 3,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-2.json",
+    "timestamp": "2026-10-02T02:55:39.593698+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-2fcab8643fb8.stderr.log",
+    "stderrReference": "evidence:3690a8e92292f137e0f15e02342b17dc58243418fd7ff4e6c4a48cf1f451e964",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-2fcab8643fb8.stdout.log",
+    "stdoutReference": "evidence:88907a1b294fb4ff1e239b10a933382c4cbbc37b1a628f2c637fa55371c3bea7",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:56:19.546773+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:25ca4491b5fff9eb202d961bb2f361d7d1d2c7eb311fb4e6842d072da154fa18",
+    "findingCount": 3,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-3.json",
+    "timestamp": "2026-10-02T02:56:23.496210+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 1,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-885bc4786ae1.stderr.log",
+    "stderrReference": "evidence:bdec845bc5ad7486e0cfee812d3ea1e7f5c8fd72964fedcf9605adc13ecb33b2",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-885bc4786ae1.stdout.log",
+    "stdoutReference": "evidence:28f0838496329bfece3add79f0a4453cfebad44e4a12100db6cda1b841065ecb",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:56:34.392970+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-43e412713e46.stderr.log",
+    "stderrReference": "evidence:f2ce2ccd0ba27fc4a3eaac5fd4bbe4b98d5315d2ab8d7e3b76813c2e9a4f7263",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-43e412713e46.stdout.log",
+    "stdoutReference": "evidence:3975e12428dfb391bd618bed53b1e5f863f5071cde09157dc7dbe768b0778d5d",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:57:14.480243+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:7e86ae67234fd74db0f4c128b3603523c7cb9112ed64a3bb94e2c4f6f7ab419c",
+    "findingCount": 5,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-4.json",
+    "timestamp": "2026-10-02T02:57:18.342636+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-31aeca669545.stderr.log",
+    "stderrReference": "evidence:3d459e0a25b0bde48261149a19efdc275d84cfd2f1a5105f32f0de6c887789db",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-31aeca669545.stdout.log",
+    "stdoutReference": "evidence:82a3fab13e0ba1b4add7e9ada5a1ee9e35ffbeedf97de5ed85c62d2cda9d58df",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:58:00.589521+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:18c1629be340b1c987a919a23aa831c9da7843caa77e45c6c61bc18deeafe5fd",
+    "findingCount": 0,
+    "outcome": "COMPLETED_CLEAN",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-experimental-5.json",
+    "timestamp": "2026-10-02T02:58:04.380864+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-9e39151e70b9.stderr.log",
+    "stderrReference": "evidence:c07b6b31920ec1b7ce636b4a0b68ce3954cafc5a4fd9a1234c0cefe75dafd0a1",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-9e39151e70b9.stdout.log",
+    "stdoutReference": "evidence:2eef338009edb5a47caa96612eb1e8f7677395d3e3eb81ab4fc85f5fc9206224",
+    "timedOut": false,
+    "timestamp": "2026-10-02T02:59:34.280435+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:18feadfa2a0d82d143c1efc4039bc16f08896dedeb48b62e228af86e5415db77",
+    "findingCount": 24,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-authoritative-6.json",
+    "timestamp": "2026-10-02T02:59:39.231917+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 1,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-1d2be5e22e52.stderr.log",
+    "stderrReference": "evidence:4b1defe23f042bc3f810ed7a46bbcc9f781c95b86a068b97b640f43ce0d1851b",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-1d2be5e22e52.stdout.log",
+    "stdoutReference": "evidence:c561436a3a3828f029e748240d360958629d0890e11a98520bc1f0eb3fe2af8b",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:00:32.190721+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-213ff94faaf5.stderr.log",
+    "stderrReference": "evidence:f7fb2d041e67a852eb92c59ed0e629b5c8db3e55ff6fd459bfe728aef73839f4",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-213ff94faaf5.stdout.log",
+    "stdoutReference": "evidence:c5c3aee5e55a15368dd7b7e7763a80502d06624b1acb449df4a4f9b94b9df2be",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:01:29.486141+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:10f46bf5b4678bbe0e5b6645b0786ca037eb88627fd464b683b234c827fd9aff",
+    "findingCount": 8,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-authoritative-7.json",
+    "timestamp": "2026-10-02T03:01:35.182169+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-f299a4c509d7.stderr.log",
+    "stderrReference": "evidence:006968b152211804c981d5ba0a486e6fa851da7e7f41a6aa8ffc303dd82b41c6",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-f299a4c509d7.stdout.log",
+    "stdoutReference": "evidence:848a78b729dceab0c151f4a5219db918e1266a4ab307ffaa600d3325a4365240",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:02:29.158316+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:eb7d273b09b578d5f3866ca544eea36e806cc30deb408fbaf23bb4ed53d350f0",
+    "findingCount": 8,
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-authoritative-8.json",
+    "timestamp": "2026-10-02T03:02:34.095894+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 1,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-6111d130b52c.stderr.log",
+    "stderrReference": "evidence:8c4a353c5fc37447953077151052b0bf0b96ec4937b5a06ed616436d9a2b5bf6",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/commands/agent-6111d130b52c.stdout.log",
+    "stdoutReference": "evidence:0b379ce94f921156ce40b59893c2fb5804a3c71e55fed904993773cf7589d505",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:03:15.248973+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  },
+  {
+    "backend": "osv",
+    "cycle": 1,
+    "evidenceReference": "evidence:d6a9f96b50dc332106af4ee19fa92faf22f4760d20c3d7641f0e33f69ec990d8",
+    "findingCount": 0,
+    "outcome": "COMPLETED_CLEAN",
+    "resultReference": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T025247Z-45a522ff/artifacts/scans/engineering-cycle-1-authoritative-9.json",
+    "timestamp": "2026-10-02T03:03:20.199181+00:00",
+    "type": "engineering_scan_completed",
+    "workspaceKind": "authoritative"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "blocked": false,
+    "command": [
+      "rm -rf /tmp/.m2"
+    ],
+    "cycle": 3,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-9b7858794ff9.stderr.log",
+    "stderrReference": "evidence:bfdad05cd80e393688ebc2c079232321495db9e4bf9c409830175a91bfad07b4",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-9b7858794ff9.stdout.log",
+    "stdoutReference": "evidence:24f890b09fc8b6a90b461e9296843d9007d9493659462b3216c2643997989ccd",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:15:58.685641+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify -Dmaven.repo.local=/tmp/.m2"
+    ],
+    "cycle": 3,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-6b9daa47d039.stderr.log",
+    "stderrReference": "evidence:2770e56aad4ba7c9e0155e93ee6497d63423cf4fcfeea11430bd26eb9ad5b0e6",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-6b9daa47d039.stdout.log",
+    "stdoutReference": "evidence:cbcde23ae6cf5d235a578f89f95ff0431c15f7e9af5df17b6f759c50087c9255",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:16:46.984948+00:00",
+    "type": "command",
+    "workspaceKind": "experimental"
+  },
+  {
+    "blocked": false,
+    "command": [
+      "mvn clean verify"
+    ],
+    "cycle": 3,
+    "exitCode": 0,
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-f22d771c9e7a.stderr.log",
+    "stderrReference": "evidence:adcd45c90bb8b054e40e473a8c830f2d91ecc91dcefc7c46f97a9dfc3712521b",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T030451Z-06d8364b/artifacts/commands/agent-f22d771c9e7a.stdout.log",
+    "stdoutReference": "evidence:7bf23fd825b8a03c4d8dbfb0e734a7357c1f6b6815b17961cdafa6b1ca576eab",
+    "timedOut": false,
+    "timestamp": "2026-10-02T03:17:41.946498+00:00",
+    "type": "command",
+    "workspaceKind": "authoritative"
+  }
+]
