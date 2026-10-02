@@ -36,7 +36,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S4 follow-up reconciles the newer three-run batch at `1dd959f4`. A read/existing-file-write prerequisite now addresses the observed omitted-tail path; Outcome evidence exposes net additions/removals, accepted Intent and check freshness; Final Resolution reconciles historical model claims against latest independent validation; run-level capture recovery ignores complete intermediate cycles. The ten-attempt checkpoint rule, one-agent architecture, independent validation, and frozen Q1-Q5 semantics remain. Small live acceptance checks are still needed before returning to comparable P1.1 evaluation. See WORK-STATE for exact evidence and limits.
+**Current position:** S4/P2 evidence work reconciled the reviewed baseline `38263075` with the branch head. A focused Outcome-summary correction counts additions/removals inside unified hunks, accounts for both character and line clipping at retained/model-facing levels, and labels unsupported or malformed diffs explicitly. File-list completeness remains separate from excerpt completeness. The existing read receipts, capture recovery and Final Resolution reconciliation remain in place. Next check a bounded summary followed by retained-diff retrieval in a small live exercise, then return to comparable frozen P1.1 evaluation at CONTINUE. See WORK-STATE for exact evidence and limits.
 
 ## Stable reasoning/evidence boundaries
 

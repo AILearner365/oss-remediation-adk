@@ -19,6 +19,7 @@ from ..models import (
 )
 from ..workspace import RunWorkspace, TraceStore, sha256_file
 from .constraints import ConstraintEvaluator
+from .diff_summary import bound_line_changes, parse_line_changes
 from .maven import MavenService
 from .scanner import ScannerPreflightError, VulnerabilityScanner
 
@@ -391,44 +392,27 @@ class DeterministicValidator:
         files, status_ok = self._capture_changed_files(baseline_commit)
         diff, diff_ok = self._capture_diff_text(baseline_commit, files)
         path = self.trace.write_text(f"outcome/cycle-{cycle}.diff", diff)
-        line_changes: list[dict] = []
-        current: dict | None = None
-        for line in diff.splitlines():
-            if line.startswith("diff --git "):
-                current = {"file": line.split(" b/", 1)[-1], "addedCount": 0,
-                           "removedCount": 0, "addedExcerpts": [], "removedExcerpts": []}
-                line_changes.append(current)
-            elif current is not None and line.startswith("+") and not line.startswith("+++"):
-                current["addedCount"] += 1
-                if len(current["addedExcerpts"]) < 12:
-                    current["addedExcerpts"].append(line[1:][:160])
-            elif current is not None and line.startswith("-") and not line.startswith("---"):
-                current["removedCount"] += 1
-                if len(current["removedExcerpts"]) < 20:
-                    current["removedExcerpts"].append(line[1:][:160])
-        for change in line_changes:
-            change["addedExcerptsComplete"] = change["addedCount"] <= len(change["addedExcerpts"])
-            change["removedExcerptsComplete"] = change["removedCount"] <= len(change["removedExcerpts"])
+        parsed_changes = parse_line_changes(diff)
+        line_changes = bound_line_changes(parsed_changes, 12, 20)
         snapshot = {
             "workspaceKind": "authoritative", "cycle": cycle,
             "capturedAt": datetime.now(timezone.utc).isoformat(),
             "baselineCommit": baseline_commit, "captureSucceeded": status_ok and diff_ok,
             "changedFiles": list(files), "diffReference": self.trace.issue_evidence_reference(path),
+            "changedFilesComplete": status_ok,
             "diffSha256": hashlib.sha256(diff.encode("utf-8")).hexdigest(),
             "diff": diff, "lineChanges": line_changes,
+            "diffComplete": diff_ok, "lineChangesComplete": True,
+            "lineChangeParsingComplete": diff_ok and all(change["countsComplete"] for change in line_changes),
+            "summaryRecovery": "For incomplete or unsupported summaries, retrieve diffReference for the full captured diff; snapshotReference retains all file summaries. Check captureSucceeded before treating the captured diff as complete repository evidence.",
             "treeDigest": self.tree_digest(files),
             "independentValidationAtCapture": "not yet run",
         }
         manifest = self.trace.write_json(f"outcome/cycle-{cycle}-state.json", snapshot)
-        displayed_changes = [{**change,
-                              "addedExcerpts": change["addedExcerpts"][:6],
-                              "removedExcerpts": change["removedExcerpts"][:12],
-                              "addedExcerptsComplete": change["addedCount"] <= 6,
-                              "removedExcerptsComplete": change["removedCount"] <= 12}
-                             for change in line_changes[:8]]
-        return {**snapshot, "changedFiles": list(files[:40]), "changedFilesComplete": len(files) <= 40,
+        displayed_changes = bound_line_changes(parsed_changes[:8], 6, 12)
+        return {**snapshot, "changedFiles": list(files[:40]), "changedFilesComplete": status_ok and len(files) <= 40,
                 "lineChanges": displayed_changes, "lineChangesComplete": len(line_changes) <= 8,
-                "diff": diff[:12000], "diffComplete": len(diff) <= 12000,
+                "diff": diff[:12000], "diffComplete": diff_ok and len(diff) <= 12000,
                 "snapshotReference": self.trace.issue_evidence_reference(manifest)}
 
     def _capture_diff_text(self, baseline_commit: str, changed_files: tuple[str, ...]) -> tuple[str, bool]:
@@ -450,10 +434,17 @@ class DeterministicValidator:
             data = path.read_bytes()
             try:
                 content = data.decode("utf-8")
-                prefixed = "\n".join(f"+{line}" for line in content.splitlines())
-                sections.append(f"diff --git a/{relative} b/{relative}\nnew file mode 100644\n--- /dev/null\n+++ b/{relative}\n{prefixed}\n")
+                lines = content.split("\n")
+                if lines[-1] == "":
+                    lines.pop()
+                prefixed = "\n".join(f"+{line}" for line in lines)
+                hunk = f"@@ -0,0 +1,{len(lines)} @@\n{prefixed}\n" if lines else ""
+                if content and not content.endswith("\n"):
+                    hunk += "\\ No newline at end of file\n"
+                sections.append(f"diff --git a/{relative} b/{relative}\nnew file mode 100644\n--- /dev/null\n+++ b/{relative}\n{hunk}")
             except UnicodeDecodeError:
-                sections.append(f"Binary untracked file {relative} sha256={hashlib.sha256(data).hexdigest()} size={len(data)}\n")
+                sections.append(f"diff --git a/{relative} b/{relative}\nBinary files /dev/null and b/{relative} differ\n"
+                                f"Binary untracked file {relative} sha256={hashlib.sha256(data).hexdigest()} size={len(data)}\n")
         return "\n".join(section for section in sections if section), result.succeeded
 
     def tree_digest(self, changed_files: Iterable[str]) -> str:
