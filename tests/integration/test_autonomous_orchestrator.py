@@ -692,6 +692,60 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def test_outcome_grounding_preserves_correction_over_stale_execution_summary(self):
+        test = self
+        sessions = []
+
+        class Session(_ScriptedAgentSession):
+            async def run_turn(self, message):
+                c = self.capabilities
+                if c.journal.phase != JournalPhase.OUTCOME_REQUIRED:
+                    c.submit_cycle_intent(1, _intent_answers(1))
+                    for old, new in (("1.0", "3.0"), ("3.0", "2.0")):
+                        c.edit_workspace_text("replace", "pom.xml",
+                                              old_text=f"<demo.version>{old}</demo.version>",
+                                              new_text=f"<demo.version>{new}</demo.version>")
+                    c.run_workspace_shell("git diff --stat")
+                    c.scan_current_repository()
+                    return AgentTurnResult("The successful final correction uses version 3.0.")
+                self.messages.append(message)
+                evidence = c.journal.cycles[1].outcome_evidence
+                changes = evidence["authoritativeChanges"]
+                test.assertTrue(changes["captureSucceeded"])
+                test.assertIn("<demo.version>2.0</demo.version>", changes["diff"])
+                test.assertNotIn("<demo.version>3.0</demo.version>", changes["diff"])
+                test.assertIn("may be stale", message)
+                test.assertIn("version 3.0", message)  # Stale model summary is explicitly labeled.
+                retained = c.retrieve_retained_evidence(changes["diffReference"])
+                test.assertEqual("ok", retained["status"])
+                test.assertIn("<demo.version>2.0</demo.version>", retained["content"])
+                recovery = AutonomousRemediationOrchestrator._retained_evidence_index(c.trace, 1)
+                test.assertIn(changes["snapshotReference"], [item["reference"] for item in recovery])
+                observations = evidence["executionObservations"]["authoritative"]["recent"]
+                test.assertTrue(any(e.get("outcome") == "COMPLETED_CLEAN" for e in observations))
+                test.assertTrue(any(e.get("exitCode") == 0 for e in observations))
+                answers = _outcome_answers()
+                answers[0]["answer"] = "Final version is 2.0, as shown by the authoritative net diff."
+                answers[1]["answer"] = "The temporary 3.0 edit was corrected to 2.0 after reassessment."
+                result = c.submit_cycle_outcome(1, "READY_FOR_INDEPENDENT_VALIDATION", "Ready for checks.", answers)
+                test.assertEqual("accepted", result["status"])
+                return AgentTurnResult("Outcome corrected from final evidence")
+
+        adapter = _RecordingDeliveryAdapter()
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1),
+            agent_session_factory=lambda c, model: sessions.append(Session(c, [])) or sessions[-1],
+            scanner_factory=_FixtureScanner,
+            delivery_adapter_factory=lambda *args: adapter,
+        ).run()
+        self.assertEqual(Outcome.SUCCESS, result.outcome)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("Harness-observed final state and check evidence", journal)
+        self.assertIn("Final version is 2.0", journal)
+        self.assertIn("Final version is 2.0", adapter.contexts[0].agent_summary)
+        self.assertNotIn("successful final correction uses version 3.0", adapter.contexts[0].agent_summary)
+        self.assertIn("diffReference", adapter.contexts[0].agent_summary)
+
     def test_same_agent_session_continues_after_validation_failure(self):
         sessions = []
 
@@ -889,9 +943,15 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
                 self.assertEqual(2, len(sessions[0].messages))
                 continuation = sessions[0].messages[1]
                 self.assertIn("# Cycle 1 — Problem Analysis and Solution Decision", continuation)
-                self.assertIn("# Cycle 1 — Outcome", continuation)
-                self.assertIn(f"`{status}`", continuation)
-                self.assertIn("Execution completed and is ready for deterministic checks.", continuation)
+                if status == "NO_CHANGE_REQUIRED":
+                    # A nonempty authoritative change set now rejects this objective contradiction.
+                    self.assertIn("**Cycle Outcome:** `FAILED`", continuation)
+                    self.assertEqual(10, sessions[0].capabilities.journal.cycles[1].outcome_attempts)
+                    self.assertIsNone(sessions[0].capabilities.journal.cycles[1].outcome)
+                else:
+                    self.assertIn("# Cycle 1 — Outcome", continuation)
+                    self.assertIn(f"`{status}`", continuation)
+                    self.assertIn("Execution completed and is ready for deterministic checks.", continuation)
                 self.assertIn("# Cycle 1 — Deterministic Validation", continuation)
                 self.assertIn("Latest deterministic validation evidence", continuation)
                 self.assertIn("original canonical Task to Solve", continuation)

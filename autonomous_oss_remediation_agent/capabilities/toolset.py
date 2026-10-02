@@ -261,6 +261,7 @@ class DeveloperCapabilitySet:
             workspaceKind=target.kind, command=payload.get("command"),
             exitCode=payload.get("exitCode"), stdoutArtifact=payload.get("stdoutArtifact"),
             stderrArtifact=payload.get("stderrArtifact"),
+            blocked=payload.get("blocked"), timedOut=payload.get("timedOut"),
         )
         for stream in ("stdout", "stderr"):
             artifact = payload.get(f"{stream}Artifact")
@@ -275,7 +276,7 @@ class DeveloperCapabilitySet:
         query: str | None = None,
     ) -> dict[str, Any]:
         """Read or search a harness-issued retained artifact in bounded byte ranges. Offsets are UTF-8 bytes."""
-        denied = self._require_phase("retrieve_retained_evidence", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
+        denied = self._require_phase("retrieve_retained_evidence", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION, JournalPhase.OUTCOME_REQUIRED})
         if denied:
             return denied
         return self._invoke("retrieve_retained_evidence", self._retrieve_evidence,
@@ -327,7 +328,7 @@ class DeveloperCapabilitySet:
     def scan_current_repository(
         self, workspace: str = "active", runtime_resource_path: str | None = None,
     ) -> dict[str, Any]:
-        """Scan active source state. For an experimental scan needing command-created runtime state outside source files, pass its current-cycle absolute, HOME-relative, or mapped /tmp directory as runtime_resource_path; the directory is verified and handed to the scanner. Omit it when no runtime resource is needed."""
+        """Scan the selected source state. active means experiment before Intent, authoritative after Intent. runtime_resource_path is ONLY for experimental scans: use a current-cycle absolute, ~/ HOME-relative, or mapped /tmp directory (no shell-variable expansion). For authoritative scans omit runtime_resource_path; the configured scanner manages its own resources. An experimental scan does not validate authoritative state."""
         denied = self._require_phase("scan_current_repository", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -340,6 +341,8 @@ class DeveloperCapabilitySet:
         runtime_resource = None
         if runtime_resource_path is not None:
             try:
+                if target.kind != "experimental":
+                    raise ValueError("runtime_resource_path applies only to experimental scans, not the authoritative workspace")
                 runtime_resource = self.process_runner.resolve_experimental_runtime_resource(
                     target, runtime_resource_path,
                 )
@@ -348,7 +351,13 @@ class DeveloperCapabilitySet:
                     "status": "error", "failureCode": "RUNTIME_RESOURCE_INVALID",
                     "outcome": "INCOMPLETE_FATAL_FAILURE", "failureKind": "CONFIGURATION",
                     "error": str(exc), "runtimeResourcePath": runtime_resource_path,
-                    "workspaceKind": target.kind, "cycle": target.cycle,
+                    "workspaceKind": target.kind, "cycle": self.journal.active_cycle if self.journal else target.cycle,
+                    "repairInstructions": (
+                        "Retry scan_current_repository(workspace='authoritative') with runtime_resource_path omitted. "
+                        "The configured scanner manages authoritative resources; this argument rejection does not mean scanning is unavailable."
+                        if target.kind != "experimental" else
+                        "Use an existing directory inside this cycle's reported experimental HOME/TEMP, with ~/ or an absolute path; shell variables are not expanded. Keep workspace='experiment'."
+                    ),
                 }
                 self.trace.append_event("scan_runtime_resource_rejected", **failure)
                 return self._invoke("scan_current_repository", lambda: failure, workspace_io=io)
@@ -416,6 +425,7 @@ class DeveloperCapabilitySet:
             workspaceKind=target.kind,
             outcome=report.effective_outcome.value,
             backend=report.backend,
+            findingCount=len(report.findings),
             resultReference=report.raw_report_path,
         )
         return payload
@@ -450,15 +460,17 @@ class DeveloperCapabilitySet:
                        "url": _bounded_research_field(result.get("url", ""), 502)}
             fields_omitted |= compact != result
             first_page.append(compact)
-        more_exists = payload.get("truncated", False) or len(results) > 10 or fields_omitted
-        return {**payload, "results": first_page, "complete": payload.get("status") == "success" and not more_exists,
+        more_exists = len(results) > 10 or fields_omitted
+        return {**payload, "results": first_page, "complete": payload.get("status") == "success" and not payload.get("truncated", False) and not more_exists,
                 "moreExists": more_exists,
-                "acquisitionSucceeded": bool(raw_reference),
+                "acquisitionSucceeded": payload.get("acquisition_succeeded") if payload.get("acquisition_succeeded") is not None else bool(raw_reference),
                 "extractionSucceeded": payload.get("status") == "success",
                 "resultFieldsOmitted": fields_omitted,
                 "resultReference": self.trace.issue_evidence_reference(result_reference),
                 "rawEvidenceReference": raw_reference,
-                "sourceTruncated": payload.get("truncated", False)}
+                "sourceTruncated": payload.get("truncated", False),
+                "recovery": payload.get("recovery") or (None if payload.get("status") == "success" else
+                    "Evidence is unavailable. Use another supported source or preserve uncertainty; no result is not evidence of absence.")}
 
     def research_fetch(self, url: str) -> dict[str, Any]:
         """Best-effort bounded public HTTP(S) retrieval with explicit failure and truncation states."""
@@ -484,13 +496,15 @@ class DeveloperCapabilitySet:
         content = payload.get("content", "")
         return {**payload, "content": content[:4000],
                 "complete": payload.get("status") == "success" and not payload.get("truncated", False) and len(content) <= 4000,
-                "moreExists": payload.get("truncated", False) or len(content) > 4000,
+                "moreExists": len(content) > 4000,
                 "displayBounded": len(content) > 4000,
-                "acquisitionSucceeded": bool(raw_reference),
+                "acquisitionSucceeded": payload.get("acquisition_succeeded") if payload.get("acquisition_succeeded") is not None else bool(raw_reference),
                 "extractionSucceeded": payload.get("status") == "success",
                 "resultReference": self.trace.issue_evidence_reference(result_reference),
                 "rawEvidenceReference": raw_reference,
-                "sourceTruncated": payload.get("truncated", False)}
+                "sourceTruncated": payload.get("truncated", False),
+                "recovery": payload.get("recovery") or (None if payload.get("status") == "success" else
+                    "Evidence is unavailable. Use another supported source or preserve uncertainty; no result is not evidence of absence.")}
 
     def _write_research_result(self, operation: str, payload: dict[str, Any], **request: Any) -> str:
         self._research_invocations += 1
@@ -521,7 +535,8 @@ class DeveloperCapabilitySet:
                     "availableCapabilities": sorted(self.available_tool_names()),
                     "nextAction": (
                         "Continue in this cycle; active workspace operations now target the authoritative "
-                        "repository, while workspace='experiment' remains available for isolated investigation."
+                        "repository, while workspace='experiment' remains available for isolated investigation. "
+                        "For authoritative scan_current_repository calls omit runtime_resource_path; that parameter is experimental-only."
                     ),
                 }
             )
@@ -563,7 +578,7 @@ class DeveloperCapabilitySet:
         by_phase = {
             JournalPhase.INTENT_REQUIRED: engineering | {"submit_cycle_intent"},
             JournalPhase.EXECUTION: engineering,
-            JournalPhase.OUTCOME_REQUIRED: {"submit_cycle_outcome"},
+            JournalPhase.OUTCOME_REQUIRED: {"submit_cycle_outcome", "retrieve_retained_evidence"},
         }
         return frozenset(by_phase.get(self.journal.phase, set()))
 

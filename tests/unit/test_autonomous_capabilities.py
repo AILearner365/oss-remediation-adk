@@ -815,7 +815,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertTrue((experiment.repository / "further-experiment.txt").is_file())
         self.assertFalse((self.workspace.repository / "further-experiment.txt").exists())
         journal.require_outcome()
-        self.assertEqual(frozenset({"submit_cycle_outcome"}), capabilities.available_tool_names())
+        self.assertEqual(frozenset({"submit_cycle_outcome", "retrieve_retained_evidence"}), capabilities.available_tool_names())
         denied = capabilities.edit_workspace_text("write", "outcome.txt", content="blocked")
         self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
         denied_shell = capabilities.run_workspace_shell(
@@ -1039,6 +1039,13 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(call_count, len(scanner.calls))
         self.assertFalse((self.workspace.repository / "marker").exists())
         self.assertEqual(experiment.repository, scanner.calls[0][0])
+        self.assertIn("runtime_resource_path omitted", authoritative["repairInstructions"])
+        self.assertIn("not the authoritative", authoritative["error"])
+        repaired = capabilities.scan_current_repository(workspace="authoritative")
+        self.assertEqual("ok", repaired["status"])
+        self.assertEqual(self.workspace.repository, scanner.calls[-1][0])
+        self.assertIsNone(scanner.calls[-1][3])
+        self.assertEqual(call_count + 1, len(scanner.calls))
 
     def test_command_created_runtime_resource_reaches_experimental_scan(self):
         scanner = _RecordingScanner()
@@ -1201,6 +1208,36 @@ class AutonomousCapabilityTests(unittest.TestCase):
         exhausted = capabilities.research_search("second")
         self.assertEqual("EXECUTION_BUDGET_EXCEEDED", exhausted["failureCode"])
         self.assertEqual(["first"], provider.queries)
+
+    def test_research_failure_metadata_and_retained_prefix_reach_model(self):
+        import base64
+        from tests.unit.test_research_acquisition import Response
+        provider = HttpResearchProvider(enabled=True, max_response_bytes=1000)
+        challenge = b'<form id="challenge-form" action="/anomaly.js">human challenge</form>'
+        result = provider._read_response(Response(challenge), 200)
+        with patch.object(provider, "search", return_value=result):
+            capabilities = DeveloperCapabilitySet(self.io, self.runner, self.budget, self.trace,
+                                                   research_provider=provider)
+            blocked = capabilities.research_search("current releases")
+        self.assertEqual("blocked", blocked["status"])
+        self.assertFalse(blocked["complete"])
+        self.assertTrue(blocked["acquisitionSucceeded"])
+        self.assertFalse(blocked["extractionSucceeded"])
+        self.assertEqual([], blocked["results"])
+        self.assertNotIn("raw_bytes_b64", blocked)
+        self.assertIn("Do not retry", blocked["recovery"])
+        self.assertEqual(challenge.decode(), capabilities.retrieve_retained_evidence(blocked["rawEvidenceReference"])["content"])
+        source = b"<style>" + b"x" * 1500 + b"</style><p>fact</p>"
+        with patch.object(provider, "_retrieve", return_value=provider._read_response(Response(source), 200)):
+            truncated = capabilities.research_fetch("https://example.test/large")
+        self.assertEqual("source_truncated", truncated["status"])
+        self.assertTrue(truncated["sourceTruncated"])
+        self.assertFalse(truncated["moreExists"])  # The missing source tail was never retained.
+        self.assertFalse(truncated["complete"])
+        self.assertFalse(truncated["extractionSucceeded"])
+        retained = json.loads(self.trace.resolve_evidence_reference(truncated["resultReference"]).read_text())
+        self.assertEqual(source[:1000], base64.b64decode(retained["result"]["raw_bytes_b64"]))
+        self.assertEqual(1000, retained["result"]["acquired_bytes"])
 
     def test_research_retains_full_extracted_result_while_returning_excerpt(self):
         class LargeProvider:

@@ -234,7 +234,7 @@ class AutonomousRemediationOrchestrator:
                         changed_files = validator.changed_files(baseline.commit)
                         outcome_turn = await self._run_until_outcome(
                             agent_session, lifecycle, cycle, execution_summary,
-                            self._execution_evidence(trace, budget, changed_files),
+                            self._execution_evidence(trace, budget, changed_files, validator, baseline.commit, cycle),
                         )
                         if not lifecycle.cycles[cycle].outcome:
                             reason = "CYCLE_OUTCOME_CAPTURE_INCOMPLETE: bounded checkpoint recovery exhausted"
@@ -264,7 +264,7 @@ class AutonomousRemediationOrchestrator:
                             changed_files = validator.changed_files(baseline.commit)
                             outcome_turn = await self._run_until_outcome(
                                 agent_session, lifecycle, cycle, execution_summary,
-                                {**self._execution_evidence(trace, budget, changed_files), "executionError": str(exc)},
+                                {**self._execution_evidence(trace, budget, changed_files, validator, baseline.commit, cycle), "executionError": str(exc)},
                             )
                         except Exception as outcome_exc:
                             if isinstance(outcome_exc, IrrecoverableAgentSessionError):
@@ -351,7 +351,7 @@ class AutonomousRemediationOrchestrator:
                             workspace,
                             baseline,
                             last_validation,
-                            summaries[-1],
+                            lifecycle.outcome_summary(cycle),
                         )
                         reason = (
                             "Validated remediation delivered as a Draft PR"
@@ -418,7 +418,7 @@ class AutonomousRemediationOrchestrator:
                         cycle,
                         interrupted_summary,
                         {
-                            **self._execution_evidence(trace, budget, changed_files),
+                            **self._execution_evidence(trace, budget, changed_files, validator, baseline.commit, cycle),
                             "executionError": str(exc),
                         },
                     )
@@ -569,6 +569,7 @@ class AutonomousRemediationOrchestrator:
         execution_summary: str,
         evidence: dict,
     ) -> AgentTurnResult:
+        lifecycle.cycles[cycle].outcome_evidence = evidence
         message = outcome_message(cycle, execution_summary, evidence)
         turn = AgentTurnResult("")
         for _ in range(lifecycle.max_checkpoint_attempts):
@@ -719,16 +720,25 @@ class AutonomousRemediationOrchestrator:
         trace: TraceStore,
         budget: ExecutionBudget,
         changed_files: tuple[str, ...],
+        validator: DeterministicValidator,
+        baseline_commit: str,
+        cycle: int,
     ) -> dict:
         events = []
+        continuation = None
         if trace.events_path.exists():
-            for line in trace.events_path.read_text(encoding="utf-8").splitlines()[-100:]:
+            for line in trace.events_path.read_text(encoding="utf-8").splitlines():
                 event = json.loads(line)
-                if event.get("type") == "command" and event.get("source") == "agent":
-                    command = event.get("result", {})
+                if event.get("cycle") != cycle:
+                    continue
+                if event.get("type") == "execution_continuation_completed":
+                    continuation = event
+                if event.get("type") == "agent_command_evidence":
+                    command = event
                     events.append(
                         {
                             "type": "command",
+                            "timestamp": event.get("timestamp"),
                             "workspaceKind": event.get("workspaceKind"),
                             "cycle": event.get("cycle"),
                             "command": command.get("command"),
@@ -737,22 +747,40 @@ class AutonomousRemediationOrchestrator:
                             "blocked": command.get("blocked"),
                             "stdoutArtifact": command.get("stdoutArtifact"),
                             "stderrArtifact": command.get("stderrArtifact"),
+                            "stdoutReference": trace.issue_evidence_reference(command["stdoutArtifact"]) if command.get("stdoutArtifact") else None,
+                            "stderrReference": trace.issue_evidence_reference(command["stderrArtifact"]) if command.get("stderrArtifact") else None,
                         }
                     )
-                elif event.get("type") in {
-                    "workspace_edit",
-                    "tool_error",
-                    "agent_command_blocked",
-                    "execution_capability_invoked",
-                    "execution_continuation_requested",
-                    "execution_continuation_completed",
-                    "engineering_scan_completed",
-                    "research",
-                }:
+                elif event.get("type") in {"engineering_scan_completed", "scan_runtime_resource_rejected", "agent_command_blocked"}:
+                    if event.get("type") == "engineering_scan_completed" and event.get("resultReference"):
+                        event["evidenceReference"] = trace.issue_evidence_reference(event["resultReference"])
                     events.append(event)
+        observations = events
+        retained = trace.write_json(f"outcome/cycle-{cycle}-observations.json", observations)
+        changes = validator.outcome_change_evidence(cycle, baseline_commit)
+        observation_reference = trace.issue_evidence_reference(retained)
+        trace.append_event("outcome_evidence_captured", cycle=cycle,
+                           references=[changes["snapshotReference"], changes["diffReference"], observation_reference])
+        def excerpt(kind: str, limit: int) -> dict:
+            selected = [event for event in observations if event.get("workspaceKind") == kind]
+            recent = selected[-limit:]
+            return {"count": len(selected), "recent": [
+                {key: (str(value)[:1000] if key in {"command", "error", "runtimeResourcePath"} else value)
+                 for key, value in event.items()} for event in recent],
+                "complete": len(selected) <= limit and all(
+                    len(str(event.get(key, ""))) <= 1000 for event in recent
+                    for key in ("command", "error", "runtimeResourcePath"))}
         return {
-            "changedFiles": list(changed_files),
-            "executionEvents": events[-40:],
+            "authoritativeChanges": changes,
+            "executionObservations": {
+                "authoritative": excerpt("authoritative", 8),
+                "experimental": excerpt("experimental", 4),
+                "fullReference": observation_reference,
+                "scope": "Observed command exits and scan results at their recorded times; not proof of arbitrary prose claims or untested behavior.",
+            },
+            "changedFiles": list(changed_files[:40]),
+            "eventHistoryIsFinalState": False,
+            "executionContinuation": continuation,
             "remainingToolCalls": self.request.budget.max_tool_calls - budget.tool_calls,
             "remainingSeconds": budget.remaining_seconds,
         }
@@ -777,6 +805,9 @@ class AutonomousRemediationOrchestrator:
                                     "reference": event["rawEvidenceReference"]})
             elif event.get("type") == "engineering_scan_completed":
                 paths = [event.get("resultReference")]
+            elif event.get("type") == "outcome_evidence_captured":
+                indexed.extend({"type": "outcome_evidence", "reference": reference}
+                               for reference in event.get("references", []))
             for path in filter(None, paths):
                 try:
                     reference = trace.issue_evidence_reference(path)

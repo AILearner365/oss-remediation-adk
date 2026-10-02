@@ -1,6 +1,6 @@
 # Autonomous Agent — Project Direction
 
-**Updated:** 2026-10-01. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
+**Updated:** 2026-10-02. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
 
 ## Objective and direction
 
@@ -15,7 +15,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | S1 | OSS workflow discovery and early ADK prototypes | Completed historical foundation | Project moved from multi-agent/exact-patch workflow to one autonomous engineering actor. |
 | S2 | Independent autonomous POC and deterministic envelope | Implemented; hardening active | CLI/request, one ADK model/session, engineering tools, scanners, policy validation, cycles, journal and gated Draft PR delivery. |
 | S3 | Evidence-grounded decision quality | Active | Q1–Q5 implemented. P1 studies premature commitment/project-fit selection. P1.1 Challenge Before Commitment remains frozen and under evaluation. |
-| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | The `section`/`answer` fix is committed. A separate P2.3 failure occurs when an unregistered tool call aborts ADK during Intent capture; bounded same-session correction is implemented. Retained-evidence retrieval under truncation remains a separate live acceptance question. |
+| S4 | Runtime evidence, tool contract and recovery quality | Active supporting work | October 2 runs establish specific same-cycle recovery, retained retrieval, and experimental scanner paths. Focused research acquisition, Outcome grounding and scanner-transition guidance follow-up is implemented; new live acceptance remains. |
 | S5 | Deployment and broader generalization | Upcoming / conditional | Repeatable evaluation, runner/credential isolation, provider reliability, portability and later deployment integration remain. |
 
 ## Meaningful backlog
@@ -27,16 +27,16 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
 | P1.1b | P1.1 + P2 | Evaluation paused for capture cleanup | Historical audit separated reasoning defects from harness contamination. `011744` had the now-fixed answer-field mismatch; `022558` lost Intent cycles after unregistered ADK tool calls. Neither capture failure is clean P1.1 strategy evidence. |
 | P2.1 | P2 | Resolved for now | Text edit exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. Latest successful runs did not reproduce the accidental file-unlink failure. |
-| P2.2 | P2 | Capability covered; optional live path unobserved | Current-cycle runtime-resource handoff is implemented and tested. The exact model-backed Maven/resource → experimental scanner → Intent path remains unproven. Its non-use is not a P1.1 evaluation gate; investigate a failed attempt's cause separately or test the path when a decision depends on its availability. |
-| P2.3 | P2 | Unregistered-tool recovery tested; live acceptance pending | The earlier `section`/`answer` mismatch was fixed in `3a415f61`. In `022558`, unknown ADK calls during Intent capture caused turn exceptions and lost cycles, including after an oversized-section rejection. ADK now returns a bounded correction at its tool-error boundary; section-size repair feedback is explicit. Substantive validation remains intact. |
-| P2.4 | P2 | Next separate live acceptance | Two 3,000-character runs had truncated shell output retained with references and file-read continuation, but neither called `retrieve_retained_evidence`. Test truncation → retrieval → use of the retrieved fact separately after P2.3 is clean. |
+| P2.2 | P2 | Experimental handoff live-observed; transition repair pending live | `011600` used a HOME-based resource for an experimental scan (8 findings, then clean) before Intent. Authoritative calls wrongly retained the experimental-only argument; focused error guidance now identifies the supported retry without it. |
+| P2.3 | P2 | Same-session recovery live-observed; boundary tested offline | `011600` recovered from three unknown calls and accepted Intent on shared attempt 4 in one session/cycle. The tenth-attempt success/exhaustion boundary remains offline-tested only. |
+| P2.4 | P2 | Retained retrieval live-observed with limited causal claim | `005510` retrieved two bounded-output ranges successfully, then obtained the decisive Jackson fact through a filtered shell command. Do not credit retrieval alone with the correction. Outcome now also exposes retained final-state/check evidence; its live use remains to verify. |
 | P2 | S4 | Implemented architecture; some live paths unobserved | Bounded model-facing outputs + full retained evidence + targeted retrieval + experimental runtime resources. Do not overclaim paths not exercised in clean traces or make optional evidence methods mandatory for P1.1. |
 | P3 | S4 | Backlog | Evidence-backed N+1 recovery and first meaningful failure localization; avoid failed-strategy momentum and distinguish strategy vs environment/harness/validation failure. |
 | P4 | S3/S4 | Active observed concern | Stale-prior substitution and decision-critical investigation depth remain visible. Recent runs vary: some still call Spring Boot `4.0.6` custom/non-public; another treats it as intentional/custom and preserves it, but without first establishing the parent control point from authoritative evidence. |
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S4 responsibility-boundary cleanup is implemented on this branch and under offline verification. Intent decision facts use typed evidence/candidate/selection records with localized repair; Outcome action chronology is event-derived and labels observed experimental versus authoritative actions. Phase-visible tools, bounded unknown-call recovery, retained references across session replacement, and general textual/XML research acquisition are included. The per-cycle, per-checkpoint ten-attempt allowance now counts unknown ADK invocations and submissions in either order, with a valid submission allowed on the last slot. This changes Q1–Q5 serialization and duplicated submission guidance while retaining their evidence-backed selection and Challenge Before Commitment semantics. Live model acceptance remains open. Next use a small live recovery/retrieval trace, then return to separate P2.4 and comparable frozen P1.1 evaluation. P2.2 experimental scanner handoff remains independent.
+**Current position:** S4 follow-up reconciles live evidence at `02dd9642`. Research distinguishes blocked/challenge, source truncation, acquisition and extraction failure within explicit byte bounds. Outcome receives retained authoritative net changes and check observations while explanations stay model-owned; scanner transition guidance states that runtime_resource_path is experimental-only. Existing phase execution gates, shared attempts, one-agent architecture, independent validation, and frozen Q1-Q5 semantics remain. The combined offline regression run passed 217 tests (2 skipped). Next obtain small live acceptance traces for these fixes, then resume comparable P1.1 evaluation. See WORK-STATE for precise evidence and acceptance steps.
 
 ## Stable reasoning/evidence boundaries
 
@@ -54,7 +54,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 
 ## Current experimental conclusion
 
-Recent post-fix runs improve confidence in end-to-end execution but do not settle Experiment 1. Two newest runs (`20260928T014926Z`, `20260928T015654Z`) both passed deterministic validation and delivered Draft PRs (#195, #196), yet neither performed an experimental scanner call before Intent. Reasoning variance also remains: stale/unsupported assumptions about Spring Boot `4.0.6` still influence some traces. Experiment 1 therefore remains `CONTINUE`, not `PROMOTE`.
+All three October 2 runs from target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, using `gemini-2.5-flash` and 3,000-character returned output, resolved 24/24 target findings in one cycle, passed deterministic validation and delivered Draft PRs #199-201. Specific recovery/handoff paths now have live evidence. However `010355` accepted and attempted a prohibited 4.0.6 -> 3.2.6 downgrade under a placeholder rationalization, and `005510` captured stale Outcome facts despite a corrected final diff. Successful final delivery does not validate those earlier decisions or records. Experiment 1 remains **CONTINUE**.
 
 ## Maintenance
 

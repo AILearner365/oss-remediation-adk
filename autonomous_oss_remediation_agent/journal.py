@@ -242,6 +242,7 @@ class CycleCapture:
     outcome_attempts: int = 0
     intent_answers: dict[str, str] = field(default_factory=dict)
     outcome_answers: dict[str, str] = field(default_factory=dict)
+    outcome_evidence: dict[str, Any] = field(default_factory=dict)
     outcome_status: str | None = None
     last_intent_errors: tuple[str, ...] = ()
     last_outcome_errors: tuple[str, ...] = ()
@@ -628,6 +629,11 @@ class JournalLifecycle:
                 errors.append("Authoritative repository state has not been observed")
         if capture is not None and normalized_status == "PARTIALLY_REMEDIATED" and not capture.authoritative_activity:
             errors.append("No authoritative implementation was attempted; report BLOCKED, FAILED, or INCONCLUSIVE instead of remediation")
+        changes = capture.outcome_evidence.get("authoritativeChanges", {}) if capture else {}
+        if normalized_status == "NO_CHANGE_REQUIRED" and changes.get("captureSucceeded") and changes.get("changedFiles"):
+            errors.append("NO_CHANGE_REQUIRED contradicts observed authoritative changes: "
+                          + ", ".join(changes["changedFiles"][:10]) + ". Inspect "
+                          + str(changes.get("diffReference")) + " and correct the status and explanation; no new execution is needed.")
         errors.extend(_answer_errors("Cycle outcome status", status_explanation, self.max_section_chars))
         if errors:
             return self._reject("outcome", cycle, errors, self._rejection_capture(cycle))
@@ -638,6 +644,8 @@ class JournalLifecycle:
             *answers,
         ]
         rendered = render_checkpoint(cycle, "Outcome", all_answers)
+        if capture.outcome_evidence:
+            rendered += "\n\n" + self._outcome_facts(capture)
         chronology = self._event_chronology(cycle)
         if chronology:
             rendered += "\n\n## Observable action chronology\n\n" + chronology
@@ -661,6 +669,21 @@ class JournalLifecycle:
             contentHash=capture.outcome.content_hash,
         )
         return CheckpointResult(True, metadata=capture.outcome)
+
+    @staticmethod
+    def _outcome_facts(capture: CycleCapture) -> str:
+        facts = {key: capture.outcome_evidence[key] for key in ("authoritativeChanges", "executionObservations")
+                 if key in capture.outcome_evidence}
+        return ("## Harness-observed final state and check evidence\n\n"
+                "Net changes are relative to the run baseline, captured before independent validation; recorded actions may have been temporary. "
+                "Model explanations are not independently verified by these observations.\n\n```json\n"
+                + json.dumps(facts, indent=2, sort_keys=True) + "\n```")
+
+    def outcome_summary(self, cycle: int) -> str:
+        capture = self._require_active_capture(cycle)
+        return ("Model-reported Outcome (rationale and reassessment):\n"
+                + "\n\n".join(f"{key}: {value}" for key, value in capture.outcome_answers.items())
+                + "\n\n" + self._outcome_facts(capture))
 
     def _event_chronology(self, cycle: int) -> str:
         if not self.trace.events_path.exists():
@@ -1413,7 +1436,8 @@ def _approach_evolution(cycles: dict[int, CycleCapture]) -> str:
         lines.extend(
             (
                 f"- **Cycle {cycle} selected direction:** {_inline(selected)}",
-                f"- **Cycle {cycle} final approach:** {_inline(final)}",
+                f"- **Cycle {cycle} final approach (model-reported):** {_inline(final)}",
+                f"- **Cycle {cycle} authoritative state evidence:** {capture.outcome_evidence.get('authoritativeChanges', {}).get('snapshotReference', 'Not captured')}",
                 f"- **Cycle {cycle} material deviations:** {_inline(deviations)}",
                 f"- **Cycle {cycle} observable actions:** See the event-derived chronology in the accepted Outcome and retained events.",
                 f"- **Cycle {cycle} validation learning:** {learning}.",

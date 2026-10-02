@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import ipaddress
 import socket
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from enum import Enum
 from html.parser import HTMLParser
 from typing import Any, Protocol
@@ -18,6 +18,7 @@ class ResearchStatus(str, Enum):
     UNAVAILABLE = "unavailable"
     HTTP_NETWORK_FAILURE = "http_network_failure"
     EXTRACTION_FAILURE = "extraction_failure"
+    SOURCE_TRUNCATED = "source_truncated"
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,12 @@ class ResearchResult:
     media_type: str | None = None
     raw_content: str = ""
     raw_bytes_b64: str = ""
+    failure_code: str | None = None
+    recovery: str | None = None
+    http_status: int | None = None
+    acquired_bytes: int = 0
+    byte_limit: int = 0
+    acquisition_succeeded: bool | None = None
 
     def to_dict(self) -> dict[str, Any]:
         value = asdict(self)
@@ -46,7 +53,7 @@ class ResearchProvider(Protocol):
 
 
 class HttpResearchProvider:
-    def __init__(self, *, enabled: bool, timeout_seconds: int = 15, max_response_bytes: int = 100_000):
+    def __init__(self, *, enabled: bool, timeout_seconds: int = 15, max_response_bytes: int = 2_000_000):
         self.enabled = enabled
         self.timeout_seconds = max(1, min(timeout_seconds, 60))
         self.max_response_bytes = max(1_000, min(max_response_bytes, 2_000_000))
@@ -60,33 +67,15 @@ class HttpResearchProvider:
         url = f"https://html.duckduckgo.com/html/?q={quote_plus(normalized)}"
         fetched = self._retrieve(url)
         if fetched.status != ResearchStatus.SUCCESS:
-            return ResearchResult(fetched.status, url, error=fetched.error, truncated=fetched.truncated,
-                                  media_type=fetched.media_type, raw_content=fetched.raw_content,
-                                  raw_bytes_b64=fetched.raw_bytes_b64)
+            return fetched
         parser = _SearchParser()
         try:
             parser.feed(fetched.content)
         except Exception as exc:
-            return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, url, error=str(exc), truncated=fetched.truncated,
-                                  media_type=fetched.media_type, raw_content=fetched.raw_content,
-                                  raw_bytes_b64=fetched.raw_bytes_b64)
+            return _extraction_failure(fetched, str(exc))
         if not parser.results:
-            return ResearchResult(
-                ResearchStatus.EXTRACTION_FAILURE,
-                url,
-                error="Search response contained no extractable results",
-                truncated=fetched.truncated,
-                media_type=fetched.media_type, raw_content=fetched.raw_content,
-                raw_bytes_b64=fetched.raw_bytes_b64,
-            )
-        return ResearchResult(
-            ResearchStatus.SUCCESS,
-            url,
-            results=tuple(parser.results),
-            truncated=fetched.truncated,
-            media_type=fetched.media_type, raw_content=fetched.raw_content,
-            raw_bytes_b64=fetched.raw_bytes_b64,
-        )
+            return _extraction_failure(fetched, "Search response contained no extractable results")
+        return replace(fetched, content="", results=tuple(parser.results))
 
     def fetch(self, url: str) -> ResearchResult:
         if not self.enabled:
@@ -103,23 +92,12 @@ class HttpResearchProvider:
                 parser.feed(fetched.content)
                 content = parser.text()
             except Exception as exc:
-                return ResearchResult(ResearchStatus.EXTRACTION_FAILURE, fetched.source, error=str(exc),
-                                      truncated=fetched.truncated, media_type=fetched.media_type,
-                                      raw_content=fetched.raw_content, raw_bytes_b64=fetched.raw_bytes_b64)
+                return _extraction_failure(fetched, str(exc))
         else:
             content = fetched.content
         if not content:
-            return ResearchResult(
-                ResearchStatus.EXTRACTION_FAILURE,
-                fetched.source,
-                error="Response contained no extractable text",
-                truncated=fetched.truncated,
-                media_type=fetched.media_type, raw_content=fetched.raw_content,
-                raw_bytes_b64=fetched.raw_bytes_b64,
-            )
-        return ResearchResult(ResearchStatus.SUCCESS, fetched.source, content=content,
-                              truncated=fetched.truncated, media_type=fetched.media_type,
-                              raw_content=fetched.raw_content, raw_bytes_b64=fetched.raw_bytes_b64)
+            return _extraction_failure(fetched, "Response contained no extractable text")
+        return replace(fetched, content=content)
 
     def _retrieve(self, url: str) -> ResearchResult:
         blocked = _public_url_error(url)
@@ -139,36 +117,64 @@ class HttpResearchProvider:
         request = Request(url, headers={"User-Agent": "oss-remediation-agent/1.0"})
         try:
             with build_opener(_PublicRedirectHandler()).open(request, timeout=self.timeout_seconds) as response:
-                content_type = response.headers.get_content_type()
-                body = response.read(self.max_response_bytes + 1)
-                truncated = len(body) > self.max_response_bytes
-                body = body[: self.max_response_bytes]
-                charset = response.headers.get_content_charset() or "utf-8"
-                raw = body.decode(charset, errors="replace")
-                supported = (content_type.startswith("text/") or content_type in {
-                    "application/xhtml+xml", "application/xml", "application/json"}
-                    or content_type.endswith("+xml") or content_type.endswith("+json"))
-                if not supported:
-                    return ResearchResult(
-                        ResearchStatus.EXTRACTION_FAILURE,
-                        response.geturl(),
-                        error=f"Unsupported public content type: {content_type}",
-                        truncated=truncated, media_type=content_type, raw_content=raw,
-                        raw_bytes_b64=base64.b64encode(body).decode("ascii"),
-                    )
-                return ResearchResult(
-                    ResearchStatus.SUCCESS,
-                    response.geturl(),
-                    content=raw, raw_content=raw, media_type=content_type,
-                    raw_bytes_b64=base64.b64encode(body).decode("ascii"),
-                    truncated=truncated,
-                )
+                return self._read_response(response, getattr(response, "status", 200))
         except _BlockedResearchError as exc:
             return ResearchResult(ResearchStatus.BLOCKED, url, error=str(exc))
         except HTTPError as exc:
-            return ResearchResult(ResearchStatus.HTTP_NETWORK_FAILURE, url, error=f"HTTP {exc.code}: {exc.reason}")
+            with exc:
+                return self._read_response(exc, exc.code)
         except (URLError, TimeoutError, OSError) as exc:
             return ResearchResult(ResearchStatus.HTTP_NETWORK_FAILURE, url, error=str(exc))
+
+    def _read_response(self, response, status: int) -> ResearchResult:
+        # Bound the whole source, not just visible text: large CSS/script prefixes
+        # need room, but neither extraction nor retention can grow without limit.
+        body = response.read(self.max_response_bytes + 1)
+        truncated = len(body) > self.max_response_bytes
+        body = body[:self.max_response_bytes]
+        charset = response.headers.get_content_charset() or "utf-8"
+        try:
+            raw = body.decode(charset, errors="replace")
+        except LookupError:
+            raw = body.decode("utf-8", errors="replace")
+        media = response.headers.get_content_type()
+        result = ResearchResult(
+            ResearchStatus.SUCCESS, response.geturl(), content=raw, raw_content=raw,
+            raw_bytes_b64=base64.b64encode(body).decode("ascii"), media_type=media,
+            truncated=truncated, acquired_bytes=len(body), byte_limit=self.max_response_bytes,
+            http_status=status, acquisition_succeeded=200 <= status < 300,
+            recovery=("Only a source prefix was acquired; retained artifacts cannot supply the missing tail. "
+                      "Use a smaller supported public source if the needed evidence is absent.") if truncated else None,
+        )
+        lowered = raw.lower()
+        challenge = media in {"text/html", "application/xhtml+xml"} and (
+            ('id="challenge-form"' in lowered and 'anomaly.js' in lowered)
+            or ('captcha' in lowered and ('verify you are human' in lowered or 'confirm you are human' in lowered))
+            or ('cf-chl-' in lowered and 'just a moment' in lowered)
+        )
+        if challenge or status in {403, 429}:
+            return replace(result, status=ResearchStatus.BLOCKED, content="",
+                           failure_code="BOT_CHALLENGE" if challenge else "HTTP_ACCESS_BLOCKED",
+                           error="Source returned a bot challenge" if challenge else f"HTTP access blocked ({status})",
+                           recovery="Do not retry or solve the challenge automatically. Use an accessible official source with research_fetch, or other available evidence; preserve uncertainty. Search provider replacement requires explicit configuration and approval.")
+        if not 200 <= status < 300:
+            return replace(result, status=ResearchStatus.HTTP_NETWORK_FAILURE, content="",
+                           failure_code="HTTP_ERROR", error=f"HTTP {status}",
+                           recovery="Use another accessible source or report the evidence as unavailable.")
+        supported = (media.startswith("text/") or media in {"application/xhtml+xml", "application/xml", "application/json"}
+                     or media.endswith("+xml") or media.endswith("+json"))
+        if not supported:
+            return _extraction_failure(result, f"Unsupported public content type: {media}")
+        return result
+
+
+def _extraction_failure(result: ResearchResult, error: str) -> ResearchResult:
+    return replace(result, content="",
+                   status=ResearchStatus.SOURCE_TRUNCATED if result.truncated else ResearchStatus.EXTRACTION_FAILURE,
+                   failure_code="SOURCE_LIMIT_BEFORE_USABLE_CONTENT" if result.truncated else "EXTRACTION_FAILED",
+                   error=error,
+                   recovery=result.recovery if result.truncated else
+                   "The retained response did not yield usable evidence. Inspect its raw reference or use another supported public source; this is not evidence of absence.")
 
 
 def _public_url_error(url: str) -> str | None:

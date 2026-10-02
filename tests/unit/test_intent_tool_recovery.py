@@ -253,7 +253,7 @@ class IntentToolRecoveryTests(unittest.IsolatedAsyncioTestCase):
         ])
         await self.session.run_turn("Record Outcome")
         self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.journal.phase)
-        self.assertEqual({"submit_cycle_outcome"}, set(model._requests[4].tools_dict))
+        self.assertEqual({"submit_cycle_outcome", "retrieve_retained_evidence"}, set(model._requests[4].tools_dict))
 
     async def test_malformed_answer_object_recovers_in_same_session(self):
         valid = test_decision_journal.DecisionJournalTests._intent_answers()

@@ -1,6 +1,6 @@
 # Autonomous Agent — Work State
 
-**Updated:** 2026-10-01. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
+**Updated:** 2026-10-02. **Repository:** `AILearner365/oss-remediation-adk`, branch `context-hygiene-clone-challenge-before-commitment`. This is a development conversation bookmark, not an agent runtime checkpoint. Read [PROJECT-DIRECTION](PROJECT-DIRECTION.md) for the stages and IDs.
 
 ## Active stack and return point
 
@@ -9,11 +9,47 @@
 3. **P1.1:** evaluate the frozen Challenge Before Commitment behavior at Q5 using the [experiment record](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md), baseline `e92837d`.
 4. **P2 support work:** remove independent harness/tool/capture contamination before judging P1.1.
 5. **P2.1 — resolved for now:** explicit whole-file delete capability replaced ambiguous text-delete semantics.
-6. **S4 responsibility-boundary implementation — current:** the previous unregistered-call, size-feedback and artifact-namespace fixes are retained. Typed Intent decision records and local section repair, event-derived Outcome chronology, phase-visible ADK capabilities, broader bounded unknown-call recovery, prior-cycle retained references, and textual/XML research support are implemented. The relevant offline regression suite passed 140 tests (2 skipped); the final focused boundary suite passed 77 (2 skipped), plus the later model-visible phase declaration check. Live acceptance is still open.
-7. **P2.4 — next separate exercise:** observe truncation → retained-evidence retrieval → use of the retrieved fact in a live trace.
-8. **P2.2 — separate tracked capability question:** experimental scanner runtime-resource handoff remains unobserved model-backed and is not a scanner-use requirement for P1.1.
+6. **S4 current follow-up:** research acquisition, Outcome final-state grounding and experimental-to-authoritative scanner guidance, based on independently reviewed October 2 live traces. Prior typed capture, shared retry, retention and phase-toolset work remains in place.
+7. **P2.4:** `005510` demonstrates two successful retained-output reads; the decisive correction fact came from a later filtered shell command. Outcome retained-evidence use is a new live check.
+8. **P2.2 / P2.3:** `011600` demonstrates experimental runtime-resource scanning before Intent and three unknown-call corrections followed by Intent accepted on attempt 4. Scanner transition repair and tenth-attempt boundaries have separate acceptance scopes.
 
-**Current return point:** offline regression and documentation are complete for the `2511ad81` review follow-up. Seek targeted live same-cycle recovery and source retrieval; conduct the separate P2.4 live exercise and return to repeated P1.1 evaluation from equivalent starting conditions. Keep P2.2 separate. Q1–Q5 reasoning and Challenge Before Commitment remain, while checkpoint serialization and duplicated submission instructions changed.
+**Current return point:** the October 2 evidence at `02dd9642718ba64afbeaa0d2ada9f3d80e6aff83` is reconciled, and focused research acquisition, Outcome grounding, and scanner-transition fixes pass offline verification. Next obtain small live acceptance traces for these fixes, then return to comparable frozen P1.1 reasoning evaluation. The earlier P2.2 and P2.3 implementation paths now have specific live evidence below; the tenth-attempt boundary remains offline-only. No paid/live model run or delivery operation was started for this implementation task.
+
+## October 2 live evidence and focused follow-up
+
+Reconciled head `02dd9642` contains the prior `d0bac2e9` retry/chronology fixes and three new live workspaces. All three used target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, `gemini-2.5-flash`, and `max_returned_output_chars=3000`; each completed one cycle, resolved 24/24 target findings, passed independent deterministic validation, and delivered Draft PR #199 (`005510`), #200 (`010355`), or #201 (`011600`). The older open-acceptance descriptions below are historical and are superseded only to the extent established here.
+
+- `011600`: one ADK session received three unknown-call corrections and accepted Intent on shared attempt 4. Before Intent, a HOME-based runtime resource reached the experimental scanner, which reported 8 findings and then clean after revision. This establishes that experimental handoff path and same-cycle unknown-tool recovery, not tenth-attempt exhaustion.
+- `005510`: truncated shell output led to two successful retained-evidence reads (offsets 0 and 4000). A later filtered `mvn dependency:tree | grep jackson-core` response supplied the decisive `tools.jackson.core:jackson-core:3.1.2` fact. Retrieval was exercised, but the trace does not show retrieval alone driving the correction.
+- `010355`: accepted Intent and attempted authoritative `4.0.6 -> 3.2.6` despite `allow_downgrade=false`, rationalizing the actual version as an assumed placeholder/equivalent. Later reversal and compliant delivery do not validate that earlier reasoning. P1.1 remains **CONTINUE**; Q1–Q5 and Challenge Before Commitment semantics are unchanged.
+
+### Confirmed causes and uncertainty
+
+Research: all six retained DuckDuckGo search pages contain the challenge form and human-verification text. `_retrieve` treated the HTTP body as acquired; `_SearchParser` found no result anchors and returned generic extraction failure. The Spring project fetch retained exactly 100,000 bytes, ending in CSS before the body; extraction yielded no text. Source truncation was recorded but recovery information did not explain that retained retrieval could not recover the missing tail. These failures withheld useful external evidence; they do not justify unsupported Spring/Jackson assumptions or prove that acquisition success would have changed the model's reasoning.
+
+Outcome: `005510` tool interactions 62–65 show the filtered dependency evidence and correction from `com.fasterxml.jackson.core` back to `tools.jackson.core`; `validation/cycle-1.diff` confirms the final state. The accepted Outcome (interaction 73) describes the earlier opposite change as the successful correction. The same session had the correct evidence. Its Outcome request contained changed filenames and command/edit metadata, but no final diff or command output; repository/evidence retrieval was unavailable in Outcome. The journal checked structure and lifecycle, not arbitrary prose facts; chronology rendered paths and tool names, not final values. These are demonstrated grounding limits. Why the model selected the stale narrative is uncertain; it is not established as context loss or a harness rewrite. Delivery used the earlier execution response, while accepted Outcome answers fed final-resolution approach history and future-cycle journal context, allowing stale claims to persist.
+
+Scanner: after Intent, `active` selected the authoritative workspace but any supplied runtime path still entered the experimental resolver. That resolver correctly rejected authoritative access with the misleading generic “Current-cycle experimental runtime is unavailable” error. The interface did not state the supported authoritative retry. Independent scanning succeeding later establishes availability in that validation environment, not that either rejected invocation actually ran a scan.
+
+### Implemented boundary changes
+
+Research now classifies known challenge pages and HTTP 403/429 as blocked, retains provenance/raw bytes and explicit acquisition metadata, and distinguishes source-limit-before-usable-content from extraction and network failures. The default source bound is 2,000,000 bytes, with a hard cap and explicit prefix completeness; scripts/styles are excluded from extracted text, allowing body content beyond the old small prefix when within the cap. Recovery advises supported accessible sources or uncertainty, without bypassing challenges, replacing providers, adding credentials, or prescribing domain research. Challenge detection is conservative and larger/dynamic pages can still be unusable.
+
+Outcome receives a current authoritative net-diff snapshot plus bounded workspace-separated command/scan observations and retrievable full artifacts. The accepted record, delivery summary, and replacement-session reference index preserve these facts separately from model explanation. Retained-artifact retrieval is permitted in Outcome while repository execution remains gated. Only the reliably verifiable no-change-status/nonempty-diff contradiction adds rejection, with specific evidence and the existing retry counter. No string matcher claims to validate arbitrary prose; semantic reassessment remains model-owned.
+
+Scanner declarations, post-Intent feedback, and argument errors now say `runtime_resource_path` is experimental-only. An authoritative call with that parameter is rejected before resource resolution and advised to retry `scan_current_repository(workspace='authoritative')` with the parameter omitted. No supplied path is ignored, no experimental resource is silently reused, and path isolation checks remain.
+
+### Offline checks and small live acceptance procedure
+
+Focused offline tests cover challenge/raw retention, HTTP/network versus extraction failure, a large style/script prefix followed by body text, a cap reached before body, partial useful content, actual capability response metadata, final correction versus stale execution summary, retained Outcome evidence, delivery-summary grounding, objective no-change repair, ADK Outcome tool exposure, and scanner rejection followed by the supported authoritative retry. The final combined run passed **217 tests, 2 skipped**, across `test_research_acquisition`, `test_autonomous_capabilities`, `test_decision_journal`, `test_autonomous_prompt_continuity`, `test_intent_tool_recovery`, `test_autonomous_agent_runtime`, `test_autonomous_scanner_constraints`, `test_autonomous_validation_delivery`, `test_autonomous_xray_scanner`, and `tests.integration.test_autonomous_orchestrator`. Initial regressions exposed an omitted execution-continuation fact (restored) and an old test expecting acceptance of a no-change claim despite real changes (updated to verify bounded rejection and continued cycle recovery). A final 30-test journal and Outcome integration check also passed after clarifying the snapshot capture-time label. Offline replay of all six saved search raw responses returned `blocked/BOT_CHALLENGE`. `git diff --check` passed. Historical run evidence is untouched, and no live model/scanner or real delivery operation was started.
+
+On the live-run machine, use small controlled exercises on this fixed harness revision (no general benchmark prerequisite):
+
+1. Fetch an accessible HTML page with a large head and confirm useful body text, raw/extracted references, acquired byte count and completeness. If the search provider returns a challenge, confirm `blocked/BOT_CHALLENGE`, empty usable results, retained raw evidence and actionable guidance; do not solve or bypass it. Inspect an intentionally bounded source separately to confirm its missing tail is not advertised as retained.
+2. Make a temporary configuration edit, correct it, and run a relevant check. At Outcome, inspect the supplied authoritative net diff and workspace-separated observations; retrieve any omitted evidence and confirm the model's accepted account explains the final correction. A no-change contradiction should return the current diff reference and accept a corrected report within the shared allowance. Free-form prose still requires review against evidence.
+3. Build with a current-cycle experimental runtime resource, scan experimentally, accept Intent, then verify that an authoritative scan with that argument gets the explicit omission guidance. Retry without it and confirm an actual authoritative scanner result, without experimental cache reuse. Keep independent validation separate.
+
+These fixes still require live model use of the new guidance and Outcome evidence, and real network/scanner acceptance in the deployed environment. Provider replacement, if desired because challenges persist, is an explicit supported-API/credentials/cost dependency. After these targeted checks, return to comparable P1.1 runs on the same target/configuration; score task success, capture quality and decision quality separately.
 
 ## October 1 review of `2511ad81`: retry and Outcome chronology
 
@@ -87,7 +123,7 @@ experimental edit/build
 
 The missing evidence is **model choice/use and real end-to-end scanner acceptance**, not a known post-fix scanner wiring failure. The protocol does not require the model to use this scanner before Intent. An unattempted path cannot by itself turn an otherwise interpretable Q2–Q5 trace into a scanner failure. If an attempted experimental scan fails, inspect whether the cause is resource handoff, unusable dependency state, model invocation, or another condition. A confirmed capability failure that withholds decision-critical evidence contaminates the affected P1.1 inference and warrants separate P2.2 investigation. A model's failure to investigate a material uncertainty remains an engineering-decision question, judged against all reasonably available evidence mechanisms rather than scanner use alone.
 
-## Latest run outcomes
+## September 28 run outcomes (historical)
 
 ### `run-20260928T010505Z-b4bbe021`
 - Cycle 1 completed successfully.
@@ -137,7 +173,7 @@ No clean post-fix live trace yet establishes that the **retained-evidence retrie
 
 This remains a separate acceptance question from P2.2 scanner runtime-resource handoff.
 
-## Immediate next action and return to P1.1
+## Historical return point (superseded by October 2 evidence above)
 
 **Decision:** treat pre-Intent experimental scanning as an optional model evidence path, not a gate before frozen P1.1 evaluation. This does not claim live acceptance of the complete Maven/runtime-resource → experimental scanner → Intent path. The implementation and tests establish controlled handoff; four post-fix runs from target commit `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` contain no experimental scanner attempt before Intent. The frozen Experiment 1 protocol asks for decision-sufficient investigation and evidence-backed challenge, without prescribing a scanner call. Forcing one would test a separate capability and change the investigation setting for that run.
 

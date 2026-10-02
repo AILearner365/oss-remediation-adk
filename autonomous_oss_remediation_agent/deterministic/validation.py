@@ -385,6 +385,23 @@ class DeterministicValidator:
     def diff_text(self, baseline_commit: str, changed_files: tuple[str, ...]) -> str:
         return self._capture_diff_text(baseline_commit, changed_files)[0]
 
+    def outcome_change_evidence(self, cycle: int, baseline_commit: str) -> dict:
+        """Capture net authoritative changes before Outcome; this is not validation."""
+        files, status_ok = self._capture_changed_files(baseline_commit)
+        diff, diff_ok = self._capture_diff_text(baseline_commit, files)
+        path = self.trace.write_text(f"outcome/cycle-{cycle}.diff", diff)
+        snapshot = {
+            "workspaceKind": "authoritative", "cycle": cycle,
+            "baselineCommit": baseline_commit, "captureSucceeded": status_ok and diff_ok,
+            "changedFiles": list(files), "diffReference": self.trace.issue_evidence_reference(path),
+            "diffSha256": hashlib.sha256(diff.encode("utf-8")).hexdigest(),
+            "diff": diff, "independentValidationAtCapture": "not yet run",
+        }
+        manifest = self.trace.write_json(f"outcome/cycle-{cycle}-state.json", snapshot)
+        return {**snapshot, "changedFiles": list(files[:40]), "changedFilesComplete": len(files) <= 40,
+                "diff": diff[:12000], "diffComplete": len(diff) <= 12000,
+                "snapshotReference": self.trace.issue_evidence_reference(manifest)}
+
     def _capture_diff_text(self, baseline_commit: str, changed_files: tuple[str, ...]) -> tuple[str, bool]:
         result = self.process_runner.run_argv(
             ["git", "diff", "--binary", "--no-ext-diff", baseline_commit],

@@ -176,6 +176,51 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertTrue(all("[workspace=authoritative]" in line for line in actions[2:]))
         self.assertNotIn("[workspace=authoritative]", "\n".join(actions[:2]))
 
+    def test_observed_changes_reject_no_change_status_with_bounded_evidence_repair(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.lifecycle.require_outcome()
+        capture = self.lifecycle.cycles[1]
+        capture.outcome_evidence = {"authoritativeChanges": {
+            "captureSucceeded": True, "changedFiles": ["config.txt"],
+            "diffReference": "evidence:current-diff", "diff": "+final-setting\n",
+        }}
+        rejected = self.lifecycle.submit_outcome(1, "NO_CHANGE_REQUIRED", "No work needed.", self._outcome_answers())
+        self.assertFalse(rejected.accepted)
+        self.assertIn("evidence:current-diff", " ".join(rejected.errors))
+        self.assertIn("config.txt", " ".join(rejected.errors))
+        self.assertTrue(rejected.retry_allowed)
+        self.assertIsNone(capture.outcome)
+        accepted = self.lifecycle.submit_outcome(1, "INCONCLUSIVE", "Changes exist; checks remain open.", self._outcome_answers())
+        self.assertTrue(accepted.accepted)
+        self.assertEqual(2, capture.outcome_attempts)
+        self.assertEqual(1, capture.rejected_outcomes)
+        self.assertIn("+final-setting", self.lifecycle._section_text(capture.outcome))
+
+    def test_stale_outcome_prose_does_not_overwrite_observed_final_facts(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        for value in ("temporary", "corrected"):
+            self.trace.append_event("agent_workspace_action", cycle=1, workspaceKind="authoritative",
+                                    action="replace", path="config.txt", status="ok")
+            (self.workspace.repository / "config.txt").write_text(value, encoding="utf-8")
+        self.lifecycle.require_outcome()
+        capture = self.lifecycle.cycles[1]
+        capture.outcome_evidence = {"authoritativeChanges": {
+            "captureSucceeded": True, "changedFiles": ["config.txt"],
+            "diff": "+" + (self.workspace.repository / "config.txt").read_text(encoding="utf-8"),
+            "snapshotReference": "evidence:corrected-state",
+        }}
+        answers = self._outcome_answers()
+        answers[0]["answer"] = "The final setting is temporary, which was the successful correction."
+        result = self.lifecycle.submit_outcome(1, "INCONCLUSIVE", "Review remains necessary.", answers)
+        self.assertTrue(result.accepted)  # No unreliable arbitrary-prose matcher.
+        rendered = self.lifecycle._section_text(capture.outcome)
+        facts = rendered.split("## Harness-observed final state and check evidence", 1)[1]
+        self.assertIn('"diff": "+corrected"', facts)
+        self.assertNotIn('"diff": "+temporary"', facts)
+        self.assertIn("not independently verified", facts)
+        self.assertIn("Model-reported Outcome", self.lifecycle.outcome_summary(1))
+        self.assertIn('"diff": "+corrected"', self.lifecycle.outcome_summary(1))
+
     def test_intent_checkpoint_limit_rejects_even_a_later_valid_submission(self):
         answers = self._intent_answers()
         next(item for item in answers if item["section"] == INTENT_SECTIONS[1]).pop("evidence")

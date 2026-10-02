@@ -298,9 +298,12 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         "failed, inconclusive, or no-change execution. Report what was actually implemented, any material differences "
         "from the selected solution, material implementation evidence and reassessments, self-validation, and unresolved "
         "coverage. Scope each self-validation claim to what its underlying check actually evaluated; keep unevaluated "
-        "coverage unresolved or unverified, and do not claim deterministic success.\n\n"
+        "coverage unresolved or unverified, and do not claim deterministic success. "
+        "Ground final-state claims in authoritativeChanges below; it is the current net diff, not the history of edits. "
+        "Distinguish temporary or reverted work from what remains. Explain material corrections yourself. "
+        "Use retrieve_retained_evidence for the supplied diff, snapshot, and check references when an excerpt is incomplete.\n\n"
         + outcome_questionnaire()
-        + "\n\nExecution response (compatibility evidence):\n"
+        + "\n\nEarlier model execution response (may be stale; reconcile with observed final state):\n"
         + execution_summary
         + "\n\nDeterministic execution evidence available before validation:\n"
         + json.dumps(evidence, indent=2, sort_keys=True, default=str)
@@ -310,7 +313,7 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
 def outcome_retry_message(cycle: int, errors: list[str]) -> str:
     return (
         f"Cycle {cycle} Outcome has not been accepted. Correct it using `submit_cycle_outcome`; only that metadata "
-        "capability is available. Rejection details:\n- " + "\n- ".join(errors)
+        "submission and retained-evidence retrieval are available. Rejection details:\n- " + "\n- ".join(errors)
     )
 
 
