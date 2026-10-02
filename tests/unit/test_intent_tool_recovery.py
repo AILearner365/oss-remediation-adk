@@ -114,13 +114,95 @@ class IntentToolRecoveryTests(unittest.IsolatedAsyncioTestCase):
                          [call["name"] for call in calls])
 
     async def test_repeated_unknown_calls_reach_shared_checkpoint_bound(self):
-        self._session([("google:python_interpreter", {"code": "pass"})] * 10)
+        self._session([("google:python_interpreter", {"code": "pass"})] * 11)
         with self.assertRaises(IntentToolRecoveryExhausted):
             await self.session.run_turn("Submit Cycle Intent")
         self.assertEqual(JournalPhase.INTENT_REQUIRED, self.journal.phase)
         self.assertIsNone(self.journal.cycles[1].intent)
         self.assertEqual("<demo.version>1.0</demo.version>\n", self.pom.read_text(encoding="utf-8"))
-        self.assertEqual(9, len(self._interactions("tool_response")))
+        responses = self._interactions("tool_response")
+        self.assertEqual(10, len(responses))
+        self.assertFalse(responses[-1]["response"]["retryAllowed"])
+        self.assertEqual(10, self.journal.cycles[1].intent_attempts)
+
+    @staticmethod
+    def _malformed_intent():
+        answers = test_decision_journal.DecisionJournalTests._intent_answers()
+        next(item for item in answers if item["section"] == "Information, investigation and remaining uncertainty").pop("evidence")
+        return answers
+
+    async def _mixed_intent(self, first: str, *, succeeds: bool):
+        valid = test_decision_journal.DecisionJournalTests._intent_answers()
+        unknown = ("invented_tool", {})
+        rejected = ("submit_cycle_intent", {"cycle_number": 1, "answers": self._malformed_intent()})
+        valid_call = ("submit_cycle_intent", {"cycle_number": 1, "answers": valid})
+        prefix = ([unknown] * 8 + [rejected] if first == "unknown" else
+                  [rejected] * 8 + [unknown])
+        if not succeeds:
+            prefix.insert(8, unknown if first == "unknown" else rejected)
+        steps = prefix + [valid_call]
+        if succeeds:
+            steps.append(("edit_workspace_text", {"action": "replace", "path": "pom.xml",
+                                                  "old_text": "1.0", "new_text": "2.0"}))
+        steps.append("Done")
+        model = self._session(steps, inspect=lambda: self.pom.read_text(encoding="utf-8"))
+        await self.session.run_turn("Submit Intent")
+        responses = self._interactions("tool_response")
+        self.assertEqual(10, self.journal.cycles[1].intent_attempts)
+        self.assertEqual(succeeds, self.journal.phase == JournalPhase.EXECUTION)
+        self.assertEqual("accepted" if succeeds else "rejected", responses[-2 if succeeds else -1]["response"]["status"])
+        self.assertEqual(["<demo.version>1.0</demo.version>\n"] * (len(model._observed) - (1 if succeeds else 0)),
+                         model._observed[:-1] if succeeds else model._observed)
+        if succeeds:
+            self.assertIn("2.0", self.pom.read_text(encoding="utf-8"))
+        else:
+            self.assertFalse(responses[-2]["response"]["retryAllowed"])
+            self.assertFalse(responses[-1]["response"]["retryAllowed"])
+            self.assertEqual("<demo.version>1.0</demo.version>\n", self.pom.read_text(encoding="utf-8"))
+
+    async def test_unknown_then_rejected_intent_can_succeed_on_tenth_attempt(self):
+        await self._mixed_intent("unknown", succeeds=True)
+
+    async def test_rejected_intent_then_unknown_can_succeed_on_tenth_attempt(self):
+        await self._mixed_intent("rejected", succeeds=True)
+
+    async def test_unknown_then_rejected_intent_exhausts_before_valid_submission(self):
+        await self._mixed_intent("unknown", succeeds=False)
+
+    async def test_rejected_intent_then_unknown_exhausts_before_valid_submission(self):
+        await self._mixed_intent("rejected", succeeds=False)
+
+    async def test_outcome_uses_its_own_shared_checkpoint_allowance(self):
+        self.assertTrue(self.journal.submit_intent(1, test_decision_journal.DecisionJournalTests._intent_answers()).accepted)
+        self.journal.require_outcome()
+        invalid = ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                            "status_explanation": "Incomplete report", "answers": []})
+        valid = ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                          "status_explanation": "Execution was incomplete.",
+                                          "answers": test_decision_journal.DecisionJournalTests._outcome_answers()[:2]})
+        self._session([("invented_outcome_tool", {})] * 8 + [invalid, valid, "Done"])
+        await self.session.run_turn("Submit Outcome")
+        responses = self._interactions("tool_response")
+        self.assertEqual("accepted", responses[-1]["response"]["status"])
+        self.assertEqual(10, self.journal.cycles[1].outcome_attempts)
+        self.assertEqual(JournalPhase.DETERMINISTIC_VALIDATION, self.journal.phase)
+
+    async def test_outcome_mixed_attempts_block_later_valid_submission(self):
+        self.assertTrue(self.journal.submit_intent(1, test_decision_journal.DecisionJournalTests._intent_answers()).accepted)
+        self.journal.require_outcome()
+        invalid = ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                            "status_explanation": "Incomplete report", "answers": []})
+        valid = ("submit_cycle_outcome", {"cycle_number": 1, "status": "FAILED",
+                                          "status_explanation": "Execution was incomplete.",
+                                          "answers": test_decision_journal.DecisionJournalTests._outcome_answers()[:2]})
+        self._session([invalid] * 9 + [("invented_outcome_tool", {}), valid, "Done"])
+        await self.session.run_turn("Submit Outcome")
+        responses = self._interactions("tool_response")
+        self.assertEqual(10, self.journal.cycles[1].outcome_attempts)
+        self.assertFalse(responses[-2]["response"]["retryAllowed"])
+        self.assertFalse(responses[-1]["response"]["retryAllowed"])
+        self.assertEqual("rejected", responses[-1]["response"]["status"])
+        self.assertEqual(JournalPhase.OUTCOME_REQUIRED, self.journal.phase)
 
     async def test_oversized_intent_rejection_can_be_corrected_in_same_adk_turn(self):
         valid = test_decision_journal.DecisionJournalTests._intent_answers()

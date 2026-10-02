@@ -553,7 +553,7 @@ class AutonomousRemediationOrchestrator:
             if lifecycle.phase == JournalPhase.EXECUTION:
                 return turn
             capture = lifecycle.cycles[cycle]
-            if capture.rejected_intents >= lifecycle.max_checkpoint_attempts:
+            if capture.intent_attempts >= lifecycle.max_checkpoint_attempts:
                 return turn
             errors = list(capture.last_intent_errors) or [
                 "No Problem Analysis and Solution Decision submission was received in the previous turn"
@@ -576,6 +576,8 @@ class AutonomousRemediationOrchestrator:
             if lifecycle.phase == JournalPhase.DETERMINISTIC_VALIDATION:
                 return turn
             capture = lifecycle.cycles[cycle]
+            if capture.outcome_attempts >= lifecycle.max_checkpoint_attempts:
+                return turn
             errors = list(capture.last_outcome_errors) or [
                 "No Cycle Outcome submission was received in the previous turn"
             ]

@@ -238,6 +238,8 @@ class CycleCapture:
     late_intent: bool = False
     rejected_intents: int = 0
     rejected_outcomes: int = 0
+    intent_attempts: int = 0
+    outcome_attempts: int = 0
     intent_answers: dict[str, str] = field(default_factory=dict)
     outcome_answers: dict[str, str] = field(default_factory=dict)
     outcome_status: str | None = None
@@ -471,13 +473,37 @@ class JournalLifecycle:
         self.phase = JournalPhase.INTENT_REQUIRED
         self.trace.append_event("journal_phase_changed", cycle=cycle, phase=self.phase.value)
 
+    def reserve_checkpoint_attempt(self, kind: str, source: str) -> tuple[bool, int]:
+        """Count an unknown invocation or submission in the active checkpoint phase."""
+        expected = JournalPhase.INTENT_REQUIRED if kind == "intent" else JournalPhase.OUTCOME_REQUIRED
+        if self.phase != expected:
+            raise RuntimeError(f"No {kind} checkpoint is active")
+        capture = self._require_active_capture(self.active_cycle)
+        field_name = "intent_attempts" if kind == "intent" else "outcome_attempts"
+        previous = getattr(capture, field_name)
+        available = previous < self.max_checkpoint_attempts
+        attempt = previous + 1 if available else previous
+        if available:
+            setattr(capture, field_name, attempt)
+        self.trace.append_event(
+            "checkpoint_attempt_recorded" if available else "checkpoint_attempt_blocked",
+            cycle=self.active_cycle, checkpoint=kind, source=source,
+            attempt=attempt, limit=self.max_checkpoint_attempts,
+            retryAllowed=available and attempt < self.max_checkpoint_attempts,
+        )
+        return available, attempt
+
     def submit_intent(self, cycle: int, answers: list[dict[str, Any]]) -> CheckpointResult:
         capture = self.cycles.get(cycle)
+        slot_available = True
+        if self.phase == JournalPhase.INTENT_REQUIRED:
+            slot_available, _ = self.reserve_checkpoint_attempt("intent", "submission")
         duplicate_sections = [str(item.get("section", "")) for item in answers
                               if isinstance(item, dict)]
         duplicate_errors = [f"Duplicate section: {name}" for name in set(duplicate_sections)
                             if duplicate_sections.count(name) > 1 and name]
-        if cycle == self.active_cycle and self.phase == JournalPhase.INTENT_REQUIRED and not duplicate_errors:
+        if (slot_available and cycle == self.active_cycle
+                and self.phase == JournalPhase.INTENT_REQUIRED and not duplicate_errors):
             draft = self._intent_drafts.setdefault(cycle, {})
             for item in answers:
                 if isinstance(item, dict) and isinstance(item.get("section"), str):
@@ -486,6 +512,8 @@ class JournalLifecycle:
         else:
             merged = answers
         errors = duplicate_errors + self._checkpoint_errors("intent", cycle, merged, capture)
+        if not slot_available:
+            errors.append(f"Cycle {self.active_cycle} intent retry limit is exhausted")
         if cycle > 1:
             errors.extend(self._missing_sections(merged, PRIOR_CYCLE_INTENT_SECTIONS))
         errors.extend(_intent_structure_errors(merged))
@@ -582,10 +610,15 @@ class JournalLifecycle:
         answers: list[dict[str, str]],
     ) -> CheckpointResult:
         capture = self.cycles.get(cycle)
+        slot_available = True
+        if self.phase == JournalPhase.OUTCOME_REQUIRED:
+            slot_available, _ = self.reserve_checkpoint_attempt("outcome", "submission")
         normalized_status = status.strip().upper()
         if capture is not None and cycle == self.active_cycle and self.phase == JournalPhase.OUTCOME_REQUIRED:
             self.record_authoritative_state(self._repository_changed())
         errors = self._checkpoint_errors("outcome", cycle, answers, capture)
+        if not slot_available:
+            errors.append(f"Cycle {self.active_cycle} outcome retry limit is exhausted")
         if normalized_status not in OUTCOME_STATUSES:
             errors.append(f"Invalid Cycle Outcome status: {status}")
         if capture is not None and normalized_status == "READY_FOR_INDEPENDENT_VALIDATION":
@@ -640,7 +673,8 @@ class JournalLifecycle:
             if event.get("cycle") != cycle or event.get("type") not in observable:
                 continue
             detail = event.get("tool") or event.get("operation") or event.get("command") or event.get("source") or event.get("path") or ""
-            lines.append(f"- {event['timestamp']} — {event['type']}: {str(detail)[:180]}")
+            workspace = f" [workspace={event['workspaceKind']}]" if event.get("workspaceKind") else ""
+            lines.append(f"- {event['timestamp']} — {event['type']}{workspace}: {str(detail)[:180]}")
         return "\n".join(lines[-100:])
 
     def append_validation(
@@ -743,15 +777,6 @@ class JournalLifecycle:
         capture: CycleCapture | None,
     ) -> list[str]:
         errors: list[str] = []
-        attempts = (
-            capture.rejected_intents
-            if capture is not None and kind == "intent"
-            else capture.rejected_outcomes
-            if capture is not None
-            else 0
-        )
-        if attempts >= self.max_checkpoint_attempts:
-            errors.append(f"Cycle {cycle} {kind} retry limit is exhausted")
         if cycle != self.active_cycle:
             errors.append(f"Expected active cycle {self.active_cycle}, received {cycle}")
         if capture is None:
@@ -814,11 +839,11 @@ class JournalLifecycle:
         if capture is not None and kind == "intent":
             capture.rejected_intents += 1
             capture.last_intent_errors = tuple(errors)
-            attempt = capture.rejected_intents
+            attempt = capture.intent_attempts
         elif capture is not None:
             capture.rejected_outcomes += 1
             capture.last_outcome_errors = tuple(errors)
-            attempt = capture.rejected_outcomes
+            attempt = capture.outcome_attempts
         else:
             attempt = 1
         retry_allowed = attempt < self.max_checkpoint_attempts

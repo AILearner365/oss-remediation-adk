@@ -154,6 +154,28 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertIn("agent_workspace_action: pom.xml", rendered)
         self.assertNotIn("Model inferred why", rendered)
 
+    def test_outcome_chronology_distinguishes_experiment_from_authoritative_work(self):
+        self.assertTrue(self.lifecycle.submit_intent(1, self._intent_answers()).accepted)
+        self.trace.append_event("agent_workspace_action", cycle=1, workspaceKind="experimental",
+                                action="replace", path="pom.xml", status="ok")
+        self.trace.append_event("agent_command_evidence", cycle=1, workspaceKind="experimental",
+                                command="mvn test", exitCode=0)
+        self.trace.append_event("agent_workspace_action", cycle=1, workspaceKind="authoritative",
+                                action="replace", path="pom.xml", status="ok")
+        self.trace.append_event("agent_command_evidence", cycle=1, workspaceKind="authoritative",
+                                command="mvn test", exitCode=0)
+        self.lifecycle.require_outcome()
+        accepted = self.lifecycle.submit_outcome(
+            1, "INCONCLUSIVE", "Compatibility remains unverified.", self._outcome_answers()[:2],
+        )
+        self.assertTrue(accepted.accepted)
+        outcome = self.lifecycle._section_text(self.lifecycle.cycles[1].outcome)
+        actions = [line for line in outcome.splitlines() if "agent_workspace_action" in line or "agent_command_evidence" in line]
+        self.assertEqual(4, len(actions))
+        self.assertTrue(all("[workspace=experimental]" in line for line in actions[:2]))
+        self.assertTrue(all("[workspace=authoritative]" in line for line in actions[2:]))
+        self.assertNotIn("[workspace=authoritative]", "\n".join(actions[:2]))
+
     def test_intent_checkpoint_limit_rejects_even_a_later_valid_submission(self):
         answers = self._intent_answers()
         next(item for item in answers if item["section"] == INTENT_SECTIONS[1]).pop("evidence")

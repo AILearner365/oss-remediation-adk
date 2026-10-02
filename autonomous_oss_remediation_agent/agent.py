@@ -46,25 +46,29 @@ class PhaseToolset(BaseToolset):
 def intent_tool_error_callback(capabilities: DeveloperCapabilitySet):
     """Recover unknown invocations within the active phase and its bounded allowance."""
     cycle = 0
-    unknown_calls = 0
+    execution_unknown_calls = 0
     registered = {tool.name for tool in capabilities.adk_tools()}
 
     def on_error(tool, args, tool_context, error):
-        nonlocal cycle, unknown_calls
+        nonlocal cycle, execution_unknown_calls
         journal = capabilities.journal
         if (journal is None or journal.phase not in {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION, JournalPhase.OUTCOME_REQUIRED}
                 or not isinstance(error, ValueError)
                 or tool.description != "Tool not found"):
             return None
         if cycle != journal.active_cycle:
-            cycle, unknown_calls = journal.active_cycle, 0
-        unknown_calls += 1
-        capture = journal.cycles.get(cycle)
-        rejected = ((capture.rejected_intents if journal.phase == JournalPhase.INTENT_REQUIRED
-                     else capture.rejected_outcomes) if capture else 0)
-        if unknown_calls + rejected >= journal.max_checkpoint_attempts:
+            cycle, execution_unknown_calls = journal.active_cycle, 0
+        if journal.phase in {JournalPhase.INTENT_REQUIRED, JournalPhase.OUTCOME_REQUIRED}:
+            kind = "intent" if journal.phase == JournalPhase.INTENT_REQUIRED else "outcome"
+            available_slot, attempt = journal.reserve_checkpoint_attempt(kind, "unknown_tool")
+        else:
+            available_slot = execution_unknown_calls < journal.max_checkpoint_attempts
+            if available_slot:
+                execution_unknown_calls += 1
+            attempt = execution_unknown_calls
+        if not available_slot:
             raise IntentToolRecoveryExhausted(
-                f"Cycle {cycle} {journal.phase.value} tool recovery exhausted after {unknown_calls} unregistered calls"
+                f"Cycle {cycle} {journal.phase.value} tool recovery exhausted after {attempt} attempts"
             )
         available = sorted(capabilities.available_tool_names())
         return {
@@ -76,7 +80,9 @@ def intent_tool_error_callback(capabilities: DeveloperCapabilitySet):
                                    + ", ".join(f"`{name}`" for name in available) + "."),
             "availableCapabilities": available,
             "cycle_number": cycle,
-            "retryAllowed": True,
+            "attempt": attempt,
+            "remainingAttempts": journal.max_checkpoint_attempts - attempt,
+            "retryAllowed": attempt < journal.max_checkpoint_attempts,
         }
 
     return on_error
