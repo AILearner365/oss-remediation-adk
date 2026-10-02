@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
+import re
 import tempfile
 from pathlib import Path
 
@@ -11,7 +13,7 @@ from autonomous_oss_remediation_agent.agent import GoogleAdkAgentSession, create
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
 from autonomous_oss_remediation_agent.capabilities.research import HttpResearchProvider
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
-from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalPhase, JournalStore
+from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalPhase, JournalStore, render_checkpoint
 from autonomous_oss_remediation_agent.prompt import intent_questionnaire, intent_retry_message
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
@@ -146,33 +148,43 @@ async def run_until_intent(session, lifecycle: JournalLifecycle, message: str) -
 def score_live_trace(trace: TraceStore, lifecycle: JournalLifecycle, display: dict,
                      budget: ExecutionBudget, continuation: dict) -> dict:
     events = [json.loads(line) for line in trace.events_path.read_text(encoding="utf-8").splitlines()]
-    calls = [event for event in events if event.get("type") == "adk_interaction"
+    interactions = [_interaction_payload(trace, event) for event in events]
+    calls = [event for event in interactions if event.get("type") == "adk_interaction"
              and event.get("interactionType") == "tool_call"]
     targeted = [event for event in calls if event.get("name") == "retrieve_retained_evidence"
                 and event.get("arguments", {}).get("reference") == display["stdoutReference"]
                 and event.get("arguments", {}).get("query")]
-    recovered = [event for event in events if event.get("type") == "adk_interaction"
+    recovered = [event for event in interactions if event.get("type") == "adk_interaction"
                  and event.get("interactionType") == "tool_response"
                  and event.get("name") == "retrieve_retained_evidence"
                  and event.get("response", {}).get("reference") == display["stdoutReference"]
                  and any(FACT in match.get("text", "")
                          for match in event.get("response", {}).get("matches", []))]
-    accepted = [event for event in events if event.get("type") == "intent_submission_accepted"]
-    rejected = [event for event in events if event.get("type") == "intent_submission_rejected"]
+    accepted = [event for event in events if event.get("type") == "intent_submission_accepted"
+                and event.get("cycle") == 1]
+    rejected = [event for event in events if event.get("type") == "intent_submission_rejected"
+                and event.get("cycle") == 1]
     accepted_after_retrieval = bool(accepted and recovered and
                                     accepted[0]["timestamp"] > recovered[0]["timestamp"])
-    submissions = [event for event in calls if event.get("name") == "submit_cycle_intent"]
+    submissions = [event for event in calls if event.get("name") == "submit_cycle_intent"
+                   and event.get("cycle") == 1]
     selected_consistent = False
     provenance = False
-    if accepted_after_retrieval and submissions:
-        answers = submissions[-1].get("arguments", {}).get("answers", [])
+    merged = _accepted_intent_answers(interactions, lifecycle, accepted[0]) if accepted else None
+    if accepted_after_retrieval and merged is not None:
+        answers = merged
         by_section = {item.get("section"): item for item in answers if isinstance(item, dict)}
         selected = by_section.get("Selected solution", {}).get("selection", {})
         candidate_id = selected.get("candidate_id") if isinstance(selected, dict) else None
         candidates = by_section.get("Concrete candidate solutions", {}).get("candidates", [])
         candidate = next((item for item in candidates if item.get("id") == candidate_id), {})
-        selected_text = " ".join(str(candidate.get(key, "")) for key in ("name", "solution"))
-        selected_consistent = "stream" in selected_text.lower() and "batch" not in selected_text.lower()
+        solution = str(candidate.get("solution", ""))
+        selected_consistent = bool(
+            re.search(r"\b(?:use|select|choose)\s+(?:the\s+)?stream\b|\bADAPTER_MODE\s*=\s*stream\b",
+                      solution, re.IGNORECASE)
+            and not re.search(r"\b(?:batch|not\s+stream|avoid\s+stream|never\s+stream)\b",
+                              solution, re.IGNORECASE)
+        )
         evidence = by_section.get("Information, investigation and remaining uncertainty", {}).get("evidence", [])
         provenance = any(FACT in str(item.get("finding", "")) and
                          display["stdoutReference"] in str(item.get("source", ""))
@@ -187,6 +199,7 @@ def score_live_trace(trace: TraceStore, lifecycle: JournalLifecycle, display: di
         "recoveryExhausted": continuation["stopReason"] in {
             "checkpoint_attempts_exhausted", "continuation_turns_exhausted"},
         "checkpointAccepted": bool(accepted),
+        "acceptedRecordVerified": merged is not None,
         "acceptedAfterRetrieval": accepted_after_retrieval,
         "selectedCandidateConsistentWithFact": selected_consistent,
         "selectedEvidenceCitesIssuedReference": provenance,
@@ -204,6 +217,62 @@ def score_live_trace(trace: TraceStore, lifecycle: JournalLifecycle, display: di
             ("accepted_checkpoint", bool(accepted)),
         ) if not exercised],
     }
+
+
+def _interaction_payload(trace: TraceStore, event: dict) -> dict:
+    """Load an ADK audit payload retained outside the bounded events stream."""
+    if event.get("type") != "adk_interaction" or "artifact" not in event:
+        return event
+    path = Path(event["artifact"]).resolve(strict=True)
+    if not path.is_relative_to(trace.workspace.artifacts.resolve(strict=True)):
+        raise ValueError("Interaction artifact is outside this run's artifacts")
+    detail = json.loads(path.read_text(encoding="utf-8"))
+    encoded = json.dumps(detail, sort_keys=True, default=str).encode("utf-8")
+    if len(encoded) != event.get("bytes") or hashlib.sha256(encoded).hexdigest() != event.get("sha256"):
+        raise ValueError("Interaction artifact differs from its event binding")
+    return {**event, **detail}
+
+
+def _accepted_intent_answers(interactions: list[dict], lifecycle: JournalLifecycle,
+                             acceptance: dict) -> list[dict] | None:
+    """Reconstruct the merged draft and verify its exact accepted journal bytes."""
+    cycle = acceptance["cycle"]
+    capture = lifecycle.cycles.get(cycle)
+    if capture is None or capture.intent is None or capture.intent.content_hash != acceptance.get("contentHash"):
+        return None
+    draft: dict[str, dict] = {}
+    for event in interactions:
+        if event is acceptance or (event.get("type") == "intent_submission_accepted"
+                                   and event.get("cycle") == cycle
+                                   and event.get("contentHash") == acceptance.get("contentHash")):
+            break
+        if (event.get("type") != "adk_interaction" or event.get("interactionType") != "tool_call"
+                or event.get("name") != "submit_cycle_intent" or event.get("cycle") != cycle
+                or event.get("arguments", {}).get("cycle_number") != cycle):
+            continue
+        answers = event.get("arguments", {}).get("answers", [])
+        if not isinstance(answers, list):
+            return None
+        sections = [item.get("section", "").strip() for item in answers if isinstance(item, dict)
+                    and isinstance(item.get("section"), str)]
+        if len(sections) != len(set(sections)):
+            continue  # Journal rejects duplicates before updating its repair draft.
+        for item in answers:
+            if not isinstance(item, dict) or not isinstance(item.get("section"), str):
+                return None
+            draft[item["section"].strip()] = item
+    if not draft:
+        return None
+    merged = list(draft.values())
+    try:
+        rendered = render_checkpoint(cycle, "Problem Analysis and Solution Decision", merged)
+    except (KeyError, TypeError, ValueError):
+        return None
+    accepted_bytes = lifecycle.store.path.read_bytes()[capture.intent.start_offset:capture.intent.end_offset]
+    expected = (rendered.rstrip() + "\n\n").encode("utf-8")
+    if expected != accepted_bytes or hashlib.sha256(expected).hexdigest() != capture.intent.content_hash:
+        return None
+    return merged
 
 
 async def verify_live(trace: TraceStore, budget: ExecutionBudget,
@@ -254,7 +323,7 @@ def main() -> int:
         parser.error("Live partial-read/edit orchestration is deferred; run its offline boundary check")
     temporary = tempfile.TemporaryDirectory() if args.workspace_parent is None else None
     try:
-        parent = args.workspace_parent if args.live else Path(temporary.name)
+        parent = args.workspace_parent if args.workspace_parent is not None else Path(temporary.name)
         results = []
         for trial in range(1, args.trials + 1):
             workspace = None
@@ -276,6 +345,9 @@ def main() -> int:
                            "artifactsRetained": temporary is None})
             if workspace:
                 result.setdefault("trace", str(workspace.artifacts / "events.jsonl"))
+                result["resultArtifact"] = str(workspace.artifacts / "acceptance-result.json")
+                (workspace.artifacts / "acceptance-result.json").write_text(
+                    json.dumps(result, indent=2) + "\n", encoding="utf-8")
             results.append(result)
         print(json.dumps({"mode": "live" if args.live else "offline", "trials": results}, indent=2))
         return 0 if all(result["passed"] for result in results) else 1

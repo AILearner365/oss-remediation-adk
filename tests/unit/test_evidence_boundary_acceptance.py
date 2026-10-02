@@ -1,14 +1,20 @@
 """Offline checks for the development evidence-boundary acceptance fixture."""
 import asyncio
+import hashlib
+import io
+import json
+import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from autonomous_oss_remediation_agent.journal import INTENT_SECTIONS, JournalLifecycle, JournalPhase, JournalStore
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 from scripts.retained_evidence_acceptance import (
-    FACT, run_until_intent, score_live_trace, verify_offline, verify_partial_read_offline, prepare,
+    FACT, main, run_until_intent, score_live_trace, verify_offline, verify_partial_read_offline, prepare,
 )
 from tests.checkpoint_fixtures import typed_intent_answers
 
@@ -89,53 +95,124 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         self.assertIn("Rejection details", session.messages[1])
         self.assertEqual(lifecycle.max_checkpoint_attempts, lifecycle.cycles[1].intent_attempts)
 
-    def test_score_distinguishes_retrieval_rejection_and_selected_provenance(self):
+    def _scored_intent(self, *, mode="stream", source=True, repair=True, artifact=False):
         lifecycle, trace = self._lifecycle()
-        ref = "evidence:issued"
+        retained = trace.write_text("commands/fixture.stdout.log", FACT)
+        ref = trace.issue_evidence_reference(retained)
         display = {"stdoutReference": ref}
         budget = SimpleNamespace(config=SimpleNamespace(max_tool_calls=80), tool_calls=2)
-        trace.append_event("adk_interaction", interactionType="tool_call", name="retrieve_retained_evidence",
+        trace.append_event("adk_interaction", cycle=1, interactionType="tool_call", name="retrieve_retained_evidence",
                            arguments={"reference": ref, "query": "ADAPTER_MODE"})
-        trace.append_event("adk_interaction", interactionType="tool_response", name="retrieve_retained_evidence",
+        trace.append_event("adk_interaction", cycle=1, interactionType="tool_response", name="retrieve_retained_evidence",
                            response={"reference": ref, "matches": [{"text": FACT, "offset": 140000}]})
         empty = score_live_trace(trace, lifecycle, display, budget, {"turns": 1, "stopReason": "continuation_turns_exhausted"})
         self.assertTrue(empty["retrievalSuccess"])
         self.assertTrue(empty["noCheckpointSubmission"])
         self.assertFalse(empty["checkpointAccepted"])
-        trace.append_event("intent_submission_rejected", attempt=1)
-        rejected = score_live_trace(trace, lifecycle, display, budget, {"turns": 2, "stopReason": "checkpoint_attempts_exhausted"})
-        self.assertEqual(1, rejected["rejectedSubmissions"])
-        self.assertTrue(rejected["recoveryExhausted"])
-        bad = [
-            {"section": "Information, investigation and remaining uncertainty", "evidence": [
-                {"finding": FACT, "source": ref}]},
-            {"section": "Concrete candidate solutions", "candidates": [
-                {"id": "A", "name": "batch", "solution": "Use batch"}]},
-            {"section": "Selected solution", "selection": {"candidate_id": "A"}, "answer": FACT},
-        ]
-        trace.append_event("adk_interaction", interactionType="tool_call", name="submit_cycle_intent",
-                           arguments={"answers": bad})
-        trace.append_event("intent_submission_accepted", cycle=1)
-        scored = score_live_trace(trace, lifecycle, display, budget, {"turns": 3, "stopReason": "accepted"})
-        self.assertTrue(scored["checkpointAccepted"])
-        self.assertFalse(scored["evidenceSupportedSelectedDecision"])
-        self.assertFalse(scored["selectedCandidateConsistentWithFact"])
-        bad[1]["candidates"][0].update(name="stream", solution="Use stream")
-        trace.append_event("adk_interaction", interactionType="tool_call", name="submit_cycle_intent",
-                           arguments={"answers": bad})
-        selected = score_live_trace(trace, lifecycle, display, budget, {"turns": 3, "stopReason": "accepted"})
-        self.assertTrue(selected["evidenceSupportedSelectedDecision"])
-        bad[0]["evidence"][0]["source"] = "uncited source"
-        trace.append_event("adk_interaction", interactionType="tool_call", name="submit_cycle_intent",
-                           arguments={"answers": bad})
-        uncited = score_live_trace(trace, lifecycle, display, budget, {"turns": 3, "stopReason": "accepted"})
+        answers = _answers()
+        if artifact:
+            for item in answers[:3]:
+                item["answer"] += " x" * 3000
+        by_section = {item["section"]: item for item in answers}
+        by_section["Information, investigation and remaining uncertainty"]["evidence"][0].update(
+            source=ref if source is True else (source or "uncited source"), finding=FACT)
+        by_section["Concrete candidate solutions"]["candidates"][0].update(
+            name=f"{mode} adapter", solution=f"Use {mode}")
+        selection = by_section["Selected solution"]
+        if repair:
+            selection["selection"]["candidate_id"] = "missing"
+
+        def record_call(items, *, retained_payload=False):
+            detail = {"name": "submit_cycle_intent", "arguments": {"cycle_number": 1, "answers": items}}
+            if retained_payload:
+                encoded = json.dumps(detail, sort_keys=True, default=str).encode("utf-8")
+                self.assertGreater(len(encoded), 16_384)
+                path = trace.write_json("agent/interactions/fixture-call.json", detail)
+                trace.append_event("adk_interaction", cycle=1, interactionType="tool_call",
+                                   artifact=str(path), bytes=len(encoded), sha256=hashlib.sha256(encoded).hexdigest())
+            else:
+                trace.append_event("adk_interaction", cycle=1, interactionType="tool_call", **detail)
+
+        record_call(answers, retained_payload=artifact)
+        first = lifecycle.submit_intent(1, answers)
+        if repair:
+            self.assertFalse(first.accepted)
+            retry = {**selection, "selection": {**selection["selection"], "candidate_id": "A"}}
+            record_call([retry])
+            self.assertTrue(lifecycle.submit_intent(1, [retry]).accepted)
+        else:
+            self.assertTrue(first.accepted)
+        scored = score_live_trace(trace, lifecycle, display, budget, {"turns": 2, "stopReason": "accepted"})
+        return scored, lifecycle, trace, display, budget, record_call
+
+    def test_section_only_repair_scores_accepted_merged_intent_and_retained_call(self):
+        scored, lifecycle, trace, display, budget, _ = self._scored_intent(artifact=True)
+        self.assertTrue(scored["acceptedRecordVerified"])
+        self.assertEqual(1, scored["rejectedSubmissions"])
+        self.assertTrue(scored["evidenceSupportedSelectedDecision"])
+        self.assertTrue(scored["selectedEvidenceCitesIssuedReference"])
+
+    def test_later_unaccepted_call_cannot_change_accepted_score(self):
+        scored, lifecycle, trace, display, budget, record_call = self._scored_intent()
+        self.assertTrue(scored["evidenceSupportedSelectedDecision"])
+        later = _answers()
+        later[3]["candidates"][0]["solution"] = "Use batch"
+        record_call(later)
+        self.assertFalse(lifecycle.submit_intent(1, later).accepted)
+        after = score_live_trace(trace, lifecycle, display, budget, {"turns": 2, "stopReason": "accepted"})
+        self.assertTrue(after["acceptedRecordVerified"])
+        self.assertTrue(after["evidenceSupportedSelectedDecision"])
+
+    def test_batch_selection_and_missing_provenance_do_not_pass(self):
+        batch, *_ = self._scored_intent(mode="batch")
+        self.assertTrue(batch["acceptedRecordVerified"])
+        self.assertFalse(batch["evidenceSupportedSelectedDecision"])
+        uncited, *_ = self._scored_intent(source=False)
+        self.assertTrue(uncited["selectedCandidateConsistentWithFact"])
         self.assertFalse(uncited["evidenceSupportedSelectedDecision"])
+        wrong, *_ = self._scored_intent(source="evidence:wrong-reference")
+        self.assertFalse(wrong["evidenceSupportedSelectedDecision"])
 
     def test_offline_capabilities_retention_and_partial_edit(self):
         workspace, trace, budget, capabilities, display = prepare(Path(self.temp.name))
         self.assertTrue(verify_offline(capabilities, display)["fullArtifactRetained"])
         other = RunWorkspace.create(self.temp.name)
         self.assertTrue(verify_partial_read_offline(other, TraceStore(other))["trailingSentinelPreserved"])
+
+    def _run_cli(self, *arguments):
+        output = io.StringIO()
+        with patch.object(sys, "argv", ["retained_evidence_acceptance", *arguments]), redirect_stdout(output):
+            status = main()
+        return status, json.loads(output.getvalue())["trials"]
+
+    def test_explicit_folder_retains_both_scenarios_and_independent_trials(self):
+        parent = Path(self.temp.name) / "explicit"
+        status, command = self._run_cli("--scenario", "retained-command", "--trials", "2",
+                                        "--workspace-parent", str(parent))
+        self.assertEqual(0, status)
+        self.assertEqual(2, len({item["workspace"] for item in command}))
+        status, partial = self._run_cli("--scenario", "partial-read-edit",
+                                        "--workspace-parent", str(parent))
+        self.assertEqual(0, status)
+        for item in [*command, *partial]:
+            self.assertTrue(item["artifactsRetained"])
+            self.assertTrue(Path(item["trace"]).is_file())
+            self.assertTrue(Path(item["resultArtifact"]).is_file())
+        self.assertTrue(partial[0]["trailingSentinelPreserved"])
+
+    def test_default_offline_temp_and_failure_report_location(self):
+        status, trials = self._run_cli("--scenario", "retained-command", "--trials", "2")
+        self.assertEqual(0, status)
+        self.assertEqual(2, len({item["workspace"] for item in trials}))
+        self.assertTrue(all(not item["artifactsRetained"] for item in trials))
+        self.assertTrue(all(not Path(item["workspace"]).exists() for item in trials))
+        parent = Path(self.temp.name) / "failed"
+        with patch("scripts.retained_evidence_acceptance.verify_offline", side_effect=RuntimeError("fixture failure")):
+            status, failed = self._run_cli("--workspace-parent", str(parent))
+        self.assertEqual(1, status)
+        self.assertIn("fixture failure", failed[0]["terminalError"])
+        self.assertTrue(Path(failed[0]["workspace"]).is_dir())
+        self.assertTrue(Path(failed[0]["resultArtifact"]).is_file())
 
 
 if __name__ == "__main__":
