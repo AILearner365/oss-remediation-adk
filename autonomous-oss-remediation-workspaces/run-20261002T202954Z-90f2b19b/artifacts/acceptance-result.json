@@ -1,0 +1,29 @@
+{
+  "retrievalSuccess": true,
+  "targetedRetrievalCalls": 1,
+  "noCheckpointSubmission": false,
+  "rejectedSubmissions": 0,
+  "recoveryExhausted": false,
+  "checkpointAccepted": true,
+  "acceptedRecordVerified": true,
+  "acceptedAfterRetrieval": true,
+  "selectedCandidateConsistentWithFact": false,
+  "selectedEvidenceCitesIssuedReference": false,
+  "evidenceSupportedSelectedDecision": false,
+  "liveTraceMeetsMechanicalCriteria": false,
+  "checkpointAttempts": 1,
+  "continuationTurns": 1,
+  "stopReason": "accepted",
+  "remainingToolCalls": 78,
+  "trace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T202954Z-90f2b19b/artifacts/events.jsonl",
+  "unexercisedPaths": [
+    "checkpoint_rejection",
+    "incomplete_turn"
+  ],
+  "passed": false,
+  "scenario": "retained-command",
+  "trial": 1,
+  "workspace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T202954Z-90f2b19b",
+  "artifactsRetained": true,
+  "resultArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T202954Z-90f2b19b/artifacts/acceptance-result.json"
+}

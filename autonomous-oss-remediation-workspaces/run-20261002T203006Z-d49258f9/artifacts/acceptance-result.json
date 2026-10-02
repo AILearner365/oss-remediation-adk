@@ -1,0 +1,31 @@
+{
+  "retrievalSuccess": true,
+  "targetedRetrievalCalls": 1,
+  "noCheckpointSubmission": true,
+  "rejectedSubmissions": 0,
+  "recoveryExhausted": false,
+  "checkpointAccepted": false,
+  "acceptedRecordVerified": false,
+  "acceptedAfterRetrieval": false,
+  "selectedCandidateConsistentWithFact": false,
+  "selectedEvidenceCitesIssuedReference": false,
+  "evidenceSupportedSelectedDecision": false,
+  "liveTraceMeetsMechanicalCriteria": false,
+  "checkpointAttempts": 10,
+  "continuationTurns": 3,
+  "stopReason": "terminal_error",
+  "remainingToolCalls": 78,
+  "trace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T203006Z-d49258f9/artifacts/events.jsonl",
+  "unexercisedPaths": [
+    "checkpoint_submission",
+    "checkpoint_rejection",
+    "accepted_checkpoint"
+  ],
+  "terminalError": "IntentToolRecoveryExhausted: Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts",
+  "passed": false,
+  "scenario": "retained-command",
+  "trial": 2,
+  "workspace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T203006Z-d49258f9",
+  "artifactsRetained": true,
+  "resultArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T203006Z-d49258f9/artifacts/acceptance-result.json"
+}
