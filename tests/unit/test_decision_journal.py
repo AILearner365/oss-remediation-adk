@@ -581,6 +581,28 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertIn("only explicitly mapped deterministic checks are authoritative", rendered)
         self.assertIn("Cycle 1 observable actions", rendered)
 
+    def test_final_resolution_reconciles_failed_checks_beside_historical_model_claim(self):
+        historical = "The earlier build passed and the change complied with policy."
+        capture = CycleCapture(outcome_answers={"Implementation Result": historical})
+        report = ValidationReport(
+            cycle=1, passed=False,
+            checks=(ValidationCheck("build_test_startup", False, "Current build failed"),
+                    ValidationCheck("fresh_vulnerability_scan", False, "Current scan incomplete"),
+                    ValidationCheck("version_policy", False, "Movement rejected")),
+            changed_files=("config.txt",), diff_path="diff.txt", tree_digest="state-1",
+        )
+        rendered = render_final_resolution(
+            RemediationOutcome.FAILED, "Original problem", {1: capture}, report,
+            CaptureStatus.COMPLETE, DeliveryEligibility.NOT_DELIVERY_ELIGIBLE,
+            "No delivery.", "Checks failed.",
+        )
+        reconciliation = rendered.split("## Reconciliation with the accepted model Outcome", 1)[1].split(
+            "## Accepted model account", 1)[0]
+        for fact in ("build_test_startup", "Current build failed", "fresh_vulnerability_scan",
+                     "Current scan incomplete", "version_policy", "Movement rejected"):
+            self.assertIn(fact, reconciliation)
+        self.assertIn(historical, rendered)
+
     def test_preliminary_baseline_and_task_records_preserve_underlying_data(self):
         workspace = RunWorkspace.create(self.temp.name)
         workspace.repository.mkdir()

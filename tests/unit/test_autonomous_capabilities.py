@@ -216,6 +216,10 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertFalse(result["stdoutComplete"])
         self.assertLess(len(result["stdout"]), 2200)
         self.assertGreater(Path(result["stdoutArtifact"]).stat().st_size, 12000)
+        self.assertEqual(Path(result["stdoutArtifact"]).stat().st_size, result["stdoutBytes"])
+        self.assertIn("query=", result["stdoutRecovery"])
+        self.assertEqual(self.budget.config.max_tool_calls - self.budget.tool_calls,
+                         result["remainingToolCalls"])
         reference = result["stdoutReference"]
         first = self.capabilities.retrieve_retained_evidence(reference, max_bytes=100)
         self.assertEqual("A" * 100, first["content"])
@@ -232,6 +236,30 @@ class AutonomousCapabilityTests(unittest.TestCase):
             self.trace.issue_evidence_reference(outside)
         Path(result["stdoutArtifact"]).write_text("changed", encoding="utf-8")
         self.assertIn("expired", self.capabilities.retrieve_retained_evidence(reference)["error"])
+
+    def test_large_retained_log_supports_one_targeted_search_with_budget_metadata(self):
+        raw = ("download progress\r" * 13_000 +
+               "TREE FACT: generic dependency relationship\n" + "tail marker\n").encode("utf-8")
+        path = self.workspace.artifacts / "commands" / "large-generic.stdout.log"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        reference = self.trace.issue_evidence_reference(path)
+        before = self.budget.tool_calls
+        found = self.capabilities.retrieve_retained_evidence(reference, query="TREE FACT")
+        self.assertEqual(before + 1, self.budget.tool_calls)
+        self.assertEqual(self.budget.config.max_tool_calls - self.budget.tool_calls,
+                         found["remainingToolCalls"])
+        self.assertEqual(self.budget.config.max_llm_calls_per_turn, found["modelTurnCallLimit"])
+        self.assertEqual(len(raw), found["totalBytes"])
+        self.assertEqual(1, len(found["matches"]))
+        self.assertGreater(found["matches"][0]["offset"], 200_000)
+        self.assertIn("generic dependency relationship", found["matches"][0]["text"])
+        self.assertLess(len(found["matches"][0]["text"]), 400)
+        first = self.capabilities.retrieve_retained_evidence(reference, max_bytes=4000)
+        self.assertIn("query=", first["recovery"])
+        self.assertEqual(len(raw), first["totalBytes"])
+        tail = self.capabilities.retrieve_retained_evidence(reference, start_offset=len(raw) - 12)
+        self.assertEqual(raw[-12:].decode(), tail["content"])
 
     def test_scanner_model_payload_is_compact_and_evidence_is_retrievable(self):
         from autonomous_oss_remediation_agent.models import ScanReport, VulnerabilityFinding
@@ -437,6 +465,7 @@ class AutonomousCapabilityTests(unittest.TestCase):
         retrieval_schema = declarations["retrieve_retained_evidence"].parameters_json_schema
         self.assertTrue({"reference", "start_offset", "max_bytes", "query"}.issubset(
             retrieval_schema["properties"]))
+        self.assertIn("prefer query", declarations["retrieve_retained_evidence"].description)
         self.assertIn("cursor", declarations["search_workspace_text"].parameters_json_schema["properties"])
         self.assertIn("start_column", declarations["read_workspace_text"].parameters_json_schema["properties"])
 

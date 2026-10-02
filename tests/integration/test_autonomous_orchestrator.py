@@ -827,6 +827,42 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertIn("Outcome reported partial remediation, but deterministic validation", journal)
         self.assertIn("historical model testimony", journal)
 
+    def test_authoritative_checks_before_first_edit_are_marked_as_pre_edit_evidence(self):
+        test = self
+
+        class Session(_ScriptedAgentSession):
+            async def run_turn(self, message):
+                c = self.capabilities
+                if c.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+                    evidence = c.journal.cycles[1].outcome_evidence
+                    observed = evidence["executionObservations"]["authoritative"]["recent"]
+                    checks = [item for item in observed if item["type"] in ("command", "engineering_scan_completed")]
+                    test.assertEqual(2, len(checks))
+                    for check in checks:
+                        test.assertEqual("before_first_recorded_authoritative_edit", check["editStateAtCheck"])
+                        test.assertEqual(0, check["authoritativeEditSequenceAtCheck"])
+                        test.assertEqual(1, check["authoritativeEditsAfterCheck"])
+                        test.assertIsNone(check["repositoryDigestAtCheck"])
+                    coverage = evidence["currentStateSelfScan"]
+                    test.assertEqual(1, coverage["scansBeforeFirstAuthoritativeEdit"])
+                    test.assertEqual(0, coverage["scansAfterLastAuthoritativeEdit"])
+                    test.assertEqual("no_authoritative_self_scan_after_latest_action", coverage["stateRelation"])
+                    test.assertIn("before_first_recorded_authoritative_edit", message)
+                    return await super().run_turn(message)
+                c.submit_cycle_intent(1, _intent_answers(1))
+                c.run_workspace_shell("git status --porcelain")
+                c.scan_current_repository()
+                c.edit_workspace_text("replace", "pom.xml",
+                                      old_text="<demo.version>1.0</demo.version>",
+                                      new_text="<demo.version>2.0</demo.version>")
+                return AgentTurnResult("An edit followed earlier checks.")
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1), agent_session_factory=lambda c, model: Session(c, []),
+            scanner_factory=_FixtureScanner,
+        ).run()
+        self.assertTrue(result.validation.passed)
+
     def test_same_agent_session_continues_after_validation_failure(self):
         sessions = []
 

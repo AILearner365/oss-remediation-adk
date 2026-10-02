@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+from pathlib import Path
 from typing import Any, Literal, NotRequired, TypedDict
 
 from google.adk.tools.function_tool import FunctionTool
@@ -268,20 +269,38 @@ class DeveloperCapabilitySet:
             artifact = payload.get(f"{stream}Artifact")
             if artifact:
                 payload[f"{stream}Reference"] = self.trace.issue_evidence_reference(artifact)
+                payload[f"{stream}Bytes"] = Path(artifact).stat().st_size
             payload[f"{stream}Complete"] = not payload[stream].startswith("[output truncated; full log retained]")
             payload[f"{stream}MoreExists"] = not payload[f"{stream}Complete"]
+            if not payload[f"{stream}Complete"]:
+                payload[f"{stream}Recovery"] = (
+                    f"Full {stream} is retained. Search {stream}Reference with "
+                    "retrieve_retained_evidence(query=...) for a relevant term; use "
+                    "start_offset only for a known byte range."
+                )
+        payload["remainingToolCalls"] = max(0, self.budget.config.max_tool_calls - self.budget.tool_calls)
         return payload
 
     def retrieve_retained_evidence(
         self, reference: str, start_offset: int = 0, max_bytes: int = 4000,
         query: str | None = None,
     ) -> dict[str, Any]:
-        """Read or search a harness-issued retained artifact in bounded byte ranges. Offsets are UTF-8 bytes."""
+        """Read a known byte range or search a harness-issued retained artifact. For a large log, prefer query (1-200 characters) to locate relevant text without paging from offset zero. Search scans at most 256,000 bytes per call and returns at most 20 bounded contexts; if moreExists, resume at nextOffset. start_offset and max_bytes control byte-range reads (max 8,000 bytes), with UTF-8 byte offsets. Each call uses one shared run tool allowance."""
         denied = self._require_phase("retrieve_retained_evidence", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION, JournalPhase.OUTCOME_REQUIRED})
         if denied:
             return denied
-        return self._invoke("retrieve_retained_evidence", self._retrieve_evidence,
-                            reference, start_offset, max_bytes, query)
+        result = self._invoke("retrieve_retained_evidence", self._retrieve_evidence,
+                              reference, start_offset, max_bytes, query)
+        if isinstance(result, dict) and result.get("status") == "ok":
+            result["remainingToolCalls"] = max(0, self.budget.config.max_tool_calls - self.budget.tool_calls)
+            result["modelTurnCallLimit"] = self.budget.config.max_llm_calls_per_turn
+            if query is None and result["moreExists"]:
+                result["recovery"] = (
+                    "If looking for a fact rather than reading a known range, call this "
+                    "tool with query=... on the same reference. Sequential pages each "
+                    "consume a tool call and a model continuation."
+                )
+        return result
 
     def _retrieve_evidence(self, reference: str, start_offset: int,
                            max_bytes: int, query: str | None) -> dict[str, Any]:

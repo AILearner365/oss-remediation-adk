@@ -1396,6 +1396,14 @@ def _validation_contradictions(
     outcome_status: str | None,
 ) -> list[str]:
     contradictions: list[str] = []
+    failed_checks = [check for check in report.checks if not check.passed]
+    if failed_checks:
+        contradictions.append(
+            "- Latest independent validation failed these current-state checks: "
+            + "; ".join(f"`{check.name}` ({check.message})" for check in failed_checks)
+            + ". These results supersede contrary factual claims in the historical model account "
+              "within each check's scope."
+        )
     resolved = len(report.resolved_target_findings)
     if outcome_status == "NO_CHANGE_REQUIRED" and report.changed_files:
         contradictions.append(

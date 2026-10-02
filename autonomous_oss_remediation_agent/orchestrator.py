@@ -792,17 +792,31 @@ class AutonomousRemediationOrchestrator:
         # about the repository after later edits or potentially mutating commands.
         mutations = [event.get("timestamp") for event in events if event.get("type") == "command"
                      and event.get("workspaceKind") == "authoritative"]
+        authoritative_edits = []
         if trace.events_path.exists():
             for line in trace.events_path.read_text(encoding="utf-8").splitlines():
                 event = json.loads(line)
                 if (event.get("cycle") == cycle and event.get("type") == "agent_workspace_action"
                         and event.get("workspaceKind") == "authoritative" and event.get("status") == "ok"):
                     mutations.append(event.get("timestamp"))
+                    authoritative_edits.append(event.get("timestamp"))
+        authoritative_edits = sorted(stamp for stamp in authoritative_edits if stamp)
         for event in events:
             if event.get("type") in {"command", "engineering_scan_completed"}:
+                stamp = event.get("timestamp", "")
+                edits_before = sum(edit <= stamp for edit in authoritative_edits)
+                event["authoritativeEditSequenceAtCheck"] = edits_before
+                event["authoritativeEditsAfterCheck"] = len(authoritative_edits) - edits_before
+                event["repositoryDigestAtCheck"] = None
+                event["editStateAtCheck"] = (
+                    "before_first_recorded_authoritative_edit" if authoritative_edits and edits_before == 0
+                    else "before_later_recorded_authoritative_edit" if edits_before < len(authoritative_edits)
+                    else "after_last_recorded_authoritative_edit" if authoritative_edits
+                    else "no_recorded_authoritative_edit"
+                )
                 event["stateRelation"] = (
                     "historical_later_authoritative_action_observed"
-                    if any(stamp and stamp > event.get("timestamp", "") for stamp in mutations)
+                    if any(action and action > stamp for action in mutations)
                     else "latest_observed_action_no_repository_digest_at_check"
                 )
         latest_mutation = max((stamp for stamp in mutations if stamp), default=None)
@@ -813,8 +827,18 @@ class AutonomousRemediationOrchestrator:
                               if latest_mutation is None or event.get("timestamp", "") > latest_mutation]
         self_scan_coverage = {
             "cycle": cycle, "workspaceKind": "authoritative",
+            "firstAuthoritativeEditAt": authoritative_edits[0] if authoritative_edits else None,
+            "lastAuthoritativeEditAt": authoritative_edits[-1] if authoritative_edits else None,
             "latestPotentiallyMutatingActionAt": latest_mutation,
             "latestScannerObservationAt": max((event.get("timestamp") for event in authoritative_scans), default=None),
+            "scansBeforeFirstAuthoritativeEdit": sum(
+                bool(authoritative_edits) and event.get("timestamp", "") < authoritative_edits[0]
+                for event in authoritative_scans
+            ),
+            "scansAfterLastAuthoritativeEdit": sum(
+                not authoritative_edits or event.get("timestamp", "") > authoritative_edits[-1]
+                for event in authoritative_scans
+            ),
             "stateRelation": ("no_authoritative_self_scan_after_latest_action" if not scans_after_action
                               else "scanner_observed_after_latest_action_without_repository_digest"),
             "scope": "Only independent validation after Outcome establishes deterministic current-state target coverage.",
