@@ -1,0 +1,1274 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/4.0.6/spring-boot-starter-parent-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/4.0.6/spring-boot-starter-parent-4.0.6.pom (14 kB at 18 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.6/spring-boot-dependencies-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.6/spring-boot-dependencies-4.0.6.pom (138 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/activemq/activemq-bom/6.1.8/activemq-bom-6.1.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/activemq/activemq-bom/6.1.8/activemq-bom-6.1.8.pom (7.9 kB at 108 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/activemq/artemis-bom/2.43.0/artemis-bom-2.43.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/activemq/artemis-bom/2.43.0/artemis-bom-2.43.0.pom (9.4 kB at 124 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/activemq/artemis-project/2.43.0/artemis-project-2.43.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/activemq/artemis-project/2.43.0/artemis-project-2.43.0.pom (56 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/35/apache-35.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/35/apache-35.pom (24 kB at 638 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-bom/3.27.7/assertj-bom-3.27.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-bom/3.27.7/assertj-bom-3.27.7.pom (3.3 kB at 79 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/zipkin/reporter2/zipkin-reporter-bom/3.5.3/zipkin-reporter-bom-3.5.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/zipkin/reporter2/zipkin-reporter-bom/3.5.3/zipkin-reporter-bom-3.5.3.pom (6.1 kB at 145 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/zipkin/brave/brave-bom/6.3.1/brave-bom-6.3.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/zipkin/brave/brave-bom/6.3.1/brave-bom-6.3.1.pom (11 kB at 273 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/cassandra/java-driver-bom/4.19.2/java-driver-bom-4.19.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/cassandra/java-driver-bom/4.19.2/java-driver-bom-4.19.2.pom (5.5 kB at 133 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-bom/5.0.5/groovy-bom-5.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-bom/5.0.5/groovy-bom-5.0.5.pom (27 kB at 736 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-bom/15.2.6.Final/infinispan-bom-15.2.6.Final.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-bom/15.2.6.Final/infinispan-bom-15.2.6.Final.pom (17 kB at 512 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-build-configuration-parent/15.2.6.Final/infinispan-build-configuration-parent-15.2.6.Final.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/infinispan/infinispan-build-configuration-parent/15.2.6.Final/infinispan-build-configuration-parent-15.2.6.Final.pom (17 kB at 440 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-bom/2.21.2/jackson-bom-2.21.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-bom/2.21.2/jackson-bom-2.21.2.pom (20 kB at 506 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-parent/2.21/jackson-parent-2.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-parent/2.21/jackson-parent-2.21.pom (6.9 kB at 181 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/75/oss-parent-75.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/75/oss-parent-75.pom (24 kB at 317 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.2/jackson-bom-3.1.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.2/jackson-bom-3.1.2.pom (20 kB at 537 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/79/oss-parent-79.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/79/oss-parent-79.pom (24 kB at 679 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jersey/jersey-bom/4.0.2/jersey-bom-4.0.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jersey/jersey-bom/4.0.2/jersey-bom-4.0.2.pom (24 kB at 642 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/ee4j/project/1.0.9/project-1.0.9.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/ee4j/project/1.0.9/project-1.0.9.pom (16 kB at 160 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/jetty/ee11/jetty-ee11-bom/12.1.8/jetty-ee11-bom-12.1.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/jetty/ee11/jetty-ee11-bom/12.1.8/jetty-ee11-bom-12.1.8.pom (9.4 kB at 204 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-bom/12.1.8/jetty-bom-12.1.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-bom/12.1.8/jetty-bom-12.1.8.pom (17 kB at 423 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jooq/jooq-bom/3.19.32/jooq-bom-3.19.32.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jooq/jooq-bom/3.19.32/jooq-bom-3.19.32.pom (4.7 kB at 116 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/6.0.3/junit-bom-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/6.0.3/junit-bom-6.0.3.pom (5.1 kB at 151 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-bom/2.2.21/kotlin-bom-2.2.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-bom/2.2.21/kotlin-bom-2.2.21.pom (9.4 kB at 262 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.10.2/kotlinx-coroutines-bom-1.10.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.10.2/kotlinx-coroutines-bom-1.10.2.pom (4.3 kB at 110 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-bom/1.9.0/kotlinx-serialization-bom-1.9.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-bom/1.9.0/kotlinx-serialization-bom-1.9.0.pom (4.0 kB at 105 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-bom/2.25.4/log4j-bom-2.25.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-bom/2.25.4/log4j-bom-2.25.4.pom (12 kB at 323 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-bom/1.16.5/micrometer-bom-1.16.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-bom/1.16.5/micrometer-bom-1.16.5.pom (8.6 kB at 238 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-bom/5.20.0/mockito-bom-5.20.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-bom/5.20.0/mockito-bom-5.20.0.pom (3.0 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mongodb/mongodb-driver-bom/5.6.5/mongodb-driver-bom-5.6.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mongodb/mongodb-driver-bom/5.6.5/mongodb-driver-bom-5.6.5.pom (4.2 kB at 123 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/neo4j/driver/neo4j-java-driver-bom/6.0.5/neo4j-java-driver-bom-6.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/neo4j/driver/neo4j-java-driver-bom/6.0.5/neo4j-java-driver-bom-6.0.5.pom (2.3 kB at 59 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/neo4j/bolt/neo4j-bolt-connection-bom/11.0.1/neo4j-bolt-connection-bom-11.0.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/neo4j/bolt/neo4j-bolt-connection-bom/11.0.1/neo4j-bolt-connection-bom-11.0.1.pom (2.5 kB at 70 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-bom/4.2.12.Final/netty-bom-4.2.12.Final.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-bom/4.2.12.Final/netty-bom-4.2.12.Final.pom (19 kB at 565 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom (4.8 kB at 138 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/opentelemetry/opentelemetry-bom/1.55.0/opentelemetry-bom-1.55.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/opentelemetry/opentelemetry-bom/1.55.0/opentelemetry-bom-1.55.0.pom (6.0 kB at 178 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/prometheus/prometheus-metrics-bom/1.4.3/prometheus-metrics-bom-1.4.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/prometheus/prometheus-metrics-bom/1.4.3/prometheus-metrics-bom-1.4.3.pom (5.8 kB at 162 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/prometheus/client_java_parent/1.4.3/client_java_parent-1.4.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/prometheus/client_java_parent/1.4.3/client_java_parent-1.4.3.pom (4.3 kB at 132 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/prometheus/simpleclient_bom/0.16.0/simpleclient_bom-0.16.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/prometheus/simpleclient_bom/0.16.0/simpleclient_bom-0.16.0.pom (6.0 kB at 182 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/prometheus/parent/0.16.0/parent-0.16.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/prometheus/parent/0.16.0/parent-0.16.0.pom (13 kB at 379 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/pulsar/pulsar-bom/4.1.3/pulsar-bom-4.1.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/pulsar/pulsar-bom/4.1.3/pulsar-bom-4.1.3.pom (25 kB at 720 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/querydsl/querydsl-bom/5.1.0/querydsl-bom-5.1.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/querydsl/querydsl-bom/5.1.0/querydsl-bom-5.1.0.pom (7.2 kB at 204 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/projectreactor/reactor-bom/2025.0.5/reactor-bom-2025.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/projectreactor/reactor-bom/2025.0.5/reactor-bom-2025.0.5.pom (4.6 kB at 135 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/rsocket/rsocket-bom/1.1.5/rsocket-bom-1.1.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/rsocket/rsocket-bom/1.1.5/rsocket-bom-1.1.5.pom (2.4 kB at 68 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/seleniumhq/selenium/selenium-bom/4.37.0/selenium-bom-4.37.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/seleniumhq/selenium/selenium-bom/4.37.0/selenium-bom-4.37.0.pom (5.8 kB at 150 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/amqp/spring-amqp-bom/4.0.3/spring-amqp-bom-4.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/amqp/spring-amqp-bom/4.0.3/spring-amqp-bom-4.0.3.pom (4.1 kB at 107 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/batch/spring-batch-bom/6.0.3/spring-batch-bom-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/batch/spring-batch-bom/6.0.3/spring-batch-bom-6.0.3.pom (3.2 kB at 76 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-bom/2025.1.5/spring-data-bom-2025.1.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-bom/2025.1.5/spring-data-bom-2025.1.5.pom (5.5 kB at 145 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/7.0.7/spring-framework-bom-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/7.0.7/spring-framework-bom-7.0.7.pom (5.7 kB at 157 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/integration/spring-integration-bom/7.0.4/spring-integration-bom-7.0.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/integration/spring-integration-bom/7.0.4/spring-integration-bom-7.0.4.pom (10 kB at 297 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/pulsar/spring-pulsar-bom/2.0.5/spring-pulsar-bom-2.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/pulsar/spring-pulsar-bom/2.0.5/spring-pulsar-bom-2.0.5.pom (2.7 kB at 76 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/restdocs/spring-restdocs-bom/4.0.0/spring-restdocs-bom-4.0.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/restdocs/spring-restdocs-bom/4.0.0/spring-restdocs-bom-4.0.0.pom (2.4 kB at 66 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-bom/7.0.5/spring-security-bom-7.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-bom/7.0.5/spring-security-bom-7.0.5.pom (6.7 kB at 202 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/session/spring-session-bom/4.0.3/spring-session-bom-4.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/session/spring-session-bom/4.0.3/spring-session-bom-4.0.3.pom (2.5 kB at 68 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/ws/spring-ws-bom/5.0.1/spring-ws-bom-5.0.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/ws/spring-ws-bom/5.0.1/spring-ws-bom-5.0.1.pom (2.3 kB at 68 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/testcontainers/testcontainers-bom/2.0.5/testcontainers-bom-2.0.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/testcontainers/testcontainers-bom/2.0.5/testcontainers-bom-2.0.5.pom (12 kB at 350 kB/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-maven-plugin/4.0.6/spring-boot-maven-plugin-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-maven-plugin/4.0.6/spring-boot-maven-plugin-4.0.6.pom (4.0 kB at 100 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-maven-plugin/4.0.6/spring-boot-maven-plugin-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-maven-plugin/4.0.6/spring-boot-maven-plugin-4.0.6.jar (139 kB at 3.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.pom (5.7 kB at 153 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/44/maven-plugins-44.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/44/maven-plugins-44.pom (8.4 kB at 239 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/44/maven-parent-44.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/44/maven-parent-44.pom (52 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/34/apache-34.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/34/apache-34.pom (24 kB at 564 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.12.1/junit-bom-5.12.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.12.1/junit-bom-5.12.1.pom (5.6 kB at 182 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.5.0/maven-clean-plugin-3.5.0.jar (37 kB at 931 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.pom (8.2 kB at 221 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer/3.6.2/enforcer-3.6.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer/3.6.2/enforcer-3.6.2.pom (9.2 kB at 248 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/45/maven-parent-45.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/45/maven-parent-45.pom (53 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.1/junit-bom-5.13.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.1/junit-bom-5.13.1.pom (5.6 kB at 157 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-enforcer-plugin/3.6.2/maven-enforcer-plugin-3.6.2.jar (40 kB at 1.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.4/maven-install-plugin-3.1.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.4/maven-install-plugin-3.1.4.pom (8.1 kB at 231 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/43/maven-plugins-43.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/43/maven-plugins-43.pom (7.5 kB at 220 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/43/maven-parent-43.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/43/maven-parent-43.pom (50 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/33/apache-33.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/33/apache-33.pom (24 kB at 756 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.3/junit-bom-5.10.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.3/junit-bom-5.10.3.pom (5.6 kB at 188 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.4/maven-install-plugin-3.1.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.4/maven-install-plugin-3.1.4.jar (33 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.pom (17 kB at 527 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/51/commons-parent-51.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/51/commons-parent-51.pom (78 kB at 2.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/23/apache-23.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/23/apache-23.pom (18 kB at 526 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.pom (32 kB at 948 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/88/commons-parent-88.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/88/commons-parent-88.pom (80 kB at 1.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.4/junit-bom-5.13.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.4/junit-bom-5.13.4.pom (5.7 kB at 177 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/json/json/20230227/json-20230227.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/json/json/20230227/json-20230227.pom (6.5 kB at 166 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom (6.6 kB at 205 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.9/commons-text-1.9.jar (216 kB at 5.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/json/json/20230227/json-20230227.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/json/json/20230227/json-20230227.jar (73 kB at 2.3 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.19.0/commons-lang3-3.19.0.jar (709 kB at 5.3 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.2/plexus-utils-4.0.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.2/plexus-utils-4.0.2.pom (13 kB at 305 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.2/plexus-utils-4.0.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.2/plexus-utils-4.0.2.jar (193 kB at 4.9 MB/s)
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.pom (3.7 kB at 106 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/18/plexus-18.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/18/plexus-18.pom (29 kB at 696 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom (5.6 kB at 157 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.pom (3.8 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.pom (5.2 kB at 127 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.pom (2.2 kB at 50 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.23/maven-resolver-1.9.23.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.23/maven-resolver-1.9.23.pom (23 kB at 587 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.23/maven-resolver-api-1.9.23.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.23/maven-resolver-api-1.9.23.pom (2.2 kB at 62 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.pom (18 kB at 419 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/85/commons-parent-85.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/85/commons-parent-85.pom (78 kB at 2.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.pom (20 kB at 525 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.pom (5.0 kB at 131 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar (94 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-api/3.6.2/enforcer-api-3.6.2.jar (15 kB at 348 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.23/maven-resolver-util-1.9.23.jar (196 kB at 2.7 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.jar (389 kB at 3.3 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/enforcer/enforcer-rules/3.6.2/enforcer-rules-3.6.2.jar (152 kB at 1.1 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar (564 kB at 3.7 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.jar (375 kB at 2.4 MB/s)
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ secure-multimodule-springboot-java21 ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/4.0.6/spring-boot-buildpack-platform-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/4.0.6/spring-boot-buildpack-platform-4.0.6.pom (3.0 kB at 91 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna-platform/5.17.0/jna-platform-5.17.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna-platform/5.17.0/jna-platform-5.17.0.pom (2.3 kB at 58 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.pom (2.0 kB at 60 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.pom (23 kB at 549 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/72/commons-parent-72.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/72/commons-parent-72.pom (78 kB at 1.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.11.0-M2/junit-bom-5.11.0-M2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.11.0-M2/junit-bom-5.11.0-M2.pom (5.7 kB at 154 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.1/commons-codec-1.17.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.1/commons-codec-1.17.1.pom (18 kB at 523 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/71/commons-parent-71.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/71/commons-parent-71.pom (78 kB at 2.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/32/apache-32.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/32/apache-32.pom (24 kB at 620 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom (20 kB at 491 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom (77 kB at 2.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/31/apache-31.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/31/apache-31.pom (24 kB at 574 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.16.0/commons-lang3-3.16.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.16.0/commons-lang3-3.16.0.pom (31 kB at 823 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.pom (6.1 kB at 132 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.5.2/httpclient5-parent-5.5.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5-parent/5.5.2/httpclient5-parent-5.5.2.pom (17 kB at 465 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpcomponents-parent/14/httpcomponents-parent-14.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpcomponents-parent/14/httpcomponents-parent-14.pom (30 kB at 821 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/27/apache-27.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/27/apache-27.pom (20 kB at 582 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.3/junit-bom-5.13.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.3/junit-bom-5.13.3.pom (5.7 kB at 167 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.pom (3.9 kB at 101 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-parent/5.3.6/httpcore5-parent-5.3.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-parent/5.3.6/httpcore5-parent-5.3.6.pom (14 kB at 332 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpcomponents-parent/13/httpcomponents-parent-13.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpcomponents-parent/13/httpcomponents-parent-13.pom (30 kB at 839 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.11.4/junit-bom-5.11.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.11.4/junit-bom-5.11.4.pom (5.6 kB at 171 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.pom (3.6 kB at 103 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom (2.7 kB at 69 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom (14 kB at 414 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.7/spring-core-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.7/spring-core-7.0.7.pom (2.2 kB at 61 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.pom (32 kB at 871 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/81/commons-parent-81.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/81/commons-parent-81.pom (78 kB at 1.8 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom (1.5 kB at 37 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/tomlj/tomlj/1.0.0/tomlj-1.0.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/tomlj/tomlj/1.0.0/tomlj-1.0.0.pom (2.8 kB at 81 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.pom (3.6 kB at 106 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-master/4.7.2/antlr4-master-4.7.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-master/4.7.2/antlr4-master-4.7.2.pom (4.4 kB at 122 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom (4.3 kB at 116 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.pom (18 kB at 440 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.2/jackson-base-3.1.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.2/jackson-base-3.1.2.pom (16 kB at 435 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.pom (7.4 kB at 189 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.pom (11 kB at 318 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/4.0.6/spring-boot-loader-tools-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/4.0.6/spring-boot-loader-tools-4.0.6.pom (2.2 kB at 56 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.pom (5.4 kB at 141 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/42/maven-shared-components-42.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/42/maven-shared-components-42.pom (3.8 kB at 108 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom (50 kB at 1.4 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.pom (2.8 kB at 85 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.4.1/maven-resolver-1.4.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.4.1/maven-resolver-1.4.1.pom (18 kB at 568 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/33/maven-parent-33.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/33/maven-parent-33.pom (44 kB at 1.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/21/apache-21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/21/apache-21.pom (17 kB at 552 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.pom (2.6 kB at 75 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom (3.2 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom (8.4 kB at 239 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom (8.4 kB at 246 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.7/spring-context-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.7/spring-context-7.0.7.pom (2.8 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.pom (2.2 kB at 69 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.pom (2.0 kB at 52 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.pom (2.1 kB at 52 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.pom (3.8 kB at 109 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.pom (3.6 kB at 85 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-shade-plugin/3.6.0/maven-shade-plugin-3.6.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-shade-plugin/3.6.0/maven-shade-plugin-3.6.0.pom (12 kB at 284 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom (7.7 kB at 197 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom (8.8 kB at 214 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom (25 kB at 747 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.pom (2.4 kB at 70 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom (11 kB at 353 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.7/asm-commons-9.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.7/asm-commons-9.7.pom (2.8 kB at 71 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7/asm-tree-9.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7/asm-tree-9.7.pom (2.6 kB at 76 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.pom (4.6 kB at 128 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.pom (23 kB at 604 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.pom (18 kB at 483 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom (31 kB at 883 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom (78 kB at 2.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/30/apache-30.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/30/apache-30.pom (23 kB at 726 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom (5.6 kB at 177 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/vafer/jdependency/2.10/jdependency-2.10.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/vafer/jdependency/2.10/jdependency-2.10.pom (14 kB at 312 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/4.0.6/spring-boot-buildpack-platform-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/4.0.6/spring-boot-buildpack-platform-4.0.6.jar (332 kB at 7.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna-platform/5.17.0/jna-platform-5.17.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.1/commons-codec-1.17.1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.16.0/commons-lang3-3.16.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.1/commons-codec-1.17.1.jar (373 kB at 4.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.16.0/commons-lang3-3.16.0.jar (674 kB at 6.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.jar (1.1 MB at 7.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar (2.0 MB at 13 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/tomlj/tomlj/1.0.0/tomlj-1.0.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.5.2/httpclient5-5.5.2.jar (961 kB at 6.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/java/dev/jna/jna-platform/5.17.0/jna-platform-5.17.0.jar (1.4 MB at 8.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.3.6/httpcore5-5.3.6.jar (909 kB at 5.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.3.6/httpcore5-h2-5.3.6.jar (243 kB at 1.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/tomlj/tomlj/1.0.0/tomlj-1.0.0.jar (157 kB at 748 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar (20 kB at 94 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/4.0.6/spring-boot-loader-tools-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar (338 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar (82 kB at 354 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/4.0.6/spring-boot-loader-tools-4.0.6.jar (341 kB at 1.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar (58 kB at 224 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar (41 kB at 151 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.2/jackson-databind-3.1.2.jar (1.9 MB at 6.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.7/spring-core-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.2/jackson-core-3.1.2.jar (600 kB at 2.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar (168 kB at 566 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar (8.5 kB at 27 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.7/spring-context-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.jar (74 kB at 230 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar (3.8 kB at 12 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar (149 kB at 457 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.7/spring-expression-7.0.7.jar (323 kB at 853 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.7/spring-core-7.0.7.jar (2.0 MB at 5.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.7/spring-aop-7.0.7.jar (426 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-shade-plugin/3.6.0/maven-shade-plugin-3.6.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.7/spring-beans-7.0.7.jar (928 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.5/micrometer-observation-1.16.5.jar (84 kB at 202 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.5/micrometer-commons-1.16.5.jar (52 kB at 122 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.7/asm-commons-9.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.7/spring-context-7.0.7.jar (1.4 MB at 3.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7/asm-tree-9.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-shade-plugin/3.6.0/maven-shade-plugin-3.6.0.jar (150 kB at 345 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar (269 kB at 603 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.7/asm-commons-9.7.jar (73 kB at 158 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/vafer/jdependency/2.10/jdependency-2.10.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar (125 kB at 270 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7/asm-tree-9.7.jar (52 kB at 110 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.jar (328 kB at 690 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar (509 kB at 1.0 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/vafer/jdependency/2.10/jdependency-2.10.jar (416 kB at 825 kB/s)
+[INFO] 
+[INFO] --- install:3.1.4:install (default-install) @ secure-multimodule-springboot-java21 ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.22/maven-resolver-util-1.9.22.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.22/maven-resolver-util-1.9.22.pom (2.2 kB at 74 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.22/maven-resolver-1.9.22.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.22/maven-resolver-1.9.22.pom (23 kB at 810 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.22/maven-resolver-api-1.9.22.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.22/maven-resolver-api-1.9.22.pom (2.2 kB at 77 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom (7.8 kB at 261 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom (28 kB at 909 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.22/maven-resolver-util-1.9.22.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.22/maven-resolver-util-1.9.22.jar (196 kB at 5.4 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.22/maven-resolver-api-1.9.22.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar (193 kB at 5.1 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.22/maven-resolver-api-1.9.22.jar (157 kB at 3.3 MB/s)
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/pom.xml to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/secure-multimodule-springboot-java21/1.0.0-SNAPSHOT/secure-multimodule-springboot-java21-1.0.0-SNAPSHOT.pom
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-common >------------------
+[INFO] Building task-common 1.0.0-SNAPSHOT                                [2/5]
+[INFO]   from task-common/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom (8.2 kB at 247 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom (8.1 kB at 225 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom (48 kB at 1.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/29/apache-29.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/29/apache-29.pom (21 kB at 505 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar (31 kB at 967 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.14.1/maven-compiler-plugin-3.14.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.14.1/maven-compiler-plugin-3.14.1.pom (9.9 kB at 282 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/45/maven-plugins-45.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/45/maven-plugins-45.pom (8.4 kB at 220 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.14.1/maven-compiler-plugin-3.14.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.14.1/maven-compiler-plugin-3.14.1.jar (84 kB at 2.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.pom (4.9 kB at 139 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.5.5/surefire-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.5.5/surefire-3.5.5.pom (19 kB at 549 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/47/maven-parent-47.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/47/maven-parent-47.pom (54 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/37/apache-37.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/37/apache-37.pom (26 kB at 776 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.12.2/junit-bom-5.12.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.12.2/junit-bom-5.12.2.pom (5.6 kB at 171 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.5/maven-surefire-plugin-3.5.5.jar (47 kB at 1.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.2/maven-jar-plugin-3.4.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.2/maven-jar-plugin-3.4.2.pom (7.7 kB at 220 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.2/maven-jar-plugin-3.4.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.2/maven-jar-plugin-3.4.2.jar (34 kB at 1.0 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-common ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-common ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-common ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom (2.7 kB at 80 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom (23 kB at 662 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom (6.0 kB at 151 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom (3.2 kB at 85 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom (612 B at 16 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom (8.0 kB at 223 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom (20 kB at 580 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom (79 kB at 1.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom (5.1 kB at 142 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom (31 kB at 829 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom (5.1 kB at 131 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar (85 kB at 2.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar (327 kB at 8.8 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar (2.5 kB at 66 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar (55 kB at 1.2 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar (587 kB at 14 MB/s)
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-common ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.pom (2.4 kB at 64 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom (5.9 kB at 179 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom (4.7 kB at 139 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom (6.4 kB at 172 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom (33 kB at 905 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom (14 kB at 368 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.0/plexus-java-1.5.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.0/plexus-java-1.5.0.pom (4.1 kB at 107 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.5.0/plexus-languages-1.5.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.5.0/plexus-languages-1.5.0.pom (3.9 kB at 110 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/20/plexus-20.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/20/plexus-20.pom (29 kB at 941 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.2.0/qdox-2.2.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.2.0/qdox-2.2.0.pom (18 kB at 464 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom (1.4 kB at 39 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom (7.6 kB at 217 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom (1.3 kB at 45 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom (1.3 kB at 39 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom (1.6 kB at 42 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.jar (126 kB at 4.2 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.0/plexus-java-1.5.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.2.0/qdox-2.2.0.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar (14 kB at 356 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.2.0/qdox-2.2.0.jar (353 kB at 9.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar (29 kB at 745 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.0/plexus-java-1.5.0.jar (57 kB at 1.4 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar (151 kB at 3.4 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar (5.2 kB at 84 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar (26 kB at 384 kB/s)
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-common ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-common ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-common ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.pom (3.7 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.pom (3.5 kB at 103 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.pom (4.0 kB at 104 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.pom (3.6 kB at 108 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.pom (7.3 kB at 202 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.pom (5.1 kB at 146 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.pom (1.7 kB at 45 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.2/plexus-java-1.5.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.2/plexus-java-1.5.2.pom (4.1 kB at 113 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.5.2/plexus-languages-1.5.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.5.2/plexus-languages-1.5.2.pom (3.9 kB at 113 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/24/plexus-24.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/24/plexus-24.pom (31 kB at 848 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.pom (2.4 kB at 59 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.5.5/surefire-api-3.5.5.jar (174 kB at 5.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.5.5/surefire-logger-api-3.5.5.jar (14 kB at 366 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.5.5/surefire-extensions-api-3.5.5.jar (26 kB at 559 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.2/plexus-java-1.5.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.5.5/surefire-booter-3.5.5.jar (123 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.5.5/surefire-extensions-spi-3.5.5.jar (8.2 kB at 139 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.5.5/maven-surefire-common-3.5.5.jar (316 kB at 4.9 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.5.2/plexus-java-1.5.2.jar (57 kB at 667 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar (126 kB at 1.3 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.5.5/surefire-shared-utils-3.5.5.jar (3.0 MB at 24 MB/s)
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-common ---
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom (4.5 kB at 128 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom (4.9 kB at 163 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom (45 kB at 758 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/26/apache-26.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/26/apache-26.pom (21 kB at 571 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom (4.4 kB at 151 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom (3.2 kB at 113 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom (50 kB at 1.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom (6.0 kB at 207 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom (3.9 kB at 138 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom (28 kB at 864 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom (5.6 kB at 188 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom (22 kB at 722 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom (77 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom (16 kB at 560 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom (15 kB at 415 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom (2.0 kB at 73 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom (2.0 kB at 72 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom (3.0 kB at 108 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar (36 kB at 1.4 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar (27 kB at 924 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar (86 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar (79 kB at 1.7 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar (225 kB at 4.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar (658 kB at 8.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar (58 kB at 674 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar (365 kB at 4.2 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar (116 kB at 1.3 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar (1.1 MB at 12 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar (6.8 MB at 34 MB/s)
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-common ---
+[INFO] 
+[INFO] --- install:3.1.4:install (default-install) @ task-common ---
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/pom.xml to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-common/1.0.0-SNAPSHOT/task-common-1.0.0-SNAPSHOT.pom
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-common/target/task-common-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-common/1.0.0-SNAPSHOT/task-common-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-domain >------------------
+[INFO] Building task-domain 1.0.0-SNAPSHOT                                [3/5]
+[INFO]   from task-domain/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-domain ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-domain ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-domain ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-domain ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-domain ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-domain ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-domain ---
+[INFO] 
+[INFO] --- install:3.1.4:install (default-install) @ task-domain ---
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/pom.xml to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-domain/1.0.0-SNAPSHOT/task-domain-1.0.0-SNAPSHOT.pom
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-domain/target/task-domain-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-domain/1.0.0-SNAPSHOT/task-domain-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----------------< com.example.secureapp:task-service >-----------------
+[INFO] Building task-service 1.0.0-SNAPSHOT                               [4/5]
+[INFO]   from task-service/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom (32 kB at 847 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/97/commons-parent-97.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/97/commons-parent-97.pom (80 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.14.2/junit-bom-5.14.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.14.2/junit-bom-5.14.2.pom (5.7 kB at 157 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.pom (4.9 kB at 96 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.pom (2.7 kB at 79 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.pom (2.4 kB at 79 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.pom (16 kB at 369 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-parent/1.5.32/logback-parent-1.5.32.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-parent/1.5.32/logback-parent-1.5.32.pom (20 kB at 559 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.pom (9.4 kB at 314 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.pom (2.8 kB at 86 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/2.0.17/slf4j-parent-2.0.17.pom (13 kB at 431 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-bom/2.0.17/slf4j-bom-2.0.17.pom (7.3 kB at 236 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.pom (5.5 kB at 166 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j/2.25.4/log4j-2.25.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j/2.25.4/log4j-2.25.4.pom (41 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-bom/4.0.27/groovy-bom-4.0.27.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-bom/4.0.27/groovy-bom-4.0.27.pom (27 kB at 758 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-bom/2.19.1/jackson-bom-2.19.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-bom/2.19.1/jackson-bom-2.19.1.pom (20 kB at 595 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-parent/2.19.2/jackson-parent-2.19.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jackson-parent/2.19.2/jackson-parent-2.19.2.pom (7.2 kB at 211 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/68/oss-parent-68.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/68/oss-parent-68.pom (24 kB at 739 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/platform/jakarta.jakartaee-bom/9.1.0/jakarta.jakartaee-bom-9.1.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/platform/jakarta.jakartaee-bom/9.1.0/jakarta.jakartaee-bom-9.1.0.pom (9.6 kB at 281 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/platform/jakartaee-api-parent/9.1.0/jakartaee-api-parent-9.1.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/platform/jakartaee-api-parent/9.1.0/jakartaee-api-parent-9.1.0.pom (15 kB at 450 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/ee4j/project/1.0.7/project-1.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/ee4j/project/1.0.7/project-1.0.7.pom (14 kB at 373 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.2/junit-bom-5.13.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.13.2/junit-bom-5.13.2.pom (5.7 kB at 157 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-bom/4.11.0/mockito-bom-4.11.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-bom/4.11.0/mockito-bom-4.11.0.pom (3.2 kB at 102 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/5.3.39/spring-framework-bom-5.3.39.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-framework-bom/5.3.39/spring-framework-bom-5.3.39.pom (5.7 kB at 202 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.pom (4.5 kB at 141 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.pom (1.1 kB at 38 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.pom (2.1 kB at 69 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.pom (2.2 kB at 63 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom (15 kB at 458 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom (21 kB at 526 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.pom (2.2 kB at 63 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/7.0.7/spring-test-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/7.0.7/spring-test-7.0.7.pom (2.1 kB at 69 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.pom (2.1 kB at 74 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.pom (1.9 kB at 66 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/minidev/json-smart/2.6.0/json-smart-2.6.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/minidev/json-smart/2.6.0/json-smart-2.6.0.pom (12 kB at 397 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.pom (14 kB at 385 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.pom (2.4 kB at 85 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.pom (13 kB at 439 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api-parent/4.0.4/jakarta.xml.bind-api-parent-4.0.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api-parent/4.0.4/jakarta.xml.bind-api-parent-4.0.4.pom (9.1 kB at 327 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.pom (19 kB at 617 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.pom (3.8 kB at 136 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.pom (19 kB at 606 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-parent/1.17.8/byte-buddy-parent-1.17.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-parent/1.17.8/byte-buddy-parent-1.17.8.pom (66 kB at 2.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.pom (3.7 kB at 116 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility-parent/4.3.0/awaitility-parent-4.3.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility-parent/4.3.0/awaitility-parent-4.3.0.pom (11 kB at 339 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.pom (1.6 kB at 52 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.pom (3.2 kB at 111 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.pom (3.4 kB at 112 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.pom (2.0 kB at 70 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.pom (3.0 kB at 84 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom (1.5 kB at 39 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.pom (3.2 kB at 97 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.pom (3.4 kB at 109 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.pom (3.4 kB at 103 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.pom (2.5 kB at 82 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.pom (14 kB at 423 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.pom (3.0 kB at 104 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis-parent/3.3/objenesis-parent-3.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis-parent/3.3/objenesis-parent-3.3.pom (19 kB at 618 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.pom (2.3 kB at 74 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.pom (7.0 kB at 233 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.pom (2.8 kB at 93 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.pom (2.8 kB at 93 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-parent/2.10.4/xmlunit-parent-2.10.4.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-parent/2.10.4/xmlunit-parent-2.10.4.pom (23 kB at 832 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.jar (74 kB at 3.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-test/4.0.6/spring-boot-starter-test-4.0.6.jar (4.8 kB at 177 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.6/spring-boot-starter-4.0.6.jar (4.8 kB at 136 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.6/spring-boot-starter-logging-4.0.6.jar (4.7 kB at 132 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.5.32/logback-classic-1.5.32.jar (286 kB at 6.7 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.4/log4j-to-slf4j-2.25.4.jar (24 kB at 514 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.5.32/logback-core-1.5.32.jar (644 kB at 12 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar (6.3 kB at 99 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.jar (351 kB at 5.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.jar (26 kB at 343 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.6/spring-boot-autoconfigure-4.0.6.jar (371 kB at 4.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.jar (340 kB at 3.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test-autoconfigure/4.0.6/spring-boot-test-autoconfigure-4.0.6.jar (28 kB at 265 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-test/4.0.6/spring-boot-test-4.0.6.jar (210 kB at 2.0 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.6/spring-boot-4.0.6.jar (1.4 MB at 12 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/minidev/json-smart/2.6.0/json-smart-2.6.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/jayway/jsonpath/json-path/2.10.0/json-path-2.10.0.jar (279 kB at 2.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.jar (131 kB at 972 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar (70 kB at 485 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.jar (67 kB at 465 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/minidev/json-smart/2.6.0/json-smart-2.6.0.jar (123 kB at 808 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.jar (30 kB at 196 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar (126 kB at 769 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/awaitility/awaitility/4.3.0/awaitility-4.3.0.jar (98 kB at 508 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar (126 kB at 629 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.jar (6.4 kB at 31 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.jar (1.4 MB at 6.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar (171 kB at 723 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar (251 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar (14 kB at 59 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar (6.8 kB at 28 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar (297 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar (356 kB at 1.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar (280 kB at 970 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.jar (711 kB at 2.4 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.jar (9.4 kB at 29 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.jar (49 kB at 153 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/7.0.7/spring-test-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar (367 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar (31 kB at 92 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar (18 kB at 52 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/xmlunit/xmlunit-core/2.10.4/xmlunit-core-2.10.4.jar (178 kB at 485 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy/1.17.8/byte-buddy-1.17.8.jar (9.0 MB at 25 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-test/7.0.7/spring-test-7.0.7.jar (1.1 MB at 2.9 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-service ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-service ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/src/main/resources
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-service ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-junit-platform/3.5.5/surefire-junit-platform-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-junit-platform/3.5.5/surefire-junit-platform-3.5.5.pom (5.2 kB at 152 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-providers/3.5.5/surefire-providers-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-providers/3.5.5/surefire-providers-3.5.5.pom (2.5 kB at 77 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/common-java5/3.5.5/common-java5-3.5.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/common-java5/3.5.5/common-java5-3.5.5.pom (3.1 kB at 99 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.pom (3.2 kB at 97 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.pom (2.8 kB at 98 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.12.2/junit-platform-launcher-1.12.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.12.2/junit-platform-launcher-1.12.2.pom (3.0 kB at 101 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-junit-platform/3.5.5/surefire-junit-platform-3.5.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-junit-platform/3.5.5/surefire-junit-platform-3.5.5.jar (35 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/common-java5/3.5.5/common-java5-3.5.5.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.12.2/junit-platform-launcher-1.12.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/common-java5/3.5.5/common-java5-3.5.5.jar (18 kB at 568 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.12.2/junit-platform-launcher-1.12.2.jar (208 kB at 6.1 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.jar (256 kB at 6.4 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.jar (152 kB at 3.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.pom (3.2 kB at 87 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar (246 kB at 7.2 MB/s)
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in com.example.secureapp.service.InMemoryTaskServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-service ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-service ---
+[INFO] 
+[INFO] --- install:3.1.4:install (default-install) @ task-service ---
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/pom.xml to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-service/1.0.0-SNAPSHOT/task-service-1.0.0-SNAPSHOT.pom
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-service/target/task-service-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-service/1.0.0-SNAPSHOT/task-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------------------< com.example.secureapp:task-web >-------------------
+[INFO] Building task-web 1.0.0-SNAPSHOT                                   [5/5]
+[INFO]   from task-web/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.pom (2.9 kB at 48 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.pom (2.3 kB at 55 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.pom (2.2 kB at 57 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.pom (2.5 kB at 74 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.pom (3.7 kB at 110 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.pom (2.6 kB at 73 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.pom (2.2 kB at 66 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.pom (1.8 kB at 48 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.pom (1.5 kB at 45 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.pom (1.8 kB at 47 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.7/spring-web-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.7/spring-web-7.0.7.pom (2.4 kB at 65 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.pom (2.2 kB at 68 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.pom (2.6 kB at 73 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.pom (2.2 kB at 67 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.pom (3.0 kB at 95 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.pom (2.3 kB at 68 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.pom (2.4 kB at 72 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.pom (5.0 kB at 140 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom (11 kB at 250 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.pom (23 kB at 612 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/jboss-parent/52/jboss-parent-52.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/jboss-parent/52/jboss-parent-52.pom (102 kB at 2.7 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.3/classmate-1.7.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.3/classmate-1.7.3.pom (6.5 kB at 171 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/74/oss-parent-74.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/74/oss-parent-74.pom (24 kB at 687 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.pom (3.2 kB at 84 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.pom (2.3 kB at 61 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.pom (2.5 kB at 58 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.pom (2.3 kB at 65 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.pom (11 kB at 287 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.pom (13 kB at 342 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.pom (7.2 kB at 213 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.pom (2.3 kB at 59 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.pom (2.0 kB at 60 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.pom (2.0 kB at 55 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.pom (3.9 kB at 123 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webmvc/4.0.6/spring-boot-starter-webmvc-4.0.6.jar (4.7 kB at 158 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.6/spring-boot-starter-jackson-4.0.6.jar (4.7 kB at 158 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.6/spring-boot-starter-tomcat-4.0.6.jar (4.8 kB at 154 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.6/spring-boot-starter-tomcat-runtime-4.0.6.jar (4.7 kB at 125 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.6/spring-boot-jackson-4.0.6.jar (68 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.6/spring-boot-web-server-4.0.6.jar (169 kB at 3.9 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.7/spring-web-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.6/spring-boot-http-converter-4.0.6.jar (54 kB at 744 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.6/spring-boot-tomcat-4.0.6.jar (124 kB at 1.7 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.21/tomcat-embed-websocket-11.0.21.jar (286 kB at 3.7 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.7/spring-web-7.0.7.jar (2.2 MB at 20 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.6/spring-boot-servlet-4.0.6.jar (47 kB at 409 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.6/spring-boot-webmvc-4.0.6.jar (174 kB at 1.5 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.21/tomcat-embed-core-11.0.21.jar (3.6 MB at 28 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.7/spring-webmvc-7.0.7.jar (1.1 MB at 8.3 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-validation/4.0.6/spring-boot-starter-validation-4.0.6.jar (4.8 kB at 32 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-validation/4.0.6/spring-boot-validation-4.0.6.jar (15 kB at 99 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.3/classmate-1.7.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.21/tomcat-embed-el-11.0.21.jar (270 kB at 1.6 MB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.jar (106 kB at 639 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.jar
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hibernate/validator/hibernate-validator/9.0.1.Final/hibernate-validator-9.0.1.Final.jar (1.4 MB at 7.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.3.Final/jboss-logging-3.6.3.Final.jar (63 kB at 341 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.3/classmate-1.7.3.jar (68 kB at 361 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-micrometer-metrics/4.0.6/spring-boot-starter-micrometer-metrics-4.0.6.jar (4.7 kB at 24 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-actuator/4.0.6/spring-boot-starter-actuator-4.0.6.jar (4.8 kB at 24 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-metrics/4.0.6/spring-boot-micrometer-metrics-4.0.6.jar (241 kB at 1.1 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-micrometer-observation/4.0.6/spring-boot-micrometer-observation-4.0.6.jar (29 kB at 131 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator-autoconfigure/4.0.6/spring-boot-actuator-autoconfigure-4.0.6.jar (141 kB at 633 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-actuator/4.0.6/spring-boot-actuator-4.0.6.jar (357 kB at 1.6 MB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-health/4.0.6/spring-boot-health-4.0.6.jar (154 kB at 649 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-jakarta9/1.16.5/micrometer-jakarta9-1.16.5.jar (55 kB at 229 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar (177 kB at 682 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar (30 kB at 113 kB/s)
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-core/1.16.5/micrometer-core-1.16.5.jar (911 kB at 3.3 MB/s)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ task-web ---
+[INFO] Deleting /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/target
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ task-web ---
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ task-web ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ task-web ---
+[INFO] skip non existing resourceDirectory /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ task-web ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ task-web ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.secureapp.web.TaskApplicationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-10-02T18:20:14.735Z  WARN 502 --- [secure-multimodule-springboot-java21] [           main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/org/json/json/20230227/json-20230227.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2026-10-02T18:20:14.764Z  INFO 502 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : Starting TaskApplicationTest using Java 21.0.12.1 with PID 502 (started by root in /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web)
+2026-10-02T18:20:14.766Z  INFO 502 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : No active profile set, falling back to 1 default profile: "default"
+2026-10-02T18:20:19.386Z  INFO 502 --- [secure-multimodule-springboot-java21] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-10-02T18:20:19.553Z  INFO 502 --- [secure-multimodule-springboot-java21] [           main] c.e.secureapp.web.TaskApplicationTest    : Started TaskApplicationTest in 5.653 seconds (process running for 8.134)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.158 s -- in com.example.secureapp.web.TaskApplicationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ task-web ---
+[INFO] Building jar: /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ task-web ---
+[INFO] Replacing main artifact /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar.original
+[INFO] 
+[INFO] --- install:3.1.4:install (default-install) @ task-web ---
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/pom.xml to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.pom
+[INFO] Installing /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/investigation/cycle-1/repository/task-web/target/task-web-1.0.0-SNAPSHOT.jar to /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T181746Z-ad37b1e3/temp/experimental-runtime/cycle-1/home/.m2/repository/com/example/secureapp/task-web/1.0.0-SNAPSHOT/task-web-1.0.0-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... SUCCESS [  7.283 s]
+[INFO] task-common ........................................ SUCCESS [  6.453 s]
+[INFO] task-domain ........................................ SUCCESS [  0.547 s]
+[INFO] task-service ....................................... SUCCESS [  7.196 s]
+[INFO] task-web ........................................... SUCCESS [ 13.802 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  40.000 s
+[INFO] Finished at: 2026-10-02T18:20:22Z
+[INFO] ------------------------------------------------------------------------

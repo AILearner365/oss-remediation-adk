@@ -1,0 +1,123 @@
+{
+  "branch": "autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z",
+  "commit": "7f16836d5b363d54d5b122e5c36fed5171f51c60",
+  "evidence": {
+    "commands": [
+      {
+        "blocked": false,
+        "command": [
+          "git",
+          "reset",
+          "--mixed",
+          "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/repository",
+        "durationSeconds": 0.004549604999965595,
+        "exitCode": 0,
+        "stderr": "",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-f47c38e25566.stderr.log",
+        "stdout": "Unstaged changes after reset:\nM\tpom.xml\n",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-f47c38e25566.stdout.log",
+        "timedOut": false
+      },
+      {
+        "blocked": false,
+        "command": [
+          "git",
+          "checkout",
+          "-b",
+          "autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/repository",
+        "durationSeconds": 0.004098156000054587,
+        "exitCode": 0,
+        "stderr": "Switched to a new branch 'autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z'\n",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-812c5dbd2e06.stderr.log",
+        "stdout": "",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-812c5dbd2e06.stdout.log",
+        "timedOut": false
+      },
+      {
+        "blocked": false,
+        "command": [
+          "git",
+          "add",
+          "-A",
+          "--",
+          "pom.xml"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/repository",
+        "durationSeconds": 0.004357795000032638,
+        "exitCode": 0,
+        "stderr": "",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-a6204bd4471b.stderr.log",
+        "stdout": "",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-a6204bd4471b.stdout.log",
+        "timedOut": false
+      },
+      {
+        "blocked": false,
+        "command": [
+          "git",
+          "-c",
+          "user.name=Autonomous OSS Remediation",
+          "-c",
+          "user.email=oss-remediation@localhost",
+          "commit",
+          "--no-verify",
+          "-m",
+          "Remediate OSS vulnerabilities"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/repository",
+        "durationSeconds": 0.008836568000106126,
+        "exitCode": 0,
+        "stderr": "",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-3c1046c7f730.stderr.log",
+        "stdout": "[autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z 7f16836] Remediate OSS vulnerabilities\n 1 file changed, 32 insertions(+), 2 deletions(-)\n",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_git-3c1046c7f730.stdout.log",
+        "timedOut": false
+      },
+      {
+        "blocked": false,
+        "command": [
+          "git",
+          "-c",
+          "core.askPass=",
+          "-c",
+          "credential.helper=",
+          "-c",
+          "credential.interactive=false",
+          "-c",
+          "credential.modalPrompt=false",
+          "-c",
+          "core.hooksPath=/dev/null",
+          "push",
+          "--no-verify",
+          "https://x-access-token:[REDACTED]@github.com/AILearner365/maven-multimodule-app",
+          "autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z"
+        ],
+        "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/repository",
+        "durationSeconds": 1.1388546919999953,
+        "exitCode": 0,
+        "stderr": "remote: \nremote: Create a pull request for 'autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z' on GitHub by visiting:        \nremote:      https://github.com/AILearner365/maven-multimodule-app/pull/new/autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z        \nremote: \nTo https://github.com/AILearner365/maven-multimodule-app\n * [new branch]      autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z -> autonomous-oss-remediation-main-runrunning-9ea1b0e-20261002T173930Z\n",
+        "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_push-74b332df1766.stderr.log",
+        "stdout": "",
+        "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261002T173326Z-910dafe4/artifacts/commands/delivery_push-74b332df1766.stdout.log",
+        "timedOut": false
+      }
+    ],
+    "github": {
+      "response": {
+        "draft": true,
+        "html_url": "https://github.com/AILearner365/maven-multimodule-app/pull/206",
+        "number": 206,
+        "state": "open"
+      },
+      "statusCode": 201
+    }
+  },
+  "pullRequestUrl": "https://github.com/AILearner365/maven-multimodule-app/pull/206",
+  "reason": null,
+  "status": "SUCCESS",
+  "succeeded": true
+}

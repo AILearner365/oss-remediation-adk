@@ -1,0 +1,69 @@
+{
+  "baselineCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "captureSucceeded": true,
+  "capturedAt": "2026-10-02T18:16:28.608784+00:00",
+  "changedFiles": [
+    "pom.xml",
+    "task-web/pom.xml"
+  ],
+  "changedFilesComplete": true,
+  "cycle": 2,
+  "diff": "diff --git a/pom.xml b/pom.xml\nindex 91b8c15..8498a0d 100644\n--- a/pom.xml\n+++ b/pom.xml\n@@ -34,8 +34,8 @@\n \n         <maven.enforcer.version>3.6.2</maven.enforcer.version>\n         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>\n-        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n-    </properties>\n+                        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>\n+</properties>\n \n     <dependencyManagement>\n         <dependencies>\n@@ -54,18 +54,48 @@\n                 <artifactId>task-service</artifactId>\n                 <version>${project.version}</version>\n             </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-expression</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-webmvc</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>io.micrometer</groupId>\n+                <artifactId>micrometer-core</artifactId>\n+                <version>1.16.6</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.apache.tomcat.embed</groupId>\n+                <artifactId>tomcat-embed-core</artifactId>\n+                <version>11.0.25</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-core</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-databind</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n     <dependencies>\n         <dependency>\n             <groupId>org.apache.commons</groupId>\n             <artifactId>commons-text</artifactId>\n-            <version>1.9</version>\n+            <version>1.10.0</version>\n         </dependency>\n         <dependency>\n             <groupId>org.json</groupId>\n             <artifactId>json</artifactId>\n-            <version>20230227</version>\n+            <version>20231013</version>\n         </dependency>\n     </dependencies>\n     <build>\ndiff --git a/task-web/pom.xml b/task-web/pom.xml\nindex d4cd9a7..903b2d9 100644\n--- a/task-web/pom.xml\n+++ b/task-web/pom.xml\n@@ -26,6 +26,7 @@\n     <dependency>\n       <groupId>org.springframework.boot</groupId>\n       <artifactId>spring-boot-starter-webmvc</artifactId>\n+\n     </dependency>\n     <dependency>\n       <groupId>org.springframework.boot</groupId>\n",
+  "diffComplete": true,
+  "diffReference": "evidence:9b6cf11b74fcc37067dea105fe5b8f757a1fc48cd705067f3820d507193acbed",
+  "diffSha256": "c8fd225dd0bc1a16e574ec67544d49ed119cd3d9d8b554197604cef41c71fbfe",
+  "independentValidationAtCapture": "not yet run",
+  "lineChangeParsingComplete": true,
+  "lineChanges": [
+    {
+      "addedCount": 34,
+      "addedExcerpts": [
+        "                        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>",
+        "</properties>",
+        "            <dependency>",
+        "                <groupId>org.springframework</groupId>",
+        "                <artifactId>spring-expression</artifactId>",
+        "                <version>7.0.8</version>",
+        "            </dependency>",
+        "            <dependency>",
+        "                <groupId>org.springframework</groupId>",
+        "                <artifactId>spring-webmvc</artifactId>",
+        "                <version>7.0.8</version>",
+        "            </dependency>"
+      ],
+      "addedExcerptsClippedLines": 0,
+      "addedExcerptsComplete": false,
+      "countsComplete": true,
+      "file": "pom.xml",
+      "removedCount": 4,
+      "removedExcerpts": [
+        "        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>",
+        "    </properties>",
+        "            <version>1.9</version>",
+        "            <version>20230227</version>"
+      ],
+      "removedExcerptsClippedLines": 0,
+      "removedExcerptsComplete": true,
+      "summaryStatus": "parsed"
+    },
+    {
+      "addedCount": 1,
+      "addedExcerpts": [
+        ""
+      ],
+      "addedExcerptsClippedLines": 0,
+      "addedExcerptsComplete": true,
+      "countsComplete": true,
+      "file": "task-web/pom.xml",
+      "removedCount": 0,
+      "removedExcerpts": [],
+      "removedExcerptsClippedLines": 0,
+      "removedExcerptsComplete": true,
+      "summaryStatus": "parsed"
+    }
+  ],
+  "lineChangesComplete": true,
+  "summaryRecovery": "For incomplete or unsupported summaries, retrieve diffReference for the full captured diff; snapshotReference retains all file summaries. Check captureSucceeded before treating the captured diff as complete repository evidence.",
+  "treeDigest": "7f299bd755d3d53b227d13877f363e0ef496192179775da4f5a0a458257700d6",
+  "workspaceKind": "authoritative"
+}
