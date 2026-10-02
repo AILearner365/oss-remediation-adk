@@ -5,6 +5,7 @@ import unittest
 
 from autonomous_oss_remediation_agent.journal import (
     CaptureStatus,
+    CheckpointCaptureStatus,
     CycleCapture,
     DeliveryEligibility,
     INTENT_SECTIONS,
@@ -17,6 +18,7 @@ from autonomous_oss_remediation_agent.journal import (
     render_final_resolution,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
+from autonomous_oss_remediation_agent.models import ValidationReport, ValidationCheck
 from tests.checkpoint_fixtures import typed_intent_answers
 
 
@@ -494,6 +496,40 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.capture_status(2))
         self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.run_capture_status)
         self.assertEqual(("Cycle 1 capture is INCOMPLETE",), self.lifecycle.capture_warnings())
+
+    def test_failed_capture_recovers_across_successfully_captured_intermediate_cycle(self):
+        def report(cycle, passed):
+            return ValidationReport(cycle, passed,
+                                    (ValidationCheck("engineering", passed, "checked"),),
+                                    ("config.txt",), "diff", f"tree-{cycle}")
+
+        failed = CycleCapture(intent_capture_status=CheckpointCaptureStatus.FAILED,
+                              validation_report=report(1, False))
+        middle = CycleCapture(intent=object(), outcome=object(), validation_report=report(2, False))
+        final = CycleCapture(intent=object(), outcome=object(), validation_report=report(3, True))
+        self.lifecycle.cycles = {1: failed, 2: middle, 3: final}
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.run_capture_status)
+        self.assertEqual(("Cycle 1 capture is INCOMPLETE",), self.lifecycle.capture_warnings())
+
+        self.lifecycle.cycles = {1: failed, 2: final}
+        self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.run_capture_status)
+        final.validation_report = report(2, True)
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.run_capture_status)
+
+        failed.intent_capture_status = CheckpointCaptureStatus.PENDING
+        self.assertEqual(CaptureStatus.MISSING, self.lifecycle.run_capture_status)
+        failed.intent_capture_status = CheckpointCaptureStatus.FAILED
+        final.validation_report = report(2, False)
+        self.assertEqual(CaptureStatus.INCOMPLETE, self.lifecycle.run_capture_status)
+
+        late = CycleCapture(intent=object(), outcome=object(), late_intent=True,
+                            validation_report=report(1, False))
+        final.validation_report = report(2, True)
+        self.lifecycle.cycles = {1: late, 2: final}
+        self.assertEqual(CaptureStatus.LATE, self.lifecycle.run_capture_status)
+
+        self.lifecycle.cycles = {1: middle}
+        self.assertEqual(CaptureStatus.COMPLETE, self.lifecycle.run_capture_status)
 
     def test_limited_markdown_subset_handles_fences_and_rejects_heading_injection(self):
         accepted = self._intent_answers()

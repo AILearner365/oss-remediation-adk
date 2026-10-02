@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -390,15 +391,43 @@ class DeterministicValidator:
         files, status_ok = self._capture_changed_files(baseline_commit)
         diff, diff_ok = self._capture_diff_text(baseline_commit, files)
         path = self.trace.write_text(f"outcome/cycle-{cycle}.diff", diff)
+        line_changes: list[dict] = []
+        current: dict | None = None
+        for line in diff.splitlines():
+            if line.startswith("diff --git "):
+                current = {"file": line.split(" b/", 1)[-1], "addedCount": 0,
+                           "removedCount": 0, "addedExcerpts": [], "removedExcerpts": []}
+                line_changes.append(current)
+            elif current is not None and line.startswith("+") and not line.startswith("+++"):
+                current["addedCount"] += 1
+                if len(current["addedExcerpts"]) < 12:
+                    current["addedExcerpts"].append(line[1:][:160])
+            elif current is not None and line.startswith("-") and not line.startswith("---"):
+                current["removedCount"] += 1
+                if len(current["removedExcerpts"]) < 20:
+                    current["removedExcerpts"].append(line[1:][:160])
+        for change in line_changes:
+            change["addedExcerptsComplete"] = change["addedCount"] <= len(change["addedExcerpts"])
+            change["removedExcerptsComplete"] = change["removedCount"] <= len(change["removedExcerpts"])
         snapshot = {
             "workspaceKind": "authoritative", "cycle": cycle,
+            "capturedAt": datetime.now(timezone.utc).isoformat(),
             "baselineCommit": baseline_commit, "captureSucceeded": status_ok and diff_ok,
             "changedFiles": list(files), "diffReference": self.trace.issue_evidence_reference(path),
             "diffSha256": hashlib.sha256(diff.encode("utf-8")).hexdigest(),
-            "diff": diff, "independentValidationAtCapture": "not yet run",
+            "diff": diff, "lineChanges": line_changes,
+            "treeDigest": self.tree_digest(files),
+            "independentValidationAtCapture": "not yet run",
         }
         manifest = self.trace.write_json(f"outcome/cycle-{cycle}-state.json", snapshot)
+        displayed_changes = [{**change,
+                              "addedExcerpts": change["addedExcerpts"][:6],
+                              "removedExcerpts": change["removedExcerpts"][:12],
+                              "addedExcerptsComplete": change["addedCount"] <= 6,
+                              "removedExcerptsComplete": change["removedCount"] <= 12}
+                             for change in line_changes[:8]]
         return {**snapshot, "changedFiles": list(files[:40]), "changedFilesComplete": len(files) <= 40,
+                "lineChanges": displayed_changes, "lineChangesComplete": len(line_changes) <= 8,
                 "diff": diff[:12000], "diffComplete": len(diff) <= 12000,
                 "snapshotReference": self.trace.issue_evidence_reference(manifest)}
 

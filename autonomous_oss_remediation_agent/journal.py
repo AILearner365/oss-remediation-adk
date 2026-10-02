@@ -449,7 +449,8 @@ class JournalLifecycle:
             return historical_status
 
         earlier_captures = (
-            self.cycles[cycle] for cycle in sorted(self.cycles) if cycle < latest_cycle
+            self.cycles[cycle] for cycle in sorted(self.cycles)
+            if cycle < latest_cycle and self.cycles[cycle].status != CaptureStatus.COMPLETE
         )
         if all(
             capture.capture_recovery_required and capture.validation_report is not None
@@ -672,7 +673,7 @@ class JournalLifecycle:
 
     @staticmethod
     def _outcome_facts(capture: CycleCapture) -> str:
-        facts = {key: capture.outcome_evidence[key] for key in ("authoritativeChanges", "executionObservations")
+        facts = {key: capture.outcome_evidence[key] for key in ("authoritativeChanges", "executionObservations", "currentStateSelfScan", "acceptedIntent", "previousCycleValidation")
                  if key in capture.outcome_evidence}
         return ("## Harness-observed final state and check evidence\n\n"
                 "Net changes are relative to the run baseline, captured before independent validation; recorded actions may have been temporary. "
@@ -1293,6 +1294,16 @@ def render_final_resolution(
     latest = cycles[max(cycles)] if cycles else None
     latest_answers = latest.outcome_answers if latest else {}
     implementation_result = latest_answers.get("Implementation Result", "")
+    latest_status = latest.outcome_status if latest else None
+    verified_state = (
+        f"Cycle {validation.cycle} independent validation {'passed' if validation.passed else 'failed'} "
+        f"for tree `{validation.tree_digest}`. Target comparison "
+        + (f"found {len(validation.remaining_target_findings)} remaining targeted findings."
+           if validation.target_comparison_complete else "was not complete.")
+        + f" Changed files: {', '.join(validation.changed_files) or 'none'}. Diff: {validation.diff_path}."
+        if validation else "Independent validation did not run."
+    )
+    contradictions = "\n".join(_validation_contradictions(validation, latest_status)) if validation else "- No independent validation available."
     partial = (
         f"Preserved changes require manual review. Unresolved deterministic checks: {', '.join(unresolved) or 'none identified'}."
         if outcome == RemediationOutcome.PARTIALLY_REMEDIATED
@@ -1317,7 +1328,15 @@ def render_final_resolution(
 
 Deterministic validation status and capture quality are reported separately. Run-level capture status: `{capture_status.value}`.
 
-## Final implemented approach
+{verified_state}
+
+## Reconciliation with the accepted model Outcome
+
+The accepted Cycle Outcome remains historical model testimony. Its status was `{latest_status or 'not captured'}`; it is not a fresh deterministic finding. Reconciliation against the latest independent validation:
+
+{contradictions}
+
+## Accepted model account of the implemented approach (historical claim)
 
 {implementation_result or 'No accepted Cycle Outcome described the implementation result.'}
 
@@ -1353,7 +1372,7 @@ Deterministic validation status and capture quality are reported separately. Run
 
 Run-level capture quality `{capture_status.value}`; delivery eligibility `{delivery.value}`.
 
-Model-reported constraint, compatibility, regression, and risk information remains in the accepted Implementation Result above; deterministic checks remain authoritative within their stated scope.
+Model-reported constraint, compatibility, regression, and risk information remains in the accepted Implementation Result above as historical claims; deterministic checks remain authoritative within their stated scope.
 
 ## Partial-remediation disclosure
 

@@ -201,8 +201,9 @@ class DeveloperCapabilitySet:
         new_text: str | None = None,
         expected_occurrences: int = 1,
         workspace: str = "active",
+        read_receipt: str | None = None,
     ) -> dict[str, Any]:
-        """Write text or replace matching text (new_text='' removes text). This never deletes a file. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
+        """Write a new file, replace a targeted span, or rewrite an existing file with a complete-current-read receipt. This never deletes a file. Before Intent, active means experiment; afterward, authoritative unless experiment is explicit."""
         denied = self._require_phase("edit_workspace_text", {JournalPhase.INTENT_REQUIRED, JournalPhase.EXECUTION})
         if denied:
             return denied
@@ -212,7 +213,7 @@ class DeveloperCapabilitySet:
         io, _ = selected
         result = self._invoke(
             "edit_workspace_text", io.edit_text, action, path, content, old_text, new_text,
-            expected_occurrences, workspace_io=io,
+            expected_occurrences, read_receipt, workspace_io=io,
         )
         self.trace.append_event("agent_workspace_action", cycle=self.journal.active_cycle if self.journal else None,
                                 workspaceKind=io.workspace_kind, action=action, path=path,

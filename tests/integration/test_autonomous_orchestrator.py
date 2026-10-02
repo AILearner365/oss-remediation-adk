@@ -746,6 +746,87 @@ class AutonomousOrchestratorIntegrationTests(unittest.TestCase):
         self.assertNotIn("successful final correction uses version 3.0", adapter.contexts[0].agent_summary)
         self.assertIn("diffReference", adapter.contexts[0].agent_summary)
 
+    def test_outcome_evidence_exposes_unrelated_removal_and_accepted_intent(self):
+        pom = self.source / "pom.xml"
+        pom.write_text(pom.read_text(encoding="utf-8").replace(
+            "</project>", "<unrelated>retain-this-section</unrelated></project>"), encoding="utf-8")
+        _git(self.source, "add", "pom.xml")
+        _git(self.source, "commit", "-m", "add unrelated section")
+        test = self
+
+        class Session(_ScriptedAgentSession):
+            async def run_turn(self, message):
+                c = self.capabilities
+                if c.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+                    evidence = c.journal.cycles[1].outcome_evidence
+                    test.assertIn("acceptedIntent", evidence)
+                    test.assertIn("pre-Intent experiments", evidence["acceptedIntent"]["scope"])
+                    changes = evidence["authoritativeChanges"]
+                    test.outcome_tree_digest = changes["treeDigest"]
+                    test.assertTrue(changes["diffComplete"])
+                    test.assertTrue(any("retain-this-section" in line
+                                        for file in changes["lineChanges"]
+                                        for line in file["removedExcerpts"]))
+                    test.assertIn("lineChanges", message)
+                    answer = _outcome_answers()
+                    answer[0]["answer"] = "The final edit updates the version and removes an unrelated section."
+                    retained_intent = c.retrieve_retained_evidence(evidence["acceptedIntent"]["fullReference"])
+                    test.assertEqual("ok", retained_intent["status"])
+                    test.assertIn("Selected solution", retained_intent["content"])
+                    c.submit_cycle_outcome(1, "READY_FOR_INDEPENDENT_VALIDATION", "Ready.", answer)
+                    test.assertTrue(c.trace.resolve_evidence_reference(
+                        evidence["acceptedIntent"]["fullReference"]).is_file())
+                    return AgentTurnResult("Outcome submitted")
+                c.edit_workspace_text("replace", "pom.xml", workspace="experiment",
+                                      old_text="<demo.version>1.0</demo.version>",
+                                      new_text="<demo.version>3.0</demo.version>")
+                c.submit_cycle_intent(1, _intent_answers(1))
+                c.edit_workspace_text("replace", "pom.xml", old_text="<demo.version>1.0</demo.version>",
+                                      new_text="<demo.version>2.0</demo.version>")
+                c.edit_workspace_text("replace", "pom.xml",
+                                      old_text="<unrelated>retain-this-section</unrelated>", new_text="")
+                return AgentTurnResult("Experimental version 3.0 preceded the accepted Intent.")
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=1), agent_session_factory=lambda c, model: Session(c, []),
+            scanner_factory=_FixtureScanner).run()
+        self.assertTrue(result.validation.passed)
+        self.assertEqual(self.outcome_tree_digest, result.validation.tree_digest)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("retain-this-section", journal)
+        self.assertIn("acceptedIntent", journal)
+
+    def test_prior_cycle_scan_does_not_validate_corrective_edit_and_final_resolution_reconciles(self):
+        test = self
+
+        class Session(_ScriptedAgentSession):
+            async def run_turn(self, message):
+                if self.capabilities.journal.phase == JournalPhase.OUTCOME_REQUIRED:
+                    cycle = self.capabilities.journal.active_cycle
+                    if cycle == 2:
+                        evidence = self.capabilities.journal.cycles[2].outcome_evidence
+                        test.assertEqual(1, evidence["previousCycleValidation"]["cycle"])
+                        test.assertEqual("historical_prior_cycle_state",
+                                         evidence["previousCycleValidation"]["stateRelation"])
+                        test.assertEqual("no_authoritative_self_scan_after_latest_action",
+                                         evidence["currentStateSelfScan"]["stateRelation"])
+                        test.assertIn("does not evaluate subsequent", message)
+                        self.outcome_status = "PARTIALLY_REMEDIATED"
+                    return await super().run_turn(message)
+                return await super().run_turn(message)
+
+        result = AutonomousRemediationOrchestrator(
+            self._request(max_cycles=2),
+            agent_session_factory=lambda c, model: Session(c, [("1.0", "1.5"), ("1.5", "2.0")]),
+            scanner_factory=_FixtureScanner).run()
+        self.assertTrue(result.validation.passed)
+        self.assertEqual("NOT_DELIVERY_ELIGIBLE", result.delivery_eligibility)
+        self.assertEqual("VALIDATED_MANUAL_DELIVERY_REQUIRED", result.delivery.status)
+        journal = Path(result.journal_path).read_text(encoding="utf-8")
+        self.assertIn("independent validation passed", journal)
+        self.assertIn("Outcome reported partial remediation, but deterministic validation", journal)
+        self.assertIn("historical model testimony", journal)
+
     def test_same_agent_session_continues_after_validation_failure(self):
         sessions = []
 

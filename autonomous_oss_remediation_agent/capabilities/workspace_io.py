@@ -29,6 +29,10 @@ class WorkspaceIO:
         self.max_active_listing_cursors = max(1, min(max_active_listing_cursors, 100))
         self._listing_cursors: dict[str, _ListingCursor] = {}
         self._search_cursors: dict[str, tuple[str, str, str | None, str, int]] = {}
+        # A receipt is issued only after this revision's full contents were returned.
+        self._read_coverage: dict[tuple[Path, str], dict[int, list[tuple[int, int]]]] = {}
+        self._read_receipts: dict[tuple[Path, str], str] = {}
+        self._partial_excerpts: dict[tuple[Path, str], set[str]] = {}
 
     @property
     def workspace_kind(self) -> str:
@@ -51,7 +55,8 @@ class WorkspaceIO:
         size = target.stat().st_size
         if size > self.max_file_bytes:
             raise ValueError(f"File exceeds {self.max_file_bytes} byte read limit: {path}")
-        text = target.read_text(encoding="utf-8")
+        original_bytes = target.read_bytes()
+        text = original_bytes.decode("utf-8")
         lines = text.splitlines()
         start = max(1, start_line)
         if start_column < 1:
@@ -88,6 +93,36 @@ class WorkspaceIO:
             "nextStartLine": end if line_truncated else (end + 1 if end < len(lines) else None),
             "nextStartColumn": start_column + 8000 if line_truncated else 1,
         }
+        revision = _sha256(original_bytes)
+        key = (target, revision)
+        if key not in self._read_coverage and len(self._read_coverage) >= 32:
+            oldest = next(iter(self._read_coverage))
+            for records in (self._read_coverage, self._read_receipts, self._partial_excerpts):
+                records.pop(oldest, None)
+        coverage = self._read_coverage.setdefault(key, {})
+        if selected_lines:
+            for offset, excerpt in enumerate(selected_lines):
+                number = start + offset
+                left = start_column - 1 if offset == 0 else 0
+                ranges = coverage.setdefault(number, [])
+                ranges.append((left, left + len(excerpt)))
+                ranges.sort()
+                merged: list[tuple[int, int]] = []
+                for interval_start, interval_end in ranges:
+                    if merged and interval_start <= merged[-1][1]:
+                        merged[-1] = (merged[-1][0], max(interval_end, merged[-1][1]))
+                    else:
+                        merged.append((interval_start, interval_end))
+                coverage[number] = merged
+        if result["moreExists"] and selected:
+            self._partial_excerpts.setdefault(key, set()).add(_sha256(selected.encode("utf-8")))
+        covered = all(coverage.get(number) == [(0, len(line))]
+                      for number, line in enumerate(lines, 1))
+        if covered:
+            self._read_receipts.setdefault(key, uuid.uuid4().hex)
+        result.update({"fileComplete": start == 1 and start_column == 1 and not result["moreExists"],
+                       "readCoverageComplete": covered, "fileSha256": revision,
+                       "readReceipt": self._read_receipts.get(key)})
         result["workspaceKind"] = self.workspace_kind
         result["cycle"] = self.cycle
         self._trace("workspace_read", path=result["path"], startLine=start, endLine=end)
@@ -338,6 +373,7 @@ class WorkspaceIO:
         old_text: str | None = None,
         new_text: str | None = None,
         expected_occurrences: int = 1,
+        read_receipt: str | None = None,
     ) -> dict[str, Any]:
         normalized_action = action.lower().strip()
         target = self.workspace.repository_path(path, allow_missing=True)
@@ -347,6 +383,13 @@ class WorkspaceIO:
         if normalized_action == "write":
             if content is None:
                 raise ValueError("content is required for write")
+            if target.is_file() and (not read_receipt or
+                    self._read_receipts.get((target, _sha256(before))) != read_receipt):
+                raise ValueError(
+                    "Existing-file write requires read_receipt from complete current-file read coverage. "
+                    "Continue read_workspace_text at nextStartLine/nextStartColumn until readCoverageComplete, "
+                    "then retry with its readReceipt; or use replace for a targeted edit."
+                )
             encoded = content.encode("utf-8")
             self._write(target, encoded)
         elif normalized_action == "replace":
@@ -354,6 +397,13 @@ class WorkspaceIO:
                 raise ValueError(f"File does not exist: {path}")
             if old_text is None or new_text is None:
                 raise ValueError("old_text and new_text are required for replace")
+            if (_sha256(old_text.encode("utf-8")) in
+                    self._partial_excerpts.get((target, _sha256(before)), set())):
+                raise ValueError(
+                    "Replacement old_text is a partial read excerpt, not the complete file. "
+                    "Use a narrower matching span to preserve the unseen tail, or complete the current-file "
+                    "read and use write with read_receipt for an intentional rewrite."
+                )
             current = before.decode("utf-8")
             occurrences = current.count(old_text)
             if occurrences != expected_occurrences:
@@ -362,6 +412,7 @@ class WorkspaceIO:
         else:
             raise ValueError("action must be write or replace; use delete_workspace_file to remove an entire file")
         after = target.read_bytes() if target.exists() else b""
+        self._forget_reads(target)
         result = {
             "status": "ok",
             "workspaceKind": self.workspace_kind,
@@ -375,6 +426,12 @@ class WorkspaceIO:
         self._trace("workspace_edit", **result)
         return result
 
+    def _forget_reads(self, target: Path) -> None:
+        for records in (self._read_coverage, self._read_receipts, self._partial_excerpts):
+            for key in list(records):
+                if key[0] == target:
+                    del records[key]
+
     def delete_file(self, path: str) -> dict[str, Any]:
         """Remove one entire repository file; never interpret this as a text edit."""
         target = self.workspace.repository_path(path, allow_missing=False)
@@ -384,6 +441,7 @@ class WorkspaceIO:
             raise ValueError(f"File exceeds {self.max_file_bytes} byte edit limit: {path}")
         before = target.read_bytes()
         target.unlink()
+        self._forget_reads(target)
         result = {
             "status": "ok", "workspaceKind": self.workspace_kind, "cycle": self.cycle,
             "action": "delete_file", "path": path.replace("\\", "/"),

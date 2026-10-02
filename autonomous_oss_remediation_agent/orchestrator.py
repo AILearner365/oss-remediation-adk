@@ -569,7 +569,40 @@ class AutonomousRemediationOrchestrator:
         execution_summary: str,
         evidence: dict,
     ) -> AgentTurnResult:
-        lifecycle.cycles[cycle].outcome_evidence = evidence
+        capture = lifecycle.cycles[cycle]
+        selected_solution = capture.intent_answers.get("Selected solution", "")
+        accepted_intent_text = lifecycle.store.path.read_bytes()[
+            capture.intent.start_offset:capture.intent.end_offset
+        ].decode("utf-8") if capture.intent else ""
+        intent_artifact = lifecycle.trace.write_text(
+            f"outcome/cycle-{cycle}-accepted-intent.md", accepted_intent_text)
+        intent_reference = lifecycle.trace.issue_evidence_reference(intent_artifact)
+        lifecycle.trace.append_event("outcome_intent_reference", cycle=cycle, reference=intent_reference)
+        evidence = {
+            **evidence,
+            "acceptedIntent": {
+                "cycle": cycle,
+                "capturedAt": capture.intent.captured_at if capture.intent else None,
+                "selectedSolution": selected_solution[:4000],
+                "selectedSolutionComplete": len(selected_solution) <= 4000,
+                "fullReference": intent_reference,
+                "scope": "Accepted pre-execution decision; pre-Intent experiments are not post-Intent deviations.",
+            },
+        }
+        earlier = [(number, item) for number, item in lifecycle.cycles.items()
+                   if number < cycle and item.validation_report is not None]
+        if earlier:
+            previous_cycle, previous_capture = max(earlier, key=lambda item: item[0])
+            report = previous_capture.validation_report
+            evidence["previousCycleValidation"] = {
+                "cycle": previous_cycle, "workspaceKind": "authoritative",
+                "capturedAt": previous_capture.validation.captured_at if previous_capture.validation else None,
+                "treeDigest": report.tree_digest,
+                "passed": report.passed, "remainingTargetFindings": len(report.remaining_target_findings),
+                "stateRelation": "historical_prior_cycle_state",
+                "scope": "This check did not evaluate subsequent authoritative edits.",
+            }
+        capture.outcome_evidence = evidence
         message = outcome_message(cycle, execution_summary, evidence)
         turn = AgentTurnResult("")
         for _ in range(lifecycle.max_checkpoint_attempts):
@@ -755,6 +788,37 @@ class AutonomousRemediationOrchestrator:
                     if event.get("type") == "engineering_scan_completed" and event.get("resultReference"):
                         event["evidenceReference"] = trace.issue_evidence_reference(event["resultReference"])
                     events.append(event)
+        # Tool results are observations at their own timestamps, not timeless claims
+        # about the repository after later edits or potentially mutating commands.
+        mutations = [event.get("timestamp") for event in events if event.get("type") == "command"
+                     and event.get("workspaceKind") == "authoritative"]
+        if trace.events_path.exists():
+            for line in trace.events_path.read_text(encoding="utf-8").splitlines():
+                event = json.loads(line)
+                if (event.get("cycle") == cycle and event.get("type") == "agent_workspace_action"
+                        and event.get("workspaceKind") == "authoritative" and event.get("status") == "ok"):
+                    mutations.append(event.get("timestamp"))
+        for event in events:
+            if event.get("type") in {"command", "engineering_scan_completed"}:
+                event["stateRelation"] = (
+                    "historical_later_authoritative_action_observed"
+                    if any(stamp and stamp > event.get("timestamp", "") for stamp in mutations)
+                    else "latest_observed_action_no_repository_digest_at_check"
+                )
+        latest_mutation = max((stamp for stamp in mutations if stamp), default=None)
+        authoritative_scans = [event for event in events
+                               if event.get("type") == "engineering_scan_completed"
+                               and event.get("workspaceKind") == "authoritative"]
+        scans_after_action = [event for event in authoritative_scans
+                              if latest_mutation is None or event.get("timestamp", "") > latest_mutation]
+        self_scan_coverage = {
+            "cycle": cycle, "workspaceKind": "authoritative",
+            "latestPotentiallyMutatingActionAt": latest_mutation,
+            "latestScannerObservationAt": max((event.get("timestamp") for event in authoritative_scans), default=None),
+            "stateRelation": ("no_authoritative_self_scan_after_latest_action" if not scans_after_action
+                              else "scanner_observed_after_latest_action_without_repository_digest"),
+            "scope": "Only independent validation after Outcome establishes deterministic current-state target coverage.",
+        }
         observations = events
         retained = trace.write_json(f"outcome/cycle-{cycle}-observations.json", observations)
         changes = validator.outcome_change_evidence(cycle, baseline_commit)
@@ -778,6 +842,7 @@ class AutonomousRemediationOrchestrator:
                 "fullReference": observation_reference,
                 "scope": "Observed command exits and scan results at their recorded times; not proof of arbitrary prose claims or untested behavior.",
             },
+            "currentStateSelfScan": self_scan_coverage,
             "changedFiles": list(changed_files[:40]),
             "eventHistoryIsFinalState": False,
             "executionContinuation": continuation,
@@ -808,6 +873,8 @@ class AutonomousRemediationOrchestrator:
             elif event.get("type") == "outcome_evidence_captured":
                 indexed.extend({"type": "outcome_evidence", "reference": reference}
                                for reference in event.get("references", []))
+            elif event.get("type") == "outcome_intent_reference":
+                indexed.append({"type": "accepted_intent", "reference": event["reference"]})
             for path in filter(None, paths):
                 try:
                     reference = trace.issue_evidence_reference(path)

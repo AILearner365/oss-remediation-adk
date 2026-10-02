@@ -300,6 +300,10 @@ def outcome_message(cycle: int, execution_summary: str, evidence: dict) -> str:
         "coverage. Scope each self-validation claim to what its underlying check actually evaluated; keep unevaluated "
         "coverage unresolved or unverified, and do not claim deterministic success. "
         "Ground final-state claims in authoritativeChanges below; it is the current net diff, not the history of edits. "
+        "Inspect lineChanges, including removals, and reconcile material changes with the acceptedIntent below. "
+        "A previousCycleValidation result is historical and does not evaluate edits in this cycle. "
+        "Use currentStateSelfScan to identify whether a scanner observed the final authoritative action sequence; "
+        "do not repeat older findings as remaining findings for a later edit without a fresh check. "
         "Distinguish temporary or reverted work from what remains. Explain material corrections yourself. "
         "Use retrieve_retained_evidence for the supplied diff, snapshot, and check references when an excerpt is incomplete.\n\n"
         + outcome_questionnaire()

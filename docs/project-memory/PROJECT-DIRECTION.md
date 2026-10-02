@@ -26,7 +26,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P1.1 | P1 | Active; frozen behavior | Evaluate Challenge Before Commitment using clean comparable runs; task success and engineering decision quality are separate. Current decision: `CONTINUE`. |
 | P1.1a | P1.1 | Completed | Durable project-continuity documents. |
 | P1.1b | P1.1 + P2 | Evaluation paused for capture cleanup | Historical audit separated reasoning defects from harness contamination. `011744` had the now-fixed answer-field mismatch; `022558` lost Intent cycles after unregistered ADK tool calls. Neither capture failure is clean P1.1 strategy evidence. |
-| P2.1 | P2 | Resolved for now | Text edit exposes write/replace only; `delete_workspace_file` explicitly removes an entire file. Latest successful runs did not reproduce the accidental file-unlink failure. |
+| P2.1 | P2 | Focused read/edit protection implemented; live acceptance pending | A later run reconstructed an existing file from an incomplete read and lost an unrelated trailing profile. Existing-file whole writes now require complete current-content read coverage; targeted replace preserves the tail. Shell edits remain outside this tool contract. |
 | P2.2 | P2 | Experimental handoff live-observed; transition repair pending live | `011600` used a HOME-based resource for an experimental scan (8 findings, then clean) before Intent. Authoritative calls wrongly retained the experimental-only argument; focused error guidance now identifies the supported retry without it. |
 | P2.3 | P2 | Same-session recovery live-observed; boundary tested offline | `011600` recovered from three unknown calls and accepted Intent on shared attempt 4 in one session/cycle. The tenth-attempt success/exhaustion boundary remains offline-tested only. |
 | P2.4 | P2 | Retained retrieval live-observed with limited causal claim | `005510` retrieved two bounded-output ranges successfully, then obtained the decisive Jackson fact through a filtered shell command. Do not credit retrieval alone with the correction. Outcome now also exposes retained final-state/check evidence; its live use remains to verify. |
@@ -36,7 +36,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 | P5 | S5 | Deferred | Runner security, credentials, deployment and ADK Web/Agent Engine adaptation. |
 | P6 | P1 | Conditional, not approved | Independent critique or broader branching/search only if clean Experiment 1 evidence justifies complexity. |
 
-**Current position:** S4 follow-up reconciles live evidence at `02dd9642`. Research distinguishes blocked/challenge, source truncation, acquisition and extraction failure within explicit byte bounds. Outcome receives retained authoritative net changes and check observations while explanations stay model-owned; scanner transition guidance states that runtime_resource_path is experimental-only. Existing phase execution gates, shared attempts, one-agent architecture, independent validation, and frozen Q1-Q5 semantics remain. The combined offline regression run passed 217 tests (2 skipped). Next obtain small live acceptance traces for these fixes, then resume comparable P1.1 evaluation. See WORK-STATE for precise evidence and acceptance steps.
+**Current position:** S4 follow-up reconciles the newer three-run batch at `1dd959f4`. A read/existing-file-write prerequisite now addresses the observed omitted-tail path; Outcome evidence exposes net additions/removals, accepted Intent and check freshness; Final Resolution reconciles historical model claims against latest independent validation; run-level capture recovery ignores complete intermediate cycles. The ten-attempt checkpoint rule, one-agent architecture, independent validation, and frozen Q1-Q5 semantics remain. Small live acceptance checks are still needed before returning to comparable P1.1 evaluation. See WORK-STATE for exact evidence and limits.
 
 ## Stable reasoning/evidence boundaries
 
@@ -54,7 +54,7 @@ The active implementation is `autonomous_oss_remediation_agent`. Older `oss_reme
 
 ## Current experimental conclusion
 
-All three October 2 runs from target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, using `gemini-2.5-flash` and 3,000-character returned output, resolved 24/24 target findings in one cycle, passed deterministic validation and delivered Draft PRs #199-201. Specific recovery/handoff paths now have live evidence. However `010355` accepted and attempted a prohibited 4.0.6 -> 3.2.6 downgrade under a placeholder rationalization, and `005510` captured stale Outcome facts despite a corrected final diff. Successful final delivery does not validate those earlier decisions or records. Experiment 1 remains **CONTINUE**.
+The prior one-cycle successes from target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` resolved 24/24 findings and delivered Draft PRs #199-201, but did not establish consistent decision quality. The next batch at `1dd959f4` exposed a different destructive file reconstruction despite passing build/OSV validation and PR #203 delivery, and a three-cycle run whose final validation passed after a stale partial Outcome. Passing delivery or validation does not validate earlier reasoning or unrelated file preservation. Experiment 1 remains **CONTINUE**.
 
 ## Maintenance
 

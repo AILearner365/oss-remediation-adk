@@ -135,6 +135,8 @@ class AutonomousCapabilityTests(unittest.TestCase):
             "long.txt", start_line=first["nextStartLine"],
             start_column=first["nextStartColumn"])
         self.assertTrue(continuation["content"].startswith("X" * 4000))
+        self.assertTrue(continuation["readCoverageComplete"])
+        self.assertIsNotNone(continuation["readReceipt"])
         first_search = self.capabilities.search_workspace_text("needle", max_results=1)
         self.assertTrue(first_search["moreExists"])
         second_search = self.capabilities.search_workspace_text("needle", max_results=1,
@@ -142,6 +144,51 @@ class AutonomousCapabilityTests(unittest.TestCase):
         self.assertEqual(3, second_search["results"][0]["line"])
         invalid = self.capabilities.search_workspace_text("different", cursor=second_search["nextCursor"])
         self.assertEqual("TOOL_ERROR", invalid["failureCode"])
+
+    def test_partial_read_cannot_reconstruct_existing_file_without_complete_current_receipt(self):
+        config = self.workspace.repository / "settings.conf"
+        content = "version=1\n" + "".join(f"option.{number}=unchanged\n" for number in range(500))
+        content += "[unrelated-trailing-section]\nkeep=true\n"
+        config.write_text(content, encoding="utf-8")
+        first = self.capabilities.read_workspace_text("settings.conf")
+        self.assertTrue(first["moreExists"])
+        self.assertFalse(first["fileComplete"])
+        self.assertFalse(first["readCoverageComplete"])
+        self.assertIsNone(first["readReceipt"])
+        prefix_reconstruction = self.capabilities.edit_workspace_text(
+            "replace", "settings.conf", old_text=first["content"],
+            new_text=first["content"].replace("version=1", "version=2") + "\n[reconstructed-end]",
+        )
+        self.assertEqual("error", prefix_reconstruction["status"])
+        self.assertIn("partial read excerpt", prefix_reconstruction["error"])
+        no_receipt = self.capabilities.edit_workspace_text("write", "settings.conf", content="version=2\n")
+        self.assertEqual("error", no_receipt["status"])
+        self.assertIn("read_receipt", no_receipt["error"])
+        targeted = self.capabilities.edit_workspace_text(
+            "replace", "settings.conf", old_text="version=1", new_text="version=2")
+        self.assertEqual("ok", targeted["status"])
+        self.assertIn("[unrelated-trailing-section]", config.read_text(encoding="utf-8"))
+        stale = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=3\n", read_receipt="invented")
+        self.assertEqual("error", stale["status"])
+        first = self.capabilities.read_workspace_text("settings.conf")
+        last = self.capabilities.read_workspace_text("settings.conf", start_line=first["nextStartLine"])
+        self.assertTrue(last["readCoverageComplete"])
+        self.assertIsNotNone(last["readReceipt"])
+        config.write_text(config.read_text(encoding="utf-8") + "external=true\n", encoding="utf-8")
+        stale_after_external_edit = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=3\n", read_receipt=last["readReceipt"])
+        self.assertEqual("error", stale_after_external_edit["status"])
+        first = self.capabilities.read_workspace_text("settings.conf")
+        last = self.capabilities.read_workspace_text("settings.conf", start_line=first["nextStartLine"])
+        self.assertTrue(last["readCoverageComplete"])
+        deliberate_rewrite = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=3\n", read_receipt=last["readReceipt"])
+        self.assertEqual("ok", deliberate_rewrite["status"])
+        self.assertEqual("version=3\n", config.read_text(encoding="utf-8"))
+        repeated = self.capabilities.edit_workspace_text(
+            "write", "settings.conf", content="version=4\n", read_receipt=last["readReceipt"])
+        self.assertEqual("error", repeated["status"])
 
     def test_symlink_escape_is_rejected_when_supported(self):
         outside = Path(self.temp.name) / "outside"
