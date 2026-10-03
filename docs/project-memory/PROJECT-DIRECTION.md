@@ -4,6 +4,8 @@
 
 ## Objective and direction
 
+**Development execution modes (October 2):** [EXECUTION-AGREEMENT](EXECUTION-AGREEMENT.md) records Cloud Shell as the current Codex development/verification default and preserves Windows → Cloud Shell as an available fallback. Use focused live evidence for relevant runtime boundaries, with sequential resource-aware verification and concise memory updates. This is development workflow guidance; the one-agent architecture and frozen reasoning evaluation remain unchanged.
+
 **Startup configuration support (October 2):** the active CLI and retained-evidence fixture now explicitly load an optional repository-root `.env` through one source-relative helper before constructing run clients or orchestration. Process values retain precedence. This is runner setup support for S4/P2 and does not change model/provider variable names, runtime evidence contracts, or the frozen P1.1 evaluation. Return to comparable frozen P1.1 reasoning evaluation at **CONTINUE**.
 
 **Latest S4/P2 boundary:** source head `acd6dee1` was reconciled with the pushed live fixture workspace at `667fff37`. That run autonomously recovered an omitted command fact but ended without Intent because the development fixture stopped after one turn. The fixture now continues within the production checkpoint bound and reports retrieval, capture, and selected-decision evidence separately. A small scenario catalogue distinguishes offline boundary checks from still-unverified autonomous Outcome/edit behavior. This is supporting evidence work; the return point remains comparable frozen P1.1 reasoning evaluation at **CONTINUE** after a small live accepted-decision check.

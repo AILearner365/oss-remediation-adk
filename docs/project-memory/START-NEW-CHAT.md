@@ -10,6 +10,8 @@ Read:
 - `docs/project-memory/WORK-STATE.md`
 - `docs/project-memory/DECISION-LOG.md`
 
+For Codex implementation and verification tasks, follow [EXECUTION-AGREEMENT](EXECUTION-AGREEMENT.md). Cloud Shell is the current default; Windows → Cloud Shell remains an available fallback selected by the task or actual development environment.
+
 Reconcile their branch/commit bookmark with the latest repository and consult the authoritative package README, journal designs, experiment record, and other linked authoritative sources only as needed.
 
 Before continuing, establish and briefly state:

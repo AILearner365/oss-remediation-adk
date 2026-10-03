@@ -10,6 +10,8 @@ Update the appropriate files in this folder:
 - `WORK-STATE.md` — update the active problem/subproblem stack, why the work is active, material findings/evidence, implementation/test results, unresolved issues, immediate next action, and explicit return point.
 - `DECISION-LOG.md` — add only material decisions/discoveries, including rationale/evidence, rejected or superseded approaches where relevant, and revisit conditions.
 
+For Codex implementation and verification tasks, follow [EXECUTION-AGREEMENT](EXECUTION-AGREEMENT.md). Cloud Shell is the current default; Windows → Cloud Shell remains an available fallback selected by the task or actual development environment.
+
 Preserve parent → child → nested problem → return-to-parent relationships. When a side problem is resolved, mark it appropriately and restore the correct parent as active.
 
 Reconcile conversation intent with actual repository implementation and runtime/test evidence. Do not invent missing information, rewrite history merely to fit the latest conclusion, duplicate authoritative technical specifications, or update files when nothing material changed.
