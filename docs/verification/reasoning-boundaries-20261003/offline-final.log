@@ -1,0 +1,82 @@
+test_blocked_and_authoritative_evidence_are_both_supplied_via_capability (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_blocked_and_authoritative_evidence_are_both_supplied_via_capability) ... ok
+test_coverage_input_uses_all_findings_without_seeding_intent (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_coverage_input_uses_all_findings_without_seeding_intent) ... ok
+test_credentials_block_is_not_model_failure (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_credentials_block_is_not_model_failure) ... ok
+test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call) ... /home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_acceptance_stops_without_extra_turn (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_acceptance_stops_without_extra_turn) ... ok
+test_accepted_record_replay_skips_malformed_items_before_local_repair (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_accepted_record_replay_skips_malformed_items_before_local_repair) ... ok
+test_ambiguous_prose_and_unrelated_citation_require_review (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_ambiguous_prose_and_unrelated_citation_require_review) ... ok
+test_batch_selection_and_missing_provenance_do_not_pass (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_batch_selection_and_missing_provenance_do_not_pass) ... ok
+test_default_offline_temp_and_failure_report_location (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_default_offline_temp_and_failure_report_location) ... ok
+test_distinct_raw_labels_merge_using_stripped_section_keys (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_distinct_raw_labels_merge_using_stripped_section_keys) ... ok
+test_duplicate_gate_matches_production_for_raw_and_invalid_labels (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_duplicate_gate_matches_production_for_raw_and_invalid_labels) ... ok
+test_empty_section_duplicates_retain_valid_sections_and_verify_accepted_score (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_empty_section_duplicates_retain_valid_sections_and_verify_accepted_score) ... ok
+test_explicit_folder_retains_both_scenarios_and_independent_trials (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_explicit_folder_retains_both_scenarios_and_independent_trials) ... ok
+test_genuine_duplicates_cannot_update_replay_draft (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_genuine_duplicates_cannot_update_replay_draft) ... ok
+test_later_unaccepted_call_cannot_change_accepted_score (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_later_unaccepted_call_cannot_change_accepted_score) ... ok
+test_missing_invalid_and_malformed_repairs_preserve_valid_draft (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_missing_invalid_and_malformed_repairs_preserve_valid_draft) ... ok
+test_observed_accepted_wording_and_selected_candidate_citation (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_observed_accepted_wording_and_selected_candidate_citation) ... ok
+test_offline_capabilities_retention_and_partial_edit (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_offline_capabilities_retention_and_partial_edit) ... ok
+test_production_no_submission_feedback_preserves_unknown_call_state (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_production_no_submission_feedback_preserves_unknown_call_state) ... ok
+test_rejection_retries_and_exhaustion_stops (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_rejection_retries_and_exhaustion_stops) ... ok
+test_replay_ignores_other_cycles_and_rejects_byte_or_hash_mismatch (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_replay_ignores_other_cycles_and_rejects_byte_or_hash_mismatch) ... ok
+test_retrieval_then_empty_turn_continues_same_session_to_accepted_intent (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_retrieval_then_empty_turn_continues_same_session_to_accepted_intent) ... ok
+test_section_only_repair_scores_accepted_merged_intent_and_retained_call (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_section_only_repair_scores_accepted_merged_intent_and_retained_call) ... ok
+test_terminal_checkpoint_exhaustion_is_not_shared_tool_or_infrastructure_failure (tests.unit.test_evidence_boundary_acceptance.EvidenceBoundaryAcceptanceTests.test_terminal_checkpoint_exhaustion_is_not_shared_tool_or_infrastructure_failure) ... ok
+test_accepted_bytes_are_required_and_later_calls_cannot_change_replay (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_accepted_bytes_are_required_and_later_calls_cannot_change_replay) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_actual_continuation_after_empty_turn_uses_same_session (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_actual_continuation_after_empty_turn_uses_same_session) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_cli_retains_blocked_execution_and_setup_failure (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_cli_retains_blocked_execution_and_setup_failure) ... ok
+test_empty_turn_exhaustion_does_not_claim_checkpoint_attempts (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_empty_turn_exhaustion_does_not_claim_checkpoint_attempts) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_live_requires_explicit_retention_folder (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_live_requires_explicit_retention_folder) ... usage: fixture [-h] [--live]
+               [--scenario {retained-command,partial-read-edit,intent-missing-section,intent-missing-answer,finding-coverage,evidence-conflict}]
+               [--trials TRIALS] [--model MODEL]
+               [--workspace-parent WORKSPACE_PARENT]
+fixture: error: --live requires --workspace-parent so its trace is retained
+ok
+test_offline_cli_retains_both_runnable_cases_without_live_claim (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_offline_cli_retains_both_runnable_cases_without_live_claim) ... ok
+test_real_adk_partial_and_complete_repairs_pass_both_cases (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_real_adk_partial_and_complete_repairs_pass_both_cases) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_repeated_supported_malformed_calls_exhaust_existing_allowance (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_repeated_supported_malformed_calls_exhaust_existing_allowance) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_seed_cases_have_exact_observed_shapes_feedback_and_retained_state (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_seed_cases_have_exact_observed_shapes_feedback_and_retained_state) ... ok
+test_seed_failure_prevents_live_session (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_seed_failure_prevents_live_session) ... ok
+test_terminal_failure_and_blocked_reporting (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_terminal_failure_and_blocked_reporting) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 29.831s
+
+OK

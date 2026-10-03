@@ -1,0 +1,13 @@
+test_blocked_and_authoritative_evidence_are_both_supplied_via_capability (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_blocked_and_authoritative_evidence_are_both_supplied_via_capability) ... ok
+test_coverage_input_uses_all_findings_without_seeding_intent (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_coverage_input_uses_all_findings_without_seeding_intent) ... ok
+test_credentials_block_is_not_model_failure (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_credentials_block_is_not_model_failure) ... ok
+test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call) ... /home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 1.622s
+
+OK

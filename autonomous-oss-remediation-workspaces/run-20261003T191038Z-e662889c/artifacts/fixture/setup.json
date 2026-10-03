@@ -1,0 +1,18 @@
+{
+  "case": "finding-coverage",
+  "checkpointAttempts": 0,
+  "evidence": {
+    "support": "Controlled fixture support record for example:gateway, current version 2.4.0.\nWithin the 2.4 line, fixes are cumulative. 2.4.2 fixes FINDING-A and FINDING-B. 2.4.5 additionally fixes FINDING-C. Both versions are published and support the project's API and runtime. The root gateway.version setting controls the dependency; no module overrides exist. Tests after implementation remain necessary.\n",
+    "supportReference": "evidence:53abb9363a1f35b2b90300a77634495b81f91fa815dfd7ff9d0afb0ce3dba63f"
+  },
+  "limits": {
+    "command_timeout_seconds": 1800,
+    "max_cycles": 1,
+    "max_llm_calls_per_turn": 60,
+    "max_returned_output_chars": 2000,
+    "max_tool_calls": 80,
+    "model_turn_timeout_seconds": 1800,
+    "overall_timeout_seconds": 7200
+  },
+  "origin": "controlled_fixture"
+}

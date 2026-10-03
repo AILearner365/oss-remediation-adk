@@ -1,0 +1,22 @@
+{
+  "cycle": 1,
+  "operation": "search",
+  "query": "Atlas Runtime official 4.x availability",
+  "result": {
+    "acquired_bytes": 0,
+    "acquisition_succeeded": true,
+    "byte_limit": 0,
+    "content": "",
+    "error": "Source returned a bot challenge",
+    "failure_code": "BOT_CHALLENGE",
+    "http_status": 202,
+    "media_type": null,
+    "raw_bytes_b64": "",
+    "raw_content": "Controlled bot challenge",
+    "recovery": "Use another accessible source or preserve uncertainty.",
+    "results": [],
+    "source": "https://search.example/",
+    "status": "blocked",
+    "truncated": false
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "mode": "offline",
+  "trials": [
+    {
+      "passed": true,
+      "captureOnly": true,
+      "outcome": "NOT_EXERCISED",
+      "classification": "controlled_evidence_autonomous_decision",
+      "offlineMechanics": "PASSED",
+      "decisionReview": "NOT_EXERCISED",
+      "capture": "NOT_EXERCISED",
+      "acceptedRecordVerified": false,
+      "acceptedContentHash": null,
+      "selectedCandidate": null,
+      "stopReason": "not_run",
+      "terminalError": null,
+      "toolCalls": 2,
+      "checkpointAttempts": 0,
+      "elapsedSeconds": 0.32439146199976676,
+      "naturalEndToEnd": "NOT_EXERCISED",
+      "reviewRequired": "Inspect accepted-decision.json, cited evidence and pre-acceptance trace using catalogue criteria. Capture is not reasoning acceptance.",
+      "scenario": "evidence-conflict",
+      "trial": 1,
+      "workspace": "/tmp/tmpyo6ioiy4/run-20261003T192115Z-e30b86ea",
+      "artifactsRetained": false,
+      "trace": "/tmp/tmpyo6ioiy4/run-20261003T192115Z-e30b86ea/artifacts/events.jsonl",
+      "resultArtifact": "/tmp/tmpyo6ioiy4/run-20261003T192115Z-e30b86ea/artifacts/acceptance-result.json"
+    }
+  ]
+}

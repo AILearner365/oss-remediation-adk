@@ -26,6 +26,7 @@ from autonomous_oss_remediation_agent.prompt import (
     intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
+from scripts.reasoning_boundary_scenarios import CASES as DECISION_CASES, prepare_decision, run_decision, score_decision
 from scripts.intent_recovery_scenarios import CASES, prepare_recovery, recovery_blocked, run_recovery, score_recovery
 
 
@@ -352,7 +353,7 @@ async def verify_live(trace: TraceStore, budget: ExecutionBudget,
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true", help="Opt in to a paid model trial")
-    parser.add_argument("--scenario", choices=("retained-command", "partial-read-edit", *CASES),
+    parser.add_argument("--scenario", choices=("retained-command", "partial-read-edit", *CASES, *DECISION_CASES),
                         default="retained-command")
     parser.add_argument("--trials", type=int, default=1, help="Independent workspaces and sessions")
     parser.add_argument("--model", default="gemini-2.5-flash")
@@ -373,7 +374,12 @@ def main() -> int:
         for trial in range(1, args.trials + 1):
             workspace = None
             try:
-                if args.scenario in CASES:
+                if args.scenario in DECISION_CASES:
+                    workspace = RunWorkspace.create(parent)
+                    fixture = prepare_decision(workspace, args.scenario)
+                    result = (asyncio.run(run_decision(fixture, args.model)) if args.live
+                              else score_decision(fixture))
+                elif args.scenario in CASES:
                     workspace = RunWorkspace.create(parent)
                     fixture = prepare_recovery(workspace, args.scenario)
                     result = (asyncio.run(run_recovery(fixture, args.model)) if args.live
@@ -387,15 +393,18 @@ def main() -> int:
                     workspace, trace, budget, capabilities, display = prepare(parent, workspace)
                     result = (asyncio.run(verify_live(trace, budget, capabilities, display, args.model))
                               if args.live else verify_offline(capabilities, display))
-                if args.scenario not in CASES:
+                if args.scenario not in (*CASES, *DECISION_CASES):
                     result["passed"] = (result["liveTraceMeetsMechanicalCriteria"] if args.live else True)
             except Exception as exc:
                 result = {"passed": False, "terminalError": f"{type(exc).__name__}: {exc}"}
-                if args.scenario in CASES:
+                if args.scenario in (*CASES, *DECISION_CASES):
                     outcome = "BLOCKED" if recovery_blocked(exc) else "FAILED"
                     result.update(outcome=outcome, classification="controlled_integration",
                                   offlineMechanics=outcome, controlledLiveIntegration="NOT_EXERCISED",
                                   naturalAutonomousRecovery="NOT_EXERCISED", executionStage="setup_or_scoring")
+                    if args.scenario in DECISION_CASES:
+                        result.update(classification="controlled_evidence_autonomous_decision",
+                                      decisionReview="NOT_EXERCISED", naturalEndToEnd="NOT_EXERCISED")
             result.update({"scenario": args.scenario, "trial": trial,
                            "workspace": str(workspace.root) if workspace else None,
                            "artifactsRetained": temporary is None})

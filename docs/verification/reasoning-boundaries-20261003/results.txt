@@ -1,0 +1,50 @@
+Execution: Cloud Shell; Windows not run, fallback preserved.
+Base: reviewed cleanup 804cb584342f94332ceb39667d7994ef40481de8 (local/remote reconciled).
+Historical normal runs: 6b437a12 workspaces 021900-a556c469 and 023912-b243508d.
+Investigation: complete; no demonstrated production defect; no runtime prompt/policy change.
+
+Offline: PASSED, 35 tests initially (31.392s) and final 35 (29.831s).
+Command: python -m unittest tests.unit.test_reasoning_boundary_scenarios tests.unit.test_evidence_boundary_acceptance tests.unit.test_intent_recovery_scenarios -v
+Logs: offline.log and offline-final.log. A final four-test scenario check passed in
+1.622s after adding selected-export integrity validation (review-integrity.log).
+Final tests add review binding, all-criteria completeness, selected-ID/hash/tamper rejection,
+and ensure captured but wrong decisions cannot automatically pass reasoning.
+Initial offline CLI setup exposed task-before-cycle ordering; fixed before testing/live.
+
+F live: run-20261003T191038Z-e662889c, gemini-2.5-flash, one trial.
+Capture PASSED: accepted attempt 1, two turns/one session, 38.52 seconds.
+Accepted hash: 90f9d27d290dbaf7e55d26ec8853ca9b786ffbf731bfef2a3929ef4460febcbc
+Coverage PASSED: selected 2.4.5 covers all A/B/C, while 2.4.2 covers only A/B.
+Provenance FAILED: accepted Q2 asserts retrieve_retained_evidence access that never occurred.
+Overall semantic review FAILED. See coverage-review.json and artifacts/reviewed-result.json.
+Post-acceptance malformed edit then corrected edit are not decision evidence.
+Raw F capture result predates the final reporting-only pending-review passed/exit correction;
+its outcome was NOT_EXERCISED, and passed=true referred to capture. Preserve raw evidence.
+
+G live: run-20261003T191151Z-240bca87, gemini-2.5-flash, one trial.
+Capture FAILED: ten unknown-tool attempts, two additional blocked, six turns/one session,
+122.61 seconds. No submit_cycle_intent call and no accepted decision.
+Accepted-decision reasoning NOT EXERCISED. Unaccepted unknown-call payloads reconcile
+publisher availability with stale expectations, preserve adapter uncertainty and say search
+was blocked; this is not an accepted-decision pass.
+No live infrastructure BLOCKED result occurred. No repeat unchanged trial.
+
+Both: controlled synthetic evidence with autonomous model decisions, normal production
+capability/Intent path, not natural end-to-end remediation. Natural E2E NOT EXERCISED.
+Frozen evaluation CONTINUE. No statistical reliability or production reasoning improvement claim.
+
+Live commands (sequential):
+python -m scripts.retained_evidence_acceptance --scenario finding-coverage --live --trials 1 --model gemini-2.5-flash --workspace-parent "$PWD/autonomous-oss-remediation-workspaces"
+python -m scripts.retained_evidence_acceptance --scenario evidence-conflict --live --trials 1 --model gemini-2.5-flash --workspace-parent "$PWD/autonomous-oss-remediation-workspaces"
+Review command:
+python -m scripts.reasoning_boundary_scenarios --workspace autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c --review docs/verification/reasoning-boundaries-20261003/coverage-review.json
+
+Return: comparable frozen P1.1 evaluation at CONTINUE; preserve open provenance,
+unsupported-prior and invocation issues. Require new evidence/change before rerunning failures.
+Retain only selected artifacts in the two live workspaces; exclude clones/temp/caches/builds.
+
+Final CLI preparation checks: both independently selectable offline commands exited zero,
+reported outcome NOT_EXERCISED and zero checkpoint attempts; see offline-*-cli.log.
+Source/documentation diff and local links passed checks. Full staged whitespace check flags
+only the two generated journals' trailing blank lines; exact journal/hash bytes are preserved.
+Staged scope excludes production source, historical mutations, clones, caches and temporary homes.

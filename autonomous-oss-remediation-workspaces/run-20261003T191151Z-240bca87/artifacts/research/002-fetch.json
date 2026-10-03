@@ -1,0 +1,22 @@
+{
+  "cycle": 1,
+  "operation": "fetch",
+  "result": {
+    "acquired_bytes": 0,
+    "acquisition_succeeded": true,
+    "byte_limit": 0,
+    "content": "Controlled fixture publisher record, not a real-world release claim.\nAtlas Runtime 4.0 is an official public release. The publisher supports the 4.x line.\nThis release record establishes availability only. Compatibility with this repository's legacy adapter has not been evaluated.\n",
+    "error": null,
+    "failure_code": null,
+    "http_status": 200,
+    "media_type": null,
+    "raw_bytes_b64": "",
+    "raw_content": "Controlled fixture publisher record, not a real-world release claim.\nAtlas Runtime 4.0 is an official public release. The publisher supports the 4.x line.\nThis release record establishes availability only. Compatibility with this repository's legacy adapter has not been evaluated.\n",
+    "recovery": null,
+    "results": [],
+    "source": "https://atlas.example/releases/4.0",
+    "status": "success",
+    "truncated": false
+  },
+  "url": "https://atlas.example/releases/4.0"
+}

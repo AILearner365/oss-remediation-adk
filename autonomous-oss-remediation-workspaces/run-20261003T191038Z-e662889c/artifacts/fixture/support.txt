@@ -1,0 +1,2 @@
+Controlled fixture support record for example:gateway, current version 2.4.0.
+Within the 2.4 line, fixes are cumulative. 2.4.2 fixes FINDING-A and FINDING-B. 2.4.5 additionally fixes FINDING-C. Both versions are published and support the project's API and runtime. The root gateway.version setting controls the dependency; no module overrides exist. Tests after implementation remain necessary.
