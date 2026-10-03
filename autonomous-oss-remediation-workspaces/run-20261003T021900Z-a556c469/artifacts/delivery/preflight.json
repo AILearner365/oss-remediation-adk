@@ -1,0 +1,5 @@
+{
+  "adapter": "git+github-rest",
+  "eligible": true,
+  "reason": "Adapter and isolated credential provider are configured"
+}
