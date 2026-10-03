@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .config import RemediationRequest
+from .environment import load_repository_env
 from .integrations import configured_delivery_adapter
 from .orchestrator import AutonomousRemediationOrchestrator
 
@@ -18,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    load_repository_env()
     request = RemediationRequest.from_json_file(args.request)
     result = AutonomousRemediationOrchestrator(
         request,

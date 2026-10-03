@@ -151,6 +151,8 @@ python -m autonomous_oss_remediation_agent.cli request.json --output result.json
 
 In PowerShell, set the token with `$env:GH_TOKEN = "<short-lived-token-with-repository-write-access>"` before running the CLI.
 
+Both the CLI and the retained-evidence acceptance script load an optional repository-root `.env` at startup. Copy `.env.example` to `.env` and set values for your runner as needed. Existing process environment variables take precedence, and `.env` remains Git-ignored. Loading is based on the package's source path, so invocation from another working directory uses the same file.
+
 The `allowNetwork` value declares the approved runner network mode; the local backend does not claim destination-level egress enforcement.
 
 ## Spring Boot Version Policy

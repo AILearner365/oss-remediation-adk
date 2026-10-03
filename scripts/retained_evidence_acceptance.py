@@ -17,6 +17,7 @@ from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet
 from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceeded
 from autonomous_oss_remediation_agent.capabilities.research import HttpResearchProvider
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
+from autonomous_oss_remediation_agent.environment import load_repository_env
 from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalPhase, JournalStore, render_checkpoint
 from autonomous_oss_remediation_agent.prompt import (
     intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
@@ -363,6 +364,7 @@ def main() -> int:
         parser.error("--live requires --workspace-parent so its trace is retained")
     if args.live and args.scenario != "retained-command":
         parser.error("Live partial-read/edit orchestration is deferred; run its offline boundary check")
+    load_repository_env()
     temporary = tempfile.TemporaryDirectory() if args.workspace_parent is None else None
     try:
         parent = args.workspace_parent if args.workspace_parent is not None else Path(temporary.name)
