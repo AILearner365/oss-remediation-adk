@@ -507,10 +507,7 @@ class JournalLifecycle:
             shape_errors.extend(item_errors)
             if not item_errors:
                 valid_answers.append(item)
-        duplicate_sections = [str(item.get("section", "")) for item in answers
-                              if isinstance(item, dict)]
-        duplicate_errors = [f"Duplicate section: {name}" for name in set(duplicate_sections)
-                            if duplicate_sections.count(name) > 1 and name]
+        duplicate_errors = _intent_duplicate_section_errors(answers)
         if (slot_available and cycle == self.active_cycle
                 and self.phase == JournalPhase.INTENT_REQUIRED and not duplicate_errors):
             draft = self._intent_drafts.setdefault(cycle, {})
@@ -890,6 +887,18 @@ class JournalLifecycle:
             repair_instructions=intent_repair_instructions(errors) if kind == "intent" else (),
             retry_allowed=retry_allowed,
         )
+
+
+def _intent_duplicate_section_errors(answers: list[dict[str, Any]]) -> list[str]:
+    """Pre-merge duplicate gate shared with accepted-Intent replay.
+
+    Preserve raw stringification: empty labels do not block the batch, while
+    repeated nonempty values do, even when their items fail shape validation.
+    Section trimming belongs to draft merging, not this gate.
+    """
+    sections = [str(item.get("section", "")) for item in answers if isinstance(item, dict)]
+    return [f"Duplicate section: {name}" for name in set(sections)
+            if sections.count(name) > 1 and name]
 
 
 def _intent_answer_shape_errors(item: Any, index: int) -> list[str]:

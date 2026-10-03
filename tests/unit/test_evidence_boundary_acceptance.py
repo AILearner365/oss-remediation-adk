@@ -1,5 +1,6 @@
 """Offline checks for the development evidence-boundary acceptance fixture."""
 import asyncio
+from copy import deepcopy
 import hashlib
 import io
 import json
@@ -19,7 +20,7 @@ from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceed
 from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 from scripts.retained_evidence_acceptance import (
-    FACT, main, run_until_intent, score_live_trace, verify_offline, verify_partial_read_offline, prepare,
+    _accepted_intent_answers, FACT, main, run_until_intent, score_live_trace, verify_offline, verify_partial_read_offline, prepare,
 )
 from tests.checkpoint_fixtures import typed_intent_answers
 
@@ -101,7 +102,7 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         self.assertEqual(lifecycle.max_checkpoint_attempts, lifecycle.cycles[1].intent_attempts)
 
     def _scored_intent(self, *, mode="stream", source=True, repair=True, artifact=False,
-                       solution=None, candidate_citation=False, unrelated_citation=False):
+                       solution=None, candidate_citation=False, unrelated_citation=False, initial_extras=()):
         lifecycle, trace = self._lifecycle()
         retained = trace.write_text("commands/fixture.stdout.log", FACT)
         ref = trace.issue_evidence_reference(retained)
@@ -147,8 +148,9 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
             else:
                 trace.append_event("adk_interaction", cycle=1, interactionType="tool_call", **detail)
 
-        record_call(answers, retained_payload=artifact)
-        first = lifecycle.submit_intent(1, answers)
+        initial = answers + list(initial_extras)
+        record_call(initial, retained_payload=artifact)
+        first = lifecycle.submit_intent(1, initial)
         if repair:
             self.assertFalse(first.accepted)
             retry = {**selection, "selection": {**selection["selection"], "candidate_id": "A"}}
@@ -183,6 +185,97 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
                       "contentHash": result.metadata.content_hash}
         interactions.append(acceptance)
         self.assertEqual(answers[:-1] + [selected], _accepted_intent_answers(interactions, lifecycle, acceptance))
+
+    def test_empty_section_duplicates_retain_valid_sections_and_verify_accepted_score(self):
+        scored, *_ = self._scored_intent(initial_extras=[
+            {"section": "", "answer": "Malformed first item"},
+            {"section": "", "answer": "Malformed second item"},
+        ])
+        self.assertTrue(scored["acceptedRecordVerified"])
+        self.assertEqual(1, scored["rejectedSubmissions"])
+        self.assertTrue(scored["evidenceSupportedSelectedDecision"])
+
+    def _record_intent(self, lifecycle, trace, answers, *, cycle=1, event_cycle=1):
+        trace.append_event("adk_interaction", cycle=event_cycle, interactionType="tool_call",
+                           name="submit_cycle_intent", arguments={"cycle_number": cycle, "answers": answers})
+        return lifecycle.submit_intent(cycle, answers)
+
+    def _replay_intent(self, lifecycle, trace):
+        events = [json.loads(line) for line in trace.events_path.read_text().splitlines()]
+        accepted = next(e for e in events if e["type"] == "intent_submission_accepted")
+        return _accepted_intent_answers(events, lifecycle, accepted)
+
+    def test_duplicate_gate_matches_production_for_raw_and_invalid_labels(self):
+        # Expected retention is asserted independently of replay and the shared helper.
+        for labels, retained in [(["", ""], True), ([" ", " "], False),
+                                 ([None, None], False), ([7, "7"], False),
+                                 ([" ", "\t"], True)]:
+            with self.subTest(labels=labels):
+                lifecycle, trace = self._lifecycle()
+                answers = _answers()
+                self.assertFalse(self._record_intent(lifecycle, trace, answers[:-1]).accepted)
+                changed = {**answers[0], "answer": "New observed analysis must only survive an allowed merge."}
+                malformed = [{"section": label, "answer": "Malformed label"} for label in labels]
+                rejected = self._record_intent(lifecycle, trace, [changed] + malformed)
+                self.assertFalse(rejected.accepted)
+                self.assertTrue(self._record_intent(lifecycle, trace, [answers[-1]]).accepted)
+                expected = [changed if retained else answers[0]] + answers[1:]
+                self.assertEqual(expected[0]["answer"], lifecycle.cycles[1].intent_answers[answers[0]["section"]])
+                self.assertEqual(expected, self._replay_intent(lifecycle, trace))
+
+    def test_genuine_duplicates_cannot_update_replay_draft(self):
+        lifecycle, trace = self._lifecycle()
+        answers = _answers()
+        self.assertFalse(self._record_intent(lifecycle, trace, answers[:-1]).accepted)
+        changed = {**answers[0], "answer": "This duplicate submission must not replace the retained answer."}
+        rejected = self._record_intent(lifecycle, trace, [changed, changed, answers[-1]])
+        self.assertFalse(rejected.accepted)
+        self.assertIn(f"Duplicate section: {changed['section']}", rejected.errors)
+        self.assertTrue(self._record_intent(lifecycle, trace, [answers[-1]]).accepted)
+        self.assertEqual(answers, self._replay_intent(lifecycle, trace))
+
+    def test_missing_invalid_and_malformed_repairs_preserve_valid_draft(self):
+        lifecycle, trace = self._lifecycle()
+        answers = _answers()
+        malformed = [{"answer": "No section"}, {"section": None, "answer": "Invalid section"},
+                     {"section": [], "answer": "Invalid list section"}, None]
+        self.assertFalse(self._record_intent(lifecycle, trace, answers[:-1] + malformed).accepted)
+        for value in [None, "", " ", 42]:
+            self.assertFalse(self._record_intent(lifecycle, trace, [
+                {"section": answers[0]["section"], "answer": value}]).accepted)
+        self.assertFalse(self._record_intent(lifecycle, trace, [{"section": answers[0]["section"]}]).accepted)
+        self.assertTrue(self._record_intent(lifecycle, trace, [answers[-1]]).accepted)
+        self.assertEqual(answers, self._replay_intent(lifecycle, trace))
+
+    def test_distinct_raw_labels_merge_using_stripped_section_keys(self):
+        lifecycle, trace = self._lifecycle()
+        answers = _answers()
+        changed = {**answers[0], "section": " " + answers[0]["section"] + " ",
+                   "answer": "Updated analysis from a distinct raw label that maps to the same draft key."}
+        self.assertFalse(self._record_intent(lifecycle, trace, answers[:-1] + [changed]).accepted)
+        self.assertTrue(self._record_intent(lifecycle, trace, [answers[-1]]).accepted)
+        self.assertEqual([changed] + answers[1:], self._replay_intent(lifecycle, trace))
+
+    def test_replay_ignores_other_cycles_and_rejects_byte_or_hash_mismatch(self):
+        lifecycle, trace = self._lifecycle()
+        answers = _answers()
+        self.assertFalse(self._record_intent(lifecycle, trace, answers[:-1]).accepted)
+        other = [{**answers[0], "answer": "Unrelated cycle must not overwrite this draft."}]
+        self.assertFalse(self._record_intent(lifecycle, trace, other, cycle=2).accepted)
+        trace.append_event("adk_interaction", cycle=2, interactionType="tool_call",
+                           name="submit_cycle_intent", arguments={"cycle_number": 1, "answers": other})
+        self.assertTrue(self._record_intent(lifecycle, trace, [answers[-1]]).accepted)
+        self.assertEqual(answers, self._replay_intent(lifecycle, trace))
+        events = [json.loads(line) for line in trace.events_path.read_text().splitlines()]
+        accepted = next(e for e in events if e["type"] == "intent_submission_accepted")
+        self.assertIsNone(_accepted_intent_answers(events, lifecycle, {**accepted, "contentHash": "wrong"}))
+        tampered = deepcopy(events)
+        call = next(e for e in tampered if e.get("name") == "submit_cycle_intent")
+        call["arguments"]["answers"][0]["answer"] = "Tampered call text"
+        self.assertIsNone(_accepted_intent_answers(tampered, lifecycle, accepted))
+        original = lifecycle.store.path.read_bytes()
+        lifecycle.store.path.write_bytes(original.replace(b"The observed fixture", b"The altered fixture", 1))
+        self.assertIsNone(self._replay_intent(lifecycle, trace))
 
     def test_later_unaccepted_call_cannot_change_accepted_score(self):
         scored, lifecycle, trace, display, budget, record_call = self._scored_intent()

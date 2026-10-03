@@ -20,6 +20,7 @@ from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, Runti
 from autonomous_oss_remediation_agent.environment import load_repository_env
 from autonomous_oss_remediation_agent.journal import (
     JournalLifecycle, JournalPhase, JournalStore, render_checkpoint, _intent_answer_shape_errors,
+    _intent_duplicate_section_errors,
 )
 from autonomous_oss_remediation_agent.prompt import (
     intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
@@ -289,9 +290,7 @@ def _accepted_intent_answers(interactions: list[dict], lifecycle: JournalLifecyc
         answers = event.get("arguments", {}).get("answers", [])
         if not isinstance(answers, list):
             return None
-        sections = [item.get("section", "").strip() for item in answers if isinstance(item, dict)
-                    and isinstance(item.get("section"), str)]
-        if len(sections) != len(set(sections)):
+        if _intent_duplicate_section_errors(answers):
             continue  # Journal rejects duplicates before updating its repair draft.
         for index, item in enumerate(answers):
             if not _intent_answer_shape_errors(item, index):
