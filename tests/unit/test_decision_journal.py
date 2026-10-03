@@ -126,6 +126,55 @@ class DecisionJournalTests(unittest.TestCase):
         self.assertTrue(self.lifecycle.submit_intent(1, valid).accepted)
         self.assertEqual(JournalPhase.EXECUTION, self.lifecycle.phase)
 
+    def test_missing_section_is_indexed_and_section_only_repair_preserves_draft(self):
+        answers = self._intent_answers()
+        selected = answers[-1].copy()
+        answers[-1].pop("section")
+        rejected = self.lifecycle.submit_intent(1, answers)
+        self.assertFalse(rejected.accepted)
+        self.assertIn(f"answers[{len(answers)-1}].section: missing required 'section' field", rejected.errors)
+        self.assertEqual(JournalPhase.INTENT_REQUIRED, self.lifecycle.phase)
+        self.assertTrue(self.lifecycle.submit_intent(1, [selected]).accepted)
+        for item in answers[:-1]:
+            self.assertEqual(item["answer"].strip(), self.lifecycle.cycles[1].intent_answers[item["section"]])
+
+    def test_structured_fields_without_answer_require_text_not_content(self):
+        answers = self._intent_answers()
+        repairs = [item.copy() for item in answers if "candidates" in item or "selection" in item]
+        for item in answers:
+            if "candidates" in item or "selection" in item:
+                item.pop("answer")
+        rejected = self.lifecycle.submit_intent(1, answers)
+        for index, item in enumerate(answers):
+            if "answer" not in item:
+                self.assertIn(f"answers[{index}] (section: {item['section']}).answer: missing required 'answer' field", rejected.errors)
+        feedback = " ".join(rejected.errors + rejected.repair_instructions)
+        self.assertNotIn("content", feedback)
+        self.assertIn("substantive `answer` text alongside", feedback)
+        self.assertTrue(self.lifecycle.submit_intent(1, repairs).accepted)
+
+    def test_malformed_repair_cannot_accept_stale_draft_and_reports_exact_field(self):
+        answers = self._intent_answers()
+        selected = answers.pop()
+        self.assertFalse(self.lifecycle.submit_intent(1, answers).accepted)
+        cases = [
+            ({"answer": "Populated answer"}, ".section: missing"),
+            ({"section": None, "answer": "Populated answer"}, ".section: invalid"),
+            ({"section": " ", "answer": "Populated answer"}, ".section: invalid"),
+            ({"section": answers[0]["section"]}, ".answer: missing"),
+            ({"section": answers[0]["section"], "answer": None}, ".answer: invalid"),
+            ({"section": answers[0]["section"], "answer": " "}, ".answer: Empty"),
+            (None, "invalid item"),
+        ]
+        for malformed, expected in cases:
+            with self.subTest(malformed=malformed):
+                rejected = self.lifecycle.submit_intent(1, [selected, malformed])
+                self.assertFalse(rejected.accepted)
+                self.assertTrue(any("answers[1]" in error and expected in error for error in rejected.errors))
+                self.assertIsNone(self.lifecycle.cycles[1].intent)
+                self.assertEqual(JournalPhase.INTENT_REQUIRED, self.lifecycle.phase)
+        self.assertTrue(self.lifecycle.submit_intent(1, [answers[0]]).accepted)
+
     def test_local_section_repair_is_atomic_and_cannot_cross_cycles(self):
         answers = self._intent_answers()
         candidate = next(item for item in answers if item["section"] == "Concrete candidate solutions")

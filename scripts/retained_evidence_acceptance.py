@@ -18,7 +18,9 @@ from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceed
 from autonomous_oss_remediation_agent.capabilities.research import HttpResearchProvider
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
 from autonomous_oss_remediation_agent.environment import load_repository_env
-from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalPhase, JournalStore, render_checkpoint
+from autonomous_oss_remediation_agent.journal import (
+    JournalLifecycle, JournalPhase, JournalStore, render_checkpoint, _intent_answer_shape_errors,
+)
 from autonomous_oss_remediation_agent.prompt import (
     intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
 )
@@ -291,10 +293,9 @@ def _accepted_intent_answers(interactions: list[dict], lifecycle: JournalLifecyc
                     and isinstance(item.get("section"), str)]
         if len(sections) != len(set(sections)):
             continue  # Journal rejects duplicates before updating its repair draft.
-        for item in answers:
-            if not isinstance(item, dict) or not isinstance(item.get("section"), str):
-                return None
-            draft[item["section"].strip()] = item
+        for index, item in enumerate(answers):
+            if not _intent_answer_shape_errors(item, index):
+                draft[item["section"].strip()] = item
     if not draft:
         return None
     merged = list(draft.values())

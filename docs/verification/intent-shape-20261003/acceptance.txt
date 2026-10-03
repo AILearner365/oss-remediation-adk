@@ -1,0 +1,6 @@
+Intent shape boundary verification — criteria recorded before live execution
+Baseline: fffa8240ee9066cc5e6e86ee413478ca784c1c1e; evidence ancestor 6b437a12.
+Cloud Shell; workloads sequential; ~1.8 GiB available RAM and 875 MiB disk before checks.
+Offline: indexed missing/invalid section, missing/non-string/empty answer; content advice only for an observed content key; substantive structured fields still required; valid draft retained; malformed incoming repair rejected despite older draft; callback and continuation agree; ten-attempt allowance and pre-Intent authoritative protection unchanged.
+Live: one existing retained-command fixture, gemini-2.5-flash, default limits, no delivery. Inspect actual tool calls/responses, accepted journal and phase/attempt events. If a malformed answer occurs naturally, require precise error, retained valid draft, and repair within existing limits. Otherwise label autonomous malformed-payload recovery NOT EXERCISED; do not rerun the unchanged scenario. Ordinary accepted Intent is compatibility evidence only. No unavailable calls will be manufactured.
+Command: python -m scripts.retained_evidence_acceptance --scenario retained-command --live --trials 1 --model gemini-2.5-flash --workspace-parent "$PWD/autonomous-oss-remediation-workspaces"

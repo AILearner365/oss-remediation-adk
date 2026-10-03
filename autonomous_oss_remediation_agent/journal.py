@@ -500,6 +500,13 @@ class JournalLifecycle:
         slot_available = True
         if self.phase == JournalPhase.INTENT_REQUIRED:
             slot_available, _ = self.reserve_checkpoint_attempt("intent", "submission")
+        shape_errors = []
+        valid_answers = []
+        for index, item in enumerate(answers):
+            item_errors = _intent_answer_shape_errors(item, index)
+            shape_errors.extend(item_errors)
+            if not item_errors:
+                valid_answers.append(item)
         duplicate_sections = [str(item.get("section", "")) for item in answers
                               if isinstance(item, dict)]
         duplicate_errors = [f"Duplicate section: {name}" for name in set(duplicate_sections)
@@ -507,13 +514,12 @@ class JournalLifecycle:
         if (slot_available and cycle == self.active_cycle
                 and self.phase == JournalPhase.INTENT_REQUIRED and not duplicate_errors):
             draft = self._intent_drafts.setdefault(cycle, {})
-            for item in answers:
-                if isinstance(item, dict) and isinstance(item.get("section"), str):
-                    draft[item["section"].strip()] = item.copy()
+            for item in valid_answers:
+                draft[item["section"].strip()] = item.copy()
             merged = list(draft.values())
         else:
-            merged = answers
-        errors = duplicate_errors + self._checkpoint_errors("intent", cycle, merged, capture)
+            merged = valid_answers
+        errors = shape_errors + duplicate_errors + self._checkpoint_errors("intent", cycle, merged, capture)
         if not slot_available:
             errors.append(f"Cycle {self.active_cycle} intent retry limit is exhausted")
         if cycle > 1:
@@ -886,12 +892,42 @@ class JournalLifecycle:
         )
 
 
+def _intent_answer_shape_errors(item: Any, index: int) -> list[str]:
+    """Validate the submitted object before section-keyed merging can hide it."""
+    path = f"answers[{index}]"
+    if not isinstance(item, dict):
+        return [f"{path}: invalid item; expected an object with section and answer"]
+    section = item.get("section")
+    if isinstance(section, str) and section.strip():
+        path += f" (section: {section.strip()})"
+    errors = []
+    if "section" not in item:
+        errors.append(f"{path}.section: missing required 'section' field")
+    elif not isinstance(section, str) or not section.strip():
+        errors.append(f"{path}.section: invalid section; expected a non-empty string")
+    if "answer" not in item:
+        detail = "; content instead of answer is not supported" if "content" in item else ""
+        errors.append(f"{path}.answer: missing required 'answer' field{detail}")
+    elif not isinstance(item["answer"], str):
+        errors.append(f"{path}.answer: invalid answer; expected a string")
+    elif not item["answer"].strip():
+        errors.append(f"{path}.answer: Empty answer; provide substantive text")
+    return errors
+
+
 def intent_repair_instructions(errors: Iterable[str]) -> tuple[str, ...]:
     """Give only the structural shape needed for the rejected Intent sections."""
     errors = tuple(errors)
-    hints = ["Resubmit only changed answer objects with their exact section names; this cycle retains the unaccepted draft until acceptance or failure."]
-    if any("missing required 'answer' field" in error for error in errors):
-        hints.append("Each answers item must use `section` and `answer`; move text from `content` into `answer` and keep substantive answers.")
+    hints = [
+        "Resubmit only changed answer objects with their exact section names and all required fields. "
+        "Shape-valid items are retained in this cycle’s unaccepted draft until acceptance or failure; "
+        "malformed items are not merged and do not replace older draft values. "
+        "Duplicate-section submissions are not merged."
+    ]
+    if any(error.startswith("answers[") for error in errors):
+        hints.append("Correct each indexed item’s reported field. Supply substantive `answer` text alongside any `candidates` or `selection`; structured fields do not substitute for answer text.")
+    if any("content instead of answer" in error for error in errors):
+        hints.append("For items reported with content instead of answer, move text from `content` into `answer`; `content` is not an answer alias.")
     if any(error.startswith("Section exceeds ") or error.startswith("Checkpoint content exceeds ") for error in errors):
         hints.append("Shorten the named section or total answers below the stated character limit, preserving substantive reasoning, then resubmit with `submit_cycle_intent`.")
     if any(".evidence" in error or error.startswith("evidence[") for error in errors):

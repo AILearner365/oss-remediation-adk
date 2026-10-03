@@ -859,18 +859,18 @@ class AutonomousCapabilityTests(unittest.TestCase):
             else f"printf escape > '{authoritative_target}'"
         )
         relative_escape = capabilities.run_workspace_shell(
-            "Set-Content ../../repository/relative-escape.txt escape"
+            "Set-Content ../../../repository/relative-escape.txt escape"
             if os.name == "nt"
-            else "printf escape > ../../repository/relative-escape.txt"
+            else "printf escape > ../../../repository/relative-escape.txt"
         )
         indirect_escape = capabilities.run_workspace_shell(
-            "$parts = @('..', '..', 'repository', 'indirect-escape.txt'); "
+            "$parts = @('..', '..', '..', 'repository', 'indirect-escape.txt'); "
             "$target = [IO.Path]::GetFullPath((Join-Path $PWD ($parts -join '\\'))); "
             "try { Set-Content $target escape -ErrorAction Stop } "
             "catch { Set-Content indirect-attempt-ran.txt caught }"
             if os.name == "nt"
             else "python -c \"import errno; from pathlib import Path; p=Path.cwd(); "
-            "target=p.joinpath(*(['..']*2+['repository','indirect-escape.txt'])).resolve(); "
+            "target=p.joinpath(*(['..']*3+['repository','indirect-escape.txt'])).resolve(); "
             "\ntry: target.write_text('escape')\nexcept OSError as error:\n "
             "if not isinstance(error, PermissionError) and error.errno != errno.EROFS: raise\n "
             "(p/'indirect-attempt-ran.txt').write_text(str(error.errno))\""

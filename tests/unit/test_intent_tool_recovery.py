@@ -89,6 +89,38 @@ class IntentToolRecoveryTests(unittest.IsolatedAsyncioTestCase):
         return [json.loads(line) for line in self.trace.events_path.read_text(encoding="utf-8").splitlines()
                 if '"interactionType": "' + kind + '"' in line]
 
+    async def test_malformed_intent_callback_and_continuation_agree_then_local_repair(self):
+        from autonomous_oss_remediation_agent.prompt import intent_retry_message
+        answers = test_decision_journal.DecisionJournalTests._intent_answers()
+        repairs = [item.copy() for item in answers if "candidates" in item or "selection" in item]
+        for item in answers:
+            if "candidates" in item or "selection" in item:
+                item.pop("answer")
+        model = self._session([
+            ("submit_cycle_intent", {"cycle_number": 1, "answers": answers}),
+            "Repair next turn",
+            ("submit_cycle_intent", {"cycle_number": 1, "answers": repairs}),
+            "Intent repaired",
+        ])
+        await self.session.run_turn("Submit Cycle Intent")
+        response = self._interactions("tool_response")[0]["response"]
+        self.assertEqual("rejected", response["status"])
+        self.assertEqual(JournalPhase.INTENT_REQUIRED, self.journal.phase)
+        denied = self.capabilities.edit_workspace_text(
+            "write", "forbidden.txt", content="blocked", workspace="authoritative")
+        self.assertEqual("PHASE_CAPABILITY_UNAVAILABLE", denied["failureCode"])
+        self.assertFalse((self.workspace.repository / "forbidden.txt").exists())
+        message = intent_retry_message(1, list(self.journal.cycles[1].last_intent_errors))
+        for detail in response["errors"] + response["repairInstructions"]:
+            self.assertIn(detail, message)
+        self.assertNotIn("content", message)
+        self.assertIn("malformed items are not merged", message)
+        await self.session.run_turn(message)
+        self.assertEqual("accepted", self._interactions("tool_response")[-1]["response"]["status"])
+        self.assertEqual(JournalPhase.EXECUTION, self.journal.phase)
+        self.assertEqual(2, self.journal.cycles[1].intent_attempts)
+        self.assertEqual("<demo.version>1.0</demo.version>\n", self.pom.read_text())
+
     async def test_unknown_tool_receives_adk_correction_then_valid_intent_allows_edit(self):
         answers = test_decision_journal.DecisionJournalTests._intent_answers()
         model = self._session([

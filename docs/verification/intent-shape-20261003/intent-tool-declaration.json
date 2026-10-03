@@ -1,0 +1,160 @@
+{
+  "description": "Submit the pre-execution decision. Each item needs section and substantive answer. Investigation adds evidence records; candidates adds candidate records; selection adds a candidate reference, rationale, and challenge. Rejected sections can be replaced locally in this cycle.",
+  "name": "submit_cycle_intent",
+  "parameters_json_schema": {
+    "$defs": {
+      "CandidateRecord": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "solution": {
+            "title": "Solution",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "constraints": {
+            "title": "Constraints",
+            "type": "string"
+          },
+          "validation": {
+            "title": "Validation",
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "COMPLETE",
+              "PARTIAL"
+            ],
+            "title": "Classification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "solution",
+          "evidence",
+          "constraints",
+          "validation",
+          "classification"
+        ],
+        "title": "CandidateRecord",
+        "type": "object"
+      },
+      "EvidenceRecord": {
+        "properties": {
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "finding": {
+            "title": "Finding",
+            "type": "string"
+          },
+          "uncertainty": {
+            "title": "Uncertainty",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "source",
+          "finding",
+          "uncertainty"
+        ],
+        "title": "EvidenceRecord",
+        "type": "object"
+      },
+      "IntentAnswer": {
+        "properties": {
+          "section": {
+            "title": "Section",
+            "type": "string"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/$defs/EvidenceRecord"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/$defs/CandidateRecord"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "selection": {
+            "$ref": "#/$defs/SelectionRecord"
+          }
+        },
+        "required": [
+          "section",
+          "answer"
+        ],
+        "title": "IntentAnswer",
+        "type": "object"
+      },
+      "SelectionRecord": {
+        "properties": {
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "challenge": {
+            "title": "Challenge",
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate_id",
+          "rationale",
+          "challenge"
+        ],
+        "title": "SelectionRecord",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "cycle_number": {
+        "title": "Cycle Number",
+        "type": "integer"
+      },
+      "answers": {
+        "items": {
+          "$ref": "#/$defs/IntentAnswer"
+        },
+        "title": "Answers",
+        "type": "array"
+      }
+    },
+    "required": [
+      "cycle_number",
+      "answers"
+    ],
+    "title": "submit_cycle_intentParams",
+    "type": "object"
+  }
+}

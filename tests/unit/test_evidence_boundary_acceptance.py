@@ -166,6 +166,24 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         self.assertTrue(scored["evidenceSupportedSelectedDecision"])
         self.assertTrue(scored["selectedEvidenceCitesIssuedReference"])
 
+    def test_accepted_record_replay_skips_malformed_items_before_local_repair(self):
+        from scripts.retained_evidence_acceptance import _accepted_intent_answers
+        lifecycle, trace = self._lifecycle()
+        answers = _answers()
+        selected = answers[-1].copy()
+        answers[-1].pop("section")
+        interactions = [{"type": "adk_interaction", "interactionType": "tool_call",
+                         "name": "submit_cycle_intent", "cycle": 1,
+                         "arguments": {"cycle_number": 1, "answers": answers}}]
+        self.assertFalse(lifecycle.submit_intent(1, answers).accepted)
+        interactions.append({**interactions[0], "arguments": {"cycle_number": 1, "answers": [selected]}})
+        result = lifecycle.submit_intent(1, [selected])
+        self.assertTrue(result.accepted)
+        acceptance = {"type": "intent_submission_accepted", "cycle": 1,
+                      "contentHash": result.metadata.content_hash}
+        interactions.append(acceptance)
+        self.assertEqual(answers[:-1] + [selected], _accepted_intent_answers(interactions, lifecycle, acceptance))
+
     def test_later_unaccepted_call_cannot_change_accepted_score(self):
         scored, lifecycle, trace, display, budget, record_call = self._scored_intent()
         self.assertTrue(scored["evidenceSupportedSelectedDecision"])

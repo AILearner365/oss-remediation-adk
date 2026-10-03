@@ -1,8 +1,10 @@
 # Autonomous Agent — Project Direction
 
-**Updated:** 2026-10-02. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
+**Updated:** 2026-10-03. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
 
 ## Objective and direction
+
+**October 3 S4/P2 Intent boundary:** incoming malformed answer objects now receive indexed field-specific errors before draft merging; valid draft sections survive rejection, and stale values cannot hide a malformed incoming repair. Answer text remains mandatory alongside candidates/selection; content migration advice is conditional on an actual content field. Relevant offline checks passed 64 tests after repairing stale relative paths in the isolation test. One existing disposable live fixture accepted a valid Intent on attempt 1 after two no-submission turns; no malformed-payload recovery occurred, so that autonomous boundary remains **not exercised**. See WORK-STATE and `docs/verification/intent-shape-20261003/`. Return after review to incomplete Tomcat coverage and unsupported Spring Boot assumptions; frozen reasoning evaluation remains **CONTINUE**.
 
 **Development execution modes (October 2):** [EXECUTION-AGREEMENT](EXECUTION-AGREEMENT.md) records Cloud Shell as the current Codex development/verification default and preserves Windows → Cloud Shell as an available fallback. Use focused live evidence for relevant runtime boundaries, with sequential resource-aware verification and concise memory updates. This is development workflow guidance; the one-agent architecture and frozen reasoning evaluation remain unchanged.
 
