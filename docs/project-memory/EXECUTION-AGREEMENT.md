@@ -1,6 +1,6 @@
 # Codex development execution agreement
 
-**Agreed:** 2026-10-02. Applies to Codex development and verification in this repository, not to the Autonomous Agent's runtime prompts, contracts, or context.
+**Agreed:** 2026-10-02. **Updated:** 2026-10-03. Applies to Codex development and verification in this repository, not to the Autonomous Agent's runtime prompts, contracts, or context.
 
 ## Choose the execution mode
 
@@ -15,11 +15,13 @@ State the selected mode once at task start. Explicit task instructions take prec
 
 1. Read the existing project-memory entry points and reconcile the branch/head. Locate the actual failure and define observable acceptance criteria before editing.
 2. Implement the smallest coherent fix. Add meaningful regressions for observed failures and run the relevant checks.
-3. In Cloud Shell, actively use focused live verification when the change concerns model behavior, tool recovery, evidence use, workspace transitions, or execution/scanner boundaries. Inspect the trace against the acceptance criteria. Documentation-only changes do not need paid model runs.
+3. For model/runtime behavior or capability-boundary changes, inspect existing test scenarios and reuse a suitable one; add or extend a reusable live scenario only when needed for meaningful coverage. Use existing runners, fixtures and [scenario documentation](../harness-design-review/RETAINED-EVIDENCE-ACCEPTANCE.md). Writing the scenario, running it, and retaining its results are separate responsibilities: a `results.txt` file or a generic run that never exercises the changed behavior does not satisfy scenario coverage. In Cloud Shell, run focused live verification and inspect the trace against its acceptance criteria. Apply this proportionally: documentation-only changes and deterministic reporting fixes do not automatically require a new scenario or paid live test.
 4. If verification fails, investigate and repair within the authorized task scope and existing limits, then rerun the affected checks. Avoid repeatedly running an unchanged scenario. If an environment or scope blocker remains, report it precisely.
 5. Update the appropriate existing memory documents with implementation, offline results, live observations, unresolved gaps, next action, and return point. Push code and selected review evidence to the task branch and report the commit and workspace paths concisely.
 
-A passing run does not verify a boundary that never occurred. Label scripted/deterministic checks, autonomous live observations, failures, and **not exercised** cases separately. Synthetic malformed-call tests verify mechanics, not autonomous recovery. Keep reasoning evaluation at **CONTINUE** unless separate evidence justifies changing it.
+Each reusable live scenario records the behavior/boundary tested, required setup and exact runnable command, observable acceptance criteria and automated checks where practical, evidence/artifact locations, and explicit **passed**, **failed**, **blocked**, and **not exercised** outcomes. State whether it tests controlled integration or autonomous model behavior.
+
+A deliberately injected malformed call can verify controlled live integration, but is not naturally occurring autonomous recovery. A successful run that never encounters the relevant boundary must report that boundary as **not exercised**. Keep scenario coverage, execution status and retained results distinct; keep reasoning evaluation at **CONTINUE** unless separate evidence justifies changing it.
 
 ## Keep verification proportional to Cloud Shell resources
 
