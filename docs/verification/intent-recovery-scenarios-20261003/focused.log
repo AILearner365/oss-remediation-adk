@@ -1,0 +1,56 @@
+test_accepted_bytes_are_required_and_later_calls_cannot_change_replay (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_accepted_bytes_are_required_and_later_calls_cannot_change_replay) ... /home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_actual_continuation_after_empty_turn_uses_same_session (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_actual_continuation_after_empty_turn_uses_same_session) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_cli_retains_blocked_execution_and_setup_failure (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_cli_retains_blocked_execution_and_setup_failure) ... ok
+test_empty_turn_exhaustion_does_not_claim_checkpoint_attempts (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_empty_turn_exhaustion_does_not_claim_checkpoint_attempts) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_live_requires_explicit_retention_folder (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_live_requires_explicit_retention_folder) ... usage: fixture [-h] [--live]
+               [--scenario {retained-command,partial-read-edit,intent-missing-section,intent-missing-answer}]
+               [--trials TRIALS] [--model MODEL]
+               [--workspace-parent WORKSPACE_PARENT]
+fixture: error: --live requires --workspace-parent so its trace is retained
+ok
+test_offline_cli_retains_both_runnable_cases_without_live_claim (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_offline_cli_retains_both_runnable_cases_without_live_claim) ... ok
+test_real_adk_partial_and_complete_repairs_pass_both_cases (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_real_adk_partial_and_complete_repairs_pass_both_cases) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_repeated_supported_malformed_calls_exhaust_existing_allowance (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_repeated_supported_malformed_calls_exhaust_existing_allowance) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+test_seed_cases_have_exact_observed_shapes_feedback_and_retained_state (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_seed_cases_have_exact_observed_shapes_feedback_and_retained_state) ... ok
+test_seed_failure_prevents_live_session (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_seed_failure_prevents_live_session) ... ok
+test_terminal_failure_and_blocked_reporting (tests.unit.test_intent_recovery_scenarios.IntentRecoveryScenarioTests.test_terminal_failure_and_blocked_reporting) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 4.395s
+
+OK

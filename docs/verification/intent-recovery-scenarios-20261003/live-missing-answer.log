@@ -1,0 +1,87 @@
+/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+{
+  "mode": "live",
+  "trials": [
+    {
+      "classification": "controlled_integration",
+      "outcome": "PASSED",
+      "passed": true,
+      "offlineMechanics": "PASSED",
+      "controlledLiveIntegration": "PASSED",
+      "naturalAutonomousRecovery": "NOT_EXERCISED",
+      "checks": {
+        "indexedShapeRejection": true,
+        "payloadSpecificGuidance": true,
+        "callbackContinuationAgree": true,
+        "validDraftRetained": true,
+        "preIntentMutationDenied": true,
+        "seedAccounting": true,
+        "acceptedRecordVerified": true,
+        "liveResubmissionObserved": true,
+        "sameSessionAndCycle": true,
+        "attemptAccounting": true,
+        "withinLimits": true
+      },
+      "checkpointAccepted": true,
+      "sectionOnlyRepairObserved": false,
+      "acceptedSubmissionKind": "complete_or_other",
+      "acceptedContentHash": "fc0cb4beb8284a19e0a92f26fb4edd01f3d14f0507a1ac7d365c79ef424aa760",
+      "checkpointAttempts": 2,
+      "seedCheckpointAttempts": 1,
+      "attemptEvents": [
+        {
+          "attempt": 1,
+          "checkpoint": "intent",
+          "cycle": 1,
+          "limit": 10,
+          "retryAllowed": true,
+          "source": "submission",
+          "timestamp": "2026-10-03T16:12:58.933376+00:00",
+          "type": "checkpoint_attempt_recorded"
+        },
+        {
+          "attempt": 2,
+          "checkpoint": "intent",
+          "cycle": 1,
+          "limit": 10,
+          "retryAllowed": true,
+          "source": "submission",
+          "timestamp": "2026-10-03T16:13:06.673248+00:00",
+          "type": "checkpoint_attempt_recorded"
+        }
+      ],
+      "sessionIds": [
+        "f9212044-71df-4c54-a7af-6bbb5d43fa99"
+      ],
+      "seedSessionId": null,
+      "cycle": 1,
+      "continuationTurns": 1,
+      "toolCalls": 0,
+      "elapsedSeconds": 9.880693769000573,
+      "limits": {
+        "max_cycles": 1,
+        "max_tool_calls": 80,
+        "max_llm_calls_per_turn": 60,
+        "command_timeout_seconds": 1800,
+        "model_turn_timeout_seconds": 1800,
+        "overall_timeout_seconds": 7200,
+        "max_returned_output_chars": 2000,
+        "max_checkpoint_attempts": 10
+      },
+      "recoveryExhausted": false,
+      "stopReason": "accepted",
+      "terminalError": null,
+      "unexercisedPaths": [
+        "natural_autonomous_recovery",
+        "section_only_repair"
+      ],
+      "trace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T161258Z-b0b6f31c/artifacts/events.jsonl",
+      "scenario": "intent-missing-answer",
+      "trial": 1,
+      "workspace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T161258Z-b0b6f31c",
+      "artifactsRetained": true,
+      "resultArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T161258Z-b0b6f31c/artifacts/acceptance-result.json"
+    }
+  ]
+}

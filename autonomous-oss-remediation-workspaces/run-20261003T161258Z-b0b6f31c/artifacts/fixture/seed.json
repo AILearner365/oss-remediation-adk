@@ -1,0 +1,121 @@
+{
+  "arguments": {
+    "answers": [
+      {
+        "answer": "The service needs an adapter compatible with its observed diagnostic setting. The decision must use the report rather than guess a mode; implementation is outside this task.",
+        "section": "Problem understanding in project context"
+      },
+      {
+        "answer": "The diagnostic report identifies stream mode and incremental record consumption. It excludes batch mode. This supports a configuration decision, not a claim of runtime validation.",
+        "evidence": [
+          {
+            "finding": "ADAPTER_MODE=stream\nThe fixture service consumes records incrementally; batch mode is not supported.",
+            "question": "Which adapter mode does the fixture support?",
+            "source": "evidence:6ef9ce9cfcd7e048772b308e279f7cb9a633df57d75a7ae98e168277eb744a63",
+            "uncertainty": "Deployment behavior was not executed; the report supports the decision only."
+          }
+        ],
+        "section": "Information, investigation and remaining uncertainty"
+      },
+      {
+        "answer": "The controlling consideration is compatibility with incremental consumption. Stream matches that requirement; batch is eliminated by the report rather than preference. No code change is needed for this decision-only task.",
+        "section": "Project-applicable engineering synthesis and high-level solution space"
+      },
+      {
+        "candidates": [
+          {
+            "classification": "COMPLETE",
+            "constraints": "Matches the observed mode; no implementation or delivery is requested.",
+            "evidence": "The report specifies ADAPTER_MODE=stream and excludes batch (evidence:6ef9ce9cfcd7e048772b308e279f7cb9a633df57d75a7ae98e168277eb744a63).",
+            "id": "stream_adapter",
+            "name": "Stream adapter",
+            "solution": "Choose stream mode for incremental consumption.",
+            "validation": "Confirm the decision matches the report. Deployment testing would belong to a future implementation task."
+          }
+        ],
+        "section": "Concrete candidate solutions"
+      },
+      {
+        "section": "Selected solution",
+        "selection": {
+          "candidate_id": "stream_adapter",
+          "challenge": "The report does not prove behavior in a future deployment; verify that separately before claiming implementation success.",
+          "rationale": "The observed report directly supports incremental stream processing."
+        }
+      }
+    ],
+    "cycle_number": 1
+  },
+  "case": "intent-missing-answer",
+  "checkpointAttemptsAfterSeed": 1,
+  "checks": {
+    "callbackContinuationAgree": true,
+    "indexedShapeRejection": true,
+    "payloadSpecificGuidance": true,
+    "preIntentMutationDenied": true,
+    "seedAccounting": true,
+    "validDraftRetained": true
+  },
+  "classification": "controlled_integration",
+  "continuation": "Cycle 1 Problem Analysis and Solution Decision has not been accepted. Correct the checkpoint using `submit_cycle_intent`. Do not modify the authoritative repository before acceptance; continue isolated investigation if useful. Rejection details:\n- answers[3] (section: Concrete candidate solutions).answer: missing required 'answer' field\n- answers[4] (section: Selected solution).answer: missing required 'answer' field\n- Missing required section: Concrete candidate solutions\n- Missing required section: Selected solution\n- Concrete candidate solutions.candidates: provide at least one supported candidate\n- selection: expected an object with candidate_id, rationale, challenge\nRepair instructions:\n- Resubmit only changed answer objects with their exact section names and all required fields. Shape-valid items are retained in this cycle\u2019s unaccepted draft until acceptance or failure; malformed items are not merged and do not replace older draft values. Duplicate-section submissions are not merged.\n- Correct each indexed item\u2019s reported field. Supply substantive `answer` text alongside any `candidates` or `selection`; structured fields do not substitute for answer text.\n- In the candidate answer object provide candidate records with id, name, solution, evidence, constraints, validation, and classification.\n- In the selected-solution answer object provide selection with candidate_id, rationale, and challenge.",
+  "limits": {
+    "command_timeout_seconds": 1800,
+    "max_checkpoint_attempts": 10,
+    "max_cycles": 1,
+    "max_llm_calls_per_turn": 60,
+    "max_returned_output_chars": 2000,
+    "max_tool_calls": 80,
+    "model_turn_timeout_seconds": 1800,
+    "overall_timeout_seconds": 7200
+  },
+  "mutationProbe": {
+    "error": "Authoritative repository capabilities are unavailable before Intent acceptance",
+    "failureCode": "PHASE_CAPABILITY_UNAVAILABLE",
+    "status": "error"
+  },
+  "repositoryDigestAfterProbe": "15a30cfbe18955733d2364f7b54fd9bac864b6239df8fd3e9bb0572aed06b962",
+  "repositoryDigestBefore": "15a30cfbe18955733d2364f7b54fd9bac864b6239df8fd3e9bb0572aed06b962",
+  "response": {
+    "errors": [
+      "answers[3] (section: Concrete candidate solutions).answer: missing required 'answer' field",
+      "answers[4] (section: Selected solution).answer: missing required 'answer' field",
+      "Missing required section: Concrete candidate solutions",
+      "Missing required section: Selected solution",
+      "Concrete candidate solutions.candidates: provide at least one supported candidate",
+      "selection: expected an object with candidate_id, rationale, challenge"
+    ],
+    "metadata": null,
+    "repairInstructions": [
+      "Resubmit only changed answer objects with their exact section names and all required fields. Shape-valid items are retained in this cycle\u2019s unaccepted draft until acceptance or failure; malformed items are not merged and do not replace older draft values. Duplicate-section submissions are not merged.",
+      "Correct each indexed item\u2019s reported field. Supply substantive `answer` text alongside any `candidates` or `selection`; structured fields do not substitute for answer text.",
+      "In the candidate answer object provide candidate records with id, name, solution, evidence, constraints, validation, and classification.",
+      "In the selected-solution answer object provide selection with candidate_id, rationale, and challenge."
+    ],
+    "retryAllowed": true,
+    "status": "rejected"
+  },
+  "retainedDraft": [
+    {
+      "answer": "The service needs an adapter compatible with its observed diagnostic setting. The decision must use the report rather than guess a mode; implementation is outside this task.",
+      "section": "Problem understanding in project context"
+    },
+    {
+      "answer": "The diagnostic report identifies stream mode and incremental record consumption. It excludes batch mode. This supports a configuration decision, not a claim of runtime validation.",
+      "evidence": [
+        {
+          "finding": "ADAPTER_MODE=stream\nThe fixture service consumes records incrementally; batch mode is not supported.",
+          "question": "Which adapter mode does the fixture support?",
+          "source": "evidence:6ef9ce9cfcd7e048772b308e279f7cb9a633df57d75a7ae98e168277eb744a63",
+          "uncertainty": "Deployment behavior was not executed; the report supports the decision only."
+        }
+      ],
+      "section": "Information, investigation and remaining uncertainty"
+    },
+    {
+      "answer": "The controlling consideration is compatibility with incremental consumption. Stream matches that requirement; batch is eliminated by the report rather than preference. No code change is needed for this decision-only task.",
+      "section": "Project-applicable engineering synthesis and high-level solution space"
+    }
+  ],
+  "seedSessionId": null,
+  "toolCallsAfterSeed": 0
+}

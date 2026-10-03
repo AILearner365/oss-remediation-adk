@@ -26,6 +26,7 @@ from autonomous_oss_remediation_agent.prompt import (
     intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
 )
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
+from scripts.intent_recovery_scenarios import CASES, prepare_recovery, recovery_blocked, run_recovery, score_recovery
 
 
 FACT = "ADAPTER_MODE=stream"
@@ -351,7 +352,7 @@ async def verify_live(trace: TraceStore, budget: ExecutionBudget,
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true", help="Opt in to a paid model trial")
-    parser.add_argument("--scenario", choices=("retained-command", "partial-read-edit"),
+    parser.add_argument("--scenario", choices=("retained-command", "partial-read-edit", *CASES),
                         default="retained-command")
     parser.add_argument("--trials", type=int, default=1, help="Independent workspaces and sessions")
     parser.add_argument("--model", default="gemini-2.5-flash")
@@ -362,7 +363,7 @@ def main() -> int:
         parser.error("--trials must be between 1 and 10")
     if args.live and args.workspace_parent is None:
         parser.error("--live requires --workspace-parent so its trace is retained")
-    if args.live and args.scenario != "retained-command":
+    if args.live and args.scenario == "partial-read-edit":
         parser.error("Live partial-read/edit orchestration is deferred; run its offline boundary check")
     load_repository_env()
     temporary = tempfile.TemporaryDirectory() if args.workspace_parent is None else None
@@ -372,7 +373,12 @@ def main() -> int:
         for trial in range(1, args.trials + 1):
             workspace = None
             try:
-                if args.scenario == "partial-read-edit":
+                if args.scenario in CASES:
+                    workspace = RunWorkspace.create(parent)
+                    fixture = prepare_recovery(workspace, args.scenario)
+                    result = (asyncio.run(run_recovery(fixture, args.model)) if args.live
+                              else score_recovery(fixture, live=False))
+                elif args.scenario == "partial-read-edit":
                     workspace = RunWorkspace.create(parent)
                     trace = TraceStore(workspace)
                     result = verify_partial_read_offline(workspace, trace)
@@ -381,9 +387,15 @@ def main() -> int:
                     workspace, trace, budget, capabilities, display = prepare(parent, workspace)
                     result = (asyncio.run(verify_live(trace, budget, capabilities, display, args.model))
                               if args.live else verify_offline(capabilities, display))
-                result["passed"] = (result["liveTraceMeetsMechanicalCriteria"] if args.live else True)
+                if args.scenario not in CASES:
+                    result["passed"] = (result["liveTraceMeetsMechanicalCriteria"] if args.live else True)
             except Exception as exc:
                 result = {"passed": False, "terminalError": f"{type(exc).__name__}: {exc}"}
+                if args.scenario in CASES:
+                    outcome = "BLOCKED" if recovery_blocked(exc) else "FAILED"
+                    result.update(outcome=outcome, classification="controlled_integration",
+                                  offlineMechanics=outcome, controlledLiveIntegration="NOT_EXERCISED",
+                                  naturalAutonomousRecovery="NOT_EXERCISED", executionStage="setup_or_scoring")
             result.update({"scenario": args.scenario, "trial": trial,
                            "workspace": str(workspace.root) if workspace else None,
                            "artifactsRetained": temporary is None})
