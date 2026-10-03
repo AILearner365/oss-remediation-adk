@@ -1,0 +1,52 @@
+{
+  "baselineCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "captureSucceeded": true,
+  "capturedAt": "2026-10-03T02:49:11.252096+00:00",
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "changedFilesComplete": true,
+  "cycle": 2,
+  "diff": "diff --git a/pom.xml b/pom.xml\nindex 91b8c15..d485c9d 100644\n--- a/pom.xml\n+++ b/pom.xml\n@@ -7,7 +7,7 @@\n     <parent>\n         <groupId>org.springframework.boot</groupId>\n         <artifactId>spring-boot-starter-parent</artifactId>\n-        <version>4.0.6</version>\n+        <version>4.0.7</version>\n         <relativePath/>\n     </parent>\n \n@@ -54,18 +54,48 @@\n                 <artifactId>task-service</artifactId>\n                 <version>${project.version}</version>\n             </dependency>\n+            <dependency>\n+                <groupId>io.micrometer</groupId>\n+                <artifactId>micrometer-core</artifactId>\n+                <version>1.16.6</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.apache.tomcat.embed</groupId>\n+                <artifactId>tomcat-embed-core</artifactId>\n+                <version>11.0.25</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-expression</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>org.springframework</groupId>\n+                <artifactId>spring-webmvc</artifactId>\n+                <version>7.0.8</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-core</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n+            <dependency>\n+                <groupId>tools.jackson.core</groupId>\n+                <artifactId>jackson-databind</artifactId>\n+                <version>3.1.7</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n     <dependencies>\n         <dependency>\n             <groupId>org.apache.commons</groupId>\n             <artifactId>commons-text</artifactId>\n-            <version>1.9</version>\n+            <version>1.10.0</version>\n         </dependency>\n         <dependency>\n             <groupId>org.json</groupId>\n             <artifactId>json</artifactId>\n-            <version>20230227</version>\n+            <version>20231013</version>\n         </dependency>\n     </dependencies>\n     <build>\n",
+  "diffComplete": true,
+  "diffReference": "evidence:5f9ed93020c1aa5706d82a2de963a39cb70666c54d61a3c1b762144727917525",
+  "diffSha256": "31fbadf621b6b482873b4d093f063e4a9375231b2fbc0f953ee42d1fe5912de6",
+  "independentValidationAtCapture": "not yet run",
+  "lineChangeParsingComplete": true,
+  "lineChanges": [
+    {
+      "addedCount": 33,
+      "addedExcerpts": [
+        "        <version>4.0.7</version>",
+        "            <dependency>",
+        "                <groupId>io.micrometer</groupId>",
+        "                <artifactId>micrometer-core</artifactId>",
+        "                <version>1.16.6</version>",
+        "            </dependency>",
+        "            <dependency>",
+        "                <groupId>org.apache.tomcat.embed</groupId>",
+        "                <artifactId>tomcat-embed-core</artifactId>",
+        "                <version>11.0.25</version>",
+        "            </dependency>",
+        "            <dependency>"
+      ],
+      "addedExcerptsClippedLines": 0,
+      "addedExcerptsComplete": false,
+      "countsComplete": true,
+      "file": "pom.xml",
+      "removedCount": 3,
+      "removedExcerpts": [
+        "        <version>4.0.6</version>",
+        "            <version>1.9</version>",
+        "            <version>20230227</version>"
+      ],
+      "removedExcerptsClippedLines": 0,
+      "removedExcerptsComplete": true,
+      "summaryStatus": "parsed"
+    }
+  ],
+  "lineChangesComplete": true,
+  "summaryRecovery": "For incomplete or unsupported summaries, retrieve diffReference for the full captured diff; snapshotReference retains all file summaries. Check captureSucceeded before treating the captured diff as complete repository evidence.",
+  "treeDigest": "8dccd5a8281038f140daeae6fd4882e9524bdeba9afad300330de75f20ddc54a",
+  "workspaceKind": "authoritative"
+}

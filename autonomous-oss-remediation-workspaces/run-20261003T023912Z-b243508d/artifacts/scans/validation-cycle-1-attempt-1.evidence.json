@@ -1,0 +1,44 @@
+{
+  "attemptNumber": 1,
+  "backoffSeconds": null,
+  "command": [
+    "/home/kavya_parivarababu/bin/osv-scanner",
+    "scan",
+    "source",
+    "-r",
+    "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository",
+    "--format",
+    "json",
+    "--data-source=native",
+    "--maven-registry=http://127.0.0.1:32921/"
+  ],
+  "commandResult": {
+    "blocked": false,
+    "command": [
+      "/home/kavya_parivarababu/bin/osv-scanner",
+      "scan",
+      "source",
+      "-r",
+      "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository",
+      "--format",
+      "json",
+      "--data-source=native",
+      "--maven-registry=http://127.0.0.1:32921/"
+    ],
+    "cwd": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository",
+    "durationSeconds": 3.2938396609997653,
+    "exitCode": 1,
+    "stderr": "Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository\nStarting filesystem walk for root: /\nScanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository/task-service/pom.xml file and found 4 packages\nScanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository/task-common/pom.xml file and found 2 packages\nScanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository/task-web/pom.xml file and found 6 packages\nScanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository/pom.xml file and found 2 packages\nScanned /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/temp/autonomous-osv-kw42_qwa/repository/task-domain/pom.xml file and found 2 packages\nEnd status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 31.726654ms elapsed, 31.726913ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nWarning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.\n",
+    "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/artifacts/commands/osv_validation-cycle-1_attempt_1-6b56afc6bca0.stderr.log",
+    "stdout": "[output truncated; full log retained]\n0,000\\ntimes produces one retained entry. This isolates attacker-controlled key\\ncardinality from ordinary request count.\\n\\n### Impact\\n\\nWhere the stated polymorphic fallback configuration is exposed to\\nattacker-influenced type IDs, distinct inputs cause incremental\\nprocess-lifetime memory retention and eventual availability pressure or\\ndenial of service. This is not claimed as a single-request allocation spike,\\nand no fixed bytes-per-ID or time-to-out-of-memory value is asserted. No\\nconfidentiality, integrity, or code-execution impact is claimed.\\n\\nRequested credit: Daniel Birtwhistle\",\n              \"id\": \"GHSA-wv8q-qhhj-9h54\",\n              \"modified\": \"2026-09-30T15:46:18.451708212Z\",\n              \"published\": \"2026-09-30T15:36:55Z\",\n              \"references\": [\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-wv8q-qhhj-9h54\"\n                },\n                {\n                  \"type\": \"ADVISORY\",\n                  \"url\": \"https://nvd.nist.gov/vuln/detail/CVE-2026-91776\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/issues/6203\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/commit/2870d1d6dc1b7e1c07ee11dd5b04ab71cddbb577\"\n                },\n                {\n                  \"type\": \"PACKAGE\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-2.18.11\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-2.21.7\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-2.22.3\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-3.1.7\"\n                },\n                {\n                  \"type\": \"WEB\",\n                  \"url\": \"https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-3.2.3\"\n                }\n              ],\n              \"schema_version\": \"1.9.0\",\n              \"severity\": [\n                {\n                  \"score\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\",\n                  \"type\": \"CVSS_V3\"\n                }\n              ],\n              \"summary\": \"jackson-databind retains every unknown raw type ID \"\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"experimental_config\": {\n    \"licenses\": {\n      \"summary\": false,\n      \"allowlist\": null\n    }\n  }\n}\n",
+    "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/artifacts/commands/osv_validation-cycle-1_attempt_1-6b56afc6bca0.stdout.log",
+    "timedOut": false
+  },
+  "exitCode": 1,
+  "failureReason": null,
+  "outcome": "COMPLETED_WITH_FINDINGS",
+  "rawReportPath": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/artifacts/scans/validation-cycle-1-attempt-1.json",
+  "retryScheduled": false,
+  "stderrArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/artifacts/scans/validation-cycle-1-attempt-1.stderr.log",
+  "stdoutArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/artifacts/scans/validation-cycle-1-attempt-1.stdout.log"
+}

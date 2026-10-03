@@ -1,0 +1,68 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.example.secureapp:task-common:jar:1.0.0-SNAPSHOT
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-common:jar -> duplicate declaration of version ${project.version} @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/repository/pom.xml, line 57, column 25
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-domain:jar -> duplicate declaration of version ${project.version} @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/repository/pom.xml, line 62, column 25
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-service:jar -> duplicate declaration of version ${project.version} @ com.example.secureapp:secure-multimodule-springboot-java21:1.0.0-SNAPSHOT, /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T023912Z-b243508d/repository/pom.xml, line 67, column 25
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.example.secureapp:secure-multimodule-springboot-java21:pom:1.0.0-SNAPSHOT
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-common:jar -> duplicate declaration of version ${project.version} @ line 57, column 25
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-domain:jar -> duplicate declaration of version ${project.version} @ line 62, column 25
+[WARNING] 'dependencyManagement.dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: ${project.groupId}:task-service:jar -> duplicate declaration of version ${project.version} @ line 67, column 25
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21                               [pom]
+[INFO] task-common                                                        [jar]
+[INFO] task-domain                                                        [jar]
+[INFO] task-service                                                       [jar]
+[INFO] task-web                                                           [jar]
+[INFO] 
+[INFO] -----< com.example.secureapp:secure-multimodule-springboot-java21 >-----
+[INFO] Building secure-multimodule-springboot-java21 1.0.0-SNAPSHOT       [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ secure-multimodule-springboot-java21 ---
+[INFO] 
+[INFO] --- enforcer:3.6.2:enforce (base-oss-dependency-guardrails) @ secure-multimodule-springboot-java21 ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion passed
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] Rule 2: org.apache.maven.enforcer.rules.dependency.DependencyConvergence passed
+[INFO] Rule 4: org.apache.maven.enforcer.rules.dependency.BannedDependencies passed
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for secure-multimodule-springboot-java21 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] secure-multimodule-springboot-java21 ............... FAILURE [  1.292 s]
+[INFO] task-common ........................................ SKIPPED
+[INFO] task-domain ........................................ SKIPPED
+[INFO] task-service ....................................... SKIPPED
+[INFO] task-web ........................................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.747 s
+[INFO] Finished at: 2026-10-03T02:48:14Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-enforcer-plugin:3.6.2:enforce (base-oss-dependency-guardrails) on project secure-multimodule-springboot-java21: 
+[ERROR] Rule 3: org.apache.maven.enforcer.rules.BanDuplicatePomDependencyVersions failed with message:
+[ERROR] Found 3 duplicate dependency declarations in this project:
+[ERROR]  - dependencyManagement.dependencies.dependency[${project.groupId}:task-common:jar] (2 times)
+[ERROR]  - dependencyManagement.dependencies.dependency[${project.groupId}:task-service:jar] (2 times)
+[ERROR]  - dependencyManagement.dependencies.dependency[${project.groupId}:task-domain:jar] (2 times)
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
