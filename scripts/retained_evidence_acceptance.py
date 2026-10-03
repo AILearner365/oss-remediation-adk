@@ -9,12 +9,18 @@ import re
 import tempfile
 from pathlib import Path
 
-from autonomous_oss_remediation_agent.agent import GoogleAdkAgentSession, create_remediation_agent
+from autonomous_oss_remediation_agent.agent import (
+    GoogleAdkAgentSession, IntentToolRecoveryExhausted, IrrecoverableAgentSessionError,
+    create_remediation_agent,
+)
 from autonomous_oss_remediation_agent.capabilities import DeveloperCapabilitySet, ExecutionBudget, ProcessRunner, WorkspaceIO
+from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceeded
 from autonomous_oss_remediation_agent.capabilities.research import HttpResearchProvider
 from autonomous_oss_remediation_agent.config import ExecutionBudgetConfig, RuntimePolicy
 from autonomous_oss_remediation_agent.journal import JournalLifecycle, JournalPhase, JournalStore, render_checkpoint
-from autonomous_oss_remediation_agent.prompt import intent_questionnaire, intent_retry_message
+from autonomous_oss_remediation_agent.prompt import (
+    intent_no_submission_retry_message, intent_questionnaire, intent_retry_message,
+)
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 
 
@@ -138,10 +144,14 @@ async def run_until_intent(session, lifecycle: JournalLifecycle, message: str) -
         capture = lifecycle.cycles[lifecycle.active_cycle]
         if capture.intent_attempts >= lifecycle.max_checkpoint_attempts:
             return {"turns": turns, "stopReason": "checkpoint_attempts_exhausted"}
-        errors = list(capture.last_intent_errors) or [
-            "No Problem Analysis and Solution Decision submission was received in the previous turn"
-        ]
-        message = intent_retry_message(lifecycle.active_cycle, errors)
+        if capture.last_intent_errors:
+            message = intent_retry_message(lifecycle.active_cycle, list(capture.last_intent_errors))
+        else:
+            message = intent_no_submission_retry_message(
+                lifecycle.active_cycle,
+                unknown_calls=capture.intent_attempts - capture.rejected_intents,
+                remaining_attempts=lifecycle.max_checkpoint_attempts - capture.intent_attempts,
+            )
     return {"turns": turns, "stopReason": "continuation_turns_exhausted"}
 
 
@@ -168,7 +178,7 @@ def score_live_trace(trace: TraceStore, lifecycle: JournalLifecycle, display: di
                                     accepted[0]["timestamp"] > recovered[0]["timestamp"])
     submissions = [event for event in calls if event.get("name") == "submit_cycle_intent"
                    and event.get("cycle") == 1]
-    selected_consistent = False
+    selected_assessment = "ambiguous"
     provenance = False
     merged = _accepted_intent_answers(interactions, lifecycle, accepted[0]) if accepted else None
     if accepted_after_retrieval and merged is not None:
@@ -179,30 +189,53 @@ def score_live_trace(trace: TraceStore, lifecycle: JournalLifecycle, display: di
         candidates = by_section.get("Concrete candidate solutions", {}).get("candidates", [])
         candidate = next((item for item in candidates if item.get("id") == candidate_id), {})
         solution = str(candidate.get("solution", ""))
-        selected_consistent = bool(
-            re.search(r"\b(?:use|select|choose)\s+(?:the\s+)?stream\b|\bADAPTER_MODE\s*=\s*stream\b",
-                      solution, re.IGNORECASE)
-            and not re.search(r"\b(?:batch|not\s+stream|avoid\s+stream|never\s+stream)\b",
-                              solution, re.IGNORECASE)
-        )
+        values = {value for value in ("stream", "batch")
+                  if re.search(rf"\b{value}\b", solution, re.IGNORECASE)}
+        uncertain = bool(re.search(r"\b(?:not|avoid|never|except|unsupported|wrong|might|could|may|"
+                                   r"maybe|possibly|perhaps|if)\b",
+                                 solution, re.IGNORECASE))
+        if not uncertain and values == {"stream"}:
+            selected_assessment = "supports_stream"
+        elif not uncertain and values == {"batch"}:
+            selected_assessment = "contradicts_stream"
         evidence = by_section.get("Information, investigation and remaining uncertainty", {}).get("evidence", [])
-        provenance = any(FACT in str(item.get("finding", "")) and
-                         display["stdoutReference"] in str(item.get("source", ""))
-                         for item in evidence if isinstance(item, dict))
+        candidate_evidence = str(candidate.get("evidence", ""))
+        candidate_citation = FACT in candidate_evidence and display["stdoutReference"] in candidate_evidence
+        investigation_citation = any(
+            FACT in str(item.get("finding", "")) and
+            display["stdoutReference"] in str(item.get("source", ""))
+            for item in evidence if isinstance(item, dict))
+        provenance = candidate_citation or (investigation_citation and
+                                            (FACT in candidate_evidence or "ADAPTER_MODE" in candidate_evidence))
     retrieval_success = bool(targeted and recovered)
-    evidence_supported = bool(accepted_after_retrieval and selected_consistent and provenance)
+    if not accepted or merged is None:
+        screen = "capture_failure"
+    elif not retrieval_success or not accepted_after_retrieval:
+        screen = "missing_evidence"
+    elif selected_assessment == "contradicts_stream":
+        screen = "mechanically_contradicted"
+    elif not provenance:
+        screen = "missing_evidence"
+    elif selected_assessment == "supports_stream":
+        screen = "mechanically_supported"
+    else:
+        screen = "ambiguous_manual_review"
+    evidence_supported = screen == "mechanically_supported"
     return {
         "retrievalSuccess": retrieval_success,
         "targetedRetrievalCalls": len(targeted),
         "noCheckpointSubmission": not submissions,
         "rejectedSubmissions": len(rejected),
         "recoveryExhausted": continuation["stopReason"] in {
-            "checkpoint_attempts_exhausted", "continuation_turns_exhausted"},
+            "checkpoint_attempts_exhausted", "continuation_turns_exhausted",
+            "checkpoint_recovery_exhausted"},
         "checkpointAccepted": bool(accepted),
         "acceptedRecordVerified": merged is not None,
         "acceptedAfterRetrieval": accepted_after_retrieval,
-        "selectedCandidateConsistentWithFact": selected_consistent,
+        "selectedCandidateAssessment": selected_assessment,
+        "selectedCandidateConsistentWithFact": selected_assessment == "supports_stream",
         "selectedEvidenceCitesIssuedReference": provenance,
+        "decisionScreen": screen,
         "evidenceSupportedSelectedDecision": evidence_supported,
         "liveTraceMeetsMechanicalCriteria": retrieval_success and evidence_supported,
         "checkpointAttempts": lifecycle.cycles[1].intent_attempts,
@@ -293,12 +326,21 @@ async def verify_live(trace: TraceStore, budget: ExecutionBudget,
         continuation = await run_until_intent(session, lifecycle, message)
         return score_live_trace(trace, lifecycle, display, budget, continuation)
     except Exception as exc:
+        if isinstance(exc, IntentToolRecoveryExhausted):
+            stop_reason, terminal_category = "checkpoint_recovery_exhausted", "checkpoint_recovery_exhausted"
+        elif isinstance(exc, BudgetExceeded):
+            stop_reason, terminal_category = "budget_exceeded", "budget_exceeded"
+        elif isinstance(exc, IrrecoverableAgentSessionError):
+            stop_reason, terminal_category = "infrastructure_error", "infrastructure_error"
+        else:
+            stop_reason, terminal_category = "terminal_error", "other_error"
         events = [json.loads(line) for line in trace.events_path.read_text(encoding="utf-8").splitlines()]
         turns = sum(event.get("type") == "adk_interaction" and
                     event.get("interactionType") == "turn_started" for event in events)
         result = score_live_trace(trace, lifecycle, display, budget,
-                                  {"turns": turns, "stopReason": "terminal_error"})
+                                  {"turns": turns, "stopReason": stop_reason})
         result["terminalError"] = f"{type(exc).__name__}: {exc}"
+        result["terminalCategory"] = terminal_category
         result["liveTraceMeetsMechanicalCriteria"] = False
         return result
     finally:

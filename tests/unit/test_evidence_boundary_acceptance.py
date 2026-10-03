@@ -12,6 +12,11 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from autonomous_oss_remediation_agent.journal import INTENT_SECTIONS, JournalLifecycle, JournalPhase, JournalStore
+from autonomous_oss_remediation_agent.agent import (
+    IntentToolRecoveryExhausted, IrrecoverableAgentSessionError, intent_tool_error_callback,
+)
+from autonomous_oss_remediation_agent.capabilities.execution import BudgetExceeded
+from autonomous_oss_remediation_agent.orchestrator import AutonomousRemediationOrchestrator
 from autonomous_oss_remediation_agent.workspace import RunWorkspace, TraceStore
 from scripts.retained_evidence_acceptance import (
     FACT, main, run_until_intent, score_live_trace, verify_offline, verify_partial_read_offline, prepare,
@@ -95,7 +100,8 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         self.assertIn("Rejection details", session.messages[1])
         self.assertEqual(lifecycle.max_checkpoint_attempts, lifecycle.cycles[1].intent_attempts)
 
-    def _scored_intent(self, *, mode="stream", source=True, repair=True, artifact=False):
+    def _scored_intent(self, *, mode="stream", source=True, repair=True, artifact=False,
+                       solution=None, candidate_citation=False, unrelated_citation=False):
         lifecycle, trace = self._lifecycle()
         retained = trace.write_text("commands/fixture.stdout.log", FACT)
         ref = trace.issue_evidence_reference(retained)
@@ -117,7 +123,15 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         by_section["Information, investigation and remaining uncertainty"]["evidence"][0].update(
             source=ref if source is True else (source or "uncited source"), finding=FACT)
         by_section["Concrete candidate solutions"]["candidates"][0].update(
-            name=f"{mode} adapter", solution=f"Use {mode}")
+            name=f"{mode} adapter", solution=solution or f"Use {mode}",
+            evidence=(f"{FACT} ({ref}, offset 140000)" if candidate_citation else
+                      "The ADAPTER_MODE diagnostic setting determines this candidate."))
+        if unrelated_citation:
+            by_section["Concrete candidate solutions"]["candidates"].append({
+                "id": "B", "name": "Unselected", "solution": "Use batch",
+                "evidence": f"{FACT} ({ref})", "constraints": "Fixture only",
+                "validation": "Check setting", "classification": "PARTIAL",
+            })
         selection = by_section["Selected solution"]
         if repair:
             selection["selection"]["candidate_id"] = "missing"
@@ -167,11 +181,116 @@ class EvidenceBoundaryAcceptanceTests(unittest.TestCase):
         batch, *_ = self._scored_intent(mode="batch")
         self.assertTrue(batch["acceptedRecordVerified"])
         self.assertFalse(batch["evidenceSupportedSelectedDecision"])
+        self.assertEqual("mechanically_contradicted", batch["decisionScreen"])
         uncited, *_ = self._scored_intent(source=False)
         self.assertTrue(uncited["selectedCandidateConsistentWithFact"])
         self.assertFalse(uncited["evidenceSupportedSelectedDecision"])
+        self.assertEqual("missing_evidence", uncited["decisionScreen"])
         wrong, *_ = self._scored_intent(source="evidence:wrong-reference")
         self.assertFalse(wrong["evidenceSupportedSelectedDecision"])
+
+    def test_observed_accepted_wording_and_selected_candidate_citation(self):
+        scored, *_ = self._scored_intent(
+            source=False, candidate_citation=True,
+            solution="The `ADAPTER_MODE` for the fixture service should be set to `stream`.")
+        self.assertEqual("mechanically_supported", scored["decisionScreen"])
+        self.assertTrue(scored["selectedEvidenceCitesIssuedReference"])
+
+    def test_ambiguous_prose_and_unrelated_citation_require_review(self):
+        ambiguous, *_ = self._scored_intent(solution="Use stream or batch")
+        self.assertEqual("ambiguous_manual_review", ambiguous["decisionScreen"])
+        negated, *_ = self._scored_intent(solution="Stream is not supported")
+        self.assertEqual("ambiguous_manual_review", negated["decisionScreen"])
+        conditional, *_ = self._scored_intent(solution="Batch might be appropriate")
+        self.assertEqual("ambiguous_manual_review", conditional["decisionScreen"])
+        unrelated, *_ = self._scored_intent(source=False, unrelated_citation=True)
+        self.assertEqual("missing_evidence", unrelated["decisionScreen"])
+
+    def test_production_no_submission_feedback_preserves_unknown_call_state(self):
+        workspace, trace, budget, capabilities, display = prepare(Path(self.temp.name))
+        lifecycle = JournalLifecycle(JournalStore(trace), trace, "Fixture", lambda: False)
+        lifecycle.append_task_to_solve("Select documented setting")
+        lifecycle.begin_cycle(1)
+        capabilities.journal = lifecycle
+        declarations = {tool.name: tool._get_declaration() for tool in capabilities.adk_tools()}
+        self.assertIn("submit_cycle_intent", declarations)
+        self.assertNotIn("SubmitCycleIntentAnswers", declarations)
+        self.assertNotIn("SubmitCycleIntentAnswersEvidence", declarations)
+        nested = declarations["submit_cycle_intent"].parameters_json_schema["$defs"]
+        self.assertTrue({"IntentAnswer", "EvidenceRecord", "CandidateRecord", "SelectionRecord"}
+                        <= set(nested))
+        callback = intent_tool_error_callback(capabilities)
+        class Session:
+            def __init__(self):
+                self.messages = []
+            async def run_turn(self, message):
+                self.messages.append(message)
+                if len(self.messages) == 1:
+                    for _ in range(3):
+                        response = callback(SimpleNamespace(name="SubmitCycleIntentAnswers",
+                                                            description="Tool not found"), {}, None,
+                                            ValueError("Tool not found"))
+                    self.feedback = response
+                else:
+                    self.result = lifecycle.submit_intent(1, _answers())
+        session = Session()
+        runner = object.__new__(AutonomousRemediationOrchestrator)
+        asyncio.run(runner._run_until_intent(session, lifecycle, 1, "initial task"))
+        self.assertEqual(7, session.feedback["remainingAttempts"])
+        self.assertIn("3 unregistered tool call(s)", session.messages[1])
+        self.assertIn("7 attempt(s) remain", session.messages[1])
+        self.assertIn("no submitted answer sections are retained", session.messages[1])
+        self.assertIn("`submit_cycle_intent`", session.messages[1])
+        self.assertTrue(session.result.accepted)
+
+    def test_terminal_checkpoint_exhaustion_is_not_shared_tool_or_infrastructure_failure(self):
+        from scripts.retained_evidence_acceptance import verify_live
+        workspace, trace, budget, capabilities, display = prepare(Path(self.temp.name))
+        class Session:
+            def __init__(self, error):
+                self.error = error
+            async def run_turn(self, message):
+                capabilities.retrieve_retained_evidence(display["stdoutReference"], query="ADAPTER_MODE")
+                for _ in range(10):
+                    capabilities.journal.reserve_checkpoint_attempt("intent", "unknown_tool")
+                raise self.error
+            async def close(self):
+                pass
+        with patch("scripts.retained_evidence_acceptance.create_remediation_agent", return_value=object()), \
+             patch("scripts.retained_evidence_acceptance.GoogleAdkAgentSession",
+                   return_value=Session(IntentToolRecoveryExhausted("ten unknown calls"))):
+            result = asyncio.run(verify_live(trace, budget, capabilities, display, "scripted"))
+        self.assertTrue(result["recoveryExhausted"])
+        self.assertEqual("checkpoint_recovery_exhausted", result["terminalCategory"])
+        self.assertIn("IntentToolRecoveryExhausted: ten unknown calls", result["terminalError"])
+        self.assertEqual(10, result["checkpointAttempts"])
+        self.assertEqual(78, result["remainingToolCalls"])
+
+        other, trace2, budget2, capabilities2, display2 = prepare(Path(self.temp.name))
+        class InfrastructureSession:
+            async def run_turn(self, message):
+                raise IrrecoverableAgentSessionError("session transport failed")
+            async def close(self):
+                pass
+        with patch("scripts.retained_evidence_acceptance.create_remediation_agent", return_value=object()), \
+             patch("scripts.retained_evidence_acceptance.GoogleAdkAgentSession",
+                   return_value=InfrastructureSession()):
+            infrastructure = asyncio.run(verify_live(trace2, budget2, capabilities2, display2, "scripted"))
+        self.assertFalse(infrastructure["recoveryExhausted"])
+        self.assertEqual("infrastructure_error", infrastructure["terminalCategory"])
+
+        third, trace3, budget3, capabilities3, display3 = prepare(Path(self.temp.name))
+        class BudgetSession:
+            async def run_turn(self, message):
+                raise BudgetExceeded("ordinary tool budget reached")
+            async def close(self):
+                pass
+        with patch("scripts.retained_evidence_acceptance.create_remediation_agent", return_value=object()), \
+             patch("scripts.retained_evidence_acceptance.GoogleAdkAgentSession",
+                   return_value=BudgetSession()):
+            budget_result = asyncio.run(verify_live(trace3, budget3, capabilities3, display3, "scripted"))
+        self.assertFalse(budget_result["recoveryExhausted"])
+        self.assertEqual("budget_exceeded", budget_result["terminalCategory"])
 
     def test_offline_capabilities_retention_and_partial_edit(self):
         workspace, trace, budget, capabilities, display = prepare(Path(self.temp.name))

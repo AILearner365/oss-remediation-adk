@@ -46,6 +46,7 @@ from .prompt import (
     canonical_task_to_solve,
     execution_continuation_message,
     initial_message,
+    intent_no_submission_retry_message,
     intent_retry_message,
     outcome_message,
     outcome_retry_message,
@@ -555,10 +556,13 @@ class AutonomousRemediationOrchestrator:
             capture = lifecycle.cycles[cycle]
             if capture.intent_attempts >= lifecycle.max_checkpoint_attempts:
                 return turn
-            errors = list(capture.last_intent_errors) or [
-                "No Problem Analysis and Solution Decision submission was received in the previous turn"
-            ]
-            message = intent_retry_message(cycle, errors)
+            if capture.last_intent_errors:
+                message = intent_retry_message(cycle, list(capture.last_intent_errors))
+            else:
+                message = intent_no_submission_retry_message(
+                    cycle, unknown_calls=capture.intent_attempts - capture.rejected_intents,
+                    remaining_attempts=lifecycle.max_checkpoint_attempts - capture.intent_attempts,
+                )
         return turn
 
     async def _run_until_outcome(

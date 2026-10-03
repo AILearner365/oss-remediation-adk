@@ -274,6 +274,25 @@ def intent_retry_message(cycle: int, errors: list[str]) -> str:
     )
 
 
+def intent_no_submission_retry_message(cycle: int, *, unknown_calls: int,
+                                       remaining_attempts: int) -> str:
+    """Carry the actual failed invocation state into a no-submission continuation."""
+    correction = (
+        f"{unknown_calls} unregistered tool call(s) used the shared checkpoint allowance; "
+        f"{remaining_attempts} attempt(s) remain. " if unknown_calls else ""
+    )
+    return (
+        f"Cycle {cycle} Problem Analysis and Solution Decision has not been accepted. "
+        "No Problem Analysis and Solution Decision submission was received in the previous turn; "
+        "no submitted answer sections are retained for repair. "
+        + correction +
+        "Use the registered `submit_cycle_intent` tool with `cycle_number` and an `answers` array "
+        "containing the required section objects. Nested answer, evidence, candidate, and selection "
+        "schemas describe values inside `answers`; they are not callable tools. Do not modify the authoritative repository "
+        "before acceptance."
+    )
+
+
 def execution_continuation_message(cycle: int) -> str:
     return (
         f"Your Problem Analysis and Solution Decision for Cycle {cycle} has been accepted. "
