@@ -256,3 +256,11 @@ After the native completion-control experiment, reassess before further tuning.
 If `gemini-2.5-flash` plus native OpenHands completion control still shows materially poor evidence interpretation, repeated unproductive actions, or requires humans to supply engineering strategy rather than validation evidence, stop adding OpenHands-specific tuning and move to the planned OpenCode comparison using the same task/validator/model availability constraints.
 
 If completion control materially improves convergence while preserving agent-owned engineering judgment, OpenHands remains a qualified candidate even though the model-quality comparison stays unresolved until a stronger Gemini model becomes available.
+
+### Stop Hook POC result
+
+**PROVEN.** Native OpenHands completion control works in the installed 1.50.0 stack. A dummy deterministic Stop hook denied the first finish attempt, injected `TEST_VALIDATION_FAILED` feedback into the same conversation, resumed execution, then allowed a later finish attempt. The run completed with `POC_RESULT=PASS` using `vertex_ai/gemini-2.5-flash`.
+
+This reduces the need for custom recovery orchestration: OpenHands can own stop interception, feedback injection, and same-conversation continuation. The remaining product-owned concern is deterministic acceptance logic and a bounded policy for repeated denied completion attempts.
+
+The next controlled experiment should replace only the dummy hook decision with the existing Gate 2 deterministic validator while keeping the clean task baseline, task contract, Gemini 2.5 Flash, repository/tools, and validator unchanged.
