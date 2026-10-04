@@ -95,6 +95,7 @@ def main() -> int:
     baseline = state_dir / "baseline.json"
     validation = state_dir / "validation.json"
     hook_state = state_dir / "hook"
+    infrastructure_failure = hook_state / "infrastructure-failure"
     persistence = state_dir / "conversation"
 
     if args.max_denials < 1:
@@ -146,7 +147,7 @@ def main() -> int:
 
     state_dir.mkdir(parents=True, exist_ok=True)
     hook_state.mkdir(parents=True, exist_ok=True)
-    for path in (hook_state / "attempt-count", hook_state / "last-validator.log", validation):
+    for path in (hook_state / "attempt-count", hook_state / "last-validator.log", infrastructure_failure, validation):
         if path.exists():
             path.unlink()
 
@@ -216,6 +217,12 @@ def main() -> int:
         print(f"DETERMINISTIC_VALIDATION_PASSED={accepted}")
         print(f"VALIDATION_REPORT={validation}")
         print(f"CONVERSATION_PERSISTENCE={persistence}")
+
+        if infrastructure_failure.is_file():
+            detail = infrastructure_failure.read_text(encoding="utf-8").strip()
+            print(f"VALIDATOR_INFRASTRUCTURE_FAILURE={detail or 'true'}")
+            print("GATE2_STOP_HOOK_RESULT=INFRASTRUCTURE_FAIL")
+            return 3
 
         if status_value == "finished" and accepted:
             print("GATE2_STOP_HOOK_RESULT=PASS")
