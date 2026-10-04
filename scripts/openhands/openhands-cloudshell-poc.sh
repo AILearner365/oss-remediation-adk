@@ -3,11 +3,7 @@ set -euo pipefail
 
 CANVAS_VERSION="${CANVAS_VERSION:-1.24.0}"
 AGENT_SERVER_VERSION="${OH_AGENT_SERVER_VERSION:-1.50.0}"
-NPM_ROOT="$(npm root -g)"
-CANVAS_ROOT="$NPM_ROOT/@openhands/agent-canvas"
-DEV_SAFE="$CANVAS_ROOT/scripts/dev-safe.mjs"
-BUILD_DIR="$CANVAS_ROOT/build/assets"
-TMUX_DIR="$HOME/.openhands/agent-canvas/tmux"
+DEFAULT_VERTEX_LOCATION="${DEFAULT_VERTEX_LOCATION:-us-central1}"
 
 die() {
   echo "ERROR: $*" >&2
@@ -22,17 +18,89 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
 }
 
+require_cmd node
+require_cmd npm
+
+NPM_ROOT="$(npm root -g)"
+NPM_PREFIX="$(npm prefix -g)"
+CANVAS_ROOT="$NPM_ROOT/@openhands/agent-canvas"
+DEV_SAFE="$CANVAS_ROOT/scripts/dev-safe.mjs"
+BUILD_DIR="$CANVAS_ROOT/build/assets"
+TMUX_DIR="$HOME/.openhands/agent-canvas/tmux"
+
+resolve_canvas_version() {
+  [ -f "$CANVAS_ROOT/package.json" ] || return 1
+  node -e 'const p=require(process.argv[1]); process.stdout.write(p.version || "")' "$CANVAS_ROOT/package.json"
+}
+
+resolve_canvas_bin() {
+  if command -v agent-canvas >/dev/null 2>&1; then
+    command -v agent-canvas
+    return
+  fi
+
+  local candidate="$NPM_PREFIX/bin/agent-canvas"
+  [ -x "$candidate" ] || die "Agent Canvas executable not found at $candidate"
+  printf '%s\n' "$candidate"
+}
+
+ensure_canvas_installed() {
+  local installed=""
+  installed="$(resolve_canvas_version 2>/dev/null || true)"
+
+  if [ "$installed" = "$CANVAS_VERSION" ]; then
+    info "Agent Canvas $installed already installed"
+    return
+  fi
+
+  if [ -n "$installed" ]; then
+    die "Agent Canvas $installed is installed, expected $CANVAS_VERSION. Stop and re-evaluate patches before changing versions."
+  fi
+
+  info "Agent Canvas is not present in this Cloud Shell session"
+  info "Installing @openhands/agent-canvas@$CANVAS_VERSION into the ephemeral global Node location"
+
+  export npm_config_cache="${npm_config_cache:-/tmp/openhands-npm-cache}"
+  mkdir -p "$npm_config_cache"
+
+  npm install -g "@openhands/agent-canvas@$CANVAS_VERSION"
+
+  installed="$(resolve_canvas_version 2>/dev/null || true)"
+  [ "$installed" = "$CANVAS_VERSION" ] || die "Agent Canvas installation completed but version could not be verified"
+
+  rm -rf "$npm_config_cache" 2>/dev/null || true
+  info "Agent Canvas $installed installed"
+}
+
+load_vertex_defaults() {
+  if [ -z "${VERTEXAI_PROJECT:-}" ]; then
+    VERTEXAI_PROJECT="${GOOGLE_CLOUD_PROJECT:-}"
+  fi
+
+  if [ -z "${VERTEXAI_PROJECT:-}" ]; then
+    VERTEXAI_PROJECT="$(gcloud config get-value project 2>/dev/null || true)"
+    [ "$VERTEXAI_PROJECT" = "(unset)" ] && VERTEXAI_PROJECT=""
+  fi
+
+  if [ -z "${VERTEXAI_LOCATION:-}" ]; then
+    VERTEXAI_LOCATION="$DEFAULT_VERTEX_LOCATION"
+  fi
+
+  export VERTEXAI_PROJECT
+  export VERTEXAI_LOCATION
+}
+
 check_versions() {
-  require_cmd node
-  require_cmd npm
   require_cmd uv
   require_cmd gcloud
   require_cmd tmux
   require_cmd python
 
+  ensure_canvas_installed
+
   local installed_canvas
-  installed_canvas="$(node -e 'const p=require(process.argv[1]); process.stdout.write(p.version || "")' "$CANVAS_ROOT/package.json" 2>/dev/null || true)"
-  [ "$installed_canvas" = "$CANVAS_VERSION" ] || die "Expected Agent Canvas $CANVAS_VERSION, found '${installed_canvas:-unknown}'. Stop and re-evaluate patches."
+  installed_canvas="$(resolve_canvas_version)"
+  [ "$installed_canvas" = "$CANVAS_VERSION" ] || die "Expected Agent Canvas $CANVAS_VERSION, found '${installed_canvas:-unknown}'."
 
   [ -f "$DEV_SAFE" ] || die "Missing expected launcher file: $DEV_SAFE"
 
@@ -45,7 +113,9 @@ check_versions() {
 }
 
 check_vertex_env() {
-  [ -n "${VERTEXAI_PROJECT:-}" ] || die "VERTEXAI_PROJECT is not set"
+  load_vertex_defaults
+
+  [ -n "${VERTEXAI_PROJECT:-}" ] || die "Vertex project could not be detected. Set VERTEXAI_PROJECT once or configure the active gcloud project."
   [ -n "${VERTEXAI_LOCATION:-}" ] || die "VERTEXAI_LOCATION is not set"
 
   gcloud auth application-default print-access-token >/dev/null 2>&1     || die "Application Default Credentials are not available"
@@ -58,6 +128,7 @@ check_vertex_env() {
 prepare_runtime() {
   export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/openhands-uv-cache}"
   mkdir -p "$UV_CACHE_DIR"
+
   mkdir -p "$TMUX_DIR"
   chmod 700 "$TMUX_DIR"
 
@@ -78,12 +149,15 @@ patch_vertex_extra() {
   python - "$DEV_SAFE" <<'PY'
 from pathlib import Path
 import sys
+
 p = Path(sys.argv[1])
 s = p.read_text()
 old = "`openhands-sdk==${version}`"
 new = "`openhands-sdk[vertex]==${version}`"
+
 if old not in s:
     raise SystemExit("Expected launcher expression not found")
+
 p.write_text(s.replace(old, new, 1))
 PY
 
@@ -119,12 +193,15 @@ patch_vertex_readiness() {
   python - "$file" <<'PY'
 from pathlib import Path
 import sys
+
 p = Path(sys.argv[1])
 s = p.read_text()
 old = "M=T&&D(O?.config)"
 new = 'M=T&&(D(O?.config)||O?.config?.model?.startsWith("vertex_ai/"))'
+
 if old not in s:
     raise SystemExit("Expected readiness expression not found")
+
 p.write_text(s.replace(old, new, 1))
 PY
 
@@ -149,12 +226,11 @@ start_canvas() {
   export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/openhands-uv-cache}"
   export OH_AGENT_SERVER_VERSION="$AGENT_SERVER_VERSION"
 
+  local canvas_bin
+  canvas_bin="$(resolve_canvas_bin)"
+
   info "Starting Agent Canvas"
   info "OH_AGENT_SERVER_VERSION=$OH_AGENT_SERVER_VERSION"
-  local canvas_bin
-  canvas_bin="$(command -v agent-canvas || true)"
-  [ -n "$canvas_bin" ] || canvas_bin="$(npm prefix -g)/bin/agent-canvas"
-  [ -x "$canvas_bin" ] || die "Agent Canvas executable not found: $canvas_bin"
   exec "$canvas_bin"
 }
 
@@ -166,14 +242,21 @@ Usage:
   openhands-cloudshell-poc.sh start
   openhands-cloudshell-poc.sh disk
 
-Environment required for prepare/start:
+The script:
+- installs Agent Canvas 1.24.0 automatically when a new Cloud Shell session lost the ephemeral global install;
+- uses /tmp for npm/uv caches to protect the small persistent /home volume;
+- detects the Vertex project from GOOGLE_CLOUD_PROJECT or the active gcloud project;
+- defaults Vertex location to us-central1;
+- verifies ADC;
+- recreates the Canvas tmux directory;
+- reapplies the two guarded Vertex POC patches when needed.
+
+Optional overrides:
   VERTEXAI_PROJECT
   VERTEXAI_LOCATION
-
-Optional:
-  CANVAS_VERSION          default: 1.24.0
-  OH_AGENT_SERVER_VERSION default: 1.50.0
-  UV_CACHE_DIR            default: /tmp/openhands-uv-cache
+  CANVAS_VERSION
+  OH_AGENT_SERVER_VERSION
+  UV_CACHE_DIR
 EOF
 }
 
