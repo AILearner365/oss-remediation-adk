@@ -14,7 +14,7 @@ info() {
   echo "==> $*"
 }
 
-[ -d "$TARGET_REPO/.git" ] || die "Target repository not found at $TARGET_REPO. Set TARGET_REPO to the existing maven-multimodule-app checkout."
+git -C "$TARGET_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Target repository not found at $TARGET_REPO. Set TARGET_REPO to the existing maven-multimodule-app checkout."
 
 cd "$TARGET_REPO"
 
