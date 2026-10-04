@@ -1,0 +1,42 @@
+{
+  "reviewType": "manual existing Experiment 1 per-run assessment; not F/G fixture scorer",
+  "sourceCommit": "c57d21710486e49c74fd2c410440982ac1b38fd2",
+  "workspace": "autonomous-oss-remediation-workspaces/run-20261004T031259Z-4d965e41",
+  "cliExitCode": 1,
+  "rawOutcome": "BASELINE FAILURE",
+  "execution": "FAILED",
+  "evaluation": "BLOCKED",
+  "capture": "MISSING",
+  "semanticAssessment": "NOT_EXERCISED",
+  "criteria": {
+    "1": "NOT_EXERCISED",
+    "2": "NOT_EXERCISED",
+    "3": "NOT_EXERCISED",
+    "4": "NOT_EXERCISED",
+    "5": "NOT_EXERCISED",
+    "6": "NOT_EXERCISED",
+    "7": "NOT_EXERCISED"
+  },
+  "acceptedIntent": null,
+  "acceptedOutcome": null,
+  "acceptedRecordBinding": "NOT_APPLICABLE: no accepted record exists",
+  "baselineBuild": "PASSED",
+  "baselineScan": "FAILED",
+  "selfValidation": "NOT_EXERCISED",
+  "independentValidation": "NOT_EXERCISED",
+  "delivery": "NOT_EXERCISED / NOT_DELIVERY_ELIGIBLE",
+  "experimentDecision": "CONTINUE",
+  "eventCounts": {
+    "journal_section_appended": 2,
+    "command": 9,
+    "scanner_preflight": 1,
+    "repository_prepared": 1,
+    "scanner_dependency_environment": 1,
+    "osv_scan_attempt": 1,
+    "run_finished": 1
+  },
+  "traceLines": 16,
+  "productionHashesUnchanged": true,
+  "actualTargetCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "authoritativeDiffEmpty": true
+}

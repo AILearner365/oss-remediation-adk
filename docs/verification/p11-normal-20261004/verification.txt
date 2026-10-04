@@ -1,0 +1,9 @@
+PASSED: all retained event lines parsed; actual target matches preflight; normalized requests match both historical runs.
+PASSED: frozen production prompt/journal/agent hashes unchanged; authoritative tracked diff empty.
+PASSED: offline paired scan diagnostic reproduces ignored-root failure and restores POM extraction with no-ignore.
+NOT EXERCISED: offline vulnerability verdict (database unavailable), model reasoning, Intent/Outcome capture, self/independent validation, delivery.
+FAILED: normal CLI exit 1, baseline scan exit 128; raw artifacts preserved.
+BLOCKED: normal P1.1 reasoning assessment. No unchanged rerun or paid model interaction.
+PASSED: diagnostic compiles/help works; existing-output guard exits 2 before scanning; raw artifact hashes unchanged.
+PASSED: new documentation links, authored documentation whitespace, selected-evidence credential-pattern check. No broad suite or second live run.
+NOTE: full staged whitespace check flags only retained raw journal EOF and Maven stdout whitespace; preserved verbatim to retain hashes.

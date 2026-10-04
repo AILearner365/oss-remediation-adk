@@ -1,0 +1,107 @@
+{
+  "sourceCommit": "c57d21710486e49c74fd2c410440982ac1b38fd2",
+  "targetBranch": "main-runrunning",
+  "expectedTargetCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "request": {
+    "repositoryUrl": "https://github.com/AILearner365/maven-multimodule-app",
+    "referenceBranch": "main-runrunning",
+    "workspaceParent": "autonomous-oss-remediation-workspaces",
+    "vulnerabilityIds": [],
+    "severityScope": [
+      "CRITICAL",
+      "HIGH"
+    ],
+    "buildCommands": [
+      "mvn clean verify"
+    ],
+    "testCommands": [],
+    "startupCommands": [],
+    "model": "gemini-2.5-flash",
+    "budget": {
+      "max_cycles": 4,
+      "max_tool_calls": 80,
+      "max_llm_calls_per_turn": 60,
+      "command_timeout_seconds": 1800,
+      "model_turn_timeout_seconds": 1800,
+      "overall_timeout_seconds": 7200,
+      "max_returned_output_chars": 3000
+    },
+    "runtimePolicy": {
+      "trusted_repository": true,
+      "dedicated_runner": true,
+      "enable_autonomous_shell": true,
+      "allow_network": true
+    },
+    "maven": {
+      "mode": "system"
+    },
+    "scanner": {
+      "backend": "osv",
+      "osv": {
+        "mode": "configured",
+        "executable": "/home/kavya_parivarababu/bin/osv-scanner",
+        "version": "2.6.0",
+        "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+        "download_url": null,
+        "archive_member": null,
+        "timeout_seconds": 300
+      }
+    },
+    "constraints": {
+      "protected_java_version": null,
+      "protected_spring_boot_version": null,
+      "prohibit_suppressions": true,
+      "prohibited_new_severities": [
+        "CRITICAL",
+        "HIGH"
+      ],
+      "allowed_paths": [],
+      "protected_paths": [],
+      "engineering_constraints": [],
+      "informational_constraints": [],
+      "version_policies": {
+        "spring_boot": {
+          "allow_patch": true,
+          "allow_minor": true,
+          "allow_major": false,
+          "allow_downgrade": false,
+          "approved_versions": [],
+          "required_version": null
+        }
+      }
+    },
+    "delivery": {
+      "mode": "auto",
+      "adapter": "github",
+      "github_api_base": "https://api.github.com",
+      "branch_prefix": "autonomous-oss-remediation",
+      "draft": true
+    }
+  },
+  "comparisons": {
+    "run-20261003T021900Z-a556c469": {
+      "exactNormalizedRequestMatch": true,
+      "differentTopLevelFields": []
+    },
+    "run-20261003T023912Z-b243508d": {
+      "exactNormalizedRequestMatch": true,
+      "differentTopLevelFields": []
+    }
+  },
+  "modelClientSetup": {
+    "clientConstructed": true,
+    "vertexai": true
+  },
+  "deliveryCredentialPresent": true,
+  "versions": {
+    "google-adk": "2.4.0",
+    "google-genai": "2.11.0",
+    "pydantic": "2.13.4"
+  },
+  "scannerSha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+  "productionPromptHashes": {
+    "autonomous_oss_remediation_agent/prompt.py": "0c243f89c301f1c7cc36ed9c459ca1186cf142b174aad9e5a0274c62e255c447",
+    "autonomous_oss_remediation_agent/journal.py": "69a0090e15c2ad744bd5921a65d3973d37d708dfa900e095e7c793116f4be406",
+    "autonomous_oss_remediation_agent/agent.py": "9da5324d9b57fac35d9e79633ba0f2a5e294d918fa4caebf401f6f70df27f0f7"
+  }
+}

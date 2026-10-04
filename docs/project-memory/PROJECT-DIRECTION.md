@@ -2,6 +2,12 @@
 
 **Updated:** 2026-10-04. **Scope:** development-project continuity for `autonomous_oss_remediation_agent` on `context-hygiene-clone-challenge-before-commitment`. These files are for ChatGPT/developers; they are not agent runtime inputs. See [WORK-STATE](WORK-STATE.md) for the active bookmark and [DECISION-LOG](DECISION-LOG.md) for durable rationale.
 
+
+**October 4 focused frozen P1.1 evaluation (reconciled `c57d2171`):** one normal CLI attempt `run-20261004T031259Z-4d965e41`, exact request match to `021900` / `023912`, actual target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, same Gemini 2.5 Flash/Vertex and budgets. Baseline build PASSED; scan FAILED (exit 128, NO_PACKAGE_SOURCES) before model execution; CLI exit 1. Capture MISSING, evaluation BLOCKED, all seven reasoning criteria NOT EXERCISED. No accepted Intent/Outcome, implementation, self/independent validation or delivery. [Per-run assessment, evidence and scoped proposal](../verification/p11-normal-20261004/review.md); [authoritative experiment update](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md).
+
+**New blocker / return:** paired offline scan of the same staged source demonstrates inherited harness `.gitignore` temp exclusion suppresses all extraction; `--no-ignore` restores five POM extractions, then lacks an offline vulnerability database (not a scan pass). Propose a separate scanner staging/ignore correction preserving target exclusions; no runtime changes here, no unchanged rerun. Historical reasoning failures remain unresolved; frozen evaluation **CONTINUE**. Next: scoped infrastructure repair, then return to the comparable normal accepted-decision gap. Selected raw artifacts and separate review retained; sequential Cloud Shell, Windows → Cloud Shell fallback preserved.
+
+
 ## Objective and direction
 
 

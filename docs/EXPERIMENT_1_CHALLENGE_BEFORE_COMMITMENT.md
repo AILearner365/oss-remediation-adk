@@ -1,6 +1,6 @@
 # Experiment 1 — Challenge Before Commitment
 
-**Status:** Behavioral baseline frozen; model-backed evaluation pending.
+**Status:** Behavioral baseline frozen; evaluation CONTINUE. Latest normal attempt (2026-10-04) blocked before model execution; see appended record.
 
 **Behavioral baseline:** `e92837d4498c6bb8ebcafefb19cfd4acf2394b06`
 
@@ -350,8 +350,16 @@ Experiment 1 may affect symptoms of these concerns, but its existence does not r
 
 ## Experiment results
 
-No model-backed Experiment 1 acceptance runs are recorded yet.
+The original record had no acceptance runs at freeze time. Later normal-run reasoning failures are retained in [the October 3 investigation](verification/reasoning-boundaries-20261003/investigation.md); controlled F/G observations remain separate. The following current attempt uses this record’s existing per-run method.
 
 ## Decision
 
 Current decision: `CONTINUE` to repeated model-backed evaluation of the frozen baseline. This is authorization to gather evidence, not a conclusion that the experiment is successful.
+
+## 2026-10-04 — Comparable normal attempt blocked at baseline
+
+Source `c57d21710486e49c74fd2c410440982ac1b38fd2`; workspace `run-20261004T031259Z-4d965e41`. [Predeclared assessment](verification/p11-normal-20261004/assessment-before-run.md), [complete per-run assessment and mandatory self-evaluation](verification/p11-normal-20261004/review.md), [separate status review](verification/p11-normal-20261004/review.json). Those linked sections instantiate the existing Q1–Q5 / implementation / validation / Outcome template; they introduce no scoring policy.
+
+Exact normalized request matches `021900` and `023912`, with actual target `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, Gemini 2.5 Flash/Vertex and unchanged budgets, constraints and delivery gates. Baseline build PASSED; scan FAILED with NO_PACKAGE_SOURCES before any model call. CLI exit 1, raw capture MISSING; evaluation BLOCKED and all seven reasoning criteria NOT EXERCISED. No accepted Intent/Outcome, self-validation, independent validation or delivery. No substantive comparison or production reasoning improvement is established.
+
+Offline paired diagnostic demonstrates that the enclosing harness temp-ignore rule suppresses staged source extraction; bypassing ignores restores five POM extractions but does not establish a vulnerability verdict. Propose a separate staging/ignore fix preserving target exclusion semantics. No runtime edits or unchanged live retry. Historical failures and uncertainty remain; **CONTINUE**. Return to the same normal evaluation gap after the infrastructure repair.

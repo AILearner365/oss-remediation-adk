@@ -132,3 +132,17 @@ python -m unittest tests.unit.test_unknown_tool_interface tests.unit.test_intent
 ```
 
 No network/provider calls or corrected Intent are supplied. Both provider variants retain the one registered Intent tool, nested JSON data and later requests containing corrections/continuations. Wire projections exclude credentials, headers and unrelated full payloads. These are controlled request-path checks, not natural autonomous recovery, historical wire capture or proof of provider-internal processing. Successful F/E1/E2 invocation traces and the prior retained identical declaration constrain but do not explain the failure. No concrete interface defect or runtime change is established, so no paid live run or unchanged failing rerun was performed. Frozen evaluation stays CONTINUE; accepted G reasoning remains NOT EXERCISED.
+
+## Comparable normal frozen P1.1 evaluation (production CLI)
+
+This uses the existing normal remediation runner, not A–G fixtures or their scorer. [Pre-run criteria/configuration](../verification/p11-normal-20261004/assessment-before-run.md) map complete coverage, supported claims, uncertainty, provenance, material challenge, reassessment and truthful Outcome to the [frozen experiment](../EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md). No expected solution is supplied.
+
+From repository root, with documented Cloud Shell credentials, pinned scanner and Maven/Java installed, check RAM/disk and run sequentially:
+
+```bash
+python -m autonomous_oss_remediation_agent.cli docs/verification/p11-normal-20261004/request.json --output /tmp/p11-normal-result.json
+```
+
+Confirm `main-runrunning` resolves to `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78` before comparing; any drift requires explicit recording. The CLI creates a fresh isolated workspace and preserves normal gated draft delivery. Retain raw traces and bind substantive review to exact accepted records where present. A capture or delivery pass alone never establishes reasoning success. PASSED requires actual evidence for exercised criteria; FAILED retains contradicted decisions/execution; BLOCKED records infrastructure preventing assessment; NOT EXERCISED applies to unreached boundaries. Do not overwrite retained results.
+
+Observed attempt `run-20261004T031259Z-4d965e41`: baseline build PASSED, scan FAILED, evaluation BLOCKED, all reasoning/validation/delivery criteria NOT EXERCISED; no model call. [Review and diagnostic](../verification/p11-normal-20261004/review.md). Do not repeat unchanged: first resolve the demonstrated inherited-ignore scanner staging defect in a separate task. This record does not alter F/G’s exit convention (offline mechanics PASSED with overall NOT_EXERCISED still exits 1).

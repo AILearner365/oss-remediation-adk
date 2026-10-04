@@ -1,0 +1,4 @@
+Scanning dir /home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261004T031259Z-4d965e41/temp/autonomous-osv-s3383_qy/repository
+Starting filesystem walk for root: /
+End status: 1 dirs visited, 1 inodes visited, 0 Extract calls, 216.083µs elapsed, 216.293µs wall time
+No package sources found, --help for usage information.
