@@ -99,8 +99,18 @@ def main() -> int:
 
     if args.max_denials < 1:
         raise SystemExit("--max-denials must be at least 1")
-    if not (target / ".git").is_dir():
+    if not target.is_dir():
         raise SystemExit(f"Target repository not found: {target}")
+    probe = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=target,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if probe.returncode != 0 or probe.stdout.strip() != "true":
+        raise SystemExit(f"Target repository is not a Git worktree: {target}")
     if not baseline.is_file():
         raise SystemExit(
             f"Baseline state not found: {baseline}. Run the task-02 baseline first."
