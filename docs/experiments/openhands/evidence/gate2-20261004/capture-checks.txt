@@ -1,0 +1,9 @@
+PASS: 366 contiguous events; all 115 action/observation pairs intact.
+PASS: all source event hashes unchanged; JSONL and document export hashes verified.
+PASS: synthetic credential redaction and reasoning omission.
+PASS: new-destination export; overwrite and source-directory output rejected; synthetic source unchanged.
+PASS: all nine advertised tool names retained after schema correction.
+PASS: baseline/recovery JSON parsing and local documentation links.
+PASS: exported content search found no private keys, Google access/API tokens, GitHub tokens, or credential assignments.
+PASS: git diff --check (including staged files).
+No OpenHands execution, remediation build, security scan, or validator rerun performed.
