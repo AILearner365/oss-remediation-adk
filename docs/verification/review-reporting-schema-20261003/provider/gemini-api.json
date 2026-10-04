@@ -1,0 +1,678 @@
+{
+  "variant": "gemini-api",
+  "classification": "offline_transport_reconstruction",
+  "versions": {
+    "google-adk": "2.4.0",
+    "google-genai": "2.11.0",
+    "pydantic": "2.13.4"
+  },
+  "historicalInitialInputSha256": "8d8fc798fe7956b20439443e654e52c86ca6083adfaa52e51235408fe3c2ce29",
+  "providerIntentDeclaration": {
+    "description": "Submit the pre-execution decision. Each item needs section and substantive answer. Investigation adds evidence records; candidates adds candidate records; selection adds a candidate reference, rationale, and challenge. Rejected sections can be replaced locally in this cycle.",
+    "name": "submit_cycle_intent",
+    "parameters_json_schema": {
+      "$defs": {
+        "CandidateRecord": {
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "solution": {
+              "title": "Solution",
+              "type": "string"
+            },
+            "evidence": {
+              "title": "Evidence",
+              "type": "string"
+            },
+            "constraints": {
+              "title": "Constraints",
+              "type": "string"
+            },
+            "validation": {
+              "title": "Validation",
+              "type": "string"
+            },
+            "classification": {
+              "enum": [
+                "COMPLETE",
+                "PARTIAL"
+              ],
+              "title": "Classification",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "solution",
+            "evidence",
+            "constraints",
+            "validation",
+            "classification"
+          ],
+          "title": "CandidateRecord",
+          "type": "object"
+        },
+        "EvidenceRecord": {
+          "properties": {
+            "question": {
+              "title": "Question",
+              "type": "string"
+            },
+            "source": {
+              "title": "Source",
+              "type": "string"
+            },
+            "finding": {
+              "title": "Finding",
+              "type": "string"
+            },
+            "uncertainty": {
+              "title": "Uncertainty",
+              "type": "string"
+            }
+          },
+          "required": [
+            "question",
+            "source",
+            "finding",
+            "uncertainty"
+          ],
+          "title": "EvidenceRecord",
+          "type": "object"
+        },
+        "IntentAnswer": {
+          "properties": {
+            "section": {
+              "title": "Section",
+              "type": "string"
+            },
+            "answer": {
+              "title": "Answer",
+              "type": "string"
+            },
+            "evidence": {
+              "items": {
+                "$ref": "#/$defs/EvidenceRecord"
+              },
+              "title": "Evidence",
+              "type": "array"
+            },
+            "candidates": {
+              "items": {
+                "$ref": "#/$defs/CandidateRecord"
+              },
+              "title": "Candidates",
+              "type": "array"
+            },
+            "selection": {
+              "$ref": "#/$defs/SelectionRecord"
+            }
+          },
+          "required": [
+            "section",
+            "answer"
+          ],
+          "title": "IntentAnswer",
+          "type": "object"
+        },
+        "SelectionRecord": {
+          "properties": {
+            "candidate_id": {
+              "title": "Candidate Id",
+              "type": "string"
+            },
+            "rationale": {
+              "title": "Rationale",
+              "type": "string"
+            },
+            "challenge": {
+              "title": "Challenge",
+              "type": "string"
+            }
+          },
+          "required": [
+            "candidate_id",
+            "rationale",
+            "challenge"
+          ],
+          "title": "SelectionRecord",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "cycle_number": {
+          "title": "Cycle Number",
+          "type": "integer"
+        },
+        "answers": {
+          "items": {
+            "$ref": "#/$defs/IntentAnswer"
+          },
+          "title": "Answers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cycle_number",
+        "answers"
+      ],
+      "title": "submit_cycle_intentParams",
+      "type": "object"
+    }
+  },
+  "requests": [
+    {
+      "request": 1,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [],
+      "continuationSha256": []
+    },
+    {
+      "request": 2,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291"
+      ]
+    },
+    {
+      "request": 3,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291"
+      ]
+    },
+    {
+      "request": 4,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291"
+      ]
+    },
+    {
+      "request": 5,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf"
+      ]
+    },
+    {
+      "request": 6,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf"
+      ]
+    },
+    {
+      "request": 7,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf",
+        "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a"
+      ]
+    },
+    {
+      "request": 8,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf",
+        "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a",
+        "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a"
+      ]
+    },
+    {
+      "request": 9,
+      "callableNames": [
+        "read_workspace_text",
+        "list_workspace_files",
+        "search_workspace_text",
+        "inspect_git_state",
+        "edit_workspace_text",
+        "delete_workspace_file",
+        "run_workspace_shell",
+        "retrieve_retained_evidence",
+        "research_search",
+        "research_fetch",
+        "submit_cycle_intent"
+      ],
+      "intentDeclarationSha256": "8f43f9596f107fa6116f3683899eb8919b38f2ccc10be31a980a5de6f847d750",
+      "systemInstructionSha256": "71ae506189160dcc170aafaa46c88ef38f867a975fffefbcc1d24e61fa99cb3d",
+      "initialInputPresent": true,
+      "correctionAttempts": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "continuationSha256": [
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291",
+        "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf",
+        "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a",
+        "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a"
+      ]
+    }
+  ],
+  "checks": {
+    "onlyRegisteredTools": true,
+    "inventedNamesAbsentFromDeclaration": true,
+    "initialInputReachesEveryRequest": true,
+    "nineCorrectionsReachLaterRequests": true,
+    "continuationCountsReachProvider": true,
+    "sharedTenAttemptsTwoBlocked": true,
+    "noAcceptedIntent": true,
+    "expectedExhaustion": true
+  },
+  "passed": true,
+  "terminalError": "Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts",
+  "limits": "Existing fixture limits unchanged; no paid calls; no supplied valid Intent.",
+  "feedbackByAttempt": {
+    "1": {
+      "name": "SubmitCycleIntentAnswers",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswers' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 1,
+        "remainingAttempts": 9,
+        "retryAllowed": true
+      }
+    },
+    "2": {
+      "name": "SubmitCycleIntentAnswersEvidence",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswersEvidence' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 2,
+        "remainingAttempts": 8,
+        "retryAllowed": true
+      }
+    },
+    "3": {
+      "name": "google:python_interpreter",
+      "response": {
+        "status": "rejected",
+        "error": "'google:python_interpreter' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 3,
+        "remainingAttempts": 7,
+        "retryAllowed": true
+      }
+    },
+    "4": {
+      "name": "SubmitCycleIntentAnswers",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswers' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 4,
+        "remainingAttempts": 6,
+        "retryAllowed": true
+      }
+    },
+    "5": {
+      "name": "SubmitCycleIntentAnswersEvidence",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswersEvidence' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 5,
+        "remainingAttempts": 5,
+        "retryAllowed": true
+      }
+    },
+    "6": {
+      "name": "google:python_interpreter",
+      "response": {
+        "status": "rejected",
+        "error": "'google:python_interpreter' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 6,
+        "remainingAttempts": 4,
+        "retryAllowed": true
+      }
+    },
+    "7": {
+      "name": "SubmitCycleIntentAnswers",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswers' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 7,
+        "remainingAttempts": 3,
+        "retryAllowed": true
+      }
+    },
+    "8": {
+      "name": "SubmitCycleIntentAnswersEvidence",
+      "response": {
+        "status": "rejected",
+        "error": "'SubmitCycleIntentAnswersEvidence' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 8,
+        "remainingAttempts": 2,
+        "retryAllowed": true
+      }
+    },
+    "9": {
+      "name": "google:python_interpreter",
+      "response": {
+        "status": "rejected",
+        "error": "'google:python_interpreter' is not a registered tool; no action was executed.",
+        "repairInstructions": "Use one of the available capabilities for the current phase: `delete_workspace_file`, `edit_workspace_text`, `inspect_git_state`, `list_workspace_files`, `read_workspace_text`, `research_fetch`, `research_search`, `retrieve_retained_evidence`, `run_workspace_shell`, `search_workspace_text`, `submit_cycle_intent`.",
+        "availableCapabilities": [
+          "delete_workspace_file",
+          "edit_workspace_text",
+          "inspect_git_state",
+          "list_workspace_files",
+          "read_workspace_text",
+          "research_fetch",
+          "research_search",
+          "retrieve_retained_evidence",
+          "run_workspace_shell",
+          "search_workspace_text",
+          "submit_cycle_intent"
+        ],
+        "cycle_number": 1,
+        "attempt": 9,
+        "remainingAttempts": 1,
+        "retryAllowed": true
+      }
+    }
+  },
+  "continuationBySha256": {
+    "6d1523f8ff1f852a79cea3ea73a2889335156fa2b814ac6ccc3dd8ace415a291": "Cycle 1 Problem Analysis and Solution Decision has not been accepted. No Problem Analysis and Solution Decision submission was received in the previous turn; no submitted answer sections are retained for repair. Use the registered `submit_cycle_intent` tool with `cycle_number` and an `answers` array containing the required section objects. Nested answer, evidence, candidate, and selection schemas describe values inside `answers`; they are not callable tools. Do not modify the authoritative repository before acceptance.",
+    "63867c5f182177f25aced9d4d39dc564cc03c81681db5771c3fb2e840090a7cf": "Cycle 1 Problem Analysis and Solution Decision has not been accepted. No Problem Analysis and Solution Decision submission was received in the previous turn; no submitted answer sections are retained for repair. 3 unregistered tool call(s) used the shared checkpoint allowance; 7 attempt(s) remain. Use the registered `submit_cycle_intent` tool with `cycle_number` and an `answers` array containing the required section objects. Nested answer, evidence, candidate, and selection schemas describe values inside `answers`; they are not callable tools. Do not modify the authoritative repository before acceptance.",
+    "1a46cc022befbce29106c3eb989fbc325c5132f96ac9f887157b32976037a12a": "Cycle 1 Problem Analysis and Solution Decision has not been accepted. No Problem Analysis and Solution Decision submission was received in the previous turn; no submitted answer sections are retained for repair. 6 unregistered tool call(s) used the shared checkpoint allowance; 4 attempt(s) remain. Use the registered `submit_cycle_intent` tool with `cycle_number` and an `answers` array containing the required section objects. Nested answer, evidence, candidate, and selection schemas describe values inside `answers`; they are not callable tools. Do not modify the authoritative repository before acceptance."
+  }
+}

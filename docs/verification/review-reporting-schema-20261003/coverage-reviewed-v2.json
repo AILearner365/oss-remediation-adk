@@ -1,0 +1,80 @@
+{
+  "passed": false,
+  "outcome": "FAILED",
+  "classification": "controlled_evidence_autonomous_decision",
+  "offlineMechanics": "PASSED",
+  "decisionReview": {
+    "acceptedContentHash": "90f9d27d290dbaf7e55d26ec8853ca9b786ffbf731bfef2a3929ef4460febcbc",
+    "selectedCandidateId": "upgrade_gateway_2_4_5",
+    "criteria": {
+      "all_findings": {
+        "status": "PASSED",
+        "rationale": "The accepted problem/evidence names A, B and C. Q2 distinguishes 2.4.2 covering A/B from 2.4.5 additionally covering C.",
+        "evidence": [
+          "fixture/model-input.txt",
+          "fixture/accepted-decision.json: answers 0 and 1"
+        ]
+      },
+      "selected_solution_coverage": {
+        "status": "PASSED",
+        "rationale": "The selected upgrade_gateway_2_4_5 sets 2.4.5, whose cumulative fixes cover all three supplied findings. The lower candidate is not called complete.",
+        "evidence": [
+          "fixture/support.txt",
+          "fixture/accepted-decision.json: selectedCandidate and selection"
+        ]
+      },
+      "constraints": {
+        "status": "PASSED",
+        "rationale": "The intended patch respects the supplied control point, API/runtime support, no suppressions and focused scope; fresh scan/testing remain planned. It unnecessarily applies the conditional Spring Boot policy to the synthetic gateway, but selects no conflicting change. This is not evidence of Spring Boot applicability.",
+        "evidence": [
+          "fixture/accepted-decision.json: selectedCandidate.constraints",
+          "fixture/model-input.txt"
+        ]
+      },
+      "cited_support": {
+        "status": "FAILED",
+        "rationale": "The selected candidate accurately cites support.txt and settings.conf, whose actual supplied/read content supports the version. However accepted Q2 falsely claims support.txt was accessed via retrieve_retained_evidence through earlier implicit agent access. Pre-acceptance trace has only search_workspace_text and read_workspace_text; no such retrieval occurred. Correct coverage does not excuse invented acquisition provenance.",
+        "evidence": [
+          "events.jsonl: sequences 1-11",
+          "fixture/accepted-decision.json: answers 1 and 3"
+        ]
+      },
+      "validation_limits": {
+        "status": "PASSED",
+        "rationale": "The candidate plans a fresh scan and tests and the challenge preserves possible runtime regressions. No build or scan is cited as already passing. Compatibility support is explicitly fixture supplied, not actual execution evidence.",
+        "evidence": [
+          "fixture/accepted-decision.json: selectedCandidate.validation and selection.challenge"
+        ]
+      }
+    }
+  },
+  "capture": "PASSED",
+  "acceptedRecordVerified": true,
+  "acceptedContentHash": "90f9d27d290dbaf7e55d26ec8853ca9b786ffbf731bfef2a3929ef4460febcbc",
+  "selectedCandidate": {
+    "classification": "COMPLETE",
+    "constraints": "- **R1 (All baseline findings absent)**: Satisfied, as `2.4.5` fixes all three reported findings.\n- **R2 (No newly introduced findings at prohibited severities)**: Expected to be satisfied, as this is a security upgrade within the same minor version.\n- **R3 (No vulnerability-suppression)**: Satisfied, no suppressions are introduced.\n- **R4 (Spring Boot version policy)**: Satisfied, upgrading from `2.4.0` to `2.4.5` is a patch-level update, which is permitted by `allow_patch=True` and is not a downgrade.\n- **R5 (Compatibility)**: The support record explicitly states that `2.4.5` supports the project's API and runtime.\n- **R6 (Engineering quality)**: The change is focused, directly addresses the vulnerability, and uses the existing versioning mechanism.\n- **R7 (Scope)**: The change is minimal and directly related to resolving the task.",
+    "evidence": "The `support.txt` record indicates that version `2.4.5` of `example:gateway` resolves all identified vulnerabilities (`FINDING-A`, `FINDING-B`, and `FINDING-C`). The file `settings.conf` was identified as the location of the `gateway.version` property.",
+    "id": "upgrade_gateway_2_4_5",
+    "name": "Upgrade example:gateway to version 2.4.5",
+    "solution": "Update the `gateway.version` property in `settings.conf` from `2.4.0` to `2.4.5`.",
+    "validation": "Execute the baseline scanner to confirm the absence of `FINDING-A`, `FINDING-B`, and `FINDING-C`, and to verify no new CRITICAL/HIGH findings are introduced. Additionally, run project tests to ensure continued compatibility and functionality."
+  },
+  "stopReason": "accepted",
+  "terminalError": null,
+  "toolCalls": 4,
+  "checkpointAttempts": 1,
+  "elapsedSeconds": 38.51790036700004,
+  "naturalEndToEnd": "NOT_EXERCISED",
+  "reviewRequired": "Inspect accepted-decision.json, cited evidence and pre-acceptance trace using catalogue criteria. Capture is not reasoning acceptance.",
+  "scenario": "finding-coverage",
+  "trial": 1,
+  "workspace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c",
+  "artifactsRetained": true,
+  "trace": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/events.jsonl",
+  "resultArtifact": "/home/kavya_parivarababu/oss-remediation-adk/autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/acceptance-result.json",
+  "execution": "PASSED",
+  "semanticAssessment": "FAILED",
+  "originalOutcome": "NOT_EXERCISED",
+  "reviewMethod": "explicit semantic review; not automated proof"
+}

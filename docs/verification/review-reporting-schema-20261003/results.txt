@@ -1,0 +1,44 @@
+Base and mode: 826089383330ba020b884699b9ba3419bf138afa, local/remote reconciled;
+Cloud Shell. Windows not executed, fallback preserved. Sequential checks, about
+5.2 GiB available RAM and 868 MiB free disk before verification.
+
+Reporting fixes: PASSED.
+- Independent capture, execution, semanticAssessment, overall outcome/boolean.
+- All-PASSED semantics cannot erase failed/blocked execution or failed capture.
+- Pending/unexercised execution or assessment cannot become an overall pass.
+- Exact journal/hash/selected-export and criterion-completeness rejection preserved.
+- Exclusive new output files; historical raw and previous review artifacts preserved.
+- Review CLI exit 0 only PASSED, 1 FAILED/BLOCKED/NOT_EXERCISED/pending.
+- F/G offline preparation exits 1: mechanics can pass, overall assessment is unexercised.
+
+Offline:
+11 initial reporting/scenario tests PASSED, 22.889s (reporting-tests.log).
+45 relevant combined tests PASSED, 50.723s (offline.log).
+13 final reporting tests PASSED, 23.893s (reporting-final.log), after adding explicit
+offline-preparation CLI and pending assessment checks.
+Final interface regression PASSED (one test covering both provider conversions, 5.464s;
+interface-final.log) after lossless compaction of repeated feedback in retained projections.
+These include actual subprocess return codes, real ADK accepted Intent then terminal
+failure or credential blockage, pending/incomplete review and binding/integrity rejection.
+No broad suite, paid model invocation or unchanged live repeat.
+
+Historical F coverage review: capture PASSED, execution PASSED, semantic FAILED,
+overall FAILED; provenance failure remains. Reassessment CLI exit 1.
+coverage-reviewed-v2.json is new evidence. coverage-review-command.json records
+unchanged hashes of original raw result, prior review, accepted export and journal.
+
+Unknown-tool diagnostic: PASSED offline request-path checks for Gemini API and Vertex.
+Provider-bound declaration is identical to prior retained declaration; nested schemas
+are data, not extra callable tools. Real serialized later requests contain all nine
+emitted corrections and exact continuation guidance. Ten attempts/two blocked calls
+reproduced without changing limits or providing a valid/corrected Intent.
+Historical G: FAILED capture; accepted substantive reasoning NOT EXERCISED.
+No demonstrated client declaration/conversion/feedback-loss defect. Underlying model or
+provider-internal cause remains uncertain. Historical wire traffic was not retained;
+provider/*.json is controlled offline reconstruction, not historical or new live capture.
+Natural autonomous recovery: NOT EXERCISED here. No new live observation.
+
+Runtime code/policy/architecture/budgets/isolation/delivery/frozen reasoning: unchanged.
+Reasoning evaluation CONTINUE. Return to comparable frozen P1.1 work; revisit invocation
+interfaces with concrete new evidence, not aliases, speculative instructions or reruns.
+See investigation.md and existing catalogue for exact commands and artifact references.

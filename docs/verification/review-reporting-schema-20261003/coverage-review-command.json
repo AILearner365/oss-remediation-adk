@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/python",
+    "-m",
+    "scripts.reasoning_boundary_scenarios",
+    "--workspace",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c",
+    "--review",
+    "docs/verification/reasoning-boundaries-20261003/coverage-review.json",
+    "--output",
+    "docs/verification/review-reporting-schema-20261003/coverage-reviewed-v2.json"
+  ],
+  "exitCode": 1,
+  "historicalHashesBefore": {
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/acceptance-result.json": "70302054cc9251855dd8babbb0b13d22c446bfe6ee9e6fe84c0da3e70fbe4349",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/reviewed-result.json": "7b8ed1da6c879fccc32b73e2240cab6ae6f34b1d90e18947eaedb8bc6b00620d",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/fixture/accepted-decision.json": "df33e78f6f2121bbe25bd6b3e892d279aa601c7c520184c3b2ff047d067e304c",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/agent/decision-journal.md": "51d136d9ac2ba12bc92720305a21d0cfcaefc27e10866b24c825f4fa733d7052"
+  },
+  "historicalHashesAfter": {
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/acceptance-result.json": "70302054cc9251855dd8babbb0b13d22c446bfe6ee9e6fe84c0da3e70fbe4349",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/reviewed-result.json": "7b8ed1da6c879fccc32b73e2240cab6ae6f34b1d90e18947eaedb8bc6b00620d",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/fixture/accepted-decision.json": "df33e78f6f2121bbe25bd6b3e892d279aa601c7c520184c3b2ff047d067e304c",
+    "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/agent/decision-journal.md": "51d136d9ac2ba12bc92720305a21d0cfcaefc27e10866b24c825f4fa733d7052"
+  },
+  "historicalArtifactsUnchanged": true
+}

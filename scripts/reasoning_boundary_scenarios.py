@@ -126,9 +126,10 @@ def score_decision(fixture, *, live=False, error=None, stop="not_run"):
         selected = next(c for c in sections['Concrete candidate solutions']['candidates'] if c['id'] == selection['candidate_id'])
         fixture.trace.write_json("fixture/accepted-decision.json", {"acceptedContentHash": accepted['contentHash'],
                                  "answers": answers, "selectedCandidate": selected, "selection": selection})
-    outcome = "NOT_EXERCISED" if not live else "BLOCKED" if recovery_blocked(error) else "FAILED" if error or not answers else "NOT_EXERCISED"
-    return {"passed": not live, "captureOnly": True,
-            "outcome": outcome, "classification": "controlled_evidence_autonomous_decision",
+    execution = "NOT_EXERCISED" if not live else "BLOCKED" if recovery_blocked(error) else "FAILED" if error or not answers else "PASSED"
+    outcome = execution if execution != "PASSED" else "NOT_EXERCISED"
+    return {"passed": False, "captureOnly": True,
+            "outcome": outcome, "execution": execution, "semanticAssessment": "PENDING" if answers else "NOT_EXERCISED", "classification": "controlled_evidence_autonomous_decision",
             "offlineMechanics": "PASSED", "decisionReview": "PENDING" if answers else "NOT_EXERCISED",
             "capture": "PASSED" if answers else "NOT_EXERCISED" if not live else outcome,
             "acceptedRecordVerified": answers is not None,
@@ -165,7 +166,23 @@ REVIEW_CRITERIA = {
 }
 
 
-def retain_review(workspace, review):
+def _execution_status(result):
+    """Read new results or conservatively derive execution from legacy raw results."""
+    # Terminal evidence must not be erased by a stale/inconsistent success flag.
+    if result.get('execution') in {'FAILED', 'BLOCKED'}:
+        return result['execution']
+    if result.get('outcome') in {'FAILED', 'BLOCKED'}:
+        return result['outcome']
+    if result.get('terminalError'):
+        return 'FAILED'
+    if 'execution' in result:
+        return result['execution'] if result['execution'] == 'PASSED' else 'NOT_EXERCISED'
+    if result.get('capture') == 'PASSED' and result.get('stopReason') == 'accepted':
+        return 'PASSED'
+    return 'NOT_EXERCISED'
+
+
+def retain_review(workspace, review, *, output=None):
     """Bind explicit human/agent semantic review to the verified accepted record.
 
     This validates review completeness/integrity, not the truth of the reviewer's prose.
@@ -195,14 +212,24 @@ def retain_review(workspace, review):
     if set(criteria) != set(REVIEW_CRITERIA[result['scenario']]):
         raise ValueError('Review must cover every scenario criterion')
     for value in criteria.values():
-        if (value.get('status') not in {'PASSED', 'FAILED', 'BLOCKED', 'NOT_EXERCISED'}
+        if (value.get('status') not in {'PASSED', 'FAILED', 'BLOCKED', 'NOT_EXERCISED', 'PENDING'}
                 or not value.get('rationale') or not value.get('evidence')):
             raise ValueError('Each criterion requires status, rationale and artifact/trace evidence')
     statuses = {c['status'] for c in criteria.values()}
-    outcome = next((s for s in ('FAILED', 'BLOCKED', 'NOT_EXERCISED') if s in statuses), 'PASSED')
+    semantic = next((s for s in ('FAILED', 'BLOCKED', 'NOT_EXERCISED', 'PENDING') if s in statuses), 'PASSED')
+    execution = _execution_status(result)
+    capture = result.get('capture', 'NOT_EXERCISED')
+    # Execution and capture gate the scenario, independently of semantic assessment.
+    outcome = next((s if s in {'FAILED', 'BLOCKED'} else 'NOT_EXERCISED'
+                    for s in (execution, capture, semantic) if s != 'PASSED'), 'PASSED')
     reviewed = {**result, 'passed': outcome == 'PASSED', 'outcome': outcome,
+                'execution': execution, 'semanticAssessment': semantic,
+                'originalOutcome': result.get('outcome'),
                 'decisionReview': review, 'reviewMethod': 'explicit semantic review; not automated proof'}
-    (artifacts / 'reviewed-result.json').write_text(json.dumps(reviewed, indent=2) + '\n')
+    destination = Path(output) if output is not None else artifacts / 'reviewed-result.json'
+    # Review output is append-only evidence: never replace a raw or previous review artifact.
+    with destination.open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(reviewed, indent=2) + '\n')
     return reviewed
 
 
@@ -212,5 +239,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retain a semantic review bound to an accepted decision')
     parser.add_argument('--workspace', type=Path, required=True)
     parser.add_argument('--review', type=Path, required=True)
+    parser.add_argument('--output', type=Path, help='New review artifact; existing files are never overwritten')
     args = parser.parse_args()
-    print(json.dumps(retain_review(args.workspace, json.loads(args.review.read_text())), indent=2))
+    result = retain_review(args.workspace, json.loads(args.review.read_text()), output=args.output)
+    print(json.dumps(result, indent=2))
+    raise SystemExit(0 if result['outcome'] == 'PASSED' else 1)

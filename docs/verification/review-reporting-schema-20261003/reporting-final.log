@@ -1,0 +1,202 @@
+test_actual_cli_exit_codes (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_actual_cli_exit_codes) ... ok
+test_inconsistent_success_flag_does_not_hide_terminal_error (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_inconsistent_success_flag_does_not_hide_terminal_error) ... ok
+test_legacy_failed_capture_and_terminal_error_cannot_be_erased (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_legacy_failed_capture_and_terminal_error_cannot_be_erased) ... ok
+test_offline_preparation_cli_is_not_an_overall_pass (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_offline_preparation_cli_is_not_an_overall_pass) ... ok
+test_pending_or_unexercised_review_never_passes (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_pending_or_unexercised_review_never_passes) ... ok
+test_real_adk_accepted_record_then_failure_or_blockage (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_real_adk_accepted_record_then_failure_or_blockage) ... /home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Node execution failed with exception
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1002, in _run_one_step_async
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1437, in _call_llm_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1415, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1498, in _run_and_handle_error
+    async for response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 418, in _run_and_handle_error
+    raise model_error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 395, in _run_and_handle_error
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_intent_tool_recovery.py", line 42, in generate_content_async
+    self._observed.append(self._inspect())
+                          ^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_decision_review_reporting.py", line 79, in fail_after_acceptance
+    raise error
+RuntimeError: after acceptance
+Root node autonomous_oss_remediation_agent failed.
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 558, in _drive_root_node
+    await root_ctx._run_node_internal(
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/context.py", line 603, in _run_node_internal
+    raise DynamicNodeFailError(
+google.adk.workflow._errors.DynamicNodeFailError: Dynamic node autonomous_oss_remediation_agent failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 820, in _cleanup_root_task
+    await task
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 567, in _drive_root_node
+    raise e.error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1002, in _run_one_step_async
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1437, in _call_llm_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1415, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1498, in _run_and_handle_error
+    async for response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 418, in _run_and_handle_error
+    raise model_error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 395, in _run_and_handle_error
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_intent_tool_recovery.py", line 42, in generate_content_async
+    self._observed.append(self._inspect())
+                          ^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_decision_review_reporting.py", line 79, in fail_after_acceptance
+    raise error
+RuntimeError: after acceptance
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Node execution failed with exception
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1002, in _run_one_step_async
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1437, in _call_llm_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1415, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1498, in _run_and_handle_error
+    async for response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 418, in _run_and_handle_error
+    raise model_error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 395, in _run_and_handle_error
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_intent_tool_recovery.py", line 42, in generate_content_async
+    self._observed.append(self._inspect())
+                          ^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_decision_review_reporting.py", line 79, in fail_after_acceptance
+    raise error
+google.auth.exceptions.DefaultCredentialsError: provider unavailable
+Root node autonomous_oss_remediation_agent failed.
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 558, in _drive_root_node
+    await root_ctx._run_node_internal(
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/context.py", line 603, in _run_node_internal
+    raise DynamicNodeFailError(
+google.adk.workflow._errors.DynamicNodeFailError: Dynamic node autonomous_oss_remediation_agent failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 820, in _cleanup_root_task
+    await task
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 567, in _drive_root_node
+    raise e.error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1002, in _run_one_step_async
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1437, in _call_llm_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1415, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1498, in _run_and_handle_error
+    async for response in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 418, in _run_and_handle_error
+    raise model_error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 395, in _run_and_handle_error
+    async for llm_response in agen:
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_intent_tool_recovery.py", line 42, in generate_content_async
+    self._observed.append(self._inspect())
+                          ^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests/unit/test_decision_review_reporting.py", line 79, in fail_after_acceptance
+    raise error
+google.auth.exceptions.DefaultCredentialsError: provider unavailable
+ok
+test_successful_execution_and_semantic_failure (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_successful_execution_and_semantic_failure) ... ok
+test_successful_execution_and_semantic_pass (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_successful_execution_and_semantic_pass) ... ok
+test_unexercised_execution_cannot_be_promoted_by_semantic_pass (tests.unit.test_decision_review_reporting.DecisionReviewReportingTests.test_unexercised_execution_cannot_be_promoted_by_semantic_pass) ... ok
+test_blocked_and_authoritative_evidence_are_both_supplied_via_capability (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_blocked_and_authoritative_evidence_are_both_supplied_via_capability) ... ok
+test_coverage_input_uses_all_findings_without_seeding_intent (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_coverage_input_uses_all_findings_without_seeding_intent) ... ok
+test_credentials_block_is_not_model_failure (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_credentials_block_is_not_model_failure) ... ok
+test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call (tests.unit.test_reasoning_boundary_scenarios.ReasoningBoundaryTests.test_real_adk_capture_does_not_pass_wrong_decision_and_ignores_later_call) ... Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model scripted-intent-model
+ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 23.893s
+
+OK

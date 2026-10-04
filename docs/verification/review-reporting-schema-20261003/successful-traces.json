@@ -1,0 +1,93 @@
+{
+  "run-20261003T191038Z-e662889c": {
+    "acceptance": [
+      {
+        "contentHash": "90f9d27d290dbaf7e55d26ec8853ca9b786ffbf731bfef2a3929ef4460febcbc",
+        "cycle": 1,
+        "late": false,
+        "timestamp": "2026-10-03T19:11:12.579342+00:00",
+        "type": "intent_submission_accepted"
+      }
+    ],
+    "calls": [
+      {
+        "sequence": 3,
+        "name": "search_workspace_text"
+      },
+      {
+        "sequence": 6,
+        "name": "read_workspace_text"
+      },
+      {
+        "sequence": 10,
+        "name": "submit_cycle_intent"
+      },
+      {
+        "sequence": 13,
+        "name": "edit_workspace_text"
+      },
+      {
+        "sequence": 16,
+        "name": "edit_workspace_text"
+      }
+    ],
+    "limits": null,
+    "sourceResult": "autonomous-oss-remediation-workspaces/run-20261003T191038Z-e662889c/artifacts/acceptance-result.json"
+  },
+  "run-20261003T161200Z-49b76752": {
+    "acceptance": [
+      {
+        "contentHash": "3fa0c087a807e31b733df2f2ec5add6eccd7787fb3334e11afa4edba069b2c21",
+        "cycle": 1,
+        "late": false,
+        "timestamp": "2026-10-03T16:12:06.370945+00:00",
+        "type": "intent_submission_accepted"
+      }
+    ],
+    "calls": [
+      {
+        "sequence": 2,
+        "name": "submit_cycle_intent"
+      }
+    ],
+    "limits": {
+      "max_cycles": 1,
+      "max_tool_calls": 80,
+      "max_llm_calls_per_turn": 60,
+      "command_timeout_seconds": 1800,
+      "model_turn_timeout_seconds": 1800,
+      "overall_timeout_seconds": 7200,
+      "max_returned_output_chars": 2000,
+      "max_checkpoint_attempts": 10
+    },
+    "sourceResult": "autonomous-oss-remediation-workspaces/run-20261003T161200Z-49b76752/artifacts/acceptance-result.json"
+  },
+  "run-20261003T161258Z-b0b6f31c": {
+    "acceptance": [
+      {
+        "contentHash": "fc0cb4beb8284a19e0a92f26fb4edd01f3d14f0507a1ac7d365c79ef424aa760",
+        "cycle": 1,
+        "late": false,
+        "timestamp": "2026-10-03T16:13:06.674606+00:00",
+        "type": "intent_submission_accepted"
+      }
+    ],
+    "calls": [
+      {
+        "sequence": 2,
+        "name": "submit_cycle_intent"
+      }
+    ],
+    "limits": {
+      "max_cycles": 1,
+      "max_tool_calls": 80,
+      "max_llm_calls_per_turn": 60,
+      "command_timeout_seconds": 1800,
+      "model_turn_timeout_seconds": 1800,
+      "overall_timeout_seconds": 7200,
+      "max_returned_output_chars": 2000,
+      "max_checkpoint_attempts": 10
+    },
+    "sourceResult": "autonomous-oss-remediation-workspaces/run-20261003T161258Z-b0b6f31c/artifacts/acceptance-result.json"
+  }
+}

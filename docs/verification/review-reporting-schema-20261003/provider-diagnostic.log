@@ -1,0 +1,286 @@
+/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/tools/function_tool.py:95: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  build_function_declaration(
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Node execution failed with exception
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 547, in _execute_single_function_call_async
+    tool = _get_tool(function_call, tools_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 1075, in _get_tool
+    raise ValueError(error_msg)
+ValueError: Tool 'SubmitCycleIntentAnswersEvidence' not found.
+Available tools: read_workspace_text, list_workspace_files, search_workspace_text, inspect_git_state, edit_workspace_text, delete_workspace_file, run_workspace_shell, retrieve_retained_evidence, research_search, research_fetch, submit_cycle_intent
+
+Possible causes:
+  1. LLM hallucinated the function name - review agent instruction clarity
+  2. Tool not registered - verify agent.tools list
+  3. Name mismatch - check for typos
+
+Suggested fixes:
+  - Review agent instruction to ensure tool usage is clear
+  - Verify tool is included in agent.tools list
+  - Check for typos in function name
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1012, in _run_one_step_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1132, in _postprocess_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1265, in _postprocess_handle_function_calls_async
+    if function_response_event := await functions.handle_function_calls_async(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 413, in handle_function_calls_async
+    return await handle_function_call_list_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 459, in handle_function_call_list_async
+    function_response_events = await asyncio.gather(*tasks)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 550, in _execute_single_function_call_async
+    error_response = await _run_on_tool_error_callbacks(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 521, in _run_on_tool_error_callbacks
+    error_response = callback(
+                     ^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/agent.py", line 70, in on_error
+    raise IntentToolRecoveryExhausted(
+autonomous_oss_remediation_agent.agent.IntentToolRecoveryExhausted: Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts
+Root node autonomous_oss_remediation_agent failed.
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 558, in _drive_root_node
+    await root_ctx._run_node_internal(
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/context.py", line 603, in _run_node_internal
+    raise DynamicNodeFailError(
+google.adk.workflow._errors.DynamicNodeFailError: Dynamic node autonomous_oss_remediation_agent failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 820, in _cleanup_root_task
+    await task
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 567, in _drive_root_node
+    raise e.error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1012, in _run_one_step_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1132, in _postprocess_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1265, in _postprocess_handle_function_calls_async
+    if function_response_event := await functions.handle_function_calls_async(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 413, in handle_function_calls_async
+    return await handle_function_call_list_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 459, in handle_function_call_list_async
+    function_response_events = await asyncio.gather(*tasks)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 550, in _execute_single_function_call_async
+    error_response = await _run_on_tool_error_callbacks(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 521, in _run_on_tool_error_callbacks
+    error_response = callback(
+                     ^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/agent.py", line 70, in on_error
+    raise IntentToolRecoveryExhausted(
+autonomous_oss_remediation_agent.agent.IntentToolRecoveryExhausted: Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Skipping missing token usage metadata for agent autonomous_oss_remediation_agent and model gemini-2.5-flash
+Node execution failed with exception
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 547, in _execute_single_function_call_async
+    tool = _get_tool(function_call, tools_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 1075, in _get_tool
+    raise ValueError(error_msg)
+ValueError: Tool 'SubmitCycleIntentAnswersEvidence' not found.
+Available tools: read_workspace_text, list_workspace_files, search_workspace_text, inspect_git_state, edit_workspace_text, delete_workspace_file, run_workspace_shell, retrieve_retained_evidence, research_search, research_fetch, submit_cycle_intent
+
+Possible causes:
+  1. LLM hallucinated the function name - review agent instruction clarity
+  2. Tool not registered - verify agent.tools list
+  3. Name mismatch - check for typos
+
+Suggested fixes:
+  - Review agent instruction to ensure tool usage is clear
+  - Verify tool is included in agent.tools list
+  - Check for typos in function name
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1012, in _run_one_step_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1132, in _postprocess_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1265, in _postprocess_handle_function_calls_async
+    if function_response_event := await functions.handle_function_calls_async(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 413, in handle_function_calls_async
+    return await handle_function_call_list_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 459, in handle_function_call_list_async
+    function_response_events = await asyncio.gather(*tasks)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 550, in _execute_single_function_call_async
+    error_response = await _run_on_tool_error_callbacks(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 521, in _run_on_tool_error_callbacks
+    error_response = callback(
+                     ^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/agent.py", line 70, in on_error
+    raise IntentToolRecoveryExhausted(
+autonomous_oss_remediation_agent.agent.IntentToolRecoveryExhausted: Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts
+Root node autonomous_oss_remediation_agent failed.
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 558, in _drive_root_node
+    await root_ctx._run_node_internal(
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/context.py", line 603, in _run_node_internal
+    raise DynamicNodeFailError(
+google.adk.workflow._errors.DynamicNodeFailError: Dynamic node autonomous_oss_remediation_agent failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 820, in _cleanup_root_task
+    await task
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/runners.py", line 567, in _drive_root_node
+    raise e.error
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 136, in run
+    await self._execute_node(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 255, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_node_runner.py", line 269, in _run_node_loop
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_base_node.py", line 217, in run
+    async for item in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 601, in _run_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/workflow/_llm_agent_wrapper.py", line 386, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/base_agent.py", line 305, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/agents/llm_agent.py", line 550, in _run_async_impl
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 923, in run_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1012, in _run_one_step_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1132, in _postprocess_async
+    async for event in agen:
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 1265, in _postprocess_handle_function_calls_async
+    if function_response_event := await functions.handle_function_calls_async(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 413, in handle_function_calls_async
+    return await handle_function_call_list_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 459, in handle_function_call_list_async
+    function_response_events = await asyncio.gather(*tasks)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 550, in _execute_single_function_call_async
+    error_response = await _run_on_tool_error_callbacks(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kavya_parivarababu/.local/lib/python3.12/site-packages/google/adk/flows/llm_flows/functions.py", line 521, in _run_on_tool_error_callbacks
+    error_response = callback(
+                     ^^^^^^^^^
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/agent.py", line 70, in on_error
+    raise IntentToolRecoveryExhausted(
+autonomous_oss_remediation_agent.agent.IntentToolRecoveryExhausted: Cycle 1 INTENT_REQUIRED tool recovery exhausted after 10 attempts
+[
+  {
+    "variant": "gemini-api",
+    "passed": true,
+    "checks": {
+      "onlyRegisteredTools": true,
+      "inventedNamesAbsentFromDeclaration": true,
+      "initialInputReachesEveryRequest": true,
+      "nineCorrectionsReachLaterRequests": true,
+      "continuationCountsReachProvider": true,
+      "sharedTenAttemptsTwoBlocked": true,
+      "noAcceptedIntent": true,
+      "expectedExhaustion": true
+    }
+  },
+  {
+    "variant": "vertex",
+    "passed": true,
+    "checks": {
+      "onlyRegisteredTools": true,
+      "inventedNamesAbsentFromDeclaration": true,
+      "initialInputReachesEveryRequest": true,
+      "nineCorrectionsReachLaterRequests": true,
+      "continuationCountsReachProvider": true,
+      "sharedTenAttemptsTwoBlocked": true,
+      "noAcceptedIntent": true,
+      "expectedExhaustion": true
+    }
+  }
+]
