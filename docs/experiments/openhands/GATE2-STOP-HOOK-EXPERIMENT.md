@@ -1,6 +1,10 @@
 # Gate 2 — Native Stop Hook Validation Experiment
 
-Status: **READY TO RUN.**
+Status: **Task-02 reviewed: INVALID FOR RECOVERY/CONVERGENCE COMPARISON.**
+
+See the [Task-02 evidence review](GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for the authoritative run classification and manual post-run result (18/24 findings absent, six remaining; overall FAILED). Task-01 had no deterministic completion interception. Task-02 proved interception and continuation but its validator was infrastructure-confounded. Task-03 is the first clean Stop Hook + real deterministic validator recovery experiment. **CONTINUE EVALUATION.**
+
+The setup below records the original experiment protocol, not a pending Task-02 rerun instruction.
 
 ## Objective
 
@@ -221,12 +225,12 @@ The hook adapter treated the validator process error as a normal validation fail
 
 Therefore:
 
-- native Stop Hook interception/feedback/continuation remains **PROVEN** by the earlier dummy POC;
-- task-02 completion-control integration is **NOT YET VALIDATED** with the real deterministic validator;
+- native Stop Hook interception/feedback/continuation is **PROVEN** by Task-02 persisted events as well as the earlier dummy POC;
+- Task-02 real-validator integration **FAILED / INFRASTRUCTURE-CONFOUNDED**;
 - the first task-02 run is **INVALID / INFRASTRUCTURE-CONFOUNDED** for comparing remediation convergence;
 - do not count its three denied completion attempts as evidence that deterministic feedback failed to improve the agent;
 - do not increase retry count or add prompting;
-- fix validator environment isolation first, then rerun from a fresh clean task baseline.
+- subsequent isolation fixes enabled Task-03; they do not repair Task-02 as experimental evidence.
 
 Preserved evidence:
 
@@ -235,13 +239,13 @@ Preserved evidence:
 - `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/baseline.json`
 - `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/attempt-count`
 
-Before any rerun, manually execute the deterministic validator outside the OpenHands `uv run` environment against the preserved task-02 workspace. This confirms both the actual final repository result and the Python environment that the Stop Hook must invoke.
+The manual post-run validation has since completed: 18/24 original findings absent, six remaining, build/tests PASS, Boot policy FAIL (`unparseable`), overall FAILED. See the linked Task-02 review for all checks and evidence limits.
 
 ## Interpretation
 
 A PASS would prove that OpenHands' native completion-control extension point can carry the product-owned deterministic validator and drive same-conversation recovery without the old custom orchestration layer.
 
-A bounded failure would still be useful: it would show that completion control works but does not compensate for weak engineering/evidence interpretation with the available Gemini 2.5 Flash model.
+A bounded failure is interpretable for recovery only when the validator executed correctly. Task-02 does not meet that prerequisite and cannot establish that completion control failed to improve engineering or evidence interpretation.
 
 Do not add AGENTS.md, Skills, dependency recipes, or solution hints during this experiment.
 
@@ -251,11 +255,11 @@ Do not add AGENTS.md, Skills, dependency recipes, or solution hints during this 
 The Stop Hook integration now isolates the deterministic validator from the ephemeral OpenHands `uv run` Python environment.
 
 Changes:
-- `openhands-gate2-validate.sh` selects the first host `python3` outside the active `VIRTUAL_ENV`, unsets virtualenv/Python path contamination, then executes the validator with only the control repository on `PYTHONPATH`.
+- `openhands-gate2-validate.sh` selects a host Python outside the active `VIRTUAL_ENV` after probing `google.adk` and `pydantic` dependencies, unsets virtualenv/Python path contamination, then executes the validator with only the control repository on `PYTHONPATH`.
 - Each Stop Hook attempt deletes any prior validation report before invoking the validator, preventing a stale report from masking a later infrastructure failure.
 - If the validator exits without producing a fresh validation report, the hook records `hook/infrastructure-failure`, allows the conversation to terminate, and the outer runner reports `GATE2_STOP_HOOK_RESULT=INFRASTRUCTURE_FAIL` rather than consuming deterministic-denial attempts.
 - Normal deterministic validation failures still return `DENY` and authoritative failure evidence to the same conversation.
 
 The Spring Boot policy was intentionally **not** relaxed. The existing unit contract fails closed for qualifier-bearing versions such as release candidates; therefore the observed `4.2.0-M2` result remains a policy failure/unverifiable outcome rather than being silently reclassified as an allowed minor upgrade.
 
-Before a fresh agent rerun, verify the updated validator against the preserved task-02 workspace from inside the same OpenHands `uv run` dependency context. It should now execute and produce a validation report rather than a `TranslationConfig` import traceback.
+The later local `uv-validation.json` records a completed validator result with the same tree digest and 18/6 outcome as the manual report. Task-03 is the subsequent clean integration experiment; Task-02 remains invalid for recovery/convergence comparison.

@@ -10,6 +10,16 @@ Evaluate whether an established coding-agent harness can replace generic harness
 
 Do not assume the existing ADK architecture is the target design. Preserve useful principles, but first test what the established harness already provides.
 
+## Experiment progression
+
+**CONTINUE EVALUATION.**
+
+- Task-01: native run and externally prompted recovery; no deterministic completion interception; agent could finish despite validator disagreement.
+- Task-02: Stop Hook mechanics and same-conversation continuation PROVEN; validator integration FAILED / INFRASTRUCTURE-CONFOUNDED. **INVALID FOR RECOVERY/CONVERGENCE COMPARISON.** Later manual validation: 18/24 original findings absent, six remained; build/tests and Java/suppression/diff-hygiene policies passed, no new prohibited findings; Boot 4.2.0-M2 failed as `unparseable`; overall FAILED.
+- Task-03: first clean Stop Hook + real deterministic validator recovery experiment, following environment isolation. Its separate evaluation must not use Task-02 as a valid convergence comparator.
+
+See [Task-02 evidence review](../experiments/openhands/GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for source-linked conclusions, attribution limits, and fix history. Earlier setup and research sections below retain historical context.
+
 ## Current status
 
 Gate 1 setup is proven and has a repeatable `verify` health check in Google Cloud Shell:
@@ -91,7 +101,7 @@ External OpenHands review is now recorded in the trajectory analysis. Current Op
 
 A stronger-model isolation run is currently **blocked/deferred** because the company Vertex environment exposes only `gemini-2.5-flash` for this POC. Keep model quality marked **UNRESOLVED** rather than attributing the Gate 2 failures entirely to OpenHands or entirely to Gemini.
 
-The next controlled experiment should therefore keep the same model, clean task baseline, task contract, tools, and deterministic validator, and change only **native completion control**. Preferred direction, if supported by the installed version: a Stop hook invoking the existing deterministic validator so that PASS permits completion and FAIL returns deterministic evidence to the same OpenHands conversation for bounded continuation.
+The controlled completion-interception experiment was designed to keep the same model, clean task baseline, task contract, tools, and deterministic validator, and change only **native completion control**. Preferred direction, if supported by the installed version: a Stop hook invoking the existing deterministic validator so that PASS permits completion and FAIL returns deterministic evidence to the same OpenHands conversation for bounded continuation.
 
 Do not add AGENTS.md, remediation Skills, custom retry/planner/memory frameworks, dependency recipes, or additional solution hints before this experiment. Those would add variables without evidence that they address the observed failure.
 
@@ -112,7 +122,7 @@ This is intentionally isolated from the OSS-remediation task and does not call t
 
 ## Gate 2 Stop Hook experiment
 
-The native Stop Hook POC has passed. The next controlled experiment is now prepared.
+The native Stop Hook POC passed. Task-02 subsequently ran with the protocol below; its invalid classification and completed manual validation are recorded above.
 
 Fresh target branch:
 
@@ -139,9 +149,9 @@ The first real-validator Stop Hook run ended with `STOP_HOOK_INVOCATIONS=4`, `DE
 
 Cause: the validator child process inherited the OpenHands ephemeral `uv run` Python/package environment and mixed it with the existing system Google ADK installation. No `validation.json` was produced. The hook wrapper incorrectly converted this infrastructure error into a normal validation `DENY`.
 
-Do **not** interpret this run as evidence that three rounds of authoritative validator feedback failed to converge. It is invalid for the remediation comparison. Native Stop Hook mechanics remain proven by the earlier dummy POC.
+Do **not** interpret this run as evidence that three rounds of authoritative validator feedback failed to converge. It is invalid for the remediation comparison. Task-02 persisted events also prove native Stop Hook mechanics and same-conversation continuation.
 
-Next: run the deterministic validator manually outside the OpenHands uv environment against the preserved task-02 workspace, then isolate the validator subprocess environment before a fresh controlled rerun.
+Completed afterward: manual validation recorded partial remediation but overall FAILED; validator environment isolation was implemented before Task-03. See the Task-02 review for evidence and provenance limits.
 
 
 ## Explicit return point
@@ -156,11 +166,11 @@ Do not turn the Cloud Shell npm bundle patches into production architecture by d
 The task-02 infrastructure confounder was traced to `openhands-gate2-validate.sh` resolving `python` from the active OpenHands `uv run` environment. That mixed temporary OpenHands packages with the host Google ADK installation and raised `google.genai.types.TranslationConfig` during import.
 
 Fix on `openhands-poc-evaluation`:
-- validator wrapper now selects a host `python3` outside `VIRTUAL_ENV` and sanitizes Python environment variables;
+- validator wrapper now selects host Python outside `VIRTUAL_ENV`, probes `google.adk`/`pydantic` dependencies, and sanitizes Python environment variables;
 - Stop Hook removes stale validation output before each invocation;
 - missing fresh validation output is classified as `INFRASTRUCTURE_FAIL`, not deterministic `DENY`;
 - outer runner reports infrastructure failure distinctly.
 
 Do not relax the Spring Boot qualifier behavior for this experiment. Existing policy tests deliberately fail closed on qualifier-bearing versions such as RCs; `4.2.0-M2` should therefore not be treated as an allowed minor upgrade without an explicit policy decision.
 
-Next: pull the branch in Cloud Shell, prove validation executes successfully from the OpenHands uv context against the preserved task-02 workspace, then create/reset a fresh task branch to the original baseline before the controlled rerun.
+Subsequent local `uv-validation.json` records the same tree digest and 18/6 outcome as the manual report. Task-03 is the first clean Stop Hook + real deterministic validator recovery experiment. Continue its separate evidence review; Task-02 remains INVALID FOR RECOVERY/CONVERGENCE COMPARISON.

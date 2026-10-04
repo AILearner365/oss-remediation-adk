@@ -1,0 +1,22 @@
+{
+  "reviewDate": "2026-10-04",
+  "targetRepository": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook",
+  "branch": "openhands-poc-task-02-stop-hook",
+  "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "status": " M pom.xml\n M task-service/pom.xml\n M task-web/pom.xml\n",
+  "diffStat": " pom.xml              |  9 +++++++--\n task-service/pom.xml | 22 ++++++++++++++++++++++\n task-web/pom.xml     | 29 +++++++++++++++++++++++++++++\n 3 files changed, 58 insertions(+), 2 deletions(-)\n",
+  "diffSha256": "ecd4c19159f8f7ca113db9d23e074eee72db8282a56df0e73d3a536f9e395121",
+  "scope": "Read-only current workspace snapshot; manual report temporary diff no longer exists. Do not infer byte equality to the historical workspace from changed-file names alone.",
+  "trackedPomSha256": {
+    "pom.xml": "c85d891094b4f3903cc0914414de4df5577b8e70334e79a4d43750b683a361fc",
+    "task-service/pom.xml": "ee89d176e383845452a0ec8bbb2adc0b12a052eb86d9c1d2b32e87a51a6c89f4",
+    "task-web/pom.xml": "d325e5b7679c012742c7e6113dc968367b9f0b1981760918904824c60a93f816"
+  },
+  "existingEvidenceMatchesLocalSources": {
+    "run.log": true,
+    "baseline.json": true,
+    "hook/last-validator.log": true,
+    "hook/attempt-count": true
+  },
+  "validationJsonPresentAtReview": false
+}

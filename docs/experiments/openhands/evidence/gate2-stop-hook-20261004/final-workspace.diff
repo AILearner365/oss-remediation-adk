@@ -1,0 +1,78 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..4159d07 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -10 +10 @@
+-        <version>4.0.6</version>
++        <version>4.2.0-M2</version>
+@@ -56,0 +57,5 @@
++            <dependency>
++                <groupId>tools.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>3.1.4</version>
++            </dependency>
+@@ -63 +68 @@
+-            <version>1.9</version>
++            <version>1.10.0</version>
+diff --git a/task-service/pom.xml b/task-service/pom.xml
+index ff2af88..74f57e1 100644
+--- a/task-service/pom.xml
++++ b/task-service/pom.xml
+@@ -30,0 +31,22 @@
++            <exclusions>
++                <exclusion>
++                    <groupId>org.apache.logging.log4j</groupId>
++                    <artifactId>log4j-api</artifactId>
++                </exclusion>
++                <exclusion>
++                    <groupId>org.apache.logging.log4j</groupId>
++                    <artifactId>log4j-to-slf4j</artifactId>
++                </exclusion>
++            </exclusions>
++        </dependency>
++        <dependency>
++            <groupId>org.apache.logging.log4j</groupId>
++            <artifactId>log4j-api</artifactId>
++            <version>2.23.1</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.apache.logging.log4j</groupId>
++            <artifactId>log4j-to-slf4j</artifactId>
++            <version>2.23.1</version>
++            <scope>test</scope>
+diff --git a/task-web/pom.xml b/task-web/pom.xml
+index d4cd9a7..0143ad7 100644
+--- a/task-web/pom.xml
++++ b/task-web/pom.xml
+@@ -28,0 +29,19 @@
++      <exclusions>
++        <exclusion>
++          <groupId>tools.jackson.core</groupId>
++          <artifactId>jackson-databind</artifactId>
++        </exclusion>
++        <exclusion>
++          <groupId>org.apache.logging.log4j</groupId>
++          <artifactId>log4j-api</artifactId>
++        </exclusion>
++        <exclusion>
++          <groupId>org.apache.logging.log4j</groupId>
++          <artifactId>log4j-to-slf4j</artifactId>
++        </exclusion>
++      </exclusions>
++    </dependency>
++    <dependency>
++      <groupId>tools.jackson.core</groupId>
++      <artifactId>jackson-databind</artifactId>
++      <version>3.1.4</version>
+@@ -36,0 +56,10 @@
++    </dependency>
++      <dependency>
++      <groupId>org.apache.logging.log4j</groupId>
++      <artifactId>log4j-api</artifactId>
++      <version>2.26.1</version>
++    </dependency>
++    <dependency>
++      <groupId>org.apache.logging.log4j</groupId>
++      <artifactId>log4j-to-slf4j</artifactId>
++      <version>2.26.1</version>

@@ -1,0 +1,142 @@
+{
+  "source": "/home/kavya_parivarababu/.openhands/gate2/task-02-stop-hook/manual-validation.json",
+  "sourceSha256": "0a54e57302aabefa7c638022ccdeb597791ca930a5553c6b270cefe2653aedaa",
+  "provenance": "Existing manual post-run report; outside-uv execution provenance supplied in handoff. Report JSON does not record interpreter/environment. No validation rerun during this review.",
+  "passed": false,
+  "deliveryEligible": true,
+  "treeDigest": "10bdd810288a4b811989a7bc92d2acb5558889f2d76717fd64fa414ba5ef6d21",
+  "changedFiles": [
+    "pom.xml",
+    "task-service/pom.xml",
+    "task-web/pom.xml"
+  ],
+  "targetComparisonComplete": true,
+  "resolvedCount": 18,
+  "remainingCount": 6,
+  "checks": [
+    {
+      "name": "baseline_ancestry",
+      "passed": true,
+      "message": "Repository remains based on the recorded baseline"
+    },
+    {
+      "name": "git_change_evidence",
+      "passed": true,
+      "message": "Git status and full diff were captured"
+    },
+    {
+      "name": "build_test_startup",
+      "passed": true,
+      "message": "Required build/test/startup commands passed"
+    },
+    {
+      "name": "fresh_vulnerability_scan",
+      "passed": true,
+      "message": "Fresh vulnerability scan completed: COMPLETED_WITH_FINDINGS"
+    },
+    {
+      "name": "target_findings_improved",
+      "passed": true,
+      "message": "18 of 24 original target findings are absent"
+    },
+    {
+      "name": "target_findings_resolved",
+      "passed": false,
+      "message": "Requested target findings remain"
+    },
+    {
+      "name": "no_new_prohibited_findings",
+      "passed": true,
+      "message": "No new prohibited findings were introduced"
+    },
+    {
+      "name": "protected_java_version",
+      "passed": true,
+      "message": "Java version configuration matches the protected value"
+    },
+    {
+      "name": "spring_boot_version_policy",
+      "passed": false,
+      "message": "Spring Boot version movement is rejected by policy: unparseable",
+      "evidence": {
+        "applicable_policy": {
+          "allow_downgrade": false,
+          "allow_major": false,
+          "allow_minor": true,
+          "allow_patch": true,
+          "approved_versions": [],
+          "required_version": null,
+          "source": "version_policies.spring_boot"
+        },
+        "baseline_version": "4.0.6",
+        "component": "spring_boot",
+        "detected_change_type": "unparseable",
+        "evaluations": [
+          {
+            "baseline_version": "4.0.6",
+            "comparable": false,
+            "detected_change_type": "unparseable",
+            "final_version": "4.2.0-M2",
+            "source": "parent"
+          }
+        ],
+        "final_version": "4.2.0-M2",
+        "passed": false,
+        "reason": "Spring Boot version movement is rejected by policy: unparseable"
+      }
+    },
+    {
+      "name": "suppression_policy",
+      "passed": true,
+      "message": "No prohibited suppression change detected"
+    },
+    {
+      "name": "delivery_diff_hygiene",
+      "passed": true,
+      "message": "No newly changed likely investigation-only artifacts were detected"
+    }
+  ],
+  "buildCommands": [
+    {
+      "command": [
+        "mvn clean verify"
+      ],
+      "exitCode": 0,
+      "timedOut": false
+    }
+  ],
+  "scan": {
+    "backend": "osv",
+    "outcome": "COMPLETED_WITH_FINDINGS",
+    "succeeded": true,
+    "error": null
+  },
+  "resolvedFindingIdentities": [
+    "CVE-2022-42889|org.apache.commons:commons-text",
+    "CVE-2026-41850|org.springframework:spring-expression",
+    "CVE-2026-40984|io.micrometer:micrometer-core",
+    "CVE-2026-40983|io.micrometer:micrometer-core",
+    "BIT-TOMCAT-2026-43515|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-43513|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-65905|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-42498|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-65182|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-41284|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-68525|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-43512|org.apache.tomcat.embed:tomcat-embed-core",
+    "BIT-TOMCAT-2026-41293|org.apache.tomcat.embed:tomcat-embed-core",
+    "CVE-2026-41845|org.springframework:spring-webmvc",
+    "CVE-2026-41842|org.springframework:spring-webmvc",
+    "CVE-2026-68494|tools.jackson.core:jackson-core",
+    "CVE-2026-54512|tools.jackson.core:jackson-databind",
+    "CVE-2026-54513|tools.jackson.core:jackson-databind"
+  ],
+  "remainingFindingIdentities": [
+    "CVE-2023-5072|org.json:json",
+    "CVE-2026-89425|tools.jackson.core:jackson-core",
+    "CVE-2026-89407|tools.jackson.core:jackson-core",
+    "CVE-2026-91777|tools.jackson.core:jackson-databind",
+    "CVE-2026-68497|tools.jackson.core:jackson-databind",
+    "CVE-2026-91776|tools.jackson.core:jackson-databind"
+  ]
+}
