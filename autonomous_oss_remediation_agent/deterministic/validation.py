@@ -13,6 +13,7 @@ from ..evidence import is_generated_evidence_path
 from ..models import (
     RepositoryBaseline,
     RepositoryCycleEvidence,
+    ScanReport,
     ValidationCheck,
     ValidationReport,
     VulnerabilityFinding,
@@ -22,6 +23,103 @@ from .constraints import ConstraintEvaluator
 from .diff_summary import bound_line_changes, parse_line_changes
 from .maven import MavenService
 from .scanner import ScannerPreflightError, VulnerabilityScanner
+
+
+_SCANNED_PACKAGE_COUNT_RE = re.compile(r"found\s+(\d+)\s+packages?\b", re.IGNORECASE)
+_FILTERED_UNSCANNABLE_RE = re.compile(
+    r"Filtered\s+(\d+)\s+local/unscannable\s+package/s\s+from\s+the\s+scan",
+    re.IGNORECASE,
+)
+
+
+def _scanner_stderr(report: ScanReport | None) -> str:
+    if report is None:
+        return ""
+    if report.command_result is not None:
+        return report.command_result.stderr or ""
+    for attempt in reversed(report.attempts):
+        command_result = attempt.get("commandResult") if isinstance(attempt, dict) else None
+        if isinstance(command_result, dict):
+            stderr = command_result.get("stderr")
+            if isinstance(stderr, str):
+                return stderr
+    return ""
+
+
+def _osv_package_coverage(report: ScanReport | None) -> dict[str, int | None]:
+    if report is None or report.backend.lower() != "osv":
+        return {"extractedPackages": None, "filteredUnscannablePackages": None, "scannablePackages": None}
+    stderr = _scanner_stderr(report)
+    counts = [int(value) for value in _SCANNED_PACKAGE_COUNT_RE.findall(stderr)]
+    filtered_matches = [int(value) for value in _FILTERED_UNSCANNABLE_RE.findall(stderr)]
+    extracted = sum(counts) if counts else None
+    filtered = max(filtered_matches) if filtered_matches else 0
+    scannable = None if extracted is None else max(extracted - filtered, 0)
+    return {
+        "extractedPackages": extracted,
+        "filteredUnscannablePackages": filtered,
+        "scannablePackages": scannable,
+    }
+
+
+def _target_comparison_coverage(
+    baseline_scan: ScanReport,
+    current_scan: ScanReport | None,
+    *,
+    build_passed: bool,
+) -> tuple[bool, str | None, dict[str, object]]:
+    baseline_coverage = _osv_package_coverage(baseline_scan)
+    current_coverage = _osv_package_coverage(current_scan)
+    evidence: dict[str, object] = {
+        "baseline": baseline_coverage,
+        "current": current_coverage,
+        "buildPassed": build_passed,
+    }
+    if current_scan is None or not current_scan.succeeded:
+        return False, "fresh vulnerability scan did not complete", evidence
+    if not build_passed:
+        return False, "build/test validation failed, so dependency scan coverage is not authoritative", evidence
+    if current_scan.backend.lower() != "osv":
+        return True, None, evidence
+
+    baseline_scannable = baseline_coverage["scannablePackages"]
+    current_scannable = current_coverage["scannablePackages"]
+    current_filtered = current_coverage["filteredUnscannablePackages"]
+
+    if current_filtered and current_coverage["extractedPackages"] is None:
+        return False, "OSV reported local/unscannable packages but package coverage could not be measured", evidence
+    if isinstance(baseline_scannable, int) and baseline_scannable > 0:
+        if not isinstance(current_scannable, int):
+            return False, "OSV package coverage could not be measured against the baseline", evidence
+        if current_scannable < baseline_scannable:
+            return (
+                False,
+                "OSV scannable package coverage regressed below the baseline; absent findings are UNKNOWN",
+                evidence,
+            )
+    elif isinstance(current_scannable, int) and current_scannable == 0 and current_filtered:
+        return False, "OSV filtered all extracted packages as local/unscannable; absent findings are UNKNOWN", evidence
+    return True, None, evidence
+
+
+def _classify_target_findings(
+    baseline_targets: Iterable[VulnerabilityFinding],
+    final_findings: Iterable[VulnerabilityFinding],
+    *,
+    comparison_complete: bool,
+) -> tuple[list[dict], list[dict], list[dict]]:
+    final = tuple(final_findings)
+    resolved: list[dict] = []
+    remaining: list[dict] = []
+    unknown: list[dict] = []
+    for target in baseline_targets:
+        if any(target.matches(current) for current in final):
+            remaining.append(target.to_dict())
+        elif comparison_complete:
+            resolved.append(target.to_dict())
+        else:
+            unknown.append(target.to_dict())
+    return resolved, remaining, unknown
 
 
 class DeterministicValidator:
@@ -118,25 +216,21 @@ class DeterministicValidator:
             )
         except ScannerPreflightError as exc:
             checks.append(ValidationCheck("fresh_vulnerability_scan", False, str(exc)))
-        target_comparison_complete = bool(scan_report and scan_report.succeeded)
-        final_findings = scan_report.findings if target_comparison_complete else ()
-        remaining_targets = (
-            [
-                target.to_dict()
-                for target in baseline.target_findings
-                if any(target.matches(current) for current in final_findings)
-            ]
-            if target_comparison_complete
-            else []
+        scan_succeeded = bool(scan_report and scan_report.succeeded)
+        final_findings = scan_report.findings if scan_succeeded else ()
+        target_comparison_complete, comparison_reason, coverage_evidence = _target_comparison_coverage(
+            baseline.scan,
+            scan_report,
+            build_passed=build_passed,
         )
-        resolved_targets = (
-            [
-                target.to_dict()
-                for target in baseline.target_findings
-                if not any(target.matches(current) for current in final_findings)
-            ]
-            if target_comparison_complete
-            else []
+        resolved_targets, remaining_targets, unknown_targets = _classify_target_findings(
+            baseline.target_findings,
+            final_findings,
+            comparison_complete=target_comparison_complete,
+        )
+        comparison_unavailable_message = (
+            "Target comparison unavailable because validation evidence is incomplete"
+            + (f": {comparison_reason}" if comparison_reason else "")
         )
         checks.append(
             ValidationCheck(
@@ -144,9 +238,9 @@ class DeterministicValidator:
                 target_comparison_complete
                 and (not baseline.target_findings or bool(resolved_targets)),
                 (
-                    "Target comparison unavailable because the fresh scan did not complete"
+                    comparison_unavailable_message
                     if not target_comparison_complete
-                    else f"{len(resolved_targets)} of {len(baseline.target_findings)} original target findings are absent"
+                    else f"{len(resolved_targets)} of {len(baseline.target_findings)} original target findings are resolved"
                     if resolved_targets
                     else (
                         "No original target finding was present in the baseline"
@@ -157,25 +251,29 @@ class DeterministicValidator:
                 {
                     "resolved": resolved_targets,
                     "remaining": remaining_targets,
+                    "unknown": unknown_targets,
                     "baselineTargetCount": len(baseline.target_findings),
                     "comparisonComplete": target_comparison_complete,
+                    "coverage": coverage_evidence,
                 },
             )
         )
         checks.append(
             ValidationCheck(
                 "target_findings_resolved",
-                target_comparison_complete and not remaining_targets,
+                target_comparison_complete and not remaining_targets and not unknown_targets,
                 (
-                    "Target comparison unavailable because the fresh scan did not complete"
+                    comparison_unavailable_message
                     if not target_comparison_complete
-                    else "Requested target findings are absent"
-                    if not remaining_targets
+                    else "Requested target findings are resolved"
+                    if not remaining_targets and not unknown_targets
                     else "Requested target findings remain"
                 ),
                 {
                     "remaining": remaining_targets,
+                    "unknown": unknown_targets,
                     "comparisonComplete": target_comparison_complete,
+                    "coverage": coverage_evidence,
                 },
             )
         )
@@ -189,7 +287,7 @@ class DeterministicValidator:
         checks.append(
             ValidationCheck(
                 "no_new_prohibited_findings",
-                not new_findings and bool(scan_report and scan_report.succeeded),
+                not new_findings and target_comparison_complete,
                 (
                     "New prohibited finding comparison unavailable because the fresh scan did not complete"
                     if not target_comparison_complete
@@ -247,6 +345,7 @@ class DeterministicValidator:
             diagnostic_artifacts=diagnostic_artifacts,
             resolved_target_findings=tuple(resolved_targets),
             remaining_target_findings=tuple(remaining_targets),
+            unknown_target_findings=tuple(unknown_targets),
             target_comparison_complete=target_comparison_complete,
         )
         self.trace.write_json(f"validation/cycle-{cycle}.json", report.to_dict())
