@@ -65,12 +65,14 @@ Control/evaluation files on this branch:
 - `docs/experiments/openhands/GATE2-TASK.md`
 - `docs/experiments/openhands/GATE2-NATIVE-REMEDIATION.md`
 - `scripts/openhands/openhands-gate2-prepare.sh`
+- `scripts/openhands/openhands-gate2-baseline.sh`
+- `scripts/openhands/openhands-gate2-baseline.py`
 
 ## Immediate next action
 
 1. Pull `openhands-poc-evaluation` in Cloud Shell.
 2. Run the guarded Gate 2 preparation script against the existing `maven-multimodule-app` checkout.
-3. Verify the HIGH/CRITICAL vulnerability baseline with the approved scanner before starting the agent.
+3. Run `bash scripts/openhands/openhands-gate2-baseline.sh` to perform the deterministic Maven baseline plus authoritative OSV scan before starting the agent.
 4. Point native OpenHands at the prepared target checkout and give it only `GATE2-TASK.md`.
 5. After OpenHands stops, run independent deterministic validation and record PASS/FAIL. For run 1, do not automatically feed validation failure back to OpenHands.
 
