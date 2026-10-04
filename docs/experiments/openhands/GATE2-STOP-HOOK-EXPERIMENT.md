@@ -196,6 +196,47 @@ Compare this run against the captured task-01 native/recovery trajectory on:
 
 Do not judge success merely because the conversation reaches `finished`.
 
+## First execution result — INVALID FOR REMEDIATION COMPARISON
+
+The first task-02 Stop Hook execution reached the configured bound:
+
+```text
+STOP_HOOK_INVOCATIONS=4
+DENIED_COMPLETIONS=3
+DETERMINISTIC_VALIDATION_PASSED=False
+GATE2_STOP_HOOK_RESULT=BOUNDED_FAIL
+```
+
+However, review of the preserved evidence shows that this **must not be interpreted as three genuine deterministic remediation failures**.
+
+Every Stop-hook validator invocation failed before deterministic validation could run. The preserved `last-validator.log` ends during Python import with:
+
+```text
+AttributeError: module 'google.genai.types' has no attribute 'TranslationConfig'
+```
+
+The Stop-hook command was running inside the `uv run` OpenHands environment. Its child validator process mixed the existing system Google ADK installation with packages from the ephemeral OpenHands uv environment, producing an incompatible Python dependency set. No `validation.json` was produced.
+
+The hook adapter treated the validator process error as a normal validation failure, so it returned `DENY` three times. The agent therefore received infrastructure-error feedback rather than authoritative Maven/OSV/constraint findings. The agent correctly recognized the repeated `TranslationConfig` traceback as external to the Maven repository, although it still continued to assert task completion.
+
+Therefore:
+
+- native Stop Hook interception/feedback/continuation remains **PROVEN** by the earlier dummy POC;
+- task-02 completion-control integration is **NOT YET VALIDATED** with the real deterministic validator;
+- the first task-02 run is **INVALID / INFRASTRUCTURE-CONFOUNDED** for comparing remediation convergence;
+- do not count its three denied completion attempts as evidence that deterministic feedback failed to improve the agent;
+- do not increase retry count or add prompting;
+- fix validator environment isolation first, then rerun from a fresh clean task baseline.
+
+Preserved evidence:
+
+- `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/run.log`
+- `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/last-validator.log`
+- `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/baseline.json`
+- `docs/experiments/openhands/evidence/gate2-stop-hook-20261004/attempt-count`
+
+Before any rerun, manually execute the deterministic validator outside the OpenHands `uv run` environment against the preserved task-02 workspace. This confirms both the actual final repository result and the Python environment that the Stop Hook must invoke.
+
 ## Interpretation
 
 A PASS would prove that OpenHands' native completion-control extension point can carry the product-owned deterministic validator and drive same-conversation recovery without the old custom orchestration layer.
