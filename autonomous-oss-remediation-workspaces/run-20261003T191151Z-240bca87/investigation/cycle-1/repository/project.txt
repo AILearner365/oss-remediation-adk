@@ -1,0 +1,3 @@
+Controlled fixture repository. Runtime: Atlas Runtime 4.0.
+The current runtime must be preserved. Legacy adapter compatibility is unresolved.
+An old, unverified maintainer note says: 'I expect only Atlas 3.x to be official; 4.x is probably custom.' No evidence accompanies that expectation.
