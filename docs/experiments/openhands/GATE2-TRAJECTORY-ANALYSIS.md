@@ -163,3 +163,96 @@ Before the next experiment, official documentation and community evidence should
 7. **Editor use:** What are the precise `file_editor` replacement/`view_range` semantics in the installed tool version, and are repeated ambiguous replacements or copying rendered line numbers known model/tool usability issues?
 8. **Comparable evidence:** Are there official or community evaluations of this same model/provider combination on constraint-sensitive dependency remediation? What evidence separates a model limitation from native harness behavior, rather than generalizing from this single paired run?
 9. **Audit fidelity:** What is the supported SDK/Agent Server event-export contract, including truncation, conversation continuation, and retained tool observations? Which additional persisted evidence, if any, can distinguish unavailable data from data the agent ignored?
+
+## Research-informed OpenHands assessment
+
+Updated 2026-10-04 after reviewing current OpenHands SDK documentation/examples/issues against the captured Gate 2 trajectory.
+
+### Current assessment
+
+| Area | Assessment |
+| --- | --- |
+| OpenHands harness capability | **PROMISING** |
+| Native repository investigation/edit/build/scan loop | **PROVEN USEFUL** |
+| Same-conversation recovery from authoritative failure evidence | **PROVEN USEFUL** |
+| Completion reliability in plain agent mode | **NOT SUFFICIENT in this experiment** |
+| Constraint retention with `gemini-2.5-flash` | **NOT SUFFICIENT in this experiment** |
+| Model-quality question | **UNRESOLVED** |
+| Stronger-Gemini isolation test | **BLOCKED/DEFERRED** — the current company Vertex environment exposes only `gemini-2.5-flash` for this POC |
+| Native completion controls | **AVAILABLE IN CURRENT OPENHANDS SDK DOCUMENTATION; NOT YET TESTED HERE** |
+| Authoritative external research tooling | **POSSIBLE GAP; NOT YET PROVEN** |
+| Need for custom orchestration | **NOT PROVEN** |
+| Need for `AGENTS.md` / remediation Skill | **NOT PROVEN** |
+| Decision | **CONTINUE EVALUATION — not ADOPT, not REJECT** |
+
+The stronger-model experiment previously considered cannot currently isolate model quality because no stronger Gemini Pro model is available in the company Vertex environment. Do not interpret the inability to run that comparison as evidence that `gemini-2.5-flash` is sufficient or that OpenHands itself is the limiting factor; the model/harness contribution remains confounded.
+
+### What current OpenHands research changes
+
+Current OpenHands SDK material explicitly recognizes premature completion as a problem class:
+
+- The [Goal Completion Loop example](https://github.com/OpenHands/software-agent-sdk/blob/main/examples/01_standalone_sdk/54_goal_completion_loop.py) distinguishes ordinary `conversation.run()`, which can stop when the agent believes it is done, from a judge-driven loop that requires completion evidence.
+- Current [Stop hook example](https://github.com/OpenHands/software-agent-sdk/blob/main/examples/02_remote_agent_server/01_convo_with_local_agent_server.py) shows deterministic validation denying an attempted stop, returning failure evidence to the same conversation, and allowing the agent to continue.
+- The original [Stop Hook feature request](https://github.com/OpenHands/software-agent-sdk/issues/1527) describes the motivation as preventing early/lazy termination when work remains.
+- Current issues also show that premature termination and stuck/repeated-action behavior can be model- and harness-sensitive rather than a single universal failure mode.
+
+These mechanisms map closely to the manual Gate 2 sequence: agent declares completion → deterministic validator fails → failure evidence is returned → same conversation revises the solution.
+
+**Version caveat:** the research above reflects current OpenHands SDK documentation/repository state. Before using Stop hooks or Goal Completion Loop in this POC, verify the exact API/behavior supported by the installed Agent Server / SDK 1.50.0. Do not upgrade or patch the runtime merely to force the experiment without recording that as a changed variable.
+
+### Revised next experiment
+
+Because only `gemini-2.5-flash` is currently available, do **not** spend effort trying to run the blocked stronger-model comparison.
+
+The next controlled experiment should isolate **native completion control**, while keeping the model and engineering task constant:
+
+```text
+same clean target baseline
++ same Gate 2 task contract
++ same Gemini 2.5 Flash
++ same repository/tools
++ same independent deterministic validator
++ one native OpenHands completion-control mechanism only
+```
+
+Preferred direction, if supported by the installed version: use a **Stop hook backed by the existing deterministic validator**, rather than an LLM judge, because OSS-remediation acceptance is already deterministic.
+
+Conceptually:
+
+```text
+OpenHands investigates / implements / self-validates
+        ↓
+agent attempts to finish
+        ↓
+native OpenHands Stop hook
+        ↓
+existing deterministic validator
+        ↓
+PASS → allow completion
+FAIL → return validator evidence to the same conversation
+        and continue within a bounded experiment
+```
+
+This is an evaluation of an existing OpenHands extension point, not a recommendation to rebuild the old custom retry/orchestration framework.
+
+### What not to add yet
+
+Do not add these merely to improve the next result:
+
+- large `AGENTS.md` guidance,
+- OSS-remediation Skill,
+- custom planner,
+- custom retry manager,
+- custom memory framework,
+- hard-coded dependency recipes,
+- extra solution hints.
+
+The Gate 2 prompt already contained the no-downgrade and acceptance constraints. Moving those same task rules into repository guidance would not explain or isolate the observed failure.
+
+### Exit criterion
+
+After the native completion-control experiment, reassess before further tuning.
+
+If `gemini-2.5-flash` plus native OpenHands completion control still shows materially poor evidence interpretation, repeated unproductive actions, or requires humans to supply engineering strategy rather than validation evidence, stop adding OpenHands-specific tuning and move to the planned OpenCode comparison using the same task/validator/model availability constraints.
+
+If completion control materially improves convergence while preserving agent-owned engineering judgment, OpenHands remains a qualified candidate even though the model-quality comparison stays unresolved until a stronger Gemini model becomes available.
