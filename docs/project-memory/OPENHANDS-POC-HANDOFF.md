@@ -133,6 +133,17 @@ Default bound: three denied completion attempts. A later forced termination caus
 
 Use a separate worktree and state directory so task-01 evidence/workspace remain untouched.
 
+### Task-02 first Stop Hook run: infrastructure-confounded
+
+The first real-validator Stop Hook run ended with `STOP_HOOK_INVOCATIONS=4`, `DENIED_COMPLETIONS=3`, and `GATE2_STOP_HOOK_RESULT=BOUNDED_FAIL`, but evidence review shows the deterministic validator never actually executed. Each hook invocation failed during Python imports with `AttributeError: module 'google.genai.types' has no attribute 'TranslationConfig'`.
+
+Cause: the validator child process inherited the OpenHands ephemeral `uv run` Python/package environment and mixed it with the existing system Google ADK installation. No `validation.json` was produced. The hook wrapper incorrectly converted this infrastructure error into a normal validation `DENY`.
+
+Do **not** interpret this run as evidence that three rounds of authoritative validator feedback failed to converge. It is invalid for the remediation comparison. Native Stop Hook mechanics remain proven by the earlier dummy POC.
+
+Next: run the deterministic validator manually outside the OpenHands uv environment against the preserved task-02 workspace, then isolate the validator subprocess environment before a fresh controlled rerun.
+
+
 ## Explicit return point
 
 If Gate 2 is promising, perform the corporate-laptop feasibility test. If that also passes, treat OpenHands as a qualified platform candidate and compare it fairly against OpenCode before committing to a production platform.
