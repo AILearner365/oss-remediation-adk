@@ -29,7 +29,9 @@ esac
 info "Target repository: $TARGET_REPO"
 info "Origin: $origin_url"
 
-git fetch origin "$BASE_BRANCH" "$TASK_BRANCH"
+git fetch origin \
+  "+refs/heads/$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH" \
+  "+refs/heads/$TASK_BRANCH:refs/remotes/origin/$TASK_BRANCH"
 
 base_sha="$(git rev-parse "origin/$BASE_BRANCH")"
 task_sha="$(git rev-parse "origin/$TASK_BRANCH")"
