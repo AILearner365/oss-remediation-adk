@@ -149,3 +149,18 @@ Next: run the deterministic validator manually outside the OpenHands uv environm
 If Gate 2 is promising, perform the corporate-laptop feasibility test. If that also passes, treat OpenHands as a qualified platform candidate and compare it fairly against OpenCode before committing to a production platform.
 
 Do not turn the Cloud Shell npm bundle patches into production architecture by default.
+
+
+### Gate 2 Stop Hook validator isolation fixed
+
+The task-02 infrastructure confounder was traced to `openhands-gate2-validate.sh` resolving `python` from the active OpenHands `uv run` environment. That mixed temporary OpenHands packages with the host Google ADK installation and raised `google.genai.types.TranslationConfig` during import.
+
+Fix on `openhands-poc-evaluation`:
+- validator wrapper now selects a host `python3` outside `VIRTUAL_ENV` and sanitizes Python environment variables;
+- Stop Hook removes stale validation output before each invocation;
+- missing fresh validation output is classified as `INFRASTRUCTURE_FAIL`, not deterministic `DENY`;
+- outer runner reports infrastructure failure distinctly.
+
+Do not relax the Spring Boot qualifier behavior for this experiment. Existing policy tests deliberately fail closed on qualifier-bearing versions such as RCs; `4.2.0-M2` should therefore not be treated as an allowed minor upgrade without an explicit policy decision.
+
+Next: pull the branch in Cloud Shell, prove validation executes successfully from the OpenHands uv context against the preserved task-02 workspace, then create/reset a fresh task branch to the original baseline before the controlled rerun.
