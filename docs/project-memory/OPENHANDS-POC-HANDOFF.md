@@ -99,6 +99,17 @@ If native completion control still leaves materially poor evidence interpretatio
 
 Gate 3 and platform adoption remain pending.
 
+## Stop Hook POC
+
+A minimal native OpenHands Stop Hook proof has been added and is **ready to run**:
+
+- `scripts/openhands/openhands-stop-hook-poc.py`
+- `docs/experiments/openhands/STOP-HOOK-POC.md`
+
+Purpose: prove, on the installed SDK 1.50.0 and existing `vertex_ai/gemini-2.5-flash` path, that the first completion attempt can be deterministically denied, feedback can be injected into the same conversation, execution can resume, and a later completion attempt can be allowed.
+
+This is intentionally isolated from the OSS-remediation task and does not call the Gate 2 validator yet. Do not rerun Gate 2 until this POC is executed and its evidence is reviewed.
+
 ## Explicit return point
 
 If Gate 2 is promising, perform the corporate-laptop feasibility test. If that also passes, treat OpenHands as a qualified platform candidate and compare it fairly against OpenCode before committing to a production platform.
