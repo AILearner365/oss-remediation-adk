@@ -215,6 +215,65 @@ show_disk() {
   du -sh "$HOME/.npm" "$HOME/.cache" "$HOME/.openhands" 2>/dev/null || true
 }
 
+verify_tmux() {
+  prepare_runtime
+  local session="openhands-verify-$"
+
+  TMUX_TMPDIR="$TMUX_DIR" tmux new-session -d -s "$session" 'sleep 2'     || die "tmux verification failed using $TMUX_DIR"
+
+  TMUX_TMPDIR="$TMUX_DIR" tmux has-session -t "$session" 2>/dev/null     || die "tmux verification session was not created"
+
+  TMUX_TMPDIR="$TMUX_DIR" tmux kill-session -t "$session" 2>/dev/null || true
+  info "tmux runtime OK"
+}
+
+verify_vertex() {
+  check_vertex_env
+  prepare_runtime
+
+  local result
+  result="$(
+    uv run --with "openhands-sdk[vertex]==$AGENT_SERVER_VERSION" python - <<'PY'
+from openhands.sdk import LLM, Message, TextContent
+
+llm = LLM(
+    model="vertex_ai/gemini-2.5-flash",
+    api_key=None,
+    usage_id="openhands-bootstrap-verify",
+)
+
+resp = llm.completion(
+    messages=[
+        Message(
+            role="user",
+            content=[TextContent(text="Reply with exactly: VERTEX_OPENHANDS_VERIFY_OK")]
+        )
+    ]
+)
+
+texts = [c.text for c in resp.message.content if isinstance(c, TextContent)]
+print(texts[0] if texts else resp.message)
+PY
+  )" || die "Vertex/OpenHands SDK verification failed"
+
+  printf '%s
+' "$result"
+  printf '%s
+' "$result" | grep -Fq 'VERTEX_OPENHANDS_VERIFY_OK'     || die "Vertex/OpenHands SDK verification returned an unexpected response"
+
+  info "Vertex Gemini smoke test OK"
+}
+
+verify_all() {
+  check_versions
+  patch_vertex_extra
+  patch_vertex_readiness
+  verify_tmux
+  verify_vertex
+  show_disk
+  info "OpenHands Cloud Shell POC verification PASSED"
+}
+
 check_effective_patch() {
   grep -n 'openhands-sdk' "$DEV_SAFE" | head -10
   local file
@@ -240,6 +299,7 @@ Usage:
   openhands-cloudshell-poc.sh check
   openhands-cloudshell-poc.sh prepare
   openhands-cloudshell-poc.sh start
+  openhands-cloudshell-poc.sh verify
   openhands-cloudshell-poc.sh disk
 
 The script:
@@ -282,6 +342,9 @@ case "${1:-}" in
     patch_vertex_extra
     patch_vertex_readiness
     start_canvas
+    ;;
+  verify)
+    verify_all
     ;;
   disk)
     show_disk
