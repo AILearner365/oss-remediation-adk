@@ -244,3 +244,18 @@ A PASS would prove that OpenHands' native completion-control extension point can
 A bounded failure would still be useful: it would show that completion control works but does not compensate for weak engineering/evidence interpretation with the available Gemini 2.5 Flash model.
 
 Do not add AGENTS.md, Skills, dependency recipes, or solution hints during this experiment.
+
+
+## Validator-isolation remediation
+
+The Stop Hook integration now isolates the deterministic validator from the ephemeral OpenHands `uv run` Python environment.
+
+Changes:
+- `openhands-gate2-validate.sh` selects the first host `python3` outside the active `VIRTUAL_ENV`, unsets virtualenv/Python path contamination, then executes the validator with only the control repository on `PYTHONPATH`.
+- Each Stop Hook attempt deletes any prior validation report before invoking the validator, preventing a stale report from masking a later infrastructure failure.
+- If the validator exits without producing a fresh validation report, the hook records `hook/infrastructure-failure`, allows the conversation to terminate, and the outer runner reports `GATE2_STOP_HOOK_RESULT=INFRASTRUCTURE_FAIL` rather than consuming deterministic-denial attempts.
+- Normal deterministic validation failures still return `DENY` and authoritative failure evidence to the same conversation.
+
+The Spring Boot policy was intentionally **not** relaxed. The existing unit contract fails closed for qualifier-bearing versions such as release candidates; therefore the observed `4.2.0-M2` result remains a policy failure/unverifiable outcome rather than being silently reclassified as an allowed minor upgrade.
+
+Before a fresh agent rerun, verify the updated validator against the preserved task-02 workspace from inside the same OpenHands `uv run` dependency context. It should now execute and produce a validation report rather than a `TranslationConfig` import traceback.
