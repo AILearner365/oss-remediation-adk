@@ -86,6 +86,11 @@ if out.is_file():
             remaining = data.get("remaining_target_findings")
         if isinstance(remaining, list):
             parts.append(f"Remaining original HIGH/CRITICAL findings: {len(remaining)}")
+        unknown = data.get("unknownTargetFindings")
+        if unknown is None:
+            unknown = data.get("unknown_target_findings")
+        if isinstance(unknown, list):
+            parts.append(f"Unknown/unscannable original HIGH/CRITICAL findings: {len(unknown)}")
         new_findings = data.get("newProhibitedFindings")
         if new_findings is None:
             new_findings = data.get("new_prohibited_findings")
