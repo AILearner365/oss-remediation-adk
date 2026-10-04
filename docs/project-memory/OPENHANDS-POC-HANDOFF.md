@@ -101,14 +101,14 @@ Gate 3 and platform adoption remain pending.
 
 ## Stop Hook POC
 
-A minimal native OpenHands Stop Hook proof has been added and is **ready to run**:
+A minimal native OpenHands Stop Hook proof has been added and **PASSED on 2026-10-04**:
 
 - `scripts/openhands/openhands-stop-hook-poc.py`
 - `docs/experiments/openhands/STOP-HOOK-POC.md`
 
 Purpose: prove, on the installed SDK 1.50.0 and existing `vertex_ai/gemini-2.5-flash` path, that the first completion attempt can be deterministically denied, feedback can be injected into the same conversation, execution can resume, and a later completion attempt can be allowed.
 
-This is intentionally isolated from the OSS-remediation task and does not call the Gate 2 validator yet. The first execution exposed a packaging-only prerequisite: `openhands-sdk` does not include the `openhands.tools` default preset, so the POC command must also supply matching `openhands-tools==1.50.0`. This is not a Stop Hook failure. Do not rerun Gate 2 until this POC is executed successfully and its evidence is reviewed.
+This is intentionally isolated from the OSS-remediation task and does not call the Gate 2 validator yet. The first execution exposed a packaging-only prerequisite: `openhands-sdk` does not include the `openhands.tools` default preset, so the POC command must also supply matching `openhands-tools==1.50.0`. The corrected run passed with two Stop-hook invocations: the first was denied, deterministic feedback was observed in the same conversation, the second was allowed, and the conversation finished. Native completion-control wiring is therefore proven for SDK/Tools 1.50.0 with Vertex Gemini 2.5 Flash.
 
 ## Explicit return point
 
