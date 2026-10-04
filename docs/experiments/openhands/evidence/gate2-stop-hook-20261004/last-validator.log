@@ -1,0 +1,48 @@
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-validate.py", line 17, in <module>
+    from autonomous_oss_remediation_agent.capabilities.execution import ExecutionBudget, ProcessRunner
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/__init__.py", line 6, in <module>
+    from .orchestrator import AutonomousRemediationOrchestrator
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/orchestrator.py", line 8, in <module>
+    from .agent import AgentSession, IntentToolRecoveryExhausted, IrrecoverableAgentSessionError, default_agent_session_factory
+  File "/home/kavya_parivarababu/oss-remediation-adk/autonomous_oss_remediation_agent/agent.py", line 11, in <module>
+    from google.adk.agents import LlmAgent, RunConfig
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/__init__.py", line 18, in <module>
+    from .agents.context import Context
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/agents/__init__.py", line 22, in <module>
+    from .invocation_context import InvocationContext
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/agents/invocation_context.py", line 47, in <module>
+    from .run_config import RunConfig
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/agents/run_config.py", line 185, in <module>
+    class RunConfig(BaseModel):
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 243, in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 579, in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_fields.py", line 265, in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py", line 368, in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py", line 423, in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py", line 474, in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py", line 511, in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/openhands-uv-cache/archive-v0/KWHR3vxZBV_q__Lh/lib/python3.12/site-packages/pydantic/_internal/_typing_extra.py", line 564, in _eval_type
+    return typing._eval_type(  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/typing.py", line 414, in _eval_type
+    return t._evaluate(globalns, localns, recursive_guard)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/typing.py", line 924, in _evaluate
+    eval(self.__forward_code__, globalns, localns),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 1, in <module>
+AttributeError: module 'google.genai.types' has no attribute 'TranslationConfig'
