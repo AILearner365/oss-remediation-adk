@@ -19,6 +19,7 @@ Gate 1 setup is proven and has a repeatable `verify` health check in Google Clou
 - native OpenHands agent
 - Vertex AI through ADC
 - `vertex_ai/gemini-2.5-flash`
+- current company Vertex model availability for this POC: **Gemini 2.5 Flash only**; no stronger Gemini Pro model is presently available for a controlled model-isolation rerun
 - no model API key
 - successful end-to-end smoke response: `VERTEX_OPENHANDS_OK`
 
@@ -82,11 +83,21 @@ See [Gate 2 trajectory analysis](../experiments/openhands/GATE2-TRAJECTORY-ANALY
 
 Evidence limits: native validator results survive in the recovery user message; a separate native validator snapshot was not recovered. Recovery's delivery-hygiene PASS coexists with a leftover `high_critical_vulnerabilities_current.txt` in its changed-file list. Do not infer complete cleanup from that PASS.
 
-## Immediate next action
+## Research-informed assessment and immediate next action
 
-Research the official/community questions at the end of the trajectory report before deciding the next experiment. Preserve the native and recovery phases separately; judge engineering decisions and reassessment as well as deterministic acceptance.
+**CONTINUE EVALUATION — not ADOPT, not REJECT.**
 
-Do not rerun OpenHands, change the target remediation, or redesign the harness as part of this evidence-capture task. No custom orchestration, AGENTS.md, Skills, retry loops, or new framework code is recommended at this stage. Gate 3 and platform adoption remain pending.
+External OpenHands review is now recorded in the trajectory analysis. Current OpenHands SDK documentation provides native completion-control patterns (Goal Completion Loop and Stop hooks) aimed at premature completion. The exact API/behavior supported by the installed Agent Server / SDK 1.50.0 must be verified before changing the experiment.
+
+A stronger-model isolation run is currently **blocked/deferred** because the company Vertex environment exposes only `gemini-2.5-flash` for this POC. Keep model quality marked **UNRESOLVED** rather than attributing the Gate 2 failures entirely to OpenHands or entirely to Gemini.
+
+The next controlled experiment should therefore keep the same model, clean task baseline, task contract, tools, and deterministic validator, and change only **native completion control**. Preferred direction, if supported by the installed version: a Stop hook invoking the existing deterministic validator so that PASS permits completion and FAIL returns deterministic evidence to the same OpenHands conversation for bounded continuation.
+
+Do not add AGENTS.md, remediation Skills, custom retry/planner/memory frameworks, dependency recipes, or additional solution hints before this experiment. Those would add variables without evidence that they address the observed failure.
+
+If native completion control still leaves materially poor evidence interpretation or requires humans to supply engineering strategy rather than validation evidence, stop OpenHands-specific tuning and proceed to the planned OpenCode comparison under the same task/validator/model-availability constraints.
+
+Gate 3 and platform adoption remain pending.
 
 ## Explicit return point
 
