@@ -111,8 +111,19 @@ def main() -> int:
     state_file = args.state_file.expanduser().resolve()
     scanner_path = args.scanner.expanduser().resolve()
 
-    if not (target / ".git").is_dir():
+    if not target.is_dir():
         die(f"Target repository not found at {target}")
+    import subprocess
+    probe = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=target,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if probe.returncode != 0 or probe.stdout.strip() != "true":
+        die(f"Target repository is not a Git worktree at {target}")
     if not state_file.is_file():
         die(f"Saved Gate 2 baseline not found at {state_file}")
     if not scanner_path.is_file() or not os.access(scanner_path, os.X_OK):
@@ -120,8 +131,6 @@ def main() -> int:
 
     state = json.loads(state_file.read_text(encoding="utf-8"))
     baseline = baseline_from_state(state, target)
-
-    import subprocess
 
     current_branch = subprocess.run(
         ["git", "branch", "--show-current"], cwd=target, text=True,
