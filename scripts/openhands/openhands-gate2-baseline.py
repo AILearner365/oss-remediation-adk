@@ -56,8 +56,18 @@ def run_git(repo: Path, *args: str) -> str:
 
 
 def verify_target(repo: Path, base_branch: str, task_branch: str) -> tuple[str, str]:
-    if not (repo / ".git").is_dir():
+    if not repo.is_dir():
         die(f"Target repository not found at {repo}")
+    probe = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if probe.returncode != 0 or probe.stdout.strip() != "true":
+        die(f"Target repository is not a Git worktree at {repo}")
 
     origin = run_git(repo, "remote", "get-url", "origin")
     if "AILearner365/maven-multimodule-app" not in origin:
