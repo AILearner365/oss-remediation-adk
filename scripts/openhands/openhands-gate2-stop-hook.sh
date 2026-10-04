@@ -11,6 +11,7 @@ MAX_DENIALS="${GATE2_MAX_DENIALS:-3}"
 mkdir -p "$HOOK_STATE_DIR"
 COUNT_FILE="$HOOK_STATE_DIR/attempt-count"
 LAST_LOG="$HOOK_STATE_DIR/last-validator.log"
+INFRA_FILE="$HOOK_STATE_DIR/infrastructure-failure"
 
 count=0
 if [ -f "$COUNT_FILE" ]; then
@@ -18,6 +19,8 @@ if [ -f "$COUNT_FILE" ]; then
 fi
 count=$((count + 1))
 printf '%s\n' "$count" > "$COUNT_FILE"
+
+rm -f "$OUTPUT_FILE" "$INFRA_FILE"
 
 set +e
 bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-validate.sh" \
@@ -35,6 +38,27 @@ attempt = int(sys.argv[1])
 print(json.dumps({
     "decision": "allow",
     "reason": f"Gate 2 deterministic validator passed on stop attempt {attempt}."
+}))
+PY
+  exit 0
+fi
+
+if [ ! -s "$OUTPUT_FILE" ]; then
+  printf '%s\n' "validator_exit_code=$rc" > "$INFRA_FILE"
+  python - "$count" "$rc" "$LAST_LOG" <<'PY'
+import json, pathlib, sys
+attempt = int(sys.argv[1])
+rc = int(sys.argv[2])
+log = pathlib.Path(sys.argv[3])
+lines = [line.strip() for line in log.read_text(errors="replace").splitlines() if line.strip()] if log.is_file() else []
+tail = " | ".join(lines[-12:]) if lines else "no validator output"
+print(json.dumps({
+    "decision": "allow",
+    "reason": (
+        f"Gate 2 validator infrastructure failure on stop attempt {attempt} "
+        f"(exit {rc}); ending the experiment without deterministic acceptance. "
+        + tail
+    ),
 }))
 PY
   exit 0
