@@ -21,7 +21,15 @@ from pathlib import Path
 from openhands.sdk import Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
 from openhands.sdk.hooks import HookConfig, HookDefinition, HookMatcher
-from openhands.tools.preset.default import get_default_agent
+try:
+    from openhands.tools.preset.default import get_default_agent
+except ModuleNotFoundError as exc:
+    raise SystemExit(
+        "Missing openhands-tools. Run this POC with both matching 1.50.0 packages: "
+        'uv run --with "openhands-sdk[vertex]==1.50.0" '
+        '--with "openhands-tools==1.50.0" '
+        "python scripts/openhands/openhands-stop-hook-poc.py"
+    ) from exc
 
 
 DENY_MARKER = "TEST_VALIDATION_FAILED"
