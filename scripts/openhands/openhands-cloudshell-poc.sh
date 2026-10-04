@@ -31,7 +31,7 @@ check_versions() {
   require_cmd python
 
   local installed_canvas
-  installed_canvas="$(agent-canvas --version 2>/dev/null || true)"
+  installed_canvas="$(node -e 'const p=require(process.argv[1]); process.stdout.write(p.version || "")' "$CANVAS_ROOT/package.json" 2>/dev/null || true)"
   [ "$installed_canvas" = "$CANVAS_VERSION" ] || die "Expected Agent Canvas $CANVAS_VERSION, found '${installed_canvas:-unknown}'. Stop and re-evaluate patches."
 
   [ -f "$DEV_SAFE" ] || die "Missing expected launcher file: $DEV_SAFE"
@@ -41,6 +41,7 @@ check_versions() {
   info "uv: $(uv --version)"
   info "tmux: $(tmux -V)"
   info "Agent Canvas: $installed_canvas"
+  info "Agent Canvas path: $CANVAS_ROOT"
 }
 
 check_vertex_env() {
@@ -150,7 +151,11 @@ start_canvas() {
 
   info "Starting Agent Canvas"
   info "OH_AGENT_SERVER_VERSION=$OH_AGENT_SERVER_VERSION"
-  exec agent-canvas
+  local canvas_bin
+  canvas_bin="$(command -v agent-canvas || true)"
+  [ -n "$canvas_bin" ] || canvas_bin="$(npm prefix -g)/bin/agent-canvas"
+  [ -x "$canvas_bin" ] || die "Agent Canvas executable not found: $canvas_bin"
+  exec "$canvas_bin"
 }
 
 usage() {
