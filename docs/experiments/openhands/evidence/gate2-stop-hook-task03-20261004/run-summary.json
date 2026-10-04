@@ -1,0 +1,42 @@
+[
+  {
+    "line": 21888,
+    "text": "MODEL=vertex_ai/gemini-2.5-flash"
+  },
+  {
+    "line": 21889,
+    "text": "CONVERSATION_ID=2884fc07-b900-4a46-8e41-14d05eb3efd4"
+  },
+  {
+    "line": 21890,
+    "text": "FINAL_STATUS=finished"
+  },
+  {
+    "line": 21891,
+    "text": "STOP_HOOK_INVOCATIONS=4"
+  },
+  {
+    "line": 21892,
+    "text": "STOP_HOOK_EVENTS=4"
+  },
+  {
+    "line": 21893,
+    "text": "DENIED_COMPLETIONS=3"
+  },
+  {
+    "line": 21894,
+    "text": "DETERMINISTIC_VALIDATION_PASSED=False"
+  },
+  {
+    "line": 21895,
+    "text": "VALIDATION_REPORT=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json"
+  },
+  {
+    "line": 21896,
+    "text": "CONVERSATION_PERSISTENCE=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation"
+  },
+  {
+    "line": 21897,
+    "text": "GATE2_STOP_HOOK_RESULT=BOUNDED_FAIL"
+  }
+]

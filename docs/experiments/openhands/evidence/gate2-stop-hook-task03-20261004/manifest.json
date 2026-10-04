@@ -1,0 +1,1952 @@
+{
+  "source_state": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook",
+  "conversation_id": "2884fc07-b900-4a46-8e41-14d05eb3efd4",
+  "control_commit": "1acddfd463c282584dd56b4c1e9ce4dbe7bc198e",
+  "sources": [
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/baseline.json",
+      "bytes": 103112,
+      "sha256": "9eb97d79ef17942724726f36d7d5d1493a73d083f0e315a5ee347633ded56b2c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json",
+      "bytes": 54944,
+      "sha256": "a6965f87b17b97fe7e78d1dadf270d6f02f3571931dedb80a9af553289342b2f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook/attempt-count",
+      "bytes": 2,
+      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook/last-validator.log",
+      "bytes": 1510,
+      "sha256": "4b3c872d5a4a072b877f8351ca0db750a03ad8485791f24ba320c241ffc8c034"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/run.log",
+      "bytes": 1572959,
+      "sha256": "389b46ddafb0d93ed792e02fc063fae899ed98400016be2fae2c2fe7ec0dedda"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00000-37f95eba-d80f-47cd-95a2-6f7597b34b23.json",
+      "bytes": 27839,
+      "sha256": "3b30f0327489f11b98853d1d09e7dc64d35a85fff36bb5910025602e9bd69ee5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00001-a990309a-0f96-4e65-944c-6038ff5292d2.json",
+      "bytes": 1372,
+      "sha256": "e732c3df6257bb7e31f3fdc61314f886da2f8ccf922f3fa324d0ae970a641317"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00002-c5e1607a-1402-475e-9a95-2d7a80da3084.json",
+      "bytes": 11027,
+      "sha256": "8d54134c5ae481a9b8dec0da28629a1da2ff8227c5510575526920a4297eeb88"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00003-56ed405d-02d5-4285-8a80-2d18e11db1ff.json",
+      "bytes": 12446,
+      "sha256": "5757338d75352f2f997221607284f786d04328a6216b97f27077e7912d53a59b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00004-2491d1df-585f-4ee5-ad4e-c65be53f5352.json",
+      "bytes": 3575,
+      "sha256": "7c98776503183ced7558683468d1bf2a42e97ca88f77a8394f72393729ea86fd"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00005-535b148a-1ad2-4c00-9cfa-598dbab32276.json",
+      "bytes": 1652,
+      "sha256": "dc4a81e72f1a06fcfb88e62d1a32ed697751195c62381b4ec468cae7ff1a7045"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00006-da88c830-af1d-4413-8bd9-54595bb53d65.json",
+      "bytes": 1682,
+      "sha256": "750c0f22a997b44353381a445b774140b8b3317ed65b13c8c7c6fdf6e331b9ec"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00007-32df6ba2-45bd-4e24-9d40-437d0dc6b12d.json",
+      "bytes": 2671,
+      "sha256": "9e4e1d9eaf532f99e308c7b35588b18121c29c32d6efc61242d2a5891fb8f0b5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00008-3812b68e-50df-4945-9da0-58c0f3705015.json",
+      "bytes": 5763,
+      "sha256": "b9cd4b5c397fcdc2f2adeb98e4fbd37fa5b20ce2d278237c28f07dd6fdaaf94c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00009-34af5b06-b08b-42da-9745-ad200cc1d726.json",
+      "bytes": 14491,
+      "sha256": "c1e13e2e790f8dd4c6fee4ca1492111daa0bedf78cf4b368397adae7b3fa98c4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00010-e8a1199f-bacc-4b55-bbe1-3ad553ee8037.json",
+      "bytes": 7650,
+      "sha256": "4a81de03527756ca28b6d72596974c80e00c8931d17bfb28c9406e6d2c94001f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00011-b357fb71-8b8c-4403-a27f-191e775beb04.json",
+      "bytes": 14273,
+      "sha256": "1243d5aa3f9089031159143605cf9c93a76a467f61cb191891cfd38142deb6d7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00012-af1cec28-a4f9-4cd4-9003-10eb1292f6d8.json",
+      "bytes": 12422,
+      "sha256": "420a1011be9ed8aee311139cc71816785d40439b8fc1cafa765022be5c6daf55"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00013-13242aaf-12f3-4a61-a596-e24d78271637.json",
+      "bytes": 24809,
+      "sha256": "2d5dc62e0f06134b99a9e09c592268d7116b91c1fcbe264ee9bf01b3decd49d9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00014-4b930280-9e12-4f41-a25c-d108f66b8c83.json",
+      "bytes": 1999,
+      "sha256": "87f94fe260834361940aa3cb5c71d46a65549c2749302f35a511eef357df18a6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00015-442aa79e-7022-4f05-b86e-5de25e71a7e5.json",
+      "bytes": 2316,
+      "sha256": "a1ca2bd7e29d7890a36d24869b88f89f373d2737c37b15a7862a2a3dac7b499a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00016-feafd4ff-6761-4be7-837c-da658a149c15.json",
+      "bytes": 2600,
+      "sha256": "99678560d18c2743b448d4a4f7da063593ed46c6391ed14c660b6321dc1e89f9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00017-806a46b8-f74b-437a-9880-8ec2dc2c6350.json",
+      "bytes": 4043,
+      "sha256": "6c61de57d5d76fc9be51fef7a3b4bfcbf22ad877baf925f5c5ce19925bf9b24d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00018-1e703465-c663-4715-bfbf-15a08f86a84e.json",
+      "bytes": 27371,
+      "sha256": "3e382fd3dba9ecb61ac31e0c45e659f6f22299c846af64a4661b2933ffa806a8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00019-d75379c4-da99-4066-a782-fc8c54c9e309.json",
+      "bytes": 10125,
+      "sha256": "b0f11f8b84e5e531d95ed1da5f0a57c6d79bb35c9e337200ac453447f43cdc6a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00020-ed428be1-8825-4876-8d38-109ec619e157.json",
+      "bytes": 17344,
+      "sha256": "8c7d72900a41c456a590a94802285482e24dd25c32eaada0cb90050daeaab3fb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00021-6859bf7f-0295-4602-a4d7-0850465fb85e.json",
+      "bytes": 26371,
+      "sha256": "8b55f66f3d5d627c28db8ae9ecdb037b39bee61a99773c74e2a04402243705c7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00022-86b5bde1-fb43-422b-b680-fd6121b61c24.json",
+      "bytes": 2907,
+      "sha256": "e60587521262057b55c57d7caacde39049082708ae13ad86c3a7a439610c872c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00023-12167160-f5d7-41c6-a091-01f0c81384c8.json",
+      "bytes": 34345,
+      "sha256": "a2d7ec36910b3715dca2b6aa25227941132ff4cf2cc7f29644f6b00413fac124"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00024-aa6117cf-52c9-4a51-8fe7-74d88056e3ba.json",
+      "bytes": 4663,
+      "sha256": "3490d7dd21ae01f645a9f9d38feb935de0721907a67aadaf2d2db06205d5babd"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00025-29933501-4435-4031-9446-24d013ac7b9f.json",
+      "bytes": 23471,
+      "sha256": "e0c9cabea444b25ce25fd582bd647bf6146c4fd0f144b577cc4e760df79db5db"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00026-f205bb79-5fc6-4bca-b0ef-6118f414a81c.json",
+      "bytes": 3335,
+      "sha256": "6372c281bbb598e2545f286b29c12dcdedb8ff1bacab4894f859f1543bcd086e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00027-49130ad3-570c-433a-881f-9648c0a0cf3d.json",
+      "bytes": 34635,
+      "sha256": "8683dbf809163372547e9ce524ae95ed9bc57712c899b61d324f432297c1ea9c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00028-21107b39-e877-40c1-862a-f051398d94c5.json",
+      "bytes": 3933,
+      "sha256": "a405754d1e18d60c46b29c87aafb00ba8eb4d0f1015d6cbf608174c30cad0843"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00029-628a8dcc-a1a1-4bef-855f-54a5e75fb7d1.json",
+      "bytes": 23287,
+      "sha256": "0a7b05e743ea65afeca51f037f30d08da49edc5df5934b0181328d8ad53a09d7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00030-839ef872-770d-4779-8437-ffd4fa539ee2.json",
+      "bytes": 2195,
+      "sha256": "4b23e1ebd3dc8ceecfa7295d569d0db07442250cbb619b24a1f38f27c4f67c99"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00031-22eedafa-fe0f-402f-965d-aad11912fc88.json",
+      "bytes": 2280,
+      "sha256": "6d6c7e158d85b8b42ee23020a2f581f53b4e83721c0c6afec70c20b0961d2113"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00032-45c11672-0b78-41fe-9e93-ed93007fb8ad.json",
+      "bytes": 6584,
+      "sha256": "c43b7dd88c143f424254fa591abb6dd0bfce367692f1fc2d60f5125a2bec34b4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00033-39d3138d-7d08-4cd4-a5f5-ee8b86aabc9a.json",
+      "bytes": 7612,
+      "sha256": "57d4f5d95451fcea625bd69647a8e8f15c6b71acef2633390bdf354b41e35e84"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00034-23ba0491-8060-4fcc-a115-364ead3a3f3e.json",
+      "bytes": 2468,
+      "sha256": "5aa2366d6f71886c180ec5b536546ae0906f63aef75abba690f960bafb985619"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00035-fb9b3504-f80e-453b-9750-eb4db4bfa3fe.json",
+      "bytes": 5375,
+      "sha256": "5779ecf9590a2cbf32e60e859ebc6a892fb79372ee944747a2045693ed33b152"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00036-ff2db210-bc4b-4113-9492-ff8ce2a25953.json",
+      "bytes": 10908,
+      "sha256": "3c94aaf6bd9b4a7f614fb2db4249f2f1306b7f6b278190614dae67def306773a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00037-3f59f8e3-36a1-409b-b817-a030e4cc9e62.json",
+      "bytes": 9616,
+      "sha256": "d1c11a8f22ba67c88cd9584a7a63ac2ea5bac7048061d595e8646fbcf7c8b51f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00038-a8144733-d2b0-4af9-8c78-6d6b5f901d96.json",
+      "bytes": 24463,
+      "sha256": "3e4fa76f9e1fdd5cab91e11371a540f9ab5f030a4af5f606fcd0b5d39ad7ef9e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00039-e93ba5a2-0092-42de-b0cd-a9a5f191e18d.json",
+      "bytes": 8856,
+      "sha256": "468b7be415009c6f35d3e7f33bc4c093d31229c2d1b964b0410af29acd34f660"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00040-600046a8-1dbf-405e-be19-3f5c63b1a663.json",
+      "bytes": 2941,
+      "sha256": "c24e668f5169abdd149fdc55c313c896bdd597b99344a7ba9f2cdd4f8f0ffa68"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00041-52125357-b910-483e-aacc-e536c819dc13.json",
+      "bytes": 2088,
+      "sha256": "b0497c85ba0699056ca00b60259b6274ec050fd53ee7c69a9e3760cb48f32d1a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00042-2ed81b10-c52e-4380-95db-dfe63c3dc9a7.json",
+      "bytes": 13624,
+      "sha256": "40c15b93b29f90428670d0cf589236c1b8ac273d1b862022ddf5d2225a56ec45"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00043-ebdc5f83-9fbe-459c-a494-b1b0eb77bbdb.json",
+      "bytes": 5370,
+      "sha256": "b388e68141a5f1bd7995f6c881c3579cddfe9b2ea69627bfa773593a24bbc631"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00044-c1651c9b-1076-41d1-b73c-12b39c78e8cc.json",
+      "bytes": 3657,
+      "sha256": "de5f3e6e344c486efb6f4b04891b33342954eaaa1b705030cb59b85f4f8c61fd"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00045-a090da19-755d-48e8-9276-1fc3dfbcca56.json",
+      "bytes": 2680,
+      "sha256": "5dbb4e448e98949a75a29e0f77af9ecffc577b2f785ab1337c1719464d613bbb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00046-7fcae91d-607a-4aeb-8707-882fd0436fba.json",
+      "bytes": 6233,
+      "sha256": "6836f79a3a3893b0770719119c5256b676e7c28577531eae2907f46f298ef253"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00047-6ee4dcc3-1c09-463d-87bf-33a1c348fdb7.json",
+      "bytes": 23831,
+      "sha256": "72e1288c264b002756a36441373d283a819b3ab0ce173ba21b05de62da24f4e8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00048-50af3c86-7704-4a79-b199-99e6b0e796d9.json",
+      "bytes": 21938,
+      "sha256": "dca943cd518b379ef2644301194cdc306648575f7534bcea97870c08e4c5312a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00049-4d092a3f-b785-4093-82c5-f3396a574c46.json",
+      "bytes": 28026,
+      "sha256": "ef3921ae1f2afa1e808c5bb638d1db5ff757a8e135d55bca8e7f98143b212334"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00050-c662e277-7543-4aec-b987-ccc17f9e549c.json",
+      "bytes": 3873,
+      "sha256": "f345f1b0f5d6f61acaf0b753b0c6011cd5c31faee71f5e8726ea7c0bdcff787d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00051-7f75ce4b-ae12-4acb-b972-f449c04b9106.json",
+      "bytes": 3100,
+      "sha256": "993c9e4d04bee6c78f17b1b6491d88dd5ca85d201bedb1f2dfe720d467b1acc8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00052-09ccffaf-9d34-457a-977a-afda4a6a872b.json",
+      "bytes": 11999,
+      "sha256": "cac11aae8ff4822b31e4a62eada1a285959f5e11a1750bb0810a3140c2c6540e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00053-68b35598-80d7-49cf-92fb-0f5b79665d5c.json",
+      "bytes": 26821,
+      "sha256": "8322d9ef740aa5160440d9d7fa73bda05cc9f957e6bc2d83ede33e3066767deb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00054-1146eacd-e6f7-45ff-973a-3053bf9fe719.json",
+      "bytes": 4775,
+      "sha256": "a31cefade650ae12cf3424ec10b707870eff313d3440a5dd6f1fe336a002f079"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00055-5cf900b6-3d28-43ce-9d50-bc2db9a2d35d.json",
+      "bytes": 36353,
+      "sha256": "d55ed866ff59dbe41d638328c6cbf92ccdaa3fb40ecb74a87043861c34f025c3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00056-1d61266c-4971-4ca7-8770-313301171e58.json",
+      "bytes": 14914,
+      "sha256": "40f0d19c01193735bd55cd460561e3ad268abc4de1ac4198143f440aa98dd5d5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00057-a464ef29-4fc8-4381-8bf1-fa07b15291cb.json",
+      "bytes": 28957,
+      "sha256": "a1688f3cc89d8e87c1c06169ee32bbefca39309f4dad221b6d05f5b235b745bc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00058-5f358731-7566-4047-94ac-bc8ce83eccb1.json",
+      "bytes": 3233,
+      "sha256": "a94b368a2b6eab3ea356b8cffe8ebf3c400d5594f1c655e6cefaaa27d69b73e1"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00059-9d5fb3cc-b805-4ae6-8bb4-a3021ead6c72.json",
+      "bytes": 3707,
+      "sha256": "ea0b2d3002c5d09e207e5f892095a2ae21faac30dbf9ec534793cc1aa047d4f2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00060-90f036fc-5119-4476-8db5-14c63d040296.json",
+      "bytes": 9583,
+      "sha256": "b2af498a7218d35db879d4833d11bf7acc66215ba925e34259ce8e9e1044274f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00061-3de398c9-b407-4069-9a54-73997db3a4db.json",
+      "bytes": 8476,
+      "sha256": "9b8fbab6958a620071a72db153990a68852bccd1b7fa7755c1db1da3b4d27530"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00062-5d03ef59-47ff-4d72-8529-1d3e1e2eaf98.json",
+      "bytes": 11752,
+      "sha256": "a9c747311cfd2be8d885203ccbc7b30c0bb323e2c67646df044edffb4dcc15dc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00063-9f06991f-1cab-4e5b-bff3-d853e3633853.json",
+      "bytes": 5071,
+      "sha256": "fe66851c746aab54db0a960b773ae8eda5cdc788e749747a8bed33cfc0b1d3cd"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00064-f3b1820b-196c-4e20-8f93-b5dc4dff33c7.json",
+      "bytes": 2990,
+      "sha256": "6d52e3515599e28160527bd7e92ec2dd5420100dc3615b2bf2cea0796eab8771"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00065-898d5b21-5358-4a75-bd49-f89263dd0482.json",
+      "bytes": 4177,
+      "sha256": "a953eede09f23bbde1134349459263c63f0e563974ab70f298f53a8a147dd289"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00066-ac875f48-ae20-4c40-a52a-d93152bab86e.json",
+      "bytes": 2994,
+      "sha256": "2953749988ae6b3fb2484cdc337ac46ba62ec4ae8c2673870d11c64ebd9d55fc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00067-a9fd9b46-9d92-4150-97c7-fe3e38bcf9c0.json",
+      "bytes": 4052,
+      "sha256": "9024c7bede07c563b6ebe563f1bc229c824b044959e658c2c36f2a2b55f403ac"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00068-f54acd9b-27a0-48fe-a81e-332990890bf1.json",
+      "bytes": 4439,
+      "sha256": "b9dc0db3c9744bda7d88678e5c034961c7b3cd9adadc27dc420e9958e418431c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00069-4d9bd18a-c646-4ec8-92b5-374b0bf23167.json",
+      "bytes": 5530,
+      "sha256": "4e47be72150df12dc3a468f227c71be4bba9756cc1cc573fb51c00c426730e06"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00070-df1006c4-1783-4b38-a405-0f33db2e41f6.json",
+      "bytes": 8307,
+      "sha256": "7e9fa87cb8e7319d579ce17f448610a46dc22991836ff87ea9dabe5a5e758490"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00071-35185522-e40b-487a-a72b-208000e9056d.json",
+      "bytes": 6885,
+      "sha256": "a7c6583dcce72f826a6b1d42766588c88c8503409b17411a855a5b4e2fa72c26"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00072-3bd2c16e-b5f3-431c-ae18-c4218f9572b7.json",
+      "bytes": 1922,
+      "sha256": "ee20c46143a48858d69f9b69f17b62bd58d23bba2d38d728e226c2b4fb4d818e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00073-f867d098-4c00-4a2c-a3be-19e062c1da77.json",
+      "bytes": 4015,
+      "sha256": "5e75db87bb3498ea1f17148a8dcaf001a2c35ecb848d375b6172600a4e22a076"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00074-731aa983-b808-4cae-8100-b1bb3b44f562.json",
+      "bytes": 4833,
+      "sha256": "83cb765e0f1d654e5d8c8ffb7e849a71b14f7b819d9c20cf70b74785dfe05e87"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00075-f4175723-2b7e-47d8-adc3-62501683c9c4.json",
+      "bytes": 6300,
+      "sha256": "9f1cde19b4e0404598aa1e7b3448f98c9ef7403339bddeb22a3e6e94b4b6a98b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00076-cebceb6b-c7db-4e56-a094-1fee3e05d5d9.json",
+      "bytes": 7626,
+      "sha256": "b397d70da00216ee5d0c9ef47c401bddc61c48af42deb9734a29dd18fd7e727d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00077-753cdc8f-df47-45bf-ac07-d167256200ad.json",
+      "bytes": 4575,
+      "sha256": "39cafb74f3c4ce11f628bf740243641576d7cd444e37371c5d4b7226f2b4da52"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00078-c47413a9-4911-49c4-b663-1501cda7136d.json",
+      "bytes": 19752,
+      "sha256": "d2ca9646744f7d357f39fb5e87239dc0f1f9ce7a3acf84e0c3740203f83a0293"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00079-c8c04b03-89f7-42e1-a185-9a9b094286fa.json",
+      "bytes": 28272,
+      "sha256": "20fcf5da27bc4cc246a02d5404575f22ea1a908c44b909b7b8f696e6f3e97b76"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00080-3710c59b-6db4-46f3-8d28-ba473e83ebd4.json",
+      "bytes": 9765,
+      "sha256": "8b7d9a8454d43eaf67618bf1fef67eaca55af617347a4a9ed586619236b35217"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00081-14f14817-3aea-454d-b524-6c8086e5ca7f.json",
+      "bytes": 22684,
+      "sha256": "836fafbe7069ecd9c5cf9f126742866b645ac4f769f45826a6b821997a6b893a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00082-8d07941a-1dbe-43e7-b97c-5a62231d7ae3.json",
+      "bytes": 4838,
+      "sha256": "9d027aca6a1cd3ee6b506dd994a7b8ce1b4b95f3dfb6e464c669123eaf49da36"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00083-5cd90d72-2ce1-452a-b4f2-9783952f2d83.json",
+      "bytes": 4687,
+      "sha256": "73e2cf37684cd3919f08eaa625e79550343855575b207f4969007206b94fba12"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00084-0553b96b-f1c8-47fc-98d0-4c311ccd00ad.json",
+      "bytes": 3945,
+      "sha256": "b0b13bbc70af1f572e903e4257f22732c7104d908e2884bf598cfbc066230798"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00085-c2494ad0-9d58-42d6-9af9-5bfcbf05e36d.json",
+      "bytes": 16618,
+      "sha256": "b9896c6c0c4263e282f8113298e745bee8813d1eb65671f7c0713477eb0ad1c1"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00086-a80c42ca-ba75-4b92-911a-fa314ae3252e.json",
+      "bytes": 28626,
+      "sha256": "c685674930adbf2807b3a5c4984432fc92be5115e158c1d872bfbe935d0b46e4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00087-9fa77fb4-6b26-4e48-9dcc-dfc55cd4c108.json",
+      "bytes": 8816,
+      "sha256": "30314b1d27219c53caa512b047e89a371309ee091825115adee4a76b4110e05c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00088-33d8b435-1a24-4ad8-b5b4-411745676478.json",
+      "bytes": 3518,
+      "sha256": "a228834a29c21e640a585011dd35622fcd91ae5704c8803418e958d0121a34da"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00089-e2794b15-8f82-4b79-88da-e8ffc4e5400c.json",
+      "bytes": 2182,
+      "sha256": "9eacaba5d75fe529e24da076341eaed2a88680f81b804288bf38ef662aedf6d0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00090-bf7547c6-9039-4221-9959-14f1186ee168.json",
+      "bytes": 2805,
+      "sha256": "31971d45a5f6e7df0cb5ce8a853dda250ce8ee461e5abda9619cc756c19cad42"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00091-08e48a95-0571-4c17-9f7c-b1306b7eb5d9.json",
+      "bytes": 1696,
+      "sha256": "30a9336662c4cd759c4f2fa29477a6b825986f3690248a817aaca9a5bdd86d4b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00092-23eda032-3787-45d9-abd8-40335f24a3b6.json",
+      "bytes": 1674,
+      "sha256": "dbd3eff89be996272028c5af890fdec17306c6574daff0270fadbf082af3a11a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00093-1dc0fa07-3431-45ea-88e7-2f7520e1b3c9.json",
+      "bytes": 2100,
+      "sha256": "36685a236025d7ada5c951d3f62df8a958350f907384418b7d37c5629f1eb899"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00094-4bb8acb7-6f81-4875-bba9-94b07e91bb92.json",
+      "bytes": 2749,
+      "sha256": "f2337c891ab73c0c5e56fab327a39b74e8ad07b709c6cb013fa6889a4d7c1616"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00095-354385d0-551a-4de0-80b7-a6e89e4af76a.json",
+      "bytes": 2770,
+      "sha256": "3a047954b4e9dda5d341a218d81d2a9523cdf40f90096f0cc122e11952355990"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00096-04386851-7bec-4e21-b8f9-5af42b8c53f7.json",
+      "bytes": 2347,
+      "sha256": "6f4aea6c068fc4e06ca91f13eec6df427652cba63e345c40d8b09695be72f8a0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00097-ab059b1a-9e10-4384-9819-5fe4908b4e7d.json",
+      "bytes": 2110,
+      "sha256": "6b6d28efcbcf4678172a58fc4f9dee192165a58d1b68491f065bc2b1ce744fd2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00098-47f07cb4-5f1f-473b-b427-3674232aa3f0.json",
+      "bytes": 3903,
+      "sha256": "3d3afa0a4d280be18dc11703b141e72f8919e5e7a79ca064268fedcaef7f9b50"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00099-d26c350a-f75d-4679-9242-c1f30b3a07c1.json",
+      "bytes": 1926,
+      "sha256": "cdcbe6f0d8857405388b90940d69ed5b5da42466cc40ccdfe1543443d233d67a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00100-56d0ca71-6010-4ca9-932b-7bad2fd758ea.json",
+      "bytes": 3295,
+      "sha256": "040d08d20ebbcfc75dc614839793e2dc9a8fe640f7306cd27e56af6d0486ff7a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00101-34178dfe-f5c3-46ac-9d8c-2982783f3075.json",
+      "bytes": 2330,
+      "sha256": "d4440cd0a9a82fffd8ad83da888352a14a1decbefc03275c901c4c64cd300a70"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00102-5f331e82-4b43-4b73-b0cd-9c1ae455e6e7.json",
+      "bytes": 866,
+      "sha256": "8ac7d11d530a46445b686e3784e3c9bd359fe9a2de217a77c0b3ed65c9dbd2b5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00103-b312f4dd-b5b1-4733-8136-16fc4dc693a7.json",
+      "bytes": 2780,
+      "sha256": "171d567256a2b2fe266ceca7c1306dde0c3b94755d405f7f8a414adde5a48d97"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00104-a30e5b05-6b7b-49e0-8bb6-b873cd790a11.json",
+      "bytes": 3787,
+      "sha256": "47f3c1f09d297e632c0d20a88e58b63a3fd4aa40fed18472f9ec8d5a3208e619"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00105-11fc3579-77bf-40d8-bf3d-fcfa4d346b5f.json",
+      "bytes": 4104,
+      "sha256": "6858bba56a71eb03d9fa32ce220314e5276c36fd780d8973ba6d949afc409421"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00106-6b542464-3880-4d7c-b898-91be887a2821.json",
+      "bytes": 5926,
+      "sha256": "ba25e39f88ac0f16644a9ec153eb6c4c005ce574555c725dbead3bbfc392f394"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00107-d51f8bcc-fc50-4d43-bfe8-0454283ca3cf.json",
+      "bytes": 3235,
+      "sha256": "4010b8cd5c7202ce5d7a06c034f60f79386a071256686a8ae4c3de7c44f7b5cf"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00108-24b115f5-5f5e-48cb-9d7a-c6545b4a7cea.json",
+      "bytes": 2876,
+      "sha256": "fc9da4fc74689586e7ada0d2b66c91cf28e698d3781a72035a13593bb7c868f4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00109-c818bfa7-61a7-4d16-892e-00da6e491db5.json",
+      "bytes": 11167,
+      "sha256": "2c21ae07fb159a1cdb36d91fe6ddbddc1c4af68faa61803c2af61ba6bbc79190"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00110-045a0f2b-68da-45b6-96e8-73a103c9791e.json",
+      "bytes": 9049,
+      "sha256": "bc8bda309a401c07c092c1754aaebc24ab019edc0221c839150bd8aa88216b49"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00111-b514ac69-6431-49c6-9b8b-fc5a85bc8658.json",
+      "bytes": 5978,
+      "sha256": "3e5ffe85c57720ca66270ceae90a2b45482d250d29235d5d8a3371505909ede6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00112-dd1dca9f-aeb3-4e03-8df4-4a76447b1df5.json",
+      "bytes": 4851,
+      "sha256": "1fa62c7f32969e354f102402e3827602bad2b343d2d520d279167e360a358846"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00113-703d73e2-8e56-43ab-8059-fb55c6b244ec.json",
+      "bytes": 3624,
+      "sha256": "a6644fac23d74271591e6ff11fcd67229945fe0ea595273fc4bf4ace0f365c97"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00114-0af71d93-31b2-4c27-839a-33a24bfcf8e1.json",
+      "bytes": 3966,
+      "sha256": "ed6dce585572005967a96f1a5700661b007b505a675a9c6834d128a37d986375"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00115-3b7af9cf-e206-4f94-b64d-962b357b815d.json",
+      "bytes": 3505,
+      "sha256": "815fee70c638a00f02329398f2c7b7cbd7b45763ba142a4c3c4e0c6c697e3e5b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00116-f3c5cdb7-f54e-4691-bc80-967c61e468a6.json",
+      "bytes": 5586,
+      "sha256": "e70ab6b29fd715e4b3ab469c9fd15e0882f3c4e2b7fabdcfb097f6c72a51203d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00117-747cd249-2f48-4980-b716-4759bff79acb.json",
+      "bytes": 8909,
+      "sha256": "c6601ad9effcdd811515f3a067992323fb6ee62f876e80ddb1e24af6ba6b9d71"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00118-f6a27c98-70f0-4461-9714-7afbe0807343.json",
+      "bytes": 8418,
+      "sha256": "1bb3bee6040c8ae1ff44974160178689574d326968019fef61f48e5d93608f02"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00119-9df07652-a569-42ae-bc86-8c10114197c1.json",
+      "bytes": 2087,
+      "sha256": "1795d6929702fc1d3061d0ece909d7df5959ab0922075c8439c51cc1a9f99a57"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00120-7b366ccf-8a85-44d2-882d-691db6bf85dc.json",
+      "bytes": 4936,
+      "sha256": "6b253c04b72d9df18b47bab0732993e1448ed777fe3c1a638a9dbe84b30b77a0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00121-b55a07a8-857d-4db1-97aa-c150f2cd2b95.json",
+      "bytes": 2315,
+      "sha256": "13583af5d6eee1d9e1449144cdd0fc38dcb479a42da5c8fb704992256e139d22"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00122-52a3ce96-56bd-4f80-9fd3-98d5953967c2.json",
+      "bytes": 7594,
+      "sha256": "0607f35baa935a6b2100efa350d8c6a08aa11a8e68a048d70719f8db57928cfc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00123-abac65f2-0950-4495-b7c2-759e069a61c9.json",
+      "bytes": 2048,
+      "sha256": "ab30847d917eba50470756a8d029793f36bfb3297900f17816df4026cc4784f0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00124-47a7e68b-ac34-4062-86c4-a6b88a959cb3.json",
+      "bytes": 5523,
+      "sha256": "67cbd3b9b4ded0c4fadfbc30045a6099d1f9997bc877734bec4f363184c82819"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00125-fb119c13-4207-4e4f-be61-9380bd66a22b.json",
+      "bytes": 5873,
+      "sha256": "e7e566c7e27f6f36e37250b5e2942c7a28df2529d80e72b1a693991e97f4ef79"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00126-795d169a-6e91-40c4-975d-e1a928c2c3ba.json",
+      "bytes": 2934,
+      "sha256": "49d3a7f085952ad96d2ac3918ec7f16b08f089f34c05dc4a510523f49c1b147e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00127-05f54fbd-38e2-4453-b8fb-d80149899d40.json",
+      "bytes": 2814,
+      "sha256": "6d8896f53d6d233278ca2431949e5b1bab7f84f6556ff283bb458c51579c1c83"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00128-722a2579-3bf7-439c-918b-999ab1030c15.json",
+      "bytes": 2154,
+      "sha256": "d7eeb1758da710866567ebad412f60dce172e7d50250dac2f71a14844c6676da"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00129-4a62d602-0aa8-46fe-a724-1283c50a872e.json",
+      "bytes": 3896,
+      "sha256": "9586f753ac161d4f8144c4572d88dd3938205635d58c1b2b2d7dad8013840f26"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00130-a24a15a9-0edf-4349-b469-33d0e889abca.json",
+      "bytes": 10456,
+      "sha256": "fa4d9d32c1f5586a087854044547f4fc600023faf75ec8b99f880bb3d63ee3f3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00131-a2fcac7e-5dfe-4e62-885b-de09cd85f862.json",
+      "bytes": 3248,
+      "sha256": "d9f24604d07a98cf984d20f0c424ef2c600bf489fdbf243b778013b55097c002"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00132-a6b9bec7-d98b-4eb0-94b8-3fae02b03bce.json",
+      "bytes": 1926,
+      "sha256": "3acffb06f026e0be50e21d9e3b7fcd5b533ec3689e1cbb1a71a8beaa98142d0a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00133-600106a9-27c1-4a1d-9507-83fa18f3cc38.json",
+      "bytes": 13742,
+      "sha256": "59bb80124f9df9f11903616e901f8ede7699e53d09ca6842e6fda8c7ad36f809"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00134-59256fe1-97ae-4123-a361-db9fdf4e65d8.json",
+      "bytes": 6108,
+      "sha256": "752d31b014eecdc8b1d661f8be5b2f33e42dc1f7374c976e950915a8a2a354cb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00135-85d9bc8e-bd20-4c89-ac90-12f5c0481122.json",
+      "bytes": 4591,
+      "sha256": "5aa22249b48f64fa6ecf96aa9fbd92665d659b89acea365aba0692e0cf93ff74"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00136-4662d015-ca60-4a1d-bd61-a73af818cb83.json",
+      "bytes": 2807,
+      "sha256": "e8a5faae2fdac596ad98b9f4cea828853074f65753a6532760119f6b5ea93108"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00137-17ace16c-4a6a-4d26-8220-c146f73b239c.json",
+      "bytes": 2200,
+      "sha256": "8bb96efcaccf1b17ad27faddbfe22230d625c804230929c9dcc88e788598d015"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00138-0dbc949d-dea4-4e06-ae41-e30a7282654e.json",
+      "bytes": 12385,
+      "sha256": "7e7768d9614d15163a1cded48a481faa86c37f29c20349af865a9a742cdbc2e9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00139-e2714d20-3b2e-4562-a02b-bcff1d006607.json",
+      "bytes": 27669,
+      "sha256": "d772137434e5de118667e4bf62bc1a1feb79cd33b4f9139163849a9adb9dc454"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00140-d7aaaa0d-d701-41f7-862f-a03d2db3c5a9.json",
+      "bytes": 8164,
+      "sha256": "badf9e0480ab88a71fc04b5b571dfccf5eee73f70214f6b1352efae248852cef"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00141-0b086cbf-6e28-4e47-b51b-dd464310fe8f.json",
+      "bytes": 24411,
+      "sha256": "09b69813607e02f3538c5890ee1ce3b6ab35c57927e043cf1a5f9d06452ede86"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00142-8cba01b6-4659-44e6-b42d-6ca6c4577125.json",
+      "bytes": 4525,
+      "sha256": "577d5279171d95734c30cec620a50941f16a111cdd94de3a39e0727021a2b908"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00143-4773ea96-5a87-42e5-8b7f-adb5f418fbd9.json",
+      "bytes": 23409,
+      "sha256": "f3db420c816ed8036348780a4118911b10f00168da84ac4aa14aa2617204631f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00144-f41c51a0-becd-4003-8aac-d70633fa22bd.json",
+      "bytes": 4345,
+      "sha256": "bea22d77864c43edc9205ca78b5df08ebfeb3048d52b08fe659b84c1530d8086"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00145-454c4b61-d39a-4cee-85c6-1bfdfb2294d5.json",
+      "bytes": 1259,
+      "sha256": "bd46ffdda93b1d7a0d2b10b3222ed69e57fd265d01900f7c5fddcbb64aded74e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00146-042dbf83-28fd-46b3-9c18-9f5e3bfdb260.json",
+      "bytes": 3434,
+      "sha256": "c40bb0510cfec2441df367b3a16cbbe23e2811ae5bdabdbc37e10c796a5816f9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00147-585e383d-2161-4e27-bea1-292a012e4d32.json",
+      "bytes": 13507,
+      "sha256": "735c0983e2730f09c3b76f101295b361b9aea7b17703c2c72daf76bad8bff2c8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00148-4e97334e-8ab4-4e5a-bd95-566a5f3dd9a9.json",
+      "bytes": 2904,
+      "sha256": "cd7fc144a56c259a0d5469cb28bbf70bebf007167e7734c366deb4d905aaeed2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00149-adff323a-1106-44c4-83df-8f3527545d2e.json",
+      "bytes": 22991,
+      "sha256": "8f9107fecea1c4669615f190751cdbd59d36302ef7492768095dbab8869001c5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00150-02452717-c20b-4ea7-952d-f89a67a92ce1.json",
+      "bytes": 3690,
+      "sha256": "181f5bb33b5ba238fcba9661a6d97c0f82ff1b1a1a9c9d06d828391867bb4a36"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00151-d20f208f-8879-416c-bbe9-1c776fea5642.json",
+      "bytes": 2597,
+      "sha256": "4431cdd035ec1b9cce1e3005a2a2afd7eaa6725bd05ccd24dcc32469de9171f0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00152-b3c2fd8b-51dd-4795-8f28-893a8ee99fda.json",
+      "bytes": 3209,
+      "sha256": "96b9ce9ab9e82dab321fe88a781eee6638a12653baf64668a5e15348394c5752"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00153-8a82c264-bc92-4f8a-96ca-cca5c46bece8.json",
+      "bytes": 3354,
+      "sha256": "a102aee30f6b7ad130b7e1f3b35331114f408360d298d71783a9fd479f8ef8a8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00154-91e86d66-8af7-4284-856f-7301bca4b389.json",
+      "bytes": 3128,
+      "sha256": "3cfc36094dc7aca8cf94b55597f02aa202c844a68c23085a1ec2393be4aa76f4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00155-659bd607-f3d3-4821-8bc0-e0403ac2657e.json",
+      "bytes": 3723,
+      "sha256": "6b683a512fcf46fd2ebeb26d71b0fafdb3b3622914b7879182e51f4046a34daa"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00156-674a8d9d-b763-4ace-a105-323b80cfd54e.json",
+      "bytes": 2720,
+      "sha256": "dbb82ad76df17c54e40a2c775107c629ef544deee5af5cf188f041ad0c1fcd4c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00157-eabf883e-0525-419a-b131-997a28566fbb.json",
+      "bytes": 2371,
+      "sha256": "1b4b190df4dc6ccd019c660aa0bfd16e99ca7be57da2f995b28fec56d9317f0d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00158-97b8bfdc-b478-4059-b027-d23f244d6190.json",
+      "bytes": 2989,
+      "sha256": "2bb099f3bd81a9e84bad3392be0c6fd884bc17e9b40a575021e4744dd98c292f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00159-48edd771-29f3-44e5-98fe-db1115c0b6b4.json",
+      "bytes": 2696,
+      "sha256": "110f295eeef056f0312fa304dc5f5768f5623772c18bda66e0361eaf5b157f44"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00160-ae16b19f-f1b1-4218-ad9f-92ecd188b689.json",
+      "bytes": 16388,
+      "sha256": "e46ef30a20c668a807b1ba1fa4c4cb84aab4327b55373dac5ed149d612837b5f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00161-d4ac09a0-ceef-4f2f-93d1-255bad732a7d.json",
+      "bytes": 28899,
+      "sha256": "57c6dc6fef37d5ead50fd69c7298aef119ce34153efd5f98e2212867fe56d83f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00162-816ad8bd-e26c-4f78-a7b1-13c1f1b698c6.json",
+      "bytes": 3252,
+      "sha256": "6dd1a1079fd73f35925f90e837ec1ac731152d13e13db29487fa71a346159f7d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00163-06e15c09-da1a-4153-9132-7291690af761.json",
+      "bytes": 25102,
+      "sha256": "23bbd95f4a82230653ffd802342c12af19cfaacfc1b31f675d8c2182ec60b521"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00164-9f1c7c71-ebc8-44a0-a402-d74bd79bdae0.json",
+      "bytes": 3197,
+      "sha256": "0d5639fbdaa6683b199bbefb5707e4a76f7ecc19d5b7d1b8e068d74558d6786b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00165-bba7bd8b-1fa7-4eac-8b02-66b83f5f23f6.json",
+      "bytes": 5113,
+      "sha256": "f54d383418206832a893d79733416df2676c2bbc4f738f0b41238f49a165c98c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00166-031ff885-0add-4319-b020-5e5669f999fa.json",
+      "bytes": 6434,
+      "sha256": "448a8eb5033c81c6dbd0d0337ef0cbf3de237f729d4cfa6d136ec21fc2e6da6a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00167-a882a33e-eb23-4cd5-8605-8f363e129eb3.json",
+      "bytes": 26344,
+      "sha256": "176624cb5391f78b2293394234be674a027c9de29c945c4bb17a5a4175b4aeaa"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00168-7cbcff69-1c0f-4a39-a667-174886873d3a.json",
+      "bytes": 4329,
+      "sha256": "481f55954902c6ca6c44e6ca1be72319039305c1869d77348e7a6e342cf4ca05"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00169-2b13f826-11eb-4f4b-a77f-27fe70305796.json",
+      "bytes": 10195,
+      "sha256": "064a8c7957c04c45813ff93172314f5cb2abb9df27cf1369d2160fb9dd17ce0c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00170-ca082726-c358-4ff5-985b-c25a221cec9f.json",
+      "bytes": 6898,
+      "sha256": "592df82bf1b5c53844f819403ceb7536a8644876fc7bbc1b75f61f5bb3721d79"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00171-929bfe73-5411-4e3d-a46b-ad2b050064bb.json",
+      "bytes": 7329,
+      "sha256": "608d8c4a386ec08b5fc047e29d90aba72ce5e28550c0b3ba04a88ce321194644"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00172-7e9765da-1ef4-4c7f-bd46-5f382ea6b4a4.json",
+      "bytes": 6819,
+      "sha256": "703664201f3fbceb0f01fe5eda82f1796c9003566e32018af4c5ea5bffb24163"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00173-2367d3f9-80d5-4885-9771-bebe920b182d.json",
+      "bytes": 4535,
+      "sha256": "c0ae7fb428a93a9a3d9610bb02e33c9b01621cf54d5e70e04716327bc6c6e6b7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00174-701255be-b7c3-4217-9cd3-0af0f80d918a.json",
+      "bytes": 5252,
+      "sha256": "526f24b4419150fc1f7345eb8ee3bf1aae8a4474bf23b79046c8af19eb66b35f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00175-349d0764-15b8-41e7-b754-b036c94a00c4.json",
+      "bytes": 4640,
+      "sha256": "e4066b6e09b94d88bb3b3e01c34b38de6b3b156481a7b5eb056bd61b273ece11"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00176-c95b5f3b-1bf2-4b5e-90f5-001d01a407de.json",
+      "bytes": 1174,
+      "sha256": "869069bb78169754fd2c343f6a920fad2272165e20b6bd2b11f44cecc53d99e3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00177-fff44b05-6851-41c1-ae8b-d2117a789f50.json",
+      "bytes": 2559,
+      "sha256": "aab96f46c2d9eff4b56d25ef97916cfcc68eff46bd84053a099da874aab0b9e0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00178-c54597d7-ed34-4d47-ba96-50775262d631.json",
+      "bytes": 14103,
+      "sha256": "5cf24ef68bd2b77bd58227455fe7d8e077c25eaa91496b5bf63e8a8451e99a26"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00179-ec0a9218-afc6-474f-8755-c0fdec5639cb.json",
+      "bytes": 9752,
+      "sha256": "cb4355bf66a8b9da964823b9e704ae28a4860e7c9e54f82cc386a70f3d40ebb9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00180-a80c4a68-36f5-480d-a3fd-ffe3ed71a663.json",
+      "bytes": 25944,
+      "sha256": "0162f0442d720677c73062e6def0152e982c5b0fb9485dda4b37dc89948951db"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00181-3585030f-708a-428c-a256-4b08b30753d3.json",
+      "bytes": 3455,
+      "sha256": "9de8d8c9894ad72daaf3ce0105a1754f5b1637e197c8bd4d279be1f37569a1d2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00182-029f859f-475a-4af3-8037-3fef8ce0f379.json",
+      "bytes": 2460,
+      "sha256": "92505c46fd711b15263ec2fd077643060c12698d211a54898d52c2bd0b897d65"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00183-1505f55f-62ea-4989-a85f-6b30437aa016.json",
+      "bytes": 12153,
+      "sha256": "ef46e6b30b49be20fe5ee71a44ed7b1d8c91c02a0154dde46692087d905603fe"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00184-63ab81da-e22d-4fe6-9f25-b0a6a07d1544.json",
+      "bytes": 25157,
+      "sha256": "b3bf94420c86ee131ed57c425b9e672b5a335f2e32f3b2e6fad16420b805e433"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00185-d13cc02c-75ad-4528-a744-48ecc7123aea.json",
+      "bytes": 2044,
+      "sha256": "7294bf351711c6bb6d12235d6016fa2a407eadea5c593f2369328a49fd07754e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00186-009b6f15-7dcd-4b03-9d00-d2ecf8594edb.json",
+      "bytes": 22509,
+      "sha256": "41b530157d3b2ae23f4980563ad7eeb07b765f9ad89a1a7a7d4c407472d9312c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00187-01fda61b-3b7d-485c-b486-5ff01812bf1c.json",
+      "bytes": 4679,
+      "sha256": "41963b25bb617f45892d00dda4db0a76d9c7ca860d521d015a5de51dbbd7b2a0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00188-1054d177-dd35-4769-98bf-4b3571313ff6.json",
+      "bytes": 2912,
+      "sha256": "1dc6ce887fe9ed3f905d6a034eaeb0fbd2371fdf7431a40dbc505591eb0b8e06"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00189-252672c4-c08b-4534-9a4b-f2d9f6176e9d.json",
+      "bytes": 5042,
+      "sha256": "2862328e4586f5121d47b31e6cc25afa510af298fda12920456b11caf81281b9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00190-b396163d-3fd5-4018-829a-8e98d89fb50c.json",
+      "bytes": 24031,
+      "sha256": "fe8769d74b61de01299cafeeba71b3b58c4d1795439d93b2accf5f5e69120c62"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00191-7f2546ec-7781-4075-84c1-b463126ca87e.json",
+      "bytes": 2391,
+      "sha256": "bb3defd89e7f378830b9398857fff0fdfabab6af61226b572413d467d3d3ef6e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00192-b7e06ac7-ff6b-4466-8417-8405c3f0af6f.json",
+      "bytes": 2476,
+      "sha256": "d75a603f55e095c4588938106d59649bd6fc525b4ffc2f895768b17f55ec6861"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00193-a248e940-9628-418d-97a7-e600414c15c3.json",
+      "bytes": 7010,
+      "sha256": "ae1f91e636a2088322f89dcb690b347bd538601d5bad1b4c259a31285b2cf67a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00194-3366043f-20ed-42af-9f09-1995fe3a9de6.json",
+      "bytes": 4671,
+      "sha256": "f7f7bfd48a1b76d6ee59417ae51a8bbe83b4f868e5e6c6a85ba655bcf25c612b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00195-2d065623-2054-4da2-b2fd-0f09cd046ea9.json",
+      "bytes": 2702,
+      "sha256": "1741593da039faf054cdc733f38b037058125e8a8268e6644775f322ca54c8a8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00196-bc035de5-e570-4077-b981-cb1e8812ef80.json",
+      "bytes": 5812,
+      "sha256": "bbe5caf09d30d0ffb66ed7c1b97227a8fbecf96f7d73df27eeb2ca7844d0f619"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00197-eb085f28-7998-492a-b7b2-07e57691fcfd.json",
+      "bytes": 3119,
+      "sha256": "bfe07af00ac56c39240998cbe420d22d6325606495c04c4e1599406587412700"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00198-eb808504-67c9-4775-ae0b-fbc32c608841.json",
+      "bytes": 5053,
+      "sha256": "d99aa085f781e80f1e49d91444fb1cec58a688c0f9cca620e5ddb143f6629a79"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00199-c28f96ef-d430-4c10-aeef-5df5999ce75c.json",
+      "bytes": 7134,
+      "sha256": "ec5beb892881bd5bc7bb02b05f27f8c2d2b3c53671486b5d8541a0425a4f6427"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00200-25e1edcc-08b1-41bf-ade9-a568e6e13de4.json",
+      "bytes": 3613,
+      "sha256": "a72413c8a02ea5dcf1afb0e0621432cabb216a19381af77b394afb35974a41ed"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00201-e7cf5d2f-2525-4ce9-9bb4-172833f63df3.json",
+      "bytes": 2269,
+      "sha256": "33511f92ee905de08f1584b622b80a8d2917faf2332edd93d736e8435d8880a1"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00202-f76e32fd-646a-4b76-8861-b01a0be71e3b.json",
+      "bytes": 31664,
+      "sha256": "dad30f48f8d93fec64a10bd11dd49761761fe674899d36a28e387064a6de89a9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00203-c5cab485-dd7e-4428-bafe-656418de7bd8.json",
+      "bytes": 9793,
+      "sha256": "d3b28150664ae82402a97823b1873f809a84380dc3ae5716291e31bf42651386"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00204-3e082824-f1be-4c5b-ba50-563e14dd3833.json",
+      "bytes": 8364,
+      "sha256": "a88da532303c87edc166e0c74d238a1bdd2ffea6fead48cf3c56c7eadfcef40c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00205-712d10b3-1793-4a94-b8f7-8e4ad81d5a74.json",
+      "bytes": 8271,
+      "sha256": "6a400fc1d3b0ec6523d3d726bdc9a168e30d28f14bb48886507c58dc88fdbbac"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00206-004d7ca1-9448-48f0-96b4-834d1bc37105.json",
+      "bytes": 33176,
+      "sha256": "b10942cde20061aef030af573eca068f70100fadf070f42f5dbe214f589c3f13"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00207-2a0e4df9-dbec-4d08-b713-bdff1fca0128.json",
+      "bytes": 6530,
+      "sha256": "fbc1e7b2f50da5b4af380cf3ec109ca1e057766fb74513f4325de59963184067"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00208-f7b2168d-8add-4165-a1d5-8aac0fd6f5b1.json",
+      "bytes": 5173,
+      "sha256": "2ad6a44aa1f1b02a7180cba588a79ea751cab8b5a4e6f3286203839e2df7d222"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00209-8a94393f-fda9-47ca-a80a-08600ae252fd.json",
+      "bytes": 3335,
+      "sha256": "5daf2dd99b9d5284570a8194ab997655d578e3f62167148335c9664c7d1768f6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00210-bc599360-2ad2-4999-b0dc-00c515cb3c2b.json",
+      "bytes": 9815,
+      "sha256": "41710dbd94d52b98237b8159d074ef8e03d5686b7e88cf95e24f133eb2ba4b3f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00211-eea57a66-7e60-4764-beb3-f6096e6c1a79.json",
+      "bytes": 4905,
+      "sha256": "399d7f2c3f6dcaf034361e285ee59f9156fb0b67e2992790f0630d4d8d5f8a74"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00212-b93661b9-925c-4df2-8d5b-e1bb94e22b30.json",
+      "bytes": 4854,
+      "sha256": "dfb02e0681a467ebb7c2858ef6a868e0dbfd7fd937e1f501e2a929aa5a15c89a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00213-1428dd22-f97c-4cea-8d19-915a7d529cdc.json",
+      "bytes": 4325,
+      "sha256": "edff08ff0dfb02d8bca2266c9aeda05f6d305d8a05def4470048bcd6e0a88c78"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00214-58d1444f-0162-45df-a3c5-c595ae69e691.json",
+      "bytes": 3581,
+      "sha256": "afcc9323ef518217e0dbe1e5f4fac639a850f0d1f314ae8b428200708c1727b4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00215-c53d3608-7ecd-440a-831a-a9232c4a3778.json",
+      "bytes": 20915,
+      "sha256": "6dc63588d83e33659f07471224ee3e4b5a090ebc18596602a45088697b368a8a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00216-9bc03855-5c1a-463a-a103-38868333b534.json",
+      "bytes": 8040,
+      "sha256": "c9242301a449c6cb3ec41a08aedcef01586ff200c503abb25c578f6492f23de4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00217-40635380-c508-4ff5-8d79-2debdc263c67.json",
+      "bytes": 3731,
+      "sha256": "358d3ee0a0ee0f153f2ddf188d31c5614e7d2acc8a9e12c82073a6d4067c6a1d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00218-37a1bad9-81cd-4e30-9afe-18bade39b548.json",
+      "bytes": 4388,
+      "sha256": "10199cd82b40d96892dec0ccfdf2685ebd6142d008306cb1e87c90378eb2e707"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00219-1b13c8e5-b5b7-40a8-8c83-341c302dd365.json",
+      "bytes": 1767,
+      "sha256": "d264f570f63c9b658a538e6c93f5c61a36972bb54771401c7ff0a2778ceb2b37"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00220-cc9ce7b3-d4f6-46ce-b273-480c3b9a6ef7.json",
+      "bytes": 4318,
+      "sha256": "f86c653c0517112ccb4ee6fec411eee32db98c7ea0ffbf3b7c9ac54361cb9a2c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00221-46de022d-6f33-48ef-b23b-22f0bbb7d1b2.json",
+      "bytes": 4353,
+      "sha256": "d2a5784ea10c2a86ab0fa29b5d478dcf501bcfc0aaa78a70bef638bb66336863"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00222-8c699a26-2989-44bc-860f-d8a8cab4456f.json",
+      "bytes": 2241,
+      "sha256": "ec81ebef2b9d41250f133e30d68ca88f48c951677f979dafbff731a739c061d8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00223-74bd0b1c-d080-4703-8cfc-5feee8b45b74.json",
+      "bytes": 17611,
+      "sha256": "460a6e9b9929a6ae506ff2439bdaa54e4a559d3b5632aa0fe370688d19827806"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00224-0cae2daa-414e-4bde-ab94-a263964a0998.json",
+      "bytes": 3495,
+      "sha256": "787e936a3d80997d9ca1842599bb9668af166a52459dfa4b0e278eef4c4a19e7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00225-f6676e28-d668-4536-9e99-a01636742ccd.json",
+      "bytes": 5360,
+      "sha256": "51c86f11f115899386d311781af08e85ac6f66ecbe28e8e8c78e73ae93b393e8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00226-7ea3b682-11bb-4edf-9b60-80657e46967c.json",
+      "bytes": 4740,
+      "sha256": "e226c7cb4758a37eb878bdc6c64173e02426ed16ee1e78b20be2ecfb301225ec"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00227-c2b027c0-2c1a-45e1-8504-107c3fb52914.json",
+      "bytes": 4716,
+      "sha256": "d86c4c0944d7659901c4ee807765a2c7ad5ebe0c1de413982ae373c0e8d5c6f0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00228-9b0c5cc9-10ef-4753-ae00-bcdf14ce49fc.json",
+      "bytes": 3803,
+      "sha256": "8dd2fd15c00b0ddb3ddefc7df11c14e52a37edccefd81889ba71d68de70dcfc9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00229-0e0e5224-ac40-41ff-a68f-b67b3f91ae2b.json",
+      "bytes": 5353,
+      "sha256": "ad192bf694e6751b2a845ecb659ba479225875a9002d8586d71f1f73c5b6cdbf"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00230-698a15f3-6666-464e-9169-7265237106a9.json",
+      "bytes": 3241,
+      "sha256": "f9506d1aae21062772140a632adbf08c37eef414e2c0517f84caf40f4beec6e0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00231-24cc48ce-550c-42c6-9ada-f80133983b3f.json",
+      "bytes": 14706,
+      "sha256": "242e88eba3013b07b8e05e33b4d5f1d2227ce35a37b87d12491c93003440b806"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00232-1ccab507-159a-418d-b5a0-1a6eac7e8006.json",
+      "bytes": 10183,
+      "sha256": "2dafd4f1c75c033b0214024463c14a97a9a9a8b7970bd594669fab317c9882f3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00233-cda9e659-fd5c-43f5-8dfa-e1641e0a3c04.json",
+      "bytes": 33454,
+      "sha256": "e86b61774ab931be74af3fc3cef6f1d999c7d7b370db768fd5a0ff084724bc98"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00234-5050a07a-4684-45e7-ad7a-de52cffaa1d5.json",
+      "bytes": 5323,
+      "sha256": "2982f36c09e5040fb595bf78738721e7dbdde99dff84c637f1ff621761cc17b4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00235-16cd80d1-4525-432e-82aa-35a22f022f1b.json",
+      "bytes": 4745,
+      "sha256": "06914c92d78981f8cdca6f7b664af4b04ce5afb0b44810a331550cfd4a99cfab"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00236-501cbf90-2b04-4a66-af0c-fc29c0658373.json",
+      "bytes": 4051,
+      "sha256": "1c585e9525932006ef953b607b0e30eee1db060663187ea41d6ec7cd7fcb7211"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00237-9a79c5b8-cd37-49e5-9312-e9d610315405.json",
+      "bytes": 4030,
+      "sha256": "6f2a404397402864c608d1df1a0f6e2276323754863e604f08b886cc3b8bba07"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00238-25a443b2-d30b-45dd-bb38-9d443bb83c83.json",
+      "bytes": 11324,
+      "sha256": "0ba27a2b78cd6b4d9aebad4eea2fb58b57ec166503c665b636cc9fd46d1a2893"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00239-4677960d-489b-4ede-89dc-a1813ccc0a2d.json",
+      "bytes": 7760,
+      "sha256": "8269d4d2e6ebf2197949cab0719286effadd617086a1ab50b38776321734ab21"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00240-a8208d32-43f2-41e6-84d9-eb51b9baf197.json",
+      "bytes": 1580,
+      "sha256": "adda79831fc873aaa779061f1cfd8aa1d1b35a8c5b0109ef8a181918dac1bbfe"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00241-94efc80f-8f00-4b58-afac-def3de593632.json",
+      "bytes": 22613,
+      "sha256": "2738b7f6b2b414eb56393528728334b0cffddd2db5cb869a0a1ee421e7ebf5a6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00242-0207df3b-cea9-4e71-83ad-cefff1cdc508.json",
+      "bytes": 3258,
+      "sha256": "b69f2f5783f1447260c364bd2a544537084d968ad722452f07221799ac6b31ca"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00243-d686913d-ba3f-4b68-9ba8-43beff110edc.json",
+      "bytes": 2897,
+      "sha256": "ecb1a5a6eb9afe0284f8f0269f8ec705ce510bdce34dac4561afc6f658919f0c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00244-4fbc2c2e-3a37-4b72-951c-7bd742ba79bf.json",
+      "bytes": 9779,
+      "sha256": "1d8ee1bf5eb196463a3e09f470a97564ac58795d9c2e39e564946f0dc72223f6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00245-85495894-3909-4268-8fcd-67e0fc7cd027.json",
+      "bytes": 7770,
+      "sha256": "e2059a9b0d164ed96be19ad6784a54430605fff62e4304f5cab874d61c5277f8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00246-8dac9534-a3f6-4b6e-9fea-974cc9bda5d1.json",
+      "bytes": 2863,
+      "sha256": "75e1addce7af0c546406b9439a14c032dfff7fae285f3d40fb134afc3e634b97"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00247-c08f07cd-9c58-4fb6-b57d-d714160ecfc3.json",
+      "bytes": 12962,
+      "sha256": "5a57322db7557e80fba26dcb90255cbec5a9891ca88dd03b41972aa82a61678d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00248-41a97b75-9844-44eb-ab53-38c14a397304.json",
+      "bytes": 6599,
+      "sha256": "56dcfe08cb448c6c3195097984c0795837ffd0d2e5778bd83123d7120d746c64"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00249-347be74e-5e44-4c40-9673-0018a62b84ea.json",
+      "bytes": 2478,
+      "sha256": "d56eeffb33568c21e106a3bb5055969847b5d2e1ab5fc50dd1a4bf4cac113608"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00250-9f2b0d23-2822-41ec-8616-e8cc66053822.json",
+      "bytes": 3011,
+      "sha256": "18012121146511a7fcd4f31decc9e4e9dc6baa5e87c839abfa5b703ba8c9bf06"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00251-dca84df2-c83a-4a26-8c9c-ea8a8387cdda.json",
+      "bytes": 1642,
+      "sha256": "ac861239f7a29d390a0ce0862474b9c856a7d6256bbc2f2a52c705cc99621827"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00252-b0be37c1-da0c-424a-a6fd-c50b1a688c9d.json",
+      "bytes": 3166,
+      "sha256": "5d2c509860ca9c78af1a72fefde5f04820bdea6949bedbd94c4c5cf6d2b99c04"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00253-da40af9e-ff12-46fc-b007-45eed0a6e795.json",
+      "bytes": 13883,
+      "sha256": "af99ec216cd2d926a473501ad924bb1c341af7a4eb28fddace58eeadc1fc83fc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00254-52ff4d5e-7884-48cb-99ef-7689629c354a.json",
+      "bytes": 4911,
+      "sha256": "d06b5dc78d77bb99e4ee8c1ef9d95c50cea6a40eae43140296686ad69685e510"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00255-0a32b18a-4804-4ae7-b54f-a1829808884a.json",
+      "bytes": 7131,
+      "sha256": "ab1927a0797a1f0fb980430cb2d4d7b3e350e869dcbed84f6d5ec26231844315"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00256-a4a3e471-0bd8-4855-8789-5edeace0ff5e.json",
+      "bytes": 2314,
+      "sha256": "799938a228a6abacad5ce57c3ac7094b6a4b2bde7614ef3593033a40aa4b6041"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00257-66704874-eb68-463b-9a10-cb2056786b8f.json",
+      "bytes": 8401,
+      "sha256": "7424a9da3dc42842c8be7220ab2e78318ddf418bee13abbfabc20266fd15ed66"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00258-ee4c8a5e-5d36-4dfb-a887-aad7b7f76a98.json",
+      "bytes": 3049,
+      "sha256": "354ce73c495eb0a4c7183c211984ac307835e891ac6d6bc238eff30409d4f2d0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00259-70e94e8d-1e57-4221-9b5b-b01936c1dcc5.json",
+      "bytes": 18479,
+      "sha256": "15237ba7293d8419e4c7331dd07b0ce55302f1b896d5df6c1399d8d89f57333f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00260-45cde4aa-d6c5-4a51-8919-66459cc47b59.json",
+      "bytes": 6134,
+      "sha256": "639bdbc0e9762cab6e51d5513d54703c9e8c1d43116723b156f0017f3d46ca2a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00261-4021ed35-74ed-4b36-a349-96cf417d01e0.json",
+      "bytes": 3274,
+      "sha256": "3472c39b90a62e1567ef54662bb1395c77e23816fc2d93806ccdfd630957e596"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00262-ff524740-4749-4b49-af1a-3a60a27566e1.json",
+      "bytes": 23498,
+      "sha256": "ae1610e68de669c2623d7c7858560ffe9caeabf6811b3155af3f1f05fbd3a0ab"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00263-53e01e32-ff6f-4228-9a43-8b43f729fbf8.json",
+      "bytes": 2973,
+      "sha256": "757fad218f590c4e194ea00c7c3a52c8a98937719b8b33f912de489bb2b82391"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00264-4f3d2668-f72d-4e27-b986-9a7b2f391224.json",
+      "bytes": 31968,
+      "sha256": "49999bef3fb3c16b5701e39f246d7b9974b5be48d690cd0ce36eec993533b7d3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00265-1e7776b8-17d6-47b1-af47-0e1ec6ad8c15.json",
+      "bytes": 2905,
+      "sha256": "9d879243c46dab5ab2196572c9bfc28976bc692b7d976e8575292b518d932c7c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00266-ed3e631e-3a08-412b-903a-4f020d6799ec.json",
+      "bytes": 1512,
+      "sha256": "9ee40b623bad5720a5bd6bace8f99680e3633714c85acadc2340e2f56cd4fcaa"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00267-9ab94dc4-77ff-4300-8299-58d541af8dc2.json",
+      "bytes": 7145,
+      "sha256": "ecda1a053543dc5312e9c119f14a47fcbb9e71298e2121de3979f9dd3116c9a6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00268-0dfc89d9-070d-44e4-9d1a-61b8a8e6909c.json",
+      "bytes": 2660,
+      "sha256": "0603c0de46364258c6486aa4740ab14ef440c7f7bc49445e4579c309c05d6635"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00269-895d43a2-6054-4c41-b14b-3fc05361195f.json",
+      "bytes": 3535,
+      "sha256": "493f1a131afafe55f8c098d6d4bd75063aad8ea82b3e99e9704ef1bc7140b88a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00270-79868064-2058-4835-b007-bfd79765b8a9.json",
+      "bytes": 1711,
+      "sha256": "0e6dbd7344c34a979ac695313371a3fe06afddaa9e948b517a9c79b1cd42cc4d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00271-757385a3-c1c5-4222-b0ea-8ec9f027618f.json",
+      "bytes": 5651,
+      "sha256": "5e139a55b62b530b1aa6bb7891d81457c0c817282a835a0edfef86efdf64b7e5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00272-1d7fc436-93e9-498d-baf9-2e816220e999.json",
+      "bytes": 2084,
+      "sha256": "d87ebde45b6b2ff03cf47c2e7451b1985c318b7614e084fb8c7692495f9ad23a"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00273-e0caa9d3-0da1-41b0-8d59-bf1458904194.json",
+      "bytes": 12871,
+      "sha256": "0d1e936e5cfbf6d77a3df8613f8977acafc0730749c9799051009b86244f459d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00274-eb754f22-1f95-4ab2-a355-13e28dcb9bbb.json",
+      "bytes": 7674,
+      "sha256": "0fd082d76282ec2a731dfaee746a4d629e80588a8ac9b5547164c041fc310259"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00275-170951a0-6113-4ae9-ad55-36ba668944d9.json",
+      "bytes": 2203,
+      "sha256": "25937ee3e25f72d2af07e9dc9199bbe2f30946b7babcad5e6cb9a5453dc3f7eb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00276-1931b209-82c8-44db-a2f4-f4217a76e474.json",
+      "bytes": 31908,
+      "sha256": "02a59be48a377f9a2ef24a5b8c60f574d0f65ee7d4aa831e010e29dd16e46f2c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00277-53397a40-cadd-4920-854e-13384b5730bb.json",
+      "bytes": 4290,
+      "sha256": "d8790442bfb912844454ea30bb8e113c693d9990beeafefe6f2e5b9fd0644b68"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00278-da3c81f7-af8a-4a52-9245-6f07857270e9.json",
+      "bytes": 2293,
+      "sha256": "3a493548b130abc2042f6b23c24746c27750bab674dc319fe04cd6a06259d055"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00279-2af4fb9c-e09e-4fac-b6c5-d50d5b06ce2d.json",
+      "bytes": 7627,
+      "sha256": "11f3bc04c0981f6fea3e44f2dbe6a4dea8379f6bffe7e9e7f93493900fcba191"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00280-44f948db-c169-44c1-820a-43e59fba76cf.json",
+      "bytes": 33292,
+      "sha256": "f3f3f48ff1e55f7597d266c6aa67ebb349949f443f7343d90a88895361853ae3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00281-eb54abc5-3c76-42ba-9c45-6efc4a52b53b.json",
+      "bytes": 11413,
+      "sha256": "7d66c51b6f6880aade7ddbd9c130605ff616a95de4f0f6ee9bcd3f15d1e9333e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00282-b008be03-049b-4536-afd3-d85adcb8de58.json",
+      "bytes": 20520,
+      "sha256": "93464afc159ffa911146efd5b85879006bf361fb8b4d2d81f932e81101b94112"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00283-69c4b526-d537-40bb-892d-c4c184ea01e5.json",
+      "bytes": 13726,
+      "sha256": "d572997f27760be8b6f7af31281d159009dc47b10fa31f148c815d4f4185bdef"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00284-295e284b-38c8-45ea-ba2a-5d31be66c952.json",
+      "bytes": 1754,
+      "sha256": "b0e5457e91f5ecd93986691f0a3420825ceca456c9117ee864187c3fd0f1905e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00285-3a5b38a8-2b4a-4051-91c8-ff2699d6bb8f.json",
+      "bytes": 692,
+      "sha256": "505f75a2532225062d0b8914eafa9f92023ebf8f788383af7158cdead36ebad8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00286-78fc8ba6-166e-4074-9112-ae527a11d09a.json",
+      "bytes": 14695,
+      "sha256": "668973703cb66a3385e237e5abcc42f77f2249d567c7bb9bb139b01708165ae0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00287-f49c7f1c-9a17-41aa-a2d3-b2490ae30b69.json",
+      "bytes": 4729,
+      "sha256": "77354d97bfc0c098cb2b421d4a41b6cebeb36f49c0f5010627981a6c71401a0b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00288-36719ae3-4c30-4cc5-ac89-4f93112b27dc.json",
+      "bytes": 4298,
+      "sha256": "12eb26ec3a4a057ce7fbb375116c93d0c29b3c4710a427d2a00cf4915a9cc9cd"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00289-c87aed93-0daa-49a5-8c39-13711e887fae.json",
+      "bytes": 1260,
+      "sha256": "30f3ccf8df5db7eab05728a8b4216f4546a2fac8f41039f585bb7dad6ab31edc"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00290-768f989e-27b3-439e-ba42-8d19e1e62b2e.json",
+      "bytes": 2118,
+      "sha256": "9b87a82cb96662c2b0f28414e94419c5584cdeba68e818ddd40828795283f3cf"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00291-fc1295ee-fdfe-4ac1-b524-02d72e60c2aa.json",
+      "bytes": 5673,
+      "sha256": "6cb8ce6a02aa8e8c240b98666fed9d2bb67e2346262918fe07df69c2374847fb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00292-c1081b5b-b734-4811-a665-f06303be4fff.json",
+      "bytes": 4510,
+      "sha256": "ef447792535d2c4b552673adb574dc1b2c26853cb9502437ab2f224d722aae99"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00293-7b3b1463-25fa-4634-8bd3-302aac0a7806.json",
+      "bytes": 2616,
+      "sha256": "0ad33f54dd068830cef4caff5536f0c45ab62aad58921f31eedb0ba71af1628e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00294-dda77184-1ab2-4c8b-9b7c-70bb0a966efb.json",
+      "bytes": 9391,
+      "sha256": "1b8d2012c031f4abe1fd42f8445dab76245bf3a314b3dd992ac54935ba8a68cf"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00295-bd288b4f-f53d-4f54-8fe3-b86ca144153f.json",
+      "bytes": 3962,
+      "sha256": "a01158ad8f27e0182033d01e1b2572673488332fdc51045567602d694552616d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00296-cfcc62f1-0bad-4f40-b37e-8dcf4502ceab.json",
+      "bytes": 3643,
+      "sha256": "c0b0a5a4ad4cf380669b59c71ad2e3e78c2b5fbb2553ac937990140d9261e614"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00297-707472aa-0908-470b-a6ae-a1f23262d290.json",
+      "bytes": 11212,
+      "sha256": "d01ecf74a8aeb933960fca2a3c506867275a33e9eaec54b95fb9744288dd898f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00298-22d87a56-a4f7-4211-b98e-c946bc999c62.json",
+      "bytes": 4442,
+      "sha256": "8cd97a8b5982b4a524f602d968f324d088260d87058dd0b4f35fd3101f6e8c7b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00299-ab646bed-85f9-4407-a6ea-b23a389e3e95.json",
+      "bytes": 12699,
+      "sha256": "c383f62d21dbdf0cccde7ba9104df55975b23cbc6c863fda7b93db93eb7e9ef9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00300-b95f3e86-80e4-45bc-894f-d99531ae62a8.json",
+      "bytes": 32970,
+      "sha256": "0548deb7bff661a9fe2eeb270ae565f506ae387a44bb15a9654b86a47a3f2fc5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00301-e81c9e42-066a-4b60-a389-c9df491ebfa0.json",
+      "bytes": 5495,
+      "sha256": "e14267bf64a916c47e7ff94d0633840ee03fe50dc54252e9c2e38d551ab01158"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00302-9038b458-9d02-446f-a1fb-b77df5e90d13.json",
+      "bytes": 32940,
+      "sha256": "19b9c0b61c4c52f8b8ae7740d6e34826f491e74cef862c8c37a43ab36ab0dc2e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00303-27796432-d832-4cc7-a173-2ee989756086.json",
+      "bytes": 3479,
+      "sha256": "8bb8d8a1fc9b2c5e41235c9cfc1dc997f08354004be2dbe4cf2e9224ebe5df02"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00304-3566427f-6a02-41c8-80ae-f5a6f126d2f6.json",
+      "bytes": 32390,
+      "sha256": "d8249d5f2857138ed3d67448695aeef68f8da0e6726f03d9ad212ffa3693b094"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00305-64bf01f5-2985-4305-94a0-2b16a405f838.json",
+      "bytes": 3045,
+      "sha256": "8a81621ed9dee85ff59fb4ea234dd9d34e12c6a96e10663760993bf6d38234d3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00306-b0c7bde5-96e0-4003-a40f-fa479f060866.json",
+      "bytes": 11668,
+      "sha256": "2048e7ab078a9e4de7009c9cc78c70fb5393de21bf730787d180195cf66c0d43"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00307-76bbbc99-4f55-45d7-a910-d8606c19109c.json",
+      "bytes": 4373,
+      "sha256": "d70d9933d920aad7314ef7a37ffc3d7ef25c73fc452bc67866160ae14db70177"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00308-279c1bef-74ca-49e4-8e02-cafd2c14a788.json",
+      "bytes": 11682,
+      "sha256": "42d6bb7a9cbd07d5ba4332f3c0cca0647a201dd4f9a5e29c5bc39377bbf6983c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00309-b270a5f7-417a-41a0-ad53-cb4e05abbcff.json",
+      "bytes": 2897,
+      "sha256": "c6f62245544c918acff25801b20cb1c3eb396714a479eccee01ca7df7fa7eb02"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00310-93cfa6fc-640b-4f07-9cab-d660b34193af.json",
+      "bytes": 32497,
+      "sha256": "3731406d25a79616167e9f2595de20300b4d507739611e1273a094e84062fa56"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00311-3c38157e-210a-41c8-a284-9bd4a20b92f4.json",
+      "bytes": 3647,
+      "sha256": "3a8295d0e409fb8fef50ae7375ac7ee5a65de17b9f8f767bbd2d6f56042633b9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00312-654597e7-a70c-4929-8860-c20b4f0c88d0.json",
+      "bytes": 14326,
+      "sha256": "cc680ddda493656e970ca3af266a16f45e0ccd0566408563979918ad7d660e69"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00313-4aad913e-2122-41d9-83a2-40f5f56699b8.json",
+      "bytes": 4803,
+      "sha256": "4cc80cd99c295d5a0a6ac9603bc9c67017e84098d1494468a925b6dd33949913"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00314-fb05bac5-0296-4e5a-8006-9c5a2d988870.json",
+      "bytes": 32709,
+      "sha256": "53fc1e33bc4314781d430d9e596d6dc648e1921df0800c901450d14dedfc15ec"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00315-5af8fb3a-fcb5-48e1-a7fe-4e7c9777c9d3.json",
+      "bytes": 4403,
+      "sha256": "2c95c54fa620cfc5db63cb25d19f0d3dac3bf761fa69c0b0438f25b962931e24"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00316-4ba9c7d6-9b48-416e-b759-46940ee1452b.json",
+      "bytes": 32709,
+      "sha256": "d8de76b79dc1fb72c3a10292e701d99fee362684147fa2a19b7827043823e8c2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00317-bb06c9c8-da50-4450-bc2b-702ce8f8ed55.json",
+      "bytes": 4685,
+      "sha256": "5a5543115bc7785394a8439329b130a5b4c6f6dec8a6f6ad2ea9b2f804c02333"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00318-29c07f16-76dc-4e16-968a-868c9f2f37f1.json",
+      "bytes": 12232,
+      "sha256": "80dbd92f49884a3efc56a751bcac999fe2bf748687cb71e1ab099947eec97706"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00319-b3bb7ccf-4a7b-4548-98da-f1b490a53ccb.json",
+      "bytes": 3305,
+      "sha256": "f6dc8b9d6ac81a42a5c8513787fc5a94eee6b223860cadfdaa2b47e14f0babd5"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00320-3e37bbd6-df1f-46d5-a5d2-bdf17e66d5e7.json",
+      "bytes": 13003,
+      "sha256": "af9dfafe95f6d28bd176ab332c536cd97a248e99f983a27db35f4f9bdb709902"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00321-80af3b09-44ac-4976-90e1-e2f2a299f3f5.json",
+      "bytes": 8479,
+      "sha256": "f43d959798f8d43bba81a16d0eb9213f3fe7789550e600b46f4d5554f96bbad3"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00322-3ee437d5-efe6-41e6-a7c5-04f0cc1fc56e.json",
+      "bytes": 3970,
+      "sha256": "6d338c583854ddc9e7eae878f3362c25e9cdee2d3cc9d46f5c3538481a88a645"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00323-d13435e9-ed8c-41f1-9684-36192eb572d0.json",
+      "bytes": 8080,
+      "sha256": "cb980beeb1b15382d01449478d599368bd70ca9439dbd0317e42571d699cad36"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00324-2d76ee76-3de2-4ecc-94e1-54480937320d.json",
+      "bytes": 24085,
+      "sha256": "245b77563166668b1ca887d3654a1e5c965a6eda4d139efd8649db2b2a8f3281"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00325-569c4f18-b961-496f-8aa3-1a03b795a37b.json",
+      "bytes": 3001,
+      "sha256": "56e3bb8c87dacc1618cc0c12a5e24eecb0dafe34c0cc5f9ed32f3e0c09670890"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00326-ad0e0b31-5e0c-4033-b9c7-de4b86496e23.json",
+      "bytes": 3379,
+      "sha256": "194c4f560602e17c0e97f23c5c978e72a16e73c91ccffb75d0c893269aba0336"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00327-e64eff67-c231-4d8f-b2a8-168ee0948ccb.json",
+      "bytes": 8855,
+      "sha256": "bc0c1c376ad47c43e80fd79a7dca51e7db579fa00c7279a39ff6ca48eac480c0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00328-020ba919-78b6-4d0a-8d05-411c67424470.json",
+      "bytes": 4719,
+      "sha256": "024f3d3f00febb6b5a0cf8b34ab1cda652cd549b70d0f455f1f7f6109a71c97f"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00329-242a0b4f-2989-4971-bfea-f7c0a7a3f20d.json",
+      "bytes": 3403,
+      "sha256": "98c9f7cd11d24703ea93284faadf607cfa3ae75f243462cdb7526de2b98deb2b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00330-eb7543ed-e282-4619-b269-82102e769c48.json",
+      "bytes": 2837,
+      "sha256": "76c54fb2ff5ce0ea117b3940113ce26bb71e3dd30419c2970625b0c35c638c5d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00331-89d0d2ba-f518-4ae2-8563-869ed744c158.json",
+      "bytes": 16158,
+      "sha256": "650d77245318c1e18300b938068672403c5ec9fa3be51fae8dee806341111ec6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00332-ada3a60f-55d5-4137-9dc2-bf3c5584c1da.json",
+      "bytes": 16984,
+      "sha256": "4e5591cb5843047b50ff13b37ea505a2c2e1abfdb234980cb4bf63f182e1f8c6"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00333-1db435e5-ca00-46c5-8c34-28a8dcc9702d.json",
+      "bytes": 4688,
+      "sha256": "6d906091f39a1f005414a89b1af3d22970d1fdb1d33740a7306a247e9797e0cb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00334-af05300d-c645-4459-9f5f-91d05dbcc4ee.json",
+      "bytes": 4620,
+      "sha256": "8dd0a7d6d0f92eeaba758645f111ba1670d54d0534f12f8d5070cd6238f8fd88"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00335-083f9f6e-c2b4-4fd6-ad9e-c50ae50faf57.json",
+      "bytes": 8399,
+      "sha256": "91dcc0fa3ffe6ab3f0aa2fae7f29f114e9480d31368d539dc38030ba302329d9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00336-85381c9c-04ae-40b2-8f12-a2a2ff3d5bb3.json",
+      "bytes": 26057,
+      "sha256": "a9c4e82b6d4ae3544e9d5909a49efda2677e527dd9bdff7d026a82cdb11cd493"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00337-d268a95d-85bf-42d5-b0d2-8086783f8f23.json",
+      "bytes": 4331,
+      "sha256": "7db2a1f7bed3e06da315e47c893384703a29f50ca0eaec10cb4da2030376bd7e"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00338-e3a6287b-bffc-4425-9246-2c8e3de712fe.json",
+      "bytes": 3431,
+      "sha256": "fb79ce2c8b54396aab13b09062b135426f0c1b68eda648f5ad394377160c94b4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00339-dd974fc1-a0fa-4b04-a19b-e23a95337889.json",
+      "bytes": 11345,
+      "sha256": "fdda10313c254b43479401378cd82d4174f75955a428a0bc200e4e6b3cdc4ada"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00340-1e65e57d-b6ca-463c-82b3-36fe5b949d9a.json",
+      "bytes": 3948,
+      "sha256": "704c10f530c9e13d0959dd791b9c60b0098658b29b7d924ed1393e1682167941"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00341-efdabfd5-cd00-4aa7-81a2-44d4221f29ec.json",
+      "bytes": 4692,
+      "sha256": "d62462840f9c796145f603399c3268348607a00c54bf850840be9906f8b19d27"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00342-cefc6f82-738e-4bf7-9394-8cdc1f20c72c.json",
+      "bytes": 4445,
+      "sha256": "9e79783717d7ce9cde3c41d89b65b2a977d11aca13243fd98b88fec84bf23ebe"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00343-f64fb61b-2aa2-441a-8b92-ca3c80af5927.json",
+      "bytes": 1704,
+      "sha256": "096e198b31c903d2a9f6677e926dcf9cd17f61c1b9e3758a8586e09cfe8de88d"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00344-9e93a02c-aaec-4fec-a71b-db126c2439bc.json",
+      "bytes": 667,
+      "sha256": "7c85271442dbce336af62c7933abb5416c1f308df376cd5f9acbd6e304ec1631"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00345-5e7462a3-31ac-480f-892b-a724ed9fede7.json",
+      "bytes": 8154,
+      "sha256": "db1c06d3bb5e2317cf96c626258cc8fb6e2ce1853038d11f3f7ced3f7c2cdcbe"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00346-59fcc869-f991-4e27-a86a-6441923ebb55.json",
+      "bytes": 2512,
+      "sha256": "475cce393455f10736a4d88c1c47f69e2ae20af3902aa44be7e31f96781632f7"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00347-6f8f352d-e2cc-4d74-a308-747597fb5c2d.json",
+      "bytes": 2560,
+      "sha256": "0808237a231fed047a2c3e1ce2e0cf5dbe811bfa7ea58ed81f6ad70aaef659da"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00348-9d075b82-17c5-495a-81c3-8df56cb0fea7.json",
+      "bytes": 1062,
+      "sha256": "916c861128a20df151eea6140cc2ee35d9fedab3d7d2ff6b22e88f08a15fe33c"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00349-cc8c042e-f7b7-4e48-b644-9c625a3f8bab.json",
+      "bytes": 2162,
+      "sha256": "0656337226fbf2ff7c6a16da02d0fa625658619344d4e8ccac2220ac7f9fe3c0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00350-a4b29b21-2d65-48e7-b111-2fe93479a03b.json",
+      "bytes": 15003,
+      "sha256": "de98f1d096f73c78e4a9050ceb1a0b288fda234b67b51bbcb4aa080e44962ae8"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00351-e295ffc1-0d2f-4f38-bc6a-5a229d38c14a.json",
+      "bytes": 7822,
+      "sha256": "b45036dc6cf4c50db4a23ca050fc0de2cb0646f6603b4a599d54889c0a832028"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00352-181c2486-c99a-47ee-8827-7505968ad9e4.json",
+      "bytes": 1704,
+      "sha256": "4d9fcf97c550bebef708fe198545ee676f401c7c6062e10f4a06286f05cc5d08"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00353-178bd8df-7f54-4883-844a-00b179521d73.json",
+      "bytes": 667,
+      "sha256": "5f3480b4ecf8cc0e0fb71adcce08335621e861a085e831db83992c886e9261d2"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00354-8a2e1f8f-897f-4137-8a65-acb6d963ec81.json",
+      "bytes": 4982,
+      "sha256": "2808ed3ba95213274d0e5a91e91f33072a13130ff9d0ce161afc346078b28fe4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00355-8fdb5798-8cde-4451-8546-55364d2705dc.json",
+      "bytes": 21570,
+      "sha256": "7ec583199bb8e1b928317abc376d25a95205a3272588443a367855b3a5177d59"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00356-cb35e6a5-b83e-4884-a247-5c15a37c737f.json",
+      "bytes": 7728,
+      "sha256": "313f60ff4d26fd82d178d1a5e335b8a9bf9e80031b0d2832cd7fe6dae37aec23"
+    },
+    {
+      "path": "/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/conversation/2884fc07b9004a468e4114d05eb3efd4/events/event-00357-5b4a9bf1-4bf5-4ad2-be48-4ac809239a05.json",
+      "bytes": 1510,
+      "sha256": "794a1adf7ddcd737cbabaf25de099dea9fa95b8da6c385a5475917247f4293bb"
+    },
+    {
+      "path": "/home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+      "bytes": 4878,
+      "sha256": "c486d536b41555603fe40a36f6d0179b32e89f54435738b1a2946986d990f281"
+    },
+    {
+      "path": "/home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook-run.py",
+      "bytes": 8558,
+      "sha256": "3e416fe77ce2a73e7fcd31d9315bff61de3b1b6770e8f76c944dcd529f6befbf"
+    },
+    {
+      "path": "/home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-validate.sh",
+      "bytes": 1417,
+      "sha256": "4af596b808c183ccc49bf6ccf20279c010ac9071d4394a076986cbaf00d418b1"
+    }
+  ],
+  "target_files": [
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/pom.xml",
+      "bytes": 10602,
+      "sha256": "9bc702f2eb0d3c34f6b90f1e303e1e6825e2d0bc8ce6ff1fc13de1cce9087f48"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/run_maven_build.sh",
+      "bytes": 116,
+      "sha256": "210fc5f892a2c40661e173a36b85992edad2b37a49d0165e2aeb9b217e8985f0"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/spring-boot-metadata.xml",
+      "bytes": 104,
+      "sha256": "6bdb5d1cf0f22a3d62fc1bcbc8e18a1af8a0d79aade1f071fc0bf5b4ad2085ab"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/tall requests",
+      "bytes": 9460,
+      "sha256": "1186a3f23609595397508c54e159de8b9c77359ec9395639fb465386bb6ebef4"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/task-common/pom.xml",
+      "bytes": 986,
+      "sha256": "ce2af5f6ccdecc52bca1209232ef3d4b093ae8f02aa28adf4446da25e25bb3c9"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/task-domain/pom.xml",
+      "bytes": 986,
+      "sha256": "f8f11cd7cb19bd69559377bab03e8e9f3989d13c2b8671c0223ad4e4e9302180"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/task-service/pom.xml",
+      "bytes": 1522,
+      "sha256": "ec8bb79d68a3eccbfdd9cd4c49cc9ecc632bd3f8b7a40a36588ff4000ad89b9b"
+    },
+    {
+      "path": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03/task-web/pom.xml",
+      "bytes": 1942,
+      "sha256": "e1462cac1d2a0f9c0bebd597aa29495bf237a628b5bbe6e4e9c97a51038390a9"
+    }
+  ],
+  "exports": [
+    {
+      "path": "README.md",
+      "bytes": 4137,
+      "sha256": "88c0f6568c8673f4a7a0a76d022966ef007e18eda8446367fd5c679156483017"
+    },
+    {
+      "path": "action-index.md",
+      "bytes": 30469,
+      "sha256": "09b64f889cad02ec30f20b77c4bfb12820398da8ce108fbf44adb7a42ba4a5ac"
+    },
+    {
+      "path": "attempt-count",
+      "bytes": 2,
+      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 103035,
+      "sha256": "4b5d2511ec1d3cb7875627a4abea1d4bc7fe27a224ec98188282bc90c39484c8"
+    },
+    {
+      "path": "capture-checks.txt",
+      "bytes": 845,
+      "sha256": "efff6f138807e2b5fded8ec66155dff6eb2185af5bd8656f86e0f274531dd655"
+    },
+    {
+      "path": "final.diff",
+      "bytes": 3737,
+      "sha256": "1e69d94ee0d98df5f773c6380102b1732f06e9d953460a55db0657f7e212fc8a"
+    },
+    {
+      "path": "git-state.json",
+      "bytes": 765,
+      "sha256": "9c07de319a3151bb6158bc893d263bd6dd472eaeec5044cdbaa2ad9bad0307d2"
+    },
+    {
+      "path": "integration-audit.json",
+      "bytes": 1999,
+      "sha256": "86c929d9f5b3ce2c56bc61fb83cfdd29a63dafdb8c2f754aebbb028b9f886b3c"
+    },
+    {
+      "path": "last-validator.log",
+      "bytes": 1510,
+      "sha256": "4b3c872d5a4a072b877f8351ca0db750a03ad8485791f24ba320c241ffc8c034"
+    },
+    {
+      "path": "run-summary.json",
+      "bytes": 861,
+      "sha256": "b2d2c256e693627d001abdf0d74149b9927beaa2e8710095b5290eaddc89acad"
+    },
+    {
+      "path": "stop-hooks.json",
+      "bytes": 7193,
+      "sha256": "ea9e0a9ec9a5267821daba2d2b3f3a46e2ea1e849b04f4460679603164c57d36"
+    },
+    {
+      "path": "trajectory.jsonl",
+      "bytes": 538669,
+      "sha256": "fdb82a161425e566321c24163516442b39c2ce08d074adaf44a19dd5ca031bff"
+    },
+    {
+      "path": "untracked-files.json",
+      "bytes": 10141,
+      "sha256": "2cbcc7168dabe6a48d47cf0aa8b772dc3ea89fd23f22af2bea9cd5d85de6b54d"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 54879,
+      "sha256": "2ffaf8944508a88087fa7ecbee1b4db33b565d45906f53fd4e54b0f6f9c85d57"
+    }
+  ],
+  "review_control_commit": "7ccd4096081ded0b1f00c4c81ddb0cc51615e96f"
+}

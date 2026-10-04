@@ -1,0 +1,116 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..a4dff27 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -41,0 +42,8 @@
++            <dependency>
++                <groupId>org.springframework.boot</groupId>
++                <artifactId>spring-boot-dependencies</artifactId>
++                <version>3.2.0</version>
++                <type>pom</type>
++                <scope>import</scope>
++            </dependency>
++
+@@ -56,0 +65,10 @@
++            <dependency>
++                <groupId>org.apache.commons</groupId>
++                <artifactId>commons-text</artifactId>
++                <version>1.10.0</version>
++            </dependency>
++            <dependency>
++                <groupId>org.json</groupId>
++                <artifactId>json</artifactId>
++                <version>20230227</version>
++            </dependency>
+@@ -57,0 +76,5 @@
++            <dependency>
++                <groupId>com.fasterxml.jackson.core</groupId>
++                <artifactId>jackson-databind</artifactId>
++                <version>2.17.0</version>
++            </dependency>
+@@ -59,12 +82,2 @@
+-    <dependencies>
+-        <dependency>
+-            <groupId>org.apache.commons</groupId>
+-            <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.json</groupId>
+-            <artifactId>json</artifactId>
+-            <version>20230227</version>
+-        </dependency>
+-    </dependencies>
++
++
+@@ -76,3 +88,0 @@
+-                <configuration>
+-                    <skip>true</skip>
+-                </configuration>
+@@ -190,0 +201 @@
++                            <javaHome>/usr/lib/jvm/java-21-openjdk-amd64</javaHome>
+diff --git a/task-common/pom.xml b/task-common/pom.xml
+index b2d8223..6e166b6 100644
+--- a/task-common/pom.xml
++++ b/task-common/pom.xml
+@@ -16,0 +17,11 @@
++    <build>
++        <plugins>
++            <plugin>
++                <groupId>org.springframework.boot</groupId>
++                <artifactId>spring-boot-maven-plugin</artifactId>
++                <configuration>
++                    <skip>true</skip>
++                </configuration>
++            </plugin>
++        </plugins>
++    </build>
+diff --git a/task-domain/pom.xml b/task-domain/pom.xml
+index d524cc5..ddb2038 100644
+--- a/task-domain/pom.xml
++++ b/task-domain/pom.xml
+@@ -16,0 +17,11 @@
++    <build>
++        <plugins>
++            <plugin>
++                <groupId>org.springframework.boot</groupId>
++                <artifactId>spring-boot-maven-plugin</artifactId>
++                <configuration>
++                    <skip>true</skip>
++                </configuration>
++            </plugin>
++        </plugins>
++    </build>
+diff --git a/task-service/pom.xml b/task-service/pom.xml
+index ff2af88..1c7ab2b 100644
+--- a/task-service/pom.xml
++++ b/task-service/pom.xml
+@@ -24,2 +24,2 @@
+-            <groupId>org.springframework</groupId>
+-            <artifactId>spring-context</artifactId>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter</artifactId>
+@@ -26,0 +27 @@
++
+@@ -29,0 +31 @@
++
+@@ -32,0 +35,12 @@
++
++    <build>
++        <plugins>
++            <plugin>
++                <groupId>org.springframework.boot</groupId>
++                <artifactId>spring-boot-maven-plugin</artifactId>
++                <configuration>
++                    <skip>true</skip>
++                </configuration>
++            </plugin>
++        </plugins>
++    </build>
+diff --git a/task-web/pom.xml b/task-web/pom.xml
+index d4cd9a7..d5cabe6 100644
+--- a/task-web/pom.xml
++++ b/task-web/pom.xml
+@@ -28 +28 @@
+-      <artifactId>spring-boot-starter-webmvc</artifactId>
++      <artifactId>spring-boot-starter-web</artifactId>

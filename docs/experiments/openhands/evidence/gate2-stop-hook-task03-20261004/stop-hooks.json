@@ -1,0 +1,81 @@
+[
+  {
+    "sequence": 284,
+    "id": "295e284b-38c8-45ea-ba2a-5d31be66c952",
+    "timestamp": "2026-10-04T21:21:55.768500",
+    "source": "hook",
+    "parent_id": "69c4b526-d537-40bb-892d-c4c184ea01e5",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 1.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 1.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "sequence": 343,
+    "id": "f64fb61b-2aa2-441a-8b92-ca3c80af5927",
+    "timestamp": "2026-10-04T21:43:55.824139",
+    "source": "hook",
+    "parent_id": "cefc6f82-738e-4bf7-9394-8cdc1f20c72c",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 2.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 2.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "sequence": 352,
+    "id": "181c2486-c99a-47ee-8827-7505968ad9e4",
+    "timestamp": "2026-10-04T21:44:59.706931",
+    "source": "hook",
+    "parent_id": "e295ffc1-0d2f-4f38-bc6a-5a229d38c14a",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 3.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 3.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "sequence": 357,
+    "id": "5b4a9bf1-4bf5-4ad2-be48-4ac809239a05",
+    "timestamp": "2026-10-04T21:45:57.606901",
+    "source": "hook",
+    "parent_id": "cb35e6a5-b83e-4884-a247-5c15a37c737f",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-03-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-03 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": true,
+    "blocked": false,
+    "exit_code": 0,
+    "stdout": "{\"decision\": \"allow\", \"reason\": \"Experiment bound reached after 3 denied completion attempts; attempt 4 is allowed only to terminate the experiment. Deterministic acceptance has NOT passed. Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0\"}\n",
+    "stderr": "",
+    "reason": "Experiment bound reached after 3 denied completion attempts; attempt 4 is allowed only to terminate the experiment. Deterministic acceptance has NOT passed. Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  }
+]

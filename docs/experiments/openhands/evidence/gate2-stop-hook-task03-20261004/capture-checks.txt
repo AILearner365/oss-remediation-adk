@@ -1,0 +1,9 @@
+PASS: all 358 raw event hashes and source report/log/control-script hashes unchanged.
+PASS: all eight changed/untracked target file hashes unchanged after capture.
+PASS: 350 observable projections match source IDs and actions/messages; observation excerpt boundaries verified.
+PASS: all 169 action/observation pairs retained; all three hook feedback messages match emitted context.
+PASS: four Stop events have block decisions true/true/true/false; final overall validator result false.
+PASS: baseline 24 and final reported 24 resolved / 0 remaining verified; empty OSV results and six filtered packages verified.
+PASS: JSON parsing, authored local Markdown links, credential-pattern and internal-reasoning-field exclusion checks.
+PASS: documentation whitespace check.
+No agent, hook, validator, build, or scan rerun. No runtime/target mutation.

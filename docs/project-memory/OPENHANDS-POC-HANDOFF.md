@@ -16,7 +16,7 @@ Do not assume the existing ADK architecture is the target design. Preserve usefu
 
 - Task-01: native run and externally prompted recovery; no deterministic completion interception; agent could finish despite validator disagreement.
 - Task-02: Stop Hook mechanics and same-conversation continuation PROVEN; validator integration FAILED / INFRASTRUCTURE-CONFOUNDED. **INVALID FOR RECOVERY/CONVERGENCE COMPARISON.** Later manual validation: 18/24 original findings absent, six remained; build/tests and Java/suppression/diff-hygiene policies passed, no new prohibited findings; Boot 4.2.0-M2 failed as `unparseable`; overall FAILED.
-- Task-03: first clean Stop Hook + real deterministic validator recovery experiment, following environment isolation. Its separate evaluation must not use Task-02 as a valid convergence comparator.
+- Task-03: first clean-validator Stop Hook run reviewed; **BOUNDED_FAIL**. Three deterministic denials and same-conversation continuation worked. Parent downgrade corrected, but final build failed; empty scan coverage prevents treating reported 24/24 absence as proven remediation. See [Task-03 analysis](../experiments/openhands/GATE2-STOP-HOOK-TASK03-ANALYSIS.md). Task-02 is not a valid convergence comparator.
 
 See [Task-02 evidence review](../experiments/openhands/GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for source-linked conclusions, attribution limits, and fix history. Earlier setup and research sections below retain historical context.
 
@@ -53,7 +53,7 @@ Parent objective:
     |     status: manual path proven; repository capture/bootstrap established
     |
     +-- Gate 2: bounded autonomous OSS-remediation capability test
-    |     status: native + one recovery completed; both validators FAILED; CONTINUE EVALUATION
+    |     status: task-01 FAILED; task-02 infrastructure-confounded; task-03 BOUNDED_FAIL; CONTINUE EVALUATION
     |
     +-- Gate 3: company-laptop package/runtime feasibility
           status: wait for Gate 2
@@ -93,17 +93,17 @@ See [Gate 2 trajectory analysis](../experiments/openhands/GATE2-TRAJECTORY-ANALY
 
 Evidence limits: native validator results survive in the recovery user message; a separate native validator snapshot was not recovered. Recovery's delivery-hygiene PASS coexists with a leftover `high_critical_vulnerabilities_current.txt` in its changed-file list. Do not infer complete cleanup from that PASS.
 
-## Research-informed assessment and immediate next action
+## Research-informed assessment (historical plan; Task-03 now reviewed)
 
 **CONTINUE EVALUATION — not ADOPT, not REJECT.**
 
-External OpenHands review is now recorded in the trajectory analysis. Current OpenHands SDK documentation provides native completion-control patterns (Goal Completion Loop and Stop hooks) aimed at premature completion. The exact API/behavior supported by the installed Agent Server / SDK 1.50.0 must be verified before changing the experiment.
+External OpenHands review is now recorded in the trajectory analysis. Current OpenHands SDK documentation provides native completion-control patterns (Goal Completion Loop and Stop hooks) aimed at premature completion. The later dummy POC and Task-03 now verify native interception and continuation for the installed stack; they do not establish adequate remediation convergence.
 
 A stronger-model isolation run is currently **blocked/deferred** because the company Vertex environment exposes only `gemini-2.5-flash` for this POC. Keep model quality marked **UNRESOLVED** rather than attributing the Gate 2 failures entirely to OpenHands or entirely to Gemini.
 
-The controlled completion-interception experiment was designed to keep the same model, clean task baseline, task contract, tools, and deterministic validator, and change only **native completion control**. Preferred direction, if supported by the installed version: a Stop hook invoking the existing deterministic validator so that PASS permits completion and FAIL returns deterministic evidence to the same OpenHands conversation for bounded continuation.
+The controlled completion-interception experiment was designed to keep the same model, clean task baseline, task contract, tools, and deterministic validator, and change only **native completion control**. Task-03 implemented that direction: the existing validator denied completion and returned evidence to the same OpenHands conversation for bounded continuation.
 
-Do not add AGENTS.md, remediation Skills, custom retry/planner/memory frameworks, dependency recipes, or additional solution hints before this experiment. Those would add variables without evidence that they address the observed failure.
+Do not add AGENTS.md, remediation Skills, custom retry/planner/memory frameworks, dependency recipes, or additional solution hints as part of this evidence review. Those would add variables without evidence that they address the observed failure.
 
 If native completion control still leaves materially poor evidence interpretation or requires humans to supply engineering strategy rather than validation evidence, stop OpenHands-specific tuning and proceed to the planned OpenCode comparison under the same task/validator/model-availability constraints.
 
@@ -173,4 +173,19 @@ Fix on `openhands-poc-evaluation`:
 
 Do not relax the Spring Boot qualifier behavior for this experiment. Existing policy tests deliberately fail closed on qualifier-bearing versions such as RCs; `4.2.0-M2` should therefore not be treated as an allowed minor upgrade without an explicit policy decision.
 
-Subsequent local `uv-validation.json` records the same tree digest and 18/6 outcome as the manual report. Task-03 is the first clean Stop Hook + real deterministic validator recovery experiment. Continue its separate evidence review; Task-02 remains INVALID FOR RECOVERY/CONVERGENCE COMPARISON.
+Subsequent local `uv-validation.json` records the same tree digest and 18/6 outcome as the manual report. Task-03 is the first clean Stop Hook + real deterministic validator recovery experiment. Its separate evidence review is now complete below; Task-02 remains INVALID FOR RECOVERY/CONVERGENCE COMPARISON.
+
+
+## Task-03 clean-validator Stop Hook result
+
+**BOUNDED_FAIL; CONTINUE EVALUATION.** Conversation `2884fc07-b900-4a46-8e41-14d05eb3efd4`, Vertex Gemini 2.5 Flash, target `~/maven-multimodule-app-stop-hook-03`, branch `openhands-poc-task-03-stop-hook`, baseline `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`.
+
+Baseline build passed and OSV reported 24 HIGH/CRITICAL findings. Four real validator-backed hook invocations produced three denials, then allowed termination only at the configured bound. No `TranslationConfig`/missing-ADK/interpreter/report-absence failure is evidenced. Only the final full validator report survives; historical hook summaries are preserved.
+
+Progression: attempt 1 rejects a Boot downgrade with remaining=0; feedback causes parent restoration to 4.0.6. Attempts 2, 3, and 4 report remaining=0 but reject build/test/startup. A misplaced Jackson dependency at POM line 76 causes the final Maven failure. The agent never corrects it and continues to claim the vulnerability task is complete. Terminal observations after a Git show indicate an unresolved `less` session, not verified subsequent Maven executions.
+
+Final report: 24 resolved / 0 remaining, no-new-findings PASS, Java PASS, parent Boot PASS, suppression PASS, hygiene PASS, build FAIL, overall FAIL. **Do not call this security convergence:** OSV extracts six packages and filters all six as local/unscannable. A Boot 3.2.0 imported BOM and three untracked investigation artifacts remain despite parent-policy/hygiene PASS. Actual remediation and full behavior preservation are unproven.
+
+The hook mechanism and same-conversation feedback chain worked without a custom retry/recovery orchestrator. The tested agent/model combination did not demonstrate adequate recovery quality. This distinction supports continued evaluation, not adoption or rejection based on bounded failure alone. Task-02's version choices must not be credited to valid deterministic feedback because its validator never ran.
+
+Evidence and per-dimension ratings: [analysis](../experiments/openhands/GATE2-STOP-HOOK-TASK03-ANALYSIS.md), [capture/provenance](../experiments/openhands/evidence/gate2-stop-hook-task03-20261004/README.md). This review changed documentation/evidence only; target and raw runtime evidence remain untouched. No rerun, policy change, or harness redesign was performed. Gate 3 and platform adoption remain pending.

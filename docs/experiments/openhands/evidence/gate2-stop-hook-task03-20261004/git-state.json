@@ -1,0 +1,12 @@
+{
+  "branch": "openhands-poc-task-03-stop-hook",
+  "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "status": "## openhands-poc-task-03-stop-hook\n M pom.xml\n M task-common/pom.xml\n M task-domain/pom.xml\n M task-service/pom.xml\n M task-web/pom.xml\n?? run_maven_build.sh\n?? spring-boot-metadata.xml\n?? \"tall requests\"\n",
+  "diff_stat": " pom.xml              | 41 ++++++++++++++++++++++++++---------------\n task-common/pom.xml  | 11 +++++++++++\n task-domain/pom.xml  | 11 +++++++++++\n task-service/pom.xml | 18 ++++++++++++++++--\n task-web/pom.xml     |  2 +-\n 5 files changed, 65 insertions(+), 18 deletions(-)\n",
+  "untracked": [
+    "run_maven_build.sh",
+    "spring-boot-metadata.xml",
+    "tall requests"
+  ],
+  "build_log_exists": false
+}

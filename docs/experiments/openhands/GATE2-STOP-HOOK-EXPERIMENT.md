@@ -1,6 +1,8 @@
 # Gate 2 — Native Stop Hook Validation Experiment
 
-Status: **Task-02 reviewed: INVALID FOR RECOVERY/CONVERGENCE COMPARISON.**
+Status: **Task-03 reviewed: BOUNDED_FAIL with clean validator execution. Task-02 remains INVALID FOR RECOVERY/CONVERGENCE COMPARISON.**
+
+See [Task-03 trajectory analysis](GATE2-STOP-HOOK-TASK03-ANALYSIS.md) for the completed real-validator feedback experiment, evidence limits, and unchanged CONTINUE EVALUATION decision.
 
 See the [Task-02 evidence review](GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for the authoritative run classification and manual post-run result (18/24 findings absent, six remaining; overall FAILED). Task-01 had no deterministic completion interception. Task-02 proved interception and continuation but its validator was infrastructure-confounded. Task-03 is the first clean Stop Hook + real deterministic validator recovery experiment. **CONTINUE EVALUATION.**
 
@@ -263,3 +265,20 @@ Changes:
 The Spring Boot policy was intentionally **not** relaxed. The existing unit contract fails closed for qualifier-bearing versions such as release candidates; therefore the observed `4.2.0-M2` result remains a policy failure/unverifiable outcome rather than being silently reclassified as an allowed minor upgrade.
 
 The later local `uv-validation.json` records a completed validator result with the same tree digest and 18/6 outcome as the manual report. Task-03 is the subsequent clean integration experiment; Task-02 remains invalid for recovery/convergence comparison.
+
+
+## Task-03: first run after validator isolation
+
+Reviewed the completed `2884fc07-b900-4a46-8e41-14d05eb3efd4` conversation against `~/maven-multimodule-app-stop-hook-03`, branch `openhands-poc-task-03-stop-hook`, original baseline `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`. State is `~/.openhands/gate2/task-03-stop-hook`.
+
+- Baseline build passed; OSV completed with 24 HIGH/CRITICAL findings.
+- Four hook invocations: three report-backed denials, then termination at the unchanged bound. No Task-02 Python import contamination is evidenced.
+- First denial identifies a Boot downgrade. Same-conversation feedback causes an observed parent correction from 3.2.0 to 4.0.6.
+- Later attempts fail build/test validation. The final build rejects a misplaced Jackson dependency element; the agent never repairs it.
+- Final report records 24 original findings absent, zero remaining/new findings, and passing Java/parent-Boot/suppression/hygiene checks. **These checks need qualification:** all six extracted packages were filtered as local/unscannable; a Boot 3.2.0 BOM and three investigation artifacts remain. Zero findings is not proven remediation.
+- Agent terminal observations show an unresolved pager interaction after the first denial. This affects recovery quality, separately from clean validator execution.
+- `FINAL_STATUS=finished`, `DETERMINISTIC_VALIDATION_PASSED=False`, `GATE2_STOP_HOOK_RESULT=BOUNDED_FAIL`.
+
+Native Stop Hook completion control is supported by real-validator evidence; adequate Gemini 2.5 Flash convergence is not demonstrated. Adoption decision remains **CONTINUE EVALUATION**. No remediation or experiment changes were made during review.
+
+See [full trajectory and ratings](GATE2-STOP-HOOK-TASK03-ANALYSIS.md) and [auditable capture](evidence/gate2-stop-hook-task03-20261004/README.md). Earlier attempt resolved/new-finding arrays were overwritten and remain UNKNOWN; their exact failure summaries and remaining counts survive in hook events.

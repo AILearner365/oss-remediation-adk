@@ -1,0 +1,53 @@
+{
+  "run_log_bytes": 1572959,
+  "run_log_lines": 21897,
+  "run_log_pattern_counts": {
+    "TranslationConfig": 0,
+    "No module named 'google.adk'": 0,
+    "ModuleNotFoundError": 0,
+    "Traceback (most recent call last)": 0,
+    "validator infrastructure failure": 0,
+    "Validation report could not be summarized": 0,
+    "Deterministic validator failed without a readable report": 0
+  },
+  "infrastructure_failure_marker_exists": false,
+  "event_counts": {
+    "SystemPromptEvent": 1,
+    "MessageEvent": 8,
+    "ActionEvent": 169,
+    "ObservationEvent": 169,
+    "Condensation": 7,
+    "HookExecutionEvent": 4
+  },
+  "hook_decisions": [
+    {
+      "sequence": 284,
+      "timestamp": "2026-10-04T21:21:55.768500",
+      "blocked": true,
+      "exit_code": 2,
+      "reason": "Gate 2 deterministic validator failed on stop attempt 1."
+    },
+    {
+      "sequence": 343,
+      "timestamp": "2026-10-04T21:43:55.824139",
+      "blocked": true,
+      "exit_code": 2,
+      "reason": "Gate 2 deterministic validator failed on stop attempt 2."
+    },
+    {
+      "sequence": 352,
+      "timestamp": "2026-10-04T21:44:59.706931",
+      "blocked": true,
+      "exit_code": 2,
+      "reason": "Gate 2 deterministic validator failed on stop attempt 3."
+    },
+    {
+      "sequence": 357,
+      "timestamp": "2026-10-04T21:45:57.606901",
+      "blocked": false,
+      "exit_code": 0,
+      "reason": "Experiment bound reached after 3 denied completion attempts; attempt 4 is allowed only to terminate the experiment. Deterministic acceptance has NOT passed. Failed deterministic checks: build_test_startup: A required build/test/startup command failed Remaining original HIGH/CRITICAL findings: 0"
+    }
+  ],
+  "historical_report_limit": "Only final validation.json and last-validator.log survive. Earlier hook stdout contains report-derived failed checks/remaining count, not full report arrays. Hook adapter removes report before each invocation; report absence takes infrastructure-allow path."
+}
