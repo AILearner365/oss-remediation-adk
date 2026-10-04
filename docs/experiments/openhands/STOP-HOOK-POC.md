@@ -62,7 +62,8 @@ Required:
 - `VERTEXAI_PROJECT` set;
 - `VERTEXAI_LOCATION` set;
 - Gemini model `vertex_ai/gemini-2.5-flash`;
-- OpenHands SDK 1.50.0.
+- OpenHands SDK 1.50.0;
+- OpenHands Tools 1.50.0 (the default coding-agent preset is packaged separately from the SDK).
 
 Keep the uv cache outside the small persistent home volume:
 
@@ -77,6 +78,10 @@ export VERTEXAI_PROJECT="$(gcloud config get-value project)"
 export VERTEXAI_LOCATION="us-central1"
 ```
 
+## Dependency note
+
+The first POC attempt with only `openhands-sdk[vertex]==1.50.0` failed before agent startup with `ModuleNotFoundError: No module named 'openhands.tools'`. That is expected packaging behavior: the default coding-agent tools/preset live in the separate `openhands-tools` distribution. Keep SDK and tools pinned to the same 1.50.0 release so this test does not introduce a version change.
+
 ## Run
 
 From the control repository:
@@ -86,6 +91,7 @@ cd ~/oss-remediation-adk
 
 UV_CACHE_DIR=/tmp/openhands-uv-cache \
 uv run --with "openhands-sdk[vertex]==1.50.0" \
+  --with "openhands-tools==1.50.0" \
   python scripts/openhands/openhands-stop-hook-poc.py
 ```
 
@@ -96,6 +102,7 @@ To make the model explicit:
 ```bash
 UV_CACHE_DIR=/tmp/openhands-uv-cache \
 uv run --with "openhands-sdk[vertex]==1.50.0" \
+  --with "openhands-tools==1.50.0" \
   python scripts/openhands/openhands-stop-hook-poc.py \
   --model vertex_ai/gemini-2.5-flash
 ```
