@@ -110,6 +110,29 @@ Purpose: prove, on the installed SDK 1.50.0 and existing `vertex_ai/gemini-2.5-f
 
 This is intentionally isolated from the OSS-remediation task and does not call the Gate 2 validator yet. The first execution exposed a packaging-only prerequisite: `openhands-sdk` does not include the `openhands.tools` default preset, so the POC command must also supply matching `openhands-tools==1.50.0`. The corrected run passed with two Stop-hook invocations: the first was denied, deterministic feedback was observed in the same conversation, the second was allowed, and the conversation finished. Native completion-control wiring is therefore proven for SDK/Tools 1.50.0 with Vertex Gemini 2.5 Flash.
 
+## Gate 2 Stop Hook experiment
+
+The native Stop Hook POC has passed. The next controlled experiment is now prepared.
+
+Fresh target branch:
+
+```text
+AILearner365/maven-multimodule-app
+openhands-poc-task-02-stop-hook
+```
+
+Control files:
+
+- `scripts/openhands/openhands-gate2-stop-hook.sh`
+- `scripts/openhands/openhands-gate2-stop-hook-run.py`
+- `docs/experiments/openhands/GATE2-STOP-HOOK-EXPERIMENT.md`
+
+The experiment keeps the Gate 2 task, Gemini 2.5 Flash, native agent, tools, and deterministic validator constant. The only intended behavioral variable is native completion interception: validator PASS allows completion; validator FAIL is returned as evidence to the same conversation.
+
+Default bound: three denied completion attempts. A later forced termination caused only by reaching the experiment bound is reported as `BOUNDED_FAIL`, never as deterministic success.
+
+Use a separate worktree and state directory so task-01 evidence/workspace remain untouched.
+
 ## Explicit return point
 
 If Gate 2 is promising, perform the corporate-laptop feasibility test. If that also passes, treat OpenHands as a qualified platform candidate and compare it fairly against OpenCode before committing to a production platform.
