@@ -1,6 +1,6 @@
 # OpenHands Stop Hook POC
 
-Status: **READY TO RUN — not yet proven.**
+Status: **PASS — proven on 2026-10-04.**
 
 ## Purpose
 
@@ -147,6 +147,36 @@ This POC intentionally does not:
 - test a stronger Gemini model, because Gemini 2.5 Flash is the only currently available company Vertex model for this POC.
 
 The agent run is bounded by `--max-iterations` (default 12).
+
+
+
+## Result
+
+The POC passed on company Cloud Shell with:
+
+```text
+MODEL=vertex_ai/gemini-2.5-flash
+CONVERSATION_ID=dfe7ff07-26bd-4773-a219-446ade0f8d3f
+FINAL_STATUS=finished
+STOP_HOOK_INVOCATIONS=2
+STOP_HOOK_EVENTS=2
+FIRST_STOP_DENIED=True
+LATER_STOP_ALLOWED=True
+DENIAL_FEEDBACK_OBSERVED=True
+PROOF_FILE_OK=True
+POC_RESULT=PASS
+```
+
+This proves, for the installed OpenHands SDK 1.50.0 + OpenHands Tools 1.50.0 + Vertex Gemini 2.5 Flash path, that a native Stop hook can:
+
+1. intercept an attempted agent completion;
+2. deterministically deny that completion;
+3. inject failure feedback into the same conversation;
+4. resume the same conversation;
+5. allow a later completion attempt;
+6. finish successfully without creating a custom retry/recovery orchestrator.
+
+The proof is limited to completion-control wiring. It does not prove that the real Gate 2 validator will converge the remediation task, nor does it prove stronger reasoning quality.
 
 ## If the POC passes
 
