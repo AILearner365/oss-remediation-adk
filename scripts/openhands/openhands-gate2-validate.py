@@ -235,6 +235,7 @@ def main() -> int:
             print(f"    {path}")
         print(f"==> Resolved target findings: {len(report.resolved_target_findings)}")
         print(f"==> Remaining target findings: {len(report.remaining_target_findings)}")
+        print(f"==> Unknown/unscannable target findings: {len(report.unknown_target_findings)}")
         print(f"==> Validation report: {args.output}")
 
         if report.passed:
