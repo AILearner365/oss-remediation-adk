@@ -2,30 +2,17 @@
 set -euo pipefail
 
 CONTROL_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# shellcheck source=./openhands-cloudshell-env.sh
-source "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-env.sh"
-openhands_resolve_vertex_env
-
 SOURCE_REPO="${SOURCE_REPO:-$HOME/maven-multimodule-app}"
-BASE_BRANCH="${BASE_BRANCH:-main-runrunning}"
-TASK_ID_RAW="${1:-05}"
+LOG_ROOT="${OPENHANDS_RUN_LOG_ROOT:-$HOME/.openhands/gate2/run-logs}"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+RUN_LOG_DIR="$LOG_ROOT/run-$RUN_ID"
+mkdir -p "$RUN_LOG_DIR"
 
-if [[ "$TASK_ID_RAW" =~ ^[0-9]+$ ]]; then
-  printf -v TASK_ID "%02d" "$((10#$TASK_ID_RAW))"
-else
-  echo "ERROR: task id must be numeric, for example: 05" >&2
-  exit 1
-fi
-
-TASK_BRANCH="${TASK_BRANCH:-openhands-poc-task-${TASK_ID}-stop-hook}"
-TARGET_REPO="${TARGET_REPO:-$HOME/maven-multimodule-app-stop-hook-${TASK_ID}}"
-STATE_DIR="${STATE_DIR:-$HOME/.openhands/gate2/task-${TASK_ID}-stop-hook}"
-MODEL="${MODEL:-vertex_ai/gemini-2.5-flash}"
-MAX_DENIALS="${MAX_DENIALS:-3}"
-MAX_ITERATIONS="${MAX_ITERATIONS:-250}"
+exec > >(tee -a "$RUN_LOG_DIR/combined.log") 2>&1
 
 die() {
   echo "ERROR: $*" >&2
+  echo "Logs: $RUN_LOG_DIR" >&2
   exit 1
 }
 
@@ -33,72 +20,60 @@ info() {
   echo "==> $*"
 }
 
-info "Preparing OpenHands / Vertex Cloud Shell environment"
-bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-startup.sh"
+next_task_id() {
+  local max=4 value ref path
+  while IFS= read -r ref; do
+    value="${ref##*openhands-poc-task-}"
+    value="${value%%-stop-hook*}"
+    if [[ "$value" =~ ^[0-9]+$ ]] && ((10#$value > max)); then
+      max=$((10#$value))
+    fi
+  done < <(
+    {
+      git -C "$SOURCE_REPO" ls-remote --heads origin 'refs/heads/openhands-poc-task-*-stop-hook' 2>/dev/null | awk '{print $2}'
+      git -C "$SOURCE_REPO" for-each-ref --format='%(refname)' 'refs/heads/openhands-poc-task-*-stop-hook' 2>/dev/null
+    } || true
+  )
 
-info "Verifying OpenHands / Vertex Cloud Shell environment"
-bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-verify.sh"
+  for path in "$HOME"/maven-multimodule-app-stop-hook-* "$HOME"/.openhands/gate2/task-*-stop-hook; do
+    [ -e "$path" ] || continue
+    value="${path##*-}"
+    if [[ "$value" =~ ^[0-9]+$ ]] && ((10#$value > max)); then
+      max=$((10#$value))
+    fi
+  done
 
-git -C "$SOURCE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
-  || die "Source repository not found at $SOURCE_REPO"
+  printf '%02d\n' "$((max + 1))"
+}
 
-origin_url="$(git -C "$SOURCE_REPO" remote get-url origin 2>/dev/null || true)"
-case "$origin_url" in
-  *AILearner365/maven-multimodule-app*) ;;
-  *) die "Unexpected source repository origin: ${origin_url:-missing}" ;;
-esac
-
-[ ! -e "$TARGET_REPO" ] || die "Target worktree already exists: $TARGET_REPO"
-[ ! -e "$STATE_DIR" ] || die "State directory already exists: $STATE_DIR"
-
-info "Fetching baseline"
-git -C "$SOURCE_REPO" fetch origin \
-  "+refs/heads/$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH"
-
-base_sha="$(git -C "$SOURCE_REPO" rev-parse "origin/$BASE_BRANCH")"
-info "Baseline: $BASE_BRANCH @ $base_sha"
-
-if git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/remotes/origin/$TASK_BRANCH"; then
-  task_sha="$(git -C "$SOURCE_REPO" rev-parse "origin/$TASK_BRANCH")"
-  [ "$task_sha" = "$base_sha" ] \
-    || die "Remote $TASK_BRANCH already exists beyond the baseline. Use a new task id."
-  info "Reusing clean remote task branch: $TASK_BRANCH"
+TASK_ID_RAW="${1:-}"
+if [ -n "$TASK_ID_RAW" ]; then
+  [[ "$TASK_ID_RAW" =~ ^[0-9]+$ ]] || die "Task id must be numeric, for example: 05"
+  printf -v TASK_ID "%02d" "$((10#$TASK_ID_RAW))"
 else
-  info "Creating remote task branch: $TASK_BRANCH"
-  git -C "$SOURCE_REPO" push origin "$base_sha:refs/heads/$TASK_BRANCH"
-  git -C "$SOURCE_REPO" fetch origin \
-    "+refs/heads/$TASK_BRANCH:refs/remotes/origin/$TASK_BRANCH"
+  git -C "$SOURCE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    || die "Source repository not found at $SOURCE_REPO"
+  TASK_ID="$(next_task_id)"
 fi
 
-if git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/heads/$TASK_BRANCH"; then
-  local_sha="$(git -C "$SOURCE_REPO" rev-parse "$TASK_BRANCH")"
-  [ "$local_sha" = "$base_sha" ] \
-    || die "Local $TASK_BRANCH exists beyond the baseline. Use a new task id."
-  info "Adding worktree from existing clean local branch"
-  git -C "$SOURCE_REPO" worktree add "$TARGET_REPO" "$TASK_BRANCH"
-else
-  info "Creating fresh worktree"
-  git -C "$SOURCE_REPO" worktree add -b "$TASK_BRANCH" "$TARGET_REPO" "origin/$TASK_BRANCH"
-fi
+printf '%s\n' "$TASK_ID" > "$RUN_LOG_DIR/task-id.txt"
 
-mkdir -p "$STATE_DIR"
+info "OpenHands Gate 2 orchestrated run"
+info "Run logs: $RUN_LOG_DIR"
+info "Task: $TASK_ID"
 
-info "Running deterministic baseline"
-cd "$CONTROL_REPO"
-bash scripts/openhands/openhands-gate2-baseline.sh \
-  --target-repo "$TARGET_REPO" \
-  --base-branch "$BASE_BRANCH" \
-  --task-branch "$TASK_BRANCH" \
-  --state-file "$STATE_DIR/baseline.json"
+info "Stage 1/3: STARTUP / PREPARE"
+bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-startup.sh" \
+  2>&1 | tee "$RUN_LOG_DIR/startup.log"
 
-info "Starting OpenHands Gate 2 run"
-UV_CACHE_DIR="$UV_CACHE_DIR" \
-uv run \
-  --with "openhands-sdk[vertex]==1.50.0" \
-  --with "openhands-tools==1.50.0" \
-  python scripts/openhands/openhands-gate2-stop-hook-run.py \
-  --target-repo "$TARGET_REPO" \
-  --state-dir "$STATE_DIR" \
-  --model "$MODEL" \
-  --max-denials "$MAX_DENIALS" \
-  --max-iterations "$MAX_ITERATIONS"
+info "Stage 2/3: VERIFY"
+bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-verify.sh" \
+  2>&1 | tee "$RUN_LOG_DIR/verify.log"
+
+info "Stage 3/3: EXECUTE"
+bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-execute.sh" "$TASK_ID" \
+  2>&1 | tee "$RUN_LOG_DIR/execute.log"
+
+info "Run completed"
+info "Task: $TASK_ID"
+info "Logs: $RUN_LOG_DIR"
