@@ -1,0 +1,77 @@
+[
+  {
+    "id": "a8015c5c-e8a3-4d87-9cbe-733cced31dee",
+    "timestamp": "2026-10-05T00:30:06.100077",
+    "source": "hook",
+    "parent_id": "c1326e8c-8122-4e93-99d9-f8f7daf8cd00",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-04 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 1.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 22 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 1.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 22 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "id": "f6a83e05-d51d-48c2-8d84-4e6ab13fd232",
+    "timestamp": "2026-10-05T00:53:02.588950",
+    "source": "hook",
+    "parent_id": "57821513-8bab-4ed1-b539-e12c5c00f8dc",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-04 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 2.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: configuration_changed, downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 2.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: configuration_changed, downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "id": "8583a7a1-aafb-46c8-887f-15aaeabd2ffa",
+    "timestamp": "2026-10-05T01:16:09.339560",
+    "source": "hook",
+    "parent_id": "9cff17c7-d4a3-40c3-840b-898335a24d57",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-04 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": false,
+    "blocked": true,
+    "exit_code": 2,
+    "stdout": "{\"decision\": \"deny\", \"reason\": \"Gate 2 deterministic validator failed on stop attempt 3.\", \"additionalContext\": \"DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.\"}\n",
+    "stderr": "",
+    "reason": "Gate 2 deterministic validator failed on stop attempt 3.",
+    "additional_context": "DETERMINISTIC_VALIDATION_FAILED: Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0 Reassess using this evidence. Do not treat the failure as a prescribed solution; choose and validate the next engineering action yourself.",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  },
+  {
+    "id": "506cff63-1a46-452d-8cf7-ad3d81a58d06",
+    "timestamp": "2026-10-05T01:21:31.371797",
+    "source": "hook",
+    "parent_id": "57871da6-7869-4b06-9e0d-30f6042df628",
+    "hook_event_type": "Stop",
+    "hook_command": "CONTROL_REPO=/home/kavya_parivarababu/oss-remediation-adk GATE2_STATE_FILE=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/baseline.json GATE2_VALIDATION_OUTPUT=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/validation.json GATE2_HOOK_STATE_DIR=/home/kavya_parivarababu/.openhands/gate2/task-04-stop-hook/hook GATE2_TARGET_REPO=/home/kavya_parivarababu/maven-multimodule-app-stop-hook-04 GATE2_MAX_DENIALS=3 bash /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook.sh",
+    "success": true,
+    "blocked": false,
+    "exit_code": 0,
+    "stdout": "{\"decision\": \"allow\", \"reason\": \"Experiment bound reached after 3 denied completion attempts; attempt 4 is allowed only to terminate the experiment. Deterministic acceptance has NOT passed. Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0\"}\n",
+    "stderr": "",
+    "reason": "Experiment bound reached after 3 denied completion attempts; attempt 4 is allowed only to terminate the experiment. Deterministic acceptance has NOT passed. Failed deterministic checks: target_findings_resolved: Requested target findings remain | no_new_prohibited_findings: New prohibited findings were introduced | spring_boot_version_policy: Spring Boot version movement is rejected by policy: downgrade | delivery_diff_hygiene: Likely investigation-only artifacts require cleanup or manual review Remaining original HIGH/CRITICAL findings: 13 Unknown/unscannable original HIGH/CRITICAL findings: 0",
+    "hook_input": {
+      "reason": "agent_finished"
+    },
+    "kind": "HookExecutionEvent"
+  }
+]

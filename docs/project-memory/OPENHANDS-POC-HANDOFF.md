@@ -17,6 +17,7 @@ Do not assume the existing ADK architecture is the target design. Preserve usefu
 - Task-01: native run and externally prompted recovery; no deterministic completion interception; agent could finish despite validator disagreement.
 - Task-02: Stop Hook mechanics and same-conversation continuation PROVEN; validator integration FAILED / INFRASTRUCTURE-CONFOUNDED. **INVALID FOR RECOVERY/CONVERGENCE COMPARISON.** Later manual validation: 18/24 original findings absent, six remained; build/tests and Java/suppression/diff-hygiene policies passed, no new prohibited findings; Boot 4.2.0-M2 failed as `unparseable`; overall FAILED.
 - Task-03: first clean-validator Stop Hook run reviewed; **BOUNDED_FAIL**. Three deterministic denials and same-conversation continuation worked. Parent downgrade corrected, but final build failed; empty scan coverage prevents treating reported 24/24 absence as proven remediation. See [Task-03 analysis](../experiments/openhands/GATE2-STOP-HOOK-TASK03-ANALYSIS.md). Task-02 is not a valid convergence comparator.
+- Task-04: hardened-evidence clean rerun reviewed; **BOUNDED_FAIL**. Remaining targets improved 22→13 after the first denial, then stayed at 13 through attempts 3 and 4. Final comparison was complete (11 resolved / 13 remaining / 0 unknown), build/tests passed, but 30 new prohibited findings, a Boot 4.0.6→3.3.1 downgrade, and hygiene failure remained. No pager recurrence or new harness capability gap was proven. See [Task-04 analysis](../experiments/openhands/GATE2-STOP-HOOK-TASK04-ANALYSIS.md).
 
 See [Task-02 evidence review](../experiments/openhands/GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for source-linked conclusions, attribution limits, and fix history. Earlier setup and research sections below retain historical context.
 
@@ -53,7 +54,7 @@ Parent objective:
     |     status: manual path proven; repository capture/bootstrap established
     |
     +-- Gate 2: bounded autonomous OSS-remediation capability test
-    |     status: task-01 FAILED; task-02 infrastructure-confounded; task-03 BOUNDED_FAIL; CONTINUE EVALUATION
+    |     status: task-01 FAILED; task-02 infrastructure-confounded; tasks 03–04 BOUNDED_FAIL; CONTINUE EVALUATION
     |
     +-- Gate 3: company-laptop package/runtime feasibility
           status: wait for Gate 2

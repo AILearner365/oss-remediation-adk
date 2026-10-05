@@ -1,0 +1,5 @@
+## openhands-poc-task-04-stop-hook
+ M dependency_tree.txt
+ M pom.xml
+ M task-web/pom.xml
+?? security_scan_output.txt
