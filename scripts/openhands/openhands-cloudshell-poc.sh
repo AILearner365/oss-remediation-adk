@@ -116,7 +116,7 @@ check_versions_prepared() {
   info "tmux: $(tmux -V)"
   info "Agent Canvas: $installed_canvas"
   info "Agent Canvas path: $CANVAS_ROOT"
-
+}
 
 check_vertex_env() {
   openhands_resolve_vertex_env
@@ -222,7 +222,7 @@ show_disk() {
 }
 
 verify_tmux() {
-  prepare_runtime
+  [ -d "$TMUX_DIR" ] || die "OpenHands tmux directory is missing: $TMUX_DIR. Run startup first."
   local session="openhands-verify-$"
 
   TMUX_TMPDIR="$TMUX_DIR" tmux new-session -d -s "$session" 'sleep 2'     || die "tmux verification failed using $TMUX_DIR"
@@ -235,7 +235,7 @@ verify_tmux() {
 
 verify_vertex() {
   check_vertex_env
-  prepare_runtime
+  [ -d "$UV_CACHE_DIR" ] || die "OpenHands uv cache directory is missing: $UV_CACHE_DIR. Run startup first."
 
   local result
   result="$(
