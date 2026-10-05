@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./openhands-cloudshell-env.sh
+source "$SCRIPT_DIR/openhands-cloudshell-env.sh"
+
 CANVAS_VERSION="${CANVAS_VERSION:-1.24.0}"
 AGENT_SERVER_VERSION="${OH_AGENT_SERVER_VERSION:-1.50.0}"
-DEFAULT_VERTEX_LOCATION="${DEFAULT_VERTEX_LOCATION:-us-central1}"
 
 die() {
   echo "ERROR: $*" >&2
@@ -72,23 +75,6 @@ ensure_canvas_installed() {
   info "Agent Canvas $installed installed"
 }
 
-load_vertex_defaults() {
-  if [ -z "${VERTEXAI_PROJECT:-}" ]; then
-    VERTEXAI_PROJECT="${GOOGLE_CLOUD_PROJECT:-}"
-  fi
-
-  if [ -z "${VERTEXAI_PROJECT:-}" ]; then
-    VERTEXAI_PROJECT="$(gcloud config get-value project 2>/dev/null || true)"
-    [ "$VERTEXAI_PROJECT" = "(unset)" ] && VERTEXAI_PROJECT=""
-  fi
-
-  if [ -z "${VERTEXAI_LOCATION:-}" ]; then
-    VERTEXAI_LOCATION="$DEFAULT_VERTEX_LOCATION"
-  fi
-
-  export VERTEXAI_PROJECT
-  export VERTEXAI_LOCATION
-}
 
 check_versions() {
   require_cmd uv
@@ -112,10 +98,30 @@ check_versions() {
   info "Agent Canvas path: $CANVAS_ROOT"
 }
 
-check_vertex_env() {
-  load_vertex_defaults
+check_versions_prepared() {
+  require_cmd uv
+  require_cmd gcloud
+  require_cmd tmux
+  require_cmd python
 
-  [ -n "${VERTEXAI_PROJECT:-}" ] || die "Vertex project could not be detected. Set VERTEXAI_PROJECT once or configure the active gcloud project."
+  local installed_canvas
+  installed_canvas="$(resolve_canvas_version 2>/dev/null || true)"
+  [ "$installed_canvas" = "$CANVAS_VERSION" ] || die "Expected prepared Agent Canvas $CANVAS_VERSION, found '${installed_canvas:-missing}'. Run startup first."
+
+  [ -f "$DEV_SAFE" ] || die "Missing expected launcher file: $DEV_SAFE"
+
+  info "Node: $(node --version)"
+  info "npm: $(npm --version)"
+  info "uv: $(uv --version)"
+  info "tmux: $(tmux -V)"
+  info "Agent Canvas: $installed_canvas"
+  info "Agent Canvas path: $CANVAS_ROOT"
+
+
+check_vertex_env() {
+  openhands_resolve_vertex_env
+
+  [ -n "${VERTEXAI_PROJECT:-}" ] || die "Vertex project could not be resolved."
   [ -n "${VERTEXAI_LOCATION:-}" ] || die "VERTEXAI_LOCATION is not set"
 
   gcloud auth application-default print-access-token >/dev/null 2>&1     || die "Application Default Credentials are not available"
@@ -265,9 +271,14 @@ PY
 }
 
 verify_all() {
-  check_versions
-  patch_vertex_extra
-  patch_vertex_readiness
+  check_versions_prepared
+  check_effective_patch >/dev/null
+  grep -Fq 'openhands-sdk[vertex]==${version}' "$DEV_SAFE" \
+    || die "Vertex SDK launcher patch is missing. Run startup first."
+  local readiness_file
+  readiness_file="$(find_readiness_file)"
+  grep -Fq 'startsWith("vertex_ai/")' "$readiness_file" \
+    || die "Vertex ADC readiness patch is missing. Run startup first."
   verify_tmux
   verify_vertex
   show_disk
@@ -303,13 +314,11 @@ Usage:
   openhands-cloudshell-poc.sh disk
 
 The script:
-- installs Agent Canvas 1.24.0 automatically when a new Cloud Shell session lost the ephemeral global install;
-- uses /tmp for npm/uv caches to protect the small persistent /home volume;
-- detects the Vertex project from GOOGLE_CLOUD_PROJECT or the active gcloud project;
-- defaults Vertex location to us-central1;
-- verifies ADC;
-- recreates the Canvas tmux directory;
-- reapplies the two guarded Vertex POC patches when needed.
+- prepare installs/repairs the pinned Cloud Shell runtime and guarded Vertex patches;
+- verify is non-repairing and proves the prepared runtime, ADC, tmux, and a real Vertex/OpenHands model call;
+- Vertex project resolution order is VERTEXAI_PROJECT, GOOGLE_CLOUD_PROJECT, active gcloud project, then the POC default;
+- prepare synchronizes the active gcloud project to the resolved Vertex project when needed;
+- /tmp is used for uv cache to protect the small persistent /home volume.
 
 Optional overrides:
   VERTEXAI_PROJECT
@@ -328,6 +337,8 @@ case "${1:-}" in
     ;;
   prepare)
     check_versions
+    openhands_resolve_vertex_env
+    openhands_sync_gcloud_project
     check_vertex_env
     prepare_runtime
     patch_vertex_extra
