@@ -34,6 +34,16 @@ Success criteria
 - Existing tests succeed.
 - The remediation is supported by repository, dependency, build/test, and available security-scanner evidence.
 
+Environment / available evidence
+--------------------------------
+An OSV Scanner executable is available at:
+
+~/bin/osv-scanner
+
+You may use it at any point during investigation or self-validation when security evidence is useful.
+
+The deterministic baseline and independent completion validation use this OSV Scanner with Maven-aware local repository support. You are free to decide when and how often to use security scanning and which other repository/build/dependency evidence to gather. Scanner availability is evidence/tooling, not a prescribed remediation strategy.
+
 Investigate the problem, determine the appropriate remediation, implement it, and validate your work.
 ```
 
@@ -54,9 +64,11 @@ The purpose is to evaluate native OpenHands behavior, not reproduce the existing
 
 ## Scanner behavior
 
-The normal scanner/tooling available in the environment may be used by OpenHands during its own investigation and self-validation.
+The OSV Scanner at `~/bin/osv-scanner` is explicitly exposed to OpenHands as available evidence/tooling. OpenHands decides if, when, and how often to use it during investigation and self-validation.
 
-That agent-owned scanner usage is separate from the authoritative deterministic validation performed after OpenHands stops.
+The deterministic baseline and independent completion validation use the same OSV Scanner with Maven-aware local repository support. Agent-owned scanner usage remains investigative/self-validation evidence; the independent validator remains the acceptance authority.
+
+Do not turn scanner availability into a prescribed sequence of remediation steps or dependency-version guidance.
 
 ## Run-1 stop rule
 
