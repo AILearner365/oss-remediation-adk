@@ -2,6 +2,10 @@
 set -euo pipefail
 
 CONTROL_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=./openhands-cloudshell-env.sh
+source "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-env.sh"
+openhands_resolve_vertex_env
+
 SOURCE_REPO="${SOURCE_REPO:-$HOME/maven-multimodule-app}"
 BASE_BRANCH="${BASE_BRANCH:-main-runrunning}"
 TASK_ID_RAW="${1:-05}"
@@ -19,10 +23,6 @@ STATE_DIR="${STATE_DIR:-$HOME/.openhands/gate2/task-${TASK_ID}-stop-hook}"
 MODEL="${MODEL:-vertex_ai/gemini-2.5-flash}"
 MAX_DENIALS="${MAX_DENIALS:-3}"
 MAX_ITERATIONS="${MAX_ITERATIONS:-250}"
-
-export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/openhands-uv-cache}"
-export VERTEXAI_PROJECT="${VERTEXAI_PROJECT:-deutschebank-aipocs}"
-export VERTEXAI_LOCATION="${VERTEXAI_LOCATION:-us-central1}"
 
 die() {
   echo "ERROR: $*" >&2
