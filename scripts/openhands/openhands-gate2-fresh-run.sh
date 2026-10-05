@@ -8,6 +8,9 @@ RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 RUN_LOG_DIR="$LOG_ROOT/run-$RUN_ID"
 mkdir -p "$RUN_LOG_DIR"
 
+CURRENT_STAGE="INITIALIZE"
+trap 'rc=$?; printf "%s\n" "stage=$CURRENT_STAGE" "exit_code=$rc" > "$RUN_LOG_DIR/status.txt"; if [ "$rc" -eq 0 ]; then printf "%s\n" "result=PASS" >> "$RUN_LOG_DIR/status.txt"; else printf "%s\n" "result=FAIL" >> "$RUN_LOG_DIR/status.txt"; fi' EXIT
+
 exec > >(tee -a "$RUN_LOG_DIR/combined.log") 2>&1
 
 die() {
@@ -37,9 +40,11 @@ next_task_id() {
 
   for path in "$HOME"/maven-multimodule-app-stop-hook-* "$HOME"/.openhands/gate2/task-*-stop-hook; do
     [ -e "$path" ] || continue
-    value="${path##*-}"
-    if [[ "$value" =~ ^[0-9]+$ ]] && ((10#$value > max)); then
-      max=$((10#$value))
+    if [[ "$(basename "$path")" =~ ([0-9]+)(-stop-hook)?$ ]]; then
+      value="${BASH_REMATCH[1]}"
+      if ((10#$value > max)); then
+        max=$((10#$value))
+      fi
     fi
   done
 
@@ -62,18 +67,22 @@ info "OpenHands Gate 2 orchestrated run"
 info "Run logs: $RUN_LOG_DIR"
 info "Task: $TASK_ID"
 
+CURRENT_STAGE="STARTUP"
 info "Stage 1/3: STARTUP / PREPARE"
 bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-startup.sh" \
   2>&1 | tee "$RUN_LOG_DIR/startup.log"
 
+CURRENT_STAGE="VERIFY"
 info "Stage 2/3: VERIFY"
 bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-verify.sh" \
   2>&1 | tee "$RUN_LOG_DIR/verify.log"
 
+CURRENT_STAGE="EXECUTE"
 info "Stage 3/3: EXECUTE"
 bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-execute.sh" "$TASK_ID" \
   2>&1 | tee "$RUN_LOG_DIR/execute.log"
 
+CURRENT_STAGE="COMPLETE"
 info "Run completed"
 info "Task: $TASK_ID"
 info "Logs: $RUN_LOG_DIR"
