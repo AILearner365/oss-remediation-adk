@@ -33,6 +33,9 @@ info() {
   echo "==> $*"
 }
 
+info "Verifying OpenHands / Vertex Cloud Shell environment"
+bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-poc.sh" verify
+
 git -C "$SOURCE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "Source repository not found at $SOURCE_REPO"
 
