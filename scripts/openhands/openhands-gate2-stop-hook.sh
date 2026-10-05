@@ -66,9 +66,32 @@ fi
 
 summary="$(python - "$OUTPUT_FILE" "$LAST_LOG" <<'PY'
 import json, pathlib, sys
+
 out = pathlib.Path(sys.argv[1])
 log = pathlib.Path(sys.argv[2])
 parts = []
+
+
+def _value(data, camel, snake):
+    value = data.get(camel)
+    return data.get(snake) if value is None else value
+
+
+def _finding_line(item, current_by_identity=None):
+    if not isinstance(item, dict):
+        return str(item)
+    identity = str(item.get("identity") or item.get("vulnerabilityId") or "UNKNOWN")
+    current = (current_by_identity or {}).get(identity, item)
+    dep = current.get("dependency") or {}
+    group = dep.get("groupId")
+    artifact = dep.get("artifactId")
+    package = dep.get("packageName")
+    coordinate = f"{group}:{artifact}" if group and artifact else str(package or "unknown-package")
+    version = str(dep.get("currentVersion") or "unknown-version")
+    severity = str(current.get("severity") or item.get("severity") or "UNKNOWN")
+    return f"identity={identity}; severity={severity}; package={coordinate}@{version}"
+
+
 if out.is_file():
     try:
         data = json.loads(out.read_text())
@@ -81,21 +104,63 @@ if out.is_file():
                 failed.append(f"{name}: {msg}" if msg else name)
         if failed:
             parts.append("Failed deterministic checks: " + " | ".join(failed[:8]))
-        remaining = data.get("remainingTargetFindings")
-        if remaining is None:
-            remaining = data.get("remaining_target_findings")
+
+        scan = data.get("scan") or {}
+        scan_findings = scan.get("findings") or []
+        current_by_identity = {
+            str(item.get("identity")): item
+            for item in scan_findings
+            if isinstance(item, dict) and item.get("identity")
+        }
+
+        remaining = _value(data, "remainingTargetFindings", "remaining_target_findings")
         if isinstance(remaining, list):
             parts.append(f"Remaining original HIGH/CRITICAL findings: {len(remaining)}")
-        unknown = data.get("unknownTargetFindings")
-        if unknown is None:
-            unknown = data.get("unknown_target_findings")
+            if remaining:
+                parts.append(
+                    "Remaining finding identities/current package versions: "
+                    + " | ".join(_finding_line(item, current_by_identity) for item in remaining)
+                )
+
+        unknown = _value(data, "unknownTargetFindings", "unknown_target_findings")
         if isinstance(unknown, list):
             parts.append(f"Unknown/unscannable original HIGH/CRITICAL findings: {len(unknown)}")
-        new_findings = data.get("newProhibitedFindings")
-        if new_findings is None:
-            new_findings = data.get("new_prohibited_findings")
+            if unknown:
+                parts.append(
+                    "Unknown finding identities/baseline package versions: "
+                    + " | ".join(_finding_line(item) for item in unknown)
+                )
+
+        new_findings = _value(data, "newProhibitedFindings", "new_prohibited_findings")
+        if not isinstance(new_findings, list):
+            new_findings = None
+            for check in checks:
+                if check.get("name") == "no_new_prohibited_findings":
+                    evidence = check.get("evidence") or {}
+                    candidate = evidence.get("newFindings")
+                    if isinstance(candidate, list):
+                        new_findings = candidate
+                    break
         if isinstance(new_findings, list):
             parts.append(f"New prohibited HIGH/CRITICAL findings: {len(new_findings)}")
+            if new_findings:
+                parts.append(
+                    "New prohibited finding identities/package versions: "
+                    + " | ".join(_finding_line(item) for item in new_findings)
+                )
+
+        for check in checks:
+            if check.get("name") == "spring_boot_version_policy" and not check.get("passed", False):
+                evidence = check.get("evidence") or {}
+                baseline = evidence.get("baseline_version")
+                final = evidence.get("final_version")
+                if baseline is not None or final is not None:
+                    parts.append(f"Spring Boot evidence: baseline={baseline}; current={final}")
+            if check.get("name") == "delivery_diff_hygiene" and not check.get("passed", False):
+                evidence = check.get("evidence") or {}
+                artifacts = evidence.get("diagnosticArtifacts")
+                if isinstance(artifacts, list) and artifacts:
+                    parts.append("Diagnostic artifacts requiring cleanup: " + ", ".join(map(str, artifacts)))
     except Exception as exc:
         parts.append(f"Validation report could not be summarized: {exc}")
 if not parts and log.is_file():
