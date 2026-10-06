@@ -2,6 +2,10 @@
 set -euo pipefail
 
 CONTROL_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=./openhands-cloudshell-env.sh
+source "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-env.sh"
+openhands_resolve_vertex_env
+
 SOURCE_REPO="${SOURCE_REPO:-$HOME/maven-multimodule-app}"
 LOG_ROOT="${OPENHANDS_RUN_LOG_ROOT:-$HOME/.openhands/gate2/run-logs}"
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
@@ -79,11 +83,11 @@ publish_evidence() {
 
   {
     printf "# OpenHands Gate 2 orchestrated run evidence\n\n"
-    printf -- "- Run: `%s`\n" "$RUN_ID"
-    printf -- "- Task: `%s`\n" "${TASK_ID:-unknown}"
-    printf -- "- Final stage: `%s`\n" "$CURRENT_STAGE"
-    printf -- "- Exit code: `%s`\n" "$rc"
-    printf -- "- Local log source: `%s`\n" "$RUN_LOG_DIR"
+    printf -- '- Run: `%s`\n' "$RUN_ID"
+    printf -- '- Task: `%s`\n' "${TASK_ID:-unknown}"
+    printf -- '- Final stage: `%s`\n' "$CURRENT_STAGE"
+    printf -- '- Exit code: `%s`\n' "$rc"
+    printf -- '- Local log source: `%s`\n' "$RUN_LOG_DIR"
     printf "\nThis directory is captured automatically by the orchestrator. It contains startup, verification, execution, deterministic validation evidence, sanitized observable OpenHands event trajectories when available, and final Git state/diff. Internal model reasoning/thought fields are intentionally excluded from the published trajectory export.\n"
   } > "$EVIDENCE_DIR/README.md"
 
