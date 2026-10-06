@@ -320,9 +320,33 @@ The new capture design is sufficient for Task-05 trajectory analysis:
 Two metadata defects are visible but nonblocking:
 
 1. generated evidence `README.md` contains blank interpolated run/task/stage fields;
-2. `run-metadata.txt` has blank Vertex project/location because those exports occur in child setup processes rather than the parent orchestrator.
+2. `run-metadata.txt` has blank Vertex project/location because those exports occurred only in child setup processes rather than the parent orchestrator.
 
-These do not invalidate Task-05 because the task id, branch, conversation, model, validation reports, and runtime logs are independently recoverable. They should be fixed before Task-06 so the evidence bundle is self-describing.
+These do not invalidate Task-05 because the task id, branch, conversation, model, validation reports, and runtime logs are independently recoverable.
+
+**Post-run fix:** commit `c67b6e2ece41fee650a93a035ef3337a0d3e80a9` corrects both audit-only defects by resolving the shared Vertex environment in the orchestrator itself and by using shell-safe `printf` formats for the Markdown evidence README. This does not change the model, task prompt, validator, Stop Hook semantics, or remediation behavior.
+
+## External research findings relevant to attribution
+
+### Spring Boot 3 vs 4 starter coordinate
+
+Official Spring Boot 3.2.5 documentation uses `spring-boot-starter-web` for Spring MVC applications. Spring's Boot 4 modularization announcement explicitly explains that the Boot 3 `web` starter was renamed to `webmvc` in Boot 4. Current Boot 4 documentation uses `spring-boot-starter-webmvc`.
+
+That independently confirms the Task-05 inference from Maven Central's 404: `spring-boot-starter-webmvc:3.2.5` is a cross-major coordinate mismatch created by the downgrade, not evidence of a general network/proxy outage.
+
+### OSV Scanner Maven resolution
+
+Current OSV-Scanner documentation states that Maven POM scanning resolves transitive dependencies and supports native Maven registry resolution with `--data-source=native` and `--maven-registry=<URL>`. Its issue tracker also contains recent reports about local Maven-module/cache resolution limitations.
+
+This matches Task-05's observed difference between the agent's simple recursive scan and the deterministic validator's Maven-aware local-registry setup. The important failure is that the agent ignored the scanner's explicit local-module resolution errors and accepted an empty JSON result as security success.
+
+### OpenHands stuck detection
+
+Current OpenHands SDK source documents native stuck detection for recent repeating action/observation cycles, action/error cycles, repeated monologue, alternating patterns, and context-window errors. The detector works over a bounded recent-event window.
+
+Task-05 contains strategic repetition but many syntactically different POM edits and build attempts. Therefore this run does not prove the native stuck detector is broken; it shows that pattern-level repetition detection does not guarantee higher-level strategy reassessment.
+
+These external findings reinforce the architecture attribution already made above: no new generic harness capability gap is proven by Task-05.
 
 ## Decision and next step
 
