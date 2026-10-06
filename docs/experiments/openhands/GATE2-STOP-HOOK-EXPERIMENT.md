@@ -8,6 +8,8 @@ See the [Task-02 evidence review](GATE2-STOP-HOOK-TASK02-INVALID-RUN.md) for the
 
 The setup below records the original experiment protocol, not a pending Task-02 rerun instruction.
 
+For the **current** clean-run procedure, use [GATE2-ORCHESTRATED-RUNBOOK.md](GATE2-ORCHESTRATED-RUNBOOK.md). The runbook supersedes the manual branch/worktree/environment commands below for new runs while preserving this document as historical experiment context.
+
 ## Objective
 
 Test whether native OpenHands completion control materially improves the same OSS-remediation task without reintroducing custom agent orchestration.
