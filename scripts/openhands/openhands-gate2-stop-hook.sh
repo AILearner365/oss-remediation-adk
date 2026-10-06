@@ -31,6 +31,16 @@ bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-validate.sh" \
 rc=$?
 set -e
 
+# Preserve every validator attempt before the next Stop Hook invocation can
+# overwrite validation.json or last-validator.log. These snapshots are
+# analysis evidence only; the live OUTPUT_FILE remains the acceptance source.
+if [ -f "$LAST_LOG" ]; then
+  cp -f "$LAST_LOG" "$HOOK_STATE_DIR/validator-attempt-$count.log"
+fi
+if [ -f "$OUTPUT_FILE" ]; then
+  cp -f "$OUTPUT_FILE" "$HOOK_STATE_DIR/validation-attempt-$count.json"
+fi
+
 if [ "$rc" -eq 0 ]; then
   python - "$count" "$OUTPUT_FILE" <<'PY'
 import json, sys
