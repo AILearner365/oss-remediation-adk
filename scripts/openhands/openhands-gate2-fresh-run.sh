@@ -37,6 +37,21 @@ publish_evidence() {
     [ -f "$state_dir/hook/last-validator.log" ] && cp -f "$state_dir/hook/last-validator.log" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/infrastructure-failure" ] && cp -f "$state_dir/hook/infrastructure-failure" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/attempt-count" ] && cp -f "$state_dir/hook/attempt-count" "$EVIDENCE_DIR/" || true
+    for hook_artifact in "$state_dir"/hook/validation-attempt-*.json "$state_dir"/hook/validator-attempt-*.log; do
+      [ -f "$hook_artifact" ] || continue
+      cp -f "$hook_artifact" "$EVIDENCE_DIR/"
+    done
+
+    {
+      printf 'control_branch=%s\n' "$(git -C "$CONTROL_REPO" branch --show-current 2>/dev/null || true)"
+      printf 'control_head=%s\n' "$(git -C "$CONTROL_REPO" rev-parse HEAD 2>/dev/null || true)"
+      printf 'task_id=%s\n' "$TASK_ID"
+      printf 'vertex_project=%s\n' "${VERTEXAI_PROJECT:-}"
+      printf 'vertex_location=%s\n' "${VERTEXAI_LOCATION:-}"
+      printf 'model=%s\n' "${MODEL:-vertex_ai/gemini-2.5-flash}"
+      printf 'max_denials=%s\n' "${MAX_DENIALS:-3}"
+      printf 'max_iterations=%s\n' "${MAX_ITERATIONS:-250}"
+    } > "$EVIDENCE_DIR/run-metadata.txt"
 
     local events_dir conversation_id trajectory_dir
     for events_dir in "$state_dir"/conversation/*/events; do
