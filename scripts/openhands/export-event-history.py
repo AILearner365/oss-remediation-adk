@@ -46,8 +46,29 @@ def project(event):
             out['value'] = event['value']
         else:
             out['value_omitted'] = True
+    elif kind == 'HookExecutionEvent':
+        out.update({
+            k: event[k]
+            for k in (
+                'hook_event_type',
+                'hook_command',
+                'success',
+                'blocked',
+                'exit_code',
+                'stdout',
+                'stderr',
+                'reason',
+                'additional_context',
+                'hook_input',
+            )
+            if k in event
+        })
     else:
-        raise ValueError(f'Unreviewed event kind: {kind}')
+        # Preserve the existence/order of an unfamiliar SDK event without
+        # publishing unreviewed payload fields that may contain private model
+        # internals, credentials, or provider-specific metadata.
+        out['details_omitted'] = True
+        out['omission_reason'] = 'Unreviewed event kind; payload omitted from observable export'
     return scrub(out)
 
 
@@ -75,7 +96,7 @@ def main():
     (dest / 'manifest.json').write_text(json.dumps({
         'source': str(source), 'event_count': len(rows),
         'export_sha256': hashlib.sha256(body.encode()).hexdigest(),
-        'omissions': 'Reasoning/thought fields, opaque thought signatures, raw LLM responses, observation metadata, stats values, system dynamic context and tool schemas. Credential patterns and cloud project banner redacted. Review before publication.',
+        'omissions': 'Reasoning/thought fields, opaque thought signatures, raw LLM responses, observation metadata, stats values, system dynamic context and tool schemas. Unknown event-kind payloads are omitted but their sequence/kind metadata is retained. Credential patterns and cloud project banner redacted. Review before publication.',
         'files': manifest}, indent=2) + '\n')
     print(f'Exported {len(rows)} events to {dest}')
 
