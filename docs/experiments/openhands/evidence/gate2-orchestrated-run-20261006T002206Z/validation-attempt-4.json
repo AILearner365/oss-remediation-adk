@@ -1,0 +1,2074 @@
+{
+  "changedFiles": [
+    "pom.xml",
+    "spring-boot-starter-webmvc-3.2.5.pom",
+    "task-service/pom.xml",
+    "task-web/pom.xml"
+  ],
+  "checks": [
+    {
+      "evidence": {
+        "blocked": false,
+        "command": [
+          "git",
+          "merge-base",
+          "--is-ancestor",
+          "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+          "HEAD"
+        ],
+        "cwd": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-05",
+        "durationSeconds": 0.005154422000032355,
+        "exitCode": 0,
+        "stderr": "",
+        "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/validation_1_git_base-a01d734913d2.stderr.log",
+        "stdout": "",
+        "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/validation_1_git_base-a01d734913d2.stdout.log",
+        "timedOut": false
+      },
+      "message": "Repository remains based on the recorded baseline",
+      "name": "baseline_ancestry",
+      "passed": true
+    },
+    {
+      "evidence": {},
+      "message": "Git status and full diff were captured",
+      "name": "git_change_evidence",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "results": [
+          {
+            "blocked": false,
+            "command": [
+              "mvn clean verify"
+            ],
+            "cwd": "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-05",
+            "durationSeconds": 5.657613056000173,
+            "exitCode": 1,
+            "stderr": "",
+            "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/validation_build_1-9c1d51b96da5.stderr.log",
+            "stdout": "Welcome to Cloud Shell! Type \"help\" to get started.\nTo set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.\nYou can view your projects by running `gcloud projects list`.\n[INFO] Scanning for projects...\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] 'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 29, column 17\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project com.example.secureapp:task-web:1.0.0-SNAPSHOT (/home/kavya_parivarababu/maven-multimodule-app-stop-hook-05/task-web/pom.xml) has 1 error\n[ERROR]     'dependencies.dependency.version' for org.springframework.boot:spring-boot-starter-webmvc:jar is missing. @ line 29, column 17\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n",
+            "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/validation_build_1-9c1d51b96da5.stdout.log",
+            "timedOut": false
+          }
+        ]
+      },
+      "message": "A required build/test/startup command failed",
+      "name": "build_test_startup",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "attempts": [
+          {
+            "attemptNumber": 1,
+            "backoffSeconds": null,
+            "command": [
+              "/home/kavya_parivarababu/bin/osv-scanner",
+              "scan",
+              "source",
+              "-r",
+              "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+              "--format",
+              "json",
+              "--data-source=native",
+              "--maven-registry=http://127.0.0.1:46681/"
+            ],
+            "commandResult": {
+              "blocked": false,
+              "command": [
+                "/home/kavya_parivarababu/bin/osv-scanner",
+                "scan",
+                "source",
+                "-r",
+                "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+                "--format",
+                "json",
+                "--data-source=native",
+                "--maven-registry=http://127.0.0.1:46681/"
+              ],
+              "cwd": "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+              "durationSeconds": 0.1411550719999468,
+              "exitCode": 127,
+              "stderr": "Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\n",
+              "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stderr.log",
+              "stdout": "{\n  \"results\": [],\n  \"experimental_config\": {\n    \"licenses\": {\n      \"summary\": false,\n      \"allowlist\": null\n    }\n  }\n}\n",
+              "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stdout.log",
+              "timedOut": false
+            },
+            "exitCode": 127,
+            "failureReason": "DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>",
+            "outcome": "INCOMPLETE_FATAL_FAILURE",
+            "rawReportPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.json",
+            "retryScheduled": false,
+            "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.stderr.log",
+            "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.stdout.log"
+          }
+        ],
+        "backend": "osv",
+        "commandResult": {
+          "blocked": false,
+          "command": [
+            "/home/kavya_parivarababu/bin/osv-scanner",
+            "scan",
+            "source",
+            "-r",
+            "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+            "--format",
+            "json",
+            "--data-source=native",
+            "--maven-registry=http://127.0.0.1:46681/"
+          ],
+          "cwd": "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+          "durationSeconds": 0.1411550719999468,
+          "exitCode": 127,
+          "stderr": "Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\n",
+          "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stderr.log",
+          "stdout": "{\n  \"results\": [],\n  \"experimental_config\": {\n    \"licenses\": {\n      \"summary\": false,\n      \"allowlist\": null\n    }\n  }\n}\n",
+          "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stdout.log",
+          "timedOut": false
+        },
+        "error": "DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>",
+        "evidence": {},
+        "failureKind": "DEPENDENCY_RESOLUTION",
+        "findings": [],
+        "outcome": "INCOMPLETE_FATAL_FAILURE",
+        "rawReportPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1.json",
+        "succeeded": false
+      },
+      "message": "Fresh vulnerability scan incomplete: INCOMPLETE_FATAL_FAILURE",
+      "name": "fresh_vulnerability_scan",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "baselineTargetCount": 25,
+        "comparisonComplete": false,
+        "coverage": {
+          "baseline": {
+            "extractedPackages": 16,
+            "filteredUnscannablePackages": 6,
+            "scannablePackages": 10
+          },
+          "buildPassed": false,
+          "current": {
+            "extractedPackages": 6,
+            "filteredUnscannablePackages": 6,
+            "scannablePackages": 0
+          }
+        },
+        "remaining": [],
+        "resolved": [],
+        "unknown": [
+          {
+            "aliases": [
+              "CVE-2022-42889"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "commons-text",
+              "currentVersion": "1.9",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.commons",
+              "packageName": "org.apache.commons:commons-text"
+            },
+            "fixedVersions": [
+              "1.10.0"
+            ],
+            "identity": "CVE-2022-42889|org.apache.commons:commons-text",
+            "severity": "CRITICAL",
+            "summary": "Arbitrary code execution in Apache Commons Text",
+            "vulnerabilityId": "GHSA-599f-7c49-w659"
+          },
+          {
+            "aliases": [
+              "CVE-2023-5072"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "json",
+              "currentVersion": "20230227",
+              "ecosystem": "Maven",
+              "groupId": "org.json",
+              "packageName": "org.json:json"
+            },
+            "fixedVersions": [
+              "20231013"
+            ],
+            "identity": "CVE-2023-5072|org.json:json",
+            "severity": "HIGH",
+            "summary": "Java: DoS Vulnerability in JSON-JAVA",
+            "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41850"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-expression",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-expression"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41850|org.springframework:spring-expression",
+            "severity": "HIGH",
+            "summary": "Spring Framework Algorithmic Denial of Service via SpEL Expressions",
+            "vulnerabilityId": "GHSA-r5w3-xv2f-j59q"
+          },
+          {
+            "aliases": [
+              "CVE-2026-40984"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "micrometer-core",
+              "currentVersion": "1.16.5",
+              "ecosystem": "Maven",
+              "groupId": "io.micrometer",
+              "packageName": "io.micrometer:micrometer-core"
+            },
+            "fixedVersions": [
+              "1.15.12",
+              "1.16.6"
+            ],
+            "identity": "CVE-2026-40984|io.micrometer:micrometer-core",
+            "severity": "HIGH",
+            "summary": "Micrometer HTTP server instrumentations DoS",
+            "vulnerabilityId": "GHSA-g3pr-3p32-fp23"
+          },
+          {
+            "aliases": [
+              "CVE-2026-40983"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "micrometer-core",
+              "currentVersion": "1.16.5",
+              "ecosystem": "Maven",
+              "groupId": "io.micrometer",
+              "packageName": "io.micrometer:micrometer-core"
+            },
+            "fixedVersions": [
+              "1.15.12",
+              "1.16.6"
+            ],
+            "identity": "CVE-2026-40983|io.micrometer:micrometer-core",
+            "severity": "HIGH",
+            "summary": "Micrometer gRPC server instrumentation DoS",
+            "vulnerabilityId": "GHSA-w737-wx49-qj23"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43515",
+              "CVE-2026-43515"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43515|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - Security constraints not correctly applied",
+            "vulnerabilityId": "GHSA-5m62-pw8w-7w9f"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43513",
+              "CVE-2026-43513"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43513|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat: LockOutRealm treats user names as case-sensitive",
+            "vulnerabilityId": "GHSA-5mp6-jrq3-r938"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-65905",
+              "CVE-2026-65905"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-65905|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat's DIGEST authenticator has an Authentication Bypass by Capture-replay vulnerability",
+            "vulnerabilityId": "GHSA-9xv2-5v5q-p794"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-42498",
+              "CVE-2026-42498"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-42498|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat - WebSocket authentication header exposure",
+            "vulnerabilityId": "GHSA-fv25-8xcx-gqjc"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-65182",
+              "CVE-2026-65182"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-65182|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat has an Improper Access Control, Incorrect Authorization vulnerability",
+            "vulnerabilityId": "GHSA-gcx9-497g-6cp6"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-41284",
+              "CVE-2026-41284"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-41284|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat: Unbounded read in WebDAV LOCK and  PROPFIND handling",
+            "vulnerabilityId": "GHSA-gx5v-xp9w-j4cg"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-68525",
+              "CVE-2026-68525"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-68525|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat's FORM authentication process has an Incorrect Authorization vulnerability",
+            "vulnerabilityId": "GHSA-h3x4-894j-xpx5"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43512",
+              "CVE-2026-43512"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43512|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - Digest authenticator will authenticate any unknown user",
+            "vulnerabilityId": "GHSA-h6fc-48rj-7qqh"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-41293",
+              "CVE-2026-41293"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-41293|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - HTTP/2 request headers not validated",
+            "vulnerabilityId": "GHSA-r29c-68gh-xp6x"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41845"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41845|org.springframework:spring-webmvc",
+            "severity": "HIGH",
+            "summary": "Spring Framework Cross-site Scripting via JavaScriptUtils",
+            "vulnerabilityId": "GHSA-3chg-m5w7-qfv5"
+          },
+          {
+            "aliases": [
+              "CVE-2026-47884"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "7.0.9"
+            ],
+            "identity": "CVE-2026-47884|org.springframework:spring-webmvc",
+            "severity": "CRITICAL",
+            "summary": "Spring Framework Improper Path Limitation in XsltView",
+            "vulnerabilityId": "GHSA-pc63-qcmh-9cmg"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41842"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41842|org.springframework:spring-webmvc",
+            "severity": "HIGH",
+            "summary": "Spring Framework Denial of Service via Versioned Resources in Spring MVC and WebFlux",
+            "vulnerabilityId": "GHSA-x23c-287f-qqv5"
+          },
+          {
+            "aliases": [
+              "CVE-2026-89425"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-89425|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": "jackson-core: UTF8DataInputJsonParser._reportInvalidToken() missing maxErrorTokenLength limit -> unbounded StringBuilder growth (DoS)",
+            "vulnerabilityId": "GHSA-7hhh-6rmp-j9qf"
+          },
+          {
+            "aliases": [
+              "CVE-2026-89407"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.2"
+            ],
+            "identity": "CVE-2026-89407|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": " jackson-core: ReDoS: quadratic backtracking in NumberInput.PATTERN_FLOAT via looksLikeValidNumber()",
+            "vulnerabilityId": "GHSA-p6pp-m3f8-5c89"
+          },
+          {
+            "aliases": [
+              "CVE-2026-68494"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-68494|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": "jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)",
+            "vulnerabilityId": "GHSA-r7wm-3cxj-wff9"
+          },
+          {
+            "aliases": [
+              "CVE-2026-91777"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-91777|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind quadratic forward-reference completion ",
+            "vulnerabilityId": "GHSA-cxp5-3px4-pw24"
+          },
+          {
+            "aliases": [
+              "CVE-2026-54512"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-54512|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+            "vulnerabilityId": "GHSA-j3rv-43j4-c7qm"
+          },
+          {
+            "aliases": [
+              "CVE-2026-68497"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.10",
+              "2.21.6",
+              "2.22.2",
+              "3.1.6",
+              "3.2.2"
+            ],
+            "identity": "CVE-2026-68497|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind: Duration XMLGregorianCalendar Unbounded Number Parse DoS",
+            "vulnerabilityId": "GHSA-q4xh-88c3-wmh7"
+          },
+          {
+            "aliases": [
+              "CVE-2026-54513"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-54513|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+            "vulnerabilityId": "GHSA-rmj7-2vxq-3g9f"
+          },
+          {
+            "aliases": [
+              "CVE-2026-91776"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-91776|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind retains every unknown raw type ID ",
+            "vulnerabilityId": "GHSA-wv8q-qhhj-9h54"
+          }
+        ]
+      },
+      "message": "Target comparison unavailable because validation evidence is incomplete: fresh vulnerability scan did not complete",
+      "name": "target_findings_improved",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "comparisonComplete": false,
+        "coverage": {
+          "baseline": {
+            "extractedPackages": 16,
+            "filteredUnscannablePackages": 6,
+            "scannablePackages": 10
+          },
+          "buildPassed": false,
+          "current": {
+            "extractedPackages": 6,
+            "filteredUnscannablePackages": 6,
+            "scannablePackages": 0
+          }
+        },
+        "remaining": [],
+        "unknown": [
+          {
+            "aliases": [
+              "CVE-2022-42889"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "commons-text",
+              "currentVersion": "1.9",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.commons",
+              "packageName": "org.apache.commons:commons-text"
+            },
+            "fixedVersions": [
+              "1.10.0"
+            ],
+            "identity": "CVE-2022-42889|org.apache.commons:commons-text",
+            "severity": "CRITICAL",
+            "summary": "Arbitrary code execution in Apache Commons Text",
+            "vulnerabilityId": "GHSA-599f-7c49-w659"
+          },
+          {
+            "aliases": [
+              "CVE-2023-5072"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "json",
+              "currentVersion": "20230227",
+              "ecosystem": "Maven",
+              "groupId": "org.json",
+              "packageName": "org.json:json"
+            },
+            "fixedVersions": [
+              "20231013"
+            ],
+            "identity": "CVE-2023-5072|org.json:json",
+            "severity": "HIGH",
+            "summary": "Java: DoS Vulnerability in JSON-JAVA",
+            "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41850"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-expression",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-expression"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41850|org.springframework:spring-expression",
+            "severity": "HIGH",
+            "summary": "Spring Framework Algorithmic Denial of Service via SpEL Expressions",
+            "vulnerabilityId": "GHSA-r5w3-xv2f-j59q"
+          },
+          {
+            "aliases": [
+              "CVE-2026-40984"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "micrometer-core",
+              "currentVersion": "1.16.5",
+              "ecosystem": "Maven",
+              "groupId": "io.micrometer",
+              "packageName": "io.micrometer:micrometer-core"
+            },
+            "fixedVersions": [
+              "1.15.12",
+              "1.16.6"
+            ],
+            "identity": "CVE-2026-40984|io.micrometer:micrometer-core",
+            "severity": "HIGH",
+            "summary": "Micrometer HTTP server instrumentations DoS",
+            "vulnerabilityId": "GHSA-g3pr-3p32-fp23"
+          },
+          {
+            "aliases": [
+              "CVE-2026-40983"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "micrometer-core",
+              "currentVersion": "1.16.5",
+              "ecosystem": "Maven",
+              "groupId": "io.micrometer",
+              "packageName": "io.micrometer:micrometer-core"
+            },
+            "fixedVersions": [
+              "1.15.12",
+              "1.16.6"
+            ],
+            "identity": "CVE-2026-40983|io.micrometer:micrometer-core",
+            "severity": "HIGH",
+            "summary": "Micrometer gRPC server instrumentation DoS",
+            "vulnerabilityId": "GHSA-w737-wx49-qj23"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43515",
+              "CVE-2026-43515"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43515|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - Security constraints not correctly applied",
+            "vulnerabilityId": "GHSA-5m62-pw8w-7w9f"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43513",
+              "CVE-2026-43513"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43513|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat: LockOutRealm treats user names as case-sensitive",
+            "vulnerabilityId": "GHSA-5mp6-jrq3-r938"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-65905",
+              "CVE-2026-65905"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-65905|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat's DIGEST authenticator has an Authentication Bypass by Capture-replay vulnerability",
+            "vulnerabilityId": "GHSA-9xv2-5v5q-p794"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-42498",
+              "CVE-2026-42498"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-42498|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat - WebSocket authentication header exposure",
+            "vulnerabilityId": "GHSA-fv25-8xcx-gqjc"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-65182",
+              "CVE-2026-65182"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-65182|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat has an Improper Access Control, Incorrect Authorization vulnerability",
+            "vulnerabilityId": "GHSA-gcx9-497g-6cp6"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-41284",
+              "CVE-2026-41284"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-41284|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "HIGH",
+            "summary": "Apache Tomcat: Unbounded read in WebDAV LOCK and  PROPFIND handling",
+            "vulnerabilityId": "GHSA-gx5v-xp9w-j4cg"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-68525",
+              "CVE-2026-68525"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.58",
+              "11.0.25",
+              "9.0.121"
+            ],
+            "identity": "BIT-TOMCAT-2026-68525|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat's FORM authentication process has an Incorrect Authorization vulnerability",
+            "vulnerabilityId": "GHSA-h3x4-894j-xpx5"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-43512",
+              "CVE-2026-43512"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-43512|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - Digest authenticator will authenticate any unknown user",
+            "vulnerabilityId": "GHSA-h6fc-48rj-7qqh"
+          },
+          {
+            "aliases": [
+              "BIT-tomcat-2026-41293",
+              "CVE-2026-41293"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "tomcat-embed-core",
+              "currentVersion": "11.0.21",
+              "ecosystem": "Maven",
+              "groupId": "org.apache.tomcat.embed",
+              "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+            },
+            "fixedVersions": [
+              "10.1.55",
+              "11.0.22",
+              "9.0.118"
+            ],
+            "identity": "BIT-TOMCAT-2026-41293|org.apache.tomcat.embed:tomcat-embed-core",
+            "severity": "CRITICAL",
+            "summary": "Apache Tomcat - HTTP/2 request headers not validated",
+            "vulnerabilityId": "GHSA-r29c-68gh-xp6x"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41845"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41845|org.springframework:spring-webmvc",
+            "severity": "HIGH",
+            "summary": "Spring Framework Cross-site Scripting via JavaScriptUtils",
+            "vulnerabilityId": "GHSA-3chg-m5w7-qfv5"
+          },
+          {
+            "aliases": [
+              "CVE-2026-47884"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "7.0.9"
+            ],
+            "identity": "CVE-2026-47884|org.springframework:spring-webmvc",
+            "severity": "CRITICAL",
+            "summary": "Spring Framework Improper Path Limitation in XsltView",
+            "vulnerabilityId": "GHSA-pc63-qcmh-9cmg"
+          },
+          {
+            "aliases": [
+              "CVE-2026-41842"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "spring-webmvc",
+              "currentVersion": "7.0.7",
+              "ecosystem": "Maven",
+              "groupId": "org.springframework",
+              "packageName": "org.springframework:spring-webmvc"
+            },
+            "fixedVersions": [
+              "6.2.19",
+              "7.0.8"
+            ],
+            "identity": "CVE-2026-41842|org.springframework:spring-webmvc",
+            "severity": "HIGH",
+            "summary": "Spring Framework Denial of Service via Versioned Resources in Spring MVC and WebFlux",
+            "vulnerabilityId": "GHSA-x23c-287f-qqv5"
+          },
+          {
+            "aliases": [
+              "CVE-2026-89425"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-89425|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": "jackson-core: UTF8DataInputJsonParser._reportInvalidToken() missing maxErrorTokenLength limit -> unbounded StringBuilder growth (DoS)",
+            "vulnerabilityId": "GHSA-7hhh-6rmp-j9qf"
+          },
+          {
+            "aliases": [
+              "CVE-2026-89407"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.2"
+            ],
+            "identity": "CVE-2026-89407|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": " jackson-core: ReDoS: quadratic backtracking in NumberInput.PATTERN_FLOAT via looksLikeValidNumber()",
+            "vulnerabilityId": "GHSA-p6pp-m3f8-5c89"
+          },
+          {
+            "aliases": [
+              "CVE-2026-68494"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-core",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-core"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-68494|tools.jackson.core:jackson-core",
+            "severity": "HIGH",
+            "summary": "jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)",
+            "vulnerabilityId": "GHSA-r7wm-3cxj-wff9"
+          },
+          {
+            "aliases": [
+              "CVE-2026-91777"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-91777|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind quadratic forward-reference completion ",
+            "vulnerabilityId": "GHSA-cxp5-3px4-pw24"
+          },
+          {
+            "aliases": [
+              "CVE-2026-54512"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-54512|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+            "vulnerabilityId": "GHSA-j3rv-43j4-c7qm"
+          },
+          {
+            "aliases": [
+              "CVE-2026-68497"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.10",
+              "2.21.6",
+              "2.22.2",
+              "3.1.6",
+              "3.2.2"
+            ],
+            "identity": "CVE-2026-68497|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind: Duration XMLGregorianCalendar Unbounded Number Parse DoS",
+            "vulnerabilityId": "GHSA-q4xh-88c3-wmh7"
+          },
+          {
+            "aliases": [
+              "CVE-2026-54513"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.8",
+              "2.21.4",
+              "3.1.4"
+            ],
+            "identity": "CVE-2026-54513|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+            "vulnerabilityId": "GHSA-rmj7-2vxq-3g9f"
+          },
+          {
+            "aliases": [
+              "CVE-2026-91776"
+            ],
+            "backendEvidence": {},
+            "dependency": {
+              "artifactId": "jackson-databind",
+              "currentVersion": "3.1.2",
+              "ecosystem": "Maven",
+              "groupId": "tools.jackson.core",
+              "packageName": "tools.jackson.core:jackson-databind"
+            },
+            "fixedVersions": [
+              "2.18.11",
+              "2.21.7",
+              "2.22.3",
+              "3.1.7",
+              "3.2.3"
+            ],
+            "identity": "CVE-2026-91776|tools.jackson.core:jackson-databind",
+            "severity": "HIGH",
+            "summary": "jackson-databind retains every unknown raw type ID ",
+            "vulnerabilityId": "GHSA-wv8q-qhhj-9h54"
+          }
+        ]
+      },
+      "message": "Target comparison unavailable because validation evidence is incomplete: fresh vulnerability scan did not complete",
+      "name": "target_findings_resolved",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "comparisonComplete": false,
+        "newFindings": []
+      },
+      "message": "New prohibited finding comparison unavailable because the fresh scan did not complete",
+      "name": "no_new_prohibited_findings",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "baseline": [
+          "java.version=21",
+          "maven.compiler.release=21"
+        ],
+        "current": [
+          "java.version=21",
+          "maven.compiler.release=21",
+          "maven.compiler.source=21",
+          "maven.compiler.target=21"
+        ],
+        "expected": [
+          "java.version=21",
+          "maven.compiler.release=21"
+        ]
+      },
+      "message": "Java version configuration violates the protected value",
+      "name": "protected_java_version",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "applicable_policy": {
+          "allow_downgrade": false,
+          "allow_major": false,
+          "allow_minor": true,
+          "allow_patch": true,
+          "approved_versions": [],
+          "required_version": null,
+          "source": "version_policies.spring_boot"
+        },
+        "baseline_version": "4.0.6",
+        "component": "spring_boot",
+        "detected_change_type": [
+          "configuration_changed",
+          "downgrade"
+        ],
+        "evaluations": [
+          {
+            "baseline_version": "4.0.6",
+            "comparable": true,
+            "detected_change_type": "downgrade",
+            "final_version": "2.7.18",
+            "source": "parent"
+          },
+          {
+            "baseline_version": null,
+            "comparable": false,
+            "detected_change_type": "configuration_changed",
+            "final_version": "2.7.18",
+            "source": "spring-boot.version"
+          }
+        ],
+        "final_version": [
+          "2.7.18",
+          "2.7.18"
+        ],
+        "passed": false,
+        "reason": "Spring Boot version movement is rejected by policy: configuration_changed, downgrade"
+      },
+      "message": "Spring Boot version movement is rejected by policy: configuration_changed, downgrade",
+      "name": "spring_boot_version_policy",
+      "passed": false
+    },
+    {
+      "evidence": {
+        "addedSuppressionLines": [],
+        "changedSuppressionFiles": []
+      },
+      "message": "No prohibited suppression change detected",
+      "name": "suppression_policy",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "diagnosticArtifacts": []
+      },
+      "message": "No newly changed likely investigation-only artifacts were detected",
+      "name": "delivery_diff_hygiene",
+      "passed": true
+    }
+  ],
+  "cycle": 1,
+  "cycleEvidence": {
+    "afterChangedFiles": [
+      "pom.xml",
+      "spring-boot-starter-webmvc-3.2.5.pom",
+      "task-service/pom.xml",
+      "task-web/pom.xml"
+    ],
+    "afterStateCaptured": true,
+    "afterStateDigest": "57b728fc67f55ea38066f87a769133724fea753ff3e82e8edc329c08662e397a",
+    "beforeChangedFiles": [
+      "pom.xml",
+      "spring-boot-starter-webmvc-3.2.5.pom",
+      "task-service/pom.xml",
+      "task-web/pom.xml"
+    ],
+    "beforeStateCaptured": true,
+    "beforeStateDigest": "57b728fc67f55ea38066f87a769133724fea753ff3e82e8edc329c08662e397a",
+    "deltaPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/validation/cycle-1-repository-delta.json",
+    "matchesPriorCycle": null,
+    "pathsAddedToChangeSet": [],
+    "pathsModifiedSinceCycleStart": [],
+    "pathsRemovedFromChangeSet": [],
+    "repositoryStateChanged": false
+  },
+  "deliveryEligible": true,
+  "diagnosticArtifacts": [],
+  "diffPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/validation/cycle-1.diff",
+  "passed": false,
+  "remainingTargetFindings": [],
+  "resolvedTargetFindings": [],
+  "scan": {
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "backoffSeconds": null,
+        "command": [
+          "/home/kavya_parivarababu/bin/osv-scanner",
+          "scan",
+          "source",
+          "-r",
+          "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+          "--format",
+          "json",
+          "--data-source=native",
+          "--maven-registry=http://127.0.0.1:46681/"
+        ],
+        "commandResult": {
+          "blocked": false,
+          "command": [
+            "/home/kavya_parivarababu/bin/osv-scanner",
+            "scan",
+            "source",
+            "-r",
+            "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+            "--format",
+            "json",
+            "--data-source=native",
+            "--maven-registry=http://127.0.0.1:46681/"
+          ],
+          "cwd": "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+          "durationSeconds": 0.1411550719999468,
+          "exitCode": 127,
+          "stderr": "Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\n",
+          "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stderr.log",
+          "stdout": "{\n  \"results\": [],\n  \"experimental_config\": {\n    \"licenses\": {\n      \"summary\": false,\n      \"allowlist\": null\n    }\n  }\n}\n",
+          "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stdout.log",
+          "timedOut": false
+        },
+        "exitCode": 127,
+        "failureReason": "DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>",
+        "outcome": "INCOMPLETE_FATAL_FAILURE",
+        "rawReportPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.json",
+        "retryScheduled": false,
+        "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.stderr.log",
+        "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1-attempt-1.stdout.log"
+      }
+    ],
+    "backend": "osv",
+    "commandResult": {
+      "blocked": false,
+      "command": [
+        "/home/kavya_parivarababu/bin/osv-scanner",
+        "scan",
+        "source",
+        "-r",
+        "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+        "--format",
+        "json",
+        "--data-source=native",
+        "--maven-registry=http://127.0.0.1:46681/"
+      ],
+      "cwd": "/tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository",
+      "durationSeconds": 0.1411550719999468,
+      "exitCode": 127,
+      "stderr": "Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\n",
+      "stderrArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stderr.log",
+      "stdout": "{\n  \"results\": [],\n  \"experimental_config\": {\n    \"licenses\": {\n      \"summary\": false,\n      \"allowlist\": null\n    }\n  }\n}\n",
+      "stdoutArtifact": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/commands/osv_validation-cycle-1_attempt_1-4045037a1949.stdout.log",
+      "timedOut": false
+    },
+    "error": "DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository\nStarting filesystem walk for root: /\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-common/pom.xml file and found 0 packages\ncould not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-service/pom.xml file and found 2 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-domain/pom.xml file and found 0 packages\nScanned /tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/task-web/pom.xml file and found 4 packages\nEnd status: 53 dirs visited, 84 inodes visited, 6 Extract calls, 9.848196ms elapsed, 9.849004ms wall time\nFiltered 6 local/unscannable package/s from the scan.\nError during extraction: (extracting as java/pomxml) tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: could not extract pom from tmp/openhands-gate2-validation-rrkg09dy/temp/autonomous-osv-7lul9tus/repository/spring-boot-starter-webmvc-3.2.5.pom: XML syntax error on line 6: element <hr> closed by </body>",
+    "evidence": {},
+    "failureKind": "DEPENDENCY_RESOLUTION",
+    "findings": [],
+    "outcome": "INCOMPLETE_FATAL_FAILURE",
+    "rawReportPath": "/tmp/openhands-gate2-validation-rrkg09dy/artifacts/scans/validation-cycle-1.json",
+    "succeeded": false
+  },
+  "targetComparisonComplete": false,
+  "treeDigest": "57b728fc67f55ea38066f87a769133724fea753ff3e82e8edc329c08662e397a",
+  "unknownTargetFindings": [
+    {
+      "aliases": [
+        "CVE-2022-42889"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "commons-text",
+        "currentVersion": "1.9",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.commons",
+        "packageName": "org.apache.commons:commons-text"
+      },
+      "fixedVersions": [
+        "1.10.0"
+      ],
+      "identity": "CVE-2022-42889|org.apache.commons:commons-text",
+      "severity": "CRITICAL",
+      "summary": "Arbitrary code execution in Apache Commons Text",
+      "vulnerabilityId": "GHSA-599f-7c49-w659"
+    },
+    {
+      "aliases": [
+        "CVE-2023-5072"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "json",
+        "currentVersion": "20230227",
+        "ecosystem": "Maven",
+        "groupId": "org.json",
+        "packageName": "org.json:json"
+      },
+      "fixedVersions": [
+        "20231013"
+      ],
+      "identity": "CVE-2023-5072|org.json:json",
+      "severity": "HIGH",
+      "summary": "Java: DoS Vulnerability in JSON-JAVA",
+      "vulnerabilityId": "GHSA-4jq9-2xhw-jpx7"
+    },
+    {
+      "aliases": [
+        "CVE-2026-41850"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "spring-expression",
+        "currentVersion": "7.0.7",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework",
+        "packageName": "org.springframework:spring-expression"
+      },
+      "fixedVersions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "CVE-2026-41850|org.springframework:spring-expression",
+      "severity": "HIGH",
+      "summary": "Spring Framework Algorithmic Denial of Service via SpEL Expressions",
+      "vulnerabilityId": "GHSA-r5w3-xv2f-j59q"
+    },
+    {
+      "aliases": [
+        "CVE-2026-40984"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "micrometer-core",
+        "currentVersion": "1.16.5",
+        "ecosystem": "Maven",
+        "groupId": "io.micrometer",
+        "packageName": "io.micrometer:micrometer-core"
+      },
+      "fixedVersions": [
+        "1.15.12",
+        "1.16.6"
+      ],
+      "identity": "CVE-2026-40984|io.micrometer:micrometer-core",
+      "severity": "HIGH",
+      "summary": "Micrometer HTTP server instrumentations DoS",
+      "vulnerabilityId": "GHSA-g3pr-3p32-fp23"
+    },
+    {
+      "aliases": [
+        "CVE-2026-40983"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "micrometer-core",
+        "currentVersion": "1.16.5",
+        "ecosystem": "Maven",
+        "groupId": "io.micrometer",
+        "packageName": "io.micrometer:micrometer-core"
+      },
+      "fixedVersions": [
+        "1.15.12",
+        "1.16.6"
+      ],
+      "identity": "CVE-2026-40983|io.micrometer:micrometer-core",
+      "severity": "HIGH",
+      "summary": "Micrometer gRPC server instrumentation DoS",
+      "vulnerabilityId": "GHSA-w737-wx49-qj23"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-43515",
+        "CVE-2026-43515"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-43515|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat - Security constraints not correctly applied",
+      "vulnerabilityId": "GHSA-5m62-pw8w-7w9f"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-43513",
+        "CVE-2026-43513"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-43513|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "HIGH",
+      "summary": "Apache Tomcat: LockOutRealm treats user names as case-sensitive",
+      "vulnerabilityId": "GHSA-5mp6-jrq3-r938"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-65905",
+        "CVE-2026-65905"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.58",
+        "11.0.25",
+        "9.0.121"
+      ],
+      "identity": "BIT-TOMCAT-2026-65905|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat's DIGEST authenticator has an Authentication Bypass by Capture-replay vulnerability",
+      "vulnerabilityId": "GHSA-9xv2-5v5q-p794"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-42498",
+        "CVE-2026-42498"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-42498|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "HIGH",
+      "summary": "Apache Tomcat - WebSocket authentication header exposure",
+      "vulnerabilityId": "GHSA-fv25-8xcx-gqjc"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-65182",
+        "CVE-2026-65182"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.58",
+        "11.0.25",
+        "9.0.121"
+      ],
+      "identity": "BIT-TOMCAT-2026-65182|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat has an Improper Access Control, Incorrect Authorization vulnerability",
+      "vulnerabilityId": "GHSA-gcx9-497g-6cp6"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-41284",
+        "CVE-2026-41284"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-41284|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "HIGH",
+      "summary": "Apache Tomcat: Unbounded read in WebDAV LOCK and  PROPFIND handling",
+      "vulnerabilityId": "GHSA-gx5v-xp9w-j4cg"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-68525",
+        "CVE-2026-68525"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.58",
+        "11.0.25",
+        "9.0.121"
+      ],
+      "identity": "BIT-TOMCAT-2026-68525|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat's FORM authentication process has an Incorrect Authorization vulnerability",
+      "vulnerabilityId": "GHSA-h3x4-894j-xpx5"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-43512",
+        "CVE-2026-43512"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-43512|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat - Digest authenticator will authenticate any unknown user",
+      "vulnerabilityId": "GHSA-h6fc-48rj-7qqh"
+    },
+    {
+      "aliases": [
+        "BIT-tomcat-2026-41293",
+        "CVE-2026-41293"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "tomcat-embed-core",
+        "currentVersion": "11.0.21",
+        "ecosystem": "Maven",
+        "groupId": "org.apache.tomcat.embed",
+        "packageName": "org.apache.tomcat.embed:tomcat-embed-core"
+      },
+      "fixedVersions": [
+        "10.1.55",
+        "11.0.22",
+        "9.0.118"
+      ],
+      "identity": "BIT-TOMCAT-2026-41293|org.apache.tomcat.embed:tomcat-embed-core",
+      "severity": "CRITICAL",
+      "summary": "Apache Tomcat - HTTP/2 request headers not validated",
+      "vulnerabilityId": "GHSA-r29c-68gh-xp6x"
+    },
+    {
+      "aliases": [
+        "CVE-2026-41845"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "spring-webmvc",
+        "currentVersion": "7.0.7",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework",
+        "packageName": "org.springframework:spring-webmvc"
+      },
+      "fixedVersions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "CVE-2026-41845|org.springframework:spring-webmvc",
+      "severity": "HIGH",
+      "summary": "Spring Framework Cross-site Scripting via JavaScriptUtils",
+      "vulnerabilityId": "GHSA-3chg-m5w7-qfv5"
+    },
+    {
+      "aliases": [
+        "CVE-2026-47884"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "spring-webmvc",
+        "currentVersion": "7.0.7",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework",
+        "packageName": "org.springframework:spring-webmvc"
+      },
+      "fixedVersions": [
+        "7.0.9"
+      ],
+      "identity": "CVE-2026-47884|org.springframework:spring-webmvc",
+      "severity": "CRITICAL",
+      "summary": "Spring Framework Improper Path Limitation in XsltView",
+      "vulnerabilityId": "GHSA-pc63-qcmh-9cmg"
+    },
+    {
+      "aliases": [
+        "CVE-2026-41842"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "spring-webmvc",
+        "currentVersion": "7.0.7",
+        "ecosystem": "Maven",
+        "groupId": "org.springframework",
+        "packageName": "org.springframework:spring-webmvc"
+      },
+      "fixedVersions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "CVE-2026-41842|org.springframework:spring-webmvc",
+      "severity": "HIGH",
+      "summary": "Spring Framework Denial of Service via Versioned Resources in Spring MVC and WebFlux",
+      "vulnerabilityId": "GHSA-x23c-287f-qqv5"
+    },
+    {
+      "aliases": [
+        "CVE-2026-89425"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-core",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-core"
+      },
+      "fixedVersions": [
+        "2.18.11",
+        "2.21.7",
+        "2.22.3",
+        "3.1.7",
+        "3.2.3"
+      ],
+      "identity": "CVE-2026-89425|tools.jackson.core:jackson-core",
+      "severity": "HIGH",
+      "summary": "jackson-core: UTF8DataInputJsonParser._reportInvalidToken() missing maxErrorTokenLength limit -> unbounded StringBuilder growth (DoS)",
+      "vulnerabilityId": "GHSA-7hhh-6rmp-j9qf"
+    },
+    {
+      "aliases": [
+        "CVE-2026-89407"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-core",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-core"
+      },
+      "fixedVersions": [
+        "2.18.11",
+        "2.21.7",
+        "2.22.3",
+        "3.1.7",
+        "3.2.2"
+      ],
+      "identity": "CVE-2026-89407|tools.jackson.core:jackson-core",
+      "severity": "HIGH",
+      "summary": " jackson-core: ReDoS: quadratic backtracking in NumberInput.PATTERN_FLOAT via looksLikeValidNumber()",
+      "vulnerabilityId": "GHSA-p6pp-m3f8-5c89"
+    },
+    {
+      "aliases": [
+        "CVE-2026-68494"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-core",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-core"
+      },
+      "fixedVersions": [
+        "2.18.8",
+        "2.21.4",
+        "3.1.4"
+      ],
+      "identity": "CVE-2026-68494|tools.jackson.core:jackson-core",
+      "severity": "HIGH",
+      "summary": "jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)",
+      "vulnerabilityId": "GHSA-r7wm-3cxj-wff9"
+    },
+    {
+      "aliases": [
+        "CVE-2026-91777"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-databind"
+      },
+      "fixedVersions": [
+        "2.18.11",
+        "2.21.7",
+        "2.22.3",
+        "3.1.7",
+        "3.2.3"
+      ],
+      "identity": "CVE-2026-91777|tools.jackson.core:jackson-databind",
+      "severity": "HIGH",
+      "summary": "jackson-databind quadratic forward-reference completion ",
+      "vulnerabilityId": "GHSA-cxp5-3px4-pw24"
+    },
+    {
+      "aliases": [
+        "CVE-2026-54512"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-databind"
+      },
+      "fixedVersions": [
+        "2.18.8",
+        "2.21.4",
+        "3.1.4"
+      ],
+      "identity": "CVE-2026-54512|tools.jackson.core:jackson-databind",
+      "severity": "HIGH",
+      "summary": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+      "vulnerabilityId": "GHSA-j3rv-43j4-c7qm"
+    },
+    {
+      "aliases": [
+        "CVE-2026-68497"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-databind"
+      },
+      "fixedVersions": [
+        "2.18.10",
+        "2.21.6",
+        "2.22.2",
+        "3.1.6",
+        "3.2.2"
+      ],
+      "identity": "CVE-2026-68497|tools.jackson.core:jackson-databind",
+      "severity": "HIGH",
+      "summary": "jackson-databind: Duration XMLGregorianCalendar Unbounded Number Parse DoS",
+      "vulnerabilityId": "GHSA-q4xh-88c3-wmh7"
+    },
+    {
+      "aliases": [
+        "CVE-2026-54513"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-databind"
+      },
+      "fixedVersions": [
+        "2.18.8",
+        "2.21.4",
+        "3.1.4"
+      ],
+      "identity": "CVE-2026-54513|tools.jackson.core:jackson-databind",
+      "severity": "HIGH",
+      "summary": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+      "vulnerabilityId": "GHSA-rmj7-2vxq-3g9f"
+    },
+    {
+      "aliases": [
+        "CVE-2026-91776"
+      ],
+      "backendEvidence": {},
+      "dependency": {
+        "artifactId": "jackson-databind",
+        "currentVersion": "3.1.2",
+        "ecosystem": "Maven",
+        "groupId": "tools.jackson.core",
+        "packageName": "tools.jackson.core:jackson-databind"
+      },
+      "fixedVersions": [
+        "2.18.11",
+        "2.21.7",
+        "2.22.3",
+        "3.1.7",
+        "3.2.3"
+      ],
+      "identity": "CVE-2026-91776|tools.jackson.core:jackson-databind",
+      "severity": "HIGH",
+      "summary": "jackson-databind retains every unknown raw type ID ",
+      "vulnerabilityId": "GHSA-wv8q-qhhj-9h54"
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,140 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..a7ffdc0 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -7,10 +7,12 @@
+     <parent>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-parent</artifactId>
+-        <version>4.0.6</version>
++        <version>2.7.18</version>
+         <relativePath/>
+     </parent>
+ 
++
++
+     <groupId>com.example.secureapp</groupId>
+     <artifactId>secure-multimodule-springboot-java21</artifactId>
+     <version>1.0.0-SNAPSHOT</version>
+@@ -29,16 +31,26 @@
+     <properties>
+         <java.version>21</java.version>
+         <maven.compiler.release>21</maven.compiler.release>
++        <maven.compiler.source>21</maven.compiler.source>
++        <maven.compiler.target>21</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+ 
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+         <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>
++
++        <!-- Dependency versions for Spring and Spring Boot -->
++
++        <spring-boot.version>2.7.18</spring-boot.version>
++        <commons-text.version>1.10.0</commons-text.version>
++        <json.version>20240303</json.version>
+     </properties>
+ 
+     <dependencyManagement>
+         <dependencies>
++
++
+             <dependency>
+                 <groupId>${project.groupId}</groupId>
+                 <artifactId>task-common</artifactId>
+@@ -54,29 +66,33 @@
+                 <artifactId>task-service</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
++
++            <dependency>
++                <groupId>org.springframework.boot</groupId>
++                <artifactId>spring-boot-dependencies</artifactId>
++                <version>${spring-boot.version}</version>
++                <type>pom</type>
++                <scope>import</scope>
++            </dependency>
++
++
++            <dependency>
++                <groupId>org.apache.commons</groupId>
++                <artifactId>commons-text</artifactId>
++                <version>${commons-text.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>org.json</groupId>
++                <artifactId>json</artifactId>
++                <version>${json.version}</version>
++            </dependency>
++
+         </dependencies>
+     </dependencyManagement>
+-    <dependencies>
+-        <dependency>
+-            <groupId>org.apache.commons</groupId>
+-            <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.json</groupId>
+-            <artifactId>json</artifactId>
+-            <version>20230227</version>
+-        </dependency>
+-    </dependencies>
++
+     <build>
+         <plugins>
+-            <plugin>
+-                <groupId>org.springframework.boot</groupId>
+-                <artifactId>spring-boot-maven-plugin</artifactId>
+-                <configuration>
+-                    <skip>true</skip>
+-                </configuration>
+-            </plugin>
++
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-enforcer-plugin</artifactId>
+diff --git a/task-service/pom.xml b/task-service/pom.xml
+index ff2af88..0fb06e3 100644
+--- a/task-service/pom.xml
++++ b/task-service/pom.xml
+@@ -15,15 +15,17 @@
+     <packaging>jar</packaging>
+     <name>task-service</name>
+ 
++
+     <dependencies>
+         <dependency>
+             <groupId>${project.groupId}</groupId>
+             <artifactId>task-domain</artifactId>
+         </dependency>
+         <dependency>
+-            <groupId>org.springframework</groupId>
+-            <artifactId>spring-context</artifactId>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter</artifactId>
+         </dependency>
++
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-test</artifactId>
+diff --git a/task-web/pom.xml b/task-web/pom.xml
+index d4cd9a7..4d76a21 100644
+--- a/task-web/pom.xml
++++ b/task-web/pom.xml
+@@ -7,9 +7,12 @@
+     <version>1.0.0-SNAPSHOT</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+-  <artifactId>task-web</artifactId>
++    <artifactId>task-web</artifactId>
++
+   <packaging>jar</packaging>
+   <name>task-web</name>
++
++
+   <dependencies>
+     <dependency>
+       <groupId>${project.groupId}</groupId>
