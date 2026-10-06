@@ -31,11 +31,35 @@ publish_evidence() {
 
   if [ -n "${TASK_ID:-}" ]; then
     local state_dir="$HOME/.openhands/gate2/task-${TASK_ID}-stop-hook"
+    local target_repo="$HOME/maven-multimodule-app-stop-hook-${TASK_ID}"
     [ -f "$state_dir/baseline.json" ] && cp -f "$state_dir/baseline.json" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/validation.json" ] && cp -f "$state_dir/validation.json" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/last-validator.log" ] && cp -f "$state_dir/hook/last-validator.log" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/infrastructure-failure" ] && cp -f "$state_dir/hook/infrastructure-failure" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/attempt-count" ] && cp -f "$state_dir/hook/attempt-count" "$EVIDENCE_DIR/" || true
+
+    local events_dir conversation_id trajectory_dir
+    for events_dir in "$state_dir"/conversation/*/events; do
+      [ -d "$events_dir" ] || continue
+      conversation_id="$(basename "$(dirname "$events_dir")")"
+      trajectory_dir="$EVIDENCE_DIR/trajectory-$conversation_id"
+      python3 "$CONTROL_REPO/scripts/openhands/export-event-history.py" \
+        "$events_dir" "$trajectory_dir" \
+        >> "$RUN_LOG_DIR/evidence-export.log" 2>&1 || true
+    done
+    [ -f "$RUN_LOG_DIR/evidence-export.log" ] && cp -f "$RUN_LOG_DIR/evidence-export.log" "$EVIDENCE_DIR/" || true
+
+    if git -C "$target_repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      {
+        printf 'branch=%s\n' "$(git -C "$target_repo" branch --show-current)"
+        printf 'head=%s\n' "$(git -C "$target_repo" rev-parse HEAD)"
+        printf 'status_begin\n'
+        git -C "$target_repo" status --porcelain=v1
+        printf 'status_end\n'
+      } > "$EVIDENCE_DIR/git-state.txt" 2>&1 || true
+      git -C "$target_repo" diff --no-ext-diff --unified=3 > "$EVIDENCE_DIR/final.diff" 2>/dev/null || true
+      git -C "$target_repo" diff --stat > "$EVIDENCE_DIR/final-diff-stat.txt" 2>/dev/null || true
+    fi
   fi
 
   {
@@ -45,7 +69,7 @@ publish_evidence() {
     printf -- "- Final stage: `%s`\n" "$CURRENT_STAGE"
     printf -- "- Exit code: `%s`\n" "$rc"
     printf -- "- Local log source: `%s`\n" "$RUN_LOG_DIR"
-    printf "\nThis directory is captured automatically by the orchestrator. It contains startup, verification, execution, and available deterministic validation evidence.\n"
+    printf "\nThis directory is captured automatically by the orchestrator. It contains startup, verification, execution, deterministic validation evidence, sanitized observable OpenHands event trajectories when available, and final Git state/diff. Internal model reasoning/thought fields are intentionally excluded from the published trajectory export.\n"
   } > "$EVIDENCE_DIR/README.md"
 
   if [ "$AUTO_PUSH_EVIDENCE" != "1" ]; then
