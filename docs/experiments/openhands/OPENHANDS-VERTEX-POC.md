@@ -240,6 +240,10 @@ Do not add Chromium merely to silence the warning unless a test specifically req
 
 ## Reproducible local workflow
 
+For the current Gate 2 evaluation, the canonical operator workflow is [GATE2-ORCHESTRATED-RUNBOOK.md](GATE2-ORCHESTRATED-RUNBOOK.md). It composes the environment preparation/verification below with clean task setup, deterministic baseline, agent execution, Stop Hook validation, and automatic evidence capture/publication.
+
+The lower-level POC commands remain useful for isolated environment troubleshooting.
+
 Use the script:
 
 ```bash
