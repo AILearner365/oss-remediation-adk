@@ -2,6 +2,10 @@
 set -euo pipefail
 
 CONTROL_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=./openhands-cloudshell-env.sh
+source "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-env.sh"
+openhands_resolve_vertex_env
+
 SOURCE_REPO="${SOURCE_REPO:-$HOME/maven-multimodule-app}"
 LOG_ROOT="${OPENHANDS_RUN_LOG_ROOT:-$HOME/.openhands/gate2/run-logs}"
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
@@ -42,25 +46,12 @@ publish_evidence() {
       cp -f "$hook_artifact" "$EVIDENCE_DIR/"
     done
 
-    # Child-stage exports do not propagate to this shell. Capture the effective
-    # values already logged by the latest stage, without changing runtime setup.
-    local captured_vertex_project="" captured_vertex_location="" stage_log
-    for stage_log in execute verify startup; do
-      [ -f "$RUN_LOG_DIR/$stage_log.log" ] || continue
-      if [ -z "$captured_vertex_project" ]; then
-        captured_vertex_project="$(sed -n '/^==> Vertex project: /{s///;p;q;}' "$RUN_LOG_DIR/$stage_log.log")"
-      fi
-      if [ -z "$captured_vertex_location" ]; then
-        captured_vertex_location="$(sed -n '/^==> Vertex location: /{s///;p;q;}' "$RUN_LOG_DIR/$stage_log.log")"
-      fi
-    done
-
     {
       printf 'control_branch=%s\n' "$(git -C "$CONTROL_REPO" branch --show-current 2>/dev/null || true)"
       printf 'control_head=%s\n' "$(git -C "$CONTROL_REPO" rev-parse HEAD 2>/dev/null || true)"
       printf 'task_id=%s\n' "$TASK_ID"
-      printf 'vertex_project=%s\n' "${captured_vertex_project:-${VERTEXAI_PROJECT:-}}"
-      printf 'vertex_location=%s\n' "${captured_vertex_location:-${VERTEXAI_LOCATION:-}}"
+      printf 'vertex_project=%s\n' "${VERTEXAI_PROJECT:-}"
+      printf 'vertex_location=%s\n' "${VERTEXAI_LOCATION:-}"
       printf 'model=%s\n' "${MODEL:-vertex_ai/gemini-2.5-flash}"
       printf 'max_denials=%s\n' "${MAX_DENIALS:-3}"
       printf 'max_iterations=%s\n' "${MAX_ITERATIONS:-250}"
