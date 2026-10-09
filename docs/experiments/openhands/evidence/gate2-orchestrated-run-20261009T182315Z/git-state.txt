@@ -1,0 +1,10 @@
+branch=openhands-poc-task-06-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+ M task-service/pom.xml
+ M task-web/pom.xml
+?? osv_scan_results.json
+?? osv_scan_results_sbom.json
+?? osv_scan_results_web.json
+status_end

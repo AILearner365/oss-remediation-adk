@@ -1,0 +1,27 @@
+==> Running independent deterministic Gate 2 validation
+==> Target: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-06
+==> Baseline commit: 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Baseline HIGH/CRITICAL findings: 26
+[PASS] baseline_ancestry: Repository remains based on the recorded baseline
+[PASS] git_change_evidence: Git status and full diff were captured
+[PASS] build_test_startup: Required build/test/startup commands passed
+[PASS] fresh_vulnerability_scan: Fresh vulnerability scan completed: COMPLETED_CLEAN
+[PASS] target_findings_improved: 26 of 26 original target findings are resolved
+[PASS] target_findings_resolved: Requested target findings are resolved
+[PASS] no_new_prohibited_findings: No new prohibited findings were introduced
+[PASS] protected_java_version: Java version configuration matches the protected value
+[PASS] spring_boot_version_policy: Spring Boot version movement is allowed by policy
+[PASS] suppression_policy: No prohibited suppression change detected
+[PASS] delivery_diff_hygiene: No newly changed likely investigation-only artifacts were detected
+==> Changed files: 6
+    osv_scan_results.json
+    osv_scan_results_sbom.json
+    osv_scan_results_web.json
+    pom.xml
+    task-service/pom.xml
+    task-web/pom.xml
+==> Resolved target findings: 26
+==> Remaining target findings: 0
+==> Unknown/unscannable target findings: 0
+==> Validation report: /home/kavya_parivarababu/.openhands/gate2/task-06-stop-hook/validation.json
+==> Gate 2 independent deterministic validation PASSED
