@@ -10,6 +10,32 @@ The setup below records the original experiment protocol, not a pending Task-02 
 
 For the **current** clean-run procedure, use [GATE2-ORCHESTRATED-RUNBOOK.md](GATE2-ORCHESTRATED-RUNBOOK.md). The runbook supersedes the manual branch/worktree/environment commands below for new runs while preserving this document as historical experiment context.
 
+## Opt-in engineering-judgment guidance experiment
+
+Task-05 showed that native completion control and evidence transport worked, while the agent did not sustain evidence-driven engineering reassessment. The next isolated hypothesis is that a short, technology-neutral, always-active instruction can improve assumption verification, response to contradictory evidence, failure attribution, constraint preservation, and final self-validation.
+
+The implementation uses SDK 1.50.0's native `AgentContext.system_message_suffix`. The guidance is stored in `scripts/openhands/guidance/engineering-judgment.md` and is attached to the existing default agent only when explicitly enabled. It adds no planner, reasoning loop, retry mechanism, memory subsystem, dependency guidance, or solution recipe. The task contract, model, tools, condenser, iteration limit, stuck detection, Stop Hook, three-denial bound, deterministic validator, baseline, target repository, and Task-05 evidence are unchanged.
+
+Default behavior remains the Task-05 configuration:
+
+```bash
+unset OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE
+bash scripts/openhands/openhands-gate2-fresh-run.sh <task-id>
+```
+
+For a future controlled treatment run, enable only the guidance variable:
+
+```bash
+OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE=1 \
+  bash scripts/openhands/openhands-gate2-fresh-run.sh <task-id>
+```
+
+The Python runner also accepts `--engineering-judgment-guidance` and `--no-engineering-judgment-guidance` when invoked directly. False values `0`, `false`, `no`, and `off` preserve the default.
+
+Offline verification against `openhands-sdk[vertex]==1.50.0` and `openhands-tools==1.50.0` passed five focused checks: default-agent identity, opt-in loading and rendered system context, switch behavior, clear missing/unreadable-file failure, and unchanged task-contract/Stop-Hook configuration. This proves configuration and prompt assembly only. No live agent or remediation run has occurred, and no improvement in engineering convergence is claimed.
+
+Remaining uncertainty is behavioral: a system instruction may be redundant with existing general guidance, may not change model decisions, or may introduce a different tradeoff. The next action, when authorized, is one clean controlled treatment run with this variable enabled and every other Task-05 control preserved; baseline/advisory drift must be recorded rather than hidden.
+
 ## Objective
 
 Test whether native OpenHands completion control materially improves the same OSS-remediation task without reintroducing custom agent orchestration.

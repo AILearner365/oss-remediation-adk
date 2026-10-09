@@ -16,7 +16,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from openhands.sdk import Conversation, LLM
+from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
 from openhands.sdk.hooks import HookConfig, HookDefinition, HookMatcher
 from openhands.tools.preset.default import get_default_agent
@@ -27,6 +27,28 @@ DEFAULT_TARGET = Path.home() / "maven-multimodule-app-stop-hook"
 DEFAULT_STATE_DIR = Path.home() / ".openhands" / "gate2" / "task-02-stop-hook"
 DEFAULT_TASK_DOC = CONTROL_REPO / "docs" / "experiments" / "openhands" / "GATE2-TASK.md"
 DEFAULT_HOOK = CONTROL_REPO / "scripts" / "openhands" / "openhands-gate2-stop-hook.sh"
+DEFAULT_ENGINEERING_GUIDANCE = (
+    CONTROL_REPO
+    / "scripts"
+    / "openhands"
+    / "guidance"
+    / "engineering-judgment.md"
+)
+ENGINEERING_GUIDANCE_ENV = "OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE"
+
+
+def environment_flag(name: str) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return False
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off", ""}:
+        return False
+    raise SystemExit(
+        f"{name} must be one of 1/0, true/false, yes/no, or on/off"
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,6 +61,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="vertex_ai/gemini-2.5-flash")
     parser.add_argument("--max-denials", type=int, default=3)
     parser.add_argument("--max-iterations", type=int, default=250)
+    parser.add_argument(
+        "--engineering-judgment-guidance",
+        action=argparse.BooleanOptionalAction,
+        default=environment_flag(ENGINEERING_GUIDANCE_ENV),
+        help=(
+            "inject the opt-in engineering-judgment guidance through native "
+            "AgentContext.system_message_suffix"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -86,6 +117,58 @@ def report_passed(path: Path) -> bool:
         return data["passed"]
     checks = data.get("checks")
     return bool(checks) and all(bool(c.get("passed")) for c in checks)
+
+
+def load_engineering_guidance(path: Path = DEFAULT_ENGINEERING_GUIDANCE) -> str:
+    try:
+        guidance = path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        raise SystemExit(
+            f"Unable to load engineering judgment guidance from {path}: {exc}"
+        ) from exc
+    if not guidance:
+        raise SystemExit(f"Engineering judgment guidance is empty: {path}")
+    return guidance
+
+
+def build_agent(llm: LLM, *, engineering_guidance: bool):
+    agent = get_default_agent(llm=llm, cli_mode=True)
+    if not engineering_guidance:
+        return agent
+    context = AgentContext(
+        system_message_suffix=load_engineering_guidance(),
+    )
+    return agent.model_copy(update={"agent_context": context})
+
+
+def build_hook_config(
+    *,
+    target: Path,
+    baseline: Path,
+    validation: Path,
+    hook_state: Path,
+    max_denials: int,
+) -> HookConfig:
+    env_prefix = {
+        "CONTROL_REPO": str(CONTROL_REPO),
+        "GATE2_STATE_FILE": str(baseline),
+        "GATE2_VALIDATION_OUTPUT": str(validation),
+        "GATE2_HOOK_STATE_DIR": str(hook_state),
+        "GATE2_TARGET_REPO": str(target),
+        "GATE2_MAX_DENIALS": str(max_denials),
+    }
+    command = " ".join(
+        [f"{key}={shlex.quote(value)}" for key, value in env_prefix.items()]
+        + ["bash", shlex.quote(str(DEFAULT_HOOK))]
+    )
+    return HookConfig(
+        stop=[
+            HookMatcher(
+                matcher="*",
+                hooks=[HookDefinition(command=command, timeout=1800)],
+            )
+        ]
+    )
 
 
 def main() -> int:
@@ -147,30 +230,21 @@ def main() -> int:
 
     state_dir.mkdir(parents=True, exist_ok=True)
     hook_state.mkdir(parents=True, exist_ok=True)
-    for path in (hook_state / "attempt-count", hook_state / "last-validator.log", infrastructure_failure, validation):
+    for path in (
+        hook_state / "attempt-count",
+        hook_state / "last-validator.log",
+        infrastructure_failure,
+        validation,
+    ):
         if path.exists():
             path.unlink()
 
-    env_prefix = {
-        "CONTROL_REPO": str(CONTROL_REPO),
-        "GATE2_STATE_FILE": str(baseline),
-        "GATE2_VALIDATION_OUTPUT": str(validation),
-        "GATE2_HOOK_STATE_DIR": str(hook_state),
-        "GATE2_TARGET_REPO": str(target),
-        "GATE2_MAX_DENIALS": str(args.max_denials),
-    }
-    command = " ".join(
-        [f"{key}={shlex.quote(value)}" for key, value in env_prefix.items()]
-        + ["bash", shlex.quote(str(DEFAULT_HOOK))]
-    )
-
-    hook_config = HookConfig(
-        stop=[
-            HookMatcher(
-                matcher="*",
-                hooks=[HookDefinition(command=command, timeout=1800)],
-            )
-        ]
+    hook_config = build_hook_config(
+        target=target,
+        baseline=baseline,
+        validation=validation,
+        hook_state=hook_state,
+        max_denials=args.max_denials,
     )
 
     llm = LLM(
@@ -178,7 +252,12 @@ def main() -> int:
         model=args.model,
         api_key=None,
     )
-    agent = get_default_agent(llm=llm, cli_mode=True)
+    agent = build_agent(
+        llm,
+        engineering_guidance=args.engineering_judgment_guidance,
+    )
+    if args.engineering_judgment_guidance:
+        print(f"ENGINEERING_JUDGMENT_GUIDANCE={DEFAULT_ENGINEERING_GUIDANCE}")
     conversation = Conversation(
         agent=agent,
         workspace=str(target),
