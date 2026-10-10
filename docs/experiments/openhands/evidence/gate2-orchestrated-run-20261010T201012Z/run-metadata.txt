@@ -1,0 +1,8 @@
+control_branch=openhands-poc-evaluation
+control_head=c2c208ebb37c07676da315580de68949f6e51bff
+task_id=11
+vertex_project=deutschebank-aipocs
+vertex_location=us-central1
+model=vertex_ai/gemini-2.5-flash
+max_denials=3
+max_iterations=250

@@ -1,0 +1,40 @@
+==> Gate 2 execution
+==> Task: 11
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> Model: vertex_ai/gemini-2.5-flash
+==> Source repo: /home/kavya_parivarababu/maven-multimodule-app
+==> Target worktree: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-11
+==> State directory: /home/kavya_parivarababu/.openhands/gate2/task-11-stop-hook
+==> Fetching baseline
+==> Baseline: main-runrunning @ 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Creating remote task branch: openhands-poc-task-11-stop-hook
+remote: 
+remote: Create a pull request for 'openhands-poc-task-11-stop-hook' on GitHub by visiting:        
+remote:      https://github.com/AILearner365/maven-multimodule-app/pull/new/openhands-poc-task-11-stop-hook        
+remote: 
+To https://github.com/AILearner365/maven-multimodule-app.git
+ * [new branch]      9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 -> openhands-poc-task-11-stop-hook
+From https://github.com/AILearner365/maven-multimodule-app
+ * [new branch]      openhands-poc-task-11-stop-hook -> origin/openhands-poc-task-11-stop-hook
+==> Creating fresh worktree
+Preparing worktree (new branch 'openhands-poc-task-11-stop-hook')
+HEAD is now at 9ea1b0e Enable Spring Boot run for web module
+==> Running deterministic baseline
+ERROR: Baseline vulnerability scan was incomplete: INCOMPLETE_FATAL_FAILURE: DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository
+Starting filesystem walk for root: /
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-common/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-service/pom.xml file and found 4 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-domain/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-web/pom.xml file and found 6 packages
+End status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 7.634998ms elapsed, 7.63528ms wall time
+Filtered 6 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
+==> Target repository: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-11
+==> Branch: openhands-poc-task-11-stop-hook
+==> Baseline commit: 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Scanner: osv-scanner version: 2.6.0
+==> Running deterministic Maven baseline: clean verify
+==> Maven baseline PASSED
+==> Running deterministic OSV scan with local Maven repository support

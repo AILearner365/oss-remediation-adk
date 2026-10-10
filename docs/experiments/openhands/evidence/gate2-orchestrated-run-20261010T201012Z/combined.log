@@ -1,0 +1,148 @@
+==> OpenHands Gate 2 orchestrated run
+==> Run logs: /home/kavya_parivarababu/.openhands/gate2/run-logs/run-20261010T201012Z
+==> Repository evidence: /home/kavya_parivarababu/oss-remediation-adk/docs/experiments/openhands/evidence/gate2-orchestrated-run-20261010T201012Z
+==> Task: 11
+==> Stage 1/3: STARTUP / PREPARE
+==> Agent Canvas is not present in this Cloud Shell session
+==> Installing @openhands/agent-canvas@1.24.0 into the ephemeral global Node location
+
+added 610 packages in 2m
+npm warn install-scripts 4 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts   @openhands/agent-canvas@1.24.0 (postinstall: node -e "if (process.env.npm_config_global === 'true') { console.log('\n\x1b[32m\x1b[1m\u2713 @openhands/agent-canvas installed!\x1b[0m\n\nTo start Agent Canvas, run:\n\n  \x1b[36m\x1b[1magent-canvas\x1b[0m\n\nThis launches the full stack at \x1b[36mhttp://localhost:8000\x1b[0m.\n\nDocs: https://docs.openhands.dev/openhands/usage/agent-canvas/setup\n') }")
+npm warn install-scripts   @heroui/shared-utils@2.1.12 (postinstall: node -e "try{require('./scripts/postinstall.js')}catch(e){}")
+npm warn install-scripts   @openrouter/sdk@1.4.25 (postinstall: node scripts/check-types.js || true)
+npm warn install-scripts   core-js@3.50.0 (postinstall: node -e "try{require('./postinstall')}catch(e){}")
+npm warn install-scripts
+npm warn install-scripts Run `npm install -g --allow-scripts=@openhands/agent-canvas,@heroui/shared-utils,@openrouter/sdk,core-js` to allow these scripts once, or `npm config set allow-scripts=@openhands/agent-canvas,@heroui/shared-utils,@openrouter/sdk,core-js --location=user` to allow them for all global installs.
+==> Agent Canvas 1.24.0 installed
+==> Node: v24.21.0
+==> npm: 12.2.0
+==> uv: uv 0.12.2 (x86_64-unknown-linux-gnu)
+==> tmux: tmux 2.1
+==> Agent Canvas: 1.24.0
+==> Agent Canvas path: /usr/local/nvm/versions/node/v24.21.0/lib/node_modules/@openhands/agent-canvas
+[environment: untagged] Read more to tag: g.co/cloud/project-env-tag.
+Updated property [core/project].
+==> ADC OK
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> UV cache: /tmp/openhands-uv-cache
+==> tmux directory: /home/kavya_parivarababu/.openhands/agent-canvas/tmux
+==> Applied Vertex SDK launcher patch
+==> Applied Vertex ADC readiness patch
+51:  "openhands-sdk",
+415: *   packages (openhands-sdk, openhands-tools, openhands-workspace) so source
+447:      path.join(localPath, "openhands-sdk"),
+460:    // openhands-agent-server/, openhands-sdk/, openhands-tools/, openhands-workspace/
+473:      `${baseGitUrl}#subdirectory=openhands-sdk`,
+491:      `openhands-sdk[vertex]==${version}`,
+507:      `openhands-sdk==${DEFAULT_AGENT_SERVER_VERSION}`,
+M=T&&(D(O?.config)||O?.config?.model?.startsWith("vertex_ai/"))
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/disk/by-id/google-home-part1  4.8G  3.9G  669M  86% /home
+4.8M	/home/kavya_parivarababu/.npm
+173M	/home/kavya_parivarababu/.cache
+53M	/home/kavya_parivarababu/.openhands
+==> Stage 2/3: VERIFY
+==> Node: v24.21.0
+==> npm: 12.2.0
+==> uv: uv 0.12.2 (x86_64-unknown-linux-gnu)
+==> tmux: tmux 2.1
+==> Agent Canvas: 1.24.0
+==> Agent Canvas path: /usr/local/nvm/versions/node/v24.21.0/lib/node_modules/@openhands/agent-canvas
+==> tmux runtime OK
+==> ADC OK
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+Downloading pygments (1.2MiB)
+Downloading hf-xet (4.3MiB)
+Downloading beartype (1.5MiB)
+Downloading pillow (6.6MiB)
+Downloading aiohttp (1.7MiB)
+Downloading litellm (35.1MiB)
+Downloading pydantic-core (2.0MiB)
+Downloading botocore (15.3MiB)
+Downloading lupa (2.3MiB)
+Downloading tokenizers (3.2MiB)
+Downloading google-cloud-aiplatform (9.0MiB)
+Downloading tiktoken (1.1MiB)
+Downloading openai (1.6MiB)
+Downloading cryptography (4.5MiB)
+Downloading grpcio (6.7MiB)
+Downloading lmnr-claude-code-proxy (1.4MiB)
+ Downloaded tiktoken
+ Downloaded lmnr-claude-code-proxy
+ Downloaded aiohttp
+ Downloaded pydantic-core
+ Downloaded pygments
+ Downloaded lupa
+ Downloaded tokenizers
+ Downloaded beartype
+ Downloaded hf-xet
+ Downloaded cryptography
+ Downloaded pillow
+ Downloaded grpcio
+ Downloaded openai
+ Downloaded google-cloud-aiplatform
+ Downloaded botocore
+ Downloaded litellm
+Installed 151 packages in 1.77s
++----------------------------------------------------------------------+
+|  OpenHands SDK v1.50.0                                               |
+|                                                                      |
+|  Report a bug: github.com/OpenHands/software-agent-sdk/issues        |
+|  Get help: openhands.dev/joinslack                                   |
+|  Scale up: openhands.dev/product/sdk                                 |
+|                                                                      |
+|  Set OPENHANDS_SUPPRESS_BANNER=1 to hide this message                |
++----------------------------------------------------------------------+
+
+VERTEX_OPENHANDS_VERIFY_OK
+==> Vertex Gemini smoke test OK
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/disk/by-id/google-home-part1  4.8G  3.9G  667M  86% /home
+4.8M	/home/kavya_parivarababu/.npm
+173M	/home/kavya_parivarababu/.cache
+53M	/home/kavya_parivarababu/.openhands
+==> OpenHands Cloud Shell POC verification PASSED
+==> Stage 3/3: EXECUTE
+==> Gate 2 execution
+==> Task: 11
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> Model: vertex_ai/gemini-2.5-flash
+==> Source repo: /home/kavya_parivarababu/maven-multimodule-app
+==> Target worktree: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-11
+==> State directory: /home/kavya_parivarababu/.openhands/gate2/task-11-stop-hook
+==> Fetching baseline
+==> Baseline: main-runrunning @ 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Creating remote task branch: openhands-poc-task-11-stop-hook
+remote: 
+remote: Create a pull request for 'openhands-poc-task-11-stop-hook' on GitHub by visiting:        
+remote:      https://github.com/AILearner365/maven-multimodule-app/pull/new/openhands-poc-task-11-stop-hook        
+remote: 
+To https://github.com/AILearner365/maven-multimodule-app.git
+ * [new branch]      9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 -> openhands-poc-task-11-stop-hook
+From https://github.com/AILearner365/maven-multimodule-app
+ * [new branch]      openhands-poc-task-11-stop-hook -> origin/openhands-poc-task-11-stop-hook
+==> Creating fresh worktree
+Preparing worktree (new branch 'openhands-poc-task-11-stop-hook')
+HEAD is now at 9ea1b0e Enable Spring Boot run for web module
+==> Running deterministic baseline
+ERROR: Baseline vulnerability scan was incomplete: INCOMPLETE_FATAL_FAILURE: DEPENDENCY_RESOLUTION_FAILURE: Scanning dir /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository
+Starting filesystem walk for root: /
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-common/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-service/pom.xml file and found 4 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-domain/pom.xml file and found 2 packages
+Scanned /tmp/openhands-gate2-baseline-xu8asizj/temp/autonomous-osv-qm1dl30l/repository/task-web/pom.xml file and found 6 packages
+End status: 53 dirs visited, 83 inodes visited, 5 Extract calls, 7.634998ms elapsed, 7.63528ms wall time
+Filtered 6 local/unscannable package/s from the scan.
+Warning: enricher transitivedependency/pomxml may be risky when run on untrusted artifacts. Please ensure you trust the source code and artifacts.
+==> Target repository: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-11
+==> Branch: openhands-poc-task-11-stop-hook
+==> Baseline commit: 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Scanner: osv-scanner version: 2.6.0
+==> Running deterministic Maven baseline: clean verify
+==> Maven baseline PASSED
+==> Running deterministic OSV scan with local Maven repository support
