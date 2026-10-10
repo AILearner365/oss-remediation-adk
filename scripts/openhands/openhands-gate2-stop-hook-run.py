@@ -36,6 +36,10 @@ DEFAULT_ENGINEERING_GUIDANCE = (
 )
 ENGINEERING_GUIDANCE_ENV = "OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE"
 TASK_SKILL_ENV = "OPENHANDS_TASK_SKILL"
+STRUCTURED_ENV = "OPENHANDS_STRUCTURED_GUIDANCE"
+GENERAL_GUIDANCE = CONTROL_REPO / "scripts/openhands/guidance/general-engineering.md"
+PROJECT_GUIDANCE = CONTROL_REPO / "scripts/openhands/project-context/AGENTS.md"
+MAVEN_SKILL_NAME = "maven-dependency-evidence"
 TASK_SKILL_DIR = CONTROL_REPO / "scripts" / "openhands" / "skills"
 TASK_SKILL_NAME = "evidence-driven-dependency-remediation"
 
@@ -79,6 +83,9 @@ def parse_args() -> argparse.Namespace:
         default=environment_flag(TASK_SKILL_ENV),
         help="opt in to the pinned local Agent Skill instead of the legacy guidance suffix",
     )
+    parser.add_argument("--structured-guidance", action=argparse.BooleanOptionalAction,
+                        default=environment_flag(STRUCTURED_ENV),
+                        help="opt-in general engineering guidance, repository context and Maven evidence Skill")
     return parser.parse_args()
 
 
@@ -140,7 +147,20 @@ def load_engineering_guidance(path: Path = DEFAULT_ENGINEERING_GUIDANCE) -> str:
     return guidance
 
 
-def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False):
+def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False, structured_guidance: bool = False):
+    if sum((engineering_guidance, task_skill, structured_guidance)) > 1:
+        raise SystemExit("Choose only one guidance experiment")
+    if structured_guidance:
+        from openhands.sdk.skills import load_skills_from_dir
+        _repo, _knowledge, skills = load_skills_from_dir(TASK_SKILL_DIR)
+        if MAVEN_SKILL_NAME not in skills:
+            raise SystemExit(f"Missing Maven evidence Skill: {MAVEN_SKILL_NAME}")
+        guidance = load_engineering_guidance(GENERAL_GUIDANCE)
+        project = load_engineering_guidance(PROJECT_GUIDANCE)
+        context = AgentContext(skills=[skills[MAVEN_SKILL_NAME]],
+            system_message_suffix=guidance + "\\n\\n<REPOSITORY_GUIDANCE>\\n" + project + "\\n</REPOSITORY_GUIDANCE>",
+            load_public_skills=False)
+        return agent.model_copy(update={"agent_context": context})
     if engineering_guidance and task_skill:
         raise SystemExit("Select one guidance mechanism: --task-skill or --engineering-judgment-guidance")
     agent = get_default_agent(llm=llm, cli_mode=True)
@@ -273,9 +293,14 @@ def main() -> int:
         llm,
         engineering_guidance=args.engineering_judgment_guidance,
         task_skill=args.task_skill,
+        structured_guidance=args.structured_guidance,
     )
     if args.engineering_judgment_guidance:
         print(f"ENGINEERING_JUDGMENT_GUIDANCE={DEFAULT_ENGINEERING_GUIDANCE}")
+    if args.structured_guidance:
+        print(f"GENERAL_GUIDANCE={GENERAL_GUIDANCE}")
+        print(f"REPOSITORY_GUIDANCE={PROJECT_GUIDANCE}")
+        print(f"MAVEN_SKILL={TASK_SKILL_DIR / MAVEN_SKILL_NAME / 'SKILL.md'}")
     if args.task_skill:
         print(f"TASK_SKILL={TASK_SKILL_DIR / TASK_SKILL_NAME / 'SKILL.md'}")
     conversation = Conversation(
@@ -289,6 +314,9 @@ def main() -> int:
     )
 
     task = extract_task_prompt(args.task_doc)
+    if args.structured_guidance:
+        task += ("\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
+                 "or published-version facts materially affect your engineering decision.")
     if args.task_skill:
         task += (
             "\n\nBefore making consequential dependency-remediation changes, "
