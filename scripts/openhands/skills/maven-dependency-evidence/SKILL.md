@@ -22,3 +22,5 @@ Use the repository's existing Maven tools before guessing version availability o
 - Prefer focused, read-only investigation first. Commands may download to Maven's cache; do not use `versions:set`, `versions:use-*`, or other mutating commands merely to discover options.
 
 Select solutions independently, applying the task constraints and general engineering guidance. This Skill supplies evidence access, not a prescribed remediation strategy.
+
+- Treat scanner output as valid clearance evidence only when execution and dependency extraction are complete. Zero reported findings paired with unresolved modules, extraction errors, missing dependency coverage, or a failed command is **incomplete/unknown**, never proof of zero vulnerabilities. Compare effective affected coordinates (including group ID) and report unresolved coverage honestly.
