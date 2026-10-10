@@ -18,4 +18,8 @@ The traceback proves the failing credential was a Compute Engine metadata creden
 Because the same LiteLLM process cached and reused that credential object, the earlier
 successful calls used its cached access token; no explicit Vertex credential was supplied.
 
+The cross-run regression reconstruction, independent three-layer reproduction,
+mechanism tests, and confidence-classified conclusions are recorded in
+[`VERTEX-AUTH-HISTORICAL-REGRESSION.md`](../../VERTEX-AUTH-HISTORICAL-REGRESSION.md).
+
 This directory is captured automatically by the orchestrator. It contains startup, verification, execution, deterministic validation evidence, sanitized observable OpenHands event trajectories when available, and final Git state/diff. Internal model reasoning/thought fields are intentionally excluded from the published trajectory export.

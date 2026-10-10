@@ -1,5 +1,10 @@
 # OpenHands + Vertex AI POC
 
+> Task-13 authentication status: the current Cloud Shell metadata credential is
+> not refreshable. See
+> [the Task-06–13 historical regression and root-cause analysis](VERTEX-AUTH-HISTORICAL-REGRESSION.md).
+> The ADC preflight is a fail-closed guard, not evidence of a completed repair.
+
 ## Purpose
 
 Evaluate OpenHands as a replacement for generic coding-agent harness infrastructure in the autonomous OSS-remediation project.
