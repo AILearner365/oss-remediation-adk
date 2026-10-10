@@ -40,3 +40,15 @@ openhands_sync_gcloud_project() {
     gcloud config set project "$VERTEXAI_PROJECT" >/dev/null
   fi
 }
+
+openhands_verify_vertex_adc() {
+  local control_repo="$1"
+  local sdk_version="${2:-1.50.0}"
+  local preflight="$control_repo/scripts/openhands/vertex-adc-preflight.py"
+  [ -f "$preflight" ] || {
+    echo "ERROR: Missing Vertex ADC preflight: $preflight" >&2
+    return 1
+  }
+  uv run --with "openhands-sdk[vertex]==$sdk_version" \
+    python "$preflight" --expected-project "$VERTEXAI_PROJECT"
+}

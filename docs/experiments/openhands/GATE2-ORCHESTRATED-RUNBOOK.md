@@ -57,7 +57,7 @@ It:
 - refuses to silently adapt to an unexpected Canvas version;
 - resolves the Vertex environment using the shared resolver;
 - synchronizes the active gcloud project to the resolved Vertex project when required;
-- verifies ADC availability;
+- verifies Python ADC discovery and forces two refreshes in the pinned OpenHands runtime;
 - prepares the uv cache under `/tmp`;
 - creates/repairs the OpenHands tmux directory;
 - reapplies the two known guarded Vertex/Canvas POC patches when required;
@@ -96,12 +96,20 @@ It verifies:
 - required Vertex launcher patch;
 - required Vertex ADC readiness patch;
 - tmux can actually create a session using the OpenHands tmux directory;
-- ADC works;
+- Python ADC discovery and repeated explicit refresh work in the pinned runtime;
 - effective Vertex project/location are available;
 - the uv runtime directory exists;
-- a real OpenHands SDK request to `vertex_ai/gemini-2.5-flash` succeeds.
+- three sequential OpenHands SDK/LiteLLM requests to `vertex_ai/gemini-2.5-flash` succeed.
 
 If Verify fails, Execute does not start. Fix or rerun Startup as appropriate, then Verify can be rerun independently.
+
+The ADC preflight forces two safe refreshes without invalidating credentials, and
+Verify makes three sequential requests through one OpenHands `LLM` instance. This
+is stronger than a single startup request, but it does not prove that Cloud Shell's
+managed metadata service will remain available for an hours-long run. A failed
+refresh is an infrastructure stop condition; do not start Execute or create a new
+task worktree until the Cloud Shell session has been reauthorized or restarted and
+Verify passes again.
 
 ## Stage 3 — Execute
 

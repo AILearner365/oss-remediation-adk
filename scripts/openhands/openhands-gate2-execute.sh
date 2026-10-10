@@ -41,6 +41,10 @@ info "Source repo: $SOURCE_REPO"
 info "Target worktree: $TARGET_REPO"
 info "State directory: $STATE_DIR"
 
+info "Verifying refreshable Python ADC before creating task state"
+openhands_verify_vertex_adc "$CONTROL_REPO" "1.50.0" \
+  || die "Python ADC refresh failed. Reauthorize or restart Cloud Shell before running OpenHands."
+
 git -C "$SOURCE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "Source repository not found at $SOURCE_REPO"
 

@@ -64,11 +64,18 @@ export VERTEXAI_PROJECT="<project-id>"
 export VERTEXAI_LOCATION="<region>"
 ```
 
-ADC must work:
+Validate ADC through the same Python Google Auth path used by LiteLLM, including
+explicit refresh, without printing token values:
 
 ```bash
-gcloud auth application-default print-access-token >/dev/null 2>&1 && echo "ADC OK"
+UV_CACHE_DIR=/tmp/openhands-uv-cache uv run \
+  --with "openhands-sdk[vertex]==1.50.0" \
+  python scripts/openhands/vertex-adc-preflight.py \
+  --expected-project "$VERTEXAI_PROJECT"
 ```
+
+The gcloud CLI credential store and Python ADC are distinct. A successful
+`gcloud auth` command does not prove that LiteLLM can discover or refresh ADC.
 
 The tested model identifier is:
 

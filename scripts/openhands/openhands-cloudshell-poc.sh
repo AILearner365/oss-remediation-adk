@@ -124,11 +124,14 @@ check_vertex_env() {
   [ -n "${VERTEXAI_PROJECT:-}" ] || die "Vertex project could not be resolved."
   [ -n "${VERTEXAI_LOCATION:-}" ] || die "VERTEXAI_LOCATION is not set"
 
-  gcloud auth application-default print-access-token >/dev/null 2>&1     || die "Application Default Credentials are not available"
-
-  info "ADC OK"
   info "Vertex project: $VERTEXAI_PROJECT"
   info "Vertex location: $VERTEXAI_LOCATION"
+}
+
+verify_vertex_adc_refresh() {
+  info "Checking Python ADC discovery and forced refresh in the pinned OpenHands runtime"
+  openhands_verify_vertex_adc "$(cd "$SCRIPT_DIR/../.." && pwd)" "$AGENT_SERVER_VERSION" \
+    || die "Python ADC refresh failed. Reauthorize or restart Cloud Shell before running OpenHands."
 }
 
 prepare_runtime() {
@@ -236,6 +239,7 @@ verify_tmux() {
 verify_vertex() {
   check_vertex_env
   [ -d "$UV_CACHE_DIR" ] || die "OpenHands uv cache directory is missing: $UV_CACHE_DIR. Run startup first."
+  verify_vertex_adc_refresh
 
   local result
   result="$(
@@ -248,26 +252,28 @@ llm = LLM(
     usage_id="openhands-bootstrap-verify",
 )
 
-resp = llm.completion(
-    messages=[
-        Message(
-            role="user",
-            content=[TextContent(text="Reply with exactly: VERTEX_OPENHANDS_VERIFY_OK")]
-        )
-    ]
-)
-
-texts = [c.text for c in resp.message.content if isinstance(c, TextContent)]
-print(texts[0] if texts else resp.message)
+for request_number in range(1, 4):
+    marker = f"VERTEX_OPENHANDS_VERIFY_OK_{request_number}"
+    resp = llm.completion(
+        messages=[
+            Message(
+                role="user",
+                content=[TextContent(text=f"Reply with exactly: {marker}")]
+            )
+        ]
+    )
+    texts = [c.text for c in resp.message.content if isinstance(c, TextContent)]
+    print(texts[0] if texts else resp.message)
 PY
   )" || die "Vertex/OpenHands SDK verification failed"
 
-  printf '%s
-' "$result"
-  printf '%s
-' "$result" | grep -Fq 'VERTEX_OPENHANDS_VERIFY_OK'     || die "Vertex/OpenHands SDK verification returned an unexpected response"
+  printf '%s\n' "$result"
+  for request_number in 1 2 3; do
+    printf '%s\n' "$result" | grep -Fq "VERTEX_OPENHANDS_VERIFY_OK_$request_number" \
+      || die "Vertex/OpenHands SDK verification request $request_number returned an unexpected response"
+  done
 
-  info "Vertex Gemini smoke test OK"
+  info "Three sequential Vertex Gemini requests through OpenHands/LiteLLM succeeded"
 }
 
 verify_all() {
@@ -314,8 +320,8 @@ Usage:
   openhands-cloudshell-poc.sh disk
 
 The script:
-- prepare installs/repairs the pinned Cloud Shell runtime and guarded Vertex patches;
-- verify is non-repairing and proves the prepared runtime, ADC, tmux, and a real Vertex/OpenHands model call;
+- prepare installs/repairs the pinned runtime and patches, then force-refreshes Python ADC twice;
+- verify proves the prepared runtime, ADC refresh, tmux, and three sequential Vertex/OpenHands model calls;
 - Vertex project resolution order is VERTEXAI_PROJECT, GOOGLE_CLOUD_PROJECT, active gcloud project, then the POC default;
 - prepare synchronizes the active gcloud project to the resolved Vertex project when needed;
 - /tmp is used for uv cache to protect the small persistent /home volume.
@@ -343,6 +349,7 @@ case "${1:-}" in
     prepare_runtime
     patch_vertex_extra
     patch_vertex_readiness
+    verify_vertex_adc_refresh
     check_effective_patch
     show_disk
     ;;
@@ -352,6 +359,7 @@ case "${1:-}" in
     prepare_runtime
     patch_vertex_extra
     patch_vertex_readiness
+    verify_vertex_adc_refresh
     start_canvas
     ;;
   verify)
