@@ -14,7 +14,10 @@ import json
 import os
 import shlex
 import subprocess
+import shutil
 from pathlib import Path
+
+from autonomous_oss_remediation_agent.deterministic.osv import _serve_maven_repository
 
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
@@ -303,6 +306,25 @@ def main() -> int:
         print(f"MAVEN_SKILL={TASK_SKILL_DIR / MAVEN_SKILL_NAME / 'SKILL.md'}")
     if args.task_skill:
         print(f"TASK_SKILL={TASK_SKILL_DIR / TASK_SKILL_NAME / 'SKILL.md'}")
+    scanner_service = None
+    if args.structured_guidance:
+        local_repository = Path.home() / ".m2" / "repository"
+        scanner_binary = Path.home() / "bin" / "osv-scanner"
+        if not local_repository.is_dir() or not scanner_binary.is_file():
+            raise SystemExit("Maven-aware OSV launcher requires ~/.m2/repository and ~/bin/osv-scanner")
+        # Scope registry serving and PATH changes to this one OpenHands conversation.
+        scanner_service = _serve_maven_repository((local_repository,))
+        registry_url, _registry_requests = scanner_service.__enter__()
+        launcher_dir = state_dir / "scanner-bin"
+        launcher_dir.mkdir(parents=True, exist_ok=True)
+        launcher = launcher_dir / "osv-scanner"
+        shutil.copyfile(CONTROL_REPO / "scripts/openhands/openhands-osv-scanner.sh", launcher)
+        launcher.chmod(0o700)
+        os.environ["OPENHANDS_OSV_EXECUTABLE"] = str(scanner_binary)
+        os.environ["OPENHANDS_OSV_MAVEN_REGISTRY"] = registry_url
+        os.environ["PATH"] = str(launcher_dir) + os.pathsep + os.environ.get("PATH", "")
+        print(f"OPENHANDS_OSV_LAUNCHER={launcher}")
+        print("OPENHANDS_OSV_REPOSITORY=local-maven")
     conversation = Conversation(
         agent=agent,
         workspace=str(target),
@@ -316,7 +338,10 @@ def main() -> int:
     task = extract_task_prompt(args.task_doc)
     if args.structured_guidance:
         task += ("\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
-                 "or published-version facts materially affect your engineering decision.")
+                 "or published-version facts materially affect your engineering decision. "
+                 "For OSV scans, invoke osv-scanner from PATH (not an absolute executable path): "
+                 "the session launcher supplies the local Maven registry. A scan with extraction "
+                 "errors is incomplete, not a clean security result.")
     if args.task_skill:
         task += (
             "\n\nBefore making consequential dependency-remediation changes, "
@@ -369,6 +394,8 @@ def main() -> int:
         return 1
     finally:
         conversation.close()
+        if scanner_service is not None:
+            scanner_service.__exit__(None, None, None)
 
 
 if __name__ == "__main__":
