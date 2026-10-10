@@ -1,9 +1,19 @@
 # OpenHands + Vertex AI POC
 
-> Task-13 authentication status: the current Cloud Shell metadata credential is
-> not refreshable. See
+> Task-13 authentication status: that run's Cloud Shell metadata credential
+> failed refresh. A later Cloud Shell session recovered without a repository
+> authentication change, but the first natural-boundary acceptance run remains
+> **INCONCLUSIVE**. See
 > [the Task-06–13 historical regression and root-cause analysis](VERTEX-AUTH-HISTORICAL-REGRESSION.md).
 > The ADC preflight is a fail-closed guard, not evidence of a completed repair.
+
+The standalone natural refresh-boundary acceptance test is
+`scripts/openhands/vertex-auth-natural-refresh-acceptance.py`. It must run once
+in one uninterrupted pinned OpenHands process; offline tests and immediate
+sequential requests never count as live renewal evidence. Reports are retained
+under `docs/experiments/openhands/evidence/vertex-auth-natural-refresh-*`.
+The first report is
+[`vertex-auth-natural-refresh-20261010T223700Z`](evidence/vertex-auth-natural-refresh-20261010T223700Z/README.md).
 
 ## Purpose
 

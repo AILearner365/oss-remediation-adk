@@ -12,6 +12,18 @@ Do not assume the existing ADK architecture is the target design. Preserve usefu
 
 ## Experiment progression
 
+- Vertex natural-refresh acceptance (2026-10-10): one standalone live trial
+  used the same OpenHands SDK 1.50.0 `LLM`, LiteLLM 1.104.2 handler, and cached
+  Compute Engine credential for two successful Gemini requests. The run is
+  **INCONCLUSIVE** because Google Auth's `expired` property became true about
+  213 seconds before nominal token expiry; the second request reused the same
+  token and expiry, so actual renewal was not established. The test now waits
+  past nominal expiry plus grace and has offline coverage for the early-threshold
+  distinction, timeout, interruption, classification, and redaction. It was not
+  rerun under the one-live-trial constraint. Evidence:
+  [vertex-auth-natural-refresh-20261010T223700Z](../experiments/openhands/evidence/vertex-auth-natural-refresh-20261010T223700Z/README.md).
+  **Do not launch Task-14.**
+
 - Task-07 completed and evidence pushed: commit `c98aa98e1a2f2b7048aa9c38b08ea85aad910713` contains run `20261010T020418Z`; run **BOUNDED_FAIL** (2/26 resolved, 24 remaining; last build/test/startup and other policy checks PASS). [Task-07 preliminary analysis](../experiments/openhands/GATE2-STOP-HOOK-TASK07-ANALYSIS.md) records repeated unsupported Boot 4.0.6→3.3.0 trial, wrong claim that official Boot 4.0.6 is custom, incompatible 3.3.0 webmvc coordinate, repeated mistaken family/BOM edits and final 4.0.6 restoration without full remediation. Refined Principle 1 did not prevent these observed failures, but causality NOT PROVEN. [Engineering reliability remediation draft](../experiments/openhands/ENGINEERING-RELIABILITY-REMEDIATION-DRAFT.md) maps R1-R8 proposed improvements, required native capability proof, offline fixtures, acceptance criteria and priority. Do not call draft items implemented. Pending full event-by-event reconciliation and evidence-backed implementation selection.
 
 

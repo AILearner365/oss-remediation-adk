@@ -25,15 +25,15 @@ session:
    `LLMServiceUnavailableError`.
 
 The failure is consequently **PROVEN not to be specific to LiteLLM or
-OpenHands**. It exists below both wrappers. It is **PROVEN present in the current
-Cloud Shell session** and was **PROVEN present late in Task-13**. Whether it was
+OpenHands**. It exists below both wrappers. It was **PROVEN present in the Cloud
+Shell session used for this initial investigation** and **PROVEN present late in Task-13**. Whether it was
 continuously present before Task-13, or appeared because the managed Cloud Shell
 session changed, is **UNKNOWN**. Historical smoke tests prove that model calls
 worked at their recorded times; they do not preserve the credential class,
 expiry, metadata response, or transitive package inventory needed to distinguish
 those alternatives.
 
-Current discovery inputs further isolate the selection: `GOOGLE_APPLICATION_CREDENTIALS`
+Discovery inputs in that failed session further isolate the selection: `GOOGLE_APPLICATION_CREDENTIALS`
 is unset, the standard local ADC JSON file is absent, and `gcloud auth list`
 reports no active account. The configured gcloud project is
 `deutschebank-aipocs`, but project configuration is not a credential. Under
@@ -41,8 +41,8 @@ these conditions `google.auth.default()` falls through to the Cloud Shell
 metadata source. These checks disclose only presence/absence, never credential
 contents or identity.
 
-No reliable repair has been established. The current fail-closed ADC preflight
-is retained as a guard, not described as a fix. Task-14 remains blocked.
+No reliable repair had been established at that point. The fail-closed ADC
+preflight is retained as a guard, not described as a fix. Task-14 remains blocked.
 
 ## Timeline: Task-06 through Task-13
 
@@ -186,18 +186,19 @@ pinned runtime: 3 passed (OpenHands SDK 1.50.0 / LiteLLM 1.104.2)
 | The failure is not specific to LiteLLM or OpenHands. | **PROVEN** | Direct Google Auth fails before either wrapper; wrapper tests preserve the cause chain. |
 | No repository authentication change occurred between Task-06 and Task-13. | **PROVEN** | Authentication/bootstrap scripts and LLM credential arguments are unchanged across Task-06–13. |
 | A recent transitive dependency change caused the failure. | **UNKNOWN** | Historical transitive versions were not recorded. The malformed response is provider-side input, but old-version behavior was not reconstructed. |
-| The condition is Cloud Shell session/metadata dependent. | **LIKELY** | Earlier calls and smoke tests succeeded; the current session consistently returns malformed service-account info. Historical credential class and metadata payload were not captured. |
+| The condition is Cloud Shell session/metadata dependent. | **LIKELY** | Earlier calls and smoke tests succeeded; the investigated failed session consistently returned malformed service-account info. Historical credential class and metadata payload were not captured. |
 | Restarting or reauthorizing Cloud Shell will make the condition reliably disappear. | **UNKNOWN** | That transition has not been exercised, and no expiry-boundary success has been observed afterward. |
 | The condition was pre-existing for the entire Task-06–13 period. | **UNKNOWN** | Successful calls do not distinguish a valid refresh from a cached token; missing historical ADC diagnostics prevent proof. |
 | The existing preflight detects but does not repair long-running authentication. | **PROVEN** | It detects and blocks the condition; current refresh still fails. |
-| Task-14 cannot safely proceed in the current state. | **PROVEN** | All three current reproduction layers fail; no reliable repair has been established. |
+| Task-14 cannot safely proceed without post-expiration renewal evidence. | **PROVEN** | The failed session reproduced the error at all three layers; the later recovered session still has no completed nominal-expiry renewal result. |
 
 ### Blocker
 
-The managed Cloud Shell ADC source is currently not refreshable, and repository
-code cannot establish why its metadata service-account response lacks `email` or
-guarantee that the response remains valid for a long conversation. Changing to
-a new credential architecture would be speculative and is outside the evidence.
+The managed Cloud Shell ADC source was not refreshable in the investigated
+session, and repository code cannot establish why its metadata service-account
+response lacked `email` or guarantee that a recovered response remains valid
+for a long conversation. Changing to a new credential architecture would be
+speculative and is outside the evidence.
 
 Stop here. Reauthenticate or replace the Cloud Shell session through the
 organization-supported Google Cloud workflow, then rerun the existing startup
@@ -205,3 +206,22 @@ and verification commands. Even if the two explicit refreshes and three
 sequential OpenHands calls pass, long-duration reliability remains **NOT
 VERIFIED** until a controlled expiry/refresh boundary or an equivalently long
 observation succeeds.
+
+## Later-session natural-boundary acceptance update
+
+After Cloud Shell recovered without repository authentication changes, one live
+acceptance trial ran from `22:36:38Z` to `22:44:57Z` using OpenHands SDK 1.50.0,
+LiteLLM 1.104.2, and google-auth 2.56.3. The same process, OpenHands `LLM`,
+LiteLLM handler, and cached metadata credential completed both real Gemini
+requests.
+
+The trial is **INCONCLUSIVE**, not PASS: `credentials.expired` became true about
+213 seconds before nominal token expiry. The second request succeeded but
+retained the same token and effectively unchanged expiry, so natural renewal
+was not established. This proves that Google Auth's early refresh threshold is
+not itself sufficient acceptance evidence in this Cloud Shell path. The test
+was corrected to wait past captured nominal expiry plus a grace interval; it
+was not rerun because only one live trial was authorized. See the
+[evidence README](evidence/vertex-auth-natural-refresh-20261010T223700Z/README.md).
+
+Task-14 remains blocked because post-expiration renewal is still **UNKNOWN**.
