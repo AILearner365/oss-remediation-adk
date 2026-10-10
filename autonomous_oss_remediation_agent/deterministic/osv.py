@@ -426,8 +426,12 @@ def _classify_attempt(
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "SCANNER_EXECUTION_BLOCKED"
     if "no package sources found" in combined_output.lower():
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, "NO_PACKAGE_SOURCES: OSV Scanner found no package sources"
-    if re.search(r"failed resolution|error during extraction", raw_stderr, re.IGNORECASE):
-        detail = raw_stderr.strip() or "OSV Scanner could not resolve the complete dependency graph"
+    if re.search(
+        r"failed resolution|failed resolving|failed to resolve|could not resolve|unable to resolve|error during extraction|error extracting",
+        combined_output, re.IGNORECASE,
+    ):
+        detail = (raw_stderr.strip() or raw_stdout.strip()
+                  or "OSV Scanner could not resolve the complete dependency graph")
         return ScanOutcome.INCOMPLETE_FATAL_FAILURE, f"DEPENDENCY_RESOLUTION_FAILURE: {detail}"
     if not recognizable:
         detail = raw_stderr.strip() or "OSV Scanner did not produce a recognizable JSON report"
