@@ -1,0 +1,76 @@
+==> Gate 2 execution
+==> Task: 12
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> Model: vertex_ai/gemini-2.5-flash
+==> Source repo: /home/kavya_parivarababu/maven-multimodule-app
+==> Target worktree: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-12
+==> State directory: /home/kavya_parivarababu/.openhands/gate2/task-12-stop-hook
+==> Fetching baseline
+==> Baseline: main-runrunning @ 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Creating remote task branch: openhands-poc-task-12-stop-hook
+remote: 
+remote: Create a pull request for 'openhands-poc-task-12-stop-hook' on GitHub by visiting:        
+remote:      https://github.com/AILearner365/maven-multimodule-app/pull/new/openhands-poc-task-12-stop-hook        
+remote: 
+To https://github.com/AILearner365/maven-multimodule-app.git
+ * [new branch]      9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 -> openhands-poc-task-12-stop-hook
+From https://github.com/AILearner365/maven-multimodule-app
+ * [new branch]      openhands-poc-task-12-stop-hook -> origin/openhands-poc-task-12-stop-hook
+==> Creating fresh worktree
+Preparing worktree (new branch 'openhands-poc-task-12-stop-hook')
+HEAD is now at 9ea1b0e Enable Spring Boot run for web module
+==> Running deterministic baseline
+==> Target repository: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-12
+==> Branch: openhands-poc-task-12-stop-hook
+==> Baseline commit: 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Scanner: osv-scanner version: 2.6.0
+==> Running deterministic Maven baseline: clean verify
+==> Maven baseline PASSED
+==> Running deterministic OSV scan with local Maven repository support
+==> Completed scan outcome: COMPLETED_WITH_FINDINGS
+==> HIGH/CRITICAL findings: 26
+    CRITICAL GHSA-599f-7c49-w659 org.apache.commons:commons-text@1.9
+    HIGH GHSA-4jq9-2xhw-jpx7 org.json:json@20230227
+    HIGH GHSA-r5w3-xv2f-j59q org.springframework:spring-expression@7.0.7
+    HIGH GHSA-g3pr-3p32-fp23 io.micrometer:micrometer-core@1.16.5
+    HIGH GHSA-w737-wx49-qj23 io.micrometer:micrometer-core@1.16.5
+    CRITICAL GHSA-5m62-pw8w-7w9f org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    HIGH GHSA-5mp6-jrq3-r938 org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    CRITICAL GHSA-9xv2-5v5q-p794 org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    HIGH GHSA-fv25-8xcx-gqjc org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    CRITICAL GHSA-gcx9-497g-6cp6 org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    HIGH GHSA-gx5v-xp9w-j4cg org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    CRITICAL GHSA-h3x4-894j-xpx5 org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    CRITICAL GHSA-h6fc-48rj-7qqh org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    CRITICAL GHSA-r29c-68gh-xp6x org.apache.tomcat.embed:tomcat-embed-core@11.0.21
+    HIGH GHSA-3chg-m5w7-qfv5 org.springframework:spring-webmvc@7.0.7
+    CRITICAL GHSA-j9f9-w8pj-32f8 org.springframework:spring-webmvc@7.0.7
+    CRITICAL GHSA-pc63-qcmh-9cmg org.springframework:spring-webmvc@7.0.7
+    HIGH GHSA-x23c-287f-qqv5 org.springframework:spring-webmvc@7.0.7
+    HIGH GHSA-7hhh-6rmp-j9qf tools.jackson.core:jackson-core@3.1.2
+    HIGH GHSA-p6pp-m3f8-5c89 tools.jackson.core:jackson-core@3.1.2
+    HIGH GHSA-r7wm-3cxj-wff9 tools.jackson.core:jackson-core@3.1.2
+    HIGH GHSA-cxp5-3px4-pw24 tools.jackson.core:jackson-databind@3.1.2
+    HIGH GHSA-j3rv-43j4-c7qm tools.jackson.core:jackson-databind@3.1.2
+    HIGH GHSA-q4xh-88c3-wmh7 tools.jackson.core:jackson-databind@3.1.2
+    HIGH GHSA-rmj7-2vxq-3g9f tools.jackson.core:jackson-databind@3.1.2
+    HIGH GHSA-wv8q-qhhj-9h54 tools.jackson.core:jackson-databind@3.1.2
+==> Baseline state: /home/kavya_parivarababu/.openhands/gate2/task-12-stop-hook/baseline.json
+==> Gate 2 deterministic baseline PASSED
+==> Starting OpenHands Gate 2 run
+   Building func-timeout==4.3.5
+      Built func-timeout==4.3.5
+Downloading reportlab (1.9MiB)
+Downloading google-api-python-client (14.9MiB)
+Downloading lxml (5.0MiB)
+Downloading anthropic (1.1MiB)
+ Downloaded reportlab
+ Downloaded lxml
+ Downloaded google-api-python-client
+ Downloaded anthropic
+Installed 192 packages in 720ms
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/openhands-gate2-stop-hook-run.py", line 20, in <module>
+    from autonomous_oss_remediation_agent.deterministic.osv import _serve_maven_repository
+ModuleNotFoundError: No module named 'autonomous_oss_remediation_agent'
