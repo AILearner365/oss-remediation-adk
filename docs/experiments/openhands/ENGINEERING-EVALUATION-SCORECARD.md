@@ -54,3 +54,33 @@ Sources: [Task-05 analysis](GATE2-STOP-HOOK-TASK05-ANALYSIS.md) and [Task-06 ana
 ## Evaluation governance
 
 This scorecard is an **evaluation/documentation contract**, not a new runtime policy, agent prompt, deterministic validator or nine hard-coded gates. Continue using one autonomous engineer with independent deterministic validation and native completion interception. Compare like with like. Every material future run should add one dated row/set of ratings and evidence references without erasing historical failures.
+
+## Decision-level trajectory evidence (required from Task-07 onward)
+
+For each **consequential engineering decision**, capture this compact audit row rather than inventing hidden reasoning:
+
+| Field | Required observation |
+| --- | --- |
+| Event/time and proposed/implemented change | Exact observable action and affected components |
+| Initial proposition or stated premise | Only explicit model statements or inferable edit hypothesis; label inference |
+| Pre-decision facts available | Baseline, task constraints, tool output or authoritative external facts |
+| Actual fact verification before commitment | Tool command/source, timestamp and result; **NONE OBSERVED** when absent |
+| Credible alternatives seen or checked | Exact evidence; do not demand an arbitrary count or invent unseen consideration |
+| First decisive contrary evidence | Event ID, tool error, official metadata or validator result |
+| First substantive revision | Event ID and strategy change; compute contradiction-to-revision actions if trace supports it |
+| Healthy state and later regression | Prior build/scan/policy checks and whether the agent discarded that progress |
+| Useful evidence versus wasted repetition | Distinguish necessary experiments from retries that failed to test a new hypothesis |
+| Outcome and uncertainty | Verified, contradicted, unresolved; never infer the model's private thought process |
+
+Evaluate **configured -> delivered -> invoked -> used -> effective** separately for prompts, tools, Skills, search, memory, stop hooks and retrieval. For current-information claims, distinguish the model's knowledge cutoff from whether any available authoritative source was consulted. For effective Gemini settings, record explicit app configuration and provider evidence; do not infer exact thinking budgets from reasoning-token totals.
+
+Keep these as sub-measures of the existing nine dimensions: facts (4,7); contradictory evidence (2,5); healthier-state regressions (6); alternatives/compatibility (3,8); useful evidence and action efficiency (9); source-delivery attribution (1). Any missing evidence must be **UNRESOLVED**, not silently scored as working.
+
+### Task-07 preflight and evidence acceptance
+
+- Control branch/commit, guidance file hash and opt-in flag recorded; Task-06 historical guidance preserved by commit and prior evidence.
+- Model `vertex_ai/gemini-2.5-flash`, OpenHands SDK/tools 1.50.0, default agent preset, task contract and constraints, max iterations and denials, scanner, validator and native Stop Hook remain unchanged unless explicitly recorded as a confounder.
+- Baseline commit and initial HIGH/CRITICAL advisory identities captured; compare scope and note drift.
+- Rendered system/dynamic context contains the exact expected opt-in guidance, and no accidental project Skills/memory/new grounding configuration.
+- Model and inference parameters: record explicitly configured values; where the effective Vertex/LiteLLM request cannot be observed, mark **UNVERIFIED**. Never log secrets.
+- Final classification must distinguish **DETERMINISTIC PASS**, **engineering acceptance** and **reasoning/evaluation confidence**. A single Task-07 run cannot prove that the guidance caused any improvement.
