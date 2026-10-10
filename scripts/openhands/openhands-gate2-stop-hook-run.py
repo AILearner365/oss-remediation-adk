@@ -10,6 +10,7 @@ to the same conversation as evidence. No remediation strategy is prescribed.
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 import json
 import os
 import shlex
@@ -17,7 +18,13 @@ import subprocess
 import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
+CONTROL_REPO = Path(__file__).resolve().parents[2]
+if str(CONTROL_REPO) not in sys.path:
+    sys.path.insert(0, str(CONTROL_REPO))
+
+from maven_repository_server import serve_maven_repository
 
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
@@ -25,10 +32,6 @@ from openhands.sdk.hooks import HookConfig, HookDefinition, HookMatcher
 from openhands.tools.preset.default import get_default_agent
 
 
-CONTROL_REPO = Path(__file__).resolve().parents[2]
-if str(CONTROL_REPO) not in sys.path:
-    sys.path.insert(0, str(CONTROL_REPO))
-from autonomous_oss_remediation_agent.deterministic.osv import _serve_maven_repository
 DEFAULT_TARGET = Path.home() / "maven-multimodule-app-stop-hook"
 DEFAULT_STATE_DIR = Path.home() / ".openhands" / "gate2" / "task-02-stop-hook"
 DEFAULT_TASK_DOC = CONTROL_REPO / "docs" / "experiments" / "openhands" / "GATE2-TASK.md"
@@ -184,6 +187,42 @@ def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = Fals
     return agent
 
 
+def configure_scanner_terminal(
+    agent: Any,
+    *,
+    launcher_dir: Path,
+    scanner_binary: Path,
+    registry_url: str,
+) -> Any:
+    """Give OpenHands a deterministic shell environment for the OSV launcher."""
+    shell = launcher_dir / "openhands-shell"
+    shell.write_text("#!/bin/sh\nexec /bin/bash --norc \"$@\"\n", encoding="utf-8")
+    shell.chmod(0o700)
+    terminal_env = {
+        "OPENHANDS_OSV_EXECUTABLE": str(scanner_binary),
+        "OPENHANDS_OSV_MAVEN_REGISTRY": registry_url,
+        "PATH": str(launcher_dir) + os.pathsep + os.environ.get("PATH", ""),
+    }
+    configured_tools = []
+    terminal_found = False
+    for tool in agent.tools:
+        if tool.name == "terminal":
+            terminal_found = True
+            params = dict(tool.params)
+            params.update(
+                {
+                    "env": terminal_env,
+                    "shell_path": str(shell),
+                    "terminal_type": "subprocess",
+                }
+            )
+            tool = tool.model_copy(update={"params": params})
+        configured_tools.append(tool)
+    if not terminal_found:
+        raise SystemExit("OpenHands default agent does not expose the terminal tool")
+    return agent.model_copy(update={"tools": configured_tools})
+
+
 def build_hook_config(
     *,
     target: Path,
@@ -309,49 +348,61 @@ def main() -> int:
         print(f"MAVEN_SKILL={TASK_SKILL_DIR / MAVEN_SKILL_NAME / 'SKILL.md'}")
     if args.task_skill:
         print(f"TASK_SKILL={TASK_SKILL_DIR / TASK_SKILL_NAME / 'SKILL.md'}")
-    scanner_service = None
-    if args.structured_guidance:
-        local_repository = Path.home() / ".m2" / "repository"
-        scanner_binary = Path.home() / "bin" / "osv-scanner"
-        if not local_repository.is_dir() or not scanner_binary.is_file():
-            raise SystemExit("Maven-aware OSV launcher requires ~/.m2/repository and ~/bin/osv-scanner")
-        # Scope registry serving and PATH changes to this one OpenHands conversation.
-        scanner_service = _serve_maven_repository((local_repository,))
-        registry_url, _registry_requests = scanner_service.__enter__()
-        launcher_dir = state_dir / "scanner-bin"
-        launcher_dir.mkdir(parents=True, exist_ok=True)
-        launcher = launcher_dir / "osv-scanner"
-        shutil.copyfile(CONTROL_REPO / "scripts/openhands/openhands-osv-scanner.sh", launcher)
-        launcher.chmod(0o700)
-        os.environ["OPENHANDS_OSV_EXECUTABLE"] = str(scanner_binary)
-        os.environ["OPENHANDS_OSV_MAVEN_REGISTRY"] = registry_url
-        os.environ["PATH"] = str(launcher_dir) + os.pathsep + os.environ.get("PATH", "")
-        print(f"OPENHANDS_OSV_LAUNCHER={launcher}")
-        print("OPENHANDS_OSV_REPOSITORY=local-maven")
-    conversation = Conversation(
-        agent=agent,
-        workspace=str(target),
-        hook_config=hook_config,
-        persistence_dir=persistence,
-        delete_on_close=False,
-        max_iteration_per_run=args.max_iterations,
-        stuck_detection=True,
-    )
-
-    task = extract_task_prompt(args.task_doc)
-    if args.structured_guidance:
-        task += ("\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
-                 "or published-version facts materially affect your engineering decision. "
-                 "For OSV scans, invoke osv-scanner from PATH (not an absolute executable path): "
-                 "the session launcher supplies the local Maven registry. A scan with extraction "
-                 "errors is incomplete, not a clean security result.")
-    if args.task_skill:
-        task += (
-            "\n\nBefore making consequential dependency-remediation changes, "
-            "read and apply the available evidence-driven-dependency-remediation "
-            "Agent Skill. It does not supersede the task constraints."
-        )
+    conversation = None
+    resources = ExitStack()
     try:
+        if args.structured_guidance:
+            local_repository = Path.home() / ".m2" / "repository"
+            scanner_binary = Path.home() / "bin" / "osv-scanner"
+            if (
+                not local_repository.is_dir()
+                or not scanner_binary.is_file()
+                or not os.access(scanner_binary, os.X_OK)
+            ):
+                raise SystemExit(
+                    "Maven-aware OSV launcher requires ~/.m2/repository and an executable "
+                    "~/bin/osv-scanner"
+                )
+            registry_url, _registry_requests = resources.enter_context(
+                serve_maven_repository((local_repository,))
+            )
+            launcher_dir = state_dir / "scanner-bin"
+            launcher_dir.mkdir(parents=True, exist_ok=True)
+            launcher = launcher_dir / "osv-scanner"
+            shutil.copyfile(CONTROL_REPO / "scripts/openhands/openhands-osv-scanner.sh", launcher)
+            launcher.chmod(0o700)
+            agent = configure_scanner_terminal(
+                agent,
+                launcher_dir=launcher_dir,
+                scanner_binary=scanner_binary,
+                registry_url=registry_url,
+            )
+            print(f"OPENHANDS_OSV_LAUNCHER={launcher}")
+            print("OPENHANDS_OSV_REPOSITORY=local-maven")
+
+        conversation = Conversation(
+            agent=agent,
+            workspace=str(target),
+            hook_config=hook_config,
+            persistence_dir=persistence,
+            delete_on_close=False,
+            max_iteration_per_run=args.max_iterations,
+            stuck_detection=True,
+        )
+
+        task = extract_task_prompt(args.task_doc)
+        if args.structured_guidance:
+            task += ("\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
+                     "or published-version facts materially affect your engineering decision. "
+                     "For OSV scans, invoke osv-scanner from PATH (not an absolute executable path): "
+                     "the session launcher supplies the local Maven registry. A scan with extraction "
+                     "errors is incomplete, not a clean security result.")
+        if args.task_skill:
+            task += (
+                "\n\nBefore making consequential dependency-remediation changes, "
+                "read and apply the available evidence-driven-dependency-remediation "
+                "Agent Skill. It does not supersede the task constraints."
+            )
         conversation.send_message(task)
         conversation.run()
 
@@ -396,9 +447,11 @@ def main() -> int:
         print("GATE2_STOP_HOOK_RESULT=FAIL")
         return 1
     finally:
-        conversation.close()
-        if scanner_service is not None:
-            scanner_service.__exit__(None, None, None)
+        try:
+            if conversation is not None:
+                conversation.close()
+        finally:
+            resources.close()
 
 
 if __name__ == "__main__":

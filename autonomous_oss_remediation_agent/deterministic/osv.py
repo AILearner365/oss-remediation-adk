@@ -10,16 +10,13 @@ import shutil
 import stat
 import tarfile
 import tempfile
-import threading
 import time
 import urllib.request
-import urllib.parse
 import zipfile
-from contextlib import contextmanager
-from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Callable, Iterable, Iterator
+from typing import Any, Callable, Iterable
+
+from maven_repository_server import serve_maven_repository
 
 from ..capabilities.execution import ProcessRunner
 from ..config import MavenConfig, ScannerConfig
@@ -228,7 +225,7 @@ class OsvScanner:
                 ignore=scanner_copy_ignore,
             )
             if registry_roots:
-                with _serve_maven_repository(registry_roots) as (registry_url, requests):
+                with serve_maven_repository(registry_roots) as (registry_url, requests):
                     command = _scan_command(handle.executable, staged, "native", registry_url)
                     result = self.process_runner.run_argv(
                         command,
@@ -301,60 +298,6 @@ _TRANSIENT_FAILURE_PATTERNS = (
     (re.compile(r"connection reset|connection aborted|connection refused|broken pipe|unexpected eof|tls handshake timeout|remote host terminated", re.IGNORECASE), "TEMPORARY_CONNECTION_FAILURE"),
     (re.compile(r"connect(?:ion)? timed out|read timed out|i/o timeout|network is unreachable|temporary network|transport.*temporar", re.IGNORECASE), "TEMPORARY_TRANSPORT_FAILURE"),
 )
-
-
-class _QuietMavenRepositoryHandler(SimpleHTTPRequestHandler):
-    def __init__(
-        self,
-        *args: Any,
-        repositories: tuple[Path, ...],
-        requests: list[dict[str, Any]],
-        **kwargs: Any,
-    ):
-        self.repositories = repositories
-        self.requests = requests
-        super().__init__(*args, directory=str(repositories[0]), **kwargs)
-
-    def log_message(self, format: str, *args: Any) -> None:
-        return None
-
-    def translate_path(self, path: str) -> str:
-        relative = Path(urllib.parse.unquote(urllib.parse.urlsplit(path).path).lstrip("/"))
-        if ".." in relative.parts:
-            return str(self.repositories[0] / "__invalid_path__")
-        for repository in self.repositories:
-            candidate = repository / relative
-            if candidate.resolve().is_relative_to(repository.resolve()) and candidate.exists():
-                self.requests.append(
-                    {"path": f"/{relative.as_posix()}", "resolvedPath": str(candidate), "found": True}
-                )
-                return str(candidate)
-        self.requests.append(
-            {
-                "path": f"/{relative.as_posix()}",
-                "resolvedPath": str(self.repositories[0] / relative),
-                "found": False,
-            }
-        )
-        return str(self.repositories[0] / relative)
-
-
-@contextmanager
-def _serve_maven_repository(
-    repositories: tuple[Path, ...],
-) -> Iterator[tuple[str, list[dict[str, Any]]]]:
-    requests: list[dict[str, Any]] = []
-    handler = partial(_QuietMavenRepositoryHandler, repositories=repositories, requests=requests)
-    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
-    server.daemon_threads = True
-    thread = threading.Thread(target=server.serve_forever, name="osv-maven-cache", daemon=True)
-    thread.start()
-    try:
-        yield f"http://127.0.0.1:{server.server_port}/", requests
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=5)
 
 
 def _default_maven_repository() -> Path:

@@ -7,6 +7,19 @@ if [[ "${1:-}" == "scan" && "${2:-}" == "source" ]]; then
     echo "INCOMPLETE_SCAN: local Maven registry is not configured" >&2
     exit 2
   }
-  exec "$scanner" "$@" --data-source=native "--maven-registry=$OPENHANDS_OSV_MAVEN_REGISTRY"
+  args=()
+  skip_next=false
+  for arg in "$@"; do
+    if $skip_next; then
+      skip_next=false
+      continue
+    fi
+    case "$arg" in
+      --data-source|--maven-registry) skip_next=true ;;
+      --data-source=*|--maven-registry=*) ;;
+      *) args+=("$arg") ;;
+    esac
+  done
+  exec "$scanner" "${args[@]}" --data-source=native "--maven-registry=$OPENHANDS_OSV_MAVEN_REGISTRY"
 fi
 exec "$scanner" "$@"
