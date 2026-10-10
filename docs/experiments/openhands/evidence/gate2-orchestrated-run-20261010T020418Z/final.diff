@@ -1,0 +1,103 @@
+diff --git a/pom.xml b/pom.xml
+index 91b8c15..79df678 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -32,40 +32,24 @@
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+ 
++
+         <maven.enforcer.version>3.6.2</maven.enforcer.version>
+         <owasp.dependency-check.version>12.2.2</owasp.dependency-check.version>
+         <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>
+     </properties>
+ 
+-    <dependencyManagement>
+-        <dependencies>
+-            <dependency>
+-                <groupId>${project.groupId}</groupId>
+-                <artifactId>task-common</artifactId>
+-                <version>${project.version}</version>
+-            </dependency>
+-            <dependency>
+-                <groupId>${project.groupId}</groupId>
+-                <artifactId>task-domain</artifactId>
+-                <version>${project.version}</version>
+-            </dependency>
+-            <dependency>
+-                <groupId>${project.groupId}</groupId>
+-                <artifactId>task-service</artifactId>
+-                <version>${project.version}</version>
+-            </dependency>
+-        </dependencies>
+-    </dependencyManagement>
++
++
+     <dependencies>
+         <dependency>
+             <groupId>org.apache.commons</groupId>
+             <artifactId>commons-text</artifactId>
+-            <version>1.9</version>
++            <version>1.10.0</version>
+         </dependency>
+         <dependency>
+             <groupId>org.json</groupId>
+             <artifactId>json</artifactId>
+-            <version>20230227</version>
++            <version>20240303</version>
+         </dependency>
+     </dependencies>
+     <build>
+diff --git a/task-service/pom.xml b/task-service/pom.xml
+index ff2af88..530d16c 100644
+--- a/task-service/pom.xml
++++ b/task-service/pom.xml
+@@ -19,11 +19,13 @@
+         <dependency>
+             <groupId>${project.groupId}</groupId>
+             <artifactId>task-domain</artifactId>
++            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework</groupId>
+             <artifactId>spring-context</artifactId>
+         </dependency>
++
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-test</artifactId>
+diff --git a/task-web/pom.xml b/task-web/pom.xml
+index d4cd9a7..652e23d 100644
+--- a/task-web/pom.xml
++++ b/task-web/pom.xml
+@@ -14,14 +14,17 @@
+     <dependency>
+       <groupId>${project.groupId}</groupId>
+       <artifactId>task-common</artifactId>
++      <version>${project.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>${project.groupId}</groupId>
+       <artifactId>task-domain</artifactId>
++      <version>${project.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>${project.groupId}</groupId>
+       <artifactId>task-service</artifactId>
++      <version>${project.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>org.springframework.boot</groupId>
+@@ -39,6 +42,12 @@
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-test</artifactId>
+       <scope>test</scope>
++      <exclusions>
++        <exclusion>
++          <groupId>com.vaadin.external.google</groupId>
++          <artifactId>android-json</artifactId>
++        </exclusion>
++      </exclusions>
+     </dependency>
+   </dependencies>
+   <build>
