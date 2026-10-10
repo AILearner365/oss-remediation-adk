@@ -1,0 +1,10 @@
+branch=openhands-poc-task-13-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+?? dependency-tree-verbose.txt
+?? dependency-tree.txt
+?? osv-scan-modules.json
+?? osv-scan-results-after-fix.json
+?? osv-scan-results.json
+status_end
