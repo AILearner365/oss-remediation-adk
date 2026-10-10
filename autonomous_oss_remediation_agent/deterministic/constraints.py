@@ -233,7 +233,7 @@ def _evaluate_spring_boot_changes(
                     "baseline_version": baseline_version,
                     "final_version": final_version,
                     "detected_change_type": change_type,
-                    "comparable": change_type != "unparseable",
+                    "comparable": change_type not in {"unparseable", "prerelease"},
                 }
             )
     return evaluations
@@ -242,6 +242,9 @@ def _evaluate_spring_boot_changes(
 def _classify_version_change(baseline_version: str, final_version: str) -> str:
     if baseline_version == final_version:
         return "unchanged"
+    # Recognize Maven-style pre-releases without treating them as stable numerics.
+    if re.fullmatch(r"[vV]?\d+(?:\.\d+){1,3}[-.](?:M\d+|RC\d+|alpha\d*|beta\d*|SNAPSHOT)", final_version, re.IGNORECASE):
+        return "prerelease"
     baseline = _numeric_version(baseline_version)
     final = _numeric_version(final_version)
     if baseline is None or final is None:
@@ -280,6 +283,9 @@ def _spring_boot_change_allowed(
     final_version = evaluation["final_version"]
     if change_type == "unchanged":
         return True
+    # No separate prerelease allowance exists in the current constraint contract.
+    if change_type == "prerelease":
+        return False
     if change_type == "patch":
         return policy.allow_patch
     if change_type == "minor":
