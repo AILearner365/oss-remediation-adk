@@ -32,6 +32,10 @@ def main() -> None:
     assert NAME in agent_skills, sorted(agent_skills)
     skill = agent_skills[NAME]
     assert skill.is_agentskills_format
+    assert skill.trigger is not None, "Task-08 Skill must be auto-injected by a task keyword"
+    task_text = (ROOT / "docs/experiments/openhands/GATE2-TASK.md").read_text(encoding="utf-8").lower()
+    for keyword in ("vulnerability", "remediation", "dependency"):
+        assert keyword in task_text
     context = AgentContext(skills=[skill], load_public_skills=False)
     assert any(s.name == NAME for s in context.skills)
     assert context.system_message_suffix is None
