@@ -35,6 +35,9 @@ DEFAULT_ENGINEERING_GUIDANCE = (
     / "engineering-judgment.md"
 )
 ENGINEERING_GUIDANCE_ENV = "OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE"
+TASK_SKILL_ENV = "OPENHANDS_TASK_SKILL"
+TASK_SKILL_DIR = CONTROL_REPO / "scripts" / "openhands" / "skills"
+TASK_SKILL_NAME = "evidence-driven-dependency-remediation"
 
 
 def environment_flag(name: str) -> bool:
@@ -69,6 +72,12 @@ def parse_args() -> argparse.Namespace:
             "inject the opt-in engineering-judgment guidance through native "
             "AgentContext.system_message_suffix"
         ),
+    )
+    parser.add_argument(
+        "--task-skill",
+        action=argparse.BooleanOptionalAction,
+        default=environment_flag(TASK_SKILL_ENV),
+        help="opt in to the pinned local Agent Skill instead of the legacy guidance suffix",
     )
     return parser.parse_args()
 
@@ -131,14 +140,22 @@ def load_engineering_guidance(path: Path = DEFAULT_ENGINEERING_GUIDANCE) -> str:
     return guidance
 
 
-def build_agent(llm: LLM, *, engineering_guidance: bool):
+def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False):
+    if engineering_guidance and task_skill:
+        raise SystemExit("Select one guidance mechanism: --task-skill or --engineering-judgment-guidance")
     agent = get_default_agent(llm=llm, cli_mode=True)
-    if not engineering_guidance:
-        return agent
-    context = AgentContext(
-        system_message_suffix=load_engineering_guidance(),
-    )
-    return agent.model_copy(update={"agent_context": context})
+    if task_skill:
+        from openhands.sdk.skills import load_skills_from_dir
+
+        _repo, _knowledge, skills = load_skills_from_dir(TASK_SKILL_DIR)
+        if TASK_SKILL_NAME not in skills:
+            raise SystemExit(f"Expected Agent Skill not found: {TASK_SKILL_NAME} in {TASK_SKILL_DIR}")
+        context = AgentContext(skills=[skills[TASK_SKILL_NAME]], load_public_skills=False)
+        return agent.model_copy(update={"agent_context": context})
+    if engineering_guidance:
+        context = AgentContext(system_message_suffix=load_engineering_guidance())
+        return agent.model_copy(update={"agent_context": context})
+    return agent
 
 
 def build_hook_config(
@@ -255,9 +272,12 @@ def main() -> int:
     agent = build_agent(
         llm,
         engineering_guidance=args.engineering_judgment_guidance,
+        task_skill=args.task_skill,
     )
     if args.engineering_judgment_guidance:
         print(f"ENGINEERING_JUDGMENT_GUIDANCE={DEFAULT_ENGINEERING_GUIDANCE}")
+    if args.task_skill:
+        print(f"TASK_SKILL={TASK_SKILL_DIR / TASK_SKILL_NAME / 'SKILL.md'}")
     conversation = Conversation(
         agent=agent,
         workspace=str(target),
