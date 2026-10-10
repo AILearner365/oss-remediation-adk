@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import subprocess
 import sys
@@ -480,6 +481,23 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
                 self.assertTrue(report.succeeded)
                 self.assertEqual(expected_outcome, report.effective_outcome)
                 self.assertEqual(bool(report.findings), report.effective_outcome == ScanOutcome.COMPLETED_WITH_FINDINGS)
+
+    def test_valid_vulnerability_json_could_not_resolve_type_id_is_not_extraction_failure(self):
+        payload = json.dumps({"results": [{"packages": [{
+            "package": {"ecosystem": "Maven", "name": "org.example:demo", "version": "1.0"},
+            "vulnerabilities": [{
+                "id": "CVE-2026-0001",
+                "database_specific": {"severity": "HIGH"},
+                "details": "REJECTED - InvalidTypeIdException: Could not resolve type id 'java.io.File'",
+            }],
+        }]}]})
+        runner = _SequenceScannerRunner([
+            CommandResult(["scanner"], ".", 1, stdout=payload, stderr="Scanning dir ."),
+        ])
+        report = self._scanner(runner).scan(self.workspace.repository, ("HIGH",), "json-description")
+        self.assertTrue(report.succeeded, report.error)
+        self.assertEqual(ScanOutcome.COMPLETED_WITH_FINDINGS, report.effective_outcome)
+        self.assertEqual(1, len(report.findings))
 
     def test_task10_failed_resolving_message_is_incomplete_even_with_zero_findings(self):
         for stream in ("stdout", "stderr"):
