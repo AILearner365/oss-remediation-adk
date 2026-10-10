@@ -481,6 +481,30 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
                 self.assertEqual(expected_outcome, report.effective_outcome)
                 self.assertEqual(bool(report.findings), report.effective_outcome == ScanOutcome.COMPLETED_WITH_FINDINGS)
 
+    def test_task10_failed_resolving_message_is_incomplete_even_with_zero_findings(self):
+        for stream in ("stdout", "stderr"):
+            with self.subTest(stream=stream):
+                output = '{"results": []}'
+                extraction_error = (
+                    "Error during extraction: failed resolving "
+                    "Maven:com.example:task-service:1.0-SNAPSHOT: "
+                    "version Maven:com.example:task-domain:1.0-SNAPSHOT: not found"
+                )
+                runner = _SequenceScannerRunner([
+                    CommandResult(
+                        ["scanner"], ".", 0,
+                        stdout=(output + "\\n" + extraction_error) if stream == "stdout" else output,
+                        stderr=extraction_error if stream == "stderr" else "",
+                    ),
+                ])
+                report = self._scanner(runner).scan(
+                    self.workspace.repository, ("HIGH",), f"task10-{stream}"
+                )
+                self.assertFalse(report.succeeded)
+                self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
+                self.assertEqual((), report.findings)
+                self.assertIn("DEPENDENCY_RESOLUTION_FAILURE", report.error or "")
+
     def test_partial_findings_with_resolution_errors_are_incomplete(self):
         payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
         runner = _SequenceScannerRunner([
