@@ -289,6 +289,12 @@ def main() -> int:
     )
 
     task = extract_task_prompt(args.task_doc)
+    if args.task_skill:
+        task += (
+            "\n\nBefore making consequential dependency-remediation changes, "
+            "read and apply the available evidence-driven-dependency-remediation "
+            "Agent Skill. It does not supersede the task constraints."
+        )
     try:
         conversation.send_message(task)
         conversation.run()
