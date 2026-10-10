@@ -1,6 +1,11 @@
 ---
 name: evidence-driven-dependency-remediation
 description: Use for autonomously investigating, implementing, and verifying vulnerable software-dependency remediations, including release-family compatibility and evidence-led changes of strategy.
+triggers:
+  - vulnerability
+  - vulnerabilities
+  - remediation
+  - dependency
 ---
 
 # Evidence-driven dependency remediation
