@@ -74,11 +74,13 @@ PY
   exit 0
 fi
 
-summary="$(python - "$OUTPUT_FILE" "$LAST_LOG" <<'PY'
+summary="$(python - "$OUTPUT_FILE" "$LAST_LOG" "$HOOK_STATE_DIR" "$count" <<'PY'
 import json, pathlib, sys
 
 out = pathlib.Path(sys.argv[1])
 log = pathlib.Path(sys.argv[2])
+history_dir = pathlib.Path(sys.argv[3])
+current_attempt = int(sys.argv[4])
 parts = []
 
 
@@ -132,6 +134,25 @@ if out.is_file():
                     + " | ".join(_finding_line(item, current_by_identity) for item in remaining)
                 )
 
+        resolved = _value(data, "resolvedTargetFindings", "resolved_target_findings")
+        if isinstance(resolved, list):
+            parts.append(f"Current validated progress: {len(resolved)} original findings resolved")
+            earlier = []
+            for previous in range(1, current_attempt):
+                snapshot = history_dir / f"validation-attempt-{previous}.json"
+                try:
+                    old = json.loads(snapshot.read_text(encoding="utf-8"))
+                    prior = _value(old, "resolvedTargetFindings", "resolved_target_findings")
+                    if isinstance(prior, list):
+                        earlier.append((len(prior), previous))
+                except (OSError, ValueError):
+                    continue
+            if earlier:
+                best, previous_attempt = max(earlier)
+                parts.append(f"Best earlier validated progress: {best} resolved on attempt {previous_attempt}; earlier attempt may have other failed constraints")
+                if best > len(resolved):
+                    parts.append("Regression in finding coverage relative to earlier attempt; compare prior evidence and preserve only defensible changes")
+
         unknown = _value(data, "unknownTargetFindings", "unknown_target_findings")
         if isinstance(unknown, list):
             parts.append(f"Unknown/unscannable original HIGH/CRITICAL findings: {len(unknown)}")
@@ -165,7 +186,7 @@ if out.is_file():
                 baseline = evidence.get("baseline_version")
                 final = evidence.get("final_version")
                 if baseline is not None or final is not None:
-                    parts.append(f"Spring Boot evidence: baseline={baseline}; current={final}")
+                    parts.append(f"Spring Boot evidence: baseline={baseline}; current={final}; classification={evidence.get('detected_change_type')}")
             if check.get("name") == "delivery_diff_hygiene" and not check.get("passed", False):
                 evidence = check.get("evidence") or {}
                 artifacts = evidence.get("diagnosticArtifacts")
