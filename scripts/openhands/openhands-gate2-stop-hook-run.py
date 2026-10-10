@@ -15,9 +15,9 @@ import os
 import shlex
 import subprocess
 import shutil
+import sys
 from pathlib import Path
 
-from autonomous_oss_remediation_agent.deterministic.osv import _serve_maven_repository
 
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
@@ -26,6 +26,9 @@ from openhands.tools.preset.default import get_default_agent
 
 
 CONTROL_REPO = Path(__file__).resolve().parents[2]
+if str(CONTROL_REPO) not in sys.path:
+    sys.path.insert(0, str(CONTROL_REPO))
+from autonomous_oss_remediation_agent.deterministic.osv import _serve_maven_repository
 DEFAULT_TARGET = Path.home() / "maven-multimodule-app-stop-hook"
 DEFAULT_STATE_DIR = Path.home() / ".openhands" / "gate2" / "task-02-stop-hook"
 DEFAULT_TASK_DOC = CONTROL_REPO / "docs" / "experiments" / "openhands" / "GATE2-TASK.md"
