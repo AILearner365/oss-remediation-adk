@@ -1,0 +1,27 @@
+==> Agent Canvas 1.24.0 already installed
+==> Node: v24.21.0
+==> npm: 12.2.0
+==> uv: uv 0.12.2 (x86_64-unknown-linux-gnu)
+==> tmux: tmux 2.1
+==> Agent Canvas: 1.24.0
+==> Agent Canvas path: /usr/local/nvm/versions/node/v24.21.0/lib/node_modules/@openhands/agent-canvas
+==> ADC OK
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> UV cache: /tmp/openhands-uv-cache
+==> tmux directory: /home/kavya_parivarababu/.openhands/agent-canvas/tmux
+==> Vertex SDK launcher patch already present
+==> Vertex ADC readiness patch already present
+51:  "openhands-sdk",
+415: *   packages (openhands-sdk, openhands-tools, openhands-workspace) so source
+447:      path.join(localPath, "openhands-sdk"),
+460:    // openhands-agent-server/, openhands-sdk/, openhands-tools/, openhands-workspace/
+473:      `${baseGitUrl}#subdirectory=openhands-sdk`,
+491:      `openhands-sdk[vertex]==${version}`,
+507:      `openhands-sdk==${DEFAULT_AGENT_SERVER_VERSION}`,
+M=T&&(D(O?.config)||O?.config?.model?.startsWith("vertex_ai/"))
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/disk/by-id/google-home-part1  4.8G  3.8G  782M  84% /home
+4.8M	/home/kavya_parivarababu/.npm
+173M	/home/kavya_parivarababu/.cache
+50M	/home/kavya_parivarababu/.openhands

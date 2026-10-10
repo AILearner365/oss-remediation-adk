@@ -1,0 +1,3 @@
+stage=EXECUTE
+exit_code=2
+result=FAIL

@@ -1,0 +1,5 @@
+branch=openhands-poc-task-10-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+status_end
