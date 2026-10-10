@@ -148,6 +148,7 @@ def load_engineering_guidance(path: Path = DEFAULT_ENGINEERING_GUIDANCE) -> str:
 
 
 def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False, structured_guidance: bool = False):
+    agent = get_default_agent(llm=llm, cli_mode=True)
     if sum((engineering_guidance, task_skill, structured_guidance)) > 1:
         raise SystemExit("Choose only one guidance experiment")
     if structured_guidance:
@@ -158,12 +159,11 @@ def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = Fals
         guidance = load_engineering_guidance(GENERAL_GUIDANCE)
         project = load_engineering_guidance(PROJECT_GUIDANCE)
         context = AgentContext(skills=[skills[MAVEN_SKILL_NAME]],
-            system_message_suffix=guidance + "\\n\\n<REPOSITORY_GUIDANCE>\\n" + project + "\\n</REPOSITORY_GUIDANCE>",
+            system_message_suffix=guidance + "\n\n<REPOSITORY_GUIDANCE>\n" + project + "\n</REPOSITORY_GUIDANCE>",
             load_public_skills=False)
         return agent.model_copy(update={"agent_context": context})
     if engineering_guidance and task_skill:
         raise SystemExit("Select one guidance mechanism: --task-skill or --engineering-judgment-guidance")
-    agent = get_default_agent(llm=llm, cli_mode=True)
     if task_skill:
         from openhands.sdk.skills import load_skills_from_dir
 
