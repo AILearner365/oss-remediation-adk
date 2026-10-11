@@ -643,6 +643,94 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         suppression_check = next(check for check in checks if check.name == "suppression_policy")
         self.assertFalse(suppression_check.passed)
 
+    def test_generated_scanner_output_cannot_trigger_suppression_policy(self):
+        evaluator = ConstraintEvaluator()
+        baseline = evaluator.capture(self.workspace.repository)
+        diff = """diff --git a/osv-output.json b/osv-output.json
+new file mode 100644
+--- /dev/null
++++ b/osv-output.json
+@@ -0,0 +1 @@
++{\"details\":\"The fix is to restrict the scheme and suppress the vulnerability\"}
+"""
+
+        checks = evaluator.validate(
+            self.workspace.repository,
+            baseline,
+            ConstraintSpec(),
+            ("osv-output.json",),
+            diff,
+        )
+
+        suppression_check = next(check for check in checks if check.name == "suppression_policy")
+        self.assertTrue(suppression_check.passed)
+        self.assertEqual([], suppression_check.evidence["addedSuppressionLines"])
+
+    def test_task14_recorded_diff_replays_without_suppression_false_positive(self):
+        recorded_diff = (
+            Path(__file__).resolve().parents[2]
+            / "docs/experiments/openhands/evidence"
+            / "gate2-orchestrated-run-20261010T232329Z/final.diff"
+        ).read_text(encoding="utf-8")
+        evaluator = ConstraintEvaluator()
+        baseline = evaluator.capture(self.workspace.repository)
+
+        checks = evaluator.validate(
+            self.workspace.repository,
+            baseline,
+            ConstraintSpec(),
+            ("osv-output.json", "pom.xml"),
+            recorded_diff,
+        )
+
+        suppression_check = next(check for check in checks if check.name == "suppression_policy")
+        self.assertTrue(suppression_check.passed)
+        self.assertEqual([], suppression_check.evidence["addedSuppressionLines"])
+
+    def test_pom_exclusion_is_detected_as_potential_suppression(self):
+        evaluator = ConstraintEvaluator()
+        baseline = evaluator.capture(self.workspace.repository)
+        diff = """diff --git a/pom.xml b/pom.xml
+--- a/pom.xml
++++ b/pom.xml
+@@ -1 +1,4 @@
++<exclusions>
++  <exclusion><groupId>vulnerable.group</groupId></exclusion>
++</exclusions>
+"""
+
+        checks = evaluator.validate(
+            self.workspace.repository, baseline, ConstraintSpec(), ("pom.xml",), diff
+        )
+
+        suppression_check = next(check for check in checks if check.name == "suppression_policy")
+        self.assertFalse(suppression_check.passed)
+        self.assertTrue(suppression_check.evidence["addedSuppressionLines"])
+
+    def test_dependency_check_suppression_file_addition_is_detected(self):
+        evaluator = ConstraintEvaluator()
+        baseline = evaluator.capture(self.workspace.repository)
+        diff = """diff --git a/security/dependency-check-suppressions.xml b/security/dependency-check-suppressions.xml
+--- /dev/null
++++ b/security/dependency-check-suppressions.xml
+@@ -0,0 +1,3 @@
++<suppressions>
++  <suppress><cve>CVE-2099-0001</cve></suppress>
++</suppressions>
+"""
+
+        checks = evaluator.validate(
+            self.workspace.repository,
+            baseline,
+            ConstraintSpec(),
+            ("security/dependency-check-suppressions.xml",),
+            diff,
+        )
+
+        suppression_check = next(check for check in checks if check.name == "suppression_policy")
+        self.assertFalse(suppression_check.passed)
+        self.assertEqual(3, len(suppression_check.evidence["addedSuppressionLines"]))
+
     def test_explicit_protected_versions_are_enforced(self):
         (self.workspace.repository / "pom.xml").write_text(
             """<project><parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.2.0</version></parent><properties><java.version>21</java.version></properties></project>""",

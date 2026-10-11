@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import ExitStack
+import hashlib
 import json
 import os
 import shlex
@@ -29,6 +30,7 @@ from maven_repository_server import serve_maven_repository
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
 from openhands.sdk.hooks import HookConfig, HookDefinition, HookMatcher
+from openhands.sdk.llm import Message, TextContent
 from openhands.tools.preset.default import get_default_agent
 
 
@@ -185,6 +187,74 @@ def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = Fals
         context = AgentContext(system_message_suffix=load_engineering_guidance())
         return agent.model_copy(update={"agent_context": context})
     return agent
+
+
+def guidance_delivery_evidence(
+    agent: Any,
+    task: str,
+    *,
+    engineering_guidance: bool,
+    task_skill: bool,
+    structured_guidance: bool,
+) -> dict[str, Any]:
+    """Describe prompt/Skill delivery without claiming observable agent use."""
+    context = agent.agent_context
+    available_skills = sorted(skill.name for skill in context.skills) if context else []
+    triggered_skills: list[str] = []
+    if context:
+        activated = context.get_user_message_suffix(
+            Message(role="user", content=[TextContent(text=task)]),
+            skip_skill_names=[],
+        )
+        if activated is not None:
+            _injected, triggered = activated
+            triggered_skills = sorted(str(name) for name in triggered)
+
+    engineering_text = load_engineering_guidance() if engineering_guidance else ""
+    engineering_delivered = bool(
+        context
+        and engineering_text
+        and context.system_message_suffix == engineering_text
+    )
+    maven_path = TASK_SKILL_DIR / MAVEN_SKILL_NAME / "SKILL.md"
+    task_skill_path = TASK_SKILL_DIR / TASK_SKILL_NAME / "SKILL.md"
+    return {
+        "engineeringJudgment": {
+            "configured": engineering_guidance,
+            "available": engineering_delivered,
+            "delivered": engineering_delivered,
+            "observedUsed": "NOT_PROVEN",
+            "sha256": (
+                hashlib.sha256(DEFAULT_ENGINEERING_GUIDANCE.read_bytes()).hexdigest()
+                if engineering_delivered
+                else None
+            ),
+        },
+        "mavenSkill": {
+            "configured": structured_guidance,
+            "available": MAVEN_SKILL_NAME in available_skills,
+            "delivered": MAVEN_SKILL_NAME in triggered_skills,
+            "observedUsed": "NOT_PROVEN",
+            "sha256": (
+                hashlib.sha256(maven_path.read_bytes()).hexdigest()
+                if MAVEN_SKILL_NAME in available_skills
+                else None
+            ),
+        },
+        "taskSkill": {
+            "configured": task_skill,
+            "available": TASK_SKILL_NAME in available_skills,
+            "delivered": TASK_SKILL_NAME in triggered_skills,
+            "observedUsed": "NOT_PROVEN",
+            "sha256": (
+                hashlib.sha256(task_skill_path.read_bytes()).hexdigest()
+                if TASK_SKILL_NAME in available_skills
+                else None
+            ),
+        },
+        "availableSkills": available_skills,
+        "triggeredSkills": triggered_skills,
+    }
 
 
 def configure_scanner_terminal(
@@ -403,6 +473,19 @@ def main() -> int:
                 "read and apply the available evidence-driven-dependency-remediation "
                 "Agent Skill. It does not supersede the task constraints."
             )
+        print(
+            "GUIDANCE_DELIVERY_EVIDENCE="
+            + json.dumps(
+                guidance_delivery_evidence(
+                    agent,
+                    task,
+                    engineering_guidance=args.engineering_judgment_guidance,
+                    task_skill=args.task_skill,
+                    structured_guidance=args.structured_guidance,
+                ),
+                sort_keys=True,
+            )
+        )
         conversation.send_message(task)
         conversation.run()
 

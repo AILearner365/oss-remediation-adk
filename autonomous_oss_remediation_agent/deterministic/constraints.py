@@ -17,6 +17,18 @@ _SUPPRESSION_NAMES = {
     ".osv-scanner-ignore",
 }
 
+_DIFF_SUPPRESSION_NAMES = _SUPPRESSION_NAMES | {
+    "dependency-check-suppression.xml",
+    "dependency-check-suppressions.xml",
+    "suppressions.xml",
+}
+
+_POM_SUPPRESSION_PATTERN = re.compile(
+    r"(?i)<\s*(?:exclusion|exclusions|suppressions?file|"
+    r"ossindex\.exclude(?:coordinates|vulnerabilityids)|"
+    r"(?:ignored|suppressed)vulnerabilit(?:y|ies))\b"
+)
+
 
 class ConstraintEvaluator:
     def capture(self, repository: Path) -> ConstraintBaseline:
@@ -28,19 +40,42 @@ class ConstraintEvaluator:
             except ET.ParseError:
                 continue
             properties = _child(root, "properties")
+            property_values: dict[str, str] = {}
             if properties is not None:
                 for child in list(properties):
                     name = _local_name(child.tag)
                     value = (child.text or "").strip()
+                    if value:
+                        property_values[name] = value
                     if name in {"java.version", "maven.compiler.release", "maven.compiler.source", "maven.compiler.target"} and value:
                         java_versions.add(f"{name}={value}")
-                    if name in {"spring-boot.version", "spring.boot.version"} and value:
-                        spring_versions.add(f"{name}={value}")
             parent = _child(root, "parent")
             if parent is not None and _text(parent, "artifactId") == "spring-boot-starter-parent":
                 version = _text(parent, "version")
                 if version:
-                    spring_versions.add(f"parent={version}")
+                    spring_versions.add(
+                        f"parent={_resolve_maven_property(version, property_values)}"
+                    )
+            dependency_management = _child(root, "dependencyManagement")
+            dependencies = (
+                _child(dependency_management, "dependencies")
+                if dependency_management is not None
+                else None
+            )
+            if dependencies is not None:
+                for dependency in list(dependencies):
+                    if (
+                        _local_name(dependency.tag) == "dependency"
+                        and _text(dependency, "groupId") == "org.springframework.boot"
+                        and _text(dependency, "artifactId") == "spring-boot-dependencies"
+                        and _text(dependency, "type") == "pom"
+                        and _text(dependency, "scope") == "import"
+                    ):
+                        version = _text(dependency, "version")
+                        if version:
+                            spring_versions.add(
+                                f"bom={_resolve_maven_property(version, property_values)}"
+                            )
         suppressions: dict[str, str] = {}
         for path in repository.rglob("*"):
             if path.is_file() and path.name.lower() in _SUPPRESSION_NAMES:
@@ -125,13 +160,7 @@ class ConstraintEvaluator:
                 for name in set(baseline.suppression_files) | set(current.suppression_files)
                 if baseline.suppression_files.get(name) != current.suppression_files.get(name)
             }
-            added_suppression_lines = [
-                line
-                for line in diff_text.splitlines()
-                if line.startswith("+")
-                and not line.startswith("+++")
-                and re.search(r"(?i)(osv|vulnerab).*(ignore|suppress|exclude)|(ignore|suppress).*(osv|vulnerab)", line)
-            ]
+            added_suppression_lines = _added_suppression_lines(diff_text)
             passed = not changed_suppression_files and not added_suppression_lines
             checks.append(
                 ValidationCheck(
@@ -193,8 +222,10 @@ def _spring_boot_policy_check(
     change_types = sorted({str(item["detected_change_type"]) for item in evaluations}) or ["unverifiable"]
     evidence = {
         "component": "spring_boot",
-        "baseline_version": _evidence_versions(baseline_values),
-        "final_version": _evidence_versions(final_values),
+        "baseline_version": _effective_evidence_versions(baseline_values),
+        "final_version": _effective_evidence_versions(final_values),
+        "baseline_declarations": list(baseline_values),
+        "final_declarations": list(final_values),
         "applicable_policy": applicable_policy,
         "detected_change_type": change_types[0] if len(change_types) == 1 else change_types,
         "passed": passed,
@@ -208,34 +239,45 @@ def _evaluate_spring_boot_changes(
     baseline_values: tuple[str, ...],
     final_values: tuple[str, ...],
 ) -> list[dict[str, str | bool | None]]:
-    baseline_by_source = _versions_by_source(baseline_values)
-    final_by_source = _versions_by_source(final_values)
+    baseline_versions = sorted(
+        {_split_detected_version(item)[1] for item in baseline_values}
+    )
+    final_versions = sorted({_split_detected_version(item)[1] for item in final_values})
     evaluations: list[dict[str, str | bool | None]] = []
-    for source in sorted(set(baseline_by_source) | set(final_by_source)):
-        baseline_versions = baseline_by_source.get(source, [])
-        final_versions = final_by_source.get(source, [])
-        if len(baseline_versions) != len(final_versions):
-            evaluations.append(
-                {
-                    "source": source,
-                    "baseline_version": ", ".join(baseline_versions) or None,
-                    "final_version": ", ".join(final_versions) or None,
-                    "detected_change_type": "configuration_changed",
-                    "comparable": False,
-                }
-            )
-            continue
-        for baseline_version, final_version in zip(sorted(baseline_versions), sorted(final_versions)):
-            change_type = _classify_version_change(baseline_version, final_version)
-            evaluations.append(
-                {
-                    "source": source,
-                    "baseline_version": baseline_version,
-                    "final_version": final_version,
-                    "detected_change_type": change_type,
-                    "comparable": change_type not in {"unparseable", "prerelease"},
-                }
-            )
+    if len(final_versions) > 1:
+        return [{
+            "source": "effective_maven_model",
+            "baseline_version": ", ".join(baseline_versions) or None,
+            "final_version": ", ".join(final_versions),
+            "detected_change_type": "incompatible_combination",
+            "comparable": False,
+        }]
+    if not baseline_versions or not final_versions:
+        return [{
+            "source": "effective_maven_model",
+            "baseline_version": ", ".join(baseline_versions) or None,
+            "final_version": ", ".join(final_versions) or None,
+            "detected_change_type": "configuration_changed",
+            "comparable": False,
+        }]
+    if len(baseline_versions) > 1:
+        return [{
+            "source": "effective_maven_model",
+            "baseline_version": ", ".join(baseline_versions),
+            "final_version": final_versions[0],
+            "detected_change_type": "configuration_changed",
+            "comparable": False,
+        }]
+    change_type = _classify_version_change(baseline_versions[0], final_versions[0])
+    evaluations.append(
+        {
+            "source": "effective_maven_model",
+            "baseline_version": baseline_versions[0],
+            "final_version": final_versions[0],
+            "detected_change_type": change_type,
+            "comparable": change_type not in {"unparseable", "prerelease"},
+        }
+    )
     return evaluations
 
 
@@ -297,12 +339,39 @@ def _spring_boot_change_allowed(
     return False
 
 
-def _versions_by_source(values: tuple[str, ...]) -> dict[str, list[str]]:
-    result: dict[str, list[str]] = {}
-    for value in values:
-        source, version = _split_detected_version(value)
-        result.setdefault(source, []).append(version)
-    return result
+def _resolve_maven_property(value: str, properties: dict[str, str]) -> str:
+    seen: set[str] = set()
+    resolved = value
+    while _is_property_reference(resolved):
+        name = resolved[2:-1]
+        if name in seen or name not in properties:
+            break
+        seen.add(name)
+        resolved = properties[name]
+    return resolved
+
+
+def _added_suppression_lines(diff_text: str) -> list[str]:
+    """Return suppression-like additions only from supported policy files."""
+    current_path: str | None = None
+    found: list[str] = []
+    for line in diff_text.splitlines():
+        if line.startswith("diff --git "):
+            match = re.match(r"diff --git a/(.+) b/(.+)$", line)
+            current_path = match.group(2) if match else None
+            continue
+        if line.startswith("+++ "):
+            value = line[4:].strip()
+            current_path = value[2:] if value.startswith("b/") else current_path
+            continue
+        if not current_path or not line.startswith("+") or line.startswith("+++"):
+            continue
+        name = Path(current_path).name.lower()
+        if name in _DIFF_SUPPRESSION_NAMES:
+            found.append(f"{current_path}:{line}")
+        elif name == "pom.xml" and _POM_SUPPRESSION_PATTERN.search(line):
+            found.append(f"{current_path}:{line}")
+    return found
 
 
 def _split_detected_version(value: str) -> tuple[str, str]:
@@ -314,8 +383,8 @@ def _is_property_reference(value: str) -> bool:
     return value.startswith("${") and value.endswith("}")
 
 
-def _evidence_versions(values: tuple[str, ...]) -> str | list[str] | None:
-    versions = [_split_detected_version(value)[1] for value in values]
+def _effective_evidence_versions(values: tuple[str, ...]) -> str | list[str] | None:
+    versions = sorted({_split_detected_version(value)[1] for value in values})
     if not versions:
         return None
     return versions[0] if len(versions) == 1 else versions

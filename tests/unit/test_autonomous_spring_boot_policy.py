@@ -154,10 +154,62 @@ class AutonomousSpringBootPolicyTests(unittest.TestCase):
         self.assertNotIn("parents, imported BOMs, properties", AGENT_INSTRUCTION)
         self.assertNotIn("required remediation order", AGENT_INSTRUCTION)
 
-    def test_unparseable_version_change_fails_closed(self):
+    def test_prerelease_version_change_fails_closed(self):
         check = self._validate("3.5.0", "4.0.0-RC1", ConstraintSpec())
         self.assertFalse(check.passed)
-        self.assertEqual("unparseable", check.evidence["detected_change_type"])
+        self.assertEqual("prerelease", check.evidence["detected_change_type"])
+
+    def test_redundant_same_version_bom_does_not_change_effective_version(self):
+        self._write_pom("4.0.6")
+        baseline = self.evaluator.capture(self.repository)
+        (self.repository / "pom.xml").write_text(
+            """<project><parent><groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-parent</artifactId><version>4.0.6</version></parent>
+<properties><spring-boot.version>4.0.6</spring-boot.version></properties>
+<dependencyManagement><dependencies><dependency>
+<groupId>org.springframework.boot</groupId><artifactId>spring-boot-dependencies</artifactId>
+<version>${spring-boot.version}</version><type>pom</type><scope>import</scope>
+</dependency></dependencies></dependencyManagement></project>""",
+            encoding="utf-8",
+        )
+
+        check = next(
+            check
+            for check in self.evaluator.validate(
+                self.repository, baseline, ConstraintSpec(), ("pom.xml",), ""
+            )
+            if check.name == "spring_boot_version_policy"
+        )
+
+        self.assertTrue(check.passed)
+        self.assertEqual("unchanged", check.evidence["detected_change_type"])
+        self.assertIn("bom=4.0.6", self.evaluator.capture(self.repository).spring_boot_versions)
+
+    def test_mismatched_parent_and_bom_are_rejected(self):
+        self._write_pom("4.0.6")
+        baseline = self.evaluator.capture(self.repository)
+        (self.repository / "pom.xml").write_text(
+            """<project><parent><groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-parent</artifactId><version>4.0.6</version></parent>
+<dependencyManagement><dependencies><dependency>
+<groupId>org.springframework.boot</groupId><artifactId>spring-boot-dependencies</artifactId>
+<version>3.2.5</version><type>pom</type><scope>import</scope>
+</dependency></dependencies></dependencyManagement></project>""",
+            encoding="utf-8",
+        )
+
+        check = next(
+            check
+            for check in self.evaluator.validate(
+                self.repository, baseline, ConstraintSpec(), ("pom.xml",), ""
+            )
+            if check.name == "spring_boot_version_policy"
+        )
+
+        self.assertFalse(check.passed)
+        self.assertEqual(
+            "incompatible_combination", check.evidence["detected_change_type"]
+        )
 
     def _validate(self, baseline_version: str, final_version: str, spec: ConstraintSpec):
         self._write_pom(baseline_version)

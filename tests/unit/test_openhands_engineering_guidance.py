@@ -111,6 +111,42 @@ class OpenHandsEngineeringGuidanceTests(unittest.TestCase):
             ):
                 self.runner.load_engineering_guidance(Path(temp_dir))
 
+    def test_delivery_evidence_distinguishes_configuration_from_use(self) -> None:
+        llm = self.make_llm()
+        task = self.runner.extract_task_prompt(TASK_DOC)
+        legacy_agent = self.runner.build_agent(llm, engineering_guidance=True)
+        legacy = self.runner.guidance_delivery_evidence(
+            legacy_agent,
+            task,
+            engineering_guidance=True,
+            task_skill=False,
+            structured_guidance=False,
+        )
+        self.assertTrue(legacy["engineeringJudgment"]["configured"])
+        self.assertTrue(legacy["engineeringJudgment"]["delivered"])
+        self.assertFalse(legacy["mavenSkill"]["available"])
+        self.assertEqual("NOT_PROVEN", legacy["engineeringJudgment"]["observedUsed"])
+
+        structured_agent = self.runner.build_agent(
+            llm, engineering_guidance=False, structured_guidance=True
+        )
+        structured_task = task + (
+            "\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
+            "or published-version facts materially affect your engineering decision."
+        )
+        structured = self.runner.guidance_delivery_evidence(
+            structured_agent,
+            structured_task,
+            engineering_guidance=False,
+            task_skill=False,
+            structured_guidance=True,
+        )
+        self.assertTrue(structured["mavenSkill"]["configured"])
+        self.assertTrue(structured["mavenSkill"]["available"])
+        self.assertTrue(structured["mavenSkill"]["delivered"])
+        self.assertIn("maven-dependency-evidence", structured["triggeredSkills"])
+        self.assertEqual("NOT_PROVEN", structured["mavenSkill"]["observedUsed"])
+
     def test_task_contract_and_stop_hook_configuration_are_unchanged(self) -> None:
         self.assertEqual(
             hashlib.sha256(TASK_DOC.read_bytes()).hexdigest(),

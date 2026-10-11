@@ -55,6 +55,15 @@ publish_evidence() {
       printf 'model=%s\n' "${MODEL:-vertex_ai/gemini-2.5-flash}"
       printf 'max_denials=%s\n' "${MAX_DENIALS:-3}"
       printf 'max_iterations=%s\n' "${MAX_ITERATIONS:-250}"
+      printf 'engineering_judgment_guidance=%s\n' "${OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE:-0}"
+      printf 'task_skill=%s\n' "${OPENHANDS_TASK_SKILL:-0}"
+      printf 'structured_guidance=%s\n' "${OPENHANDS_STRUCTURED_GUIDANCE:-0}"
+      sha256sum \
+        "$CONTROL_REPO/scripts/openhands/guidance/engineering-judgment.md" \
+        "$CONTROL_REPO/scripts/openhands/guidance/general-engineering.md" \
+        "$CONTROL_REPO/scripts/openhands/project-context/AGENTS.md" \
+        "$CONTROL_REPO/scripts/openhands/skills/maven-dependency-evidence/SKILL.md" \
+        "$CONTROL_REPO/scripts/openhands/skills/evidence-driven-dependency-remediation/SKILL.md"
     } > "$EVIDENCE_DIR/run-metadata.txt"
 
     local events_dir conversation_id trajectory_dir

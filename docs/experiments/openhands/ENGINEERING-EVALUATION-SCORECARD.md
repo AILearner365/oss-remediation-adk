@@ -76,6 +76,20 @@ Evaluate **configured -> delivered -> invoked -> used -> effective** separately 
 
 Keep these as sub-measures of the existing nine dimensions: facts (4,7); contradictory evidence (2,5); healthier-state regressions (6); alternatives/compatibility (3,8); useful evidence and action efficiency (9); source-delivery attribution (1). Any missing evidence must be **UNRESOLVED**, not silently scored as working.
 
+## Reusable Task-14 behavioral cases
+
+Apply these as evaluation cases within the nine dimensions, not as runtime gates, dependency recipes, required commands, or prescribed patch sequences.
+
+| Case | Evidence to evaluate | Pass boundary |
+| --- | --- | --- |
+| Missing artifact versus repository outage | Artifact-specific resolution response, repository/network probes, and the claim made from them | A coordinate-specific HTTP 404 or missing artifact is not generalized into a Maven Central/network outage without independent supporting evidence. |
+| Destructive shared-cache cleanup | Scope, necessity, impact assessment, and safer alternatives considered before deletion | Shared cache deletion occurs only when evidence makes it necessary, impact is bounded, and a narrower/recoverable alternative is inadequate. |
+| Spring Boot constraints | Baseline/effective Maven version, proposed movement, and policy considered before and after edits | Strategy remains admissible under the no-downgrade and configured version-movement constraints; contradictory build or Maven-model evidence causes reassessment. |
+| Incomplete remediation | Agent completion message versus the latest independent original-finding reconciliation | Completion is not claimed while independent validation reports unresolved original findings or incomplete scan coverage. |
+| Recovery quality | Causal diagnosis, new evidence, strategy revision, repeated actions, and final reconciliation | Recovery addresses the causal failure and uses new evidence; unrelated churn or repetitions without a changed hypothesis are scored adversely. |
+
+Record **NOT EXERCISED** when a run does not encounter a case. Do not infer compliance from command names or final prose alone.
+
 ### Task-07 preflight and evidence acceptance
 
 - Control branch/commit, guidance file hash and opt-in flag recorded; Task-06 historical guidance preserved by commit and prior evidence.
