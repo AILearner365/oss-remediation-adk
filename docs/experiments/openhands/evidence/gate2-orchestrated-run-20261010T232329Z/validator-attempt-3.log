@@ -1,0 +1,27 @@
+==> Running independent deterministic Gate 2 validation
+==> Target: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-14
+==> Baseline commit: 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+==> Baseline HIGH/CRITICAL findings: 26
+[PASS] baseline_ancestry: Repository remains based on the recorded baseline
+[PASS] git_change_evidence: Git status and full diff were captured
+[FAIL] build_test_startup: A required build/test/startup command failed
+[PASS] fresh_vulnerability_scan: Fresh vulnerability scan completed: COMPLETED_WITH_FINDINGS
+[FAIL] target_findings_improved: Target comparison unavailable because validation evidence is incomplete: build/test validation failed, so dependency scan coverage is not authoritative
+[FAIL] target_findings_resolved: Target comparison unavailable because validation evidence is incomplete: build/test validation failed, so dependency scan coverage is not authoritative
+[FAIL] no_new_prohibited_findings: New prohibited finding comparison unavailable because the fresh scan did not complete
+[PASS] protected_java_version: Java version configuration matches the protected value
+[FAIL] spring_boot_version_policy: Spring Boot version movement is rejected by policy: configuration_changed, downgrade
+[PASS] suppression_policy: No prohibited suppression change detected
+[PASS] delivery_diff_hygiene: No newly changed likely investigation-only artifacts were detected
+==> Changed files: 6
+    effective-pom-task-web.xml
+    osv-output.json
+    pom.xml
+    spring-boot-dependencies-3.2.5.pom
+    task-web/osv-output.json
+    task-web/pom.xml
+==> Resolved target findings: 0
+==> Remaining target findings: 2
+==> Unknown/unscannable target findings: 24
+==> Validation report: /home/kavya_parivarababu/.openhands/gate2/task-14-stop-hook/validation.json
+==> Gate 2 independent deterministic validation FAILED
