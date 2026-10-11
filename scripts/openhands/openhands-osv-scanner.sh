@@ -23,6 +23,11 @@ elif [[ "${1:-}" == -* ]]; then
         unsupported=true ;;
     esac
   done
+  if ! $recursive && ! $unsupported; then
+    # Legacy nonrecursive source scans are allowed for focused investigation,
+    # but must never look like silent proof of whole-repository clearance.
+    echo "OSV_LAUNCHER_SCOPE=NON_RECURSIVE; only explicitly selected files may be scanned. This is not full-project clearance." >&2
+  fi
   if $recursive && ! $unsupported; then
     source_scan=true
     args=(scan source "$@")
