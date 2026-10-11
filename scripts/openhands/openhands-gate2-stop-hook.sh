@@ -187,6 +187,16 @@ if out.is_file():
                 final = evidence.get("final_version")
                 if baseline is not None or final is not None:
                     parts.append(f"Spring Boot evidence: baseline={baseline}; current={final}; classification={evidence.get('detected_change_type')}")
+            if check.get("name") == "suppression_policy" and not check.get("passed", False):
+                evidence = check.get("evidence") or {}
+                added = evidence.get("addedSuppressionLines")
+                if isinstance(added, list) and added:
+                    parts.append("Suppression-policy changed lines: " + " | ".join(str(line) for line in added[:24]))
+                    if len(added) > 24:
+                        parts.append(f"Additional suppression-policy lines omitted: {len(added) - 24}; inspect validation report")
+                changed = evidence.get("changedSuppressionFiles")
+                if isinstance(changed, list) and changed:
+                    parts.append("Changed suppression files: " + " | ".join(map(str, changed[:24])))
             if check.get("name") == "delivery_diff_hygiene" and not check.get("passed", False):
                 evidence = check.get("evidence") or {}
                 artifacts = evidence.get("diagnosticArtifacts")
