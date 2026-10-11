@@ -23,7 +23,7 @@ The runner resolves and records the baseline (currently `9ea1b0ed5ca255db0fc7c65
 
 ## Artifacts and review
 
-The chosen output directory contains `run-manifest.json`, `skill-delivery.json`, `status.json`, `events.jsonl`, `final-assistant.json`, `assessment.json`, before/after workspace manifests, `workspace-integrity.json`, the SDK `conversation/` persistence, and the isolated `workspace/`. The integrity report checks both the isolated workspace and the original source worktree. Artifacts written before model execution remain available after an exception. Inspect the summary with:
+The chosen output directory contains `run-manifest.json`, `skill-delivery.json`, `status.json`, `events.jsonl`, `final-assistant.json`, `assessment.json`, before/after workspace manifests, `workspace-integrity.json`, the SDK `conversation/` persistence, and the isolated `workspace/`. If JSONL export fails, the runner attempts `events-export-fallback.json`. The integrity report checks both the isolated workspace and the original source worktree. Partial events and separately labeled execution, state-capture, export, and cleanup errors are retained where the filesystem remains writable. Inspect the summary with:
 
 ```bash
 jq . "$HOME/.openhands/maven-dependency-research/$RUN_ID/assessment.json" \
@@ -34,9 +34,9 @@ less "$HOME/.openhands/maven-dependency-research/$RUN_ID/events.jsonl"
 
 ## Boundaries and limitations
 
-The run may use Maven repositories, vulnerability services, and ordinary web access available to the default agent; those results can change. It does not alter Maven caches or scanner policy. Skill configuration and trigger delivery are recorded separately and do not prove explicit use. The assessment is a conservative keyword index (`PROVEN`, `PARTIAL`, `NOT PROVEN`), not an automated judgment of hidden reasoning; a person must review the observable commands, results, and final answer. OpenHands/provider internals may not expose every token count, stop detail, or Skill invocation. Private reasoning is deliberately not exported, and redaction is best-effort, so artifacts should be reviewed before sharing.
+The run may use Maven repositories, vulnerability services, and ordinary web access available to the default agent; those results can change. It does not alter Maven caches or scanner policy. Skill configuration and trigger delivery are recorded separately and do not prove explicit use. `skillExplicitlyInvoked` is proven only by SDK 1.50.0's canonical `conversation.state.invoked_skills`, populated by the built-in `invoke_skill` tool. The other content checks are explicitly named keyword indicators (`PARTIAL` or `NOT PROVEN`); they locate review material but do not establish technical correctness, evidence coverage, decision quality, or successful Skill application. A person must review the observable commands, results, and final answer. OpenHands/provider internals may not expose every token count or stop detail. Private reasoning is deliberately not exported, and redaction is best-effort, so artifacts should be reviewed before sharing.
 
-A live run consumes Vertex AI Gemini 2.5 Flash tokens plus any external repository/scanner traffic, is bounded to 120 agent iterations by default, and may take several minutes. No live run is part of the offline test procedure.
+A live run consumes Vertex AI Gemini 2.5 Flash tokens plus any external repository/scanner traffic, is bounded to 15 agent iterations by default (override with `--max-iterations`), and may take several minutes. No live run is part of the offline test procedure.
 
 Run offline coverage (no Gemini calls) with:
 

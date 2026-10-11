@@ -144,42 +144,119 @@ def serialize_event(event: Any) -> dict[str, Any]:
 
 
 def evidence_assessment(events: list[dict[str, Any]], configured: bool,
-                        delivered: bool) -> dict[str, str]:
-    text = json.dumps(events).lower()
-    explicit_skill_invocation = any(
-        row.get("kind") == "ActionEvent"
-        and SKILL_NAME in json.dumps(row).lower()
-        for row in events
-    )
-    dimensions = {
+                        delivered: bool, invoked_skills: list[str]) -> dict[str, Any]:
+    evidence_rows = [
+        row for row in events
+        if row.get("kind") != "SystemPromptEvent"
+        and not (
+            row.get("kind") == "MessageEvent"
+            and isinstance(row.get("observable_message"), dict)
+            and row["observable_message"].get("role") == "user"
+        )
+    ]
+    text = json.dumps(evidence_rows).lower()
+    classifications = {
         "skillConfigured": "PROVEN" if configured else "NOT PROVEN",
         "skillTriggeredDelivered": "PROVEN" if delivered else "NOT PROVEN",
-        "skillExplicitlyInvoked": "PROVEN" if explicit_skill_invocation else "NOT PROVEN",
-        "skillInstructionsVisiblyApplied": "PARTIAL" if any(x in text for x in ("dependency:tree", "effective-pom", "dependency management")) else "NOT PROVEN",
-        "publishedVersionVerification": "PARTIAL" if any(x in text for x in ("maven-metadata", "dependency:get", "versions:display")) else "NOT PROVEN",
-        "dependencyBomOwnership": "PARTIAL" if any(x in text for x in ("effective-pom", "dependency:tree", "bom")) else "NOT PROVEN",
-        "vulnerabilityCoverage": "PARTIAL" if any(x in text for x in ("osv", "cve-", "ghsa-")) else "NOT PROVEN",
-        "compatibilityAssessment": "PARTIAL" if "compatib" in text else "NOT PROVEN",
-        "decisionQuality": "PARTIAL" if "recommend" in text else "NOT PROVEN",
-        "unresolvedUncertainties": "PARTIAL" if any(x in text for x in ("uncertain", "insufficient", "unknown")) else "NOT PROVEN",
+        "skillExplicitlyInvoked": "PROVEN" if SKILL_NAME in invoked_skills else "NOT PROVEN",
     }
-    dimensions["note"] = "Keyword-based observable-evidence index; requires human review of events.jsonl. Delivery is not proof of use."
-    return dimensions
+    indicators = {
+        "skillInstructionsVisiblyAppliedIndicator": "PARTIAL" if any(x in text for x in ("dependency:tree", "effective-pom", "dependency management")) else "NOT PROVEN",
+        "publishedVersionVerificationIndicator": "PARTIAL" if any(x in text for x in ("maven-metadata", "dependency:get", "versions:display")) else "NOT PROVEN",
+        "dependencyBomOwnershipIndicator": "PARTIAL" if any(x in text for x in ("effective-pom", "dependency:tree", "bom")) else "NOT PROVEN",
+        "vulnerabilityCoverageIndicator": "PARTIAL" if any(x in text for x in ("osv", "cve-", "ghsa-")) else "NOT PROVEN",
+        "compatibilityAssessmentIndicator": "PARTIAL" if "compatib" in text else "NOT PROVEN",
+        "decisionQualityIndicator": "PARTIAL" if "recommend" in text else "NOT PROVEN",
+        "unresolvedUncertaintiesIndicator": "PARTIAL" if any(x in text for x in ("uncertain", "insufficient", "unknown")) else "NOT PROVEN",
+    }
+    return {
+        "classifications": classifications,
+        "keywordIndicators": indicators,
+        "sdkInvokedSkills": invoked_skills,
+        "indicatorDisclaimer": (
+            "Keyword indicators locate evidence for human review only. They do not prove "
+            "technical correctness, evidence coverage, decision quality, or successful Skill application."
+        ),
+        "skillEvidenceDisclaimer": (
+            "Configuration and trigger delivery do not prove use. Explicit invocation is PROVEN "
+            "only when SDK 1.50.0 conversation state records the Skill in invoked_skills."
+        ),
+    }
 
 
 def export_events(events: list[Any], output: Path) -> list[dict[str, Any]]:
-    rows = []
+    rows = serialize_events(events)
     with output.open("w", encoding="utf-8") as stream:
-        for sequence, event in enumerate(events):
-            try:
-                row = serialize_event(event)
-            except Exception as exc:
-                row = {"kind": type(event).__name__, "serializationError": str(exc)}
-            row["sequence"] = sequence
-            rows.append(row)
+        for row in rows:
             stream.write(json.dumps(row, ensure_ascii=False) + "\n")
             stream.flush()
     return rows
+
+
+def serialize_events(events: list[Any]) -> list[dict[str, Any]]:
+    rows = []
+    for sequence, event in enumerate(events):
+        try:
+            row = serialize_event(event)
+        except Exception as exc:
+            row = {"kind": type(event).__name__, "serializationError": str(exc)}
+        row["sequence"] = sequence
+        rows.append(row)
+    return rows
+
+
+def record_error(status: dict[str, Any], phase: str, exc: BaseException) -> None:
+    status["phase"] = "failed"
+    status.setdefault("errors", []).append({
+        "phase": phase, "type": type(exc).__name__, "message": str(exc),
+    })
+    if status.get("error") is None:
+        status["error"] = status["errors"][0]
+
+
+def export_events_preserving_status(events: list[Any], output: Path,
+                                    status: dict[str, Any],
+                                    exporter: Any = export_events) -> list[dict[str, Any]]:
+    try:
+        return exporter(events, output / "events.jsonl")
+    except BaseException as exc:
+        record_error(status, "event_export", exc)
+        rows = serialize_events(events)
+        try:
+            write_json(output / "events-export-fallback.json", rows)
+        except BaseException as fallback_exc:
+            record_error(status, "event_export_fallback", fallback_exc)
+        return rows
+
+
+def run_conversation(conversation: Any, prompt: str,
+                     status: dict[str, Any]) -> tuple[list[Any], list[str]]:
+    """Run and close a conversation while retaining each observable failure."""
+    events: list[Any] = []
+    invoked_skills: list[str] = []
+    try:
+        conversation.send_message(prompt)
+        conversation.run()
+        status["phase"] = "completed"
+    except BaseException as exc:
+        record_error(status, "execution", exc)
+    finally:
+        try:
+            state = conversation.state
+            events = list(state.events)
+            invoked_skills = list(getattr(state, "invoked_skills", []))
+            execution_status = getattr(state, "execution_status", None)
+            status["stopReason"] = getattr(execution_status, "value", str(execution_status))
+            stats = getattr(state, "stats", None)
+            status["tokenUsage"] = sanitize(
+                stats.model_dump(mode="json") if hasattr(stats, "model_dump") else None)
+        except BaseException as exc:
+            record_error(status, "state_capture", exc)
+        try:
+            conversation.close()
+        except BaseException as exc:
+            record_error(status, "conversation_cleanup", exc)
+    return events, invoked_skills
 
 
 def final_assistant_message(events: list[dict[str, Any]]) -> Any:
@@ -196,7 +273,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline-ref", default=DEFAULT_BASELINE_REF)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--max-iterations", type=int, default=120)
+    parser.add_argument("--max-iterations", type=int, default=15)
     return parser.parse_args()
 
 
@@ -210,11 +287,13 @@ def main() -> int:
         raise SystemExit(f"Output directory must not already exist: {output}")
     output.mkdir(parents=True)
     workspace = output / "workspace"
-    status: dict[str, Any] = {"phase": "preparing", "error": None, "stopReason": None,
-                              "tokenUsage": None}
+    status: dict[str, Any] = {"phase": "preparing", "error": None, "errors": [],
+                              "stopReason": None, "tokenUsage": None}
     write_json(output / "status.json", status)
     events: list[Any] = []
+    invoked_skills: list[str] = []
     delivered = False
+    triggered_names: list[str] = []
     try:
         baseline = create_clean_fixture(source, args.baseline_ref, workspace)
         require_clean_fixture(workspace)
@@ -253,9 +332,10 @@ def main() -> int:
         activation = context.get_user_message_suffix(
             Message(role="user", content=[TextContent(text=PROMPT)]), skip_skill_names=[])
         delivered = bool(activation and SKILL_NAME in activation[1])
+        triggered_names = sorted(str(x) for x in activation[1]) if activation else []
         write_json(output / "skill-delivery.json", {
             "configured": True, "triggeredDelivered": delivered,
-            "triggeredNames": sorted(str(x) for x in activation[1]) if activation else [],
+            "triggeredNames": triggered_names,
             "explicitInvocation": "NOT PROVEN",
         })
         llm = LLM(usage_id="maven-dependency-research", model=args.model, api_key=None)
@@ -263,24 +343,17 @@ def main() -> int:
         conversation = Conversation(agent=agent, workspace=str(workspace),
                                     persistence_dir=output / "conversation", delete_on_close=False,
                                     max_iteration_per_run=args.max_iterations, stuck_detection=True)
-        try:
-            conversation.send_message(PROMPT)
-            conversation.run()
-            events = list(conversation.state.events)
-            state = conversation.state
-            status["stopReason"] = getattr(getattr(state, "execution_status", None), "value", None)
-            stats = getattr(state, "stats", None)
-            status["tokenUsage"] = sanitize(stats.model_dump(mode="json") if hasattr(stats, "model_dump") else None)
-        finally:
-            if not events:
-                events = list(conversation.state.events)
-            conversation.close()
-        status["phase"] = "completed"
+        events, invoked_skills = run_conversation(conversation, PROMPT, status)
     except BaseException as exc:
-        status["phase"] = "failed"
-        status["error"] = {"type": type(exc).__name__, "message": str(exc)}
+        record_error(status, "setup", exc)
     finally:
-        rows = export_events(events, output / "events.jsonl")
+        rows = export_events_preserving_status(events, output, status)
+        write_json(output / "skill-delivery.json", {
+            "configured": True, "triggeredDelivered": delivered,
+            "triggeredNames": triggered_names,
+            "sdkInvokedSkills": invoked_skills,
+            "explicitInvocation": "PROVEN" if SKILL_NAME in invoked_skills else "NOT PROVEN",
+        })
         write_json(output / "final-assistant.json", {
             "content": final_assistant_message(rows),
             "status": "PROVEN" if final_assistant_message(rows) is not None else "NOT PROVEN",
@@ -299,17 +372,15 @@ def main() -> int:
         source_unchanged = ("source_status_before" in locals()
                             and source_status_after == source_status_before)
         if status["phase"] == "completed" and (changes or not source_unchanged):
-            status["phase"] = "failed"
-            status["error"] = {
-                "type": "UnexpectedWorkspaceModification",
-                "message": "isolated workspace or source worktree changed during investigation",
-            }
+            record_error(status, "workspace_integrity", RuntimeError(
+                "isolated workspace or source worktree changed during investigation"))
         write_json(output / "workspace-integrity.json", {
             "workspaceUnchanged": not changes, "changedPaths": changes,
             "sourceWorktreeUnchanged": source_unchanged,
             "sourceStatusAfter": source_status_after.splitlines(),
         })
-        write_json(output / "assessment.json", evidence_assessment(rows, True, delivered))
+        write_json(output / "assessment.json", evidence_assessment(
+            rows, True, delivered, invoked_skills))
         write_json(output / "status.json", status)
     if status["phase"] != "completed" or changes or not source_unchanged:
         return 1
