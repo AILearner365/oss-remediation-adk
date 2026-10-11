@@ -1,0 +1,8 @@
+branch=openhands-poc-task-16-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+?? json-smart-updates.txt
+?? osv-scan-report.json
+?? osv-scan-root-pom.json
+status_end
