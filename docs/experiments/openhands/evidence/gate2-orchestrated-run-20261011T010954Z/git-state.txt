@@ -1,0 +1,14 @@
+branch=openhands-poc-task-15-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+?? dependencies.txt
+?? osv-scan-report-2.json
+?? osv-scan-report-3.json
+?? osv-scan-report-4.json
+?? osv-scan-report-5.json
+?? osv-scan-report-6.json
+?? osv-scan-report-7.json
+?? osv-scan-report-8.json
+?? osv-scan-report.json
+status_end
