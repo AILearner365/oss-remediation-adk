@@ -12,6 +12,18 @@ triggers:
 
 # Maven dependency evidence
 
+## Evidence-driven dependency decisions
+
+Treat remediation as a dependency-ownership, vulnerability-coverage, and compatibility problem, not simply a search for newer versions. Adapt the investigation to the decision at hand:
+
+- **Framework/BOM-managed vulnerabilities:** Establish the effective managing parent, BOM, or property. Investigate whether compatible published framework releases resolve related findings together before selecting independent overrides.
+- **Direct or residual vulnerable dependencies:** Identify the effective dependency path, advisory affected/fixed ranges, published compatible candidates, and what remains unresolved after each credible candidate.
+- **Uncertain release or version:** Establish a consequential candidate's publication, resolvability, stability, and relevant compatibility *before selecting or editing*. A plausible version number or unrelated update report is not evidence of availability.
+- **Compatibility-sensitive substitutions:** Assess dependency-family alignment, upstream/downstream consumers, runtime/API effects, and the resolved graph. An exclusion or `dependencyManagement` entry does not by itself establish a working replacement or preserve security coverage.
+- **Contradictory evidence:** Identify the failed premise and reassess the strategy before repeating it. Revisit a disproven candidate only when new evidence supports it; preserve validated progress and the full original vulnerability/coverage scope.
+
+Use available Maven, repository, advisory, and build evidence to settle material uncertainties. Compare meaningfully different credible approaches when useful, without forcing an arbitrary number of alternatives or a predetermined POM edit. Choose a proportionate defensible solution, then validate the dependency graph, security findings, compatibility, build, and tests as applicable.
+
 Use the repository's existing Maven tools before guessing version availability or dependency ownership.
 
 - Inspect `pom.xml` and relevant parent/BOM and `dependencyManagement` entries to identify which layer controls a candidate; `mvn dependency:tree` shows the resolved graph, not all published versions.
