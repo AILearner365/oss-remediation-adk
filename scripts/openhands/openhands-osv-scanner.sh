@@ -1,15 +1,43 @@
 #!/usr/bin/env bash
 # Session-scoped OpenHands OSV launcher; the runner supplies the local Maven registry.
+# Both current and legacy recursive source-scan invocations must use that registry.
 set -euo pipefail
+
 scanner="${OPENHANDS_OSV_EXECUTABLE:-$HOME/bin/osv-scanner}"
+registry="${OPENHANDS_OSV_MAVEN_REGISTRY:-}"
+
+args=("$@")
+source_scan=false
 if [[ "${1:-}" == "scan" && "${2:-}" == "source" ]]; then
-  [[ -n "${OPENHANDS_OSV_MAVEN_REGISTRY:-}" ]] || {
+  source_scan=true
+elif [[ "${1:-}" == -* ]]; then
+  # Older OSV CLI syntax: osv-scanner --format json -r .
+  # Normalize only recursive source scans. Do not reinterpret --help,
+  # --version, SBOM scans, or other commands.
+  recursive=false
+  unsupported=false
+  for arg in "$@"; do
+    case "$arg" in
+      -r|--recursive|--recursive=*) recursive=true ;;
+      --help|-h|--version|-v|--sbom|--sbom=*|--sbom-file|--sbom-file=*|-L)
+        unsupported=true ;;
+    esac
+  done
+  if $recursive && ! $unsupported; then
+    source_scan=true
+    args=(scan source "$@")
+    echo "OSV_LAUNCHER: normalized legacy recursive scan to 'scan source' with Maven registry" >&2
+  fi
+fi
+
+if $source_scan; then
+  [[ -n "$registry" ]] || {
     echo "INCOMPLETE_SCAN: local Maven registry is not configured" >&2
     exit 2
   }
-  args=()
+  clean=()
   skip_next=false
-  for arg in "$@"; do
+  for arg in "${args[@]}"; do
     if $skip_next; then
       skip_next=false
       continue
@@ -17,9 +45,10 @@ if [[ "${1:-}" == "scan" && "${2:-}" == "source" ]]; then
     case "$arg" in
       --data-source|--maven-registry) skip_next=true ;;
       --data-source=*|--maven-registry=*) ;;
-      *) args+=("$arg") ;;
+      *) clean+=("$arg") ;;
     esac
   done
-  exec "$scanner" "${args[@]}" --data-source=native "--maven-registry=$OPENHANDS_OSV_MAVEN_REGISTRY"
+  exec "$scanner" "${clean[@]}" --data-source=native "--maven-registry=$registry"
 fi
+
 exec "$scanner" "$@"
