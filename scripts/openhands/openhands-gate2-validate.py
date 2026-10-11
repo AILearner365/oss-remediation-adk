@@ -105,6 +105,11 @@ def main() -> int:
     parser.add_argument("--scanner", type=Path, default=DEFAULT_SCANNER)
     parser.add_argument("--scanner-version", default="2.6.0")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--workspace-root",
+        type=Path,
+        help="retain the validator workspace and all detailed evidence at this path",
+    )
     args = parser.parse_args()
 
     target = args.target_repo.expanduser().resolve()
@@ -129,15 +134,22 @@ def main() -> int:
     if not scanner_path.is_file() or not os.access(scanner_path, os.X_OK):
         die(f"OSV Scanner is not executable: {scanner_path}")
 
-    state = json.loads(state_file.read_text(encoding="utf-8"))
-    baseline = baseline_from_state(state, target)
+    try:
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        die(f"Saved Gate 2 baseline is invalid or unreadable at {state_file}: {exc}")
+    try:
+        baseline = baseline_from_state(state, target)
+        expected_task_branch = str(state["taskBranch"])
+    except (KeyError, TypeError, ValueError) as exc:
+        die(f"Saved Gate 2 baseline has invalid or missing required data: {exc}")
 
     current_branch = subprocess.run(
         ["git", "branch", "--show-current"], cwd=target, text=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
     ).stdout.strip()
-    if current_branch != state["taskBranch"]:
-        die(f"Expected task branch {state['taskBranch']}, found {current_branch}")
+    if current_branch != expected_task_branch:
+        die(f"Expected task branch {expected_task_branch}, found {current_branch}")
 
     request = RemediationRequest(
         repository_url=str(state["origin"]),
@@ -174,9 +186,14 @@ def main() -> int:
         ),
     )
 
-    temp = tempfile.TemporaryDirectory(prefix="openhands-gate2-validation-", dir="/tmp")
+    temp = None
     try:
-        root = Path(temp.name)
+        if args.workspace_root:
+            root = args.workspace_root.expanduser().resolve()
+            root.mkdir(parents=True, exist_ok=False)
+        else:
+            temp = tempfile.TemporaryDirectory(prefix="openhands-gate2-validation-", dir="/tmp")
+            root = Path(temp.name)
         workspace = RunWorkspace(
             root=root,
             repository=target,
@@ -236,7 +253,46 @@ def main() -> int:
         print(f"==> Resolved target findings: {len(report.resolved_target_findings)}")
         print(f"==> Remaining target findings: {len(report.remaining_target_findings)}")
         print(f"==> Unknown/unscannable target findings: {len(report.unknown_target_findings)}")
+        scan = report.scan
+        coverage = (scan.evidence.get("mavenCoverage") or {}) if scan else {}
+        print(f"==> Overall validation result: {'PASS' if report.passed else 'FAIL'}")
+        build_check = next((check for check in report.checks if check.name == "build_test_startup"), None)
+        print(f"==> Maven build/test result: {'PASS' if build_check and build_check.passed else 'FAIL'}")
+        print(
+            "==> OSV scan completed: "
+            + ("YES" if scan and scan.succeeded else "NO")
+            + f" ({scan.effective_outcome.value if scan else 'NOT_RUN'})"
+        )
+        if coverage:
+            print(
+                f"==> Maven POM coverage: expected {coverage.get('expectedPomCount', 0)}, "
+                f"scanned {coverage.get('scannedPomCount', 0)}"
+            )
+            print("    Expected: " + ", ".join(coverage.get("expectedPoms") or ["none"]))
+            print("    Scanned:  " + ", ".join(coverage.get("scannedPoms") or ["none"]))
+            if coverage.get("missingPoms"):
+                print("    Missing:  " + ", ".join(coverage["missingPoms"]))
+        if not report.target_comparison_complete:
+            print("==> Vulnerability comparison: UNKNOWN because validation evidence is incomplete")
+        failed = [check for check in report.checks if not check.passed]
+        if failed:
+            print("==> Failed constraints/checks:")
+            for check in failed:
+                print(f"    {check.name}: {check.message}")
         print(f"==> Validation report: {args.output}")
+        print(f"==> Detailed evidence directory: {workspace.artifacts}")
+        if scan:
+            print(f"==> Full OSV JSON: {scan.raw_report_path}")
+            for attempt in scan.attempts:
+                print(f"==> OSV stderr: {attempt.get('stderrArtifact')}")
+                print(f"==> OSV execution details: {workspace.artifacts / 'scans' / ('validation-cycle-1-attempt-' + str(attempt.get('attemptNumber')) + '.evidence.json')}")
+            print(f"==> Normalized OSV report: {workspace.artifacts / 'scans/validation-cycle-1.normalized.json'}")
+            print(f"==> Scanner coverage evidence: {workspace.artifacts / 'scans/validation-cycle-1-coverage.json'}")
+        if build_check:
+            for result in build_check.evidence.get("results", []):
+                for key in ("stdoutArtifact", "stderrArtifact"):
+                    if result.get(key):
+                        print(f"==> Maven {key}: {result[key]}")
 
         if report.passed:
             print("==> Gate 2 independent deterministic validation PASSED")
@@ -245,7 +301,8 @@ def main() -> int:
         print("==> Gate 2 independent deterministic validation FAILED")
         return 2
     finally:
-        temp.cleanup()
+        if temp is not None:
+            temp.cleanup()
 
 
 if __name__ == "__main__":

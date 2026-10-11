@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Harness-configured OpenHands self-validation entry point. It intentionally
+# accepts no baseline, target, policy, or evidence arguments from the agent.
+set -uo pipefail
+
+required=(CONTROL_REPO GATE2_TARGET_REPO GATE2_STATE_FILE GATE2_SELF_VALIDATION_ROOT)
+for name in "${required[@]}"; do
+  if [ -z "${!name:-}" ]; then
+    echo "VALIDATION INFRASTRUCTURE ERROR: harness variable $name is unavailable" >&2
+    exit 70
+  fi
+done
+
+mkdir -p "$GATE2_SELF_VALIDATION_ROOT"
+invocation="$(mktemp -d "$GATE2_SELF_VALIDATION_ROOT/validation-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")" || {
+  echo "VALIDATION INFRASTRUCTURE ERROR: could not create retained evidence directory" >&2
+  exit 70
+}
+log="$invocation/validator.log"
+report="$invocation/validation.json"
+
+set +e
+bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-validate.sh" \
+  --target-repo "$GATE2_TARGET_REPO" \
+  --state-file "$GATE2_STATE_FILE" \
+  --scanner "${GATE2_SCANNER_EXECUTABLE:-$HOME/bin/osv-scanner}" \
+  --output "$report" \
+  --workspace-root "$invocation/workspace" \
+  2>&1 | tee "$log"
+rc=${PIPESTATUS[0]}
+set -e
+
+integrity="$invocation/evidence-integrity.json"
+if [ -s "$report" ]; then
+  evidence_python="${GATE2_VALIDATOR_PYTHON:-python3}"
+  set +e
+  "$evidence_python" - "$report" "$invocation/workspace/artifacts" > "$integrity" <<'PY'
+import json
+import pathlib
+import sys
+
+report_path = pathlib.Path(sys.argv[1])
+artifacts = pathlib.Path(sys.argv[2])
+missing = []
+try:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    scan = report.get("scan") or {}
+    candidates = [scan.get("rawReportPath")]
+    for attempt in scan.get("attempts") or []:
+        candidates.extend(attempt.get(key) for key in ("rawReportPath", "stdoutArtifact", "stderrArtifact"))
+    for check in report.get("checks") or []:
+        if check.get("name") == "build_test_startup":
+            for result in (check.get("evidence") or {}).get("results") or []:
+                candidates.extend(result.get(key) for key in ("stdoutArtifact", "stderrArtifact"))
+    candidates.extend((
+        str(artifacts / "scans/validation-cycle-1.normalized.json"),
+        str(artifacts / "scans/validation-cycle-1-coverage.json"),
+    ))
+    missing = [str(path) for value in candidates if value for path in [pathlib.Path(value)] if not path.is_file()]
+except Exception as exc:
+    missing = [f"validation report could not be inspected: {exc}"]
+print(json.dumps({"complete": not missing, "missingOrInaccessible": missing}, indent=2))
+raise SystemExit(0 if not missing else 1)
+PY
+  evidence_rc=$?
+  set -e
+  if [ "$evidence_rc" -ne 0 ]; then
+    echo "VALIDATION INFRASTRUCTURE ERROR: retained evidence is missing or inaccessible; inspect $integrity" >&2
+    rc=70
+  fi
+else
+  printf '{"complete": false, "missingOrInaccessible": ["validation.json"]}\n' > "$integrity"
+fi
+
+if [ "$rc" -eq 0 ]; then
+  status="passed"
+elif [ "$rc" -eq 2 ] && [ -s "$report" ]; then
+  status="validation_failed"
+else
+  status="infrastructure_failed"
+fi
+printf '{\n  "status": "%s",\n  "validatorExitCode": %s\n}\n' "$status" "$rc" > "$invocation/execution.json"
+
+echo "==> Self-validation status: $status"
+echo "==> Retained invocation evidence: $invocation"
+echo "==> Complete terminal log: $log"
+echo "==> Machine-readable execution result: $invocation/execution.json"
+echo "==> Evidence integrity result: $integrity"
+if [ -s "$report" ]; then
+  echo "==> Full validation JSON: $report"
+else
+  echo "==> Full validation JSON: unavailable; inspect the retained terminal log"
+fi
+echo "==> This self-validation did not request final acceptance or consume a Stop Hook attempt."
+exit "$rc"

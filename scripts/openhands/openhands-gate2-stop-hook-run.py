@@ -261,18 +261,20 @@ def configure_scanner_terminal(
     agent: Any,
     *,
     launcher_dir: Path,
-    scanner_binary: Path,
-    registry_url: str,
+    scanner_binary: Path | None = None,
+    registry_url: str | None = None,
+    validation_env: dict[str, str] | None = None,
 ) -> Any:
-    """Give OpenHands a deterministic shell environment for the OSV launcher."""
+    """Give OpenHands the harness-owned launchers and fixed validation context."""
     shell = launcher_dir / "openhands-shell"
     shell.write_text("#!/bin/sh\nexec /bin/bash --norc \"$@\"\n", encoding="utf-8")
     shell.chmod(0o700)
-    terminal_env = {
-        "OPENHANDS_OSV_EXECUTABLE": str(scanner_binary),
-        "OPENHANDS_OSV_MAVEN_REGISTRY": registry_url,
-        "PATH": str(launcher_dir) + os.pathsep + os.environ.get("PATH", ""),
-    }
+    terminal_env = dict(validation_env or {})
+    terminal_env["PATH"] = str(launcher_dir) + os.pathsep + os.environ.get("PATH", "")
+    if scanner_binary is not None:
+        terminal_env["OPENHANDS_OSV_EXECUTABLE"] = str(scanner_binary)
+    if registry_url is not None:
+        terminal_env["OPENHANDS_OSV_MAVEN_REGISTRY"] = registry_url
     configured_tools = []
     terminal_found = False
     for tool in agent.tools:
@@ -421,6 +423,18 @@ def main() -> int:
     conversation = None
     resources = ExitStack()
     try:
+        launcher_dir = state_dir / "scanner-bin"
+        launcher_dir.mkdir(parents=True, exist_ok=True)
+        validation_launcher = launcher_dir / "validate-remediation"
+        shutil.copyfile(CONTROL_REPO / "scripts/openhands/validate-remediation", validation_launcher)
+        validation_launcher.chmod(0o700)
+        terminal_validation_env = {
+            "CONTROL_REPO": str(CONTROL_REPO),
+            "GATE2_TARGET_REPO": str(target),
+            "GATE2_STATE_FILE": str(baseline),
+            "GATE2_SCANNER_EXECUTABLE": str(Path.home() / "bin" / "osv-scanner"),
+            "GATE2_SELF_VALIDATION_ROOT": str(state_dir / "self-validation"),
+        }
         if args.structured_guidance:
             local_repository = Path.home() / ".m2" / "repository"
             scanner_binary = Path.home() / "bin" / "osv-scanner"
@@ -436,8 +450,6 @@ def main() -> int:
             registry_url, _registry_requests = resources.enter_context(
                 serve_maven_repository((local_repository,))
             )
-            launcher_dir = state_dir / "scanner-bin"
-            launcher_dir.mkdir(parents=True, exist_ok=True)
             launcher = launcher_dir / "osv-scanner"
             shutil.copyfile(CONTROL_REPO / "scripts/openhands/openhands-osv-scanner.sh", launcher)
             launcher.chmod(0o700)
@@ -446,9 +458,18 @@ def main() -> int:
                 launcher_dir=launcher_dir,
                 scanner_binary=scanner_binary,
                 registry_url=registry_url,
+                validation_env=terminal_validation_env,
             )
             print(f"OPENHANDS_OSV_LAUNCHER={launcher}")
             print("OPENHANDS_OSV_REPOSITORY=local-maven")
+        else:
+            agent = configure_scanner_terminal(
+                agent,
+                launcher_dir=launcher_dir,
+                validation_env=terminal_validation_env,
+            )
+        print(f"OPENHANDS_VALIDATION_LAUNCHER={validation_launcher}")
+        print(f"OPENHANDS_SELF_VALIDATION_EVIDENCE={state_dir / 'self-validation'}")
 
         conversation = Conversation(
             agent=agent,
@@ -466,7 +487,8 @@ def main() -> int:
                      "or published-version facts materially affect your engineering decision. "
                      "For OSV scans, invoke osv-scanner from PATH (not an absolute executable path): "
                      "the session launcher supplies the local Maven registry. A scan with extraction "
-                     "errors is incomplete, not a clean security result.")
+                     "errors is incomplete, not a clean security result. Run `validate-remediation` "
+                     "for independent full-project validation and detailed retained evidence paths.")
         if args.task_skill:
             task += (
                 "\n\nBefore making consequential dependency-remediation changes, "

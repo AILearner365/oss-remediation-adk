@@ -109,6 +109,13 @@ class OsvScanner:
             outcome, failure_reason = _classify_attempt(
                 result, payload, raw_stdout, raw_stderr, has_in_scope_findings=bool(findings)
             )
+            coverage = _maven_scan_coverage(repository, result, raw_stderr)
+            if outcome in {ScanOutcome.COMPLETED_CLEAN, ScanOutcome.COMPLETED_WITH_FINDINGS} and not coverage["complete"]:
+                outcome = ScanOutcome.INCOMPLETE_FATAL_FAILURE
+                failure_reason = (
+                    "INCOMPLETE_MAVEN_COVERAGE: OSV dependency extraction did not cover "
+                    + ", ".join(coverage["missingPoms"])
+                )
             retry_scheduled = (
                 outcome == ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE
                 and attempt_number < max_attempts
@@ -126,6 +133,7 @@ class OsvScanner:
                 "retryScheduled": retry_scheduled,
                 "backoffSeconds": backoff_seconds,
                 "commandResult": result.to_dict(),
+                "mavenCoverage": coverage,
             }
             attempts.append(attempt)
             self.trace.write_json(f"scans/{label}-attempt-{attempt_number}.evidence.json", attempt)
@@ -150,7 +158,9 @@ class OsvScanner:
                 attempts=tuple(attempts),
                 backend=self.backend,
                 failure_kind=_failure_kind(failure_reason),
+                evidence={"mavenCoverage": coverage},
             )
+            self.trace.write_json(f"scans/{label}-coverage.json", coverage)
             break
         else:
             raise AssertionError("OSV retry loop did not produce a report")
@@ -299,6 +309,47 @@ _TRANSIENT_FAILURE_PATTERNS = (
     (re.compile(r"connect(?:ion)? timed out|read timed out|i/o timeout|network is unreachable|temporary network|transport.*temporar", re.IGNORECASE), "TEMPORARY_TRANSPORT_FAILURE"),
 )
 
+_SCANNED_MAVEN_POM_RE = re.compile(
+    r"^Scanned\s+(.+?pom\.xml)\s+file\s+and\s+found\s+(\d+)\s+packages?\b",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _maven_scan_coverage(
+    repository: Path,
+    result: CommandResult,
+    stderr: str,
+) -> dict[str, Any]:
+    """Compare repository-derived Maven scope with successful OSV extractions."""
+    expected = sorted(
+        path.relative_to(repository).as_posix()
+        for path in repository.rglob("pom.xml")
+        if not is_generated_evidence_path(path.relative_to(repository))
+    )
+    scanned: dict[str, int] = {}
+    cwd = Path(result.cwd)
+    for raw_path, package_count in _SCANNED_MAVEN_POM_RE.findall(stderr):
+        candidate = Path(raw_path.strip())
+        try:
+            relative = candidate.relative_to(cwd).as_posix() if candidate.is_absolute() else candidate.as_posix()
+        except ValueError:
+            relative = candidate.as_posix()
+        for expected_path in sorted(expected, key=len, reverse=True):
+            if relative == expected_path or relative.endswith("/" + expected_path):
+                scanned[expected_path] = int(package_count)
+                break
+    scanned_paths = sorted(scanned)
+    missing = sorted(set(expected) - set(scanned_paths))
+    return {
+        "complete": not missing,
+        "expectedPomCount": len(expected),
+        "scannedPomCount": len(scanned_paths),
+        "expectedPoms": expected,
+        "scannedPoms": scanned_paths,
+        "missingPoms": missing,
+        "packagesByPom": scanned,
+    }
+
 
 def _default_maven_repository() -> Path:
     maven_user_home = os.environ.get("MAVEN_USER_HOME")
@@ -417,7 +468,7 @@ def _failure_kind(reason: str | None) -> ScanFailureKind | None:
         return ScanFailureKind.NETWORK
     if prefix in {"UNRECOGNIZABLE_REPORT"}:
         return ScanFailureKind.INVALID_RESPONSE
-    if prefix in {"SCANNER_EXECUTION_BLOCKED", "NO_PACKAGE_SOURCES"}:
+    if prefix in {"SCANNER_EXECUTION_BLOCKED", "NO_PACKAGE_SOURCES", "INCOMPLETE_MAVEN_COVERAGE"}:
         return ScanFailureKind.CONFIGURATION
     return ScanFailureKind.BACKEND
 

@@ -83,7 +83,13 @@ class _StagingScannerRunner:
                 if path.is_file()
             )
         )
-        return CommandResult(list(command), str(staged), 0, stdout='{"results": []}')
+        scan_lines = "\n".join(
+            f"Scanned {path} file and found 0 packages"
+            for path in staged.rglob("pom.xml")
+        )
+        return CommandResult(
+            list(command), str(staged), 0, stdout='{"results": []}', stderr=scan_lines
+        )
 
 
 class AutonomousScannerConstraintTests(unittest.TestCase):
@@ -434,6 +440,31 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
         self.assertEqual((), report.findings)
 
+    def test_success_exit_with_empty_or_malformed_json_is_not_clean(self):
+        for output in ("", "not-json"):
+            with self.subTest(output=output):
+                runner = _SequenceScannerRunner([
+                    CommandResult(["scanner"], ".", 0, stdout=output),
+                ])
+                report = self._scanner(runner).scan(
+                    self.workspace.repository, ("HIGH",), "invalid-json-" + str(len(output))
+                )
+                self.assertFalse(report.succeeded)
+                self.assertEqual(ScanFailureKind.INVALID_RESPONSE, report.failure_kind)
+                self.assertTrue(Path(report.attempts[0]["stderrArtifact"]).is_file())
+
+    def test_scanner_timeout_is_retryable_failure_with_logs(self):
+        timeout = CommandResult(
+            ["scanner"], ".", 124, stderr="timed out while scanning", timed_out=True
+        )
+        runner = _SequenceScannerRunner([timeout, timeout, timeout])
+        report = self._scanner(runner).scan(self.workspace.repository, ("HIGH",), "timeout")
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_RETRYABLE_FAILURE, report.effective_outcome)
+        self.assertEqual(ScanFailureKind.TIMEOUT, report.failure_kind)
+        self.assertEqual(3, len(report.attempts))
+        self.assertTrue(Path(report.attempts[-1]["stderrArtifact"]).is_file())
+
     def test_normal_vulnerability_findings_remain_complete(self):
         payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2024-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
         runner = _SequenceScannerRunner([
@@ -575,7 +606,14 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         module.mkdir()
         (module / "pom.xml").write_text("<project/>", encoding="utf-8")
         runner = _SequenceScannerRunner([
-            CommandResult(["scanner"], ".", 0, stdout='{"results": []}'),
+            CommandResult(
+                ["scanner"], str(self.workspace.repository), 0,
+                stdout='{"results": []}',
+                stderr=(
+                    f"Scanned {self.workspace.repository / 'pom.xml'} file and found 1 package\n"
+                    f"Scanned {module / 'pom.xml'} file and found 1 package"
+                ),
+            ),
         ])
         scanner = self._scanner(runner, version="osv-scanner version: 2.6.0")
 
@@ -584,6 +622,54 @@ class AutonomousScannerConstraintTests(unittest.TestCase):
         self.assertTrue(report.succeeded)
         self.assertEqual(1, len(runner.commands))
         self.assertIn("--data-source=native", runner.commands[0][0])
+
+    def test_multimodule_root_only_zero_findings_is_not_clean(self):
+        (self.workspace.repository / "pom.xml").write_text("<project/>", encoding="utf-8")
+        module = self.workspace.repository / "module"
+        module.mkdir()
+        (module / "pom.xml").write_text("<project/>", encoding="utf-8")
+        runner = _SequenceScannerRunner([
+            CommandResult(
+                ["scanner"], str(self.workspace.repository), 0,
+                stdout='{"results": []}',
+                stderr=f"Scanned {self.workspace.repository / 'pom.xml'} file and found 1 package",
+            ),
+        ])
+
+        report = self._scanner(runner, version="osv-scanner version: 2.6.0").scan(
+            self.workspace.repository, ("HIGH",), "root-only"
+        )
+
+        self.assertFalse(report.succeeded)
+        self.assertEqual(ScanOutcome.INCOMPLETE_FATAL_FAILURE, report.effective_outcome)
+        self.assertIn("module/pom.xml", report.error)
+        self.assertEqual(["module/pom.xml"], report.evidence["mavenCoverage"]["missingPoms"])
+
+    def test_complete_multimodule_scan_with_findings_reports_findings(self):
+        (self.workspace.repository / "pom.xml").write_text("<project/>", encoding="utf-8")
+        module = self.workspace.repository / "module"
+        module.mkdir()
+        (module / "pom.xml").write_text("<project/>", encoding="utf-8")
+        payload = '{"results":[{"packages":[{"package":{"ecosystem":"Maven","name":"org.example:demo","version":"1.0"},"vulnerabilities":[{"id":"CVE-2026-0001","database_specific":{"severity":"HIGH"}}]}]}]}'
+        runner = _SequenceScannerRunner([
+            CommandResult(
+                ["scanner"], str(self.workspace.repository), 1,
+                stdout=payload,
+                stderr=(
+                    f"Scanned {self.workspace.repository / 'pom.xml'} file and found 1 package\n"
+                    f"Scanned {module / 'pom.xml'} file and found 1 package"
+                ),
+            ),
+        ])
+
+        report = self._scanner(runner, version="osv-scanner version: 2.6.0").scan(
+            self.workspace.repository, ("HIGH",), "complete-findings"
+        )
+
+        self.assertTrue(report.succeeded)
+        self.assertEqual(ScanOutcome.COMPLETED_WITH_FINDINGS, report.effective_outcome)
+        self.assertEqual(1, len(report.findings))
+        self.assertTrue(report.evidence["mavenCoverage"]["complete"])
 
     def _scanner(self, runner, sleep=lambda _: None, maven_repository=None, version="test"):
         executable = self.workspace.tools / "osv-scanner.exe"

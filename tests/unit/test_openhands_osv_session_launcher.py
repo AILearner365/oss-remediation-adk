@@ -97,6 +97,7 @@ class Placeholder:
 
 module("openhands")
 module("openhands.sdk", AgentContext=Placeholder, Conversation=Placeholder, LLM=Placeholder)
+module("openhands.sdk.llm", Message=Placeholder, TextContent=Placeholder)
 module("openhands.sdk.event", HookExecutionEvent=Placeholder)
 module("openhands.sdk.hooks", HookConfig=Placeholder, HookDefinition=Placeholder, HookMatcher=Placeholder)
 module("openhands.tools")
@@ -124,12 +125,16 @@ with tempfile.TemporaryDirectory() as tmp:
     launcher = launcher_dir / "osv-scanner"
     launcher.write_text("#!/bin/sh\\nexit 0\\n")
     launcher.chmod(0o700)
+    validation_launcher = launcher_dir / "validate-remediation"
+    validation_launcher.write_text("#!/bin/sh\\nexit 0\\n")
+    validation_launcher.chmod(0o700)
     agent = Config(tools=[Config(name="terminal")])
     configured = runner["configure_scanner_terminal"](
         agent,
         launcher_dir=launcher_dir,
         scanner_binary=Path("/scanner"),
         registry_url="http://127.0.0.1:1234/",
+        validation_env={{"GATE2_STATE_FILE": "/harness/baseline.json"}},
     )
     params = configured.tools[0].params
     resolved = subprocess.run(
@@ -138,6 +143,14 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     if resolved.stdout.strip() != str(launcher):
         raise SystemExit("configured terminal did not resolve session launcher: " + resolved.stdout)
+    validation_resolved = subprocess.run(
+        [params["shell_path"], "-i", "-c", "command -v validate-remediation"],
+        env={{**os.environ, **params["env"]}}, capture_output=True, text=True,
+    )
+    if validation_resolved.stdout.strip() != str(validation_launcher):
+        raise SystemExit("configured terminal did not resolve validation launcher: " + validation_resolved.stdout)
+    if params["env"].get("GATE2_STATE_FILE") != "/harness/baseline.json":
+        raise SystemExit("configured terminal did not receive harness baseline context")
 """
         result = subprocess.run(
             [sys.executable, "-c", probe], cwd=CONTROL_REPO,
