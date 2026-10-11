@@ -344,3 +344,9 @@ Q2 investigation/evidence
 ```
 
 Keep task success separate from reasoning quality. Experiment 1 remains **CONTINUE** until clean repeated evidence supports a stronger disposition. The explicit return point for the optional P2.2 path is an attempted scan with a possible handoff defect, or a decision that depends on proving its live availability.
+
+## October 11 controlled live agent validation
+
+One bounded OpenHands SDK conversation (`ec608c4e-e15e-4890-8ee6-529c61a05cd0`) ran with `vertex_ai/gemini-2.5-flash` against a disposable three-POM Maven fixture. Gemini invoked the PATH command, received real validator exit `2`, continued after failure, read the retained raw OSV JSON, and accurately reported failed validation, complete 3/3 POM coverage, and the remaining HIGH SnakeYAML finding. Baseline and tracked source stayed unchanged; the isolated Stop Hook sentinel and counter stayed unchanged at zero; evidence integrity passed.
+
+The live result is **PARTIAL**, not full behavioral acceptance: Gemini did not separately open the retained coverage JSON, and the completed-with-findings run did not exercise zero findings versus incomplete coverage. Do not rerun this controlled conversation automatically. Full evidence and the assertion matrix are in `docs/verification/gate2-agent-validation-live-20261011/`; host-local generated evidence is under `/home/kavya_parivarababu/.openhands/gate2-live/validate-remediation-20261011T234125Z`. Task-20 remains unstarted.

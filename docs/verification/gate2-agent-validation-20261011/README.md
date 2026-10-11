@@ -31,7 +31,7 @@ Persistent invocation evidence includes `validation.json`, `validator.log`, `exe
 | 15 | Stop reports/counters unchanged | launcher integration sentinel and Task-19 attempt count remained `4` | PASS |
 | 16 | POM/source unchanged | launcher integration hashes every tracked target file | PASS |
 | 17 | Multiple invocations distinguishable | launcher integration retains two unique invocation directories | PASS |
-| 18 | Failure does not end conversation/consume denial | launcher never invokes Stop Hook; Task-19 failed self-validation left attempt count `4` | PASS (mechanism); live conversation NOT RUN |
+| 18 | Failure does not end conversation/consume denial | launcher never invokes Stop Hook; controlled live conversation continued after exit `2`; disposable counter stayed `0` | PASS |
 | 19 | Disposable temp cleaned | production scanner `TemporaryDirectory` lifecycle exercised by integration | PASS |
 | 20 | Failure evidence preserved | missing-baseline and Task-19 failed-constraint evidence retained | PASS |
 | 21 | Other evidence/caches unchanged | scoped unique evidence roots; no deletion code; sentinel/target assertions | PASS |
@@ -90,9 +90,13 @@ Representative agent-visible lines:
     suppression_policy: Potential vulnerability suppression change detected
 ```
 
+## Controlled live follow-up
+
+One bounded Gemini 2.5 Flash conversation subsequently exercised the integration. The result is **PARTIAL**: the model invoked the command, observed real exit `2`, read raw OSV evidence, continued, and correctly reported complete 3/3 POM coverage plus the remaining finding. It did not separately open the coverage JSON, and a zero-finding/incomplete-coverage case was not exercised. See [the live verification record](../gate2-agent-validation-live-20261011/README.md).
+
 ## Evidence limits
 
 - The offline launcher test uses deterministic fake Maven/OSV executables but executes the real launcher and real validator path. It does not prove the real OSV binary.
 - The separate real-scanner test proves real OSV extraction, findings handling, coverage, and raw evidence for a three-POM fixture. It does not prove autonomous agent behavior.
-- PATH discovery is tested through the runner's configured terminal parameters, and the command was executed under the same configured PATH/env contract for Task-19. A new live OpenHands conversation was not started, so full live OpenHands behavioral proof is **NOT RUN**.
+- PATH discovery and post-failure continuation are now observed in one live conversation. Separate model reading of the coverage artifact failed, so full behavioral acceptance remains incomplete.
 - Task-20 was not started.
