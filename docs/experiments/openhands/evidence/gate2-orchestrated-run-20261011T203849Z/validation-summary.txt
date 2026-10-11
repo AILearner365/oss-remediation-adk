@@ -1,0 +1,11 @@
+==> GATE 2 INDEPENDENT VALIDATION SUMMARY
+Attempt 1: FAIL - resolved 2/26; remaining 24; scan=COMPLETED_WITH_FINDINGS; scanned_poms=5
+  Failed checks: target_findings_resolved
+Attempt 2: FAIL - resolved 22/26; remaining 4; scan=COMPLETED_WITH_FINDINGS; scanned_poms=5
+  Failed checks: target_findings_resolved, spring_boot_version_policy
+Attempt 3: FAIL - resolved 10/26; remaining 16; scan=COMPLETED_WITH_FINDINGS; scanned_poms=5
+  Failed checks: target_findings_resolved
+Attempt 4: FAIL - resolved 26/26; remaining 0; scan=COMPLETED_CLEAN; scanned_poms=5
+  Failed checks: suppression_policy
+Final independent validation: FAIL
+==> End Gate 2 validation summary
