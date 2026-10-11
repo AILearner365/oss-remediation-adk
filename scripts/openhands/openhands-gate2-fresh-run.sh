@@ -85,9 +85,40 @@ publish_evidence() {
         git -C "$target_repo" status --porcelain=v1
         printf 'status_end\n'
       } > "$EVIDENCE_DIR/git-state.txt" 2>&1 || true
-      git -C "$target_repo" diff --no-ext-diff --unified=3 > "$EVIDENCE_DIR/final.diff" 2>/dev/null || true
-      git -C "$target_repo" diff --stat > "$EVIDENCE_DIR/final-diff-stat.txt" 2>/dev/null || true
+      # Compare against the recorded baseline, not HEAD: the agent commits
+      # intermediate fixes, so a clean working tree must not erase the solution.
+      local baseline_sha=""
+      if [ -f "$state_dir/baseline.json" ]; then
+        baseline_sha="$(python3 - "$state_dir/baseline.json" <<'PY'
+import json
+import sys
+try:
+    print(json.load(open(sys.argv[1], encoding="utf-8")).get("baselineCommit", ""))
+except (OSError, ValueError):
+    pass
+PY
+)"
+      fi
+      if [ -n "$baseline_sha" ] && git -C "$target_repo" cat-file -e "$baseline_sha^{commit}" 2>/dev/null; then
+        printf 'diff_base=%s\n' "$baseline_sha" >> "$EVIDENCE_DIR/git-state.txt"
+        git -C "$target_repo" diff --no-ext-diff --unified=3 "$baseline_sha" -- > "$EVIDENCE_DIR/final.diff" \
+          || echo "WARNING: Could not export baseline-relative diff" >&2
+        git -C "$target_repo" diff --stat "$baseline_sha" -- > "$EVIDENCE_DIR/final-diff-stat.txt" \
+          || echo "WARNING: Could not export baseline-relative diff stat" >&2
+      else
+        echo "WARNING: No valid recorded baseline commit; final diff unavailable" >&2
+        printf 'diff_error=missing_or_invalid_baseline\n' >> "$EVIDENCE_DIR/git-state.txt"
+      fi
     fi
+  fi
+
+  # Show the same deterministic validation sequence to the user that is
+  # already stored for the agent and in the published evidence artifacts.
+  if [ -n "${TASK_ID:-}" ]; then
+    python3 "$CONTROL_REPO/scripts/openhands/openhands-gate2-evidence-summary.py" "$EVIDENCE_DIR" \
+      > "$EVIDENCE_DIR/validation-summary.txt" \
+      || echo "WARNING: Unable to generate validation summary" >&2
+    [ ! -f "$EVIDENCE_DIR/validation-summary.txt" ] || cat "$EVIDENCE_DIR/validation-summary.txt"
   fi
 
   {
