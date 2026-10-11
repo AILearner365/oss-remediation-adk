@@ -30,6 +30,9 @@ def main():
     system = context.get_system_message_suffix(llm_model="vertex_ai/gemini-2.5-flash")
     assert system is not None
     assert "hard constraint" in system
+    assert "independent feedback" in system
+    assert "original evaluation scope is unknown" in system
+    assert "report that limitation instead of declaring the task complete" in system
     assert "task-common" in system
     assert NAME in system
     assert "evidence-driven-dependency-remediation" not in system
