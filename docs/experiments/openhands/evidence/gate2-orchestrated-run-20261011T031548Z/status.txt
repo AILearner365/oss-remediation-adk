@@ -1,0 +1,3 @@
+stage=STARTUP
+exit_code=1
+result=FAIL
