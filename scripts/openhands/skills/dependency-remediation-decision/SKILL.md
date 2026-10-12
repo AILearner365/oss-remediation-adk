@@ -1,6 +1,6 @@
 ---
 name: dependency-remediation-decision
-description: Use for autonomous OSS vulnerability remediation decisions before consequential dependency edits. Trace vulnerabilities to version owners, evaluate actual candidate effects and compatibility, select a defensible approach, and revise disproven premises.
+description: Use for autonomous software dependency vulnerability remediation before consequential edits. Establish finding coverage and version ownership, investigate credible solutions using current evidence, select and validate a compatible remediation, and reassess disproven decisions.
 triggers:
   - vulnerability
   - vulnerabilities
@@ -10,30 +10,28 @@ triggers:
 
 # Dependency-remediation decision
 
-Own the remediation decision; the task contract determines scope and constraints. Use the `maven-dependency-evidence` Skill for Maven facts. Preserve the original findings as the coverage baseline. Never choose a version solely because it is newer or remembered as fixed.
+Own the engineering decision. The task contract controls goals and constraints; the `maven-dependency-evidence` Skill supplies Maven evidence methods, not a competing workflow. Preserve the **original findings** as the coverage baseline. This sequence describes what an informed decision must establish, not a mandatory command order, report, or predetermined strategy.
 
-## 1. Explain each finding before proposing the edit
+## 1. Understand the whole problem and version ownership
 
-Using retained vulnerability findings, establish affected coordinates, resolved version, advisory, affected module and dependency path. For Maven, obtain the *actual* dependency tree and effective POM and identify who determines the version: a direct declaration/property, parent, imported BOM, upstream dependency, or an override. Distinguish a BOM-managed version from the version actually resolved by the project. If the observed build and an external version lookup disagree, investigate the discrepancy rather than declaring an existing version impossible.
+Account for each relevant original finding: affected coordinate, resolved version, advisory, module, dependency path, and version owner (direct version/property, parent, imported BOM, upstream dependency, or override). Distinguish a managed version from the version actually resolved. Investigate inconsistencies and incomplete evidence instead of silently assuming they are resolved.
 
-## 2. Identify the applicable remediation mechanism
+## 2. Identify credible remediation mechanisms
 
-Connect each root cause to credible approaches: parent/framework or BOM upgrade when it controls related versions; direct upgrade when independently declared; upstream upgrade, compatible override/exclusion, or replacement where justified. Reject hard-constraint violations immediately. Do not assume the framework is the solution or fabricate a fixed number of alternatives.
+Consider mechanisms that fit observed ownership: parent/framework/BOM upgrade for related managed dependencies; direct upgrade for independently declared versions; upstream upgrade, compatible override, exclusion, or replacement when justified. Do not assume a framework upgrade is always correct, force a fixed number of alternatives, or choose a strategy solely because it is easy to edit. Reject candidates that violate task constraints.
 
-## 3. Establish real candidate effects *before changing the working POM*
+## 3. Establish candidate facts **before consequential edits**
 
-Use domain evidence to verify publication, stability, permitted release family, availability, and Java requirements. For a parent/BOM candidate, examine its **published managing POM and imports**, then establish affected managed versions **and** any declarations that would override them in this project. For direct/upstream candidates, examine the introduced dependency path and expected effective version. When static inspection cannot establish resolution, use a *separate, disposable* Maven resolution experiment if proportionate; keep the task workspace unchanged until the decision.
+For credible candidates, verify current publication, stability, availability, permitted release family, Java/runtime compatibility, and the versions the target project is expected to resolve. **When a parent/BOM controls a family of affected dependencies, investigate compatible published parent/BOM candidates and their actual managed effects before preferring individual overrides.** Inspect published managing POMs and imports; account for the project's direct versions, properties, overrides, exclusions, and mediation. Use a disposable Maven resolution experiment when static evidence cannot settle an important question. Do not treat remembered versions or an unsuccessful lookup as proof.
 
-## 4. Predict goal coverage and compatibility
+## 4. Predict original-finding coverage and downstream consequences
 
-For **every original relevant finding**, compare the candidate's expected *resolved* coordinate/version against authoritative advisory affected/fixed ranges. Separate expected resolved, expected remaining, and uncertain findings; do not equate publication, upgrade, or successful build with security clearance. Use retained validation findings and advisory sources, **not a direct OSV scanner command as a required investigation step**.
+For **every relevant original finding**, compare each credible candidate's expected resolved coordinate/version with authoritative advisory affected/fixed ranges. Distinguish expected-fixed, expected-still-affected, and unknown. Identify material compatibility, transitive, upstream/downstream, API and runtime risks. A newer published version, BOM declaration, or passing build does not establish security clearance.
 
-Evaluate supported Java/framework release alignment, dependency families, API/runtime changes, transitive conflicts and affected downstream modules. Documented compatibility is evidence; runtime compatibility still requires tests. Prefer a candidate that addresses related findings together when the evidence supports it.
+## 5. Make a supported choice
 
-## 5. Commit to the strongest supported decision
+Before editing, have enough evidence to explain in the normal working context: why the dependency is present, why the chosen mechanism applies, which version changes are expected, what original findings are expected to remain, compatibility risks, meaningful unknowns, and why this candidate is preferable. If deciding requires an experiment, identify the hypothesis and its limits. **Do not use successive scanner runs in place of readily available pre-edit ownership, published-version, candidate-effect, and coverage investigation.** No separate mandatory plan, questionnaire, approval, or report is required.
 
-Before a consequential edit, be able to explain in normal working context: root cause; proposed mechanism and real candidate; expected resolved versions; advisory coverage and remaining findings; compatibility and constraints; material unknowns; why this candidate is preferred. Do not create a required report, special form or approval step. Obtain readily available decision-critical evidence before editing; if a hypothesis requires testing, say what the experiment can prove.
+## 6. Implement, validate, and reassess
 
-## 6. Implement and learn
-
-Implement using existing OpenHands editing/build tools, then use `validate-remediation` for full-project self-validation. Retain original scope and inspect its complete findings and evidence. When results contradict a decision, identify the *specific failed premise* (availability, management, resolution, advisory coverage, compatibility or implementation) and return to the applicable decision step. Preserve validated work; do not repeat disproven candidates without new evidence. The existing independent Stop Hook, not the agent, determines final acceptance.
+Implement with available OpenHands tools and preserve justified existing behavior. Run `validate-remediation` for whole-project build, tests, vulnerability findings, and constraints; inspect its retained evidence against the original coverage baseline. Distinguish an incomplete implementation from a disproven candidate premise. Reassess the relevant decision when evidence contradicts it; preserve validated progress. The harness-owned independent Stop Hook, not an agent declaration, determines final acceptance. Report material uncertainty and actual changes accurately.
