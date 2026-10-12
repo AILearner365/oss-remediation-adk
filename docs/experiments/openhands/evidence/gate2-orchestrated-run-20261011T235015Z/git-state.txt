@@ -1,0 +1,10 @@
+branch=openhands-poc-task-20-stop-hook
+head=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
+status_begin
+ M pom.xml
+ M task-web/pom.xml
+?? current_dependency_tree.txt
+?? dependency_updates.txt
+?? full_dependency_tree.txt
+status_end
+diff_base=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78
