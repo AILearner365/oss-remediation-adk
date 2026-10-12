@@ -485,10 +485,8 @@ def main() -> int:
         if args.structured_guidance:
             task += ("\n\nUse the available maven-dependency-evidence Skill when Maven dependency "
                      "or published-version facts materially affect your engineering decision. "
-                     "For OSV scans, invoke osv-scanner from PATH (not an absolute executable path): "
-                     "the session launcher supplies the local Maven registry. A scan with extraction "
-                     "errors is incomplete, not a clean security result. Run `validate-remediation` "
-                     "for independent full-project validation and detailed retained evidence paths.")
+                     "Run `validate-remediation` for complete-project build, test, vulnerability, "
+                     "and constraint validation, with detailed retained evidence paths.")
         if args.task_skill:
             task += (
                 "\n\nBefore making consequential dependency-remediation changes, "
