@@ -1,7 +1,7 @@
-# Repository guidance for the Maven Gate-2 evaluation workspace
+# Repository context — Maven Gate-2 evaluation workspace
 
-This is a Java 21, multi-module Maven project with modules `task-common`, `task-domain`, `task-service`, and `task-web`. Inspect the actual POMs for authoritative relationships and current configuration; do not assume versions from this document.
+The workspace under remediation is a Java 21 multi-module Maven application: `task-common`, `task-domain`, `task-service`, and `task-web`. Inspect the actual working POMs rather than assuming this description establishes current dependency versions or module relationships.
 
-The root parent and `dependencyManagement` influence effective dependency versions across modules. Distinguish managed versions from direct declarations and transitive resolution. For material changes, inspect relevant module dependencies and runtime/test impact.
+The root parent and `dependencyManagement` may affect dependencies across modules; local declarations and transitive paths can alter actual resolution. The existing Maven build and tests are the project's normal verification entry points.
 
-Use the project's existing Maven build/test entry points and `validate-remediation` when complete-project validation evidence is needed. The current task contract, not this repository guide, owns remediation goals, version restrictions and acceptance criteria. Do not introduce project changes merely to follow this guide.
+This file supplies repository facts only. The task prompt defines goals and constraints, `dependency-remediation-decision` owns the remediation decision process, and `maven-dependency-evidence` supplies Maven evidence methods. `validate-remediation` is provided by the harness for whole-project self-validation.
