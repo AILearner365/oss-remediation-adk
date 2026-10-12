@@ -48,9 +48,11 @@ DEFAULT_ENGINEERING_GUIDANCE = (
 ENGINEERING_GUIDANCE_ENV = "OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE"
 TASK_SKILL_ENV = "OPENHANDS_TASK_SKILL"
 STRUCTURED_ENV = "OPENHANDS_STRUCTURED_GUIDANCE"
+DECISION_ENV = "OPENHANDS_DECISION_GUIDANCE"
 GENERAL_GUIDANCE = CONTROL_REPO / "scripts/openhands/guidance/general-engineering.md"
 PROJECT_GUIDANCE = CONTROL_REPO / "scripts/openhands/project-context/AGENTS.md"
 MAVEN_SKILL_NAME = "maven-dependency-evidence"
+DECISION_SKILL_NAME = "dependency-remediation-decision"
 TASK_SKILL_DIR = CONTROL_REPO / "scripts" / "openhands" / "skills"
 TASK_SKILL_NAME = "evidence-driven-dependency-remediation"
 
@@ -97,6 +99,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--structured-guidance", action=argparse.BooleanOptionalAction,
                         default=environment_flag(STRUCTURED_ENV),
                         help="opt-in general engineering guidance, repository context and Maven evidence Skill")
+    parser.add_argument("--decision-guidance", action=argparse.BooleanOptionalAction,
+                        default=environment_flag(DECISION_ENV),
+                        help="opt-in candidate decision Skill and Maven evidence Skill")
     return parser.parse_args()
 
 
@@ -158,18 +163,22 @@ def load_engineering_guidance(path: Path = DEFAULT_ENGINEERING_GUIDANCE) -> str:
     return guidance
 
 
-def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False, structured_guidance: bool = False):
+def build_agent(llm: LLM, *, engineering_guidance: bool, task_skill: bool = False, structured_guidance: bool = False, decision_guidance: bool = False):
     agent = get_default_agent(llm=llm, cli_mode=True)
-    if sum((engineering_guidance, task_skill, structured_guidance)) > 1:
+    if sum((engineering_guidance, task_skill, structured_guidance, decision_guidance)) > 1:
         raise SystemExit("Choose only one guidance experiment")
-    if structured_guidance:
+    if structured_guidance or decision_guidance:
         from openhands.sdk.skills import load_skills_from_dir
         _repo, _knowledge, skills = load_skills_from_dir(TASK_SKILL_DIR)
         if MAVEN_SKILL_NAME not in skills:
             raise SystemExit(f"Missing Maven evidence Skill: {MAVEN_SKILL_NAME}")
+        if decision_guidance and DECISION_SKILL_NAME not in skills:
+            raise SystemExit(f"Missing decision Skill: {DECISION_SKILL_NAME}")
         guidance = load_engineering_guidance(GENERAL_GUIDANCE)
         project = load_engineering_guidance(PROJECT_GUIDANCE)
-        context = AgentContext(skills=[skills[MAVEN_SKILL_NAME]],
+        selected_skills = ([skills[DECISION_SKILL_NAME], skills[MAVEN_SKILL_NAME]]
+                           if decision_guidance else [skills[MAVEN_SKILL_NAME]])
+        context = AgentContext(skills=selected_skills,
             system_message_suffix=guidance + "\n\n<REPOSITORY_GUIDANCE>\n" + project + "\n</REPOSITORY_GUIDANCE>",
             load_public_skills=False)
         return agent.model_copy(update={"agent_context": context})
@@ -196,6 +205,7 @@ def guidance_delivery_evidence(
     engineering_guidance: bool,
     task_skill: bool,
     structured_guidance: bool,
+    decision_guidance: bool = False,
 ) -> dict[str, Any]:
     """Describe prompt/Skill delivery without claiming observable agent use."""
     context = agent.agent_context
@@ -218,6 +228,7 @@ def guidance_delivery_evidence(
     )
     maven_path = TASK_SKILL_DIR / MAVEN_SKILL_NAME / "SKILL.md"
     task_skill_path = TASK_SKILL_DIR / TASK_SKILL_NAME / "SKILL.md"
+    decision_path = TASK_SKILL_DIR / DECISION_SKILL_NAME / "SKILL.md"
     return {
         "engineeringJudgment": {
             "configured": engineering_guidance,
@@ -231,7 +242,7 @@ def guidance_delivery_evidence(
             ),
         },
         "mavenSkill": {
-            "configured": structured_guidance,
+            "configured": structured_guidance or decision_guidance,
             "available": MAVEN_SKILL_NAME in available_skills,
             "delivered": MAVEN_SKILL_NAME in triggered_skills,
             "observedUsed": "NOT_PROVEN",
@@ -252,6 +263,12 @@ def guidance_delivery_evidence(
                 else None
             ),
         },
+        "decisionSkill": {"configured": decision_guidance,
+                          "available": DECISION_SKILL_NAME in available_skills,
+                          "delivered": DECISION_SKILL_NAME in triggered_skills,
+                          "observedUsed": "NOT_PROVEN",
+                          "sha256": (hashlib.sha256(decision_path.read_bytes()).hexdigest()
+                                     if DECISION_SKILL_NAME in available_skills else None)},
         "availableSkills": available_skills,
         "triggeredSkills": triggered_skills,
     }
@@ -411,13 +428,16 @@ def main() -> int:
         engineering_guidance=args.engineering_judgment_guidance,
         task_skill=args.task_skill,
         structured_guidance=args.structured_guidance,
+        decision_guidance=args.decision_guidance,
     )
     if args.engineering_judgment_guidance:
         print(f"ENGINEERING_JUDGMENT_GUIDANCE={DEFAULT_ENGINEERING_GUIDANCE}")
-    if args.structured_guidance:
+    if args.structured_guidance or args.decision_guidance:
         print(f"GENERAL_GUIDANCE={GENERAL_GUIDANCE}")
         print(f"REPOSITORY_GUIDANCE={PROJECT_GUIDANCE}")
         print(f"MAVEN_SKILL={TASK_SKILL_DIR / MAVEN_SKILL_NAME / 'SKILL.md'}")
+    if args.decision_guidance:
+        print(f"DECISION_SKILL={TASK_SKILL_DIR / DECISION_SKILL_NAME / 'SKILL.md'}")
     if args.task_skill:
         print(f"TASK_SKILL={TASK_SKILL_DIR / TASK_SKILL_NAME / 'SKILL.md'}")
     conversation = None
@@ -487,6 +507,11 @@ def main() -> int:
                      "or published-version facts materially affect your engineering decision. "
                      "Run `validate-remediation` for complete-project build, test, vulnerability, "
                      "and constraint validation, with detailed retained evidence paths.")
+        if args.decision_guidance:
+            task += ("\n\nBefore consequential remediation edits, apply the available "
+                     "dependency-remediation-decision Skill and use the "
+                     "maven-dependency-evidence Skill for Maven facts. "
+                     "Use `validate-remediation` for full-project self-validation.")
         if args.task_skill:
             task += (
                 "\n\nBefore making consequential dependency-remediation changes, "
@@ -502,6 +527,7 @@ def main() -> int:
                     engineering_guidance=args.engineering_judgment_guidance,
                     task_skill=args.task_skill,
                     structured_guidance=args.structured_guidance,
+                    decision_guidance=args.decision_guidance,
                 ),
                 sort_keys=True,
             )
