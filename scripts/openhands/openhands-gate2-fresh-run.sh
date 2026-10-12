@@ -213,6 +213,14 @@ fi
 
 printf '%s\n' "$TASK_ID" > "$RUN_LOG_DIR/task-id.txt"
 
+# Once the task is known, associate both local logs and published evidence
+# with that task while retaining the timestamp for distinct runs.
+RUN_LOG_DIR_TASK="$LOG_ROOT/task-${TASK_ID}-run-$RUN_ID"
+EVIDENCE_REL_DIR="docs/experiments/openhands/evidence/gate2-task-${TASK_ID}-orchestrated-run-$RUN_ID"
+EVIDENCE_DIR="$CONTROL_REPO/$EVIDENCE_REL_DIR"
+mv "$RUN_LOG_DIR" "$RUN_LOG_DIR_TASK"
+RUN_LOG_DIR="$RUN_LOG_DIR_TASK"
+
 info "OpenHands Gate 2 orchestrated run"
 info "Run logs: $RUN_LOG_DIR"
 info "Repository evidence: $EVIDENCE_DIR"
