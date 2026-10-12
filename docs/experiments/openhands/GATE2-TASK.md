@@ -36,13 +36,7 @@ Success criteria
 
 Environment / available evidence
 --------------------------------
-An OSV Scanner executable is available at:
-
-~/bin/osv-scanner
-
-You may use it at any point during investigation or self-validation when security evidence is useful.
-
-The deterministic baseline and independent completion validation use this OSV Scanner with Maven-aware local repository support. You are free to decide when and how often to use security scanning and which other repository/build/dependency evidence to gather. Scanner availability is evidence/tooling, not a prescribed remediation strategy.
+Run `validate-remediation` when you need complete-project Maven build, test, vulnerability, and constraint validation. Review its findings and retained evidence to investigate failures. You remain free to choose your investigation and remediation strategy.
 
 Investigate the problem, determine the appropriate remediation, implement it, and validate your work.
 ```
@@ -62,13 +56,9 @@ Do not add any of the following to the initial run:
 
 The purpose is to evaluate native OpenHands behavior, not reproduce the existing harness through prompting.
 
-## Scanner behavior
+## Validation behavior
 
-The OSV Scanner at `~/bin/osv-scanner` is explicitly exposed to OpenHands as available evidence/tooling. OpenHands decides if, when, and how often to use it during investigation and self-validation.
-
-The deterministic baseline and independent completion validation use the same OSV Scanner with Maven-aware local repository support. Agent-owned scanner usage remains investigative/self-validation evidence; the independent validator remains the acceptance authority.
-
-Do not turn scanner availability into a prescribed sequence of remediation steps or dependency-version guidance.
+`validate-remediation` gives OpenHands full-project validation feedback with retained security evidence. The deterministic baseline and independent completion validation remain the acceptance authority. This does not prescribe remediation steps or dependency versions.
 
 ## Run-1 stop rule
 
