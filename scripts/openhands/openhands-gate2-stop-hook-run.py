@@ -508,10 +508,13 @@ def main() -> int:
                      "Run `validate-remediation` for complete-project build, test, vulnerability, "
                      "and constraint validation, with detailed retained evidence paths.")
         if args.decision_guidance:
-            task += ("\n\nBefore consequential remediation edits, apply the available "
-                     "dependency-remediation-decision Skill and use the "
-                     "maven-dependency-evidence Skill for Maven facts. "
-                     "Use `validate-remediation` for full-project self-validation.")
+            task += ("\n\nBefore consequential remediation edits, use the "
+                     "dependency-remediation-decision Skill to establish ownership, "
+                     "investigate credible candidate effects, and predict original-finding "
+                     "coverage and compatibility. Use the maven-dependency-evidence Skill "
+                     "for current Maven release and resolution facts rather than remembered "
+                     "versions. Choose the solution autonomously; use `validate-remediation` "
+                     "for full-project self-validation.")
         if args.task_skill:
             task += (
                 "\n\nBefore making consequential dependency-remediation changes, "
