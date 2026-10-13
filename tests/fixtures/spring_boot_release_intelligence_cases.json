@@ -1,0 +1,79 @@
+{
+  "description": "Synthetic fixtures testing evidence classification; NOT claims about real Spring Boot releases",
+  "cases": [
+    {
+      "id": "C1",
+      "scenario": "known_fix_managed_imported_bom",
+      "finding": {
+        "id": "CVE-EXAMPLE-0001",
+        "package": "example:managed-lib",
+        "current": "1.0",
+        "fixed": "2.0"
+      },
+      "candidate": {
+        "boot": "synthetic-boot-a",
+        "managed_version": "2.0",
+        "origin": "imported-bom",
+        "selected_version": "2.0",
+        "selection_path": "starter-a -> managed-lib",
+        "advisory_explicitly_unaffected": true
+      },
+      "expected": "addressed_by_candidate_default_graph"
+    },
+    {
+      "id": "C2",
+      "scenario": "unmanaged_starter_transitive",
+      "finding": {
+        "id": "CVE-EXAMPLE-0002",
+        "package": "example:transitive-lib",
+        "current": "1.0",
+        "fixed": "3.0"
+      },
+      "candidate": {
+        "boot": "synthetic-boot-b",
+        "managed_version": null,
+        "selected_version": "3.1",
+        "selection_path": "starter-b -> upstream-lib -> transitive-lib",
+        "advisory_explicitly_unaffected": true
+      },
+      "expected": "addressed_by_candidate_default_graph"
+    },
+    {
+      "id": "C3",
+      "scenario": "missing_fixed_version_unknown_advisory",
+      "finding": {
+        "id": "CVE-EXAMPLE-0003",
+        "package": "example:unknown-lib",
+        "current": "1.0",
+        "fixed": null
+      },
+      "candidate": {
+        "boot": "synthetic-boot-c",
+        "selected_version": "1.5",
+        "selection_path": "starter-c -> unknown-lib",
+        "advisory_explicitly_unaffected": null,
+        "osv_empty_response": true
+      },
+      "expected": "unknown"
+    },
+    {
+      "id": "C4",
+      "scenario": "application_override",
+      "finding": {
+        "id": "CVE-EXAMPLE-0004",
+        "package": "example:overridden-lib",
+        "current": "1.0",
+        "fixed": "2.0"
+      },
+      "candidate": {
+        "boot": "synthetic-boot-d",
+        "managed_version": "2.0",
+        "application_override": "1.0",
+        "selected_version": "1.0",
+        "selection_path": "application -> overridden-lib",
+        "advisory_explicitly_affected": true
+      },
+      "expected": "still_affected"
+    }
+  ]
+}
