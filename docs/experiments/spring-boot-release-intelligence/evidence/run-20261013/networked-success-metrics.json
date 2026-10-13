@@ -1,0 +1,13 @@
+{
+  "description": "Metrics captured from the first successful run after two diagnostic attempts; some metadata was already cached",
+  "total_elapsed_seconds": 72.24975636399904,
+  "maven_elapsed_seconds": 70.52109511599974,
+  "http": {
+    "cache_hits": 289,
+    "network_requests": 9,
+    "network_failures": 0,
+    "retries": 0,
+    "response_bytes": 48917,
+    "elapsed_seconds": 0.7306982149984833
+  }
+}
