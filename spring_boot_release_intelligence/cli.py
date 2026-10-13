@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
     if args.command == "run-live":
         result = Experiment(args.output).run()
-        print(args.output / "results.json")
+        print(args.output / "results-v2.json")
         print(f"cells={len(result['cells'])} elapsed={result['measurements']['total_elapsed_seconds']:.3f}s")
 
 

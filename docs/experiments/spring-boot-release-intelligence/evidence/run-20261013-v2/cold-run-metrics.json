@@ -1,0 +1,16 @@
+{
+  "description": "Fresh experiment output directory; real HTTP and Maven execution",
+  "total_elapsed_seconds": 140.4378970329999,
+  "network_requests": 149,
+  "cache_hits": 162,
+  "network_failures": 0,
+  "retries": 0,
+  "response_bytes": 3600119,
+  "http_elapsed_seconds": 11.85065837098773,
+  "stages": {
+    "A1_seconds": 9.830133486000705,
+    "A2_seconds": 127.50343775500005,
+    "A3_seconds": 0.6381335070000205,
+    "A4_and_comparison_seconds": 1.8521477579997736
+  }
+}

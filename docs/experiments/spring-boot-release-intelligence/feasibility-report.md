@@ -1,68 +1,69 @@
-# Feasibility report
+# Strengthened feasibility report
 
-## Execution summary
+## Previous conclusion and weakness
 
-The 2026-10-13 live run executed 16 approach/case combinations on branch
-`spring-boot-release-intelligence-feasibility` at commit
-`ec9956b5b07033e31d96216662dca03de1e2b315`. Twelve offline tests passed. The
-networked successful run took 72.250 seconds; Maven accounted for 70.521
-seconds. It made 9 remaining network requests after reuse of metadata cached by
-the two diagnostic attempts, transferred 48,917 response bytes, recorded 289
-cache hits, and had no retries or network failures. The final fully warm run
-took 69.423 seconds and made no network requests. Evidence occupied 8.0 MB,
-mostly bounded responses and Maven graphs.
+Commit `a325aa4b2749de30450c2292a331988e83a0f34b` recommended A2 plus narrow A1
+and OSV. Its live observations were useful, but `_cells()` assigned feasibility
+statuses directly, OSV reasoning considered any historical fixed event
+sufficient, Maven coverage centered on one successful starter/Tomcat fixture,
+and its replay benchmark did not measure scale.
 
-## Findings
+## New evidence
 
-All three source-specific implementations work within their stated boundaries.
-A1 accurately reads the relevant Boot BOM properties and imported BOMs. A2
-delegates the effective graph to Maven and is the only individual approach that
-fully covers all four cases. A3 supplies useful published-version, advisory-key
-and hosted-graph corroboration, but cannot independently establish Boot
-management, application-effective resolution, override behavior, or advisory
-range semantics.
+Nineteen deterministic tests pass: the original six plus identity comparison,
+graph traversal, all five feasibility status derivations, explicit affected
+versions, introduced/fixed/last-affected boundaries, multiple and reintroduced
+intervals, known/unknown qualifiers, and contradictory advisory events.
 
-The run reproduced the historical C1 regression exactly. Baseline Boot 3.3.4
-managed and resolved Tomcat 10.1.30 with 33 original OSV IDs. Boot 3.3.5
-(10.1.31) and 3.3.6 (10.1.33) each had 1 original ID no longer reported and 32
-still reported. Boot 3.3.7 and 3.3.8 (10.1.34) each had 3 no longer reported and
-30 still reported. No new candidate IDs were reported. The removed identities
-were `GHSA-qvf5-hvjx-wm27` at 10.1.31, plus
-`GHSA-27hp-xhwr-wr2m` and `GHSA-5j33-cvvr-w245` at 10.1.34. Explicit OSV fixed
-events support those conclusions; mere query absence was not used as proof.
+The fresh live run completed 16 original cells and 28 expanded approach/scenario
+cells. All seven real Maven scenarios passed their expected version and path
+checks. This independently demonstrates mediation, direct and managed overrides,
+profile activation, exclusions, and multi-module resolution. A1 and A3 were
+correctly `NOT_SUPPORTED` for those application-specific questions.
 
-Maven and deps.dev both showed the tested path through `starter-web` and
-`starter-tomcat`. deps.dev returned 34 nodes and 62 edges for each candidate,
-including two graph paths to Tomcat. Maven's application-specific path is used
-as stronger evidence. In C4, candidate Boot defaults changed while the
-application's `tomcat.version=10.1.30` kept the effective dependency vulnerable.
+The multi-dependency comparison observed:
 
-## Reliability, performance, and bounded benchmark
+- Tomcat: 1 original finding addressed at Boot 3.3.5/3.3.6 and 3 at
+  3.3.7/3.3.8; 32 or 30 remain affected.
+- Spring Web: 1 of 2 original findings addressed in every candidate; 1 remains.
+- Logback Core: 0 of 6 addressed through Boot 3.3.7; Boot 3.3.8 addresses 2 and
+  leaves 4.
+- SnakeYAML 2.2 did not change and had no original findings in this observation.
+- No candidate introduced a newly reported finding for these four artifacts.
 
-The first two attempted executions exposed probe defects: an output path was
-resolved relative to the generated Maven project, then the installed dependency
-plugin emitted text for unsupported JSON output. Both were repaired; TGF
-node/edge output is now parsed. Maven itself returned success in both cases, so
-neither was classified as an approach limitation. See `execution-attempts.json`.
+Each absent original ID was upgraded to `ADDRESSED` only after its real advisory
+placed the candidate outside all safely interpreted affected intervals. No
+unknowns occurred in this live set, but deterministic contradictory/unsupported
+cases return `UNKNOWN`.
 
-On the final warm run A1 took 0.443 seconds (288 cache reads), A2 took 68.237
-seconds, A3 took 0.026 seconds (10 cache reads), and A4 integration took 0.0002
-seconds with no duplicated HTTP calls. The requested 10-findings × 5-candidates
-cached replay ran 50 comparisons in 0.000016 seconds with zero additional
-network requests. The remaining 8 scale
-combinations (20/100 candidates and 50/100 findings) were deliberately not live
-tested; multiplying identical historical requests would add traffic without
-testing new correctness. No throughput extrapolation is claimed.
+## Performance and reliability
 
-## Unknowns and limitations
+The fresh-cache run took 140.438 seconds: A1 9.830 seconds, A2 127.503 seconds,
+A3 0.638 seconds, and combined comparison 1.852 seconds. It made 149 network
+requests, transferred 3,600,119 bytes, recorded 162 cache hits, and had zero
+failures/retries. The final warm-cache run took 115.640 seconds, made zero
+network requests, and spent 114.569 seconds in Maven. Warm candidate comparison
+computation took 0.0064 seconds over already acquired evidence. These are bounded
+workload measurements, not a scalability extrapolation.
 
-- The BOM reader supports parent/import/property patterns observed here, not a
-  complete effective Maven model or all import-precedence/profile semantics.
-- The numeric fixed-event comparator refuses qualifiers; full Maven version
-  ordering remains a production gap.
-- The fixture proves one starter path and one property override, not arbitrary
-  profiles, exclusions, multi-module mediation, repositories, or compatibility.
-- OSV and deps.dev are mutable services. Stored evidence is a timestamped
-  observation, not a continuously valid assertion.
-- Original-finding coverage is not application compatibility and is not a full
-  independent candidate vulnerability scan.
+## Changed conclusions
+
+The 4×4 labels did not change, but their confidence improved materially. A2's
+application-resolution capability is no longer inferred from one favorable
+fixture. A4 remains capable, but deps.dev still adds corroboration rather than a
+required fact. The expanded results strengthen—not broaden—the recommendation:
+Maven is the effective-model authority and OSV interpretation must remain
+conservative.
+
+## Remaining limitations
+
+- The Maven-version comparator supports common numeric and known qualifier forms
+  but returns unknown for unfamiliar semantics; using Maven ComparableVersion
+  directly remains a production requirement.
+- Repository mirrors, authentication, optional dependencies, classifiers,
+  relocations, imported-BOM precedence conflicts and more complex profile
+  activation remain untested.
+- Only four resolved dependencies and five Boot versions were compared.
+- Build/runtime compatibility and whole-application candidate scans were not
+  executed, so vulnerability counts cannot select a release.
+- Source mutation, withdrawal and rate limiting need longer-running tests.

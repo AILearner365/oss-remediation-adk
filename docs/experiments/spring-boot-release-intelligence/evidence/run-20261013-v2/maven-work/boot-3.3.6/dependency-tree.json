@@ -1,0 +1,70 @@
+867909510 experiment:case-3.3.6:jar:1
+26502020 org.springframework.boot:spring-boot-starter-web:jar:3.3.6:compile
+1791280119 org.springframework.boot:spring-boot-starter:jar:3.3.6:compile
+1947378744 org.springframework.boot:spring-boot:jar:3.3.6:compile
+290509937 org.springframework.boot:spring-boot-autoconfigure:jar:3.3.6:compile
+1889468930 org.springframework.boot:spring-boot-starter-logging:jar:3.3.6:compile
+1699637904 ch.qos.logback:logback-classic:jar:1.5.12:compile
+21063905 ch.qos.logback:logback-core:jar:1.5.12:compile
+379963364 org.slf4j:slf4j-api:jar:2.0.16:compile
+505567264 org.apache.logging.log4j:log4j-to-slf4j:jar:2.23.1:compile
+145664926 org.apache.logging.log4j:log4j-api:jar:2.23.1:compile
+44227594 org.slf4j:jul-to-slf4j:jar:2.0.16:compile
+973123933 jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+921640293 org.springframework:spring-core:jar:6.1.15:compile
+1273012861 org.springframework:spring-jcl:jar:6.1.15:compile
+1597400455 org.yaml:snakeyaml:jar:2.2:compile
+1610853733 org.springframework.boot:spring-boot-starter-json:jar:3.3.6:compile
+784961589 com.fasterxml.jackson.core:jackson-databind:jar:2.17.3:compile
+1618230491 com.fasterxml.jackson.core:jackson-annotations:jar:2.17.3:compile
+201484047 com.fasterxml.jackson.core:jackson-core:jar:2.17.3:compile
+1897372527 com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.17.3:compile
+331216192 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.17.3:compile
+1382973704 com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.17.3:compile
+1305194069 org.springframework.boot:spring-boot-starter-tomcat:jar:3.3.6:compile
+4888672 org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.33:compile
+2090953436 org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.33:compile
+1524744833 org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.33:compile
+1254651534 org.springframework:spring-web:jar:6.1.15:compile
+513113647 org.springframework:spring-beans:jar:6.1.15:compile
+1762984107 io.micrometer:micrometer-observation:jar:1.13.8:compile
+1035219650 io.micrometer:micrometer-commons:jar:1.13.8:compile
+876695548 org.springframework:spring-webmvc:jar:6.1.15:compile
+26229597 org.springframework:spring-aop:jar:6.1.15:compile
+1078031260 org.springframework:spring-context:jar:6.1.15:compile
+1560243060 org.springframework:spring-expression:jar:6.1.15:compile
+#
+1791280119 1947378744 compile
+1791280119 290509937 compile
+1699637904 21063905 compile
+1699637904 379963364 compile
+1889468930 1699637904 compile
+505567264 145664926 compile
+1889468930 505567264 compile
+1889468930 44227594 compile
+1791280119 1889468930 compile
+1791280119 973123933 compile
+921640293 1273012861 compile
+1791280119 921640293 compile
+1791280119 1597400455 compile
+26502020 1791280119 compile
+784961589 1618230491 compile
+784961589 201484047 compile
+1610853733 784961589 compile
+1610853733 1897372527 compile
+1610853733 331216192 compile
+1610853733 1382973704 compile
+26502020 1610853733 compile
+1305194069 4888672 compile
+1305194069 2090953436 compile
+1305194069 1524744833 compile
+26502020 1305194069 compile
+1254651534 513113647 compile
+1762984107 1035219650 compile
+1254651534 1762984107 compile
+26502020 1254651534 compile
+876695548 26229597 compile
+876695548 1078031260 compile
+876695548 1560243060 compile
+26502020 876695548 compile
+867909510 26502020 compile

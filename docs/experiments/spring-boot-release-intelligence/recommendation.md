@@ -1,22 +1,22 @@
 # Recommendation
 
-Use **A2 (Maven resolution + OSV) as the smallest viable core**, with the A1 BOM
-reader retained as explanatory provenance and release pre-filtering. Do not put
-deps.dev on the required decision path.
+## Decision: A — proceed with A2 + narrow A1 + OSV
 
-A2 alone was the only individual approach proven across C1–C4: it identifies
-the actual tested application's direct/transitive paths, honors Boot's effective
-management, detects the application override, and gives OSV the exact selected
-version. A1 adds cheap, valuable evidence about why Boot selected a default and
-can avoid resolving irrelevant candidates, but cannot prove inclusion or
-application control. A3 agreed with the tested graph yet remained partial in
-three cases and unsupported for the override; its additional network and
-reconciliation complexity did not improve any final verdict.
+The strengthened evidence supports proceeding to a bounded next design phase
+with Maven resolution as the application-effective authority, a narrow Boot BOM
+component for release/management provenance, and conservative OSV advisory
+interpretation.
 
-Thus the practical combination is **A2 + the narrow A1 metadata component +
-OSV**, not full A4. deps.dev can remain optional corroboration or a diagnostics
-fallback, clearly labelled as a published-package graph. Before production,
-add a real Maven version comparator, repository/auth handling, profiles and
-multi-module cases, conflict/exclusion cases, durable rate-limit behavior, and
-candidate compatibility/build tests. Keep vulnerability remediation and
-compatibility as separate conclusions.
+A2 passed the original four cases and seven expanded real Maven executions,
+including negative path removal and multiple forms of application control. A1
+reliably explains managed defaults and advisory ranges but still cannot resolve
+applications. deps.dev corroborated the hosted starter graph and advisory keys,
+yet supplied no fact required to reach a verdict that Maven/BOM/OSV could not;
+therefore decision B is not supported. The remaining gaps are important for
+production design but no longer block this feasibility choice, so decision C is
+also not warranted for the stated experiment.
+
+Proceeding does not mean choosing releases by finding counts or claiming
+compatibility. The next phase must invoke Maven's own full version semantics,
+exercise repository/auth/profile/import edge cases, run candidate builds/tests,
+and independently scan the complete resolved candidate application.

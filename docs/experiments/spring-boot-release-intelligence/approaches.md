@@ -1,56 +1,52 @@
-# Experimental approaches
+# Experimental approaches — strengthened evaluation
 
-This document fixes the experiment design before implementation. The code is an
-isolated feasibility probe, not a production Maven model builder or remediation
-engine. Every conclusion carries source and request provenance.
+The experiment remains isolated from production and OpenHands. Version 2 adds
+independent executable checks: a cell status is derived from its recorded check
+outcomes, never assigned directly. `PASS` means the observed value matched an
+expectation established before execution; `FAIL` is contradictory evidence;
+`UNAVAILABLE` means the approach lacks required information; `NOT_EXECUTED`
+means no observation exists. These map to `PROVEN`, `FAILED`,
+`NOT_SUPPORTED`/`PARTIALLY_PROVEN`, and `NOT_TESTED` respectively.
 
-## A1: Spring Boot BOM + OSV
+## A1 — Spring Boot BOM + OSV
 
-A1 downloads published `spring-boot-dependencies` POMs from Maven Central,
-walks their parent and imported BOM dependency-management metadata, resolves
-ordinary nested `${property}` references, and queries OSV for the resulting
-Maven package/version. It can establish a Boot-managed default and advisory
-applicability. It cannot establish that an application includes the artifact,
-Maven conflict mediation, active profiles, or an application's effective
-override. Import ordering and parent inheritance are reported; this probe does
-not claim complete Maven model resolution.
+A1 reads real Spring Boot parent/import/property metadata and queries OSV. Its
+OSV interpreter handles introduced/fixed/last-affected events, multiple and
+reintroduced intervals, explicit affected versions, and a conservative subset
+of Maven qualifier ordering. Unsupported qualifiers, malformed intervals,
+non-ECOSYSTEM ranges, missing packages and contradictions return `UNKNOWN`.
+Candidate absence from an OSV query is never itself proof of remediation.
 
-## A2: Maven resolution + OSV
+A1 establishes managed defaults and advisory applicability, not application
+inclusion, conflict mediation, active profiles, exclusions, or overrides. The
+BOM parser remains deliberately narrower than Maven's effective model.
 
-A2 generates reproducible, case-specific sample applications and invokes the
-installed Maven `dependency:tree` goal. It captures direct/transitive paths and
-effective selected versions, then applies OSV evidence to the exact versions.
-This delegates Maven mediation, parent/BOM processing, properties and active
-dependency management to Maven. Results prove the supplied fixture and command,
-not compatibility or every profile/environment of a production application.
+## A2 — Maven resolution + OSV
 
-## A3: deps.dev
+A2 delegates effective resolution to Maven's `dependency:tree` output and
+validates selected versions and paths. Besides the original Boot/Tomcat fixture,
+real published artifacts now exercise transitive mediation, direct overrides,
+dependency-management overrides, active/inactive profiles, exclusions and a
+two-module reactor. Expectations are explicit and compared with command output.
 
-A3 calls the public deps.dev v3 package-version and dependency endpoints. Direct
-facts are version publication metadata, advisory keys, and the dependency graph
-returned for that published artifact. Paths or candidate effects are labelled
-inferences. deps.dev is not treated as an application-specific effective Maven
-model, and an API failure is recorded separately from lack of capability.
+## A3 — deps.dev
 
-## A4: combined
+A3 records public version metadata, advisory keys and hosted dependency graphs.
+The live graph corroborates the published Boot starter path, but cannot establish
+an application's effective model or OSV affected intervals. It is therefore
+partial for C1–C3 and unsupported for C4 and the expanded application scenarios.
 
-A4 reuses cached A1, A2 and A3 results. Maven's effective graph is authoritative
-for application selection and paths; BOM evidence explains Boot management;
-OSV establishes advisory applicability; deps.dev adds independent published
-metadata/advisory corroboration. Conflicts remain explicit and weaker hosted
-inferences never replace Maven evidence. The integration is worthwhile only if
-it measurably adds coverage or provenance.
+## A4 — combined
 
-## Classification and success rules
+A4 preserves source precedence: Maven for effective application resolution,
+Boot metadata for management provenance, OSV for advisory applicability, and
+deps.dev only for hosted corroboration. Integration reuses results and does not
+convert weaker hosted inference into application evidence.
 
-`ADDRESSED`, `STILL_AFFECTED`, `UNKNOWN`, and
-`ABSENT_ON_EXAMINED_PATH` describe vulnerability state.
-`APPLICATION_CONTROLLED` is separately retained as effective-version
-provenance, allowing (for example) `APPLICATION_CONTROLLED + STILL_AFFECTED`.
-An empty query is not proof of remediation. A cell is `PROVEN` only when a live
-executable probe supplies all evidence that approach claims; deterministic
-tests alone cannot earn that status.
+## Classification safeguards
 
-All HTTP responses are bounded and cached by URL/request hash. Measurements
-include elapsed time, request/cache counts, response bytes, Maven time and
-command outcome. No JFrog Xray code or evidence is used.
+Vulnerability verdicts are `ADDRESSED`, `STILL_AFFECTED`, `UNKNOWN`, or
+`ABSENT_ON_EXAMINED_PATH`; `APPLICATION_CONTROLLED` remains separate provenance.
+New candidate findings are separate from original-finding coverage. Neither a
+higher version nor a lower vulnerability count proves compatibility or makes a
+candidate preferable.
