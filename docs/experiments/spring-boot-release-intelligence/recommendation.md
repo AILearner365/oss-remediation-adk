@@ -1,5 +1,10 @@
 # Recommendation
 
+The A1–A6 feasibility phase is closed with A5 as the preferred collector. The
+authoritative phase summary, evidence index, implementation boundaries, and
+deferred decisions are preserved in
+[FEASIBILITY-HANDOFF.md](FEASIBILITY-HANDOFF.md).
+
 ## Decision: A — proceed with A2 + narrow A1 + OSV
 
 The strengthened evidence supports proceeding to a bounded next design phase

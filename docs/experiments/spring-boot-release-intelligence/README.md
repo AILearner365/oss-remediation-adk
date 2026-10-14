@@ -1,5 +1,11 @@
 # Spring Boot release vulnerability-coverage feasibility
 
+The A1–A6 feasibility phase is closed. A5 remains the preferred metadata-only
+collector, with normal Maven build/test validation retained for shortlisted
+candidates. See [FEASIBILITY-HANDOFF.md](FEASIBILITY-HANDOFF.md) for the preserved
+decision, implementation boundaries, evidence, reproduction commands, and
+deliberately deferred next-phase questions.
+
 ## Objective
 Given a current Spring Boot version, an eligible upgrade range, and vulnerability findings from **OSV (testing)** or **JFrog Xray (production)**, identify **which published Spring Boot releases address the most *original findings*** and why. This is a research/acceptance contract, **not** an implementation of a scanner, dependency resolver, database, or autonomous remediation agent.
 
