@@ -39,24 +39,44 @@ def parse_tgf(output: Path, targets: list[str]) -> dict:
             children.add(child)
     paths = {target: [] for target in targets}
     selected = {}
+    selected_records = []
     roots = [node_id for node_id in nodes if node_id not in children]
     queue = deque((root, []) for root in roots)
     while queue:
         node_id, path = queue.popleft()
         parts = nodes[node_id].split(":")
         coordinate = ":".join(parts[:2])
-        # Maven TGF is g:a:type:version[:scope].
-        current = path + [f"{coordinate}:{parts[3]}"]
-        selected.setdefault(coordinate, parts[3])
+        # Maven TGF is g:a:type:version[:scope] or
+        # g:a:type:classifier:version:scope. Roots commonly omit scope.
+        if len(parts) == 4:
+            group, artifact, artifact_type, version = parts
+            classifier, scope = None, None
+        elif len(parts) == 5:
+            group, artifact, artifact_type, version, scope = parts
+            classifier = None
+        elif len(parts) == 6:
+            group, artifact, artifact_type, classifier, version, scope = parts
+        else:
+            raise ValueError(f"unrecognized Maven TGF coordinate: {nodes[node_id]}")
+        current = path + [f"{coordinate}:{version}"]
+        if coordinate not in selected:
+            selected[coordinate] = version
+            selected_records.append({"group_id": group, "artifact_id": artifact,
+                                     "type": artifact_type, "classifier": classifier,
+                                     "version": version, "scope": scope,
+                                     "coordinate": coordinate})
         if coordinate in paths:
             paths[coordinate].append(current)
         for child in edges.get(node_id, []):
             queue.append((child, current))
     primary_paths = paths[targets[0]] if targets else []
+    root_artifacts = [":".join(nodes[node_id].split(":")[:2]) for node_id in roots]
     return {"paths": primary_paths, "target_paths": paths,
             "selected_version": (primary_paths[0][-1].rsplit(":", 1)[-1]
                                  if primary_paths else None),
-            "selected_artifacts": selected}
+            "selected_artifacts": selected, "selected_records": selected_records,
+            "root_artifacts": root_artifacts,
+            "preserves_dependency_paths": True}
 
 
 class MavenResolver:

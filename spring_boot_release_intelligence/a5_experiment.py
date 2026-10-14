@@ -66,7 +66,7 @@ def _storage(repository: Path, before: dict[str, int], workload: dict,
                  "maven_reported_bytes": None,
                  "http_request_count": None,
                  "reason": "A2 quiet Maven output does not expose transport events"}
-    if approach == "A5":
+    if approach in ("A5", "A6"):
         records = list(workload["maven"].values()) + list(workload["overrides"].values())
         records += [value["observation"] for value in workload["scenarios"].values()]
         transfers = {

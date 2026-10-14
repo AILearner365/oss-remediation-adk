@@ -1,0 +1,22 @@
+134943275 experiment:mediation:jar:1
+161069393 org.apache.httpcomponents:httpclient:jar:4.5.14:compile
+1708084589 org.apache.httpcomponents:httpcore:jar:4.4.16:compile
+271002555 commons-logging:commons-logging:jar:1.2:compile
+57488372 commons-codec:commons-codec:jar:1.11:compile
+376660032 org.apache.poi:poi:jar:5.2.5:compile
+2086477093 org.apache.commons:commons-collections4:jar:4.4:compile
+1427020774 org.apache.commons:commons-math3:jar:3.6.1:compile
+1066856480 commons-io:commons-io:jar:2.15.0:compile
+854255346 com.zaxxer:SparseBitSet:jar:1.3:compile
+650797503 org.apache.logging.log4j:log4j-api:jar:2.21.1:compile
+#
+161069393 1708084589 compile
+161069393 271002555 compile
+161069393 57488372 compile
+134943275 161069393 compile
+376660032 2086477093 compile
+376660032 1427020774 compile
+376660032 1066856480 compile
+376660032 854255346 compile
+376660032 650797503 compile
+134943275 376660032 compile

@@ -47,13 +47,14 @@ def _svg(title: str, labels: list[str], series: list[tuple[str, list[float]]],
     return "\n".join(out)
 
 
-def _capability(cells: list[dict]) -> str:
-    approaches = [f"A{i}" for i in range(1, 6)]
+def _capability(cells: list[dict], approach_count: int = 5) -> str:
+    approaches = [f"A{i}" for i in range(1, approach_count + 1)]
     cases = [f"C{i}" for i in range(1, 5)]
     lookup = {(cell["approach"], cell["case"]): cell["status"] for cell in cells}
-    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="900" height="390">',
+    height = 390 + max(0, approach_count - 5) * 52
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="900" height="{height}">',
            '<rect width="100%" height="100%" fill="white"/>',
-           '<text x="450" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">A1–A5 capability coverage across C1–C4</text>']
+           f'<text x="450" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">A1–A{approach_count} capability coverage across C1–C4</text>']
     for col, case in enumerate(cases):
         out.append(f'<text x="{235+col*150}" y="70" text-anchor="middle" font-family="sans-serif">{case}</text>')
     for row, approach in enumerate(approaches):
@@ -64,7 +65,8 @@ def _capability(cells: list[dict]) -> str:
             x = 160 + col * 150
             out.extend([f'<rect x="{x}" y="{y}" width="145" height="38" rx="4" fill="{STATUS_COLORS[status]}"/>',
                         f'<text x="{x+72.5}" y="{y+24}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="white">{status}</text>'])
-    out.append('<text x="30" y="375" font-family="sans-serif" font-size="11">A1–A4 are preserved v2 results; A5 is the 2026-10-14 execution.</text></svg>')
+    note_y = height - 15
+    out.append(f'<text x="30" y="{note_y}" font-family="sans-serif" font-size="11">A1–A4 are preserved v2 results; later approaches are independent executions.</text></svg>')
     return "\n".join(out)
 
 
@@ -123,4 +125,58 @@ def generate_a5_charts(results_file: Path, output_dir: Path) -> list[Path]:
         "".join(f"<h2>{html.escape(path.stem)}</h2><img src='charts/{path.name}' alt='{html.escape(path.stem)}'>"
                 for path in written), encoding="utf-8")
     written.append(html_file)
+    return written
+
+
+def generate_a6_charts(results_file: Path, output_dir: Path) -> list[Path]:
+    data = json.loads(results_file.read_text(encoding="utf-8"))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    charts = {"01-capability-coverage.svg": _capability(data["cells"], 6)}
+    a5_accuracy = data["a5_path_accuracy_against_a2"]
+    a6_accuracy = data["a6_selection_accuracy_against_a5"]
+    charts["02-selected-version-accuracy.svg"] = _svg(
+        "A2/A5/A6 selected dependency accuracy", ["Selected checks"],
+        [("A2 reference", [100]),
+         ("A5", [round(100 * a5_accuracy["passed_count"] / a5_accuracy["total_count"], 1)]),
+         ("A6", [round(100 * a6_accuracy["passed_count"] / a6_accuracy["total_count"], 1)])],
+        "A5 includes version/path checks; A6 includes complete-set/version checks", "%")
+    agreement = data["a6_vulnerability_agreement_with_a5"]
+    a6_percent = round(100 * agreement["passed_count"] / agreement["total_count"], 1)
+    charts["03-vulnerability-agreement.svg"] = _svg(
+        "A2/A5/A6 vulnerability classification agreement", ["Frozen findings"],
+        [("A2 reference", [100]), ("A5", [100]), ("A6", [a6_percent])],
+        "Agreement on addressed, remaining, new, and unknown finding sets", "%")
+    charts["04-fresh-warm-time.svg"] = _svg(
+        "Fresh-cache vs warm-cache workload time", ["Fresh", "Warm"],
+        [(name, [round(data[name.lower()][temp]["elapsed_seconds"], 1)
+                 for temp in ("fresh", "warm")]) for name in ("A2", "A5", "A6")],
+        "Same release/override/scenario workload; elapsed seconds", "s")
+    charts["05-cache-footprint.svg"] = _svg(
+        "Fresh isolated repository footprint", ["Cache MB"],
+        [(name, [round(data[name.lower()]["fresh"]["storage"]["cache_bytes_after"] / 1_000_000, 2)])
+         for name in ("A2", "A5", "A6")], "Final fresh-cache bytes", " MB")
+    charts["06-binary-downloads.svg"] = _svg(
+        "Fresh JAR download categories", ["Application JARs", "Plugin/bootstrap JARs"],
+        [(name, [data[name.lower()]["fresh"]["storage"]["binary_summary"][category]["count"]
+                 for category in ("application_dependency_jars", "plugin_bootstrap_jars")])
+         for name in ("A2", "A5", "A6")],
+        "A5/A6 attribution is independently qualified by zero-dependency controls")
+    releases = list(data["release_comparison"]["candidates"])
+    charts["07-addressed-by-release.svg"] = _svg(
+        "Original vulnerabilities addressed by Spring Boot release", releases,
+        [("Addressed", [data["release_comparison"]["candidates"][release]["summary"]["addressed"]
+                        for release in releases])])
+    written = []
+    for name, content in charts.items():
+        path = output_dir / name
+        path.write_text(content, encoding="utf-8")
+        written.append(path)
+    report = output_dir.parent / "a6-charts.html"
+    report.write_text(
+        "<!doctype html><meta charset='utf-8'><title>A6 comparison charts</title>"
+        "<style>body{font:16px sans-serif;max-width:980px;margin:auto}img{max-width:100%;border:1px solid #ddd;margin:12px 0}</style>"
+        "<h1>A6 evidence charts</h1><p>Generated from <code>results-a6.json</code>.</p>" +
+        "".join(f"<h2>{html.escape(path.stem)}</h2><img src='charts/{path.name}' alt='{html.escape(path.stem)}'>"
+                for path in written), encoding="utf-8")
+    written.append(report)
     return written

@@ -1,0 +1,14 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------< experiment:excluded >-------------------------
+[INFO] Building excluded 1
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- dependency:3.8.1:collect (default-cli) @ excluded ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.837 s
+[INFO] Finished at: 2026-10-14T04:58:50Z
+[INFO] ------------------------------------------------------------------------

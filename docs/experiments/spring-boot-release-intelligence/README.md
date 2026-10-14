@@ -70,6 +70,18 @@ plugin/bootstrap JARs remain required. See
 [a5-comparison-report.md](a5-comparison-report.md) and
 `evidence/run-20261014-a5/a5-charts.html`.
 
+### Executed A6 extension
+
+The subsequent A6 experiment tested the same plugin's flat
+`dependency:collect` output as a selected-artifact source. A6 matched A5's
+complete dependency sets and versions in all 16 configurations and reproduced
+all frozen vulnerability verdicts, but did not preserve dependency paths and
+showed no material runtime or storage improvement. A5 therefore remains the
+preferred release-intelligence collector; A6 is feasible when only selected
+artifact presence/version is required. See
+[a6-comparison-report.md](a6-comparison-report.md) and
+`evidence/run-20261014-a6/a6-charts.html`.
+
 Sources:
 - https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html
 - https://docs.deps.dev/api/v3/

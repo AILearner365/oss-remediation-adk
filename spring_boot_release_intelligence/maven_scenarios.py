@@ -22,6 +22,7 @@ def _dependency(group, artifact, version=None, extra=""):
 
 def run_scenarios(resolver: MavenResolver) -> dict:
     cases = {}
+    require_paths = getattr(resolver, "preserves_paths", True)
     # Independent expectation: both dependencies are at equal depth; Maven's
     # documented nearest-definition tie-break selects the first declaration.
     mediation = HEADER.format(parent="", artifact="mediation", body="<dependencies>" +
@@ -29,7 +30,8 @@ def run_scenarios(resolver: MavenResolver) -> dict:
         _dependency("org.apache.poi", "poi", "5.2.5") + "</dependencies>")
     cases["transitive_mediation"] = _record(
         resolver.resolve_pom("scenario-mediation", mediation, [CODEC]),
-        {"selected_version": "1.11", "path_contains": "org.apache.httpcomponents:httpclient:4.5.14"})
+        {"selected_version": "1.11", "path_contains": "org.apache.httpcomponents:httpclient:4.5.14"},
+        require_path=require_paths)
 
     parent = """<parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.4</version></parent>"""
     starter = _dependency("org.springframework.boot", "spring-boot-starter-web")
@@ -37,7 +39,8 @@ def run_scenarios(resolver: MavenResolver) -> dict:
         _dependency("org.apache.tomcat.embed", "tomcat-embed-core", "10.1.31") + "</dependencies>")
     cases["direct_override"] = _record(
         resolver.resolve_pom("scenario-direct", direct, [TOMCAT]),
-        {"selected_version": "10.1.31", "path_contains": "experiment:direct:1"})
+        {"selected_version": "10.1.31", "path_contains": "experiment:direct:1"},
+        require_path=require_paths)
 
     management = "<dependencyManagement><dependencies>" + _dependency(
         "org.apache.tomcat.embed", "tomcat-embed-core", "10.1.31") + "</dependencies></dependencyManagement>"
@@ -45,17 +48,20 @@ def run_scenarios(resolver: MavenResolver) -> dict:
                             "<dependencies>" + starter + "</dependencies>")
     cases["dependency_management_override"] = _record(
         resolver.resolve_pom("scenario-managed", managed, [TOMCAT]),
-        {"selected_version": "10.1.31", "path_contains": "spring-boot-starter-tomcat:3.3.4"})
+        {"selected_version": "10.1.31", "path_contains": "spring-boot-starter-tomcat:3.3.4"},
+        require_path=require_paths)
 
     profile = "<profiles><profile><id>upgrade</id>" + management + "</profile></profiles>"
     profiled = HEADER.format(parent=parent, artifact="profile", body=profile +
                             "<dependencies>" + starter + "</dependencies>")
     cases["applicable_profile_inactive"] = _record(
         resolver.resolve_pom("scenario-profile-inactive", profiled, [TOMCAT]),
-        {"selected_version": "10.1.30", "path_contains": "spring-boot-starter-tomcat:3.3.4"})
+        {"selected_version": "10.1.30", "path_contains": "spring-boot-starter-tomcat:3.3.4"},
+        require_path=require_paths)
     cases["applicable_profile_active"] = _record(
         resolver.resolve_pom("scenario-profile-active", profiled, [TOMCAT], ["upgrade"]),
-        {"selected_version": "10.1.31", "path_contains": "spring-boot-starter-tomcat:3.3.4"})
+        {"selected_version": "10.1.31", "path_contains": "spring-boot-starter-tomcat:3.3.4"},
+        require_path=require_paths)
 
     exclusion = "<exclusions><exclusion><groupId>org.springframework.boot</groupId>" \
                 "<artifactId>spring-boot-starter-tomcat</artifactId></exclusion></exclusions>"
@@ -64,20 +70,29 @@ def run_scenarios(resolver: MavenResolver) -> dict:
                                          extra=exclusion) + "</dependencies>")
     cases["dependency_exclusion"] = _record(
         resolver.resolve_pom("scenario-exclusion", excluded, [TOMCAT]),
-        {"selected_version": None, "path_contains": None})
+        {"selected_version": None, "path_contains": None},
+        require_path=require_paths)
     cases["multi_module"] = (resolver.resolve_multi_module()
                              if hasattr(resolver, "resolve_multi_module")
                              else _multi_module(resolver))
     return cases
 
 
-def _record(observation: dict, expected: dict) -> dict:
+def _record(observation: dict, expected: dict, *, require_path: bool = True) -> dict:
     contains = expected["path_contains"]
     paths = observation["paths"]
     path_ok = (not paths if contains is None else
                any(any(contains in node for node in path) for path in paths))
     checks = {"selected_version": observation["selected_version"] == expected["selected_version"],
-              "path": path_ok, "command_succeeded": observation["returncode"] == 0}
+              "command_succeeded": observation["returncode"] == 0}
+    if require_path:
+        checks["path"] = path_ok
+    else:
+        target = next(iter(observation["target_presence"]))
+        checks["selection_presence"] = (
+            observation["target_presence"].get(target)
+            == (expected["selected_version"] is not None))
+        checks["collection_complete"] = observation.get("collection_complete", False)
     return {"expected": expected, "observation": observation, "checks": checks,
             "passed": all(checks.values())}
 

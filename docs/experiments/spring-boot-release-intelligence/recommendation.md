@@ -35,3 +35,18 @@ candidate graph/vulnerability comparison, followed by the existing Maven
 build/test path only for shortlisted candidates that need compatibility proof.
 This replaces A2's dependency-collection stage, not A2's broader validation
 role. deps.dev remains optional corroboration.
+
+## A6 update: retain A5 as the preferred collector
+
+A6 proves that Maven's flat `dependency:collect` result is sufficient for the
+tested selected-artifact vulnerability comparison: complete sets and versions
+matched A5 on 32/32 checks, and frozen verdict sets matched on 64/64 checks.
+It also avoided application dependency JARs.
+
+Do not replace A5 with A6 for the overall objective. A6 saved only 0.48% fresh,
+was 0.27% slower warm, and used exactly the same cache and plugin/bootstrap
+closure. A5's paths explain introduction, mediation, and changed reachability at
+no material measured cost. Keep A5 for release intelligence and A2-style normal
+Maven build/test validation for shortlisted candidates. A6 is a valid narrower
+option only where selected artifact presence/version is the complete requirement
+and path provenance is explicitly unnecessary.

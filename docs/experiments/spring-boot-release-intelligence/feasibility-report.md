@@ -92,3 +92,30 @@ Maven did not expose transport-level HTTP request counts. A2 ran with the
 existing quiet command, so its transfer-event/byte metrics are unavailable;
 no bandwidth saving is claimed from the cache-size difference. See
 [a5-comparison-report.md](a5-comparison-report.md) for the full comparison.
+
+## A6 addendum — 2026-10-14
+
+A6 used the pinned Maven `dependency:collect` goal and parsed its flat mediated
+artifact records. It matched the freshly rerun A5 complete dependency set and
+versions on 32/32 assertions, detailed type/classifier/scope/version records on
+16/16 assertions, and 64/64 frozen vulnerability result-set assertions. C1–C4
+and all seven expanded selection scenarios were `PROVEN`.
+The multi-module command included the reactor library and applied the app's
+10.1.31 dependency management without installing module artifacts.
+
+On the identical quiet 16-resolution workload, A2 took 183.180 s fresh and
+142.750 s warm, A5 took 177.746 s and 150.766 s, and A6 took 176.896 s and
+151.175 s. Relative to A5, A6 was 0.851 s (0.48%) faster fresh and 0.409 s
+(0.27%) slower warm: negligible in this workload. Both A5 and A6 produced an
+identical 21,134,449-byte cache containing 460 POMs (6,118,943 bytes), no Maven
+metadata files, no application dependency JARs, and 50 plugin/bootstrap JARs
+(14,912,596 bytes). Separate A6 telemetry recorded 510 successful transfer
+events and 21,091,327 Maven-reported bytes fresh, and zero warm. HTTP request
+counts remain unavailable.
+
+The result supports flat selected artifacts as sufficient for the tested
+vulnerability-coverage calculation. It does not establish path provenance,
+reachability explanation, competing-path diagnosis, or compatibility. Because
+A6 offered no material resource advantage while A5 retains those diagnostic
+paths, A5 remains preferred. See
+[a6-comparison-report.md](a6-comparison-report.md).

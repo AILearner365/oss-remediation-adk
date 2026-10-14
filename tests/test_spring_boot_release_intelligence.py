@@ -9,7 +9,9 @@ from spring_boot_release_intelligence.osv import OsvClient, advisory_verdict, co
 from spring_boot_release_intelligence.validation import check, equality_check, evaluate
 from spring_boot_release_intelligence.maven import parse_tgf
 from spring_boot_release_intelligence.metadata_maven import (
-    MetadataOnlyMavenResolver, classify_repository_delta, transfer_metrics)
+    COLLECT_GOAL, CollectMavenResolver, MetadataOnlyMavenResolver,
+    classify_repository_delta, parse_collect, transfer_metrics)
+from spring_boot_release_intelligence.a6_experiment import dependency_selection
 
 
 class OfflineIntelligenceTests(unittest.TestCase):
@@ -107,6 +109,20 @@ class OfflineIntelligenceTests(unittest.TestCase):
         self.assertEqual(result["selected_artifacts"]["org.example:target"], "3")
         self.assertEqual(result["target_paths"]["org.example:target"], [[
             "example:app:1", "org.example:middle:2", "org.example:target:3"]])
+        self.assertEqual(result["selected_records"][2], {
+            "group_id": "org.example", "artifact_id": "target", "type": "jar",
+            "classifier": None, "version": "3", "scope": "runtime",
+            "coordinate": "org.example:target"})
+
+    def test_tgf_parser_preserves_classifier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tree = Path(directory) / "tree.tgf"
+            tree.write_text(
+                "1 example:app:jar:1\n"
+                "2 org.example:native:jar:linux-x86_64:3:runtime\n#\n"
+                "1 2 runtime\n", encoding="utf-8")
+            result = parse_tgf(tree, [])
+        self.assertEqual(result["selected_records"][1]["classifier"], "linux-x86_64")
 
     def test_repository_inventory_separates_dependency_and_plugin_jars(self):
         after = {
@@ -139,6 +155,57 @@ class OfflineIntelligenceTests(unittest.TestCase):
         self.assertEqual(
             PLUGIN_GOAL,
             "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree")
+
+    def test_collect_parser_preserves_selected_artifact_fields_without_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "collect.txt"
+            output.write_text(
+                "The following files have been resolved:\n"
+                "   org.example:plain:jar:2.0:compile\n"
+                "   org.example:native:jar:linux-x86_64:3.0:runtime\n",
+                encoding="utf-8")
+            result = parse_collect(output, ["org.example:plain"])
+        self.assertEqual(result["selected_artifacts"], {
+            "org.example:plain": "2.0", "org.example:native": "3.0"})
+        self.assertEqual(result["selected_records"][1]["classifier"], "linux-x86_64")
+        self.assertEqual(result["target_presence"], {"org.example:plain": True})
+        self.assertFalse(result["preserves_dependency_paths"])
+        self.assertEqual(result["target_paths"], {"org.example:plain": []})
+
+    def test_collect_parser_rejects_incomplete_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "collect.txt"
+            output.write_text("BUILD SUCCESS\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                parse_collect(output, [])
+
+    def test_collect_parser_accepts_explicit_empty_collection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "collect.txt"
+            output.write_text(
+                "The following files have been resolved:\n   none\n",
+                encoding="utf-8")
+            result = parse_collect(output, [])
+        self.assertTrue(result["collection_complete"])
+        self.assertEqual(result["selected_artifacts"], {})
+
+    def test_a6_command_is_pinned_and_uses_isolated_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            resolver = CollectMavenResolver(root / "work", root / "repo")
+            self.assertEqual(resolver.local_repository, root / "repo")
+            self.assertFalse(resolver.preserves_paths)
+        self.assertEqual(
+            COLLECT_GOAL,
+            "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:collect")
+
+    def test_dependency_selection_excludes_only_graph_root(self):
+        record = {"selected_artifacts": {
+            "experiment:app": "1", "experiment:library": "1",
+            "org.example:dependency": "2"},
+            "root_artifacts": ["experiment:app"]}
+        self.assertEqual(dependency_selection(record), {
+            "experiment:library": "1", "org.example:dependency": "2"})
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from .maven_scenarios import HEADER, TOMCAT, _dependency, _record
 
 
 PLUGIN_GOAL = "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree"
+COLLECT_GOAL = "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:collect"
 _BINARY_SUFFIXES = {".jar", ".war", ".zip", ".class", ".so", ".dll", ".dylib", ".exe"}
 _SIZE = re.compile(r"\((\d+(?:\.\d+)?)\s*([kMGT]?B)\s+at")
 
@@ -92,6 +93,63 @@ def transfer_metrics(log: str) -> dict:
             "http_request_count_reason": "Maven CLI does not expose transport-level request counts"}
 
 
+def parse_collect(output: Path, targets: list[str]) -> dict:
+    """Parse dependency:collect's mediated artifact list.
+
+    Maven formats entries as ``g:a:type:version:scope`` or
+    ``g:a:type:classifier:version:scope``.  The goal intentionally provides no
+    graph edges; A6 therefore exposes complete selected records and explicit
+    target presence, but never manufactures paths.
+    """
+    text = output.read_text(encoding="utf-8")
+    marker = "The following files have been resolved:"
+    if marker not in text:
+        raise ValueError("dependency:collect output is missing its resolved-files marker")
+    records = []
+    malformed = []
+    for raw in text.split(marker, 1)[1].splitlines():
+        value = raw.strip()
+        if not value:
+            continue
+        if value == "none":
+            continue
+        parts = value.split(":")
+        if len(parts) == 5:
+            group, artifact, artifact_type, version, scope = parts
+            classifier = None
+        elif len(parts) == 6:
+            group, artifact, artifact_type, classifier, version, scope = parts
+        else:
+            malformed.append(value)
+            continue
+        records.append({"group_id": group, "artifact_id": artifact,
+                        "type": artifact_type, "classifier": classifier,
+                        "version": version, "scope": scope,
+                        "coordinate": f"{group}:{artifact}"})
+    if malformed:
+        raise ValueError(f"unrecognized dependency:collect records: {malformed}")
+    selected = {}
+    conflicts = []
+    for record in records:
+        coordinate = record["coordinate"]
+        previous = selected.setdefault(coordinate, record["version"])
+        if previous != record["version"]:
+            conflicts.append({"coordinate": coordinate,
+                              "versions": sorted({previous, record["version"]})})
+    if conflicts:
+        raise ValueError(f"contradictory selected versions: {conflicts}")
+    target_paths = {target: [] for target in targets}
+    first = targets[0] if targets else None
+    return {
+        "paths": [], "target_paths": target_paths,
+        "selected_version": selected.get(first) if first else None,
+        "selected_artifacts": selected, "selected_records": records,
+        "target_presence": {target: target in selected for target in targets},
+        "collection_complete": True, "malformed_records": malformed,
+        "preserves_dependency_paths": False, "root_artifacts": [],
+    }
+
+
 class MetadataOnlyMavenResolver:
     """Maven-native graph collection with an isolated local repository.
 
@@ -154,7 +212,7 @@ class MetadataOnlyMavenResolver:
         log = log_file.read_text(encoding="utf-8")
         if process.returncode or not output.exists():
             raise RuntimeError(f"Maven metadata collection failed ({process.returncode}):\n{log[-4000:]}")
-        parsed = parse_tgf(output, targets)
+        parsed = self.parse_output(output, targets)
         after = repository_snapshot(self.local_repository)
         final_bytes = sum(after.values())
         inventory = classify_repository_delta(before, after, parsed["selected_artifacts"])
@@ -179,7 +237,11 @@ class MetadataOnlyMavenResolver:
         })
         return parsed
 
-    def resolve_multi_module(self) -> dict:
+    @staticmethod
+    def parse_output(output: Path, targets: list[str]) -> dict:
+        return parse_tgf(output, targets)
+
+    def _write_multi_module_project(self) -> Path:
         root = self.work_dir / "scenario-multi-module"
         library, app = root / "library", root / "app"
         library.mkdir(parents=True, exist_ok=True)
@@ -199,6 +261,10 @@ class MetadataOnlyMavenResolver:
         (root / "pom.xml").write_text(root_pom, encoding="utf-8")
         (library / "pom.xml").write_text(library_pom, encoding="utf-8")
         (app / "pom.xml").write_text(app_pom, encoding="utf-8")
+        return root
+
+    def resolve_multi_module(self) -> dict:
+        root = self._write_multi_module_project()
         output = (root / "app-dependency-tree.tgf").resolve()
         command = ["mvn", "-B", f"-Dmaven.repo.local={self.local_repository.resolve()}",
                    "-f", str((root / "pom.xml").resolve()), "-pl", "app", "-am",
@@ -214,3 +280,54 @@ class MetadataOnlyMavenResolver:
             and observation["storage"]["no_application_dependency_jars"])
         record["passed"] = all(record["checks"].values())
         return record
+
+
+class CollectMavenResolver(MetadataOnlyMavenResolver):
+    """A6 flat selected-artifact collection using Maven's collect goal."""
+
+    preserves_paths = False
+
+    @staticmethod
+    def parse_output(output: Path, targets: list[str]) -> dict:
+        return parse_collect(output, targets)
+
+    def resolve_pom(self, name: str, pom: str, targets: list[str],
+                    profiles: list[str] | None = None) -> dict:
+        project = self.work_dir / name
+        project.mkdir(parents=True, exist_ok=True)
+        (project / "pom.xml").write_text(pom, encoding="utf-8")
+        output = (project / "dependency-collect.txt").resolve()
+        command = ["mvn", "-B", f"-Dmaven.repo.local={self.local_repository.resolve()}",
+                   COLLECT_GOAL, f"-DoutputFile={output}"]
+        if self.quiet:
+            command.insert(2, "-q")
+        if profiles:
+            command.append(f"-P{','.join(profiles)}")
+        return self._execute(name, project, output, command, targets)
+
+    def resolve_multi_module(self) -> dict:
+        root = self._write_multi_module_project()
+        output = (root / "app-dependency-collect.txt").resolve()
+        command = ["mvn", "-B", f"-Dmaven.repo.local={self.local_repository.resolve()}",
+                   "-f", str((root / "pom.xml").resolve()), "-pl", "app", "-am",
+                   COLLECT_GOAL, f"-DoutputFile={output}"]
+        if self.quiet:
+            command.insert(2, "-q")
+        observation = self._execute("scenario-multi-module", root, output,
+                                    command, [TOMCAT])
+        expected = {"selected_version": "10.1.31",
+                    "selected_present": True,
+                    "reactor_library_present": True}
+        checks = {
+            "selected_version": observation["selected_version"] == "10.1.31",
+            "selected_present": observation["target_presence"][TOMCAT],
+            "reactor_library_present": observation["selected_artifacts"].get(
+                "experiment:library") == "1",
+            "collection_complete": observation["collection_complete"],
+            "reactor_collection_without_install": (
+                not list(root.rglob("*.jar"))
+                and observation["storage"]["no_application_dependency_jars"]),
+            "command_succeeded": observation["returncode"] == 0,
+        }
+        return {"expected": expected, "observation": observation,
+                "checks": checks, "passed": all(checks.values())}

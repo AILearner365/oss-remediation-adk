@@ -63,6 +63,29 @@ JARs,” not “no JARs.”
 OSV conclusions reuse the frozen v2 advisory evidence so A2/A5 classification
 differences cannot be caused by source mutation.
 
+## A6 — Maven dependency:collect + BOM + OSV
+
+A6 invokes pinned
+`org.apache.maven.plugins:maven-dependency-plugin:3.8.1:collect` with a distinct
+isolated `maven.repo.local`. Its output is parsed as Maven's flat, mediated
+`groupId:artifactId:type[:classifier]:version:scope` records. Acceptance requires
+the resolved-files marker, no malformed or contradictory records, complete set
+and version equality with A5, and expected target presence/absence. A successful
+exit alone is insufficient.
+
+A6 intentionally does not manufacture paths. A reactor command uses
+`-pl app -am` and proved that the application set includes the reactor library
+and its dependency-management-adjusted transitive version without `install`.
+The original C1–C4 and seven expanded scenarios all passed selection checks.
+A6 matched A5 on 32/32 complete-set/version assertions, 16/16
+type/classifier/scope/version record assertions, and 64/64 frozen per-artifact
+vulnerability result assertions.
+
+The empty-project control exposed Maven's literal `none` sentinel, which is now
+handled as a verified empty collection. It also independently attributed the
+same 50 JARs (14,912,596 bytes) to plugin/bootstrap operation and found no
+application dependency JARs or unexplained binaries.
+
 ## Classification safeguards
 
 Vulnerability verdicts are `ADDRESSED`, `STILL_AFFECTED`, `UNKNOWN`, or

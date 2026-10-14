@@ -33,6 +33,7 @@ python3 -m unittest tests.test_spring_boot_release_intelligence_contract \
 
 python3 -m spring_boot_release_intelligence.cli run-live \
   --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261013-v2
+```
 
 A5 uses disposable cache roots; never point these commands at `~/.m2`:
 
@@ -58,6 +59,36 @@ The A5 run repeats C1–C4 and all seven expanded cases for fresh and warm A2/A5
 passes. The zero-dependency control is required because
 `commons-logging:commons-logging:1.2` occurs in one application graph and in
 the plugin bootstrap closure; filename matching alone would misclassify it.
+
+A6 repeats the complete workload for independently isolated A2, A5 and A6
+caches. Its storage controls and network telemetry use additional empty cache
+roots:
+
+```bash
+A6_CACHE_ROOT="$(mktemp -d /tmp/sbri-a6-main.XXXXXX)"
+python3 -m spring_boot_release_intelligence.cli run-a6 \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6 \
+  --cache-root "$A6_CACHE_ROOT" \
+  --reference docs/experiments/spring-boot-release-intelligence/evidence/run-20261013-v2/results-v2.json
+
+A6_CONTROL_CACHE="$(mktemp -d /tmp/sbri-a6-control.XXXXXX)"
+python3 -m spring_boot_release_intelligence.cli qualify-a6-storage \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/results-a6.json \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/a6-qualification \
+  --cache-root "$A6_CONTROL_CACHE"
+
+A6_TELEMETRY_CACHE="$(mktemp -d /tmp/sbri-a6-telemetry.XXXXXX)"
+python3 -m spring_boot_release_intelligence.cli capture-a6-telemetry \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/results-a6.json \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6 \
+  --cache-root "$A6_TELEMETRY_CACHE"
+
+python3 -m spring_boot_release_intelligence.cli generate-a6-charts \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/results-a6.json \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/charts
+
+python3 -m spring_boot_release_intelligence.cli finalize-a6-evidence \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/results-a6.json
 ```
 
 Prerequisites: Python 3, Java, Maven and network access to Maven Central, OSV
