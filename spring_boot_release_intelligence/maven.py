@@ -23,10 +23,49 @@ POM = """<project xmlns="http://maven.apache.org/POM/4.0.0">
 """
 
 
+def parse_tgf(output: Path, targets: list[str]) -> dict:
+    node_lines, edge_lines = output.read_text(encoding="utf-8").split("#", 1)
+    nodes = {}
+    for line in node_lines.splitlines():
+        if line.strip():
+            node_id, coordinate = line.split(" ", 1)
+            nodes[node_id] = coordinate
+    edges = {}
+    children = set()
+    for line in edge_lines.splitlines():
+        if line.strip():
+            parent, child, *_ = line.split()
+            edges.setdefault(parent, []).append(child)
+            children.add(child)
+    paths = {target: [] for target in targets}
+    selected = {}
+    roots = [node_id for node_id in nodes if node_id not in children]
+    queue = deque((root, []) for root in roots)
+    while queue:
+        node_id, path = queue.popleft()
+        parts = nodes[node_id].split(":")
+        coordinate = ":".join(parts[:2])
+        # Maven TGF is g:a:type:version[:scope].
+        current = path + [f"{coordinate}:{parts[3]}"]
+        selected.setdefault(coordinate, parts[3])
+        if coordinate in paths:
+            paths[coordinate].append(current)
+        for child in edges.get(node_id, []):
+            queue.append((child, current))
+    primary_paths = paths[targets[0]] if targets else []
+    return {"paths": primary_paths, "target_paths": paths,
+            "selected_version": (primary_paths[0][-1].rsplit(":", 1)[-1]
+                                 if primary_paths else None),
+            "selected_artifacts": selected}
+
+
 class MavenResolver:
-    def __init__(self, work_dir: Path):
+    def __init__(self, work_dir: Path, local_repository: Path | None = None):
         self.work_dir = work_dir
         self.work_dir.mkdir(parents=True, exist_ok=True)
+        self.local_repository = local_repository
+        if local_repository:
+            local_repository.mkdir(parents=True, exist_ok=True)
 
     def resolve(self, boot: str, tomcat_override: str | None = None,
                 targets: list[str] | None = None) -> dict:
@@ -49,6 +88,8 @@ class MavenResolver:
         output = (project / "dependency-tree.json").resolve()
         command = ["mvn", "-B", "-q", "dependency:tree", "-DoutputType=tgf",
                    f"-DoutputFile={output}"]
+        if self.local_repository:
+            command.insert(3, f"-Dmaven.repo.local={self.local_repository.resolve()}")
         if profiles:
             command.append(f"-P{','.join(profiles)}")
         return self._execute(project, output, command, targets)
@@ -62,39 +103,8 @@ class MavenResolver:
         elapsed = time.monotonic() - started
         if completed.returncode or not output.exists():
             raise RuntimeError(f"Maven dependency:tree failed ({completed.returncode}):\n{completed.stdout}")
-        node_lines, edge_lines = output.read_text(encoding="utf-8").split("#", 1)
-        nodes = {}
-        for line in node_lines.splitlines():
-            if line.strip():
-                node_id, coordinate = line.split(" ", 1)
-                nodes[node_id] = coordinate
-        edges = {}
-        children = set()
-        for line in edge_lines.splitlines():
-            if line.strip():
-                parent, child, *_ = line.split()
-                edges.setdefault(parent, []).append(child)
-                children.add(child)
-        paths = {target: [] for target in targets}
-        selected = {}
-        roots = [node_id for node_id in nodes if node_id not in children]
-        queue = deque((root, []) for root in roots)
-        while queue:
-            node_id, path = queue.popleft()
-            parts = nodes[node_id].split(":")
-            coordinate = ":".join(parts[:2])
-            # Maven TGF is g:a:type:version[:scope].
-            current = path + [f"{coordinate}:{parts[3]}"]
-            selected.setdefault(coordinate, parts[3])
-            if coordinate in paths:
-                paths[coordinate].append(current)
-            for child in edges.get(node_id, []):
-                queue.append((child, current))
-        primary_paths = paths[targets[0]] if targets else []
-        return {"paths": primary_paths, "target_paths": paths,
-                "selected_version": (primary_paths[0][-1].rsplit(":", 1)[-1]
-                                     if primary_paths else None),
-                "selected_artifacts": selected,
-                "command": command, "elapsed_seconds": elapsed,
-                "returncode": completed.returncode,
-                "stdout": completed.stdout[-4000:], "tree_file": str(output)}
+        parsed = parse_tgf(output, targets)
+        parsed.update({"command": command, "elapsed_seconds": elapsed,
+                       "returncode": completed.returncode,
+                       "stdout": completed.stdout[-4000:], "tree_file": str(output)})
+        return parsed

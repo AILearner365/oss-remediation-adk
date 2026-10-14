@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">A2 vs A5 expanded Maven scenario accuracy</text>
+<line x1="90" y1="385" x2="865" y2="385" stroke="#334155"/>
+<text x="145.35714285714286" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">applicable_profile_active</text>
+<rect x="103.83928571428572" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="123.09821428571429" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="145.35714285714286" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="164.61607142857144" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="256.07142857142856" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">applicable_profile_inactive</text>
+<rect x="214.55357142857142" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="233.8125" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="256.07142857142856" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="275.3303571428571" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="366.7857142857143" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">dependency_exclusion</text>
+<rect x="325.2678571428571" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="344.52678571428567" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="366.7857142857142" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="386.0446428571428" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="477.5" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">dependency_management_override</text>
+<rect x="435.9821428571429" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="455.24107142857144" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="477.5" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="496.75892857142856" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="588.2142857142857" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">direct_override</text>
+<rect x="546.6964285714286" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="565.9553571428571" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="588.2142857142857" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="607.4732142857142" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="698.9285714285714" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">multi_module</text>
+<rect x="657.4107142857143" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="676.6696428571429" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="698.9285714285714" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="718.1875" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<text x="809.6428571428571" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">transitive_mediation</text>
+<rect x="768.125" y="65.0" width="38.51785714285714" height="320.0" fill="#2563eb"/>
+<text x="787.3839285714286" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="809.6428571428571" y="65.0" width="38.51785714285714" height="320.0" fill="#16a34a"/>
+<text x="828.9017857142857" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">1</text>
+<rect x="90" y="438" width="13" height="13" fill="#2563eb"/>
+<text x="108" y="449" font-family="sans-serif" font-size="12">A2</text>
+<rect x="240" y="438" width="13" height="13" fill="#16a34a"/>
+<text x="258" y="449" font-family="sans-serif" font-size="12">A5</text>
+<text x="90" y="470" font-family="sans-serif" font-size="11" fill="#475569">1 = expected version and path checks passed</text>
+</svg>

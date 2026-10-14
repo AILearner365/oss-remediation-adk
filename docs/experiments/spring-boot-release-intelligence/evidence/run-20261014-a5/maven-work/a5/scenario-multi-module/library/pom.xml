@@ -1,0 +1,3 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+<modelVersion>4.0.0</modelVersion><parent><groupId>experiment</groupId><artifactId>multi-parent</artifactId><version>1</version></parent><groupId>experiment</groupId>
+<artifactId>library</artifactId><version>1</version><dependencies><dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-core</artifactId><version>10.1.30</version></dependency></dependencies></project>

@@ -65,7 +65,9 @@ def run_scenarios(resolver: MavenResolver) -> dict:
     cases["dependency_exclusion"] = _record(
         resolver.resolve_pom("scenario-exclusion", excluded, [TOMCAT]),
         {"selected_version": None, "path_contains": None})
-    cases["multi_module"] = _multi_module(resolver)
+    cases["multi_module"] = (resolver.resolve_multi_module()
+                             if hasattr(resolver, "resolve_multi_module")
+                             else _multi_module(resolver))
     return cases
 
 
@@ -100,7 +102,10 @@ def _multi_module(resolver: MavenResolver) -> dict:
     (library / "pom.xml").write_text(library_pom, encoding="utf-8")
     (app / "pom.xml").write_text(app_pom, encoding="utf-8")
     started = time.monotonic()
-    install = subprocess.run(["mvn", "-B", "-q", "install", "-DskipTests"], cwd=root,
+    install_command = ["mvn", "-B", "-q", "install", "-DskipTests"]
+    if resolver.local_repository:
+        install_command.insert(3, f"-Dmaven.repo.local={resolver.local_repository.resolve()}")
+    install = subprocess.run(install_command, cwd=root,
                              text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              timeout=180)
     observation = resolver.resolve_pom("scenario-multi-module/app", app_pom, [TOMCAT])

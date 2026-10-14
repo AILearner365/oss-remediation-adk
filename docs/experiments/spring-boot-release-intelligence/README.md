@@ -61,6 +61,15 @@ After correctness on the four cases, replay 10, 50, and 100 unique vulnerability
 ### Exit / next decision
 Compare **hosted-data-only**, **hosted + small Maven fallback**, and **pre-indexed Boot release metadata** on correctness, coverage, runtime and disk usage. Choose the least complex method satisfying evidence completeness; leave actual remediation and new-vulnerability scanning outside this feasibility scope.
 
+### Executed A5 extension
+
+The 2026-10-14 extension evaluated isolated Maven metadata-only graph collection
+against a freshly rerun A2 reference. A5 matched all tested versions, paths and
+frozen OSV classifications without downloading application dependency JARs;
+plugin/bootstrap JARs remain required. See
+[a5-comparison-report.md](a5-comparison-report.md) and
+`evidence/run-20261014-a5/a5-charts.html`.
+
 Sources:
 - https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html
 - https://docs.deps.dev/api/v3/

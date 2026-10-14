@@ -1,0 +1,374 @@
+{
+  "a5_cells": [
+    {
+      "case": "C1",
+      "status": "PROVEN"
+    },
+    {
+      "case": "C2",
+      "status": "PROVEN"
+    },
+    {
+      "case": "C3",
+      "status": "PROVEN"
+    },
+    {
+      "case": "C4",
+      "status": "PROVEN"
+    }
+  ],
+  "a5_expanded_cells": [
+    {
+      "case": "transitive_mediation",
+      "status": "PROVEN"
+    },
+    {
+      "case": "direct_override",
+      "status": "PROVEN"
+    },
+    {
+      "case": "dependency_management_override",
+      "status": "PROVEN"
+    },
+    {
+      "case": "applicable_profile_inactive",
+      "status": "PROVEN"
+    },
+    {
+      "case": "applicable_profile_active",
+      "status": "PROVEN"
+    },
+    {
+      "case": "dependency_exclusion",
+      "status": "PROVEN"
+    },
+    {
+      "case": "multi_module",
+      "status": "PROVEN"
+    }
+  ],
+  "accuracy": {
+    "checks": [
+      {
+        "case": "maven.3.3.4.versions",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.4.paths",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.5.versions",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.5.paths",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.6.versions",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.6.paths",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.7.versions",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.7.paths",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.8.versions",
+        "passed": true
+      },
+      {
+        "case": "maven.3.3.8.paths",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.5.versions",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.5.paths",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.6.versions",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.6.paths",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.7.versions",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.7.paths",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.8.versions",
+        "passed": true
+      },
+      {
+        "case": "overrides.3.3.8.paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.transitive_mediation.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.transitive_mediation.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.direct_override.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.direct_override.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.dependency_management_override.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.dependency_management_override.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.applicable_profile_inactive.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.applicable_profile_inactive.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.applicable_profile_active.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.applicable_profile_active.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.dependency_exclusion.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.dependency_exclusion.target_paths",
+        "passed": true
+      },
+      {
+        "case": "scenarios.multi_module.selected_version",
+        "passed": true
+      },
+      {
+        "case": "scenarios.multi_module.target_paths",
+        "passed": true
+      }
+    ],
+    "first_material_difference": null,
+    "passed": true,
+    "passed_count": 32,
+    "total_count": 32
+  },
+  "network_telemetry": {
+    "execution_condition": "non-quiet isolated A5 pass; excluded from fair timing",
+    "fresh_transfers": {
+      "http_request_count": null,
+      "maven_reported_bytes": 21091327,
+      "reason": "Maven CLI exposes transfer events, not HTTP request counts",
+      "successful_transfer_events": 510,
+      "transfer_attempt_events": 510
+    },
+    "warm_transfers": {
+      "http_request_count": null,
+      "maven_reported_bytes": 0,
+      "reason": "Maven CLI exposes transfer events, not HTTP request counts",
+      "successful_transfer_events": 0,
+      "transfer_attempt_events": 0
+    }
+  },
+  "performance": {
+    "A2": {
+      "fresh": {
+        "elapsed_seconds": 218.6522195159996,
+        "storage": {
+          "binary_summary": {
+            "application_dependency_jars": {
+              "bytes": 4725608,
+              "count": 7
+            },
+            "other_binary": {
+              "bytes": 0,
+              "count": 0
+            },
+            "plugin_bootstrap_jars": {
+              "bytes": 48370649,
+              "count": 129
+            }
+          },
+          "cache_bytes_after": 61247561,
+          "cache_bytes_before": 0,
+          "no_application_dependency_jars": false,
+          "peak_cache_bytes": 61247561,
+          "transfers": {
+            "http_request_count": null,
+            "maven_reported_bytes": null,
+            "reason": "A2 quiet Maven output does not expose transport events",
+            "successful_transfer_events": null,
+            "transfer_attempt_events": null
+          }
+        }
+      },
+      "warm": {
+        "elapsed_seconds": 161.8627107299999,
+        "storage": {
+          "binary_summary": {
+            "application_dependency_jars": {
+              "bytes": 0,
+              "count": 0
+            },
+            "other_binary": {
+              "bytes": 0,
+              "count": 0
+            },
+            "plugin_bootstrap_jars": {
+              "bytes": 0,
+              "count": 0
+            }
+          },
+          "cache_bytes_after": 61247561,
+          "cache_bytes_before": 61247561,
+          "no_application_dependency_jars": true,
+          "peak_cache_bytes": 61247561,
+          "transfers": {
+            "http_request_count": null,
+            "maven_reported_bytes": null,
+            "reason": "A2 quiet Maven output does not expose transport events",
+            "successful_transfer_events": null,
+            "transfer_attempt_events": null
+          }
+        }
+      }
+    },
+    "A5": {
+      "fresh": {
+        "elapsed_seconds": 183.47217630600016,
+        "storage": {
+          "binary_summary": {
+            "application_dependency_jars": {
+              "bytes": 0,
+              "count": 0
+            },
+            "other_binary": {
+              "bytes": 0,
+              "count": 0
+            },
+            "plugin_bootstrap_jars": {
+              "bytes": 14912596,
+              "count": 50
+            }
+          },
+          "cache_bytes_after": 21134449,
+          "cache_bytes_before": 0,
+          "no_application_dependency_jars": true,
+          "peak_cache_bytes": 21134449,
+          "transfers": {
+            "http_request_count": null,
+            "maven_reported_bytes": 0,
+            "reason": "Maven CLI exposes transfer events, not HTTP request counts",
+            "successful_transfer_events": 0,
+            "transfer_attempt_events": 0
+          }
+        }
+      },
+      "warm": {
+        "elapsed_seconds": 162.45314675300006,
+        "storage": {
+          "binary_summary": {
+            "application_dependency_jars": {
+              "bytes": 0,
+              "count": 0
+            },
+            "other_binary": {
+              "bytes": 0,
+              "count": 0
+            },
+            "plugin_bootstrap_jars": {
+              "bytes": 0,
+              "count": 0
+            }
+          },
+          "cache_bytes_after": 21134449,
+          "cache_bytes_before": 21134449,
+          "no_application_dependency_jars": true,
+          "peak_cache_bytes": 21134449,
+          "transfers": {
+            "http_request_count": null,
+            "maven_reported_bytes": 0,
+            "reason": "Maven CLI exposes transfer events, not HTTP request counts",
+            "successful_transfer_events": 0,
+            "transfer_attempt_events": 0
+          }
+        }
+      }
+    }
+  },
+  "release_summaries": {
+    "3.3.5": {
+      "absent_dependencies": 0,
+      "addressed": 2,
+      "new": 0,
+      "remaining": 39,
+      "unchanged_dependencies": 1,
+      "unknown": 0
+    },
+    "3.3.6": {
+      "absent_dependencies": 0,
+      "addressed": 2,
+      "new": 0,
+      "remaining": 39,
+      "unchanged_dependencies": 1,
+      "unknown": 0
+    },
+    "3.3.7": {
+      "absent_dependencies": 0,
+      "addressed": 4,
+      "new": 0,
+      "remaining": 37,
+      "unchanged_dependencies": 1,
+      "unknown": 0
+    },
+    "3.3.8": {
+      "absent_dependencies": 0,
+      "addressed": 6,
+      "new": 0,
+      "remaining": 35,
+      "unchanged_dependencies": 1,
+      "unknown": 0
+    }
+  },
+  "storage_qualification": {
+    "qualified_no_application_dependency_jars": true,
+    "reclassified_overlap_paths": [
+      "commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
+    ],
+    "unexplained_binary_paths": []
+  },
+  "vulnerability_accuracy": {
+    "matches_frozen_v2": true,
+    "source": "run-20261013-v2/results-v2.json"
+  }
+}

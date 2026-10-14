@@ -43,6 +43,26 @@ Boot metadata for management provenance, OSV for advisory applicability, and
 deps.dev only for hosted corroboration. Integration reuses results and does not
 convert weaker hosted inference into application evidence.
 
+## A5 — isolated Maven metadata-only collection + BOM + OSV
+
+A5 invokes the pinned Maven-native
+`org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree` collector with a
+dedicated `maven.repo.local`. `dependency:collect` was rejected because its
+flat output did not preserve paths; a direct Resolver integration was not chosen
+because Maven's existing graph builder met the experiment needs with less model-
+building/bootstrap code. A5 never implements mediation itself.
+
+The same Boot releases, overrides and seven expanded fixtures were executed.
+For multi-module input, A5 uses one reactor graph command with `-pl app -am`
+instead of installing module JARs. An independent empty-project control
+attributes the pinned plugin's binary closure. A5 downloaded no selected
+application-dependency JARs, but it did download 50 plugin/bootstrap JARs
+(14,912,596 bytes); therefore the accurate claim is “no application dependency
+JARs,” not “no JARs.”
+
+OSV conclusions reuse the frozen v2 advisory evidence so A2/A5 classification
+differences cannot be caused by source mutation.
+
 ## Classification safeguards
 
 Vulnerability verdicts are `ADDRESSED`, `STILL_AFFECTED`, `UNKNOWN`, or

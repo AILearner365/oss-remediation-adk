@@ -1,0 +1,587 @@
+{
+  "file_count": 116,
+  "files": [
+    {
+      "bytes": 1071,
+      "path": "README.md",
+      "sha256": "61fd72e2584d961ef09488107dacae0fec43862634a299508a65708a59be8266"
+    },
+    {
+      "bytes": 976,
+      "path": "a5-charts.html",
+      "sha256": "6a666dd5f592bec5e9d2a52f493183c6cdaa8941fb5215be6c196c1cd1dbc2a6"
+    },
+    {
+      "bytes": 63466,
+      "path": "bootstrap-control/logs/project.log",
+      "sha256": "31429a2ea90b4ecd6abc6fecf9915c437488f9dcbd9136c3b706f5c8a85a9d72"
+    },
+    {
+      "bytes": 47,
+      "path": "bootstrap-control/project/dependency-tree.tgf",
+      "sha256": "b57c7f1c0ab3c5a1d5896c1b62c690c40bca123593e50bca252048a9bc9b799f"
+    },
+    {
+      "bytes": 188,
+      "path": "bootstrap-control/project/pom.xml",
+      "sha256": "d0409b9eef61706e90cb4aa3be137c879a565ee80b85044762d792679000c38d"
+    },
+    {
+      "bytes": 119973,
+      "path": "bootstrap-control.json",
+      "sha256": "fc72152f940ce1367b87de8d32d7fb25fe091ef6fa5e5b9e46b6bff37051a114"
+    },
+    {
+      "bytes": 4735,
+      "path": "charts/01-capability-coverage.svg",
+      "sha256": "9be9e3a48362fcc43f4449c8488f636bdb9673c8109303407ae342e944321a3f"
+    },
+    {
+      "bytes": 4372,
+      "path": "charts/02-expanded-accuracy.svg",
+      "sha256": "3fdb2ab9c74b46a9b49ed3bd3180cf090a325b3ebc4a95090a2b6fe74b0aa186"
+    },
+    {
+      "bytes": 1669,
+      "path": "charts/03-addressed-by-release.svg",
+      "sha256": "3737aebfe201d16d906084307d566aee7ae5e987f8eac04d6322e62e8ae6979a"
+    },
+    {
+      "bytes": 3313,
+      "path": "charts/04-findings-by-release.svg",
+      "sha256": "d45994de4aabf27733ad7a79445ee3ca2ed8e7ad33cd01d6edf1ad0473912725"
+    },
+    {
+      "bytes": 1726,
+      "path": "charts/05-fresh-warm-time.svg",
+      "sha256": "b930c8a3c7fecb3b631608459bdfe653a563077e46d3b0e57f51e0b3587a030d"
+    },
+    {
+      "bytes": 2343,
+      "path": "charts/06-cache-and-downloads.svg",
+      "sha256": "8ed96e52138302ac32073a6fc4e56d67feabe76c2c85599d50b947ddfda0edfd"
+    },
+    {
+      "bytes": 1241,
+      "path": "charts/07-network-usage.svg",
+      "sha256": "d8605829b9f5835e29c40a089a56c68fb668e9fe287143efaa4a8af6b9e35170"
+    },
+    {
+      "bytes": 953,
+      "path": "execution-attempts.json",
+      "sha256": "db270468c555558e6c6a3c789e56d7b5bd01bc270ccf28fac7ec55ace6803de4"
+    },
+    {
+      "bytes": 3346,
+      "path": "maven-work/a2/boot-3.3.4/dependency-tree.json",
+      "sha256": "7648d431a98aaafdec9205112cc426e5c3281d74c3a3633a699e220ac709f003"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a2/boot-3.3.4/pom.xml",
+      "sha256": "2a1c50c2ee72387975b127cde2c285ff9c119bd53d6a0eb257ad642d706fc197"
+    },
+    {
+      "bytes": 3355,
+      "path": "maven-work/a2/boot-3.3.5/dependency-tree.json",
+      "sha256": "081f3fc47175007cfa8bf3852939c4b48e449b91a29be55d1362b9cbb527dd5c"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a2/boot-3.3.5/pom.xml",
+      "sha256": "a70533c71f0678ab1796916fda41bed8a3e6961fe80fa5e41e386fdc2b571332"
+    },
+    {
+      "bytes": 3365,
+      "path": "maven-work/a2/boot-3.3.5-override-10.1.30/dependency-tree.json",
+      "sha256": "e9c9421cff87661cf5d46607f9ff371b1dce3b261827aa1e06293321b376e826"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a2/boot-3.3.5-override-10.1.30/pom.xml",
+      "sha256": "e1e24d4217a1ca93aebb74d54b829d968ce1f425271e288afe4b2e2e66a34fba"
+    },
+    {
+      "bytes": 3354,
+      "path": "maven-work/a2/boot-3.3.6/dependency-tree.json",
+      "sha256": "00a9321e98261eb67c5afc5ffb7fb289739f99192f9b5a1ed89cf7ce25f4f7fd"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a2/boot-3.3.6/pom.xml",
+      "sha256": "9e1a491d00537014837f48da7a5ce1f282c76ce3f74d4ea8e99deca2cada33fc"
+    },
+    {
+      "bytes": 3358,
+      "path": "maven-work/a2/boot-3.3.6-override-10.1.30/dependency-tree.json",
+      "sha256": "dbfc5343f16f6a839eef32e04b17b2c7b6106c8b8c534ade04e844a2a2ccb1bd"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a2/boot-3.3.6-override-10.1.30/pom.xml",
+      "sha256": "910e03de1fa1962c45d7ebd687fb22de0d098c82d67099b77d75da71abb4b40c"
+    },
+    {
+      "bytes": 3348,
+      "path": "maven-work/a2/boot-3.3.7/dependency-tree.json",
+      "sha256": "aa3cf1580475c629fa241880cd138625b7fece7e3cee0ac4d27cfaaf556ef61f"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a2/boot-3.3.7/pom.xml",
+      "sha256": "5d421ada58317d7a2e5f0d327ec2cf3b91c4d692b1ca26893c4156b8386f8c6e"
+    },
+    {
+      "bytes": 3372,
+      "path": "maven-work/a2/boot-3.3.7-override-10.1.30/dependency-tree.json",
+      "sha256": "78c38c9babdf93000863e70907c4e6f2f81640b8a6ba3843dfe8500fc8e75ae4"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a2/boot-3.3.7-override-10.1.30/pom.xml",
+      "sha256": "c8624bad3bc7cc7da68a7f4e73fefbbd993753d9d24f493a097ada5fb724e285"
+    },
+    {
+      "bytes": 3356,
+      "path": "maven-work/a2/boot-3.3.8/dependency-tree.json",
+      "sha256": "8b5ba2d0f3c4f39d9dfed4d365d7a9b53e88635d07b350e6c293e22ac88ccfc0"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a2/boot-3.3.8/pom.xml",
+      "sha256": "97d41be1eccd9c3a1d51957561f2d7b408fe96e3c5ca25ee2fd0803236d211fd"
+    },
+    {
+      "bytes": 3360,
+      "path": "maven-work/a2/boot-3.3.8-override-10.1.30/dependency-tree.json",
+      "sha256": "c186c2f7fbd30df36407324a9979c49d7cfd6aa27397a6b4dfdf0d03dce08411"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a2/boot-3.3.8-override-10.1.30/pom.xml",
+      "sha256": "149785cb463c2698afaa110bad8c5c0a5b2ab82ded04a5618e371795167b2571"
+    },
+    {
+      "bytes": 3444,
+      "path": "maven-work/a2/scenario-direct/dependency-tree.json",
+      "sha256": "349b15d7d5f1cedb97dca4d7d35c89340c4b547769bc778b701030578ce3bf0e"
+    },
+    {
+      "bytes": 592,
+      "path": "maven-work/a2/scenario-direct/pom.xml",
+      "sha256": "c0d1c4abbf2ed3023e7fd1af491a6bc9d62a03d22289672500e399ba07b24bb7"
+    },
+    {
+      "bytes": 2939,
+      "path": "maven-work/a2/scenario-exclusion/dependency-tree.json",
+      "sha256": "fca49fcf1f40f16302250d65592d7af5ffb1d114364a4ed33b115a136510828e"
+    },
+    {
+      "bytes": 601,
+      "path": "maven-work/a2/scenario-exclusion/pom.xml",
+      "sha256": "0a3217811fa449a63903da758185f18eca80904168a8b4f00cc668cf1b7257e8"
+    },
+    {
+      "bytes": 3349,
+      "path": "maven-work/a2/scenario-managed/dependency-tree.json",
+      "sha256": "7bbea7f2c9fef4a2d68a5c571b9a2e6e312ef7880eee153f3b64052879578773"
+    },
+    {
+      "bytes": 667,
+      "path": "maven-work/a2/scenario-managed/pom.xml",
+      "sha256": "e48cac517034b8059684179422918b77c8468b2a4df1e286d56f0e53a61a6744"
+    },
+    {
+      "bytes": 915,
+      "path": "maven-work/a2/scenario-mediation/dependency-tree.json",
+      "sha256": "5fd3c7c1108d91decb7cf8a6e8ba693110431ce56e2c61252a4f76a2961fd4be"
+    },
+    {
+      "bytes": 448,
+      "path": "maven-work/a2/scenario-mediation/pom.xml",
+      "sha256": "f1d66d2f4fe5d41c9198c1ab48019c429571aa88c0265158770a829195261372"
+    },
+    {
+      "bytes": 311,
+      "path": "maven-work/a2/scenario-multi-module/app/dependency-tree.json",
+      "sha256": "df4e5efa02def7459ddec6524eecae953631e5807e9d65fb014205f183e781df"
+    },
+    {
+      "bytes": 621,
+      "path": "maven-work/a2/scenario-multi-module/app/pom.xml",
+      "sha256": "4ccab45790ccf2f292f54254daa13922892f3c69646853fb2e40120ef068b648"
+    },
+    {
+      "bytes": 445,
+      "path": "maven-work/a2/scenario-multi-module/library/pom.xml",
+      "sha256": "a67d643162d488d5b341711a5bae7a08b77119397c73721e095416f18cf65083"
+    },
+    {
+      "bytes": 272,
+      "path": "maven-work/a2/scenario-multi-module/pom.xml",
+      "sha256": "22692af6d4275e8080385b41c62ebdf03e3bf52342e6ff8d847481994621fadb"
+    },
+    {
+      "bytes": 3343,
+      "path": "maven-work/a2/scenario-profile-active/dependency-tree.json",
+      "sha256": "f084d3af8f1b8a35cc8eb3d62da190df708ec744177be35068f3f1674a88ade3"
+    },
+    {
+      "bytes": 723,
+      "path": "maven-work/a2/scenario-profile-active/pom.xml",
+      "sha256": "d0682b2ca3e91f66b7a93d157e4110d1a7e3c6d9f44a3cb75ba2f672d991e08d"
+    },
+    {
+      "bytes": 3343,
+      "path": "maven-work/a2/scenario-profile-inactive/dependency-tree.json",
+      "sha256": "07d760bf039fe3d16b1d03909932fefc5a757e7be86ea66b6c2aa23581816ec1"
+    },
+    {
+      "bytes": 723,
+      "path": "maven-work/a2/scenario-profile-inactive/pom.xml",
+      "sha256": "d0682b2ca3e91f66b7a93d157e4110d1a7e3c6d9f44a3cb75ba2f672d991e08d"
+    },
+    {
+      "bytes": 3355,
+      "path": "maven-work/a5/boot-3.3.4/dependency-tree.tgf",
+      "sha256": "8181e0e5f00a0a7ebef8169cea64955998b6e7a69777fec0f4c2890dc036af14"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a5/boot-3.3.4/pom.xml",
+      "sha256": "2a1c50c2ee72387975b127cde2c285ff9c119bd53d6a0eb257ad642d706fc197"
+    },
+    {
+      "bytes": 3367,
+      "path": "maven-work/a5/boot-3.3.5/dependency-tree.tgf",
+      "sha256": "0f33ad9cecc37dca41dfbeb1165f681e055511ba80d43d76a15b32ad996e896d"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a5/boot-3.3.5/pom.xml",
+      "sha256": "a70533c71f0678ab1796916fda41bed8a3e6961fe80fa5e41e386fdc2b571332"
+    },
+    {
+      "bytes": 3381,
+      "path": "maven-work/a5/boot-3.3.5-override-10.1.30/dependency-tree.tgf",
+      "sha256": "b1f515e845917c584d9d4ba5b16c87466081271707764a78415f3b1124bcd930"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a5/boot-3.3.5-override-10.1.30/pom.xml",
+      "sha256": "e1e24d4217a1ca93aebb74d54b829d968ce1f425271e288afe4b2e2e66a34fba"
+    },
+    {
+      "bytes": 3369,
+      "path": "maven-work/a5/boot-3.3.6/dependency-tree.tgf",
+      "sha256": "d4d6b831cd73751ec14c428912a3d8d5de647d6aa5cadf37c2f6fc5355877df9"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a5/boot-3.3.6/pom.xml",
+      "sha256": "9e1a491d00537014837f48da7a5ce1f282c76ce3f74d4ea8e99deca2cada33fc"
+    },
+    {
+      "bytes": 3380,
+      "path": "maven-work/a5/boot-3.3.6-override-10.1.30/dependency-tree.tgf",
+      "sha256": "928b091be478b1a9b018ccf698ac7cdccc6ee5373aa927f395f4f5ecc8c37617"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a5/boot-3.3.6-override-10.1.30/pom.xml",
+      "sha256": "910e03de1fa1962c45d7ebd687fb22de0d098c82d67099b77d75da71abb4b40c"
+    },
+    {
+      "bytes": 3362,
+      "path": "maven-work/a5/boot-3.3.7/dependency-tree.tgf",
+      "sha256": "e28641f93a4ba47b50db0a1fba58b11ed7cbaa9c6a3f386a215a3f8d44dd11f3"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a5/boot-3.3.7/pom.xml",
+      "sha256": "5d421ada58317d7a2e5f0d327ec2cf3b91c4d692b1ca26893c4156b8386f8c6e"
+    },
+    {
+      "bytes": 3379,
+      "path": "maven-work/a5/boot-3.3.7-override-10.1.30/dependency-tree.tgf",
+      "sha256": "6663fa386b0eef8f1a9c5bc42b63bd36f7b36d8afb6a11c6a7badc0465715ade"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a5/boot-3.3.7-override-10.1.30/pom.xml",
+      "sha256": "c8624bad3bc7cc7da68a7f4e73fefbbd993753d9d24f493a097ada5fb724e285"
+    },
+    {
+      "bytes": 3364,
+      "path": "maven-work/a5/boot-3.3.8/dependency-tree.tgf",
+      "sha256": "70af62fbbad23ab5b0d8cdb883a8f3e7ee802108aabb3b2002a5e038b7da94d0"
+    },
+    {
+      "bytes": 505,
+      "path": "maven-work/a5/boot-3.3.8/pom.xml",
+      "sha256": "97d41be1eccd9c3a1d51957561f2d7b408fe96e3c5ca25ee2fd0803236d211fd"
+    },
+    {
+      "bytes": 3376,
+      "path": "maven-work/a5/boot-3.3.8-override-10.1.30/dependency-tree.tgf",
+      "sha256": "5d75a37e6377992f688b651beb438470266a2f62281cdbe138c6d5693a9b33c1"
+    },
+    {
+      "bytes": 587,
+      "path": "maven-work/a5/boot-3.3.8-override-10.1.30/pom.xml",
+      "sha256": "149785cb463c2698afaa110bad8c5c0a5b2ab82ded04a5618e371795167b2571"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.4-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.4-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.5-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.5-override-10.1.30-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.5-override-10.1.30-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.5-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.6-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.6-override-10.1.30-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.6-override-10.1.30-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.6-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.7-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.7-override-10.1.30-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.7-override-10.1.30-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.7-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.8-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.8-override-10.1.30-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.8-override-10.1.30-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/boot-3.3.8-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-direct-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-direct-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-exclusion-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-exclusion-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-managed-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-managed-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-mediation-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-mediation-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-multi-module-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-multi-module-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-profile-active-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-profile-active-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-profile-inactive-fresh.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "maven-work/a5/logs/scenario-profile-inactive-warm.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3455,
+      "path": "maven-work/a5/scenario-direct/dependency-tree.tgf",
+      "sha256": "a92e2cadb42736f00f8c7ffaef83a880575e44320badba01833b6c14724056bc"
+    },
+    {
+      "bytes": 592,
+      "path": "maven-work/a5/scenario-direct/pom.xml",
+      "sha256": "c0d1c4abbf2ed3023e7fd1af491a6bc9d62a03d22289672500e399ba07b24bb7"
+    },
+    {
+      "bytes": 2952,
+      "path": "maven-work/a5/scenario-exclusion/dependency-tree.tgf",
+      "sha256": "62271e2cbd81da4f969c109adbf5fd4af0e93dbd5095d19c3127f9867e201c72"
+    },
+    {
+      "bytes": 601,
+      "path": "maven-work/a5/scenario-exclusion/pom.xml",
+      "sha256": "0a3217811fa449a63903da758185f18eca80904168a8b4f00cc668cf1b7257e8"
+    },
+    {
+      "bytes": 3350,
+      "path": "maven-work/a5/scenario-managed/dependency-tree.tgf",
+      "sha256": "08b0a1d6af9549775b0f3f4846a47b628df23ae3dc8d1aca6b6ded79693b9a1f"
+    },
+    {
+      "bytes": 667,
+      "path": "maven-work/a5/scenario-managed/pom.xml",
+      "sha256": "e48cac517034b8059684179422918b77c8468b2a4df1e286d56f0e53a61a6744"
+    },
+    {
+      "bytes": 925,
+      "path": "maven-work/a5/scenario-mediation/dependency-tree.tgf",
+      "sha256": "2efe30f1a9787ae91452d750bf3f775e982897056bd6ba7e730c2752f5df6366"
+    },
+    {
+      "bytes": 448,
+      "path": "maven-work/a5/scenario-mediation/pom.xml",
+      "sha256": "f1d66d2f4fe5d41c9198c1ab48019c429571aa88c0265158770a829195261372"
+    },
+    {
+      "bytes": 621,
+      "path": "maven-work/a5/scenario-multi-module/app/pom.xml",
+      "sha256": "4ccab45790ccf2f292f54254daa13922892f3c69646853fb2e40120ef068b648"
+    },
+    {
+      "bytes": 306,
+      "path": "maven-work/a5/scenario-multi-module/app-dependency-tree.tgf",
+      "sha256": "c19fc9b651d834024cb1bc58d593f4403f64d76101fb193ced8022e36a998292"
+    },
+    {
+      "bytes": 445,
+      "path": "maven-work/a5/scenario-multi-module/library/pom.xml",
+      "sha256": "a67d643162d488d5b341711a5bae7a08b77119397c73721e095416f18cf65083"
+    },
+    {
+      "bytes": 272,
+      "path": "maven-work/a5/scenario-multi-module/pom.xml",
+      "sha256": "22692af6d4275e8080385b41c62ebdf03e3bf52342e6ff8d847481994621fadb"
+    },
+    {
+      "bytes": 3352,
+      "path": "maven-work/a5/scenario-profile-active/dependency-tree.tgf",
+      "sha256": "88356b7a596231debdeca21ad78f2c4161f95fb9e82404abcdee31198b97c52e"
+    },
+    {
+      "bytes": 723,
+      "path": "maven-work/a5/scenario-profile-active/pom.xml",
+      "sha256": "d0682b2ca3e91f66b7a93d157e4110d1a7e3c6d9f44a3cb75ba2f672d991e08d"
+    },
+    {
+      "bytes": 3352,
+      "path": "maven-work/a5/scenario-profile-inactive/dependency-tree.tgf",
+      "sha256": "4a202f3a824c95f0eca762eaa73539b86659f51b7ea6ee1e9d240ff353d6062a"
+    },
+    {
+      "bytes": 723,
+      "path": "maven-work/a5/scenario-profile-inactive/pom.xml",
+      "sha256": "d0682b2ca3e91f66b7a93d157e4110d1a7e3c6d9f44a3cb75ba2f672d991e08d"
+    },
+    {
+      "bytes": 9326,
+      "path": "metrics-summary.json",
+      "sha256": "53aae00343a88452fa634b2b445248960f0ea94d20269d535a822e8ccb904a30"
+    },
+    {
+      "bytes": 1792062,
+      "path": "results-a5.json",
+      "sha256": "1decfd06398ce239257c93bacccc1c625d579ab5b2a618664f0541a2a6e98789"
+    }
+  ],
+  "schema_version": 1,
+  "total_bytes": 2123274
+}

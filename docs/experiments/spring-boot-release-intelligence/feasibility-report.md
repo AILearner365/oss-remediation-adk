@@ -10,10 +10,12 @@ and its replay benchmark did not measure scale.
 
 ## New evidence
 
-Nineteen deterministic tests pass: the original six plus identity comparison,
+Twenty-three deterministic tests pass: the original six plus identity comparison,
 graph traversal, all five feasibility status derivations, explicit affected
 versions, introduced/fixed/last-affected boundaries, multiple and reintroduced
 intervals, known/unknown qualifiers, and contradictory advisory events.
+The four A5 additions cover TGF path parsing, download-purpose inventory,
+transfer-metric semantics and the pinned isolated collector contract.
 
 The fresh live run completed 16 original cells and 28 expanded approach/scenario
 cells. All seven real Maven scenarios passed their expected version and path
@@ -67,3 +69,26 @@ conservative.
 - Build/runtime compatibility and whole-application candidate scans were not
   executed, so vulnerability counts cannot select a release.
 - Source mutation, withdrawal and rate limiting need longer-running tests.
+
+## A5 addendum — 2026-10-14
+
+A5 used Maven's pinned dependency-tree graph collector with isolated disposable
+repositories. It matched an independently rerun A2 on all 32 selected-version
+and path comparisons, passed C1–C4 and all seven expanded scenarios, and
+reproduced every frozen v2 per-finding vulnerability classification.
+
+For the same 16-resolution workload, isolated A2 took 218.652 s fresh and
+161.863 s warm; A5 took 183.472 s fresh and 162.453 s warm. A5 was 35.180 s
+(16.1%) faster fresh but 0.590 s (0.4%) slower warm. The fresh A2 cache was
+61,247,561 bytes; A5 was 21,134,449 bytes, a 40,113,112-byte (65.5%) reduction.
+A2 downloaded seven application JARs (4,725,608 bytes), including reactor/build
+artifacts needed by its multi-module install. A5 downloaded none. A5 still
+required 50 plugin/bootstrap JARs (14,912,596 bytes), 460 POMs (6,118,943
+bytes), and 510 successful Maven transfer events reporting 21,091,327 bytes.
+Warm A5 added no files. Network values came from a separate non-quiet A5
+telemetry pass so the fair A2/A5 timings both used quiet Maven output.
+
+Maven did not expose transport-level HTTP request counts. A2 ran with the
+existing quiet command, so its transfer-event/byte metrics are unavailable;
+no bandwidth saving is claimed from the cache-size difference. See
+[a5-comparison-report.md](a5-comparison-report.md) for the full comparison.

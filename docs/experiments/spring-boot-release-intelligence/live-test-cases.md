@@ -33,6 +33,31 @@ python3 -m unittest tests.test_spring_boot_release_intelligence_contract \
 
 python3 -m spring_boot_release_intelligence.cli run-live \
   --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261013-v2
+
+A5 uses disposable cache roots; never point these commands at `~/.m2`:
+
+```bash
+A5_CACHE_ROOT="$(mktemp -d /tmp/sbri-a5-caches.XXXXXX)"
+python3 -m spring_boot_release_intelligence.cli run-a5 \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5 \
+  --cache-root "$A5_CACHE_ROOT" \
+  --reference docs/experiments/spring-boot-release-intelligence/evidence/run-20261013-v2/results-v2.json
+
+A5_CONTROL_CACHE="$(mktemp -d /tmp/sbri-a5-control.XXXXXX)"
+python3 -m spring_boot_release_intelligence.cli qualify-a5-storage \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5/results-a5.json \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5 \
+  --cache-root "$A5_CONTROL_CACHE"
+
+python3 -m spring_boot_release_intelligence.cli generate-a5-charts \
+  --results docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5/results-a5.json \
+  --output docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5/charts
+```
+
+The A5 run repeats C1–C4 and all seven expanded cases for fresh and warm A2/A5
+passes. The zero-dependency control is required because
+`commons-logging:commons-logging:1.2` occurs in one application graph and in
+the plugin bootstrap closure; filename matching alone would misclassify it.
 ```
 
 Prerequisites: Python 3, Java, Maven and network access to Maven Central, OSV
