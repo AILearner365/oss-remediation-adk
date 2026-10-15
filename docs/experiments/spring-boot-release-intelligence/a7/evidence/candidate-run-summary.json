@@ -1,0 +1,2923 @@
+{
+  "effective_versions": {
+    "3.3.4": {
+      "ch.qos.logback:logback-core": "1.5.8",
+      "com.fasterxml.jackson.core:jackson-databind": "2.17.2",
+      "org.apache.tomcat.embed:tomcat-embed-core": "10.1.30",
+      "org.springframework.boot:spring-boot": "3.3.4",
+      "org.springframework:spring-core": "6.1.13"
+    },
+    "3.3.5": {
+      "ch.qos.logback:logback-core": "1.5.11",
+      "com.fasterxml.jackson.core:jackson-databind": "2.17.2",
+      "org.apache.tomcat.embed:tomcat-embed-core": "10.1.31",
+      "org.springframework.boot:spring-boot": "3.3.5",
+      "org.springframework:spring-core": "6.1.14"
+    },
+    "3.3.7": {
+      "ch.qos.logback:logback-core": "1.5.12",
+      "com.fasterxml.jackson.core:jackson-databind": "2.17.3",
+      "org.apache.tomcat.embed:tomcat-embed-core": "10.1.34",
+      "org.springframework.boot:spring-boot": "3.3.7",
+      "org.springframework:spring-core": "6.1.16"
+    },
+    "3.3.8": {
+      "ch.qos.logback:logback-core": "1.5.16",
+      "com.fasterxml.jackson.core:jackson-databind": "2.17.3",
+      "org.apache.tomcat.embed:tomcat-embed-core": "10.1.34",
+      "org.springframework.boot:spring-boot": "3.3.8",
+      "org.springframework:spring-core": "6.1.16"
+    }
+  },
+  "environment": {
+    "java": "openjdk version \"21.0.12.1\" 2026-08-18",
+    "maven": "Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)",
+    "osv_scanner": "osv-scanner version: 2.6.0"
+  },
+  "findings": {
+    "3.3.4": [
+      {
+        "advisory": "GHSA-72hv-8253-57qq",
+        "package": "jackson-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-7hhh-6rmp-j9qf",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-p6pp-m3f8-5c89",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-r7wm-3cxj-wff9",
+        "package": "jackson-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-3pjw-73gf-8qr5",
+        "package": "jackson-databind",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-5jmj-h7xm-6q6v",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-cxp5-3px4-pw24",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-gx83-3vf8-gh7j",
+        "package": "jackson-databind",
+        "score": 5.6,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-hgj6-7826-r7m5",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-j3rv-43j4-c7qm",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-q4xh-88c3-wmh7",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-rmj7-2vxq-3g9f",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-vvgp-rfg2-7rr6",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-wjgm-6hv5-3cvf",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-wv8q-qhhj-9h54",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-qv9r-c865-cp47",
+        "package": "log4j-api",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "2.23.1"
+      },
+      {
+        "advisory": "GHSA-25qh-j22f-pwp8",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-6v67-2wr5-gvf4",
+        "package": "logback-core",
+        "score": 2.4,
+        "severity": "LOW",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-jhq6-gfmj-v8fx",
+        "package": "logback-core",
+        "score": 2.9,
+        "severity": "LOW",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-p47f-322f-whfh",
+        "package": "logback-core",
+        "score": 1.2,
+        "severity": "LOW",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-pr98-23f8-jwxv",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-qqpg-mvqg-649v",
+        "package": "logback-core",
+        "score": 1.8,
+        "severity": "LOW",
+        "version": "1.5.8"
+      },
+      {
+        "advisory": "GHSA-rc42-6c7j-7h5r",
+        "package": "spring-boot",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "3.3.4"
+      },
+      {
+        "advisory": "GHSA-wwpq-f5c3-7hvx",
+        "package": "spring-boot",
+        "score": 7.0,
+        "severity": "HIGH",
+        "version": "3.3.4"
+      },
+      {
+        "advisory": "GHSA-ggg2-9786-hwc8",
+        "package": "spring-boot-autoconfigure",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "3.3.4"
+      },
+      {
+        "advisory": "GHSA-4gc7-5j7h-4qph",
+        "package": "spring-context",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-4wp7-92pw-q264",
+        "package": "spring-context",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-659m-px2c-25wj",
+        "package": "spring-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-jmp9-x22r-554x",
+        "package": "spring-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-9f52-rjqv-25qv",
+        "package": "spring-expression",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-r5w3-xv2f-j59q",
+        "package": "spring-expression",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-wxpp-56q6-5pcg",
+        "package": "spring-expression",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-4gc7-5j7h-4qph",
+        "package": "spring-web",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-6r3c-xf4w-jxjm",
+        "package": "spring-web",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-3chg-m5w7-qfv5",
+        "package": "spring-webmvc",
+        "score": 7.1,
+        "severity": "HIGH",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-4773-3jfm-qmx3",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-6hcq-hmm3-jj3c",
+        "package": "spring-webmvc",
+        "score": 2.6,
+        "severity": "LOW",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-6p4f-wcwh-5vvm",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-72pg-x5f8-j25j",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-957g-f97v-vppc",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-cjpg-rgq5-fr37",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-g5vr-rgqm-vf78",
+        "package": "spring-webmvc",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-h3qp-gqrc-q736",
+        "package": "spring-webmvc",
+        "score": 4.2,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-mq64-j8f9-9gcj",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-pc63-qcmh-9cmg",
+        "package": "spring-webmvc",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-r936-gwx5-v52f",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-wg35-8jpf-2xv3",
+        "package": "spring-webmvc",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-x23c-287f-qqv5",
+        "package": "spring-webmvc",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.13"
+      },
+      {
+        "advisory": "GHSA-23hv-mwm6-g8jf",
+        "package": "tomcat-embed-core",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-25xr-qj8w-c4vf",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-27hp-xhwr-wr2m",
+        "package": "tomcat-embed-core",
+        "score": 7.2,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-3p2h-wqq4-wf4h",
+        "package": "tomcat-embed-core",
+        "score": 6.6,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-42wg-hm62-jcwg",
+        "package": "tomcat-embed-core",
+        "score": 4.8,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-563x-q5rq-57qp",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-5j33-cvvr-w245",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-5m62-pw8w-7w9f",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-5mp6-jrq3-r938",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-83qj-6fr2-vhqg",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-9m3c-qcxr-9x87",
+        "package": "tomcat-embed-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-9m89-8frq-c98c",
+        "package": "tomcat-embed-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-9xv2-5v5q-p794",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-ff77-26x5-69cr",
+        "package": "tomcat-embed-core",
+        "score": 2.7,
+        "severity": "LOW",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-fpj8-gq4v-p354",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-fv25-8xcx-gqjc",
+        "package": "tomcat-embed-core",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-gcx9-497g-6cp6",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-gqp3-2cvr-x8m3",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-gx5v-xp9w-j4cg",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-h2fw-rfh5-95r3",
+        "package": "tomcat-embed-core",
+        "score": 1.7,
+        "severity": "LOW",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-h3gc-qfqq-6h8f",
+        "package": "tomcat-embed-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-h3x4-894j-xpx5",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-h6fc-48rj-7qqh",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-hgrr-935x-pq79",
+        "package": "tomcat-embed-core",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-mgp5-rv84-w37q",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-qvf5-hvjx-wm27",
+        "package": "tomcat-embed-core",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-r29c-68gh-xp6x",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-rv64-5gf8-9qq8",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-vfww-5hm6-hx2j",
+        "package": "tomcat-embed-core",
+        "score": 9.6,
+        "severity": "CRITICAL",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-wc4r-xq3c-5cf3",
+        "package": "tomcat-embed-core",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-wmwf-9ccg-fff5",
+        "package": "tomcat-embed-core",
+        "score": 7.7,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-wr62-c79q-cv37",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      },
+      {
+        "advisory": "GHSA-x4m4-345f-5h5g",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.30"
+      }
+    ],
+    "3.3.5": [
+      {
+        "advisory": "GHSA-72hv-8253-57qq",
+        "package": "jackson-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-7hhh-6rmp-j9qf",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-p6pp-m3f8-5c89",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-r7wm-3cxj-wff9",
+        "package": "jackson-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-3pjw-73gf-8qr5",
+        "package": "jackson-databind",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-5jmj-h7xm-6q6v",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-cxp5-3px4-pw24",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-gx83-3vf8-gh7j",
+        "package": "jackson-databind",
+        "score": 5.6,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-hgj6-7826-r7m5",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-j3rv-43j4-c7qm",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-q4xh-88c3-wmh7",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-rmj7-2vxq-3g9f",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-vvgp-rfg2-7rr6",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-wjgm-6hv5-3cvf",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-wv8q-qhhj-9h54",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.2"
+      },
+      {
+        "advisory": "GHSA-qv9r-c865-cp47",
+        "package": "log4j-api",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "2.23.1"
+      },
+      {
+        "advisory": "GHSA-25qh-j22f-pwp8",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-6v67-2wr5-gvf4",
+        "package": "logback-core",
+        "score": 2.4,
+        "severity": "LOW",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-jhq6-gfmj-v8fx",
+        "package": "logback-core",
+        "score": 2.9,
+        "severity": "LOW",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-p47f-322f-whfh",
+        "package": "logback-core",
+        "score": 1.2,
+        "severity": "LOW",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-pr98-23f8-jwxv",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-qqpg-mvqg-649v",
+        "package": "logback-core",
+        "score": 1.8,
+        "severity": "LOW",
+        "version": "1.5.11"
+      },
+      {
+        "advisory": "GHSA-rc42-6c7j-7h5r",
+        "package": "spring-boot",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "3.3.5"
+      },
+      {
+        "advisory": "GHSA-wwpq-f5c3-7hvx",
+        "package": "spring-boot",
+        "score": 7.0,
+        "severity": "HIGH",
+        "version": "3.3.5"
+      },
+      {
+        "advisory": "GHSA-ggg2-9786-hwc8",
+        "package": "spring-boot-autoconfigure",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "3.3.5"
+      },
+      {
+        "advisory": "GHSA-4wp7-92pw-q264",
+        "package": "spring-context",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-659m-px2c-25wj",
+        "package": "spring-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-jmp9-x22r-554x",
+        "package": "spring-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-9f52-rjqv-25qv",
+        "package": "spring-expression",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-r5w3-xv2f-j59q",
+        "package": "spring-expression",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-wxpp-56q6-5pcg",
+        "package": "spring-expression",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-6r3c-xf4w-jxjm",
+        "package": "spring-web",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-3chg-m5w7-qfv5",
+        "package": "spring-webmvc",
+        "score": 7.1,
+        "severity": "HIGH",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-4773-3jfm-qmx3",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-6hcq-hmm3-jj3c",
+        "package": "spring-webmvc",
+        "score": 2.6,
+        "severity": "LOW",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-6p4f-wcwh-5vvm",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-72pg-x5f8-j25j",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-957g-f97v-vppc",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-cjpg-rgq5-fr37",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-h3qp-gqrc-q736",
+        "package": "spring-webmvc",
+        "score": 4.2,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-mq64-j8f9-9gcj",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-pc63-qcmh-9cmg",
+        "package": "spring-webmvc",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-r936-gwx5-v52f",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-wg35-8jpf-2xv3",
+        "package": "spring-webmvc",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-x23c-287f-qqv5",
+        "package": "spring-webmvc",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.14"
+      },
+      {
+        "advisory": "GHSA-23hv-mwm6-g8jf",
+        "package": "tomcat-embed-core",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-25xr-qj8w-c4vf",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-27hp-xhwr-wr2m",
+        "package": "tomcat-embed-core",
+        "score": 7.2,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-3p2h-wqq4-wf4h",
+        "package": "tomcat-embed-core",
+        "score": 6.6,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-42wg-hm62-jcwg",
+        "package": "tomcat-embed-core",
+        "score": 4.8,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-563x-q5rq-57qp",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-5j33-cvvr-w245",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-5m62-pw8w-7w9f",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-5mp6-jrq3-r938",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-83qj-6fr2-vhqg",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-9m3c-qcxr-9x87",
+        "package": "tomcat-embed-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-9m89-8frq-c98c",
+        "package": "tomcat-embed-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-9xv2-5v5q-p794",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-ff77-26x5-69cr",
+        "package": "tomcat-embed-core",
+        "score": 2.7,
+        "severity": "LOW",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-fpj8-gq4v-p354",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-fv25-8xcx-gqjc",
+        "package": "tomcat-embed-core",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-gcx9-497g-6cp6",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-gqp3-2cvr-x8m3",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-gx5v-xp9w-j4cg",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-h2fw-rfh5-95r3",
+        "package": "tomcat-embed-core",
+        "score": 1.7,
+        "severity": "LOW",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-h3gc-qfqq-6h8f",
+        "package": "tomcat-embed-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-h3x4-894j-xpx5",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-h6fc-48rj-7qqh",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-hgrr-935x-pq79",
+        "package": "tomcat-embed-core",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-mgp5-rv84-w37q",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-r29c-68gh-xp6x",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-rv64-5gf8-9qq8",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-vfww-5hm6-hx2j",
+        "package": "tomcat-embed-core",
+        "score": 9.6,
+        "severity": "CRITICAL",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-wc4r-xq3c-5cf3",
+        "package": "tomcat-embed-core",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-wmwf-9ccg-fff5",
+        "package": "tomcat-embed-core",
+        "score": 7.7,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-wr62-c79q-cv37",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      },
+      {
+        "advisory": "GHSA-x4m4-345f-5h5g",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.31"
+      }
+    ],
+    "3.3.7": [
+      {
+        "advisory": "GHSA-72hv-8253-57qq",
+        "package": "jackson-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-7hhh-6rmp-j9qf",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-p6pp-m3f8-5c89",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-r7wm-3cxj-wff9",
+        "package": "jackson-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-3pjw-73gf-8qr5",
+        "package": "jackson-databind",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-5jmj-h7xm-6q6v",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-cxp5-3px4-pw24",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-gx83-3vf8-gh7j",
+        "package": "jackson-databind",
+        "score": 5.6,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-hgj6-7826-r7m5",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-j3rv-43j4-c7qm",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-q4xh-88c3-wmh7",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-rmj7-2vxq-3g9f",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-vvgp-rfg2-7rr6",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-wjgm-6hv5-3cvf",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-wv8q-qhhj-9h54",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-qv9r-c865-cp47",
+        "package": "log4j-api",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "2.23.1"
+      },
+      {
+        "advisory": "GHSA-25qh-j22f-pwp8",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-6v67-2wr5-gvf4",
+        "package": "logback-core",
+        "score": 2.4,
+        "severity": "LOW",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-jhq6-gfmj-v8fx",
+        "package": "logback-core",
+        "score": 2.9,
+        "severity": "LOW",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-p47f-322f-whfh",
+        "package": "logback-core",
+        "score": 1.2,
+        "severity": "LOW",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-pr98-23f8-jwxv",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-qqpg-mvqg-649v",
+        "package": "logback-core",
+        "score": 1.8,
+        "severity": "LOW",
+        "version": "1.5.12"
+      },
+      {
+        "advisory": "GHSA-rc42-6c7j-7h5r",
+        "package": "spring-boot",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "3.3.7"
+      },
+      {
+        "advisory": "GHSA-wwpq-f5c3-7hvx",
+        "package": "spring-boot",
+        "score": 7.0,
+        "severity": "HIGH",
+        "version": "3.3.7"
+      },
+      {
+        "advisory": "GHSA-ggg2-9786-hwc8",
+        "package": "spring-boot-autoconfigure",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "3.3.7"
+      },
+      {
+        "advisory": "GHSA-4wp7-92pw-q264",
+        "package": "spring-context",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-659m-px2c-25wj",
+        "package": "spring-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-jmp9-x22r-554x",
+        "package": "spring-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-9f52-rjqv-25qv",
+        "package": "spring-expression",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-r5w3-xv2f-j59q",
+        "package": "spring-expression",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-wxpp-56q6-5pcg",
+        "package": "spring-expression",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6r3c-xf4w-jxjm",
+        "package": "spring-web",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-3chg-m5w7-qfv5",
+        "package": "spring-webmvc",
+        "score": 7.1,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-4773-3jfm-qmx3",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6hcq-hmm3-jj3c",
+        "package": "spring-webmvc",
+        "score": 2.6,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6p4f-wcwh-5vvm",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-72pg-x5f8-j25j",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-957g-f97v-vppc",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-cjpg-rgq5-fr37",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-h3qp-gqrc-q736",
+        "package": "spring-webmvc",
+        "score": 4.2,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-mq64-j8f9-9gcj",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-pc63-qcmh-9cmg",
+        "package": "spring-webmvc",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-r936-gwx5-v52f",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-wg35-8jpf-2xv3",
+        "package": "spring-webmvc",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-x23c-287f-qqv5",
+        "package": "spring-webmvc",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-23hv-mwm6-g8jf",
+        "package": "tomcat-embed-core",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-25xr-qj8w-c4vf",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-3p2h-wqq4-wf4h",
+        "package": "tomcat-embed-core",
+        "score": 6.6,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-42wg-hm62-jcwg",
+        "package": "tomcat-embed-core",
+        "score": 4.8,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-563x-q5rq-57qp",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-5m62-pw8w-7w9f",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-5mp6-jrq3-r938",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-83qj-6fr2-vhqg",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9m3c-qcxr-9x87",
+        "package": "tomcat-embed-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9m89-8frq-c98c",
+        "package": "tomcat-embed-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9xv2-5v5q-p794",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-ff77-26x5-69cr",
+        "package": "tomcat-embed-core",
+        "score": 2.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-fpj8-gq4v-p354",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-fv25-8xcx-gqjc",
+        "package": "tomcat-embed-core",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gcx9-497g-6cp6",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gqp3-2cvr-x8m3",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gx5v-xp9w-j4cg",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h2fw-rfh5-95r3",
+        "package": "tomcat-embed-core",
+        "score": 1.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h3gc-qfqq-6h8f",
+        "package": "tomcat-embed-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h3x4-894j-xpx5",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h6fc-48rj-7qqh",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-hgrr-935x-pq79",
+        "package": "tomcat-embed-core",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-mgp5-rv84-w37q",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-r29c-68gh-xp6x",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-rv64-5gf8-9qq8",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-vfww-5hm6-hx2j",
+        "package": "tomcat-embed-core",
+        "score": 9.6,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wc4r-xq3c-5cf3",
+        "package": "tomcat-embed-core",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wmwf-9ccg-fff5",
+        "package": "tomcat-embed-core",
+        "score": 7.7,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wr62-c79q-cv37",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-x4m4-345f-5h5g",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      }
+    ],
+    "3.3.8": [
+      {
+        "advisory": "GHSA-72hv-8253-57qq",
+        "package": "jackson-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-7hhh-6rmp-j9qf",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-p6pp-m3f8-5c89",
+        "package": "jackson-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-r7wm-3cxj-wff9",
+        "package": "jackson-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-3pjw-73gf-8qr5",
+        "package": "jackson-databind",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-5jmj-h7xm-6q6v",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-cxp5-3px4-pw24",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-gx83-3vf8-gh7j",
+        "package": "jackson-databind",
+        "score": 5.6,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-hgj6-7826-r7m5",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-j3rv-43j4-c7qm",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-q4xh-88c3-wmh7",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-rmj7-2vxq-3g9f",
+        "package": "jackson-databind",
+        "score": 8.1,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-vvgp-rfg2-7rr6",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-wjgm-6hv5-3cvf",
+        "package": "jackson-databind",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-wv8q-qhhj-9h54",
+        "package": "jackson-databind",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "2.17.3"
+      },
+      {
+        "advisory": "GHSA-qv9r-c865-cp47",
+        "package": "log4j-api",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "2.23.1"
+      },
+      {
+        "advisory": "GHSA-25qh-j22f-pwp8",
+        "package": "logback-core",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "1.5.16"
+      },
+      {
+        "advisory": "GHSA-jhq6-gfmj-v8fx",
+        "package": "logback-core",
+        "score": 2.9,
+        "severity": "LOW",
+        "version": "1.5.16"
+      },
+      {
+        "advisory": "GHSA-p47f-322f-whfh",
+        "package": "logback-core",
+        "score": 1.2,
+        "severity": "LOW",
+        "version": "1.5.16"
+      },
+      {
+        "advisory": "GHSA-qqpg-mvqg-649v",
+        "package": "logback-core",
+        "score": 1.8,
+        "severity": "LOW",
+        "version": "1.5.16"
+      },
+      {
+        "advisory": "GHSA-rc42-6c7j-7h5r",
+        "package": "spring-boot",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "3.3.8"
+      },
+      {
+        "advisory": "GHSA-wwpq-f5c3-7hvx",
+        "package": "spring-boot",
+        "score": 7.0,
+        "severity": "HIGH",
+        "version": "3.3.8"
+      },
+      {
+        "advisory": "GHSA-ggg2-9786-hwc8",
+        "package": "spring-boot-autoconfigure",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "3.3.8"
+      },
+      {
+        "advisory": "GHSA-4wp7-92pw-q264",
+        "package": "spring-context",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-659m-px2c-25wj",
+        "package": "spring-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-jmp9-x22r-554x",
+        "package": "spring-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-9f52-rjqv-25qv",
+        "package": "spring-expression",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-r5w3-xv2f-j59q",
+        "package": "spring-expression",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-wxpp-56q6-5pcg",
+        "package": "spring-expression",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6r3c-xf4w-jxjm",
+        "package": "spring-web",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-3chg-m5w7-qfv5",
+        "package": "spring-webmvc",
+        "score": 7.1,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-4773-3jfm-qmx3",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6hcq-hmm3-jj3c",
+        "package": "spring-webmvc",
+        "score": 2.6,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-6p4f-wcwh-5vvm",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-72pg-x5f8-j25j",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-957g-f97v-vppc",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-cjpg-rgq5-fr37",
+        "package": "spring-webmvc",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-h3qp-gqrc-q736",
+        "package": "spring-webmvc",
+        "score": 4.2,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-mq64-j8f9-9gcj",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-pc63-qcmh-9cmg",
+        "package": "spring-webmvc",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-r936-gwx5-v52f",
+        "package": "spring-webmvc",
+        "score": 5.9,
+        "severity": "MEDIUM",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-wg35-8jpf-2xv3",
+        "package": "spring-webmvc",
+        "score": 3.1,
+        "severity": "LOW",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-x23c-287f-qqv5",
+        "package": "spring-webmvc",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "6.1.16"
+      },
+      {
+        "advisory": "GHSA-23hv-mwm6-g8jf",
+        "package": "tomcat-embed-core",
+        "score": 6.5,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-25xr-qj8w-c4vf",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-3p2h-wqq4-wf4h",
+        "package": "tomcat-embed-core",
+        "score": 6.6,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-42wg-hm62-jcwg",
+        "package": "tomcat-embed-core",
+        "score": 4.8,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-563x-q5rq-57qp",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-5m62-pw8w-7w9f",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-5mp6-jrq3-r938",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-83qj-6fr2-vhqg",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9m3c-qcxr-9x87",
+        "package": "tomcat-embed-core",
+        "score": 6.9,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9m89-8frq-c98c",
+        "package": "tomcat-embed-core",
+        "score": 3.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-9xv2-5v5q-p794",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-ff77-26x5-69cr",
+        "package": "tomcat-embed-core",
+        "score": 2.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-fpj8-gq4v-p354",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-fv25-8xcx-gqjc",
+        "package": "tomcat-embed-core",
+        "score": 7.3,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gcx9-497g-6cp6",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gqp3-2cvr-x8m3",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-gx5v-xp9w-j4cg",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h2fw-rfh5-95r3",
+        "package": "tomcat-embed-core",
+        "score": 1.7,
+        "severity": "LOW",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h3gc-qfqq-6h8f",
+        "package": "tomcat-embed-core",
+        "score": 8.7,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h3x4-894j-xpx5",
+        "package": "tomcat-embed-core",
+        "score": 9.1,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-h6fc-48rj-7qqh",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-hgrr-935x-pq79",
+        "package": "tomcat-embed-core",
+        "score": 5.3,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-mgp5-rv84-w37q",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-r29c-68gh-xp6x",
+        "package": "tomcat-embed-core",
+        "score": 9.8,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-rv64-5gf8-9qq8",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-vfww-5hm6-hx2j",
+        "package": "tomcat-embed-core",
+        "score": 9.6,
+        "severity": "CRITICAL",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wc4r-xq3c-5cf3",
+        "package": "tomcat-embed-core",
+        "score": 6.3,
+        "severity": "MEDIUM",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wmwf-9ccg-fff5",
+        "package": "tomcat-embed-core",
+        "score": 7.7,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-wr62-c79q-cv37",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      },
+      {
+        "advisory": "GHSA-x4m4-345f-5h5g",
+        "package": "tomcat-embed-core",
+        "score": 7.5,
+        "severity": "HIGH",
+        "version": "10.1.34"
+      }
+    ]
+  },
+  "limitations": [
+    "Shared-cache fresh workload: only the first candidate starts from an empty repository; later candidates measure incremental cache reuse",
+    "S3 HTTP security-stage RSS was not separately sampled; its Maven subprocess peak is retained",
+    "C6 additional-finding branch is deterministic synthetic evidence because no live candidate introduced a finding",
+    "WAR/provided-scope packaging not executed",
+    "Source-project scan does not resolve transitive Maven dependencies in this fixture and returned zero findings",
+    "OSV Scanner cache growth was not isolated; scanner request/cache telemetry remains NOT EXERCISED"
+  ],
+  "override_scan": {
+    "boot_candidate": "3.3.8",
+    "finding_count_for_tomcat": 33,
+    "selected_tomcat": "10.1.30"
+  },
+  "packaging": {
+    "3.3.4": {
+      "build_exit": 0,
+      "jar_bytes": 20031162,
+      "metadata_count": 34,
+      "metadata_not_packaged": [
+        "org.springframework.boot:spring-boot-starter-web:3.3.4",
+        "org.springframework.boot:spring-boot-starter:3.3.4",
+        "org.springframework.boot:spring-boot-starter-json:3.3.4",
+        "org.springframework.boot:spring-boot-starter-tomcat:3.3.4",
+        "org.springframework.boot:spring-boot-starter-logging:3.3.4"
+      ],
+      "packaged_library_count": 30,
+      "packaged_only": [
+        "org.springframework.boot:spring-boot-jarmode-tools"
+      ]
+    },
+    "3.3.8": {
+      "build_exit": 0,
+      "jar_bytes": 20103604,
+      "metadata_count": 34,
+      "metadata_not_packaged": [
+        "org.springframework.boot:spring-boot-starter-web:3.3.8",
+        "org.springframework.boot:spring-boot-starter:3.3.8",
+        "org.springframework.boot:spring-boot-starter-json:3.3.8",
+        "org.springframework.boot:spring-boot-starter-tomcat:3.3.8",
+        "org.springframework.boot:spring-boot-starter-logging:3.3.8"
+      ],
+      "packaged_library_count": 30,
+      "packaged_only": [
+        "org.springframework.boot:spring-boot-jarmode-tools"
+      ]
+    }
+  },
+  "performance": {
+    "s1": {
+      "cold": {
+        "peak_subprocess_rss_bytes": 200294400,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 200294400,
+            "seconds": 21.90242679200128
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 189243392,
+            "seconds": 16.85587272199973
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 195981312,
+            "seconds": 18.543657509000695
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 193552384,
+            "seconds": 17.209751442999732
+          }
+        },
+        "repository_bytes": 71350075,
+        "workload_seconds": 74.51170846600144
+      },
+      "warm": {
+        "peak_subprocess_rss_bytes": 227315712,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 215552000,
+            "seconds": 13.753431435000493
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 189591552,
+            "seconds": 12.588537405999887
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 194670592,
+            "seconds": 15.645186659999126
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 227315712,
+            "seconds": 15.283057897000617
+          }
+        },
+        "repository_bytes": 71350075,
+        "workload_seconds": 57.270213398000124
+      }
+    },
+    "s2": {
+      "cold": {
+        "peak_subprocess_rss_bytes": 219074560,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 203653120,
+            "seconds": 38.033179082999595
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 205160448,
+            "seconds": 30.609292729001027
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 201883648,
+            "seconds": 29.608580783000434
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 219074560,
+            "seconds": 26.931789928999933
+          }
+        },
+        "repository_bytes": 87027720,
+        "workload_seconds": 125.18284252400099
+      },
+      "warm": {
+        "peak_subprocess_rss_bytes": 229208064,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 193101824,
+            "seconds": 21.088036744999044
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 229208064,
+            "seconds": 21.209615172999293
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 218370048,
+            "seconds": 21.066850559999693
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 222658560,
+            "seconds": 21.77819996299968
+          }
+        },
+        "repository_bytes": 87027720,
+        "workload_seconds": 85.14270244099771
+      }
+    },
+    "s3": {
+      "cold": {
+        "peak_subprocess_rss_bytes": 189919232,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 189919232,
+            "seconds": 21.442815213000358
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 187293696,
+            "seconds": 11.689508338999985
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 183738368,
+            "seconds": 12.332816602000094
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 181485568,
+            "seconds": 10.299745016999623
+          }
+        },
+        "repository_bytes": 20241909,
+        "workload_seconds": 62.749815311999555
+      },
+      "warm": {
+        "peak_subprocess_rss_bytes": 229380096,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 228233216,
+            "seconds": 8.67203949100076
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 215052288,
+            "seconds": 8.453801032999763
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 229380096,
+            "seconds": 7.9926841350006725
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 215126016,
+            "seconds": 8.559754965000138
+          }
+        },
+        "repository_bytes": 20241909,
+        "workload_seconds": 40.54166619100124
+      }
+    },
+    "s4": {
+      "cold": {
+        "peak_subprocess_rss_bytes": 183119872,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 182255616,
+            "seconds": 23.743367368999316
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 183119872,
+            "seconds": 12.850518846999876
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 181583872,
+            "seconds": 12.982862824999756
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 181600256,
+            "seconds": 12.073244052999144
+          }
+        },
+        "repository_bytes": 20241909,
+        "workload_seconds": 61.64999309399809
+      },
+      "warm": {
+        "peak_subprocess_rss_bytes": 236822528,
+        "per_candidate": {
+          "3.3.4": {
+            "peak_rss_bytes": 227074048,
+            "seconds": 9.298215998999694
+          },
+          "3.3.5": {
+            "peak_rss_bytes": 201371648,
+            "seconds": 9.528450204000364
+          },
+          "3.3.7": {
+            "peak_rss_bytes": 229273600,
+            "seconds": 9.23485461600012
+          },
+          "3.3.8": {
+            "peak_rss_bytes": 236822528,
+            "seconds": 9.709477893999065
+          }
+        },
+        "repository_bytes": 20241909,
+        "workload_seconds": 37.770998712999244
+      }
+    }
+  },
+  "resources": {
+    "s1": {
+      "application_dependency_jar_bytes": 60060405,
+      "application_dependency_jars": 95,
+      "repository_bytes": 71350075,
+      "total_repository_jars": 114
+    },
+    "s2": {
+      "application_dependency_jar_bytes": 60060405,
+      "application_dependency_jars": 95,
+      "repository_bytes": 87027720,
+      "total_repository_jars": 157
+    },
+    "s3": {
+      "application_dependency_jar_bytes": 0,
+      "application_dependency_jars": 0,
+      "repository_bytes": 20241909,
+      "total_repository_jars": 50
+    },
+    "s4": {
+      "application_dependency_jar_bytes": 0,
+      "application_dependency_jars": 0,
+      "repository_bytes": 20241909,
+      "total_repository_jars": 50
+    }
+  },
+  "s3_deduplication": {
+    "cold": {
+      "complete": true,
+      "deduplicated_query_count": 95,
+      "error": null,
+      "naive_query_count": 136,
+      "request_count": 81,
+      "seconds": 6.984930140999495
+    },
+    "warm": {
+      "complete": true,
+      "deduplicated_query_count": 95,
+      "error": null,
+      "naive_query_count": 136,
+      "request_count": 81,
+      "seconds": 6.863386566999907
+    }
+  },
+  "sbom_bytes": {
+    "s1": {
+      "3.3.4": 89883,
+      "3.3.5": 89893,
+      "3.3.7": 89893,
+      "3.3.8": 89904
+    },
+    "s2": {
+      "3.3.4": 89883,
+      "3.3.5": 89893,
+      "3.3.7": 89893,
+      "3.3.8": 89904
+    },
+    "s4": {
+      "3.3.4": 21377,
+      "3.3.5": 21385,
+      "3.3.7": 21385,
+      "3.3.8": 21393
+    }
+  },
+  "scanner_equivalence": {
+    "s1_s2_s4": {
+      "3.3.4": {
+        "s1_s2_equal": true,
+        "s1_s4_equal": true,
+        "s2_inventory": {
+          "a5_count": 34,
+          "a5_only": [],
+          "cyclonedx_count": 34,
+          "cyclonedx_only": [],
+          "equal": true
+        }
+      },
+      "3.3.5": {
+        "s1_s2_equal": true,
+        "s1_s4_equal": true,
+        "s2_inventory": {
+          "a5_count": 34,
+          "a5_only": [],
+          "cyclonedx_count": 34,
+          "cyclonedx_only": [],
+          "equal": true
+        }
+      },
+      "3.3.7": {
+        "s1_s2_equal": true,
+        "s1_s4_equal": true,
+        "s2_inventory": {
+          "a5_count": 34,
+          "a5_only": [],
+          "cyclonedx_count": 34,
+          "cyclonedx_only": [],
+          "equal": true
+        }
+      },
+      "3.3.8": {
+        "s1_s2_equal": true,
+        "s1_s4_equal": true,
+        "s2_inventory": {
+          "a5_count": 34,
+          "a5_only": [],
+          "cyclonedx_count": 34,
+          "cyclonedx_only": [],
+          "equal": true
+        }
+      }
+    },
+    "s3_vs_s1": {
+      "3.3.4": {
+        "api_only": [],
+        "count": 81,
+        "equal": true,
+        "scanner_only": []
+      },
+      "3.3.5": {
+        "api_only": [],
+        "count": 77,
+        "equal": true,
+        "scanner_only": []
+      },
+      "3.3.7": {
+        "api_only": [],
+        "count": 75,
+        "equal": true,
+        "scanner_only": []
+      },
+      "3.3.8": {
+        "api_only": [],
+        "count": 73,
+        "equal": true,
+        "scanner_only": []
+      }
+    }
+  },
+  "scenario_evidence": {
+    "elapsed_seconds": 135.34221519199946,
+    "historical": {
+      "applicable_profile_active": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "spring-boot-starter-tomcat:3.3.4",
+          "selected_version": "10.1.31"
+        },
+        "passed": true
+      },
+      "applicable_profile_inactive": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "spring-boot-starter-tomcat:3.3.4",
+          "selected_version": "10.1.30"
+        },
+        "passed": true
+      },
+      "dependency_exclusion": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": null,
+          "selected_version": null
+        },
+        "passed": true
+      },
+      "dependency_management_override": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "spring-boot-starter-tomcat:3.3.4",
+          "selected_version": "10.1.31"
+        },
+        "passed": true
+      },
+      "direct_override": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "experiment:direct:1",
+          "selected_version": "10.1.31"
+        },
+        "passed": true
+      },
+      "multi_module": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "reactor_collection_without_install": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "experiment:library:1",
+          "selected_version": "10.1.31"
+        },
+        "passed": true
+      },
+      "transitive_mediation": {
+        "checks": {
+          "command_succeeded": true,
+          "path": true,
+          "selected_version": true
+        },
+        "expected": {
+          "path_contains": "org.apache.httpcomponents:httpclient:4.5.14",
+          "selected_version": "1.11"
+        },
+        "passed": true
+      }
+    },
+    "independent_direct": {
+      "paths": [
+        [
+          "experiment:independent-direct:1",
+          "commons-io:commons-io:2.11.0"
+        ]
+      ],
+      "selected": "2.11.0"
+    },
+    "other_bom": {
+      "paths": [
+        [
+          "experiment:other-bom:1",
+          "com.fasterxml.jackson.core:jackson-databind:2.16.2"
+        ]
+      ],
+      "selected": "2.16.2"
+    },
+    "override": {
+      "3.3.4": {
+        "paths": [
+          [
+            "experiment:case-3.3.4-override-10.1.30:1",
+            "org.springframework.boot:spring-boot-starter-web:3.3.4",
+            "org.springframework.boot:spring-boot-starter-tomcat:3.3.4",
+            "org.apache.tomcat.embed:tomcat-embed-core:10.1.30"
+          ]
+        ],
+        "selected": "10.1.30"
+      },
+      "3.3.5": {
+        "paths": [
+          [
+            "experiment:case-3.3.5-override-10.1.30:1",
+            "org.springframework.boot:spring-boot-starter-web:3.3.5",
+            "org.springframework.boot:spring-boot-starter-tomcat:3.3.5",
+            "org.apache.tomcat.embed:tomcat-embed-core:10.1.30"
+          ]
+        ],
+        "selected": "10.1.30"
+      },
+      "3.3.7": {
+        "paths": [
+          [
+            "experiment:case-3.3.7-override-10.1.30:1",
+            "org.springframework.boot:spring-boot-starter-web:3.3.7",
+            "org.springframework.boot:spring-boot-starter-tomcat:3.3.7",
+            "org.apache.tomcat.embed:tomcat-embed-core:10.1.30"
+          ]
+        ],
+        "selected": "10.1.30"
+      },
+      "3.3.8": {
+        "paths": [
+          [
+            "experiment:case-3.3.8-override-10.1.30:1",
+            "org.springframework.boot:spring-boot-starter-web:3.3.8",
+            "org.springframework.boot:spring-boot-starter-tomcat:3.3.8",
+            "org.apache.tomcat.embed:tomcat-embed-core:10.1.30"
+          ]
+        ],
+        "selected": "10.1.30"
+      }
+    }
+  },
+  "schema": "a7-candidate-summary-v1",
+  "source_scan": {
+    "3.3.4": {
+      "exit": 0,
+      "finding_count": 0
+    },
+    "3.3.8": {
+      "exit": 0,
+      "finding_count": 0
+    }
+  },
+  "timestamp_utc": "2026-10-15",
+  "versions": [
+    "3.3.4",
+    "3.3.5",
+    "3.3.7",
+    "3.3.8"
+  ],
+  "vulnerability_comparison": {
+    "3.3.4": {
+      "additional": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "UNKNOWN": 0
+      },
+      "addressed": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "UNKNOWN": 0
+      },
+      "candidate_total": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      },
+      "counts": {
+        "additional": 0,
+        "addressed": 0,
+        "candidate_total": 81,
+        "original": 81,
+        "remaining": 81
+      },
+      "original": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      },
+      "remaining": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      }
+    },
+    "3.3.5": {
+      "additional": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "UNKNOWN": 0
+      },
+      "addressed": {
+        "CRITICAL": 0,
+        "HIGH": 1,
+        "LOW": 0,
+        "MEDIUM": 3,
+        "UNKNOWN": 0
+      },
+      "candidate_total": {
+        "CRITICAL": 11,
+        "HIGH": 27,
+        "LOW": 12,
+        "MEDIUM": 27,
+        "UNKNOWN": 0
+      },
+      "counts": {
+        "additional": 0,
+        "addressed": 4,
+        "candidate_total": 77,
+        "original": 81,
+        "remaining": 77
+      },
+      "original": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      },
+      "remaining": {
+        "CRITICAL": 11,
+        "HIGH": 27,
+        "LOW": 12,
+        "MEDIUM": 27,
+        "UNKNOWN": 0
+      }
+    },
+    "3.3.7": {
+      "additional": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "UNKNOWN": 0
+      },
+      "addressed": {
+        "CRITICAL": 1,
+        "HIGH": 2,
+        "LOW": 0,
+        "MEDIUM": 3,
+        "UNKNOWN": 0
+      },
+      "candidate_total": {
+        "CRITICAL": 10,
+        "HIGH": 26,
+        "LOW": 12,
+        "MEDIUM": 27,
+        "UNKNOWN": 0
+      },
+      "counts": {
+        "additional": 0,
+        "addressed": 6,
+        "candidate_total": 75,
+        "original": 81,
+        "remaining": 75
+      },
+      "original": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      },
+      "remaining": {
+        "CRITICAL": 10,
+        "HIGH": 26,
+        "LOW": 12,
+        "MEDIUM": 27,
+        "UNKNOWN": 0
+      }
+    },
+    "3.3.8": {
+      "additional": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "UNKNOWN": 0
+      },
+      "addressed": {
+        "CRITICAL": 1,
+        "HIGH": 2,
+        "LOW": 1,
+        "MEDIUM": 4,
+        "UNKNOWN": 0
+      },
+      "candidate_total": {
+        "CRITICAL": 10,
+        "HIGH": 26,
+        "LOW": 11,
+        "MEDIUM": 26,
+        "UNKNOWN": 0
+      },
+      "counts": {
+        "additional": 0,
+        "addressed": 8,
+        "candidate_total": 73,
+        "original": 81,
+        "remaining": 73
+      },
+      "original": {
+        "CRITICAL": 11,
+        "HIGH": 28,
+        "LOW": 12,
+        "MEDIUM": 30,
+        "UNKNOWN": 0
+      },
+      "remaining": {
+        "CRITICAL": 10,
+        "HIGH": 26,
+        "LOW": 11,
+        "MEDIUM": 26,
+        "UNKNOWN": 0
+      }
+    }
+  },
+  "workspace_measurements": {
+    "disposable_workspace_bytes": 358279081,
+    "retained_summary_bytes_before_manifest": 73238,
+    "unretained_raw_scanner_bytes": 44566410
+  }
+}

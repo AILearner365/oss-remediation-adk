@@ -1,24 +1,23 @@
-# A7 comparison
+# A7 solution comparison
 
 | Criterion | S1 | S2 | S3 | S4 |
 | --- | --- | --- | --- | --- |
-| Maven-selected inventory | Native plugin resolution | Native plus A5 reconciliation | A5 | A5 |
-| Paths | No | A5 | A5 | A5 |
-| Scanner semantics | OSV Scanner | OSV Scanner | Not equivalent; API semantics | OSV Scanner |
-| Second resolver | Yes | Yes | No | No |
-| Focused inventory correctness | 34 components | exact 34/34 | queried all 34 | exact 34/34 |
-| Focused scanner equivalence | reference side | same native scan | not claimed | exact 81/81 pairs |
-| Application JAR download | 34/34 | same overhead | A5 boundary | A5 boundary |
-| Main risk | duplicated resolution and packaged/metadata scope | cost without demonstrated added correctness | advisory interpretation and detail fan-out | converter/schema and scanner-input maintenance |
+| Effective inventory | Native CycloneDX | A5 + native | A5 | A5 |
+| Paths | No | Yes | Yes | Yes |
+| All-candidate finding agreement | Exact | Exact | Exact | Exact |
+| Second Maven resolution | Yes | Yes | No | No |
+| Application JAR downloads | 95 | 95 | 0 | 0 |
+| Fresh/warm seconds | 74.512/57.270 | 125.183/85.143 | 62.750/40.542 | **61.650/37.771** |
+| Repository bytes | 71,350,075 | 87,027,720 | **20,241,909** | **20,241,909** |
+| Main maintenance risk | Plugin inventory behavior | Duplicate resolution | API/advisory semantics | Small SBOM converter/scanner contract |
 
-S1 demonstrates that native CycloneDX works, but it downloaded every selected
-application JAR in the focused fixture. S2 retained A5 explanation and found no
-inventory difference, while its combined fresh cost was not measured. S3
-successfully retrieved live details, but required 81 API calls and is not
-scanner-equivalent. S4 used a 76% smaller SBOM than S1 and matched all 81
-scanner identities without a second Maven mechanism; that result is limited to
-one baseline configuration.
+S1 is correct but lacks A5 paths and downloads application JARs. S2 adds paths
+without a measured correctness advantage and is most expensive. S3 is finding
+equivalent and deduplicates queries, but owns advisory detail, alias and severity
+semantics and made 81 API calls. S4 delegates those semantics to OSV Scanner,
+retains A5 paths, avoids a second resolver and has the best measured
+time/storage combination.
 
-No performance ranking is fair yet: collection stages were not measured from
-equivalent fresh/warm caches as complete solution pipelines, and peak memory is
-missing.
+No Critical/High discrepancy is unexplained. The source-scan difference follows
+non-transitive semantics; the packaged-JAR difference follows metadata-only
+starters and repackager-added content.

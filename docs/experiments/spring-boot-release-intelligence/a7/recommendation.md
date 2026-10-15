@@ -1,18 +1,21 @@
 # A7 recommendation
 
-## Decision: CONTINUE
+## Select S4 for the bounded collector
 
-Do not select an A7 winner yet. S4 has the strongest result in the focused live
-subset: it preserved A5 paths, avoided a second resolver, produced the same 81
-scanner finding identities as S1, and generated a 21,377-byte SBOM versus
-89,883 bytes. This is promising evidence, not a winner declaration.
+S4—A5 TGF collection, deterministic minimal CycloneDX and OSV Scanner—is the
+evidence-backed winner for the tested release-comparison boundary.
 
-A defensible selection still requires the full C1–C10 candidate matrix,
-baseline/candidate vulnerability dispositions and severity counts, packaged
-JAR/WAR comparison, independent project
-scan comparison, equivalent cold/warm whole-pipeline benchmarks, peak memory,
-failure injection, and cross-candidate S3 deduplication measurement.
+Across Boot 3.3.4, 3.3.5, 3.3.7 and 3.3.8 it demonstrated exact inventory and
+S1/S2/S3/S4 finding agreement, severity/disposition arithmetic, override and
+ownership visibility, dependency paths, explicit incomplete status, and no
+unexplained scanner discrepancy.
 
-S1–S4 therefore remain `PARTIALLY PROVEN`. Continue with the smallest next run
-that exercises all four against identical baseline and multiple candidate
-inputs; do not infer clean status from any partial collection or scan.
+Among correct solutions it avoids a second resolver and application JAR
+downloads, delegates advisory semantics to OSV Scanner, tied for the smallest
+repository, and recorded the lowest fresh/warm workload times.
+
+This does not make S4 production-ready. C6 has synthetic but no live additional
+finding; C9 lacks WAR/provided-scope coverage; private repositories,
+scanner-cache telemetry, larger reactors and S3 HTTP RSS remain unverified.
+Candidate builds/tests and compatibility validation remain a separate stage.
+Reopen the selection if those environments reveal a material discrepancy.

@@ -224,6 +224,51 @@ def compare_findings(baseline: list[dict], candidate: list[dict], complete: bool
             "clean": complete and not current}
 
 
+SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
+
+
+def severity_summary(findings: list[dict]) -> dict[str, int]:
+    result = {severity: 0 for severity in SEVERITIES}
+    for finding in findings:
+        severity = str(finding.get("severity", "UNKNOWN")).upper()
+        result[severity if severity in result else "UNKNOWN"] += 1
+    return result
+
+
+def release_comparison(baseline: list[dict], candidate: list[dict],
+                       complete: bool) -> dict:
+    comparison = compare_findings(baseline, candidate, complete)
+    result = {name: severity_summary(comparison[name]) for name in
+              ("addressed", "remaining", "additional", "candidate_total")}
+    result["original"] = severity_summary(baseline)
+    result["counts"] = {"original": len(baseline),
+                        **{name: len(comparison[name]) for name in
+                           ("addressed", "remaining", "additional", "candidate_total")}}
+    result["invariants"] = {
+        "original_equals_addressed_plus_remaining":
+            len(baseline) == len(comparison["addressed"]) + len(comparison["remaining"]),
+        "candidate_equals_remaining_plus_additional":
+            len(candidate) == len(comparison["remaining"]) + len(comparison["additional"]),
+    }
+    result["assessment"] = comparison["assessment"]
+    return result
+
+
+def management_category(coordinate: str, *, direct: bool,
+                        explicit_versions: set[str], boot_defaults: dict[str, str],
+                        other_defaults: dict[str, str]) -> str:
+    """Classify only from independently supplied effective-model evidence."""
+    if coordinate in boot_defaults and coordinate in other_defaults:
+        return "AMBIGUOUS"
+    if coordinate in explicit_versions and coordinate in boot_defaults:
+        return "BOOT_MANAGED_OVERRIDDEN"
+    if coordinate in other_defaults:
+        return "OTHER_MANAGED"
+    if coordinate in boot_defaults:
+        return "BOOT_MANAGED"
+    return "INDEPENDENT_DIRECT" if direct else "INDEPENDENT_TRANSITIVE"
+
+
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")

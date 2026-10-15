@@ -1,9 +1,10 @@
 # Spring Boot Release Intelligence feasibility handoff
 
-> **A7 update (2026-10-15):** A bounded four-solution follow-up is documented in
-> [a7/recommendation.md](a7/recommendation.md). All solutions are currently
-> `PARTIALLY PROVEN`; the decision is `CONTINUE`. S4 is promising but the A7
-> evidence does not yet justify replacing the phase-close A5 collector decision.
+> **A7 update (2026-10-15):** The completed four-solution comparison is in
+> [a7/recommendation.md](a7/recommendation.md). S4 (A5, minimal CycloneDX and
+> OSV Scanner) is selected for the bounded collector after exact four-release
+> inventory/finding equivalence and resource comparison. Documented C6/C9 and
+> environment limitations remain outside that selection.
 
 ## Phase status
 
