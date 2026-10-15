@@ -1,5 +1,10 @@
 # Spring Boot Release Intelligence feasibility handoff
 
+> **A7 update (2026-10-15):** A bounded four-solution follow-up is documented in
+> [a7/recommendation.md](a7/recommendation.md). All solutions are currently
+> `PARTIALLY PROVEN`; the decision is `CONTINUE`. S4 is promising but the A7
+> evidence does not yet justify replacing the phase-close A5 collector decision.
+
 ## Phase status
 
 The A1–A6 feasibility phase is closed at commit

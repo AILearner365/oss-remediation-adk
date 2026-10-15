@@ -1,0 +1,474 @@
+{
+  "environment": {
+    "cyclonedx_maven_plugin": "2.9.1",
+    "java": "21.0.12.1",
+    "maven": "3.9.16",
+    "osv_scanner": "2.6.0"
+  },
+  "equivalence": {
+    "pair_count": 81,
+    "pairs": [
+      [
+        "jackson-core",
+        "2.17.2",
+        "GHSA-72hv-8253-57qq"
+      ],
+      [
+        "jackson-core",
+        "2.17.2",
+        "GHSA-7hhh-6rmp-j9qf"
+      ],
+      [
+        "jackson-core",
+        "2.17.2",
+        "GHSA-p6pp-m3f8-5c89"
+      ],
+      [
+        "jackson-core",
+        "2.17.2",
+        "GHSA-r7wm-3cxj-wff9"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-3pjw-73gf-8qr5"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-5jmj-h7xm-6q6v"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-cxp5-3px4-pw24"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-gx83-3vf8-gh7j"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-hgj6-7826-r7m5"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-j3rv-43j4-c7qm"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-q4xh-88c3-wmh7"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-rmj7-2vxq-3g9f"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-vvgp-rfg2-7rr6"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-wjgm-6hv5-3cvf"
+      ],
+      [
+        "jackson-databind",
+        "2.17.2",
+        "GHSA-wv8q-qhhj-9h54"
+      ],
+      [
+        "log4j-api",
+        "2.23.1",
+        "GHSA-qv9r-c865-cp47"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-25qh-j22f-pwp8"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-6v67-2wr5-gvf4"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-jhq6-gfmj-v8fx"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-p47f-322f-whfh"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-pr98-23f8-jwxv"
+      ],
+      [
+        "logback-core",
+        "1.5.8",
+        "GHSA-qqpg-mvqg-649v"
+      ],
+      [
+        "spring-boot",
+        "3.3.4",
+        "GHSA-rc42-6c7j-7h5r"
+      ],
+      [
+        "spring-boot",
+        "3.3.4",
+        "GHSA-wwpq-f5c3-7hvx"
+      ],
+      [
+        "spring-boot-autoconfigure",
+        "3.3.4",
+        "GHSA-ggg2-9786-hwc8"
+      ],
+      [
+        "spring-context",
+        "6.1.13",
+        "GHSA-4gc7-5j7h-4qph"
+      ],
+      [
+        "spring-context",
+        "6.1.13",
+        "GHSA-4wp7-92pw-q264"
+      ],
+      [
+        "spring-core",
+        "6.1.13",
+        "GHSA-659m-px2c-25wj"
+      ],
+      [
+        "spring-core",
+        "6.1.13",
+        "GHSA-jmp9-x22r-554x"
+      ],
+      [
+        "spring-expression",
+        "6.1.13",
+        "GHSA-9f52-rjqv-25qv"
+      ],
+      [
+        "spring-expression",
+        "6.1.13",
+        "GHSA-r5w3-xv2f-j59q"
+      ],
+      [
+        "spring-expression",
+        "6.1.13",
+        "GHSA-wxpp-56q6-5pcg"
+      ],
+      [
+        "spring-web",
+        "6.1.13",
+        "GHSA-4gc7-5j7h-4qph"
+      ],
+      [
+        "spring-web",
+        "6.1.13",
+        "GHSA-6r3c-xf4w-jxjm"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-3chg-m5w7-qfv5"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-4773-3jfm-qmx3"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-6hcq-hmm3-jj3c"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-6p4f-wcwh-5vvm"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-72pg-x5f8-j25j"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-957g-f97v-vppc"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-cjpg-rgq5-fr37"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-g5vr-rgqm-vf78"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-h3qp-gqrc-q736"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-mq64-j8f9-9gcj"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-pc63-qcmh-9cmg"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-r936-gwx5-v52f"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-wg35-8jpf-2xv3"
+      ],
+      [
+        "spring-webmvc",
+        "6.1.13",
+        "GHSA-x23c-287f-qqv5"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-23hv-mwm6-g8jf"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-25xr-qj8w-c4vf"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-27hp-xhwr-wr2m"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-3p2h-wqq4-wf4h"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-42wg-hm62-jcwg"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-563x-q5rq-57qp"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-5j33-cvvr-w245"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-5m62-pw8w-7w9f"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-5mp6-jrq3-r938"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-83qj-6fr2-vhqg"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-9m3c-qcxr-9x87"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-9m89-8frq-c98c"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-9xv2-5v5q-p794"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-ff77-26x5-69cr"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-fpj8-gq4v-p354"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-fv25-8xcx-gqjc"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-gcx9-497g-6cp6"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-gqp3-2cvr-x8m3"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-gx5v-xp9w-j4cg"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-h2fw-rfh5-95r3"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-h3gc-qfqq-6h8f"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-h3x4-894j-xpx5"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-h6fc-48rj-7qqh"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-hgrr-935x-pq79"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-mgp5-rv84-w37q"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-qvf5-hvjx-wm27"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-r29c-68gh-xp6x"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-rv64-5gf8-9qq8"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-vfww-5hm6-hx2j"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-wc4r-xq3c-5cf3"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-wmwf-9ccg-fff5"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-wr62-c79q-cv37"
+      ],
+      [
+        "tomcat-embed-core",
+        "10.1.30",
+        "GHSA-x4m4-345f-5h5g"
+      ]
+    ],
+    "s1_s4_package_version_advisory_equal": true
+  },
+  "fixture": "Boot 3.3.4 starter-web historical A5 fixture",
+  "limitations": [
+    "Peak RSS unavailable because GNU time is not installed",
+    "Candidate release comparison not executed",
+    "C1-C10 matrix not executed",
+    "Direct project scan was invoked in the same scanner command and is not an independent isolated reference",
+    "S3 batch matching is not claimed scanner-equivalent"
+  ],
+  "s1": {
+    "application_jar_count": 34,
+    "finding_count": 81,
+    "fresh_ms": 24551,
+    "native_components": 34,
+    "repository_bytes": 29943373,
+    "repository_jar_count": 53,
+    "sbom_bytes": 89883,
+    "scanner_exit": 1,
+    "scanner_ms": 1769,
+    "status": "PARTIALLY_PROVEN",
+    "warm_ms": 10754
+  },
+  "s2": {
+    "a5_count": 34,
+    "a5_only": [],
+    "cyclonedx_count": 34,
+    "cyclonedx_only": [],
+    "equal": true,
+    "note": "A5 inventory was pre-existing for this focused run; combined fresh overhead not measured",
+    "status": "PARTIALLY_PROVEN"
+  },
+  "s3": {
+    "batch_queries": 34,
+    "complete": true,
+    "elapsed_seconds": 7.2940684550003425,
+    "http_requests_including_details": 81,
+    "naive_queries": 34,
+    "note": "cross-candidate deduplication not measured with one configuration",
+    "status": "PARTIALLY_PROVEN"
+  },
+  "s4": {
+    "components": 34,
+    "finding_count": 81,
+    "fresh_scanner_ms": 910,
+    "sbom_bytes": 21377,
+    "scanner_exit": 1,
+    "schema_sha256": "067f7824b08653839ea050ae9e09ca48375eadc2652b0e2a299476e7db90335b",
+    "schema_structural_errors": [],
+    "schema_url": "https://raw.githubusercontent.com/CycloneDX/specification/1.5/schema/bom-1.5.schema.json",
+    "schema_validation_errors": 0,
+    "status": "PARTIALLY_PROVEN",
+    "warm_scanner_ms": 952
+  },
+  "schema": "a7-live-subset-v1",
+  "scope": "single baseline; not the full C1-C10 matrix",
+  "timestamp_utc": "2026-10-15"
+}
