@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any, Mapping
 from urllib.parse import urlsplit
@@ -414,6 +414,73 @@ class TaskRequest:
             "intelligence": {"sbri": {"mode": self.sbri_mode}},
             "delivery": {"mode": self.delivery_mode},
             "metadata": metadata,
+        }
+
+
+@dataclass(frozen=True)
+class PreparationRecord:
+    """Immutable identity of a successfully prepared task worktree."""
+
+    task_id: str
+    repository_url: str
+    base_ref: str
+    expected_commit: str
+    baseline_commit: str
+    source_path: str
+    workspace_path: str
+    local_branch: str
+    prepared_at: str
+    contract_version: str = CONTRACT_VERSION
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "preparation.taskId", maximum=128, pattern=IDENTIFIER)
+        repository = RepositoryRequest.from_dict(
+            {
+                "url": self.repository_url,
+                "baseRef": self.base_ref,
+                "expectedCommit": self.expected_commit,
+            }
+        )
+        object.__setattr__(self, "repository_url", repository.url)
+        object.__setattr__(self, "base_ref", repository.base_ref)
+        object.__setattr__(self, "expected_commit", repository.expected_commit)
+        baseline = _string(
+            self.baseline_commit,
+            "preparation.baselineCommit",
+            maximum=40,
+            pattern=FULL_GIT_SHA,
+        ).lower()
+        if baseline != repository.expected_commit:
+            raise ContractValidationError(
+                "preparation baseline commit must equal the registered expected commit"
+            )
+        object.__setattr__(self, "baseline_commit", baseline)
+        for value, path in (
+            (self.source_path, "preparation.sourcePath"),
+            (self.workspace_path, "preparation.workspacePath"),
+        ):
+            parsed = Path(_string(value, path, maximum=4096))
+            if not parsed.is_absolute() or str(parsed.resolve(strict=False)) != value:
+                raise ContractValidationError(f"{path} must be an absolute normalized path")
+        branch = _string(self.local_branch, "preparation.localBranch", maximum=240)
+        if any(character.isspace() for character in branch) or ".." in branch:
+            raise ContractValidationError("preparation.localBranch has an invalid format")
+        _timestamp(self.prepared_at, "preparation.preparedAt")
+        if self.contract_version != CONTRACT_VERSION:
+            raise ContractValidationError("preparation.contractVersion is unsupported")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "contractVersion": self.contract_version,
+            "taskId": self.task_id,
+            "repositoryUrl": self.repository_url,
+            "baseRef": self.base_ref,
+            "expectedCommit": self.expected_commit,
+            "baselineCommit": self.baseline_commit,
+            "sourcePath": self.source_path,
+            "workspacePath": self.workspace_path,
+            "localBranch": self.local_branch,
+            "preparedAt": self.prepared_at,
         }
 
 

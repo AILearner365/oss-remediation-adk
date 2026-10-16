@@ -1,6 +1,6 @@
-"""Shared OpenHands task contracts and durable metadata service.
+"""Shared OpenHands task metadata and deterministic preparation foundation.
 
-M2 Change 1 deliberately contains no worker or agent execution integration.
+M2 Changes 1 and 2 deliberately contain no worker or agent execution.
 """
 
 from .contracts import (
@@ -8,6 +8,7 @@ from .contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    PreparationRecord,
     ResultOutcome,
     TaskEvent,
     TaskRequest,
@@ -16,7 +17,13 @@ from .contracts import (
     TaskStatusSnapshot,
     ValidationStatus,
 )
-from .store import IdempotencyConflictError, SQLiteTaskStore
+from .preparation import (
+    DeterministicPreparer,
+    PreparationConfig,
+    PreparationError,
+    TrustedRepository,
+)
+from .store import IdempotencyConflictError, PreparationConflictError, SQLiteTaskStore
 
 __all__ = [
     "ArtifactMetadata",
@@ -24,6 +31,11 @@ __all__ = [
     "DeliveryStatus",
     "ExecutionStatus",
     "IdempotencyConflictError",
+    "DeterministicPreparer",
+    "PreparationConfig",
+    "PreparationConflictError",
+    "PreparationError",
+    "PreparationRecord",
     "ResultOutcome",
     "SQLiteTaskStore",
     "TaskEvent",
@@ -31,5 +43,6 @@ __all__ = [
     "TaskResult",
     "TaskStatus",
     "TaskStatusSnapshot",
+    "TrustedRepository",
     "ValidationStatus",
 ]

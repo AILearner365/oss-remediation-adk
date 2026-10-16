@@ -9,14 +9,17 @@ def task_request_data(
     *,
     idempotency_key: str = "repo-123-cve-batch-20261016",
     objective: str = "Resolve the identified HIGH and CRITICAL dependency vulnerabilities.",
+    repository_url: str = "https://github.com/example/maven-app.git",
+    base_ref: str = "refs/heads/main",
+    expected_commit: str = "a" * 40,
 ) -> dict[str, Any]:
     return {
         "contractVersion": "1",
         "idempotencyKey": idempotency_key,
         "repository": {
-            "url": "https://github.com/example/maven-app.git",
-            "baseRef": "refs/heads/main",
-            "expectedCommit": "a" * 40,
+            "url": repository_url,
+            "baseRef": base_ref,
+            "expectedCommit": expected_commit,
         },
         "objective": objective,
         "constraints": {

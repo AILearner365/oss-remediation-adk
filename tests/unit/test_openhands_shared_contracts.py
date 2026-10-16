@@ -7,6 +7,7 @@ from openhands_shared.contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    PreparationRecord,
     ResultOutcome,
     TaskEvent,
     TaskRequest,
@@ -109,6 +110,36 @@ class SharedContractTests(unittest.TestCase):
                 delivery_status=DeliveryStatus.NOT_REQUESTED,
                 validated_tree="b" * 40,
                 validation_report_artifact_id="validation-1",
+            )
+
+    def test_preparation_contract_requires_exact_baseline_and_absolute_paths(self):
+        record = PreparationRecord(
+            task_id="task_" + "1" * 32,
+            repository_url="https://github.com/example/maven-app.git",
+            base_ref="refs/heads/main",
+            expected_commit="a" * 40,
+            baseline_commit="a" * 40,
+            source_path="/durable/source",
+            workspace_path="/durable/workspaces/task/repository",
+            local_branch="openhands-shared/task_111",
+            prepared_at="2026-10-16T00:00:00.000Z",
+        )
+        self.assertEqual("1", record.to_dict()["contractVersion"])
+        self.assertEqual("a" * 40, record.to_dict()["baselineCommit"])
+
+        with self.assertRaisesRegex(ContractValidationError, "must equal"):
+            PreparationRecord(
+                **{
+                    **record.__dict__,
+                    "baseline_commit": "b" * 40,
+                }
+            )
+        with self.assertRaisesRegex(ContractValidationError, "absolute normalized"):
+            PreparationRecord(
+                **{
+                    **record.__dict__,
+                    "workspace_path": "relative/repository",
+                }
             )
 
     def test_result_event_and_artifact_serialize_without_secrets(self):

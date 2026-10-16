@@ -13,6 +13,7 @@ from openhands_shared.contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    PreparationRecord,
     ResultOutcome,
     TaskRequest,
     TaskResult,
@@ -23,6 +24,7 @@ from openhands_shared.contracts import (
 from openhands_shared.store import (
     ArtifactConflictError,
     IdempotencyConflictError,
+    PreparationConflictError,
     SQLiteTaskStore,
 )
 from tests.openhands_shared_fixtures import task_request_data
@@ -78,6 +80,43 @@ class SQLiteTaskStoreTests(unittest.TestCase):
 
         self.assertEqual(TaskStatus.QUEUED, self.store.get_status(task_id).status)
         self.assertEqual([1], [event.sequence for event in self.store.list_events(task_id)])
+
+    def test_preparation_record_status_and_completion_event_are_atomic(self):
+        task_id = self.store.register_task(TaskRequest.from_dict(task_request_data())).status.task_id
+        self.store.start_preparation(task_id)
+        connection = sqlite3.connect(self.database)
+        try:
+            connection.execute(
+                """
+                CREATE TRIGGER reject_preparation_completion BEFORE INSERT ON events
+                WHEN NEW.type = 'preparation.completed'
+                BEGIN SELECT RAISE(ABORT, 'test preparation event failure'); END
+                """
+            )
+            connection.commit()
+        finally:
+            connection.close()
+        record = PreparationRecord(
+            task_id=task_id,
+            repository_url="https://github.com/example/maven-app.git",
+            base_ref="refs/heads/main",
+            expected_commit="a" * 40,
+            baseline_commit="a" * 40,
+            source_path="/durable/source",
+            workspace_path=f"/durable/workspaces/{task_id}/repository",
+            local_branch=f"openhands-shared/{task_id}",
+            prepared_at=utc_now(),
+        )
+
+        with self.assertRaises(PreparationConflictError):
+            self.store.complete_preparation(record)
+
+        self.assertIsNone(self.store.get_preparation(task_id))
+        self.assertEqual(TaskStatus.PREPARING, self.store.get_status(task_id).status)
+        self.assertEqual(
+            ["task.registered", "preparation.started"],
+            [event.type for event in self.store.list_events(task_id)],
+        )
 
     def test_events_are_strictly_ordered_across_status_and_artifact_transactions(self):
         registration = self.store.register_task(TaskRequest.from_dict(task_request_data()))

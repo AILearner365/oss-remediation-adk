@@ -18,6 +18,7 @@ from .contracts import (
     ArtifactMetadata,
     DeliveryStatus,
     ExecutionStatus,
+    PreparationRecord,
     TaskEvent,
     TaskRequest,
     TaskResult,
@@ -29,7 +30,7 @@ from .contracts import (
 )
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class TaskStoreError(RuntimeError):
@@ -52,6 +53,10 @@ class InvalidTransitionError(TaskStoreError):
 
 
 class ArtifactConflictError(TaskStoreError):
+    pass
+
+
+class PreparationConflictError(TaskStoreError):
     pass
 
 
@@ -201,11 +206,14 @@ class SQLiteTaskStore:
                 """
             )
             connection.execute(
-                "INSERT OR IGNORE INTO schema_info(singleton, version) VALUES (1, ?)",
-                (SCHEMA_VERSION,),
+                "INSERT OR IGNORE INTO schema_info(singleton, version) VALUES (1, 1)"
             )
             row = connection.execute("SELECT version FROM schema_info WHERE singleton = 1").fetchone()
-            if row["version"] != SCHEMA_VERSION:
+            version = row["version"]
+            if version == 1:
+                self._migrate_v1_to_v2(connection)
+                version = 2
+            if version != SCHEMA_VERSION:
                 raise TaskStoreError(f"unsupported task database schema version {row['version']}")
         except BaseException:
             if connection.in_transaction:
@@ -213,6 +221,51 @@ class SQLiteTaskStore:
             raise
         finally:
             connection.close()
+
+    @staticmethod
+    def _migrate_v1_to_v2(connection: sqlite3.Connection) -> None:
+        """Add immutable preparation metadata without rebuilding v1 tables."""
+
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            current = connection.execute(
+                "SELECT version FROM schema_info WHERE singleton = 1"
+            ).fetchone()["version"]
+            if current == 2:
+                connection.commit()
+                return
+            if current != 1:
+                raise TaskStoreError(f"cannot migrate task database schema version {current}")
+            connection.execute(
+                """CREATE TABLE preparations (
+                    task_id TEXT PRIMARY KEY REFERENCES tasks(task_id) ON DELETE RESTRICT,
+                    repository_url TEXT NOT NULL,
+                    base_ref TEXT NOT NULL,
+                    expected_commit TEXT NOT NULL,
+                    baseline_commit TEXT NOT NULL,
+                    source_path TEXT NOT NULL,
+                    workspace_path TEXT NOT NULL UNIQUE,
+                    local_branch TEXT NOT NULL UNIQUE,
+                    prepared_at TEXT NOT NULL,
+                    CHECK (expected_commit = baseline_commit)
+                )"""
+            )
+            connection.execute(
+                """CREATE TRIGGER preparations_immutable_update
+                BEFORE UPDATE ON preparations
+                BEGIN SELECT RAISE(ABORT, 'preparation metadata is immutable'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER preparations_immutable_delete
+                BEFORE DELETE ON preparations
+                BEGIN SELECT RAISE(ABORT, 'preparation metadata is immutable'); END"""
+            )
+            connection.execute("UPDATE schema_info SET version = 2 WHERE singleton = 1")
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
 
     def register_task(self, request: TaskRequest) -> TaskRegistration:
         # Revalidate direct Python callers as strictly as REST callers.
@@ -288,6 +341,150 @@ class SQLiteTaskStore:
         try:
             row = self._task_row(connection, task_id)
             return TaskRequest.from_dict(json.loads(row["request_json"]))
+        finally:
+            connection.close()
+
+    def get_preparation(self, task_id: str) -> PreparationRecord | None:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM preparations WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            return None if row is None else self._preparation_from_row(row)
+        finally:
+            connection.close()
+
+    def start_preparation(self, task_id: str) -> TaskStatusSnapshot:
+        """Idempotently reserve the PREPARING stage for a trusted internal caller."""
+
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = self._task_row(connection, task_id)
+            current = TaskStatus(row["status"])
+            if current is TaskStatus.PREPARING:
+                status = self._status_from_row(row)
+                connection.commit()
+                return status
+            preparation = connection.execute(
+                "SELECT task_id FROM preparations WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            if preparation is not None:
+                status = self._status_from_row(row)
+                connection.commit()
+                return status
+            if current is not TaskStatus.QUEUED:
+                raise InvalidTransitionError(
+                    f"task {task_id!r} cannot start preparation from {current.value}"
+                )
+            now = utc_now()
+            connection.execute(
+                "UPDATE tasks SET status = ?, stage = ?, updated_at = ? WHERE task_id = ?",
+                (TaskStatus.PREPARING.value, _STATUS_STAGE[TaskStatus.PREPARING], now, task_id),
+            )
+            self._append_event(
+                connection,
+                task_id=task_id,
+                event_type="preparation.started",
+                stage=_STATUS_STAGE[TaskStatus.PREPARING],
+                data={},
+                timestamp=now,
+            )
+            status = self._status_from_row(self._task_row(connection, task_id))
+            connection.commit()
+            return status
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def complete_preparation(self, preparation: PreparationRecord) -> TaskStatusSnapshot:
+        """Atomically persist immutable baseline identity and enter BASELINING."""
+
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, preparation.task_id)
+            request = TaskRequest.from_dict(json.loads(task["request_json"]))
+            if (
+                preparation.repository_url != request.repository.url
+                or preparation.base_ref != request.repository.base_ref
+                or preparation.expected_commit != request.repository.expected_commit
+            ):
+                raise PreparationConflictError(
+                    "preparation identity does not match the registered task contract"
+                )
+            existing = connection.execute(
+                "SELECT * FROM preparations WHERE task_id = ?",
+                (preparation.task_id,),
+            ).fetchone()
+            if existing is not None:
+                recorded = self._preparation_from_row(existing)
+                if recorded != preparation:
+                    raise PreparationConflictError("preparation metadata is immutable")
+                status = self._status_from_row(task)
+                connection.commit()
+                return status
+            if TaskStatus(task["status"]) is not TaskStatus.PREPARING:
+                raise InvalidTransitionError(
+                    "preparation can complete only while the task is PREPARING"
+                )
+            connection.execute(
+                """INSERT INTO preparations(
+                    task_id, repository_url, base_ref, expected_commit,
+                    baseline_commit, source_path, workspace_path,
+                    local_branch, prepared_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    preparation.task_id,
+                    preparation.repository_url,
+                    preparation.base_ref,
+                    preparation.expected_commit,
+                    preparation.baseline_commit,
+                    preparation.source_path,
+                    preparation.workspace_path,
+                    preparation.local_branch,
+                    preparation.prepared_at,
+                ),
+            )
+            connection.execute(
+                "UPDATE tasks SET status = ?, stage = ?, updated_at = ? WHERE task_id = ?",
+                (
+                    TaskStatus.BASELINING.value,
+                    _STATUS_STAGE[TaskStatus.BASELINING],
+                    preparation.prepared_at,
+                    preparation.task_id,
+                ),
+            )
+            self._append_event(
+                connection,
+                task_id=preparation.task_id,
+                event_type="preparation.completed",
+                stage=_STATUS_STAGE[TaskStatus.PREPARING],
+                data={
+                    "baselineCommit": preparation.baseline_commit,
+                    "localBranch": preparation.local_branch,
+                },
+                timestamp=preparation.prepared_at,
+            )
+            status = self._status_from_row(self._task_row(connection, preparation.task_id))
+            connection.commit()
+            return status
+        except sqlite3.IntegrityError as exc:
+            if connection.in_transaction:
+                connection.rollback()
+            raise PreparationConflictError(
+                "preparation metadata could not be committed atomically"
+            ) from exc
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
         finally:
             connection.close()
 
@@ -587,4 +784,18 @@ class SQLiteTaskStore:
             sha256=row["sha256"],
             size_bytes=row["size_bytes"],
             created_at=row["created_at"],
+        )
+
+    @staticmethod
+    def _preparation_from_row(row: sqlite3.Row) -> PreparationRecord:
+        return PreparationRecord(
+            task_id=row["task_id"],
+            repository_url=row["repository_url"],
+            base_ref=row["base_ref"],
+            expected_commit=row["expected_commit"],
+            baseline_commit=row["baseline_commit"],
+            source_path=row["source_path"],
+            workspace_path=row["workspace_path"],
+            local_branch=row["local_branch"],
+            prepared_at=row["prepared_at"],
         )

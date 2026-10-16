@@ -6,7 +6,10 @@ This is the task registration and observation boundary specified by
 [OPENHANDS-SHARED-BACKEND-IMPLEMENTATION-PLAN.md](OPENHANDS-SHARED-BACKEND-IMPLEMENTATION-PLAN.md).
 It does not start a worker, prepare a repository, invoke OpenHands, contact
 Vertex AI, run Maven or a scanner, validate changes, or deliver them. All newly
-registered tasks remain `QUEUED`.
+registered tasks remain `QUEUED`. M2 Change 2 adds a separately invoked trusted
+internal preparation operation documented in
+[OPENHANDS-SHARED-PREPARATION.md](OPENHANDS-SHARED-PREPARATION.md); registration
+does not call it.
 
 ## Run locally
 
@@ -110,7 +113,7 @@ non-`none` delivery modes are rejected.
 
 ## Persistence and lifecycle invariants
 
-SQLite schema version 1 contains:
+SQLite schema version 2 retains these Change 1 tables:
 
 - `tasks`: canonical request and hash, unique idempotency key, current product
   status, separate OpenHands/validation/delivery states, optional immutable
@@ -120,6 +123,9 @@ SQLite schema version 1 contains:
 - `artifacts`: immutable metadata keyed by `(task_id, artifact_id)`, with unique
   safe relative paths, content hash and size; and
 - `schema_info`: the schema compatibility version.
+
+Change 2 adds immutable `preparations` metadata through a tested in-place
+schema migration; it does not change these HTTP response contracts.
 
 SQLite foreign keys, WAL mode, `BEGIN IMMEDIATE` write transactions, and a busy
 timeout support concurrent registration. Registration writes the task and its
