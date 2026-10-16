@@ -48,7 +48,13 @@ def _csv(value: str | list[str] | None) -> list[str]:
     if not isinstance(value, (str, list)):
         raise ReleaseSelectionError("release versions/ranges must be a comma-separated string or list")
     values = value if isinstance(value, list) else value.split(",")
-    return [str(item).strip() for item in values if str(item).strip()]
+    stripped = [str(item).strip() for item in values]
+    if not stripped or any(not item for item in stripped):
+        position = next((index for index, item in enumerate(stripped, 1) if not item), 1)
+        raise ReleaseSelectionError(
+            f"release versions/ranges contain an empty entry at position {position}"
+        )
+    return stripped
 
 
 def _version(value: str, label: str = "version") -> tuple[int, int, int]:
@@ -126,8 +132,6 @@ def select_candidates(
     published = set(metadata.versions)
     stable_published = sorted((value for value in published if STABLE_VERSION.fullmatch(value)),
                               key=lambda value: tuple(map(int, value.split("."))))
-    excluded: list[dict[str, str]] = []
-
     if mode == "explicit":
         requested_values = list(dict.fromkeys(_csv(requested)))
         if not requested_values:
@@ -192,14 +196,51 @@ def select_candidates(
             "narrow the range, increase --sbri-max-candidates, or use --sbri-versions"
         )
     selection = {
+        "baseline": baseline,
         "mode": mode,
         "source": source,
         "requested": requested_record,
         "resolved_candidates": candidates,
         "candidate_count": len(candidates),
         "max_candidates": maximum,
-        "excluded": excluded,
         "metadata": {"source": metadata.source, "sha256": metadata.sha256},
         "prereleases_allowed": False,
+        "selection_filters": {
+            "published_only": True,
+            "stable_numeric_only": True,
+            "forward_from_baseline_only": True,
+        },
+        "exclusion_reporting": (
+            "Filters are recorded, but individual excluded metadata versions are not enumerated."
+        ),
     }
+    return candidates, selection
+
+
+def validate_resolved_selection(selection: dict[str, Any], baseline: str) -> tuple[list[str], dict[str, Any]]:
+    """Validate a previously resolved, provenance-bearing selection without fetching metadata."""
+    if not isinstance(selection, dict):
+        raise ReleaseSelectionError("resolved release selection must be a JSON object")
+    if selection.get("baseline") != baseline:
+        raise ReleaseSelectionError(
+            f"resolved release selection baseline {selection.get('baseline')!r} does not match {baseline!r}"
+        )
+    candidates = selection.get("resolved_candidates")
+    if not isinstance(candidates, list) or not candidates:
+        raise ReleaseSelectionError("resolved release selection must contain resolved_candidates")
+    if len(candidates) != len(set(candidates)):
+        raise ReleaseSelectionError("resolved release selection contains duplicate candidates")
+    baseline_key = _version(baseline, "baseline version")
+    for candidate in candidates:
+        if not isinstance(candidate, str):
+            raise ReleaseSelectionError("resolved candidate versions must be strings")
+        if _version(candidate) <= baseline_key:
+            raise ReleaseSelectionError(
+                f"resolved candidate {candidate!r} is not newer than baseline {baseline}"
+            )
+    if selection.get("candidate_count") != len(candidates):
+        raise ReleaseSelectionError("resolved release selection candidate_count is inconsistent")
+    metadata = selection.get("metadata")
+    if not isinstance(metadata, dict) or not metadata.get("source") or not metadata.get("sha256"):
+        raise ReleaseSelectionError("resolved release selection lacks metadata source/SHA-256 provenance")
     return candidates, selection

@@ -8,6 +8,7 @@ from spring_boot_release_intelligence.release_selection import (
     Metadata,
     ReleaseSelectionError,
     select_candidates,
+    validate_resolved_selection,
 )
 
 
@@ -30,6 +31,8 @@ class ReleaseSelectionTests(unittest.TestCase):
         self.assertEqual(["4.0.7", "4.0.8"], releases)
         self.assertEqual("automatic", evidence["mode"])
         self.assertEqual("fixture-sha256", evidence["metadata"]["sha256"])
+        self.assertNotIn("excluded", evidence)
+        self.assertIn("not enumerated", evidence["exclusion_reporting"])
 
     def test_single_and_multiple_ranges_are_complete(self):
         releases, evidence = self.select(ranges="4.0.x")
@@ -44,9 +47,19 @@ class ReleaseSelectionTests(unittest.TestCase):
         self.assertEqual(["4.1.0", "4.1.1", "5.0.0", "5.0.1"], releases)
 
     def test_explicit_versions_are_validated_and_deduplicated(self):
-        releases, evidence = self.select(versions="4.1.1,4.0.8,4.1.1")
+        releases, evidence = self.select(versions=" 4.1.1, 4.0.8 ,4.1.1 ")
         self.assertEqual(["4.0.8", "4.1.1"], releases)
         self.assertEqual(["4.1.1", "4.0.8"], evidence["requested"])
+
+    def test_empty_csv_entries_are_rejected(self):
+        for key, value in (("versions", "4.0.8,,4.1.1"),
+                           ("ranges", "4.0.x,"),
+                           ("versions", ["4.0.8", " "])):
+            with self.subTest(key=key, value=value), self.assertRaisesRegex(
+                    ReleaseSelectionError, "empty entry"):
+                self.select(**{key: value})
+        with self.assertRaisesRegex(ReleaseSelectionError, "empty entry"):
+            self.select(config={"release_selection": {"ranges": ["4.0.x", ""]}})
 
     def test_invalid_unpublished_prerelease_and_downgrade_are_rejected(self):
         for versions, text in (("4.1", "invalid version"),
@@ -76,6 +89,12 @@ class ReleaseSelectionTests(unittest.TestCase):
     def test_legacy_bounded_range_remains_supported(self):
         releases, _ = self.select(ranges="4.0.7..4.1.0")
         self.assertEqual(["4.0.7", "4.0.8", "4.1.0"], releases)
+
+    def test_resolved_selection_is_validated_without_metadata_lookup(self):
+        candidates, selection = self.select(versions="4.0.8,4.1.1")
+        self.assertEqual((candidates, selection), validate_resolved_selection(selection, "4.0.6"))
+        with self.assertRaisesRegex(ReleaseSelectionError, "does not match"):
+            validate_resolved_selection(selection, "4.0.7")
 
 
 if __name__ == "__main__":

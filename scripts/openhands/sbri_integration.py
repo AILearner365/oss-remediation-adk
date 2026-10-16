@@ -233,20 +233,16 @@ def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
     run_dir = root / fingerprint
     output = run_dir / "output"
     execution_path = run_dir / "execution.json"
+    selection_path = run_dir / "release-selection.json"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    selection_path.write_text(json.dumps(selection, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if execution_path.is_file() and (output / "result.json").is_file():
         record = json.loads(execution_path.read_text())
         record.update({"reused": True, "duplicateExecutionAvoided": True})
         (root / "latest.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
         return record
-    run_dir.mkdir(parents=True, exist_ok=True)
     command = [str(control_repo / "sbri"), "evaluate", "--project", str(project),
-               "--output", str(output)]
-    if release_versions:
-        command.extend(["--releases", release_versions])
-    elif release_ranges:
-        command.extend(["--range", release_ranges])
-    if max_candidates is not None:
-        command.extend(["--max-candidates", str(max_candidates)])
+               "--output", str(output), "--resolved-selection-file", str(selection_path)]
     if scanner:
         command.extend(["--scanner", str(scanner)])
     if config:
@@ -270,6 +266,7 @@ def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
               "duplicateExecutionAvoided": False, "exitCode": exit_code,
               "fingerprint": fingerprint, "request": request, "command": command,
               "releaseSelection": selection,
+              "releaseSelectionPath": str(selection_path),
               "elapsedSeconds": time.monotonic() - started, "measurement": measurement,
               "outputFiles": output_files, "outputBytes": output_bytes,
               "mavenCacheFiles": cache_files, "mavenCacheBytes": cache_bytes,
@@ -303,12 +300,18 @@ def agent_message(record: dict) -> str:
             "rank 1 as a compatibility conclusion or mandatory upgrade.")
 
 
+def require_valid_selection(record: dict[str, Any]) -> None:
+    """Stop before agent/model invocation for invalid user selection only."""
+    if record.get("status") == "INVALID_RELEASE_SELECTION":
+        raise SystemExit("SBRI release selection rejected: " + record["message"])
+
+
 def retain_review_bundle(latest: Path, destination: Path) -> None:
     """Copy bounded durable evidence while excluding caches and materialized workspaces."""
     record = json.loads(latest.read_text(encoding="utf-8"))
     destination.mkdir(parents=True, exist_ok=True)
     shutil.copy2(latest, destination / "latest.json")
-    for key in ("summaryPath", "summaryJsonPath", "commandLog"):
+    for key in ("summaryPath", "summaryJsonPath", "commandLog", "releaseSelectionPath"):
         source = Path(record[key]) if record.get(key) else None
         if source and source.is_file():
             shutil.copy2(source, destination / source.name)

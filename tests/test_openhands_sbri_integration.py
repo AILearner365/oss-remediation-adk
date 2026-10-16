@@ -11,6 +11,7 @@ from unittest.mock import patch
 from scripts.openhands.sbri_integration import (
     agent_message,
     applicability,
+    require_valid_selection,
     retain_review_bundle,
     run_pre_edit_intelligence,
 )
@@ -74,7 +75,11 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             invocations.append(command)
             output = Path(command[command.index("--output") + 1]); output.mkdir(parents=True)
             if exit_code in (0, 3) or status == "FAILURE":
-                (output / "result.json").write_text(json.dumps(result(status)))
+                observed = result(status)
+                manifest = Path(command[command.index("--resolved-selection-file") + 1])
+                observed["execution"]["release_selection"] = json.loads(manifest.read_text())
+                observed["execution"]["evaluated_releases"] = ["4.0.6", *candidates]
+                (output / "result.json").write_text(json.dumps(observed))
                 (output / "report.html").write_text("<html></html>")
                 (output / "evidence").mkdir()
             kwargs["log"].write_text("fixture execution\n")
@@ -83,12 +88,13 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
         candidates = list(dict.fromkeys((release_versions or "4.0.8").split(",")))
         mode = "explicit" if release_versions else ("range" if release_ranges else "automatic")
         selection = {"mode": mode, "source": "cli" if release_versions or release_ranges else "automatic",
+                     "baseline": "4.0.6",
                      "requested": release_versions or release_ranges or ["4.0.x"],
                      "resolved_candidates": candidates, "candidate_count": len(candidates),
-                     "max_candidates": 12, "excluded": [],
+                     "max_candidates": 12,
                      "metadata": {"source": "fixture", "sha256": "x"}}
         with patch("scripts.openhands.sbri_integration.select_candidates",
-                   return_value=(["4.0.8"], selection)), \
+                   return_value=(candidates, selection)), \
              patch("scripts.openhands.sbri_integration._execute_sbri", side_effect=fake_execute):
             record = run_pre_edit_intelligence(
                 control_repo=ROOT, project=project,
@@ -172,7 +178,10 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             second, second_calls = self.execute(project, state, release_versions="4.0.8,4.1.1")
             self.assertEqual(1, len(first_calls)); self.assertEqual(1, len(second_calls))
             self.assertNotEqual(first["fingerprint"], second["fingerprint"])
-            self.assertIn("4.0.8,4.1.1", second_calls[0])
+            self.assertIn("--resolved-selection-file", second_calls[0])
+            manifest = json.loads(Path(second["releaseSelectionPath"]).read_text())
+            self.assertEqual(["4.0.8", "4.1.1"], manifest["resolved_candidates"])
+            self.assertEqual(manifest, second["releaseSelection"])
 
     def test_changed_application_source_invalidates_cache(self):
         with tempfile.TemporaryDirectory() as value:
@@ -194,7 +203,8 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             config.write_text(json.dumps({"release_selection": {"versions": ["4.0.8"]},
                                           "scanner": "configured-scanner"}))
             record, calls = self.execute(project, state, config=config)
-            self.assertIn("--config", calls[0]); self.assertNotIn("--releases", calls[0])
+            self.assertIn("--config", calls[0]); self.assertIn("--resolved-selection-file", calls[0])
+            self.assertNotIn("--releases", calls[0])
             self.assertNotIn("--scanner", calls[0])
             self.assertEqual("configured-scanner", record["request"]["config"]["content"]["scanner"])
             self.assertEqual("configured-scanner", record["request"]["scanner"]["requested"])
@@ -208,10 +218,44 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
         self.assertIn('parser.add_argument("--sbri"', source)
         self.assertIn('selection.add_argument("--sbri-versions"', source)
         self.assertIn('selection.add_argument("--sbri-range"', source)
-        self.assertIn('sbri_record["status"] == "INVALID_RELEASE_SELECTION"', source)
-        self.assertLess(source.index('sbri_record["status"] == "INVALID_RELEASE_SELECTION"'),
+        self.assertIn("require_valid_selection(sbri_record)", source)
+        self.assertLess(source.index("require_valid_selection(sbri_record)"),
                         source.index("conversation.send_message(task)"))
         self.assertIn("argparse.BooleanOptionalAction", source)
+
+    def test_invalid_selection_stops_before_model_boundary(self):
+        for message in ("malformed version", "conflicting selection", "candidate limit exceeded"):
+            with self.subTest(message=message), self.assertRaisesRegex(SystemExit, message):
+                require_valid_selection({"status": "INVALID_RELEASE_SELECTION", "message": message})
+        require_valid_selection({"status": "FAILED", "message": "scanner unavailable"})
+
+    def test_candidate_resolution_occurs_once_and_manifest_is_evaluated(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); project = self.make_project(root); state = root / "state"
+            first = {"baseline": "4.0.6", "mode": "range", "source": "cli",
+                     "requested": ["4.0.x"], "resolved_candidates": ["4.0.7"],
+                     "candidate_count": 1, "max_candidates": 12,
+                     "metadata": {"source": "fixture", "sha256": "first"}}
+            calls = []
+            def execute(command, **kwargs):
+                manifest = json.loads(Path(command[command.index("--resolved-selection-file") + 1]).read_text())
+                calls.append(manifest)
+                output = Path(command[command.index("--output") + 1]); output.mkdir(parents=True)
+                observed = result(); observed["execution"]["release_selection"] = manifest
+                observed["execution"]["evaluated_releases"] = ["4.0.6", *manifest["resolved_candidates"]]
+                (output / "result.json").write_text(json.dumps(observed)); (output / "report.html").write_text("x")
+                return {"exitCode": 0, "wallSeconds": 1, "peakProcessTreeRssKib": 1, "timedOut": False}
+            with patch("scripts.openhands.sbri_integration.select_candidates",
+                       return_value=(["4.0.7"], first)) as selector, \
+                 patch("scripts.openhands.sbri_integration._execute_sbri", side_effect=execute):
+                record = run_pre_edit_intelligence(control_repo=ROOT, project=project,
+                    task="Resolve Maven Spring Boot security vulnerabilities", state_dir=state,
+                    release_ranges="4.0.x")
+            selector.assert_called_once()
+            self.assertEqual([first], calls)
+            output = json.loads(Path(record["resultPath"]).read_text())
+            self.assertEqual(first, output["execution"]["release_selection"])
+            self.assertEqual(first, record["releaseSelection"])
 
     def test_gate2_shell_launchers_forward_release_selection_arguments(self):
         fresh = FRESH_RUN.read_text(); execute = EXECUTE.read_text()

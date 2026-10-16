@@ -94,6 +94,17 @@ retained result; changed inputs produce a different directory. Conversation
 persistence, the task message and `sbri/latest.json` keep references available
 after context condensation or recovery.
 
+Gate-2 resolves metadata once and writes the exact provenance-bearing selection
+to its fingerprinted run directory. The standalone CLI validates and evaluates
+that resolved manifest without retrieving metadata again. The manifest,
+fingerprint, result and agent summary therefore refer to one identical candidate
+set even if Maven Central metadata changes while an evaluation is running.
+
+Selection evidence records the applied published/stable/forward filters and
+states that individual excluded metadata versions are not enumerated. It does
+not emit an empty `excluded` list that could imply comprehensive exclusion
+tracking.
+
 Disable pre-edit integration with `--no-sbri` or `OPENHANDS_SBRI=0`. This does
 not remove the standalone CLI launcher.
 

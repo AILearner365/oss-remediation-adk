@@ -26,7 +26,11 @@ if str(CONTROL_REPO) not in sys.path:
     sys.path.insert(0, str(CONTROL_REPO))
 
 from maven_repository_server import serve_maven_repository
-from scripts.openhands.sbri_integration import agent_message, run_pre_edit_intelligence
+from scripts.openhands.sbri_integration import (
+    agent_message,
+    require_valid_selection,
+    run_pre_edit_intelligence,
+)
 
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
@@ -566,8 +570,7 @@ def main() -> int:
                 "rankForcedAsStrategy", "measurement", "outputBytes", "mavenCacheJarCount",
                 "mavenCacheJarBytes", "releaseSelection", "request")
         }, sort_keys=True))
-        if sbri_record["status"] == "INVALID_RELEASE_SELECTION":
-            raise SystemExit("SBRI release selection rejected: " + sbri_record["message"])
+        require_valid_selection(sbri_record)
         print(f"OPENHANDS_SBRI_LAUNCHER={sbri_launcher}")
         print(
             "GUIDANCE_DELIVERY_EVIDENCE="

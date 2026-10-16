@@ -230,6 +230,29 @@ class SbriTests(unittest.TestCase):
                              ["release_selection"]["ranges"][0])
             self.assertEqual("configured-scanner", constructor.call_args.kwargs["scanner"])
 
+    def test_resolved_selection_file_bypasses_metadata_resolution(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); output = root / "out"; output.mkdir()
+            selection = root / "selection.json"
+            manifest = {"baseline": "1.0.0", "mode": "explicit", "source": "cli",
+                        "requested": ["1.0.1"], "resolved_candidates": ["1.0.1"],
+                        "candidate_count": 1, "max_candidates": 12,
+                        "metadata": {"source": "fixture", "sha256": "abc"}}
+            selection.write_text(json.dumps(manifest))
+            evaluated = result_fixture(); evaluator = unittest.mock.Mock()
+            evaluator.evaluate.return_value = evaluated
+            with patch("spring_boot_release_intelligence.sbri_cli.discover_boot_version",
+                       return_value={"version": "1.0.0"}), \
+                 patch("spring_boot_release_intelligence.sbri_cli.select_candidates") as selector, \
+                 patch("spring_boot_release_intelligence.sbri_cli.Evaluator",
+                       return_value=evaluator) as constructor:
+                self.assertEqual(0, cli_main(["evaluate", "--project", str(root),
+                    "--resolved-selection-file", str(selection), "--output", str(output)]))
+            selector.assert_not_called()
+            self.assertEqual(["1.0.1"], constructor.call_args.args[1])
+            rendered = json.loads((output / "result.json").read_text())
+            self.assertEqual(manifest, rendered["execution"]["release_selection"])
+
     def test_failed_candidate_is_not_rendered_as_zero_findings(self):
         result = result_fixture()
         result["releases"].append({"version": "1.0.2", "assessment_status": "FAILED",

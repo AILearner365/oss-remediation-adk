@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from .report import write_report
-from .release_selection import select_candidates
+from .release_selection import select_candidates, validate_resolved_selection
 from .standalone import Evaluator, discover_boot_version
 
 
@@ -22,6 +22,7 @@ def main(argv=None) -> int:
     group = evaluate.add_mutually_exclusive_group()
     group.add_argument("--range", dest="release_range")
     group.add_argument("--releases")
+    group.add_argument("--resolved-selection-file", type=Path, help=argparse.SUPPRESS)
     evaluate.add_argument("--max-candidates", type=int)
     evaluate.add_argument("--output", type=Path, default=Path("output"))
     evaluate.add_argument("--maven")
@@ -41,10 +42,14 @@ def main(argv=None) -> int:
     try:
         configured = json.loads(args.config.read_text()) if args.config else {}
         baseline = discover_boot_version(args.project)["version"]
-        releases, selection = select_candidates(
-            baseline, versions=args.releases, ranges=args.release_range,
-            config=configured, max_candidates=args.max_candidates,
-        )
+        if args.resolved_selection_file:
+            selection_data = json.loads(args.resolved_selection_file.read_text(encoding="utf-8"))
+            releases, selection = validate_resolved_selection(selection_data, baseline)
+        else:
+            releases, selection = select_candidates(
+                baseline, versions=args.releases, ranges=args.release_range,
+                config=configured, max_candidates=args.max_candidates,
+            )
         reports = {}
         for value in args.scanner_report:
             version, path = value.split("=", 1); reports[version] = Path(path)
