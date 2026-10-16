@@ -1,0 +1,28 @@
+{
+  "baseline": "4.0.6",
+  "candidate_count": 3,
+  "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+  "max_candidates": 12,
+  "metadata": {
+    "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+    "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+  },
+  "mode": "explicit",
+  "prereleases_allowed": false,
+  "requested": [
+    "4.0.7",
+    "4.0.8",
+    "4.1.1"
+  ],
+  "resolved_candidates": [
+    "4.0.7",
+    "4.0.8",
+    "4.1.1"
+  ],
+  "selection_filters": {
+    "forward_from_baseline_only": true,
+    "published_only": true,
+    "stable_numeric_only": true
+  },
+  "source": "cli"
+}

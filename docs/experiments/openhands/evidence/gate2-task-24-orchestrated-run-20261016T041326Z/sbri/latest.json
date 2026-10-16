@@ -1,0 +1,295 @@
+{
+  "agentContextApproxTokens": 651,
+  "agentContextCharacters": 2602,
+  "applicability": {
+    "applicable": true,
+    "baseline": "4.0.6",
+    "controller": "parent",
+    "reason": "Spring Boot Maven security remediation"
+  },
+  "command": [
+    "/home/kavya_parivarababu/oss-remediation-adk/sbri",
+    "evaluate",
+    "--project",
+    "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-24",
+    "--output",
+    "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/output",
+    "--resolved-selection-file",
+    "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/release-selection.json",
+    "--scanner",
+    "/home/kavya_parivarababu/bin/osv-scanner"
+  ],
+  "commandLog": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/command.log",
+  "deliveredBeforeAgentRun": true,
+  "duplicateExecutionAvoided": false,
+  "elapsedSeconds": 81.4947217830013,
+  "evidencePath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/output/evidence",
+  "exitCode": 0,
+  "fingerprint": "3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3",
+  "invoked": true,
+  "mavenCacheBytes": 21827104,
+  "mavenCacheFiles": 1765,
+  "mavenCacheJarBytes": 14912596,
+  "mavenCacheJarCount": 50,
+  "measurement": {
+    "exitCode": 0,
+    "peakProcessTreeRssKib": 227656,
+    "timedOut": false,
+    "wallSeconds": 80.62645200299994
+  },
+  "observedConsideredBeforeFirstDependencyEdit": "NOT_YET_OBSERVABLE",
+  "outputBytes": 26581696,
+  "outputFiles": 2029,
+  "rankForcedAsStrategy": false,
+  "releaseSelection": {
+    "baseline": "4.0.6",
+    "candidate_count": 3,
+    "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+    "max_candidates": 12,
+    "metadata": {
+      "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+      "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+    },
+    "mode": "explicit",
+    "prereleases_allowed": false,
+    "requested": [
+      "4.0.7",
+      "4.0.8",
+      "4.1.1"
+    ],
+    "resolved_candidates": [
+      "4.0.7",
+      "4.0.8",
+      "4.1.1"
+    ],
+    "selection_filters": {
+      "forward_from_baseline_only": true,
+      "published_only": true,
+      "stable_numeric_only": true
+    },
+    "source": "cli"
+  },
+  "releaseSelectionPath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/release-selection.json",
+  "reportPath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/output/report.html",
+  "request": {
+    "baseline": "4.0.6",
+    "config": null,
+    "releaseSelection": {
+      "baseline": "4.0.6",
+      "candidate_count": 3,
+      "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+      "max_candidates": 12,
+      "metadata": {
+        "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+        "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+      },
+      "mode": "explicit",
+      "prereleases_allowed": false,
+      "requested": [
+        "4.0.7",
+        "4.0.8",
+        "4.1.1"
+      ],
+      "resolved_candidates": [
+        "4.0.7",
+        "4.0.8",
+        "4.1.1"
+      ],
+      "selection_filters": {
+        "forward_from_baseline_only": true,
+        "published_only": true,
+        "stable_numeric_only": true
+      },
+      "source": "cli"
+    },
+    "releases": [
+      "4.0.7",
+      "4.0.8",
+      "4.1.1"
+    ],
+    "scanner": {
+      "requested": "/home/kavya_parivarababu/bin/osv-scanner",
+      "resolved": "/home/kavya_parivarababu/bin/osv-scanner",
+      "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+      "size": 57524384
+    }
+  },
+  "resultPath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/output/result.json",
+  "reused": false,
+  "sourceAfter": {
+    "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "poms": {
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827"
+    },
+    "request": {
+      "baseline": "4.0.6",
+      "config": null,
+      "releaseSelection": {
+        "baseline": "4.0.6",
+        "candidate_count": 3,
+        "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+        "max_candidates": 12,
+        "metadata": {
+          "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+          "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+        },
+        "mode": "explicit",
+        "prereleases_allowed": false,
+        "requested": [
+          "4.0.7",
+          "4.0.8",
+          "4.1.1"
+        ],
+        "resolved_candidates": [
+          "4.0.7",
+          "4.0.8",
+          "4.1.1"
+        ],
+        "selection_filters": {
+          "forward_from_baseline_only": true,
+          "published_only": true,
+          "stable_numeric_only": true
+        },
+        "source": "cli"
+      },
+      "releases": [
+        "4.0.7",
+        "4.0.8",
+        "4.1.1"
+      ],
+      "scanner": {
+        "requested": "/home/kavya_parivarababu/bin/osv-scanner",
+        "resolved": "/home/kavya_parivarababu/bin/osv-scanner",
+        "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+        "size": 57524384
+      }
+    },
+    "sourceFiles": {
+      ".gitignore": "92500e4e5ded5174647c8cd8f4de5b935e707356b80f412ab097b43ba4ab1091",
+      "README.md": "fa134e7a03eb83d628f25e350c9661ceab6c83aff814cf3daffb12fbc0653af5",
+      "docs/oss-vulnerability-scenarios.md": "eb2f976389f26cd631b1f4ea4b1615e63d7591ae0daf037c6af8f060557ad472",
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "security/dependency-check-suppressions.xml": "8fc2e1e92bf87b2a23c1deaff2d0485d551ec9bf47e71bc62806797e9db0467a",
+      "security/dependency-policy.md": "c09c44505c9e1d7638519c1cd0a3f5dfe01ba7d917a927b5a09c9cbb751c2000",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-common/src/main/java/com/example/secureapp/common/api/ApiErrorResponse.java": "7a22f7edcd14badfd3edb9fba15b6fc967b47edd9ad665961013e3f2eee5996a",
+      "task-common/src/main/java/com/example/secureapp/common/api/ApiResponse.java": "30228d09712c51d7d1b8b89ffce175400a5e7ef2858d445b9fca503891851506",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-domain/src/main/java/com/example/secureapp/domain/Task.java": "799fb711b909edc18fd4209dbd1def24b929e729121f951c722c0e561ba90462",
+      "task-domain/src/main/java/com/example/secureapp/domain/TaskStatus.java": "c82bb7f8e1abac8d7a853317e313f0721ecfa4ff7eeebbf9d11da55fa26d81c5",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-service/src/main/java/com/example/secureapp/service/InMemoryTaskService.java": "cebe0614e9ff054e34e029b51f8e50c4997e7377a0868f153b6423199c862262",
+      "task-service/src/main/java/com/example/secureapp/service/TaskNotFoundException.java": "46e12fdc68471520494841a3cd7478dc81f4e6d037a9ba0b4d56cb1776dcd425",
+      "task-service/src/main/java/com/example/secureapp/service/TaskService.java": "f413b493ba5d8c7905b7a8be321edfe66f06e3dc195db11b38962af0dab2654f",
+      "task-service/src/test/java/com/example/secureapp/service/InMemoryTaskServiceTest.java": "e4e2a0c0274ab2eb614ca88971f98ebe60c0eb9e89ad6dee1b09372cdd6a3476",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827",
+      "task-web/src/main/java/com/example/secureapp/web/TaskApplication.java": "c43ee5bd31a7208f3cd884284f2ad8fb5c054ef62311fcb4b7b34bc7ff3a5974",
+      "task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java": "a7e13f541a462c27b2d46a1579750f5cb68c15846344f5565fca175d3f482f3c",
+      "task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java": "c6f0746037b4b774131a988d62f69b883cd877fdaec203348cc9eaa28a816612",
+      "task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java": "ccd6c7c37268c91410599b53bbfd10ddb65918703734e2bafbc3e3ddca41bf7b",
+      "task-web/src/main/java/com/example/secureapp/web/dto/SecurityPostureResponse.java": "a48d2d7a17248c5d3bf9c5c317064ccaeead5847c154d6f353f7eb41599d1825",
+      "task-web/src/main/java/com/example/secureapp/web/dto/TaskResponse.java": "00578529a144416755dc2431ef589d55da6b1bc12d659c5626b308b6986b0901",
+      "task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java": "06ceb9a6f02b508a8d4e606a4c14274d26128681c1c6a3167c300492e487d91d",
+      "task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java": "6fb58d29221f0dc2ef692f35440a415f10755be5387aa03c130aecec91fe7ab1",
+      "task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java": "d4d22f9af69ddb19f656630ef72102137bc21b5d9b2ca63fd4e0a6048ae50ac1",
+      "task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java": "1fb277c83e51d7461f799a39a2d5a94d9fd52aed51317632d54033a8a910e520",
+      "task-web/src/main/resources/application.yml": "ea56222e1fc014c97a9cfa74bbe7614ebeb8128dcc2536acefe3e002a549f4b1",
+      "task-web/src/test/java/com/example/secureapp/web/TaskApplicationTest.java": "ccb7f51f6e4ef07c95a4025eff02f3e2716156401049c3e787695dd606d7b125"
+    },
+    "status": ""
+  },
+  "sourceBefore": {
+    "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "poms": {
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827"
+    },
+    "request": {
+      "baseline": "4.0.6",
+      "config": null,
+      "releaseSelection": {
+        "baseline": "4.0.6",
+        "candidate_count": 3,
+        "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+        "max_candidates": 12,
+        "metadata": {
+          "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+          "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+        },
+        "mode": "explicit",
+        "prereleases_allowed": false,
+        "requested": [
+          "4.0.7",
+          "4.0.8",
+          "4.1.1"
+        ],
+        "resolved_candidates": [
+          "4.0.7",
+          "4.0.8",
+          "4.1.1"
+        ],
+        "selection_filters": {
+          "forward_from_baseline_only": true,
+          "published_only": true,
+          "stable_numeric_only": true
+        },
+        "source": "cli"
+      },
+      "releases": [
+        "4.0.7",
+        "4.0.8",
+        "4.1.1"
+      ],
+      "scanner": {
+        "requested": "/home/kavya_parivarababu/bin/osv-scanner",
+        "resolved": "/home/kavya_parivarababu/bin/osv-scanner",
+        "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108",
+        "size": 57524384
+      }
+    },
+    "sourceFiles": {
+      ".gitignore": "92500e4e5ded5174647c8cd8f4de5b935e707356b80f412ab097b43ba4ab1091",
+      "README.md": "fa134e7a03eb83d628f25e350c9661ceab6c83aff814cf3daffb12fbc0653af5",
+      "docs/oss-vulnerability-scenarios.md": "eb2f976389f26cd631b1f4ea4b1615e63d7591ae0daf037c6af8f060557ad472",
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "security/dependency-check-suppressions.xml": "8fc2e1e92bf87b2a23c1deaff2d0485d551ec9bf47e71bc62806797e9db0467a",
+      "security/dependency-policy.md": "c09c44505c9e1d7638519c1cd0a3f5dfe01ba7d917a927b5a09c9cbb751c2000",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-common/src/main/java/com/example/secureapp/common/api/ApiErrorResponse.java": "7a22f7edcd14badfd3edb9fba15b6fc967b47edd9ad665961013e3f2eee5996a",
+      "task-common/src/main/java/com/example/secureapp/common/api/ApiResponse.java": "30228d09712c51d7d1b8b89ffce175400a5e7ef2858d445b9fca503891851506",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-domain/src/main/java/com/example/secureapp/domain/Task.java": "799fb711b909edc18fd4209dbd1def24b929e729121f951c722c0e561ba90462",
+      "task-domain/src/main/java/com/example/secureapp/domain/TaskStatus.java": "c82bb7f8e1abac8d7a853317e313f0721ecfa4ff7eeebbf9d11da55fa26d81c5",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-service/src/main/java/com/example/secureapp/service/InMemoryTaskService.java": "cebe0614e9ff054e34e029b51f8e50c4997e7377a0868f153b6423199c862262",
+      "task-service/src/main/java/com/example/secureapp/service/TaskNotFoundException.java": "46e12fdc68471520494841a3cd7478dc81f4e6d037a9ba0b4d56cb1776dcd425",
+      "task-service/src/main/java/com/example/secureapp/service/TaskService.java": "f413b493ba5d8c7905b7a8be321edfe66f06e3dc195db11b38962af0dab2654f",
+      "task-service/src/test/java/com/example/secureapp/service/InMemoryTaskServiceTest.java": "e4e2a0c0274ab2eb614ca88971f98ebe60c0eb9e89ad6dee1b09372cdd6a3476",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827",
+      "task-web/src/main/java/com/example/secureapp/web/TaskApplication.java": "c43ee5bd31a7208f3cd884284f2ad8fb5c054ef62311fcb4b7b34bc7ff3a5974",
+      "task-web/src/main/java/com/example/secureapp/web/controller/SecurityPostureController.java": "a7e13f541a462c27b2d46a1579750f5cb68c15846344f5565fca175d3f482f3c",
+      "task-web/src/main/java/com/example/secureapp/web/controller/TaskController.java": "c6f0746037b4b774131a988d62f69b883cd877fdaec203348cc9eaa28a816612",
+      "task-web/src/main/java/com/example/secureapp/web/dto/CreateTaskRequest.java": "ccd6c7c37268c91410599b53bbfd10ddb65918703734e2bafbc3e3ddca41bf7b",
+      "task-web/src/main/java/com/example/secureapp/web/dto/SecurityPostureResponse.java": "a48d2d7a17248c5d3bf9c5c317064ccaeead5847c154d6f353f7eb41599d1825",
+      "task-web/src/main/java/com/example/secureapp/web/dto/TaskResponse.java": "00578529a144416755dc2431ef589d55da6b1bc12d659c5626b308b6986b0901",
+      "task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskRequest.java": "06ceb9a6f02b508a8d4e606a4c14274d26128681c1c6a3167c300492e487d91d",
+      "task-web/src/main/java/com/example/secureapp/web/dto/UpdateTaskStatusRequest.java": "6fb58d29221f0dc2ef692f35440a415f10755be5387aa03c130aecec91fe7ab1",
+      "task-web/src/main/java/com/example/secureapp/web/error/GlobalExceptionHandler.java": "d4d22f9af69ddb19f656630ef72102137bc21b5d9b2ca63fd4e0a6048ae50ac1",
+      "task-web/src/main/java/com/example/secureapp/web/security/SecurityHeadersFilter.java": "1fb277c83e51d7461f799a39a2d5a94d9fd52aed51317632d54033a8a910e520",
+      "task-web/src/main/resources/application.yml": "ea56222e1fc014c97a9cfa74bbe7614ebeb8128dcc2536acefe3e002a549f4b1",
+      "task-web/src/test/java/com/example/secureapp/web/TaskApplicationTest.java": "ccb7f51f6e4ef07c95a4025eff02f3e2716156401049c3e787695dd606d7b125"
+    },
+    "status": ""
+  },
+  "sourceUnchanged": true,
+  "status": "COMPLETE",
+  "summaryJsonPath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/agent-summary.json",
+  "summaryPath": "/home/kavya_parivarababu/.openhands/gate2/task-24-stop-hook/sbri/3b2a139097183dda75394a8304181a7d7deb5e2f95df7c0fd811d0dd3dc8d8f3/agent-summary.txt"
+}
