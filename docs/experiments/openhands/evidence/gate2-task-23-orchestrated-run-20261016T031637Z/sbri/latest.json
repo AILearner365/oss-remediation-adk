@@ -1,0 +1,115 @@
+{
+  "agentContextApproxTokens": 534,
+  "agentContextCharacters": 2134,
+  "applicability": {
+    "applicable": true,
+    "baseline": "4.0.6",
+    "controller": "parent",
+    "reason": "Spring Boot Maven security remediation"
+  },
+  "command": [
+    "/home/kavya_parivarababu/oss-remediation-adk/sbri",
+    "evaluate",
+    "--project",
+    "/home/kavya_parivarababu/maven-multimodule-app-stop-hook-23",
+    "--releases",
+    "4.0.7,4.0.8",
+    "--output",
+    "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/output",
+    "--scanner",
+    "/home/kavya_parivarababu/bin/osv-scanner"
+  ],
+  "commandLog": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/command.log",
+  "deliveredBeforeAgentRun": true,
+  "duplicateExecutionAvoided": false,
+  "elapsedSeconds": 61.38117634199989,
+  "evidencePath": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/output/evidence",
+  "exitCode": 0,
+  "fingerprint": "066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047",
+  "invoked": true,
+  "mavenCacheBytes": 21068345,
+  "mavenCacheFiles": 1567,
+  "mavenCacheJarBytes": 14912596,
+  "mavenCacheJarCount": 50,
+  "measurement": {
+    "exitCode": 0,
+    "peakProcessTreeRssKib": 235564,
+    "timedOut": false,
+    "wallSeconds": 61.04819854699963
+  },
+  "observedConsideredBeforeFirstDependencyEdit": "NOT_YET_OBSERVABLE",
+  "outputBytes": 24917941,
+  "outputFiles": 1771,
+  "rankForcedAsStrategy": false,
+  "reportPath": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/output/report.html",
+  "request": {
+    "baseline": "4.0.6",
+    "candidateDiscovery": {
+      "policy": "latest 3 stable forward patches in 4.0.x",
+      "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+      "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+    },
+    "config": null,
+    "releases": [
+      "4.0.7",
+      "4.0.8"
+    ],
+    "scanner": "/home/kavya_parivarababu/bin/osv-scanner"
+  },
+  "resultPath": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/output/result.json",
+  "reused": false,
+  "sourceAfter": {
+    "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "poms": {
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827"
+    },
+    "request": {
+      "baseline": "4.0.6",
+      "candidateDiscovery": {
+        "policy": "latest 3 stable forward patches in 4.0.x",
+        "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+        "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+      },
+      "config": null,
+      "releases": [
+        "4.0.7",
+        "4.0.8"
+      ],
+      "scanner": "/home/kavya_parivarababu/bin/osv-scanner"
+    },
+    "status": ""
+  },
+  "sourceBefore": {
+    "head": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "poms": {
+      "pom.xml": "fcfb35d0fb5cf19a3a1ebc7d5ba38aeff6b6e336065c55c04b31ec6a442601c8",
+      "task-common/pom.xml": "714aec85abe501b26cbe97c647cf9b8c03cbe0f6c9ea954b64443cc399d1deae",
+      "task-domain/pom.xml": "4b9c168ad66534147fac85a580a1e476947381d37df5cf38c22205f9749ad38d",
+      "task-service/pom.xml": "7a5dd66f8b2f3363907a0827adfef125f4d08da933d6bad0051ce1c66ca04994",
+      "task-web/pom.xml": "d1bc6b463562aa1453035b1610d1744c1416e107fe92c1fc21c7eca5e00a8827"
+    },
+    "request": {
+      "baseline": "4.0.6",
+      "candidateDiscovery": {
+        "policy": "latest 3 stable forward patches in 4.0.x",
+        "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+        "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+      },
+      "config": null,
+      "releases": [
+        "4.0.7",
+        "4.0.8"
+      ],
+      "scanner": "/home/kavya_parivarababu/bin/osv-scanner"
+    },
+    "status": ""
+  },
+  "sourceUnchanged": true,
+  "status": "COMPLETE",
+  "summaryJsonPath": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/agent-summary.json",
+  "summaryPath": "/home/kavya_parivarababu/.openhands/gate2/task-23-stop-hook/sbri/066d2ed45844baba133e7b7c3eceae1f20796a3befb278e52a428e7540e5b047/agent-summary.txt"
+}
