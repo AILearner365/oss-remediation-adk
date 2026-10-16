@@ -1,0 +1,235 @@
+{
+  "application_dependency_jar_count": 0,
+  "command": [
+    "./sbri",
+    "evaluate",
+    "--project",
+    "docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a5/maven-work/a5/boot-3.3.4",
+    "--releases",
+    "3.3.5,3.3.7,3.3.8",
+    "--output",
+    "/tmp/sbri-live"
+  ],
+  "dependency_counts": {
+    "3.3.4": 34,
+    "3.3.5": 34,
+    "3.3.7": 34,
+    "3.3.8": 34
+  },
+  "errors": [],
+  "evidence_bytes": 29375632,
+  "exit_code": 0,
+  "finding_counts": {
+    "3.3.4": 80,
+    "3.3.5": 77,
+    "3.3.7": 75,
+    "3.3.8": 73
+  },
+  "historical_comparison": {
+    "a7_baseline_findings": 81,
+    "current_baseline_findings": 80,
+    "difference": "one Medium finding absent from the current live advisory response; historical evidence unchanged"
+  },
+  "html_table_count": 4,
+  "isolated_repository_bytes": 20241909,
+  "limitations": [
+    "No live private repository, large reactor, corporate-parent ownership, or complete WAR/provided-scope validation",
+    "Peak RSS is whole process-tree peak, not per stage",
+    "Compatibility/build/test behavior is outside the security ranking"
+  ],
+  "original_project_unchanged": true,
+  "ownership_categories": [
+    "BOOT_MANAGED"
+  ],
+  "peak_process_tree_rss_bytes": 230948864,
+  "releases": [
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        }
+      },
+      "rank": null,
+      "recommendation": "Baseline",
+      "version": "3.3.4"
+    },
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "LOW": 0,
+          "MEDIUM": 2,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 11,
+          "HIGH": 27,
+          "LOW": 12,
+          "MEDIUM": 27,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 11,
+          "HIGH": 27,
+          "LOW": 12,
+          "MEDIUM": 27,
+          "UNKNOWN": 0
+        }
+      },
+      "rank": 3,
+      "recommendation": "Rank 3 by assessed security findings",
+      "version": "3.3.5"
+    },
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 1,
+          "HIGH": 2,
+          "LOW": 0,
+          "MEDIUM": 2,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 10,
+          "HIGH": 26,
+          "LOW": 12,
+          "MEDIUM": 27,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 10,
+          "HIGH": 26,
+          "LOW": 12,
+          "MEDIUM": 27,
+          "UNKNOWN": 0
+        }
+      },
+      "rank": 2,
+      "recommendation": "Rank 2 by assessed security findings",
+      "version": "3.3.7"
+    },
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 1,
+          "HIGH": 2,
+          "LOW": 1,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 11,
+          "HIGH": 28,
+          "LOW": 12,
+          "MEDIUM": 29,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 10,
+          "HIGH": 26,
+          "LOW": 11,
+          "MEDIUM": 26,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 10,
+          "HIGH": 26,
+          "LOW": 11,
+          "MEDIUM": 26,
+          "UNKNOWN": 0
+        }
+      },
+      "rank": 1,
+      "recommendation": "Preferred \u2014 best measured security result",
+      "version": "3.3.8"
+    }
+  ],
+  "report_bytes": 103888,
+  "report_sha256": "1e70341716228371c4ecad1a5a3a7ed9b9df99173022de904bd785fe5b980073",
+  "repository_jar_count": 50,
+  "result_bytes": 523885,
+  "result_schema_valid": true,
+  "result_sha256": "1c8e3ad5c128d7153eebf33c9f5c9801a8c0fc67d4ba7882f2ed666f536758ee",
+  "schema": "sbri-live-validation-v1",
+  "status": "SUCCESS",
+  "timestamp_utc": "2026-10-16",
+  "versions": [
+    "3.3.4",
+    "3.3.5",
+    "3.3.7",
+    "3.3.8"
+  ],
+  "wall_seconds": 65.46252988200001
+}

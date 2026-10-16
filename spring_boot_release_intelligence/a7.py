@@ -123,14 +123,15 @@ class CandidateConfigurationError(ValueError):
     pass
 
 
-def materialize_candidate(source: Path, destination: Path, candidate: str) -> dict:
+def materialize_candidate(source: Path, destination: Path, candidate: str,
+                          *, ignore=None) -> dict:
     """Copy a project and replace exactly one verified Boot controller.
 
     Supported controllers are the Boot parent version, an imported Boot BOM
     version, or a property referenced by that BOM. Multiple controllers are
     rejected instead of guessed.
     """
-    shutil.copytree(source, destination)
+    shutil.copytree(source, destination, ignore=ignore)
     pom = destination / "pom.xml"
     tree = ET.parse(pom)
     root = tree.getroot()
@@ -205,7 +206,10 @@ class OsvBatchClient:
 
 
 def finding_identity(finding: dict) -> tuple[str, str, str]:
-    return (finding["package"], finding["version"], finding["advisory"])
+    advisory = finding.get("advisory_id", finding.get("advisory"))
+    if not advisory:
+        raise ValueError("finding is missing advisory identity")
+    return (finding["package"], finding["version"], advisory)
 
 
 def compare_findings(baseline: list[dict], candidate: list[dict], complete: bool) -> dict:
