@@ -1,0 +1,12 @@
+==> Gate 2 execution
+==> Task: 26
+==> Vertex project: deutschebank-aipocs
+==> Vertex location: us-central1
+==> Model: vertex_ai/gemini-2.5-flash
+==> Source repo: /home/kavya_parivarababu/maven-multimodule-app
+==> Target worktree: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-26
+==> State directory: /home/kavya_parivarababu/.openhands/gate2/task-26-stop-hook
+==> Verifying refreshable Python ADC before creating task state
+{"credentialClass": "Credentials", "credentialSource": "metadata-server", "detectedProject": "deutschebank-aipocs", "effectiveProject": "deutschebank-aipocs", "expiryPresent": true, "explicitRefreshes": 2, "minimumLifetimeSatisfied": true, "principalMetadataPresent": true, "tokenPresent": true}
+VERTEX_ADC_REFRESH=PASS
+ERROR: Target worktree already exists: /home/kavya_parivarababu/maven-multimodule-app-stop-hook-26

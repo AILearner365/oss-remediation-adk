@@ -1,0 +1,6 @@
+==> GATE 2 INDEPENDENT VALIDATION SUMMARY
+Attempt 1: FAIL - resolved 16/26; remaining 10; scan=COMPLETED_WITH_FINDINGS; scanned_poms=5
+  Failed checks: target_findings_resolved
+Attempt 2: PASS - resolved 26/26; remaining 0; scan=COMPLETED_CLEAN; scanned_poms=5
+Final independent validation: PASS
+==> End Gate 2 validation summary
