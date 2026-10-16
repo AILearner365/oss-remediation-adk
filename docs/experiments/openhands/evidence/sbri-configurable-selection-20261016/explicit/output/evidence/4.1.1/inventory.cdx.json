@@ -1,0 +1,1668 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:maven/ch.qos.logback/logback-classic@1.5.38",
+      "group": "ch.qos.logback",
+      "name": "logback-classic",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1 > ch.qos.logback:logback-classic:1.5.38"
+        }
+      ],
+      "purl": "pkg:maven/ch.qos.logback/logback-classic@1.5.38",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.38"
+    },
+    {
+      "bom-ref": "pkg:maven/ch.qos.logback/logback-core@1.5.38",
+      "group": "ch.qos.logback",
+      "name": "logback-core",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1 > ch.qos.logback:logback-classic:1.5.38 > ch.qos.logback:logback-core:1.5.38"
+        }
+      ],
+      "purl": "pkg:maven/ch.qos.logback/logback-core@1.5.38",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.38"
+    },
+    {
+      "bom-ref": "pkg:maven/com.example.secureapp/task-common@1.0.0-SNAPSHOT",
+      "group": "com.example.secureapp",
+      "name": "task-common",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-common:1.0.0-SNAPSHOT"
+        }
+      ],
+      "purl": "pkg:maven/com.example.secureapp/task-common@1.0.0-SNAPSHOT",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.0-SNAPSHOT"
+    },
+    {
+      "bom-ref": "pkg:maven/com.example.secureapp/task-domain@1.0.0-SNAPSHOT",
+      "group": "com.example.secureapp",
+      "name": "task-domain",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-domain:1.0.0-SNAPSHOT"
+        }
+      ],
+      "purl": "pkg:maven/com.example.secureapp/task-domain@1.0.0-SNAPSHOT",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.0-SNAPSHOT"
+    },
+    {
+      "bom-ref": "pkg:maven/com.example.secureapp/task-service@1.0.0-SNAPSHOT",
+      "group": "com.example.secureapp",
+      "name": "task-service",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-service:1.0.0-SNAPSHOT"
+        }
+      ],
+      "purl": "pkg:maven/com.example.secureapp/task-service@1.0.0-SNAPSHOT",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.0-SNAPSHOT"
+    },
+    {
+      "bom-ref": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.21",
+      "group": "com.fasterxml.jackson.core",
+      "name": "jackson-annotations",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-jackson:4.1.1 > org.springframework.boot:spring-boot-jackson:4.1.1 > tools.jackson.core:jackson-databind:3.1.5 > com.fasterxml.jackson.core:jackson-annotations:2.21"
+        }
+      ],
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.21",
+      "scope": "required",
+      "type": "library",
+      "version": "2.21"
+    },
+    {
+      "bom-ref": "pkg:maven/com.fasterxml/classmate@1.7.3",
+      "group": "com.fasterxml",
+      "name": "classmate",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1 > org.hibernate.validator:hibernate-validator:9.1.3.Final > com.fasterxml:classmate:1.7.3"
+        }
+      ],
+      "purl": "pkg:maven/com.fasterxml/classmate@1.7.3",
+      "scope": "required",
+      "type": "library",
+      "version": "1.7.3"
+    },
+    {
+      "bom-ref": "pkg:maven/commons-logging/commons-logging@1.3.6",
+      "group": "commons-logging",
+      "name": "commons-logging",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-test:4.1.1 > org.springframework:spring-core:7.0.9 > commons-logging:commons-logging:1.3.6"
+        }
+      ],
+      "purl": "pkg:maven/commons-logging/commons-logging@1.3.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.3.6"
+    },
+    {
+      "bom-ref": "pkg:maven/io.micrometer/micrometer-commons@1.17.1",
+      "group": "io.micrometer",
+      "name": "micrometer-commons",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-observation:1.17.1 > io.micrometer:micrometer-commons:1.17.1"
+        }
+      ],
+      "purl": "pkg:maven/io.micrometer/micrometer-commons@1.17.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.17.1"
+    },
+    {
+      "bom-ref": "pkg:maven/io.micrometer/micrometer-core@1.17.1",
+      "group": "io.micrometer",
+      "name": "micrometer-core",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-jakarta9:1.17.1 > io.micrometer:micrometer-core:1.17.1"
+        }
+      ],
+      "purl": "pkg:maven/io.micrometer/micrometer-core@1.17.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.17.1"
+    },
+    {
+      "bom-ref": "pkg:maven/io.micrometer/micrometer-jakarta9@1.17.1",
+      "group": "io.micrometer",
+      "name": "micrometer-jakarta9",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-jakarta9:1.17.1"
+        }
+      ],
+      "purl": "pkg:maven/io.micrometer/micrometer-jakarta9@1.17.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.17.1"
+    },
+    {
+      "bom-ref": "pkg:maven/io.micrometer/micrometer-observation@1.17.1",
+      "group": "io.micrometer",
+      "name": "micrometer-observation",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-observation:1.17.1"
+        }
+      ],
+      "purl": "pkg:maven/io.micrometer/micrometer-observation@1.17.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.17.1"
+    },
+    {
+      "bom-ref": "pkg:maven/jakarta.annotation/jakarta.annotation-api@3.0.0",
+      "group": "jakarta.annotation",
+      "name": "jakarta.annotation-api",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > jakarta.annotation:jakarta.annotation-api:3.0.0"
+        }
+      ],
+      "purl": "pkg:maven/jakarta.annotation/jakarta.annotation-api@3.0.0",
+      "scope": "required",
+      "type": "library",
+      "version": "3.0.0"
+    },
+    {
+      "bom-ref": "pkg:maven/jakarta.validation/jakarta.validation-api@3.1.1",
+      "group": "jakarta.validation",
+      "name": "jakarta.validation-api",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1 > org.hibernate.validator:hibernate-validator:9.1.3.Final > jakarta.validation:jakarta.validation-api:3.1.1"
+        }
+      ],
+      "purl": "pkg:maven/jakarta.validation/jakarta.validation-api@3.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "3.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.commons/commons-lang3@3.20.0",
+      "group": "org.apache.commons",
+      "name": "commons-lang3",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.apache.commons:commons-text:1.9 > org.apache.commons:commons-lang3:3.20.0"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.commons/commons-lang3@3.20.0",
+      "scope": "required",
+      "type": "library",
+      "version": "3.20.0"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.commons/commons-text@1.9",
+      "group": "org.apache.commons",
+      "name": "commons-text",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.apache.commons:commons-text:1.9"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.commons/commons-text@1.9",
+      "scope": "required",
+      "type": "library",
+      "version": "1.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j-api@2.25.5",
+      "group": "org.apache.logging.log4j",
+      "name": "log4j-api",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1 > org.apache.logging.log4j:log4j-to-slf4j:2.25.5 > org.apache.logging.log4j:log4j-api:2.25.5"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j-api@2.25.5",
+      "scope": "required",
+      "type": "library",
+      "version": "2.25.5"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j-to-slf4j@2.25.5",
+      "group": "org.apache.logging.log4j",
+      "name": "log4j-to-slf4j",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1 > org.apache.logging.log4j:log4j-to-slf4j:2.25.5"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j-to-slf4j@2.25.5",
+      "scope": "required",
+      "type": "library",
+      "version": "2.25.5"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@11.0.24",
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-core",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat-runtime:4.1.1 > org.apache.tomcat.embed:tomcat-embed-core:11.0.24"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@11.0.24",
+      "scope": "required",
+      "type": "library",
+      "version": "11.0.24"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-el@11.0.24",
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-el",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1 > org.apache.tomcat.embed:tomcat-embed-el:11.0.24"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-el@11.0.24",
+      "scope": "required",
+      "type": "library",
+      "version": "11.0.24"
+    },
+    {
+      "bom-ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-websocket@11.0.24",
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-websocket",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat-runtime:4.1.1 > org.apache.tomcat.embed:tomcat-embed-websocket:11.0.24"
+        }
+      ],
+      "purl": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-websocket@11.0.24",
+      "scope": "required",
+      "type": "library",
+      "version": "11.0.24"
+    },
+    {
+      "bom-ref": "pkg:maven/org.hdrhistogram/HdrHistogram@2.2.2",
+      "group": "org.hdrhistogram",
+      "name": "HdrHistogram",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "runtime"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-jakarta9:1.17.1 > io.micrometer:micrometer-core:1.17.1 > org.hdrhistogram:HdrHistogram:2.2.2"
+        }
+      ],
+      "purl": "pkg:maven/org.hdrhistogram/HdrHistogram@2.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "2.2.2"
+    },
+    {
+      "bom-ref": "pkg:maven/org.hibernate.validator/hibernate-validator@9.1.3.Final",
+      "group": "org.hibernate.validator",
+      "name": "hibernate-validator",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1 > org.hibernate.validator:hibernate-validator:9.1.3.Final"
+        }
+      ],
+      "purl": "pkg:maven/org.hibernate.validator/hibernate-validator@9.1.3.Final",
+      "scope": "required",
+      "type": "library",
+      "version": "9.1.3.Final"
+    },
+    {
+      "bom-ref": "pkg:maven/org.jboss.logging/jboss-logging@3.6.3.Final",
+      "group": "org.jboss.logging",
+      "name": "jboss-logging",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1 > org.hibernate.validator:hibernate-validator:9.1.3.Final > org.jboss.logging:jboss-logging:3.6.3.Final"
+        }
+      ],
+      "purl": "pkg:maven/org.jboss.logging/jboss-logging@3.6.3.Final",
+      "scope": "required",
+      "type": "library",
+      "version": "3.6.3.Final"
+    },
+    {
+      "bom-ref": "pkg:maven/org.json/json@20230227",
+      "group": "org.json",
+      "name": "json",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.json:json:20230227"
+        }
+      ],
+      "purl": "pkg:maven/org.json/json@20230227",
+      "scope": "required",
+      "type": "library",
+      "version": "20230227"
+    },
+    {
+      "bom-ref": "pkg:maven/org.jspecify/jspecify@1.0.1",
+      "group": "org.jspecify",
+      "name": "jspecify",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > io.micrometer:micrometer-observation:1.17.1 > org.jspecify:jspecify:1.0.1"
+        }
+      ],
+      "purl": "pkg:maven/org.jspecify/jspecify@1.0.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.slf4j/jul-to-slf4j@2.0.18",
+      "group": "org.slf4j",
+      "name": "jul-to-slf4j",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1 > org.slf4j:jul-to-slf4j:2.0.18"
+        }
+      ],
+      "purl": "pkg:maven/org.slf4j/jul-to-slf4j@2.0.18",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.18"
+    },
+    {
+      "bom-ref": "pkg:maven/org.slf4j/slf4j-api@2.0.18",
+      "group": "org.slf4j",
+      "name": "slf4j-api",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-test:4.1.1 > com.jayway.jsonpath:json-path:2.10.0 > org.slf4j:slf4j-api:2.0.18"
+        }
+      ],
+      "purl": "pkg:maven/org.slf4j/slf4j-api@2.0.18",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.18"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-actuator-autoconfigure@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-actuator-autoconfigure",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-actuator-autoconfigure:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-actuator-autoconfigure@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-actuator@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-actuator",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-actuator-autoconfigure:4.1.1 > org.springframework.boot:spring-boot-actuator:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-actuator@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-autoconfigure@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-autoconfigure",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-autoconfigure:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-autoconfigure@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-health@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-health",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-health:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-health@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-http-converter@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-http-converter",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-http-converter:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-http-converter@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-jackson@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-jackson",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-jackson:4.1.1 > org.springframework.boot:spring-boot-jackson:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-jackson@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-micrometer-metrics@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-micrometer-metrics",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-starter-micrometer-metrics:4.1.1 > org.springframework.boot:spring-boot-micrometer-metrics:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-micrometer-metrics@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-micrometer-observation@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-micrometer-observation",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-starter-micrometer-metrics:4.1.1 > org.springframework.boot:spring-boot-micrometer-metrics:4.1.1 > org.springframework.boot:spring-boot-micrometer-observation:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-micrometer-observation@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-servlet@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-servlet",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-webmvc:4.1.1 > org.springframework.boot:spring-boot-servlet:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-servlet@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-actuator",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-jackson@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-jackson",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-jackson:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jackson@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-logging@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-logging",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.springframework.boot:spring-boot-starter-logging:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-logging@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-micrometer-metrics@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-micrometer-metrics",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-actuator:4.1.1 > org.springframework.boot:spring-boot-starter-micrometer-metrics:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-micrometer-metrics@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat-runtime@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-tomcat-runtime",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat-runtime:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat-runtime@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-tomcat",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-validation@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-validation",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-validation@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter-webmvc@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-webmvc",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-webmvc@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-starter@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-tomcat@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-tomcat",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1 > org.springframework.boot:spring-boot-tomcat:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-tomcat@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-validation@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-validation",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-validation:4.1.1 > org.springframework.boot:spring-boot-validation:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-validation@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-web-server@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-web-server",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat:4.1.1 > org.springframework.boot:spring-boot-starter-tomcat-runtime:4.1.1 > org.springframework.boot:spring-boot-web-server:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-web-server@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-webmvc@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-webmvc",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-webmvc:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-webmvc@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot@4.1.1",
+      "group": "org.springframework.boot",
+      "name": "spring-boot",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-http-converter:4.1.1 > org.springframework.boot:spring-boot:4.1.1"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework.boot/spring-boot@4.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-aop@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-aop",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-service:1.0.0-SNAPSHOT > org.springframework:spring-context:7.0.9 > org.springframework:spring-aop:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-aop@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-beans@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-beans",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-service:1.0.0-SNAPSHOT > org.springframework:spring-context:7.0.9 > org.springframework:spring-beans:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-beans@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-context@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-context",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-service:1.0.0-SNAPSHOT > org.springframework:spring-context:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-context@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-core@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-core",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-test:4.1.1 > org.springframework:spring-core:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-core@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-expression@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-expression",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > com.example.secureapp:task-service:1.0.0-SNAPSHOT > org.springframework:spring-context:7.0.9 > org.springframework:spring-expression:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-expression@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-web@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-web",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-http-converter:4.1.1 > org.springframework:spring-web:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-web@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.springframework/spring-webmvc@7.0.9",
+      "group": "org.springframework",
+      "name": "spring-webmvc",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-webmvc:4.1.1 > org.springframework:spring-webmvc:7.0.9"
+        }
+      ],
+      "purl": "pkg:maven/org.springframework/spring-webmvc@7.0.9",
+      "scope": "required",
+      "type": "library",
+      "version": "7.0.9"
+    },
+    {
+      "bom-ref": "pkg:maven/org.yaml/snakeyaml@2.6",
+      "group": "org.yaml",
+      "name": "snakeyaml",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter:4.1.1 > org.yaml:snakeyaml:2.6"
+        }
+      ],
+      "purl": "pkg:maven/org.yaml/snakeyaml@2.6",
+      "scope": "required",
+      "type": "library",
+      "version": "2.6"
+    },
+    {
+      "bom-ref": "pkg:maven/tools.jackson.core/jackson-core@3.1.5",
+      "group": "tools.jackson.core",
+      "name": "jackson-core",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-jackson:4.1.1 > org.springframework.boot:spring-boot-jackson:4.1.1 > tools.jackson.core:jackson-databind:3.1.5 > tools.jackson.core:jackson-core:3.1.5"
+        }
+      ],
+      "purl": "pkg:maven/tools.jackson.core/jackson-core@3.1.5",
+      "scope": "required",
+      "type": "library",
+      "version": "3.1.5"
+    },
+    {
+      "bom-ref": "pkg:maven/tools.jackson.core/jackson-databind@3.1.5",
+      "group": "tools.jackson.core",
+      "name": "jackson-databind",
+      "properties": [
+        {
+          "name": "a7:modules",
+          "value": "root"
+        },
+        {
+          "name": "a7:maven-scopes",
+          "value": "compile"
+        },
+        {
+          "name": "a7:dependency-paths",
+          "value": "com.example.secureapp:task-web:1.0.0-SNAPSHOT > org.springframework.boot:spring-boot-starter-webmvc:4.1.1 > org.springframework.boot:spring-boot-starter-jackson:4.1.1 > org.springframework.boot:spring-boot-jackson:4.1.1 > tools.jackson.core:jackson-databind:3.1.5"
+        }
+      ],
+      "purl": "pkg:maven/tools.jackson.core/jackson-databind@3.1.5",
+      "scope": "required",
+      "type": "library",
+      "version": "3.1.5"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/ch.qos.logback/logback-classic@1.5.38"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/ch.qos.logback/logback-core@1.5.38"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/com.example.secureapp/task-common@1.0.0-SNAPSHOT"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/com.example.secureapp/task-domain@1.0.0-SNAPSHOT"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/com.example.secureapp/task-service@1.0.0-SNAPSHOT"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.21"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/com.fasterxml/classmate@1.7.3"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/commons-logging/commons-logging@1.3.6"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/io.micrometer/micrometer-commons@1.17.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/io.micrometer/micrometer-core@1.17.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/io.micrometer/micrometer-jakarta9@1.17.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/io.micrometer/micrometer-observation@1.17.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/jakarta.annotation/jakarta.annotation-api@3.0.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/jakarta.validation/jakarta.validation-api@3.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.commons/commons-lang3@3.20.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.commons/commons-text@1.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.logging.log4j/log4j-api@2.25.5"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.logging.log4j/log4j-to-slf4j@2.25.5"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@11.0.24"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-el@11.0.24"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-websocket@11.0.24"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.hdrhistogram/HdrHistogram@2.2.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.hibernate.validator/hibernate-validator@9.1.3.Final"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.jboss.logging/jboss-logging@3.6.3.Final"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.json/json@20230227"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.jspecify/jspecify@1.0.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.slf4j/jul-to-slf4j@2.0.18"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.slf4j/slf4j-api@2.0.18"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-actuator-autoconfigure@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-actuator@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-autoconfigure@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-health@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-http-converter@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-jackson@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-micrometer-metrics@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-micrometer-observation@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-servlet@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-jackson@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-logging@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-micrometer-metrics@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat-runtime@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-validation@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter-webmvc@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-starter@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-tomcat@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-validation@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-web-server@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot-webmvc@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework.boot/spring-boot@4.1.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-aop@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-beans@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-context@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-core@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-expression@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-web@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.springframework/spring-webmvc@7.0.9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/org.yaml/snakeyaml@2.6"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/tools.jackson.core/jackson-core@3.1.5"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:maven/tools.jackson.core/jackson-databind@3.1.5"
+    }
+  ],
+  "metadata": {
+    "tools": {
+      "components": [
+        {
+          "name": "spring-boot-release-intelligence-a7",
+          "type": "application",
+          "version": "1"
+        }
+      ]
+    }
+  },
+  "serialNumber": "urn:uuid:da046477-e641-cdaa-83e8-30d391c3f2ae",
+  "specVersion": "1.5",
+  "version": 1
+}

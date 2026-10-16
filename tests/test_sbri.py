@@ -157,7 +157,9 @@ class SbriTests(unittest.TestCase):
                 output = Path(value) / "out"; output.mkdir()
                 result = result_fixture(); result["status"] = status
                 evaluator = unittest.mock.Mock(); evaluator.evaluate.return_value = result
-                with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+                with patch("spring_boot_release_intelligence.sbri_cli.discover_boot_version",
+                           return_value={"version": "1.0.0"}), \
+                     patch("spring_boot_release_intelligence.sbri_cli.select_candidates",
                            return_value=(["1.0.1"], {"method": "explicit"})), \
                      patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator):
                     self.assertEqual(expected, cli_main(["evaluate", "--project", value,
@@ -166,7 +168,9 @@ class SbriTests(unittest.TestCase):
                     self.assertTrue((output / "report.html").is_file())
         with tempfile.TemporaryDirectory() as value:
             evaluator = unittest.mock.Mock(); evaluator.evaluate.side_effect = ValueError("no baseline")
-            with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+            with patch("spring_boot_release_intelligence.sbri_cli.discover_boot_version",
+                       return_value={"version": "1.0.0"}), \
+                 patch("spring_boot_release_intelligence.sbri_cli.select_candidates",
                        return_value=(["1.0.1"], {"method": "explicit"})), \
                  patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator):
                 self.assertEqual(2, cli_main(["evaluate", "--project", value,
@@ -176,7 +180,9 @@ class SbriTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as value:
             output = Path(value) / "out"; output.mkdir()
             result = result_fixture(); evaluator = unittest.mock.Mock(); evaluator.evaluate.return_value = result
-            with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+            with patch("spring_boot_release_intelligence.sbri_cli.discover_boot_version",
+                       return_value={"version": "1.0.0"}), \
+                 patch("spring_boot_release_intelligence.sbri_cli.select_candidates",
                        return_value=(["1.0.1"], {"method": "explicit"})), \
                  patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator) as constructor:
                 code = cli_main(["evaluate", "--project", value, "--releases", "1.0.1",
@@ -199,6 +205,30 @@ class SbriTests(unittest.TestCase):
             config = Path(value) / "config.json"; config.write_text("{not-json")
             self.assertEqual(2, cli_main(["evaluate", "--project", value,
                 "--releases", "1.0.1", "--config", str(config)]))
+
+    def test_configuration_defined_release_selection_reaches_shared_selector(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); output = root / "out"; output.mkdir()
+            config = root / "config.json"
+            config.write_text(json.dumps({"release_selection": {"ranges": ["1.1.x"]},
+                                          "scanner": "configured-scanner"}))
+            evaluated = result_fixture(); evaluator = unittest.mock.Mock()
+            evaluator.evaluate.return_value = evaluated
+            selection = {"mode": "range", "source": "config",
+                         "resolved_candidates": ["1.1.0"]}
+            with patch("spring_boot_release_intelligence.sbri_cli.discover_boot_version",
+                       return_value={"version": "1.0.0"}), \
+                 patch("spring_boot_release_intelligence.sbri_cli.select_candidates",
+                       return_value=(["1.1.0"], selection)) as selector, \
+                 patch("spring_boot_release_intelligence.sbri_cli.Evaluator",
+                       return_value=evaluator) as constructor:
+                self.assertEqual(0, cli_main(["evaluate", "--project", str(root),
+                    "--config", str(config), "--output", str(output)]))
+            self.assertIsNone(selector.call_args.kwargs["versions"])
+            self.assertIsNone(selector.call_args.kwargs["ranges"])
+            self.assertEqual("1.1.x", selector.call_args.kwargs["config"]
+                             ["release_selection"]["ranges"][0])
+            self.assertEqual("configured-scanner", constructor.call_args.kwargs["scanner"])
 
     def test_failed_candidate_is_not_rendered_as_zero_findings(self):
         result = result_fixture()

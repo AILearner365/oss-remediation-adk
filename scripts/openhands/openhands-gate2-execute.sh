@@ -15,6 +15,8 @@ if [[ ! "$TASK_ID_RAW" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 printf -v TASK_ID "%02d" "$((10#$TASK_ID_RAW))"
+shift
+SBRI_ARGS=("$@")
 
 TASK_BRANCH="${TASK_BRANCH:-openhands-poc-task-${TASK_ID}-stop-hook}"
 TARGET_REPO="${TARGET_REPO:-$HOME/maven-multimodule-app-stop-hook-${TASK_ID}}"
@@ -107,4 +109,5 @@ uv run \
   --state-dir "$STATE_DIR" \
   --model "$MODEL" \
   --max-denials "$MAX_DENIALS" \
-  --max-iterations "$MAX_ITERATIONS"
+  --max-iterations "$MAX_ITERATIONS" \
+  "${SBRI_ARGS[@]}"

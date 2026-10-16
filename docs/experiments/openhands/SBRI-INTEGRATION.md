@@ -35,12 +35,36 @@ Unrelated tasks and non-Spring Maven repositories receive no injected SBRI
 context. Applicability failure is recorded and is not interpreted as evidence
 against a Spring Boot strategy.
 
-The harness discovers current stable forward patch releases from Spring Boot's
-Maven Central metadata. It evaluates up to the latest three releases in the
-baseline major/minor line, excluding milestones, release candidates,
-snapshots, downgrades and invented versions. The actual discovered versions are
-passed through the existing `sbri evaluate --releases` interface. A run can
-instead use ordinary SBRI JSON configuration via `--sbri-config`.
+One reusable selector serves standalone SBRI and Gate-2. With no selection
+argument, it discovers current stable forward patches from Spring Boot's Maven
+Central metadata and evaluates up to the latest three in the baseline
+major/minor line. Explicit `--sbri-range "4.0.x,4.1.x"` evaluates every stable,
+published, forward release in those lines; `--sbri-versions "4.0.8,4.1.1"`
+validates and evaluates exactly that deduplicated set. Cross-minor and
+cross-major comparison therefore requires an explicit range/version request.
+Snapshots, milestones, release candidates, downgrades and invented versions
+are rejected.
+
+The default maximum is 12 candidates (`--sbri-max-candidates N`). An oversized
+range is rejected with its actual candidate count; it is never silently
+truncated. Narrow the range, raise the explicit limit, or list versions.
+
+`--sbri-config PATH` remains available for Maven/scanner settings and may now
+own release selection through `release_selection.versions` or
+`release_selection.ranges`. Exactly one selection source is allowed: explicit
+versions, explicit ranges, configuration policy, or automatic discovery. CLI
+selection can be combined with unrelated configuration, but a CLI selection
+plus configuration selection is an actionable error rather than implicit
+precedence.
+
+Examples:
+
+```bash
+bash scripts/openhands/openhands-gate2-fresh-run.sh 23
+bash scripts/openhands/openhands-gate2-fresh-run.sh 23 --sbri-range "4.0.x,4.1.x"
+bash scripts/openhands/openhands-gate2-fresh-run.sh 23 --sbri-versions "4.0.8,4.1.1"
+bash scripts/openhands/openhands-gate2-fresh-run.sh 23 --sbri-config ./sbri.json
+```
 
 ## Environment and tool access
 
@@ -63,8 +87,9 @@ Pre-edit outputs live under the persistent task state:
   output/evidence/
 ```
 
-The source commit, every non-generated POM hash, candidate set, scanner and
-configuration participate in the fingerprint. An identical request reuses the
+The source commit/status, every non-generated POM hash, selection mode and
+request, resolved candidates, release-metadata hash, scanner, and configuration
+content/hash participate in the fingerprint. An identical request reuses the
 retained result; changed inputs produce a different directory. Conversation
 persistence, the task message and `sbri/latest.json` keep references available
 after context condensation or recovery.
@@ -74,15 +99,17 @@ not remove the standalone CLI launcher.
 
 ## Agent-facing evidence
 
-The injected summary is bounded. It contains baseline/evaluated releases,
+The injected summary is bounded. It contains the baseline, requested selection
+mode/scope, actual published candidates evaluated, complete/partial status,
 complete/partial status, original/addressed/remaining/new/total counts,
 remaining Critical+High counts, security ranking, a bounded list of selected
 version and ownership changes, errors, and absolute artifact paths. Full JSON,
 HTML, Maven graphs and scanner responses are referenced rather than dumped into
 model context.
 
-The message explicitly states that rank 1 is security evidence, not an upgrade
-instruction. It prompts the agent to combine SBRI with Maven ownership,
+The message explicitly states that the evaluated set is not necessarily the
+complete credible candidate set and rank 1 is scoped security evidence, not an
+upgrade instruction or compatibility conclusion. It prompts the agent to combine SBRI with Maven ownership,
 application compatibility, task constraints and other current evidence and to
 choose among credible framework, targeted, override, combined or other
 justified strategies. The existing decision Skill contains the same boundary.
@@ -121,6 +148,8 @@ token count, plus whether duplicate execution was avoided.
   runtime compatibility.
 - Forward discovery is intentionally bounded to stable patches in the current
   line; the agent may investigate other task-permitted strategies/releases.
+- Explicit range selection is all-or-error under the configured candidate
+  limit; it is not a streaming or pagination interface.
 - SBRI collection populates an output-local Maven cache and may require network
   access. Failure is non-authoritative investigation evidence, not completion.
 - Whether the model inspected or relied on SBRI is observable only in a live

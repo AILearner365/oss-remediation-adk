@@ -6,7 +6,8 @@ import sys
 from pathlib import Path
 
 from .report import write_report
-from .standalone import Evaluator, select_releases
+from .release_selection import select_candidates
+from .standalone import Evaluator, discover_boot_version
 
 
 def _csv(value: str | None) -> list[str]:
@@ -18,9 +19,10 @@ def main(argv=None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     evaluate = sub.add_parser("evaluate", help="compare Spring Boot releases")
     evaluate.add_argument("--project", type=Path, required=True)
-    group = evaluate.add_mutually_exclusive_group(required=True)
+    group = evaluate.add_mutually_exclusive_group()
     group.add_argument("--range", dest="release_range")
     group.add_argument("--releases")
+    evaluate.add_argument("--max-candidates", type=int)
     evaluate.add_argument("--output", type=Path, default=Path("output"))
     evaluate.add_argument("--maven")
     evaluate.add_argument("--settings", type=Path)
@@ -38,8 +40,11 @@ def main(argv=None) -> int:
         return 2
     try:
         configured = json.loads(args.config.read_text()) if args.config else {}
-        request = args.release_range or args.releases
-        releases, selection = select_releases(request)
+        baseline = discover_boot_version(args.project)["version"]
+        releases, selection = select_candidates(
+            baseline, versions=args.releases, ranges=args.release_range,
+            config=configured, max_candidates=args.max_candidates,
+        )
         reports = {}
         for value in args.scanner_report:
             version, path = value.split("=", 1); reports[version] = Path(path)

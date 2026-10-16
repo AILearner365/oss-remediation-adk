@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import re
 import shutil
 import subprocess
 import time
-import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -20,9 +18,6 @@ from .report import write_report
 from .security_report import read_cyclonedx_vulnerabilities, read_osv_json
 
 SCHEMA_VERSION = "1.0"
-BOOT_METADATA = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
-
-
 def discover_boot_version(project: Path) -> dict:
     root = ET.parse(project / "pom.xml").getroot()
     parent = root.find("{*}parent")
@@ -47,27 +42,6 @@ def discover_boot_version(project: Path) -> dict:
     if len(values) != 1:
         raise ValueError("CANDIDATE_CONFIGURATION_AMBIGUOUS: expected one local Boot controller")
     return {"version": values[0][0], "controller": values[0][1]}
-
-
-def _version_tuple(value: str):
-    return tuple(int(part) for part in value.split("."))
-
-
-def select_releases(request: str) -> tuple[list[str], dict]:
-    if ".." not in request:
-        values = [value.strip() for value in request.split(",") if value.strip()]
-        return values, {"method": "explicit", "requested": request}
-    lower, upper = request.split("..", 1)
-    with urllib.request.urlopen(BOOT_METADATA, timeout=30) as response:
-        raw = response.read()
-    root = ET.fromstring(raw)
-    published = [node.text for node in root.findall(".//version") if node.text]
-    prefix = ".".join(lower.split(".")[:2]) + "."
-    eligible = [value for value in published if value.startswith(prefix)
-                and re.fullmatch(r"\d+\.\d+\.\d+", value)
-                and _version_tuple(lower) <= _version_tuple(value) <= _version_tuple(upper)]
-    return eligible, {"method": "maven-central-metadata", "requested": request,
-                      "metadata_sha256": hashlib.sha256(raw).hexdigest()}
 
 
 def _pom_inputs(project: Path) -> dict:

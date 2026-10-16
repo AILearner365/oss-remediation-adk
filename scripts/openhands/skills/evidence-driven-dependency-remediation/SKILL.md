@@ -18,4 +18,17 @@ Work within the task's objective, constraints, and acceptance criteria. Own the 
 4. **Implement with continuity.** Keep changes proportional to the objective. Preserve previously validated working states and improvements unless contrary evidence warrants replacing them. Inspect upstream, downstream, runtime and security implications, including justified exclusions and overrides.
 5. **Validate the whole goal.** Check the effective dependency graph, build, tests, relevant runtime behavior, scan findings and the entire task contract using available evidence. Passing one command is not proof of full remediation. Report remaining gaps and uncertainty accurately. Prefer information-gaining actions over repeated edits or scans that do not test a new hypothesis.
 
+When the task includes pre-edit SBRI evidence, treat its evaluated release scope
+and security ranking as bounded facts, not as a prescribed strategy. Inspect the
+referenced JSON, HTML, dependency graphs and scanner evidence when the summary
+is insufficient. Unresolved findings still require a credible strategy, and a
+rank says nothing conclusive about build, test, API or runtime compatibility.
+The comparison becomes stale when POM/dependency state, candidate scope,
+scanner or SBRI configuration changes. When a consequential decision justifies
+broader evidence, request an explicit comparison with `sbri evaluate --range
+MAJOR.MINOR.x` or `--releases V1,V2`; the supported Gate-2 launch equivalents
+are `--sbri-range` and `--sbri-versions`. Candidate breadth and remediation
+strategy remain your engineering decisions, subject to task constraints and
+independent validation.
+
 Use the OpenHands tools available in this environment and decide independently what evidence to collect. This skill neither requires fixed commands nor authorizes overriding explicit task constraints.

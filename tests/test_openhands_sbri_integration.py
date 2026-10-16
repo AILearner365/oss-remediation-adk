@@ -18,6 +18,8 @@ from scripts.openhands.sbri_integration import (
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts/openhands/openhands-gate2-stop-hook-run.py"
+FRESH_RUN = ROOT / "scripts/openhands/openhands-gate2-fresh-run.sh"
+EXECUTE = ROOT / "scripts/openhands/openhands-gate2-execute.sh"
 
 
 def counts(original=2, addressed=0, remaining=2, new=0, total=2):
@@ -65,7 +67,8 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
                         "commit", "-m", "baseline"], cwd=project, check=True, capture_output=True)
         return project
 
-    def execute(self, project: Path, state: Path, *, status="SUCCESS", exit_code=0):
+    def execute(self, project: Path, state: Path, *, status="SUCCESS", exit_code=0,
+                release_versions=None, release_ranges=None, config=None):
         invocations = []
         def fake_execute(command, **kwargs):
             invocations.append(command)
@@ -77,12 +80,20 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             kwargs["log"].write_text("fixture execution\n")
             return {"exitCode": exit_code, "wallSeconds": 1.0,
                     "peakProcessTreeRssKib": 100, "timedOut": False}
-        with patch("scripts.openhands.sbri_integration.discover_patch_candidates",
-                   return_value=(["4.0.8"], {"source": "fixture", "sha256": "x"})), \
+        candidates = list(dict.fromkeys((release_versions or "4.0.8").split(",")))
+        mode = "explicit" if release_versions else ("range" if release_ranges else "automatic")
+        selection = {"mode": mode, "source": "cli" if release_versions or release_ranges else "automatic",
+                     "requested": release_versions or release_ranges or ["4.0.x"],
+                     "resolved_candidates": candidates, "candidate_count": len(candidates),
+                     "max_candidates": 12, "excluded": [],
+                     "metadata": {"source": "fixture", "sha256": "x"}}
+        with patch("scripts.openhands.sbri_integration.select_candidates",
+                   return_value=(["4.0.8"], selection)), \
              patch("scripts.openhands.sbri_integration._execute_sbri", side_effect=fake_execute):
             record = run_pre_edit_intelligence(
                 control_repo=ROOT, project=project,
-                task="Resolve Maven Spring Boot security vulnerabilities", state_dir=state)
+                task="Resolve Maven Spring Boot security vulnerabilities", state_dir=state,
+                release_versions=release_versions, release_ranges=release_ranges, config=config)
         return record, invocations
 
     def test_applicable_spring_boot_task_runs_before_edit_and_preserves_source(self):
@@ -118,7 +129,8 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             self.assertLess(record["agentContextCharacters"], 6000)
             self.assertIn("baseline Spring Boot: 4.0.6", message)
             self.assertIn("addressed=1", message); self.assertIn("remaining Critical+High=1", message)
-            self.assertIn("do not treat security rank 1 as a mandatory upgrade", message)
+            self.assertIn("not necessarily the complete set of credible remediation candidates", message)
+            self.assertIn("mandatory upgrade", message)
             self.assertFalse(record["rankForcedAsStrategy"])
 
     def test_partial_result_and_machine_readable_errors_are_preserved(self):
@@ -153,6 +165,40 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
             self.assertTrue((review / "output/result.json").is_file())
             self.assertTrue((review / "agent-summary.txt").is_file())
 
+    def test_changed_candidate_scope_invalidates_cache_and_is_propagated(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); project = self.make_project(root); state = root / "state"
+            first, first_calls = self.execute(project, state, release_versions="4.0.8")
+            second, second_calls = self.execute(project, state, release_versions="4.0.8,4.1.1")
+            self.assertEqual(1, len(first_calls)); self.assertEqual(1, len(second_calls))
+            self.assertNotEqual(first["fingerprint"], second["fingerprint"])
+            self.assertIn("4.0.8,4.1.1", second_calls[0])
+
+    def test_changed_application_source_invalidates_cache(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); project = self.make_project(root); state = root / "state"
+            source = project / "README.md"; source.write_text("before\n")
+            subprocess.run(["git", "add", "README.md"], cwd=project, check=True)
+            subprocess.run(["git", "-c", "user.name=Test", "-c", "user.email=test@example.test",
+                            "commit", "-m", "source"], cwd=project, check=True, capture_output=True)
+            first, _ = self.execute(project, state)
+            source.write_text("after\n")
+            second, calls = self.execute(project, state)
+            self.assertEqual(1, len(calls))
+            self.assertNotEqual(first["fingerprint"], second["fingerprint"])
+
+    def test_config_is_hashed_and_forwarded_without_overriding_its_selection(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value); project = self.make_project(root); state = root / "state"
+            config = root / "sbri.json"
+            config.write_text(json.dumps({"release_selection": {"versions": ["4.0.8"]},
+                                          "scanner": "configured-scanner"}))
+            record, calls = self.execute(project, state, config=config)
+            self.assertIn("--config", calls[0]); self.assertNotIn("--releases", calls[0])
+            self.assertNotIn("--scanner", calls[0])
+            self.assertEqual("configured-scanner", record["request"]["config"]["content"]["scanner"])
+            self.assertEqual("configured-scanner", record["request"]["scanner"]["requested"])
+
     def test_runner_places_sbri_before_agent_run_and_leaves_validator_authoritative(self):
         source = RUNNER.read_text()
         self.assertLess(source.index("run_pre_edit_intelligence("), source.index("conversation.send_message(task)"))
@@ -160,7 +206,19 @@ class SbriOpenHandsIntegrationTests(unittest.TestCase):
         self.assertIn("hook_config=hook_config", source)
         self.assertIn("DETERMINISTIC_VALIDATION_PASSED", source)
         self.assertIn('parser.add_argument("--sbri"', source)
+        self.assertIn('selection.add_argument("--sbri-versions"', source)
+        self.assertIn('selection.add_argument("--sbri-range"', source)
+        self.assertIn('sbri_record["status"] == "INVALID_RELEASE_SELECTION"', source)
+        self.assertLess(source.index('sbri_record["status"] == "INVALID_RELEASE_SELECTION"'),
+                        source.index("conversation.send_message(task)"))
         self.assertIn("argparse.BooleanOptionalAction", source)
+
+    def test_gate2_shell_launchers_forward_release_selection_arguments(self):
+        fresh = FRESH_RUN.read_text(); execute = EXECUTE.read_text()
+        self.assertIn('SBRI_ARGS=("$@")', fresh)
+        self.assertIn('"${SBRI_ARGS[@]}"', fresh)
+        self.assertIn('SBRI_ARGS=("$@")', execute)
+        self.assertIn('"${SBRI_ARGS[@]}"', execute)
 
 
 if __name__ == "__main__":

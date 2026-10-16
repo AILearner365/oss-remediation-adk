@@ -69,6 +69,9 @@ PY
       printf 'task_skill=%s\n' "${OPENHANDS_TASK_SKILL:-0}"
       printf 'structured_guidance=%s\n' "${OPENHANDS_STRUCTURED_GUIDANCE:-0}"
       printf 'sbri_enabled=%s\n' "${OPENHANDS_SBRI:-1}"
+      printf 'sbri_arguments='
+      printf '%q ' "${SBRI_ARGS[@]}"
+      printf '\n'
       sha256sum \
         "$CONTROL_REPO/scripts/openhands/guidance/engineering-judgment.md" \
         "$CONTROL_REPO/scripts/openhands/guidance/general-engineering.md" \
@@ -217,11 +220,13 @@ TASK_ID_RAW="${1:-}"
 if [ -n "$TASK_ID_RAW" ]; then
   [[ "$TASK_ID_RAW" =~ ^[0-9]+$ ]] || die "Task id must be numeric, for example: 05"
   printf -v TASK_ID "%02d" "$((10#$TASK_ID_RAW))"
+  shift
 else
   git -C "$SOURCE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
     || die "Source repository not found at $SOURCE_REPO"
   TASK_ID="$(next_task_id)"
 fi
+SBRI_ARGS=("$@")
 
 printf '%s\n' "$TASK_ID" > "$RUN_LOG_DIR/task-id.txt"
 
@@ -251,6 +256,7 @@ bash "$CONTROL_REPO/scripts/openhands/openhands-cloudshell-verify.sh" \
 CURRENT_STAGE="EXECUTE"
 info "Stage 3/3: EXECUTE"
 bash "$CONTROL_REPO/scripts/openhands/openhands-gate2-execute.sh" "$TASK_ID" \
+  "${SBRI_ARGS[@]}" \
   2>&1 | tee "$RUN_LOG_DIR/execute.log"
 
 CURRENT_STAGE="COMPLETE"

@@ -7,6 +7,7 @@ Prerequisites: Python 3.11+, Java, Maven, and OSV Scanner 2.x on `PATH`.
 
 ```bash
 ./sbri evaluate --project ./application --range 3.3.4..3.3.8
+./sbri evaluate --project ./application --range 4.0.x,4.1.x --max-candidates 12
 ./sbri evaluate --project ./application --releases 3.3.5,3.3.7,3.3.8 \
   --profiles production --modules service --output build/sbri
 ```
@@ -18,7 +19,7 @@ baseline execution prevented a usable result. Scanner exit 1 means findings,
 not failure.
 
 Optional JSON configuration keys are `maven`, `settings`, `profiles`, `modules`,
-`scopes`, `scanner`, `severities`, and `timeout`. CLI values take precedence. A CI job or
+`scopes`, `scanner`, `severities`, `timeout`, and `release_selection`. A CI job or
 autonomous agent should consume `result.json`; HTML is rendered only from that
 same representation. The schema is
 `spring_boot_release_intelligence/result-schema-v1.json`.
@@ -31,9 +32,11 @@ its Python modules.
 Required inputs:
 
 - `--project PATH`: the Maven reactor or project root containing `pom.xml`.
-- Exactly one of `--range LOWER..UPPER` or `--releases V1,V2`: candidate Spring
-  Boot releases. The discovered baseline is always assessed independently and
-  should not be repeated merely to make it appear as a candidate.
+- Optional `--range MAJOR.MINOR.x[,MAJOR.MINOR.x]` (legacy bounded
+  `LOWER..UPPER` remains supported) or `--releases V1,V2`: candidate Spring Boot
+  releases. With neither, SBRI automatically selects up to the latest three
+  stable forward patches in the baseline line. The discovered baseline is
+  always assessed independently and should not be repeated as a candidate.
 
 Optional inputs:
 
@@ -48,8 +51,16 @@ Optional inputs:
   1.5 vulnerability reports instead of invoking the default scanner. Supply a
   report for the baseline and every candidate being assessed.
 - `--timeout SECONDS` for each Maven/scanner command.
+- `--max-candidates N` (default 12) rejects, rather than truncates, an explicit
+  selection that is too broad.
 - `--config PATH` for JSON defaults. Supported keys are `maven`, `settings`,
-  `profiles`, `modules`, `scopes`, `scanner`, `severities`, and `timeout`.
+  `profiles`, `modules`, `scopes`, `scanner`, `severities`, `timeout`, and
+  `release_selection` (`versions` or `ranges`, plus optional `max_candidates`).
+
+Use exactly one release-selection source: CLI versions, CLI range,
+configuration `release_selection`, or automatic discovery. Conflicting CLI and
+configuration sources are rejected. Unrelated configuration such as scanner
+settings remains usable with CLI selection.
 
 Project path, release selection, scanner-report paths and output directory are
 CLI parameters, not configuration-file keys. A small configuration is:

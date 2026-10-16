@@ -34,8 +34,20 @@ Use the relevant read-only Maven and repository methods below to establish facts
 - When necessary, use a disposable workspace copy to query candidate effective POMs and dependency trees **without editing the working project**. Do not use `help:effective-pom -Dartifact=...` as proof of a candidate graph.
 - Prefer read-only investigation; Maven can populate its local cache. Do not run `versions:set` or `versions:use-*` merely to discover candidates.
 
+If pre-edit SBRI evidence is supplied, its release-selection record identifies
+the requested mode/ranges/versions, authoritative metadata hash and actual
+published candidates evaluated. The set is not necessarily every credible
+candidate. Read the referenced `result.json`, report and raw Maven/scanner
+evidence before relying on omitted detail. Security ranks compare only that
+set; remaining findings and ownership evidence may support framework, targeted,
+override or combined approaches. Expand a justified comparison through `sbri
+evaluate --range MAJOR.MINOR.x` or `--releases V1,V2` (or the Gate-2
+`--sbri-range`/`--sbri-versions` launch options). Re-run when source/POM state,
+candidate scope, scanner or configuration changes, but do not rerun after every
+edit without an evidence need.
+
 ## How reliable are security and compatibility claims?
 
 - Cross-check original retained findings and authoritative advisories against expected **resolved** artifact versions and advisory affected/fixed ranges. Distinguish evidence, inference, and unknowns.
 - Consult relevant framework release notes, Java requirements, dependency-management documentation, and affected module/API consumers. Maven Enforcer `dependencyConvergence` and `requireUpperBoundDeps` may help on a disposable candidate graph but do not prove runtime compatibility.
-- `validate-remediation` supplies full-project self-validation and retained scanner/build/test evidence after implementation. Direct agent-facing OSV execution is not required; independent validation remains the acceptance authority. A partial or missing scan is not proof of zero findings.
+- `validate-remediation` supplies full-project self-validation and retained scanner/build/test evidence after implementation. Direct agent-facing OSV execution is not required; independent validation remains the acceptance authority. Treat a partial or missing scan, including unresolved modules or a mismatched group ID, as incomplete/unknown evidence, not proof of zero findings.

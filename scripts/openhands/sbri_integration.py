@@ -6,16 +6,17 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import time
-import urllib.request
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from spring_boot_release_intelligence.standalone import BOOT_METADATA, discover_boot_version
+from spring_boot_release_intelligence.release_selection import (
+    ReleaseSelectionError,
+    select_candidates,
+)
+from spring_boot_release_intelligence.standalone import discover_boot_version
 
 
 SECURITY_TERMS = ("vulnerability", "vulnerabilities", "security", "cve", "remediation")
@@ -33,6 +34,16 @@ def _git(repo: Path, *args: str) -> str:
 def _tree_size(path: Path, pattern: str | None = None) -> tuple[int, int]:
     files = [item for item in path.rglob(pattern or "*") if item.is_file()] if path.exists() else []
     return len(files), sum(item.stat().st_size for item in files)
+
+
+def _scanner_identity(scanner: Path | None, configured: dict[str, Any]) -> dict[str, Any]:
+    requested = str(scanner) if scanner else configured.get("scanner", "osv-scanner")
+    resolved = Path(requested).expanduser() if os.sep in requested else Path(shutil.which(requested) or requested)
+    identity: dict[str, Any] = {"requested": requested, "resolved": str(resolved)}
+    if resolved.is_file():
+        identity["sha256"] = hashlib.sha256(resolved.read_bytes()).hexdigest()
+        identity["size"] = resolved.stat().st_size
+    return identity
 
 
 def _execute_sbri(command: list[str], *, cwd: Path, env: dict[str, str],
@@ -86,35 +97,18 @@ def applicability(project: Path, task: str) -> dict[str, Any]:
             "baseline": discovery["version"], "controller": discovery["controller"]}
 
 
-def discover_patch_candidates(baseline: str, *, limit: int = 3) -> tuple[list[str], dict]:
-    """Discover bounded forward stable patches from current Maven Central metadata."""
-    with urllib.request.urlopen(BOOT_METADATA, timeout=30) as response:
-        raw = response.read()
-    root = ET.fromstring(raw)
-    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", baseline)
-    if not match:
-        raise ValueError(f"baseline is not a stable numeric release: {baseline}")
-    major, minor, patch = map(int, match.groups())
-    eligible = []
-    for node in root.findall(".//version"):
-        candidate = node.text or ""
-        parsed = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", candidate)
-        if not parsed:
-            continue
-        values = tuple(map(int, parsed.groups()))
-        if values[:2] == (major, minor) and values[2] > patch:
-            eligible.append((values, candidate))
-    selected = [value for _, value in sorted(eligible)[-limit:]]
-    return selected, {"source": BOOT_METADATA, "sha256": hashlib.sha256(raw).hexdigest(),
-                      "policy": f"latest {limit} stable forward patches in {major}.{minor}.x"}
-
-
 def project_fingerprint(project: Path, request: dict) -> tuple[str, dict]:
     poms = sorted(project.rglob("pom.xml"))
     pom_hashes = {path.relative_to(project).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
                   for path in poms if ".git" not in path.parts and "target" not in path.parts}
+    tracked = _git(project, "ls-files", "--cached", "--others", "--exclude-standard").splitlines()
+    source_hashes = {}
+    for relative in sorted(set(tracked)):
+        path = project / relative
+        if path.is_file() and ".git" not in path.parts and "target" not in path.parts:
+            source_hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     state = {"head": _git(project, "rev-parse", "HEAD"), "status": _git(project, "status", "--porcelain"),
-             "poms": pom_hashes, "request": request}
+             "poms": pom_hashes, "sourceFiles": source_hashes, "request": request}
     digest = hashlib.sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
     return digest, state
 
@@ -156,8 +150,10 @@ def build_summary(result: dict, output: Path, *, max_changes: int = 12,
                   for item in result["findings"]
                   if item["release"] == (preferred or baseline) and
                   item["severity"] in {"CRITICAL", "HIGH"}][:max_advisories]
+    selection = result["execution"].get("release_selection", {})
     bounded = {"status": result["status"], "baseline": baseline,
                "evaluated": result["execution"]["evaluated_releases"], "releases": releases,
+               "releaseSelection": selection,
                "securityRankOne": preferred, "rankIsSecurityEvidenceOnly": True,
                "dependencyChanges": changes[:max_changes],
                "dependencyChangesOmitted": max(0, len(changes) - max_changes),
@@ -167,7 +163,10 @@ def build_summary(result: dict, output: Path, *, max_changes: int = 12,
                              "report": str(output / "report.html"),
                              "evidence": str(output / "evidence")}}
     lines = ["SBRI pre-edit release intelligence (security evidence; not an upgrade instruction)",
-             f"Status: {bounded['status']}; baseline Spring Boot: {baseline}"]
+             f"Status: {bounded['status']}; baseline Spring Boot: {baseline}",
+             f"Release selection: mode={selection.get('mode', 'unknown')}; "
+             f"source={selection.get('source', 'unknown')}; requested={selection.get('requested', [])}",
+             f"Published candidates evaluated: {selection.get('resolved_candidates', bounded['evaluated'])}"]
     for item in releases:
         if item["counts"] is None:
             lines.append(f"- {item['version']}: {item['assessmentStatus']}; not ranked")
@@ -186,14 +185,21 @@ def build_summary(result: dict, output: Path, *, max_changes: int = 12,
     lines.extend([f"Full JSON: {bounded['artifacts']['result']}",
                   f"HTML: {bounded['artifacts']['report']}",
                   f"Raw evidence: {bounded['artifacts']['evidence']}",
-                  "Use this with Maven/application compatibility evidence and consider credible targeted, "
-                  "framework, override, or combined strategies. Independent validation remains authoritative."])
+                  "The evaluated release set is not necessarily the complete set of credible remediation "
+                  "candidates. A security ranking applies only to evaluated candidates, does not establish "
+                  "compatibility, and does not mandate an upgrade. Investigate other task-permitted releases "
+                  "or targeted, framework, override, combined, or other strategies when justified. "
+                  "Independent validation remains authoritative."])
     return "\n".join(lines), bounded
 
 
 def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
                               state_dir: Path, scanner: Path | None = None,
-                              config: Path | None = None, enabled: bool = True,
+                              config: Path | None = None,
+                              release_versions: str | None = None,
+                              release_ranges: str | None = None,
+                              max_candidates: int | None = None,
+                              enabled: bool = True,
                               timeout: int = 2400) -> dict[str, Any]:
     started = time.monotonic()
     root = state_dir / "sbri"
@@ -205,18 +211,24 @@ def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
         (root / "latest.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
         return record
     try:
-        candidates, discovery = discover_patch_candidates(applicable["baseline"])
-    except Exception as error:
-        candidates, discovery = [], {"error": str(error)}
-    if not candidates:
-        record = {"status": "NO_FORWARD_PATCH_CANDIDATES", "applicability": applicable,
-                  "candidateDiscovery": discovery, "invoked": False, "reused": False,
-                  "message": "No eligible forward stable patch was discovered; no upgrade was invented."}
+        configured = json.loads(config.read_text(encoding="utf-8")) if config else {}
+        candidates, selection = select_candidates(
+            applicable["baseline"], versions=release_versions, ranges=release_ranges,
+            config=configured, max_candidates=max_candidates,
+        )
+    except (OSError, json.JSONDecodeError, ReleaseSelectionError) as error:
+        record = {"status": "INVALID_RELEASE_SELECTION", "applicability": applicable,
+                  "invoked": False, "reused": False, "message": str(error),
+                  "releaseSelection": {"versions": release_versions, "ranges": release_ranges,
+                                       "maxCandidates": max_candidates}}
         (root / "latest.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
         return record
     request = {"baseline": applicable["baseline"], "releases": candidates,
-               "scanner": str(scanner) if scanner else "osv-scanner",
-               "config": str(config) if config else None, "candidateDiscovery": discovery}
+               "scanner": _scanner_identity(scanner, configured),
+               "config": ({"path": str(config),
+                           "sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+                           "content": configured} if config else None),
+               "releaseSelection": selection}
     fingerprint, before = project_fingerprint(project, request)
     run_dir = root / fingerprint
     output = run_dir / "output"
@@ -228,7 +240,13 @@ def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
         return record
     run_dir.mkdir(parents=True, exist_ok=True)
     command = [str(control_repo / "sbri"), "evaluate", "--project", str(project),
-               "--releases", ",".join(candidates), "--output", str(output)]
+               "--output", str(output)]
+    if release_versions:
+        command.extend(["--releases", release_versions])
+    elif release_ranges:
+        command.extend(["--range", release_ranges])
+    if max_candidates is not None:
+        command.extend(["--max-candidates", str(max_candidates)])
     if scanner:
         command.extend(["--scanner", str(scanner)])
     if config:
@@ -251,6 +269,7 @@ def run_pre_edit_intelligence(*, control_repo: Path, project: Path, task: str,
                          "FAILED")), "applicability": applicable, "invoked": True, "reused": False,
               "duplicateExecutionAvoided": False, "exitCode": exit_code,
               "fingerprint": fingerprint, "request": request, "command": command,
+              "releaseSelection": selection,
               "elapsedSeconds": time.monotonic() - started, "measurement": measurement,
               "outputFiles": output_files, "outputBytes": output_bytes,
               "mavenCacheFiles": cache_files, "mavenCacheBytes": cache_bytes,
@@ -279,8 +298,9 @@ def agent_message(record: dict) -> str:
                 "task-permitted investigation methods.")
     summary = Path(record["summaryPath"]).read_text(encoding="utf-8").strip()
     return (summary + "\n\nThis evidence was generated before your first action. Inspect the referenced "
-            "artifacts as needed and make the remediation decision yourself; do not treat security rank 1 "
-            "as a mandatory upgrade.")
+            "artifacts as needed and make the remediation decision yourself. The evaluated release set is "
+            "not necessarily the complete set of credible remediation candidates; do not treat security "
+            "rank 1 as a compatibility conclusion or mandatory upgrade.")
 
 
 def retain_review_bundle(latest: Path, destination: Path) -> None:

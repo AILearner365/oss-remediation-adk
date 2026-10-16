@@ -109,6 +109,13 @@ def parse_args() -> argparse.Namespace:
                         help="provide applicable Spring Boot security tasks with pre-edit SBRI evidence")
     parser.add_argument("--sbri-config", type=Path,
                         help="optional SBRI JSON configuration for Maven/scanner settings")
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--sbri-versions",
+                           help="comma-separated published stable Spring Boot versions")
+    selection.add_argument("--sbri-range",
+                           help="comma-separated major.minor.x release ranges")
+    parser.add_argument("--sbri-max-candidates", type=int,
+                        help="reject selection exceeding this candidate count (default: 12)")
     return parser.parse_args()
 
 
@@ -541,8 +548,11 @@ def main() -> int:
             project=target,
             task=task,
             state_dir=state_dir,
-            scanner=Path.home() / "bin" / "osv-scanner",
+            scanner=None if args.sbri_config else Path.home() / "bin" / "osv-scanner",
             config=args.sbri_config.expanduser().resolve() if args.sbri_config else None,
+            release_versions=args.sbri_versions,
+            release_ranges=args.sbri_range,
+            max_candidates=args.sbri_max_candidates,
             enabled=args.sbri,
         )
         if sbri_record["status"] not in {"DISABLED", "NOT_APPLICABLE"}:
@@ -554,8 +564,10 @@ def main() -> int:
                 "sourceUnchanged", "summaryPath", "resultPath", "reportPath", "evidencePath",
                 "agentContextCharacters", "agentContextApproxTokens", "deliveredBeforeAgentRun",
                 "rankForcedAsStrategy", "measurement", "outputBytes", "mavenCacheJarCount",
-                "mavenCacheJarBytes")
+                "mavenCacheJarBytes", "releaseSelection", "request")
         }, sort_keys=True))
+        if sbri_record["status"] == "INVALID_RELEASE_SELECTION":
+            raise SystemExit("SBRI release selection rejected: " + sbri_record["message"])
         print(f"OPENHANDS_SBRI_LAUNCHER={sbri_launcher}")
         print(
             "GUIDANCE_DELIVERY_EVIDENCE="
