@@ -7,7 +7,8 @@ from spring_boot_release_intelligence.a7 import Dependency
 from spring_boot_release_intelligence.report import TABLES, render_html
 from spring_boot_release_intelligence.security_report import read_cyclonedx_vulnerabilities
 from spring_boot_release_intelligence.standalone import (discover_boot_version,
-                                                         rank_releases, validate_result)
+                                                         _pom_inputs, _portable, rank_releases,
+                                                         validate_result)
 
 
 SEVS = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
@@ -25,10 +26,13 @@ def result_fixture():
     candidate = {**dependency, "release": "1.0.1", "selected_version": "2", "findings": []}
     return {"schema_version": "1.0", "status": "SUCCESS",
       "application": {"project_path": "/p", "original_spring_boot_version": "1.0.0",
-                      "original_pom_sha256": "x"},
+                      "project_id": "sample-app", "original_pom_sha256": "x"},
       "execution": {"requested_releases": ["1.0.1"], "evaluated_releases": ["1.0.0", "1.0.1"],
-                    "selected_severities": SEVS, "scopes": ["compile"]},
-      "scanner": {"provider": "test", "version": "1", "inventory_format": "CycloneDX 1.5"},
+                    "selected_severities": SEVS, "scopes": ["compile"],
+                    "profiles": [], "discovered_modules": ["api", "service"],
+                    "other_severities": "None; all scanner severity categories selected"},
+      "scanner": {"provider": "test", "version": "1", "inventory_format": "CycloneDX 1.5",
+                  "snapshot_comparable": True},
       "releases": [
         {"version": "1.0.0", "assessment_status": "COMPLETE", "rank": None,
          "counts": {"original": counts(1), "addressed": counts(), "remaining": counts(1),
@@ -37,7 +41,8 @@ def result_fixture():
          "counts": {"original": counts(1), "addressed": counts(1), "remaining": counts(),
                     "new": counts(), "total": counts()}, "recommendation": "Preferred"}],
       "dependencies": [dependency, candidate], "findings": [finding], "override_notes": [],
-      "evidence": {}, "errors": []}
+      "evidence": {"coverage": "Complete test inventory", "limitations": ["Test limitation"]},
+      "errors": []}
 
 
 class SbriTests(unittest.TestCase):
@@ -67,7 +72,51 @@ class SbriTests(unittest.TestCase):
             self.assertEqual(positions, sorted(positions))
         exact = [x.format(base="1.0.0", selected="1.0.1") for x in TABLES[3]]
         self.assertTrue(all(f"<th>{heading}</th>" in rendered for heading in exact))
+        self.assertIn("<th>Boot 1.0.0 default</th>", rendered)
+        self.assertNotIn("Boot {base} default", rendered)
         self.assertIn("g:a", rendered); self.assertIn("Preferred", rendered)
+
+    def test_report_header_contains_complete_assessment_metadata(self):
+        rendered = render_html(result_fixture())
+        for value in ("sample-app", "1.0.0", "1.0.1", "test", "api, service",
+                      "None", "compile", "CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN",
+                      "all scanner severity categories selected", "Complete test inventory",
+                      "Test limitation"):
+            self.assertIn(value, rendered)
+        self.assertEqual(4, rendered.count("<table id="))
+
+    def test_evidence_references_are_output_relative_and_exist(self):
+        with tempfile.TemporaryDirectory() as value:
+            output = Path(value)
+            evidence = output / "evidence" / "1.0.0" / "scanner.json"
+            evidence.parent.mkdir(parents=True)
+            evidence.write_text("{}")
+            reference = _portable(evidence, output)
+            self.assertEqual("evidence/1.0.0/scanner.json", reference)
+            self.assertTrue((output / reference).is_file())
+
+    def test_external_evidence_reference_is_not_falsely_rewritten(self):
+        with tempfile.TemporaryDirectory() as output_value, tempfile.TemporaryDirectory() as external_value:
+            external = Path(external_value) / "scanner.json"
+            external.write_text("{}")
+            self.assertEqual(str(external), _portable(external, Path(output_value)))
+
+    def test_reactor_modules_are_discovered_as_managed_project_components(self):
+        with tempfile.TemporaryDirectory() as value:
+            root = Path(value)
+            (root / "pom.xml").write_text('''<project xmlns="http://maven.apache.org/POM/4.0.0">
+<modelVersion>4.0.0</modelVersion><groupId>example</groupId><artifactId>app</artifactId><version>1</version>
+<name>Example Application</name><modules><module>service</module></modules>
+<dependencyManagement><dependencies><dependency><groupId>example</groupId><artifactId>service</artifactId><version>${project.version}</version></dependency></dependencies></dependencyManagement>
+</project>''')
+            (root / "service").mkdir()
+            (root / "service" / "pom.xml").write_text('''<project xmlns="http://maven.apache.org/POM/4.0.0">
+<modelVersion>4.0.0</modelVersion><parent><groupId>example</groupId><artifactId>app</artifactId><version>1</version></parent><artifactId>service</artifactId>
+</project>''')
+            inputs = _pom_inputs(root)
+            self.assertEqual(["service"], inputs["modules"])
+            self.assertEqual({"example:service"}, inputs["reactor"])
+            self.assertEqual("Example Application", inputs["project_id"])
 
     def test_external_cyclonedx_vulnerability_ingestion(self):
         path = Path("tests/fixtures/external-scanner.cdx.json")

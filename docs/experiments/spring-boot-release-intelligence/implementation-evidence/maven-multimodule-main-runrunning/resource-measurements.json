@@ -1,0 +1,22 @@
+{
+  "wall_clock_seconds": 55.94093634400042,
+  "evaluator_elapsed_seconds": 55.59971332999976,
+  "peak_process_tree_rss_kib": 231000,
+  "peak_single_process_rss_kib": 202528,
+  "memory_measurement": "ps process-tree RSS sampling at 0.1 second intervals",
+  "isolated_maven_cache_bytes": 21068345,
+  "isolated_maven_cache_jar_count": 50,
+  "isolated_maven_cache_jar_bytes": 14912596,
+  "temporary_output_workspace_bytes": 24905972,
+  "materialized_application_workspaces_bytes": 125733,
+  "http_cache_bytes": 1352956,
+  "retained_evidence_bytes": 2056544,
+  "retained_validation_directory_bytes_before_notes": 2369919,
+  "selected_components_per_release": 62,
+  "evaluated_release_count_including_baseline": 3,
+  "notes": [
+    "The isolated Maven cache, copied workspaces, and HTTP cache were measured but not retained.",
+    "The JAR count is the number of JAR files populated in the initially empty isolated Maven repository.",
+    "These measurements are not exactly comparable to A7 fixtures because this application has four modules and a different dependency graph."
+  ]
+}

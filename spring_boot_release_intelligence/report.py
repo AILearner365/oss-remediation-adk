@@ -31,6 +31,10 @@ def _finding_text(findings: list[dict]) -> str:
     return ", ".join(f"{value} {key.title()}" for key, value in counts.items()) or "0"
 
 
+def _list_text(values: list | None, empty: str = "None") -> str:
+    return ", ".join(str(value) for value in (values or [])) or empty
+
+
 def render_html(result: dict) -> str:
     base = result["application"]["original_spring_boot_version"]
     severities = result["execution"]["selected_severities"]
@@ -65,7 +69,7 @@ def render_html(result: dict) -> str:
         return (f'<table id="{table_id}"><thead><tr>' + ''.join(f'<th>{_e(x)}</th>' for x in headers) +
                 '</tr></thead><tbody>' + ''.join('<tr>' + ''.join(f'<td>{_e(x)}</td>' for x in row) +
                 '</tr>' for row in rows) + '</tbody></table>')
-    headers3 = TABLES[2][:5] + severities
+    headers3 = [heading.format(base=base) for heading in TABLES[2][:5]] + severities
     # Table 4 rows are also embedded for the lightweight selector.
     comparisons = {}
     for release in assessed[1:]:
@@ -102,9 +106,29 @@ def render_html(result: dict) -> str:
                       for item in result.get("findings", []))
     script = """<script>const DATA=JSON.parse(document.getElementById('comparison-data').textContent);
 function pick(v){const b=document.querySelector('#table4 tbody');b.innerHTML='';for(const r of DATA[v]){const tr=document.createElement('tr');for(const x of r){const td=document.createElement('td');td.textContent=x??'—';tr.appendChild(td)}b.appendChild(tr)}const h=document.querySelectorAll('#table4 th');h[3].textContent=`Boot ${v} default`;h[4].textContent=`Boot ${v} selected`}</script>"""
+    limitations = result.get("evidence", {}).get("limitations", [])
+    coverage = result.get("evidence", {}).get("coverage", "Complete selected Maven inventory for each successfully assessed release")
+    modules = result["execution"].get("discovered_modules", result["execution"].get("modules", []))
+    requested = result["execution"].get("requested_releases", [])
+    evaluated = result["execution"].get("evaluated_releases", [])
+    metadata = f"""<section id="report-metadata"><h2>Assessment metadata</h2><dl>
+<dt>Application / project</dt><dd>{_e(result['application'].get('project_id') or result['application']['project_path'])}</dd>
+<dt>Original Spring Boot</dt><dd>{_e(base)}</dd>
+<dt>Requested releases</dt><dd>{_e(_list_text(requested))}</dd>
+<dt>Evaluated releases</dt><dd>{_e(_list_text(evaluated))}</dd>
+<dt>Scanner</dt><dd>{_e(result['scanner']['provider'])} {_e(result['scanner'].get('version'))}</dd>
+<dt>Maven modules</dt><dd>{_e(_list_text(modules, 'Root project only'))}</dd>
+<dt>Active profiles</dt><dd>{_e(_list_text(result['execution'].get('profiles'), 'None'))}</dd>
+<dt>Relevant scopes</dt><dd>{_e(_list_text(result['execution'].get('scopes')))}</dd>
+<dt>Selected severities</dt><dd>{_e(_list_text(severities))}</dd>
+<dt>Other severities</dt><dd>{_e(result['execution'].get('other_severities', 'Not recorded'))}</dd>
+<dt>Assessment coverage</dt><dd>{_e(coverage)}</dd>
+<dt>Snapshot comparability</dt><dd>{_e(result['scanner'].get('snapshot_comparable', 'Unknown'))}</dd>
+<dt>Meaningful limitations</dt><dd>{_e('; '.join(limitations) or 'None recorded')}</dd>
+</dl></section>"""
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>Spring Boot Release Intelligence</title>
 <style>body{{font:14px system-ui;margin:2rem;color:#17202a}}table{{border-collapse:collapse;width:100%;margin:1rem 0 2rem}}th,td{{border:1px solid #ccd1d1;padding:.45rem;text-align:left}}th{{background:#eef2f3}}.note{{background:#fff7d6;padding:.7rem}}details{{margin:.5rem 0}}</style></head><body>
-<h1>Spring Boot Release Intelligence</h1><p>Application: {_e(result['application']['project_path'])} · Base: {_e(base)} · Scanner: {_e(result['scanner']['provider'])} {_e(result['scanner'].get('version'))}</p>
+<h1>Spring Boot Release Intelligence</h1>{metadata}
 <p>Security-only ranking; compatibility is not validated. Status: {_e(result['status'])}</p>
 <h2>Overall release comparison and ranking</h2>{table(TABLES[0], rows1, 'table1')}{override}
 <h2>Severity breakdown</h2>{table(TABLES[1], rows2, 'table2')}

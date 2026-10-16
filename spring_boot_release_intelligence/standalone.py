@@ -86,7 +86,7 @@ def _pom_inputs(project: Path) -> dict:
         if dependency.findtext("{*}version"):
             explicit[coordinate] = "pom.xml dependency version"
     management = root.find("{*}dependencyManagement/{*}dependencies")
-    for dependency in list(management or []):
+    for dependency in list(management) if management is not None else []:
         group, artifact = dependency.findtext("{*}groupId"), dependency.findtext("{*}artifactId")
         version = dependency.findtext("{*}version") or ""
         if version.startswith("${"):
@@ -96,8 +96,38 @@ def _pom_inputs(project: Path) -> dict:
                 imports.append((group, artifact, version))
         elif version:
             explicit[f"{group}:{artifact}"] = "pom.xml dependencyManagement"
+    modules = [node.text.strip() for node in root.findall("{*}modules/{*}module")
+               if node.text and node.text.strip()]
+    reactor = set()
+    root_group = root.findtext("{*}groupId") or (parent.findtext("{*}groupId") if parent is not None else None)
+    root_version = root.findtext("{*}version") or (parent.findtext("{*}version") if parent is not None else None)
+    for module in modules:
+        module_pom = project / module / "pom.xml"
+        if not module_pom.exists():
+            continue
+        module_root = ET.parse(module_pom).getroot()
+        group = module_root.findtext("{*}groupId") or root_group
+        artifact = module_root.findtext("{*}artifactId")
+        if group and artifact:
+            reactor.add(f"{group}:{artifact}")
+        for dependency in module_root.findall("{*}dependencies/{*}dependency"):
+            coordinate = f"{dependency.findtext('{*}groupId')}:{dependency.findtext('{*}artifactId')}"
+            direct.add(coordinate)
+            if dependency.findtext("{*}version"):
+                explicit[coordinate] = f"{module}/pom.xml dependency version"
     return {"direct": direct, "explicit": explicit, "imports": imports,
-            "properties": properties, "corporate_parent": corporate_parent}
+            "properties": properties, "corporate_parent": corporate_parent,
+            "modules": modules, "reactor": reactor, "reactor_version": root_version,
+            "project_id": root.findtext("{*}name") or root.findtext("{*}artifactId") or project.name}
+
+
+def _portable(path: str | Path, output: Path) -> str:
+    """Return an output-relative evidence reference when the path is retained there."""
+    value = Path(path)
+    try:
+        return value.resolve().relative_to(output.resolve()).as_posix()
+    except ValueError:
+        return str(value)
 
 
 def _run(command: list[str], cwd: Path, log: Path, timeout: int) -> dict:
@@ -268,7 +298,9 @@ class Evaluator:
                     override = pom_inputs["explicit"].get(item.coordinate)
                     property_override = next((name for name in getattr(boot_item, "property_chain", [])
                                               if name in pom_inputs["properties"]), None)
-                    if boot_item and other_item: ownership = "OWNERSHIP_UNKNOWN"
+                    if item.coordinate in pom_inputs["reactor"]:
+                        ownership = "OTHER_BOM_PARENT_MANAGED"
+                    elif boot_item and other_item: ownership = "OWNERSHIP_UNKNOWN"
                     elif boot_item and (override or property_override): ownership = "BOOT_MANAGED_OVERRIDDEN"
                     elif boot_item: ownership = "BOOT_MANAGED"
                     elif other_item: ownership = "OTHER_BOM_PARENT_MANAGED"
@@ -279,10 +311,15 @@ class Evaluator:
                         "selected_version": item.version, "scope": item.scope, "direct": item.direct,
                         "ownership": ownership,
                         "boot_managed_default": getattr(boot_item, "version", None),
-                        "management_source": getattr(other_item, "origin", None),
+                        "management_source": ("reactor dependencyManagement" if item.coordinate in pom_inputs["reactor"]
+                                              else getattr(other_item, "origin", None)),
                         "override_source": override or (f"property:{property_override}" if property_override else None),
                         "paths": [list(item.path)] if item.path else [], "module_occurrences": [item.module],
-                        "findings": by_coordinate.get(item.coordinate, []), "limitations": warnings})
+                        "findings": [{**finding,
+                            "source": _portable(finding["source"], self.output),
+                            "evidence_reference": _portable(finding["evidence_reference"], self.output)}
+                            for finding in by_coordinate.get(item.coordinate, [])],
+                        "limitations": warnings})
                 observations[version] = {"inventory": inventory, "dependencies": dependencies,
                                          "findings": findings, "maven": maven_run,
                                          "scanner": scanner_run, "warnings": warnings}
@@ -310,8 +347,8 @@ class Evaluator:
                            "remaining": comparison["remaining"], "new": comparison["additional"],
                            "total": comparison["candidate_total"]},
                 "recommendation": "Baseline" if version == base else "Assessed",
-                "evidence": {"maven": observations[version]["maven"]["tree"],
-                             "scanner": observations[version]["scanner"]["report"]}})
+                "evidence": {"maven": _portable(observations[version]["maven"]["tree"], self.output),
+                             "scanner": _portable(observations[version]["scanner"]["report"], self.output)}})
         rank_releases(releases, base)
         candidates = [item for item in releases if item["version"] != base
                       and item["assessment_status"] == "COMPLETE"]
@@ -327,7 +364,10 @@ class Evaluator:
                                for item in baseline_findings}
         for version, observation in observations.items():
             for finding in observation["findings"]:
-                findings.append({**finding, "release": version,
+                portable_finding = {**finding,
+                    "source": _portable(finding["source"], self.output),
+                    "evidence_reference": _portable(finding["evidence_reference"], self.output)}
+                findings.append({**portable_finding, "release": version,
                                  "disposition": ("ORIGINAL" if version == base else
                                      "REMAINING" if (finding["package"], finding["advisory_id"])
                                      in baseline_advisories else "ADDITIONAL"),
@@ -344,14 +384,16 @@ class Evaluator:
                         "Worth investigating; override removal has not been tested.")
         result = {"schema_version": SCHEMA_VERSION, "status": status,
             "application": {"project_path": str(self.project),
-                            "project_id": self.project.name,
+                            "project_id": pom_inputs["project_id"],
                             "original_spring_boot_version": base,
                             "controller": discovery["controller"], "original_pom_sha256": original_hash},
             "execution": {"requested_releases": self.releases,
                           "evaluated_releases": list(observations), "profiles": self.profiles,
-                          "modules": self.modules, "scopes": self.scopes,
+                          "modules": self.modules, "discovered_modules": pom_inputs["modules"],
+                          "scopes": self.scopes,
                           "selected_severities": self.severities,
-                          "other_severities": "SCANNED_BUT_HIDDEN",
+                          "other_severities": ("None; all scanner severity categories selected" if
+                              set(self.severities) == set(SEVERITIES) else "SCANNED_BUT_HIDDEN"),
                           "maven": self.maven, "maven_version": _tool_version([self.maven, "-version"]),
                           "elapsed_seconds": time.monotonic() - started,
                           "original_project_unchanged": original_hash == hashlib.sha256(
@@ -361,10 +403,13 @@ class Evaluator:
                         "inventory_format": "CycloneDX 1.5", "snapshot_comparable": True},
             "releases": releases, "dependencies": dependencies, "findings": findings,
             "override_notes": override_notes,
-            "evidence": {"directory": str(self.evidence), "http_metrics": self.http.metrics,
+            "evidence": {"directory": _portable(self.evidence, self.output),
+                         "coverage": "Complete compile/runtime Maven-selected inventory for each successfully assessed release",
+                         "http_metrics": self.http.metrics,
                          "limitations": ["Security-only ranking; compatibility not assessed",
                                          "Private repositories, large reactors and all packaging scopes remain unverified"]},
-            "errors": errors}
+            "errors": [{**error, "log_path": _portable(error["log_path"], self.output)}
+                       for error in errors]}
         schema_errors = validate_result(result)
         if schema_errors: raise RuntimeError(f"result contract validation failed: {schema_errors}")
         (self.output / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
