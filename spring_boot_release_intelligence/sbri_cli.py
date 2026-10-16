@@ -36,23 +36,23 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     if args.command != "evaluate":
         return 2
-    configured = json.loads(args.config.read_text()) if args.config else {}
-    request = args.release_range or args.releases
-    releases, selection = select_releases(request)
-    reports = {}
-    for value in args.scanner_report:
-        version, path = value.split("=", 1); reports[version] = Path(path)
-    evaluator = Evaluator(args.project, releases, args.output,
-        maven=args.maven or configured.get("maven", "mvn"),
-        settings=args.settings or (Path(configured["settings"]) if configured.get("settings") else None),
-        profiles=_csv(args.profiles) or configured.get("profiles", []),
-        modules=_csv(args.modules) or configured.get("modules", []),
-        scopes=_csv(args.scopes) or configured.get("scopes", ["compile", "runtime"]),
-        scanner=args.scanner or configured.get("scanner", "osv-scanner"),
-        severities=[value.upper() for value in (_csv(args.severities) or
-                    configured.get("severities", ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]))],
-        timeout=args.timeout or configured.get("timeout", 300), scanner_reports=reports)
     try:
+        configured = json.loads(args.config.read_text()) if args.config else {}
+        request = args.release_range or args.releases
+        releases, selection = select_releases(request)
+        reports = {}
+        for value in args.scanner_report:
+            version, path = value.split("=", 1); reports[version] = Path(path)
+        evaluator = Evaluator(args.project, releases, args.output,
+            maven=args.maven or configured.get("maven", "mvn"),
+            settings=args.settings or (Path(configured["settings"]) if configured.get("settings") else None),
+            profiles=_csv(args.profiles) or configured.get("profiles", []),
+            modules=_csv(args.modules) or configured.get("modules", []),
+            scopes=_csv(args.scopes) or configured.get("scopes", ["compile", "runtime"]),
+            scanner=args.scanner or configured.get("scanner", "osv-scanner"),
+            severities=[value.upper() for value in (_csv(args.severities) or
+                        configured.get("severities", ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]))],
+            timeout=args.timeout or configured.get("timeout", 300), scanner_reports=reports)
         result = evaluator.evaluate()
         result["execution"]["release_selection"] = selection
         (args.output / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

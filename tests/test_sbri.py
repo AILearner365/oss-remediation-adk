@@ -1,10 +1,13 @@
 import json
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
+from unittest.mock import patch
 
 from spring_boot_release_intelligence.a7 import Dependency
 from spring_boot_release_intelligence.report import TABLES, render_html
+from spring_boot_release_intelligence.sbri_cli import main as cli_main
 from spring_boot_release_intelligence.security_report import read_cyclonedx_vulnerabilities
 from spring_boot_release_intelligence.standalone import (discover_boot_version,
                                                          _pom_inputs, _portable, rank_releases,
@@ -67,7 +70,7 @@ class SbriTests(unittest.TestCase):
         result = result_fixture(); rendered = render_html(result)
         self.assertEqual(4, rendered.count("<table id="))
         for index, table in enumerate(TABLES[:2], 1):
-            fragment = rendered.split(f'<table id="table{index}">', 1)[1].split("</table>", 1)[0]
+            fragment = rendered.split(f'<table id="table{index}"', 1)[1].split("</table>", 1)[0]
             positions = [fragment.index(f"<th>{heading}</th>") for heading in table]
             self.assertEqual(positions, sorted(positions))
         exact = [x.format(base="1.0.0", selected="1.0.1") for x in TABLES[3]]
@@ -84,6 +87,27 @@ class SbriTests(unittest.TestCase):
                       "Test limitation"):
             self.assertIn(value, rendered)
         self.assertEqual(4, rendered.count("<table id="))
+
+    def test_filter_controls_are_emitted_for_every_header_without_mutating_result(self):
+        result = result_fixture(); before = deepcopy(result)
+        rendered = render_html(result)
+        self.assertEqual(result, before)
+        self.assertEqual(4, rendered.count('data-filterable="true"'))
+        self.assertEqual(4, rendered.count('class="reset-filters"'))
+        self.assertEqual(4, rendered.count('class="row-count"'))
+        self.assertIn("new TableFilter(table)", rendered)
+
+    def test_report_escapes_dependency_and_scanner_controlled_text(self):
+        result = result_fixture()
+        result["dependencies"][0]["coordinate"] = '<img src=x onerror="alert(1)">'
+        result["findings"][0].update({"advisory_id": "<script>alert(2)</script>",
+                                      "package": "unsafe&package",
+                                      "evidence_reference": 'evidence/<bad>.json'})
+        rendered = render_html(result)
+        self.assertNotIn('<img src=x onerror="alert(1)">', rendered)
+        self.assertNotIn("<script>alert(2)</script>", rendered)
+        self.assertIn("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;", rendered)
+        self.assertIn("&lt;script&gt;alert(2)&lt;/script&gt;", rendered)
 
     def test_evidence_references_are_output_relative_and_exist(self):
         with tempfile.TemporaryDirectory() as value:
@@ -127,6 +151,55 @@ class SbriTests(unittest.TestCase):
         self.assertEqual("HIGH", findings[0]["severity"])
         self.assertEqual(["1.1"], findings[0]["fixed_versions"])
 
+    def test_cli_exit_codes_for_complete_partial_and_baseline_failure(self):
+        for status, expected in (("SUCCESS", 0), ("PARTIAL", 3)):
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as value:
+                output = Path(value) / "out"; output.mkdir()
+                result = result_fixture(); result["status"] = status
+                evaluator = unittest.mock.Mock(); evaluator.evaluate.return_value = result
+                with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+                           return_value=(["1.0.1"], {"method": "explicit"})), \
+                     patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator):
+                    self.assertEqual(expected, cli_main(["evaluate", "--project", value,
+                        "--releases", "1.0.1", "--output", str(output)]))
+                    self.assertTrue((output / "result.json").is_file())
+                    self.assertTrue((output / "report.html").is_file())
+        with tempfile.TemporaryDirectory() as value:
+            evaluator = unittest.mock.Mock(); evaluator.evaluate.side_effect = ValueError("no baseline")
+            with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+                       return_value=(["1.0.1"], {"method": "explicit"})), \
+                 patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator):
+                self.assertEqual(2, cli_main(["evaluate", "--project", value,
+                    "--releases", "1.0.1", "--output", str(Path(value) / "out")]))
+
+    def test_cli_passes_external_scanner_reports_and_optional_inputs(self):
+        with tempfile.TemporaryDirectory() as value:
+            output = Path(value) / "out"; output.mkdir()
+            result = result_fixture(); evaluator = unittest.mock.Mock(); evaluator.evaluate.return_value = result
+            with patch("spring_boot_release_intelligence.sbri_cli.select_releases",
+                       return_value=(["1.0.1"], {"method": "explicit"})), \
+                 patch("spring_boot_release_intelligence.sbri_cli.Evaluator", return_value=evaluator) as constructor:
+                code = cli_main(["evaluate", "--project", value, "--releases", "1.0.1",
+                    "--output", str(output), "--profiles", "prod", "--modules", "api,web",
+                    "--scopes", "runtime", "--severities", "critical,high",
+                    "--scanner-report", "1.0.0=base.json",
+                    "--scanner-report", "1.0.1=next.json", "--timeout", "42"])
+                self.assertEqual(0, code)
+                kwargs = constructor.call_args.kwargs
+                self.assertEqual(["prod"], kwargs["profiles"])
+                self.assertEqual(["api", "web"], kwargs["modules"])
+                self.assertEqual(["runtime"], kwargs["scopes"])
+                self.assertEqual(["CRITICAL", "HIGH"], kwargs["severities"])
+                self.assertEqual(42, kwargs["timeout"])
+                self.assertEqual({"1.0.0": Path("base.json"), "1.0.1": Path("next.json")},
+                                 kwargs["scanner_reports"])
+
+    def test_invalid_json_configuration_returns_configuration_exit_code(self):
+        with tempfile.TemporaryDirectory() as value:
+            config = Path(value) / "config.json"; config.write_text("{not-json")
+            self.assertEqual(2, cli_main(["evaluate", "--project", value,
+                "--releases", "1.0.1", "--config", str(config)]))
+
     def test_failed_candidate_is_not_rendered_as_zero_findings(self):
         result = result_fixture()
         result["releases"].append({"version": "1.0.2", "assessment_status": "FAILED",
@@ -136,7 +209,7 @@ class SbriTests(unittest.TestCase):
         result["errors"].append({"release": "1.0.2", "stage": "scanner",
                                  "message": "unavailable"})
         rendered = render_html(result)
-        table2 = rendered.split('<table id="table2">', 1)[1].split("</table>", 1)[0]
+        table2 = rendered.split('<table id="table2"', 1)[1].split("</table>", 1)[0]
         self.assertNotIn("1.0.2", table2)
         self.assertIn("1.0.2 / scanner: unavailable", rendered)
 
