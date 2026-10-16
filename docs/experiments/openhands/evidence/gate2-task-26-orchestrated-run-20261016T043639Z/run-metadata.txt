@@ -1,0 +1,19 @@
+control_branch=openhands-poc-evaluation
+control_head=0bb8e08102236fbcdae9ebc9ffc5a0b2016f3d63
+task_id=26
+vertex_project=deutschebank-aipocs
+vertex_location=us-central1
+model=vertex_ai/gemini-2.5-flash
+max_denials=3
+max_iterations=250
+engineering_judgment_guidance=0
+task_skill=0
+structured_guidance=0
+sbri_enabled=1
+sbri_arguments=--sbri-versions 4.0.7\,4.0.8 
+57ed584371c05b62269fab1154e2f5628acaa007402af88607adfb66e3e67ad7  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/guidance/engineering-judgment.md
+a430a22e98c9da22c688de5c55ded351de89f9e4da79eb47c3d02511979c5a5c  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/guidance/general-engineering.md
+1e32f48816368bd62be00a79823b63a9e583c65f14e6b8cbebfad466252dd4c4  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/project-context/AGENTS.md
+849eaa1dc19fa2212502c7cbdcd1c19761bae84e58c94785073175589ddbd0dc  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/skills/maven-dependency-evidence/SKILL.md
+00ce3fda01da29eeb38bbd83e9a410d1faf57fa86803282bba369ca635686f31  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/skills/evidence-driven-dependency-remediation/SKILL.md
+da64d357ef54c16c083bb8888cf53b360996845e930e2325ae7bcaf05668dcc6  /home/kavya_parivarababu/oss-remediation-adk/scripts/openhands/sbri_integration.py
