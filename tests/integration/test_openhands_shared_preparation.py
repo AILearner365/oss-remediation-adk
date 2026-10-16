@@ -347,6 +347,9 @@ class SharedPreparationSchemaMigrationTests(unittest.TestCase):
             try:
                 connection.executescript(
                     """
+                    DROP TRIGGER intelligence_assessments_immutable_update;
+                    DROP TRIGGER intelligence_assessments_immutable_delete;
+                    DROP TABLE intelligence_assessments;
                     DROP TRIGGER baseline_assessments_immutable_update;
                     DROP TRIGGER baseline_assessments_immutable_delete;
                     DROP TABLE baseline_assessments;
@@ -375,11 +378,15 @@ class SharedPreparationSchemaMigrationTests(unittest.TestCase):
                     baseline_table = connection.execute(
                         "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'baseline_assessments'"
                     ).fetchone()
+                    intelligence_table = connection.execute(
+                        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'intelligence_assessments'"
+                    ).fetchone()
                 finally:
                     connection.close()
-                self.assertEqual(3, version)
+                self.assertEqual(4, version)
                 self.assertEqual(("preparations",), preparation_table)
                 self.assertEqual(("baseline_assessments",), baseline_table)
+                self.assertEqual(("intelligence_assessments",), intelligence_table)
             finally:
                 reopened.close()
 

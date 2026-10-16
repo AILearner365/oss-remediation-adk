@@ -111,6 +111,17 @@ class BaselineAssessmentStatus(str, Enum):
     FAILED_SCANNER = "FAILED_SCANNER"
 
 
+class IntelligenceOutcome(str, Enum):
+    DISABLED = "DISABLED"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    COMPLETE = "COMPLETE"
+    PARTIAL = "PARTIAL"
+    FAILED = "FAILED"
+    INVALID_SELECTION = "INVALID_SELECTION"
+    CORRUPT_EVIDENCE = "CORRUPT_EVIDENCE"
+    REPOSITORY_MUTATION = "REPOSITORY_MUTATION"
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
@@ -572,6 +583,103 @@ class BaselineRecord:
             "reportArtifactId": self.report_artifact_id,
             "reportSha256": self.report_sha256,
             "toolVersions": dict(self.tool_versions),
+            "completedAt": self.completed_at,
+        }
+
+
+@dataclass(frozen=True)
+class IntelligenceRecord:
+    """Immutable summary of optional pre-edit release intelligence."""
+
+    task_id: str
+    baseline_commit: str
+    outcome: IntelligenceOutcome
+    applicable: bool | None
+    invoked: bool
+    reused: bool
+    profile_id: str
+    fingerprint: str | None
+    selection_manifest: Mapping[str, Any]
+    evaluated_versions: tuple[str, ...]
+    record_artifact_id: str
+    record_sha256: str
+    summary_artifact_id: str
+    explanation: str
+    completed_at: str
+    contract_version: str = CONTRACT_VERSION
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "intelligence.taskId", maximum=128, pattern=IDENTIFIER)
+        object.__setattr__(
+            self,
+            "baseline_commit",
+            _string(
+                self.baseline_commit,
+                "intelligence.baselineCommit",
+                maximum=40,
+                pattern=FULL_GIT_SHA,
+            ).lower(),
+        )
+        if not isinstance(self.outcome, IntelligenceOutcome):
+            raise ContractValidationError("intelligence.outcome is invalid")
+        if self.applicable is not None and not isinstance(self.applicable, bool):
+            raise ContractValidationError("intelligence.applicable must be a boolean or null")
+        if not isinstance(self.invoked, bool) or not isinstance(self.reused, bool):
+            raise ContractValidationError("intelligence invocation flags must be booleans")
+        _string(self.profile_id, "intelligence.profileId", maximum=64, pattern=PROFILE)
+        if self.fingerprint is not None:
+            _string(self.fingerprint, "intelligence.fingerprint", maximum=64, pattern=SHA256)
+        object.__setattr__(
+            self,
+            "selection_manifest",
+            MappingProxyType(_json_data(self.selection_manifest, "intelligence.selectionManifest")),
+        )
+        versions = tuple(
+            _string(value, f"intelligence.evaluatedVersions[{index}]", maximum=64)
+            for index, value in enumerate(self.evaluated_versions)
+        )
+        if len(versions) != len(set(versions)):
+            raise ContractValidationError("intelligence.evaluatedVersions contains duplicates")
+        object.__setattr__(self, "evaluated_versions", versions)
+        _string(self.record_artifact_id, "intelligence.recordArtifactId", maximum=128, pattern=IDENTIFIER)
+        _string(self.record_sha256, "intelligence.recordSha256", maximum=64, pattern=SHA256)
+        _string(self.summary_artifact_id, "intelligence.summaryArtifactId", maximum=128, pattern=IDENTIFIER)
+        _string(self.explanation, "intelligence.explanation", maximum=1000)
+        _timestamp(self.completed_at, "intelligence.completedAt")
+        if self.contract_version != CONTRACT_VERSION:
+            raise ContractValidationError("intelligence.contractVersion is unsupported")
+        if self.reused and not self.invoked:
+            raise ContractValidationError("reused intelligence must represent an invoked evaluation")
+        if self.outcome is IntelligenceOutcome.DISABLED:
+            if self.applicable is not None or self.invoked:
+                raise ContractValidationError("disabled intelligence must not claim applicability or invocation")
+        elif self.outcome is IntelligenceOutcome.NOT_APPLICABLE:
+            if self.applicable is not False or self.invoked:
+                raise ContractValidationError("not-applicable intelligence must not be invoked")
+        elif self.outcome in {IntelligenceOutcome.COMPLETE, IntelligenceOutcome.PARTIAL}:
+            if self.applicable is not True or not self.invoked or self.fingerprint is None:
+                raise ContractValidationError("completed intelligence requires applicable invoked fingerprinted evidence")
+        elif self.outcome is IntelligenceOutcome.INVALID_SELECTION:
+            if self.invoked:
+                raise ContractValidationError("invalid selection must stop before collector invocation")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "contractVersion": self.contract_version,
+            "taskId": self.task_id,
+            "baselineCommit": self.baseline_commit,
+            "outcome": self.outcome.value,
+            "applicable": self.applicable,
+            "invoked": self.invoked,
+            "reused": self.reused,
+            "profileId": self.profile_id,
+            "fingerprint": self.fingerprint,
+            "selectionManifest": dict(self.selection_manifest),
+            "evaluatedVersions": list(self.evaluated_versions),
+            "recordArtifactId": self.record_artifact_id,
+            "recordSha256": self.record_sha256,
+            "summaryArtifactId": self.summary_artifact_id,
+            "explanation": self.explanation,
             "completedAt": self.completed_at,
         }
 

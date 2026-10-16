@@ -360,6 +360,9 @@ class SharedBaselineSchemaMigrationTests(unittest.TestCase):
             try:
                 connection.executescript(
                     """
+                    DROP TRIGGER intelligence_assessments_immutable_update;
+                    DROP TRIGGER intelligence_assessments_immutable_delete;
+                    DROP TABLE intelligence_assessments;
                     DROP TRIGGER baseline_assessments_immutable_update;
                     DROP TRIGGER baseline_assessments_immutable_delete;
                     DROP TABLE baseline_assessments;
@@ -375,7 +378,7 @@ class SharedBaselineSchemaMigrationTests(unittest.TestCase):
                 self.assertEqual(task_id, reopened.get_status(task_id).task_id)
                 self.assertIsNone(reopened.get_baseline(task_id))
                 with sqlite3.connect(database) as check:
-                    self.assertEqual(3, check.execute("SELECT version FROM schema_info").fetchone()[0])
+                    self.assertEqual(4, check.execute("SELECT version FROM schema_info").fetchone()[0])
             finally:
                 reopened.close()
 

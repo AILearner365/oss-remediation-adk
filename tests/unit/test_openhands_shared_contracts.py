@@ -9,6 +9,8 @@ from openhands_shared.contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    IntelligenceOutcome,
+    IntelligenceRecord,
     PreparationRecord,
     ResultOutcome,
     TaskEvent,
@@ -165,6 +167,36 @@ class SharedContractTests(unittest.TestCase):
                 **{
                     **record.__dict__,
                     "build_succeeded": False,
+                }
+            )
+
+    def test_intelligence_contract_preserves_explicit_optional_outcomes(self):
+        record = IntelligenceRecord(
+            task_id="task_" + "1" * 32,
+            baseline_commit="a" * 40,
+            outcome=IntelligenceOutcome.PARTIAL,
+            applicable=True,
+            invoked=True,
+            reused=False,
+            profile_id="gate2-sbri-v1",
+            fingerprint="b" * 64,
+            selection_manifest={"resolved_candidates": ["4.0.8"]},
+            evaluated_versions=("4.0.6", "4.0.8"),
+            record_artifact_id="intelligence-record",
+            record_sha256="c" * 64,
+            summary_artifact_id="intelligence-summary",
+            explanation="partial evidence retains explicit uncertainty",
+            completed_at="2026-10-16T00:02:00.000Z",
+        )
+        self.assertEqual("PARTIAL", record.to_dict()["outcome"])
+        self.assertTrue(record.to_dict()["applicable"])
+
+        with self.assertRaisesRegex(ContractValidationError, "must not be invoked"):
+            IntelligenceRecord(
+                **{
+                    **record.__dict__,
+                    "outcome": IntelligenceOutcome.NOT_APPLICABLE,
+                    "applicable": False,
                 }
             )
 

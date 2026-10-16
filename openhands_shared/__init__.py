@@ -1,6 +1,6 @@
-"""Shared OpenHands task, preparation and deterministic baseline foundation.
+"""Shared OpenHands task, preparation, baseline and intelligence foundation.
 
-M2 Changes 1 through 3 deliberately contain no agent execution.
+M2 Changes 1 through 4 deliberately contain no agent execution.
 """
 
 from .baseline import (
@@ -19,6 +19,8 @@ from .contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    IntelligenceOutcome,
+    IntelligenceRecord,
     PreparationRecord,
     ResultOutcome,
     TaskEvent,
@@ -27,6 +29,13 @@ from .contracts import (
     TaskStatus,
     TaskStatusSnapshot,
     ValidationStatus,
+)
+from .intelligence import (
+    ExistingSbriRunner,
+    IntelligenceConfig,
+    IntelligenceError,
+    IntelligenceProfile,
+    SharedIntelligenceAssessor,
 )
 from .preparation import (
     DeterministicPreparer,
@@ -37,6 +46,7 @@ from .preparation import (
 from .store import (
     BaselineConflictError,
     IdempotencyConflictError,
+    IntelligenceConflictError,
     PreparationConflictError,
     SQLiteTaskStore,
 )
@@ -53,7 +63,14 @@ __all__ = [
     "ContractValidationError",
     "DeliveryStatus",
     "ExecutionStatus",
+    "ExistingSbriRunner",
     "IdempotencyConflictError",
+    "IntelligenceConfig",
+    "IntelligenceConflictError",
+    "IntelligenceError",
+    "IntelligenceOutcome",
+    "IntelligenceProfile",
+    "IntelligenceRecord",
     "DeterministicBaselineAssessor",
     "DeterministicPreparer",
     "ExistingDeterministicBaselineRunner",
@@ -63,6 +80,7 @@ __all__ = [
     "PreparationRecord",
     "ResultOutcome",
     "SQLiteTaskStore",
+    "SharedIntelligenceAssessor",
     "TaskEvent",
     "TaskRequest",
     "TaskResult",

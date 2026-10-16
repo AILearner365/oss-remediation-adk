@@ -20,6 +20,8 @@ from .contracts import (
     BaselineRecord,
     DeliveryStatus,
     ExecutionStatus,
+    IntelligenceOutcome,
+    IntelligenceRecord,
     PreparationRecord,
     TaskEvent,
     TaskRequest,
@@ -32,7 +34,7 @@ from .contracts import (
 )
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 class TaskStoreError(RuntimeError):
@@ -63,6 +65,10 @@ class PreparationConflictError(TaskStoreError):
 
 
 class BaselineConflictError(TaskStoreError):
+    pass
+
+
+class IntelligenceConflictError(TaskStoreError):
     pass
 
 
@@ -222,6 +228,9 @@ class SQLiteTaskStore:
             if version == 2:
                 self._migrate_v2_to_v3(connection)
                 version = 3
+            if version == 3:
+                self._migrate_v3_to_v4(connection)
+                version = 4
             if version != SCHEMA_VERSION:
                 raise TaskStoreError(f"unsupported task database schema version {row['version']}")
         except BaseException:
@@ -319,6 +328,65 @@ class SQLiteTaskStore:
                 BEGIN SELECT RAISE(ABORT, 'baseline metadata is immutable'); END"""
             )
             connection.execute("UPDATE schema_info SET version = 3 WHERE singleton = 1")
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+
+    @staticmethod
+    def _migrate_v3_to_v4(connection: sqlite3.Connection) -> None:
+        """Add immutable optional intelligence metadata without rebuilding data."""
+
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            current = connection.execute(
+                "SELECT version FROM schema_info WHERE singleton = 1"
+            ).fetchone()["version"]
+            if current == 4:
+                connection.commit()
+                return
+            if current != 3:
+                raise TaskStoreError(f"cannot migrate task database schema version {current}")
+            connection.execute(
+                """CREATE TABLE intelligence_assessments (
+                    task_id TEXT PRIMARY KEY REFERENCES tasks(task_id) ON DELETE RESTRICT,
+                    baseline_commit TEXT NOT NULL,
+                    outcome TEXT NOT NULL CHECK (
+                        outcome IN (
+                            'DISABLED', 'NOT_APPLICABLE', 'COMPLETE', 'PARTIAL', 'FAILED',
+                            'INVALID_SELECTION', 'CORRUPT_EVIDENCE', 'REPOSITORY_MUTATION'
+                        )
+                    ),
+                    applicable INTEGER CHECK (applicable IS NULL OR applicable IN (0, 1)),
+                    invoked INTEGER NOT NULL CHECK (invoked IN (0, 1)),
+                    reused INTEGER NOT NULL CHECK (reused IN (0, 1)),
+                    profile_id TEXT NOT NULL,
+                    fingerprint TEXT,
+                    selection_manifest_json TEXT NOT NULL,
+                    evaluated_versions_json TEXT NOT NULL,
+                    record_artifact_id TEXT NOT NULL,
+                    record_sha256 TEXT NOT NULL,
+                    summary_artifact_id TEXT NOT NULL,
+                    explanation TEXT NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    FOREIGN KEY (task_id, record_artifact_id)
+                        REFERENCES artifacts(task_id, artifact_id) ON DELETE RESTRICT,
+                    FOREIGN KEY (task_id, summary_artifact_id)
+                        REFERENCES artifacts(task_id, artifact_id) ON DELETE RESTRICT
+                )"""
+            )
+            connection.execute(
+                """CREATE TRIGGER intelligence_assessments_immutable_update
+                BEFORE UPDATE ON intelligence_assessments
+                BEGIN SELECT RAISE(ABORT, 'intelligence metadata is immutable'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER intelligence_assessments_immutable_delete
+                BEFORE DELETE ON intelligence_assessments
+                BEGIN SELECT RAISE(ABORT, 'intelligence metadata is immutable'); END"""
+            )
+            connection.execute("UPDATE schema_info SET version = 4 WHERE singleton = 1")
             connection.commit()
         except BaseException:
             if connection.in_transaction:
@@ -423,6 +491,18 @@ class SQLiteTaskStore:
                 (task_id,),
             ).fetchone()
             return None if row is None else self._baseline_from_row(row)
+        finally:
+            connection.close()
+
+    def get_intelligence(self, task_id: str) -> IntelligenceRecord | None:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM intelligence_assessments WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            return None if row is None else self._intelligence_from_row(row)
         finally:
             connection.close()
 
@@ -674,6 +754,161 @@ class SQLiteTaskStore:
                 timestamp=baseline.completed_at,
             )
             status = self._status_from_row(self._task_row(connection, baseline.task_id))
+            connection.commit()
+            return status
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def complete_intelligence(
+        self,
+        intelligence: IntelligenceRecord,
+        artifacts: tuple[ArtifactMetadata, ...],
+    ) -> TaskStatusSnapshot:
+        """Atomically persist optional intelligence and leave its stage."""
+
+        continuing = {
+            IntelligenceOutcome.DISABLED,
+            IntelligenceOutcome.NOT_APPLICABLE,
+            IntelligenceOutcome.COMPLETE,
+            IntelligenceOutcome.PARTIAL,
+            IntelligenceOutcome.FAILED,
+        }
+        target_status = (
+            TaskStatus.AGENT_RUNNING
+            if intelligence.outcome in continuing
+            else TaskStatus.FAILED_INFRASTRUCTURE
+        )
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, intelligence.task_id)
+            baseline_row = connection.execute(
+                "SELECT * FROM baseline_assessments WHERE task_id = ?",
+                (intelligence.task_id,),
+            ).fetchone()
+            if baseline_row is None:
+                raise IntelligenceConflictError("intelligence requires durable baseline metadata")
+            baseline = self._baseline_from_row(baseline_row)
+            if (
+                baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED
+                or baseline.baseline_commit != intelligence.baseline_commit
+            ):
+                raise IntelligenceConflictError("intelligence requires a successful matching baseline")
+            existing = connection.execute(
+                "SELECT * FROM intelligence_assessments WHERE task_id = ?",
+                (intelligence.task_id,),
+            ).fetchone()
+            if existing is not None:
+                if self._intelligence_from_row(existing) != intelligence:
+                    raise IntelligenceConflictError("intelligence metadata is immutable")
+                status = self._status_from_row(task)
+                if status.status is not target_status:
+                    raise IntelligenceConflictError("intelligence metadata and task status disagree")
+                connection.commit()
+                return status
+            if TaskStatus(task["status"]) is not TaskStatus.INTELLIGENCE:
+                raise InvalidTransitionError(
+                    "intelligence can complete only while the task is INTELLIGENCE"
+                )
+            by_id = {artifact.artifact_id: artifact for artifact in artifacts}
+            record_artifact = by_id.get(intelligence.record_artifact_id)
+            summary_artifact = by_id.get(intelligence.summary_artifact_id)
+            if (
+                len(by_id) != len(artifacts)
+                or record_artifact is None
+                or summary_artifact is None
+                or record_artifact.sha256 != intelligence.record_sha256
+            ):
+                raise IntelligenceConflictError(
+                    "intelligence record and artifact metadata disagree"
+                )
+            for artifact in artifacts:
+                if artifact.task_id != intelligence.task_id:
+                    raise IntelligenceConflictError("intelligence artifact belongs to another task")
+                try:
+                    connection.execute(
+                        """INSERT INTO artifacts(
+                            task_id, artifact_id, kind, relative_path, media_type,
+                            sha256, size_bytes, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            artifact.task_id,
+                            artifact.artifact_id,
+                            artifact.kind,
+                            artifact.relative_path,
+                            artifact.media_type,
+                            artifact.sha256,
+                            artifact.size_bytes,
+                            artifact.created_at,
+                        ),
+                    )
+                except sqlite3.IntegrityError as exc:
+                    raise IntelligenceConflictError(
+                        "intelligence artifact metadata conflicts with existing data"
+                    ) from exc
+            connection.execute(
+                """INSERT INTO intelligence_assessments(
+                    task_id, baseline_commit, outcome, applicable, invoked, reused,
+                    profile_id, fingerprint, selection_manifest_json,
+                    evaluated_versions_json, record_artifact_id, record_sha256,
+                    summary_artifact_id, explanation, completed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    intelligence.task_id,
+                    intelligence.baseline_commit,
+                    intelligence.outcome.value,
+                    None if intelligence.applicable is None else int(intelligence.applicable),
+                    int(intelligence.invoked),
+                    int(intelligence.reused),
+                    intelligence.profile_id,
+                    intelligence.fingerprint,
+                    canonical_json(dict(intelligence.selection_manifest)),
+                    canonical_json({"versions": list(intelligence.evaluated_versions)}),
+                    intelligence.record_artifact_id,
+                    intelligence.record_sha256,
+                    intelligence.summary_artifact_id,
+                    intelligence.explanation,
+                    intelligence.completed_at,
+                ),
+            )
+            connection.execute(
+                "UPDATE tasks SET status = ?, stage = ?, updated_at = ? WHERE task_id = ?",
+                (
+                    target_status.value,
+                    _STATUS_STAGE[target_status],
+                    intelligence.completed_at,
+                    intelligence.task_id,
+                ),
+            )
+            if intelligence.outcome in {
+                IntelligenceOutcome.DISABLED,
+                IntelligenceOutcome.NOT_APPLICABLE,
+            }:
+                event_type = "intelligence.skipped"
+            elif intelligence.outcome in {IntelligenceOutcome.PARTIAL, IntelligenceOutcome.FAILED}:
+                event_type = "intelligence.incomplete"
+            elif intelligence.outcome is IntelligenceOutcome.COMPLETE:
+                event_type = "intelligence.completed"
+            else:
+                event_type = "intelligence.failed"
+            self._append_event(
+                connection,
+                task_id=intelligence.task_id,
+                event_type=event_type,
+                stage=_STATUS_STAGE[TaskStatus.INTELLIGENCE],
+                data={
+                    "outcome": intelligence.outcome.value,
+                    "recordArtifactId": intelligence.record_artifact_id,
+                    "summaryArtifactId": intelligence.summary_artifact_id,
+                    "agentStagePending": target_status is TaskStatus.AGENT_RUNNING,
+                },
+                timestamp=intelligence.completed_at,
+            )
+            status = self._status_from_row(self._task_row(connection, intelligence.task_id))
             connection.commit()
             return status
         except BaseException:
@@ -1007,5 +1242,27 @@ class SQLiteTaskStore:
             report_artifact_id=row["report_artifact_id"],
             report_sha256=row["report_sha256"],
             tool_versions=json.loads(row["tool_versions_json"]),
+            completed_at=row["completed_at"],
+        )
+
+    @staticmethod
+    def _intelligence_from_row(row: sqlite3.Row) -> IntelligenceRecord:
+        applicable = None if row["applicable"] is None else bool(row["applicable"])
+        evaluated = json.loads(row["evaluated_versions_json"])
+        return IntelligenceRecord(
+            task_id=row["task_id"],
+            baseline_commit=row["baseline_commit"],
+            outcome=IntelligenceOutcome(row["outcome"]),
+            applicable=applicable,
+            invoked=bool(row["invoked"]),
+            reused=bool(row["reused"]),
+            profile_id=row["profile_id"],
+            fingerprint=row["fingerprint"],
+            selection_manifest=json.loads(row["selection_manifest_json"]),
+            evaluated_versions=tuple(evaluated["versions"]),
+            record_artifact_id=row["record_artifact_id"],
+            record_sha256=row["record_sha256"],
+            summary_artifact_id=row["summary_artifact_id"],
+            explanation=row["explanation"],
             completed_at=row["completed_at"],
         )

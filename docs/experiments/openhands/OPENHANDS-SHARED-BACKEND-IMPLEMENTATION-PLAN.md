@@ -253,6 +253,10 @@ evidence are recorded in
 
 ### Change 4 — optional SBRI adapter
 
+Implemented on `openhands-service-integration`; operational details and offline
+evidence are recorded in
+[OPENHANDS-SHARED-INTELLIGENCE.md](OPENHANDS-SHARED-INTELLIGENCE.md).
+
 - Likely files: `intelligence.py`; existing `sbri_integration.py` receives only
   narrowly necessary extraction after parity tests; tests reuse existing SBRI
   fixtures.

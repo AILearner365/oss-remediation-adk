@@ -134,3 +134,6 @@ scan with no HIGH/CRITICAL findings does not permit agent work. The shared
 adapter additionally persists that outcome and its evidence atomically instead
 of exiting with only a process code. The frozen script's output shape and
 behavior are unchanged.
+
+The optional consumer of a successful baseline is documented in
+[OPENHANDS-SHARED-INTELLIGENCE.md](OPENHANDS-SHARED-INTELLIGENCE.md).
