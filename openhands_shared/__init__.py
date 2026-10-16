@@ -1,6 +1,6 @@
-"""Shared OpenHands task, preparation, baseline and intelligence foundation.
+"""Shared OpenHands task lifecycle foundation through M2 Change 5.
 
-M2 Changes 1 through 4 deliberately contain no agent execution.
+Change 5 provisions native conversations but deliberately cannot execute them.
 """
 
 from .baseline import (
@@ -21,6 +21,9 @@ from .contracts import (
     ExecutionStatus,
     IntelligenceOutcome,
     IntelligenceRecord,
+    OpenHandsEventLink,
+    OpenHandsRuntimeRecord,
+    OpenHandsRuntimeStatus,
     PreparationRecord,
     ResultOutcome,
     TaskEvent,
@@ -43,10 +46,23 @@ from .preparation import (
     PreparationError,
     TrustedRepository,
 )
+from .openhands_runtime import (
+    AgentServerCompatibilityError,
+    AgentServerUnavailableError,
+    HttpAgentServerTransport,
+    OpenHandsAgentProfile,
+    OpenHandsRuntimeConfig,
+    OpenHandsRuntimeError,
+    RuntimeConfigurationError,
+    RuntimeIdentityError,
+    RuntimeRecoveryRequiredError,
+    SharedOpenHandsRuntime,
+)
 from .store import (
     BaselineConflictError,
     IdempotencyConflictError,
     IntelligenceConflictError,
+    OpenHandsRuntimeConflictError,
     PreparationConflictError,
     SQLiteTaskStore,
 )
@@ -71,6 +87,9 @@ __all__ = [
     "IntelligenceOutcome",
     "IntelligenceProfile",
     "IntelligenceRecord",
+    "OpenHandsEventLink",
+    "OpenHandsRuntimeRecord",
+    "OpenHandsRuntimeStatus",
     "DeterministicBaselineAssessor",
     "DeterministicPreparer",
     "ExistingDeterministicBaselineRunner",
@@ -81,6 +100,17 @@ __all__ = [
     "ResultOutcome",
     "SQLiteTaskStore",
     "SharedIntelligenceAssessor",
+    "AgentServerCompatibilityError",
+    "AgentServerUnavailableError",
+    "HttpAgentServerTransport",
+    "OpenHandsAgentProfile",
+    "OpenHandsRuntimeConfig",
+    "OpenHandsRuntimeConflictError",
+    "OpenHandsRuntimeError",
+    "RuntimeConfigurationError",
+    "RuntimeIdentityError",
+    "RuntimeRecoveryRequiredError",
+    "SharedOpenHandsRuntime",
     "TaskEvent",
     "TaskRequest",
     "TaskResult",

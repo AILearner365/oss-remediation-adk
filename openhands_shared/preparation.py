@@ -134,6 +134,7 @@ class GitRunner:
             "config",
             "fetch",
             "ls-remote",
+            "merge-base",
             "remote",
             "rev-parse",
             "show-ref",

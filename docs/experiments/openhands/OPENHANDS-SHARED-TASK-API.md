@@ -113,7 +113,7 @@ non-`none` delivery modes are rejected.
 
 ## Persistence and lifecycle invariants
 
-SQLite schema version 4 retains these Change 1 tables:
+SQLite schema version 5 retains these Change 1 tables:
 
 - `tasks`: canonical request and hash, unique idempotency key, current product
   status, separate OpenHands/validation/delivery states, optional immutable
@@ -133,6 +133,10 @@ shapes.
 Change 4 adds immutable `intelligence_assessments` metadata and SBRI evidence
 through the same artifact endpoint. `AGENT_RUNNING` after intelligence means
 only that the agent stage is pending; no conversation is created by this API.
+Change 5 adds native conversation association and bounded event-link metadata.
+The trusted internal operation is documented in
+[OPENHANDS-SHARED-AGENT-SERVER.md](OPENHANDS-SHARED-AGENT-SERVER.md). Task
+registration still cannot provision or run a conversation.
 
 SQLite foreign keys, WAL mode, `BEGIN IMMEDIATE` write transactions, and a busy
 timeout support concurrent registration. Registration writes the task and its

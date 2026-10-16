@@ -11,6 +11,9 @@ from openhands_shared.contracts import (
     ExecutionStatus,
     IntelligenceOutcome,
     IntelligenceRecord,
+    OpenHandsEventLink,
+    OpenHandsRuntimeRecord,
+    OpenHandsRuntimeStatus,
     PreparationRecord,
     ResultOutcome,
     TaskEvent,
@@ -252,6 +255,55 @@ class SharedContractTests(unittest.TestCase):
                         size_bytes=1,
                         created_at="2026-10-16T00:00:00.000Z",
                     )
+
+    def test_openhands_runtime_and_event_link_are_bounded_versioned_contracts(self):
+        runtime = OpenHandsRuntimeRecord(
+            task_id="task_" + "1" * 32,
+            conversation_id="4e6d7335-c08e-49a9-b765-e21cb49d0c96",
+            agent_server_identity="primary-agent-server",
+            agent_server_version="1.50.0",
+            sdk_version="1.50.0",
+            tools_version="1.50.0",
+            agent_profile_id="gate2-dependency-remediation-v1",
+            native_agent_profile_id="d360c86d-a779-45e1-a773-f888477a08cf",
+            native_agent_profile_revision=7,
+            model_profile_id="vertex-gemini-2-5-flash",
+            native_model="vertex_ai/gemini-2.5-flash",
+            profile_fingerprint="a" * 64,
+            request_fingerprint="b" * 64,
+            workspace_path="/durable/workspaces/task/repository",
+            baseline_commit="c" * 40,
+            runtime_status=OpenHandsRuntimeStatus.CONTEXT_ATTACHED,
+            execution_status=ExecutionStatus.NOT_STARTED,
+            last_native_event_id="native-event-1",
+            last_native_event_order=1,
+            failure_code=None,
+            failure_detail=None,
+            created_at="2026-10-16T00:00:00.000Z",
+            updated_at="2026-10-16T00:01:00.000Z",
+        )
+        link = OpenHandsEventLink(
+            task_id=runtime.task_id,
+            conversation_id=runtime.conversation_id,
+            native_event_id="native-event-1",
+            native_order=1,
+            native_kind="MessageEvent",
+            native_timestamp="2026-10-16T00:00:30.000Z",
+            observed_at=runtime.updated_at,
+        )
+        self.assertEqual("1", runtime.to_dict()["contractVersion"])
+        self.assertEqual(runtime.conversation_id, link.to_dict()["conversationId"])
+        self.assertNotIn("payload", link.to_dict())
+
+        with self.assertRaisesRegex(ContractValidationError, "credential"):
+            OpenHandsRuntimeRecord(
+                **{
+                    **runtime.__dict__,
+                    "runtime_status": OpenHandsRuntimeStatus.RECOVERY_REQUIRED,
+                    "failure_code": "REMOTE_FAILURE",
+                    "failure_detail": "api_key=raw-secret-value",
+                }
+            )
 
 
 if __name__ == "__main__":

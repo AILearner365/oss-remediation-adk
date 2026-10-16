@@ -16,6 +16,7 @@ from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any, Mapping
 from urllib.parse import urlsplit
+from uuid import UUID
 
 
 CONTRACT_VERSION = "1"
@@ -120,6 +121,14 @@ class IntelligenceOutcome(str, Enum):
     INVALID_SELECTION = "INVALID_SELECTION"
     CORRUPT_EVIDENCE = "CORRUPT_EVIDENCE"
     REPOSITORY_MUTATION = "REPOSITORY_MUTATION"
+
+
+class OpenHandsRuntimeStatus(str, Enum):
+    """Product-side association state, not native conversation execution state."""
+
+    CONVERSATION_READY = "CONVERSATION_READY"
+    CONTEXT_ATTACHED = "CONTEXT_ATTACHED"
+    RECOVERY_REQUIRED = "RECOVERY_REQUIRED"
 
 
 def utc_now() -> str:
@@ -681,6 +690,252 @@ class IntelligenceRecord:
             "summaryArtifactId": self.summary_artifact_id,
             "explanation": self.explanation,
             "completedAt": self.completed_at,
+        }
+
+
+@dataclass(frozen=True)
+class OpenHandsRuntimeRecord:
+    """Bounded product metadata linking a task to one native conversation."""
+
+    task_id: str
+    conversation_id: str
+    agent_server_identity: str
+    agent_server_version: str
+    sdk_version: str
+    tools_version: str
+    agent_profile_id: str
+    native_agent_profile_id: str
+    native_agent_profile_revision: int
+    model_profile_id: str
+    native_model: str
+    profile_fingerprint: str
+    request_fingerprint: str
+    workspace_path: str
+    baseline_commit: str
+    runtime_status: OpenHandsRuntimeStatus
+    execution_status: ExecutionStatus
+    last_native_event_id: str | None
+    last_native_event_order: int
+    failure_code: str | None
+    failure_detail: str | None
+    created_at: str
+    updated_at: str
+    contract_version: str = CONTRACT_VERSION
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "openhandsRuntime.taskId", maximum=128, pattern=IDENTIFIER)
+        try:
+            parsed_conversation = UUID(self.conversation_id)
+        except (TypeError, ValueError) as exc:
+            raise ContractValidationError(
+                "openhandsRuntime.conversationId must be a UUID"
+            ) from exc
+        object.__setattr__(self, "conversation_id", str(parsed_conversation))
+        _string(
+            self.agent_server_identity,
+            "openhandsRuntime.agentServerIdentity",
+            maximum=128,
+            pattern=IDENTIFIER,
+        )
+        for value, path in (
+            (self.agent_server_version, "openhandsRuntime.agentServerVersion"),
+            (self.sdk_version, "openhandsRuntime.sdkVersion"),
+            (self.tools_version, "openhandsRuntime.toolsVersion"),
+        ):
+            _string(value, path, maximum=64, pattern=IDENTIFIER)
+        _string(
+            self.agent_profile_id,
+            "openhandsRuntime.agentProfileId",
+            maximum=64,
+            pattern=PROFILE,
+        )
+        try:
+            parsed_profile = UUID(self.native_agent_profile_id)
+        except (TypeError, ValueError) as exc:
+            raise ContractValidationError(
+                "openhandsRuntime.nativeAgentProfileId must be a UUID"
+            ) from exc
+        object.__setattr__(self, "native_agent_profile_id", str(parsed_profile))
+        if (
+            isinstance(self.native_agent_profile_revision, bool)
+            or not isinstance(self.native_agent_profile_revision, int)
+            or self.native_agent_profile_revision < 0
+        ):
+            raise ContractValidationError(
+                "openhandsRuntime.nativeAgentProfileRevision must be non-negative"
+            )
+        _string(
+            self.model_profile_id,
+            "openhandsRuntime.modelProfileId",
+            maximum=64,
+            pattern=PROFILE,
+        )
+        _string(self.native_model, "openhandsRuntime.nativeModel", maximum=256)
+        _string(
+            self.profile_fingerprint,
+            "openhandsRuntime.profileFingerprint",
+            maximum=64,
+            pattern=SHA256,
+        )
+        _string(
+            self.request_fingerprint,
+            "openhandsRuntime.requestFingerprint",
+            maximum=64,
+            pattern=SHA256,
+        )
+        parsed_workspace = Path(
+            _string(self.workspace_path, "openhandsRuntime.workspacePath", maximum=4096)
+        )
+        if (
+            not parsed_workspace.is_absolute()
+            or str(parsed_workspace.resolve(strict=False)) != self.workspace_path
+        ):
+            raise ContractValidationError(
+                "openhandsRuntime.workspacePath must be an absolute normalized path"
+            )
+        object.__setattr__(
+            self,
+            "baseline_commit",
+            _string(
+                self.baseline_commit,
+                "openhandsRuntime.baselineCommit",
+                maximum=40,
+                pattern=FULL_GIT_SHA,
+            ).lower(),
+        )
+        if not isinstance(self.runtime_status, OpenHandsRuntimeStatus):
+            raise ContractValidationError("openhandsRuntime.runtimeStatus is invalid")
+        if not isinstance(self.execution_status, ExecutionStatus):
+            raise ContractValidationError("openhandsRuntime.executionStatus is invalid")
+        if self.last_native_event_id is not None:
+            _string(
+                self.last_native_event_id,
+                "openhandsRuntime.lastNativeEventId",
+                maximum=128,
+                pattern=IDENTIFIER,
+            )
+        if (
+            isinstance(self.last_native_event_order, bool)
+            or not isinstance(self.last_native_event_order, int)
+            or self.last_native_event_order < 0
+        ):
+            raise ContractValidationError(
+                "openhandsRuntime.lastNativeEventOrder must be non-negative"
+            )
+        if (self.last_native_event_id is None) != (self.last_native_event_order == 0):
+            raise ContractValidationError(
+                "openhandsRuntime native event id/order must be present together"
+            )
+        if self.failure_code is not None:
+            _string(
+                self.failure_code,
+                "openhandsRuntime.failureCode",
+                maximum=128,
+                pattern=IDENTIFIER,
+            )
+        if self.failure_detail is not None:
+            _string(
+                self.failure_detail,
+                "openhandsRuntime.failureDetail",
+                maximum=512,
+            )
+            reject_sensitive_input(
+                self.failure_detail, "openhandsRuntime.failureDetail"
+            )
+        if self.runtime_status is OpenHandsRuntimeStatus.RECOVERY_REQUIRED:
+            if self.failure_code is None or self.failure_detail is None:
+                raise ContractValidationError(
+                    "recovery-required OpenHands runtime needs bounded failure metadata"
+                )
+        elif self.failure_code is not None or self.failure_detail is not None:
+            raise ContractValidationError(
+                "OpenHands runtime failure metadata requires recovery-required status"
+            )
+        _timestamp(self.created_at, "openhandsRuntime.createdAt")
+        _timestamp(self.updated_at, "openhandsRuntime.updatedAt")
+        if self.contract_version != CONTRACT_VERSION:
+            raise ContractValidationError("openhandsRuntime.contractVersion is unsupported")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "contractVersion": self.contract_version,
+            "taskId": self.task_id,
+            "conversationId": self.conversation_id,
+            "agentServerIdentity": self.agent_server_identity,
+            "agentServerVersion": self.agent_server_version,
+            "sdkVersion": self.sdk_version,
+            "toolsVersion": self.tools_version,
+            "agentProfileId": self.agent_profile_id,
+            "nativeAgentProfileId": self.native_agent_profile_id,
+            "nativeAgentProfileRevision": self.native_agent_profile_revision,
+            "modelProfileId": self.model_profile_id,
+            "nativeModel": self.native_model,
+            "profileFingerprint": self.profile_fingerprint,
+            "requestFingerprint": self.request_fingerprint,
+            "workspacePath": self.workspace_path,
+            "baselineCommit": self.baseline_commit,
+            "runtimeStatus": self.runtime_status.value,
+            "executionStatus": self.execution_status.value,
+            "lastNativeEventId": self.last_native_event_id,
+            "lastNativeEventOrder": self.last_native_event_order,
+            "failureCode": self.failure_code,
+            "failureDetail": self.failure_detail,
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+        }
+
+
+@dataclass(frozen=True)
+class OpenHandsEventLink:
+    """A bounded pointer to an event retained by native OpenHands storage."""
+
+    task_id: str
+    conversation_id: str
+    native_event_id: str
+    native_order: int
+    native_kind: str
+    native_timestamp: str | None
+    observed_at: str
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "openhandsEventLink.taskId", maximum=128, pattern=IDENTIFIER)
+        try:
+            UUID(self.conversation_id)
+        except (TypeError, ValueError) as exc:
+            raise ContractValidationError(
+                "openhandsEventLink.conversationId must be a UUID"
+            ) from exc
+        _string(
+            self.native_event_id,
+            "openhandsEventLink.nativeEventId",
+            maximum=128,
+            pattern=IDENTIFIER,
+        )
+        if (
+            isinstance(self.native_order, bool)
+            or not isinstance(self.native_order, int)
+            or self.native_order < 1
+        ):
+            raise ContractValidationError("openhandsEventLink.nativeOrder must be positive")
+        _string(
+            self.native_kind,
+            "openhandsEventLink.nativeKind",
+            maximum=128,
+            pattern=IDENTIFIER,
+        )
+        if self.native_timestamp is not None:
+            _timestamp(self.native_timestamp, "openhandsEventLink.nativeTimestamp")
+        _timestamp(self.observed_at, "openhandsEventLink.observedAt")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "taskId": self.task_id,
+            "conversationId": self.conversation_id,
+            "nativeEventId": self.native_event_id,
+            "nativeOrder": self.native_order,
+            "nativeKind": self.native_kind,
+            "nativeTimestamp": self.native_timestamp,
+            "observedAt": self.observed_at,
         }
 
 

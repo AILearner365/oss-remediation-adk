@@ -383,7 +383,7 @@ class SharedPreparationSchemaMigrationTests(unittest.TestCase):
                     ).fetchone()
                 finally:
                     connection.close()
-                self.assertEqual(4, version)
+                self.assertEqual(5, version)
                 self.assertEqual(("preparations",), preparation_table)
                 self.assertEqual(("baseline_assessments",), baseline_table)
                 self.assertEqual(("intelligence_assessments",), intelligence_table)

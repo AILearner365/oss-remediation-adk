@@ -271,6 +271,10 @@ evidence are recorded in
 
 ### Change 5 — native Agent Server adapter
 
+Implemented on `openhands-service-integration` as a non-running native
+conversation boundary. Operational details and pinned-version findings are in
+[OPENHANDS-SHARED-AGENT-SERVER.md](OPENHANDS-SHARED-AGENT-SERVER.md).
+
 - Likely files: `openhands_runtime.py`, locked deployment manifest/image,
   fake-Agent-Server integration tests.
 - Move/reuse: default-agent/profile construction, current Skills/guidance,
@@ -283,6 +287,14 @@ evidence are recorded in
 - Acceptance: API-created task reaches one native conversation visible through
   Agent Server; REST and worker observe the same id/status/events.
 - Rollback: feature flag worker execution off; retain stored tasks for diagnosis.
+
+Actual Change 5 stops before execution: the pinned `1.50.0` creation path runs
+any supplied `initial_message`, so the adapter creates an idle deterministic-id
+conversation without one and attaches context separately with `run=false`.
+There is no execution feature flag or `/run` call to accidentally enable.
+SQLite stores the native association and bounded event references; Agent Server
+continues to own full conversation persistence and streaming. Change 6 remains
+the required gate for shared validator/Stop Hook parity and agent execution.
 
 ### Change 6 — validation/Stop Hook parity
 

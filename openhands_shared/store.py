@@ -22,6 +22,9 @@ from .contracts import (
     ExecutionStatus,
     IntelligenceOutcome,
     IntelligenceRecord,
+    OpenHandsEventLink,
+    OpenHandsRuntimeRecord,
+    OpenHandsRuntimeStatus,
     PreparationRecord,
     TaskEvent,
     TaskRequest,
@@ -34,7 +37,7 @@ from .contracts import (
 )
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 
 class TaskStoreError(RuntimeError):
@@ -69,6 +72,10 @@ class BaselineConflictError(TaskStoreError):
 
 
 class IntelligenceConflictError(TaskStoreError):
+    pass
+
+
+class OpenHandsRuntimeConflictError(TaskStoreError):
     pass
 
 
@@ -231,6 +238,9 @@ class SQLiteTaskStore:
             if version == 3:
                 self._migrate_v3_to_v4(connection)
                 version = 4
+            if version == 4:
+                self._migrate_v4_to_v5(connection)
+                version = 5
             if version != SCHEMA_VERSION:
                 raise TaskStoreError(f"unsupported task database schema version {row['version']}")
         except BaseException:
@@ -393,6 +403,116 @@ class SQLiteTaskStore:
                 connection.rollback()
             raise
 
+    @staticmethod
+    def _migrate_v4_to_v5(connection: sqlite3.Connection) -> None:
+        """Add native conversation associations and bounded event references."""
+
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            current = connection.execute(
+                "SELECT version FROM schema_info WHERE singleton = 1"
+            ).fetchone()["version"]
+            if current == 5:
+                connection.commit()
+                return
+            if current != 4:
+                raise TaskStoreError(f"cannot migrate task database schema version {current}")
+            connection.execute(
+                """CREATE TABLE IF NOT EXISTS openhands_runtimes (
+                    task_id TEXT PRIMARY KEY REFERENCES tasks(task_id) ON DELETE RESTRICT,
+                    conversation_id TEXT NOT NULL UNIQUE,
+                    agent_server_identity TEXT NOT NULL,
+                    agent_server_version TEXT NOT NULL,
+                    sdk_version TEXT NOT NULL,
+                    tools_version TEXT NOT NULL,
+                    agent_profile_id TEXT NOT NULL,
+                    native_agent_profile_id TEXT NOT NULL,
+                    native_agent_profile_revision INTEGER NOT NULL CHECK (native_agent_profile_revision >= 0),
+                    model_profile_id TEXT NOT NULL,
+                    native_model TEXT NOT NULL,
+                    profile_fingerprint TEXT NOT NULL,
+                    request_fingerprint TEXT NOT NULL,
+                    workspace_path TEXT NOT NULL UNIQUE,
+                    baseline_commit TEXT NOT NULL,
+                    runtime_status TEXT NOT NULL CHECK (
+                        runtime_status IN ('CONVERSATION_READY', 'CONTEXT_ATTACHED', 'RECOVERY_REQUIRED')
+                    ),
+                    execution_status TEXT NOT NULL CHECK (
+                        execution_status IN ('NOT_STARTED', 'RUNNING', 'COMPLETED', 'FAILED')
+                    ),
+                    last_native_event_id TEXT,
+                    last_native_event_order INTEGER NOT NULL DEFAULT 0 CHECK (last_native_event_order >= 0),
+                    failure_code TEXT,
+                    failure_detail TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    CHECK ((last_native_event_id IS NULL) = (last_native_event_order = 0)),
+                    CHECK (
+                        (runtime_status = 'RECOVERY_REQUIRED' AND failure_code IS NOT NULL AND failure_detail IS NOT NULL)
+                        OR
+                        (runtime_status != 'RECOVERY_REQUIRED' AND failure_code IS NULL AND failure_detail IS NULL)
+                    )
+                )"""
+            )
+            connection.execute(
+                """CREATE TABLE IF NOT EXISTS openhands_event_links (
+                    task_id TEXT NOT NULL REFERENCES openhands_runtimes(task_id) ON DELETE RESTRICT,
+                    native_event_id TEXT NOT NULL,
+                    conversation_id TEXT NOT NULL,
+                    native_order INTEGER NOT NULL CHECK (native_order > 0),
+                    native_kind TEXT NOT NULL,
+                    native_timestamp TEXT,
+                    observed_at TEXT NOT NULL,
+                    product_event_sequence INTEGER NOT NULL,
+                    PRIMARY KEY (task_id, native_event_id),
+                    UNIQUE (task_id, native_order),
+                    FOREIGN KEY (task_id, product_event_sequence)
+                        REFERENCES events(task_id, sequence) ON DELETE RESTRICT
+                )"""
+            )
+            connection.execute(
+                """CREATE TRIGGER IF NOT EXISTS openhands_runtimes_identity_immutable
+                BEFORE UPDATE ON openhands_runtimes
+                WHEN OLD.task_id != NEW.task_id
+                  OR OLD.conversation_id != NEW.conversation_id
+                  OR OLD.agent_server_identity != NEW.agent_server_identity
+                  OR OLD.agent_server_version != NEW.agent_server_version
+                  OR OLD.sdk_version != NEW.sdk_version
+                  OR OLD.tools_version != NEW.tools_version
+                  OR OLD.agent_profile_id != NEW.agent_profile_id
+                  OR OLD.native_agent_profile_id != NEW.native_agent_profile_id
+                  OR OLD.native_agent_profile_revision != NEW.native_agent_profile_revision
+                  OR OLD.model_profile_id != NEW.model_profile_id
+                  OR OLD.native_model != NEW.native_model
+                  OR OLD.profile_fingerprint != NEW.profile_fingerprint
+                  OR OLD.request_fingerprint != NEW.request_fingerprint
+                  OR OLD.workspace_path != NEW.workspace_path
+                  OR OLD.baseline_commit != NEW.baseline_commit
+                  OR OLD.created_at != NEW.created_at
+                BEGIN SELECT RAISE(ABORT, 'OpenHands runtime identity is immutable'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER IF NOT EXISTS openhands_runtimes_no_delete
+                BEFORE DELETE ON openhands_runtimes
+                BEGIN SELECT RAISE(ABORT, 'OpenHands runtime metadata cannot be deleted'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER IF NOT EXISTS openhands_event_links_immutable_update
+                BEFORE UPDATE ON openhands_event_links
+                BEGIN SELECT RAISE(ABORT, 'OpenHands event links are immutable'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER IF NOT EXISTS openhands_event_links_immutable_delete
+                BEFORE DELETE ON openhands_event_links
+                BEGIN SELECT RAISE(ABORT, 'OpenHands event links are immutable'); END"""
+            )
+            connection.execute("UPDATE schema_info SET version = 5 WHERE singleton = 1")
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+
     def register_task(self, request: TaskRequest) -> TaskRegistration:
         # Revalidate direct Python callers as strictly as REST callers.
         request = TaskRequest.from_dict(request.to_dict())
@@ -503,6 +623,30 @@ class SQLiteTaskStore:
                 (task_id,),
             ).fetchone()
             return None if row is None else self._intelligence_from_row(row)
+        finally:
+            connection.close()
+
+    def get_openhands_runtime(self, task_id: str) -> OpenHandsRuntimeRecord | None:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            return None if row is None else self._openhands_runtime_from_row(row)
+        finally:
+            connection.close()
+
+    def list_openhands_event_links(self, task_id: str) -> tuple[OpenHandsEventLink, ...]:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            rows = connection.execute(
+                """SELECT * FROM openhands_event_links
+                WHERE task_id = ? ORDER BY native_order ASC""",
+                (task_id,),
+            ).fetchall()
+            return tuple(self._openhands_event_link_from_row(row) for row in rows)
         finally:
             connection.close()
 
@@ -918,6 +1062,329 @@ class SQLiteTaskStore:
         finally:
             connection.close()
 
+    def record_openhands_runtime(
+        self, runtime: OpenHandsRuntimeRecord
+    ) -> OpenHandsRuntimeRecord:
+        """Atomically bind one product task to one native conversation."""
+
+        if runtime.execution_status is not ExecutionStatus.NOT_STARTED:
+            raise OpenHandsRuntimeConflictError(
+                "Change 5 can only persist a non-running native conversation"
+            )
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, runtime.task_id)
+            if TaskStatus(task["status"]) is not TaskStatus.AGENT_RUNNING:
+                raise InvalidTransitionError(
+                    "OpenHands conversation provisioning requires AGENT_RUNNING"
+                )
+            if ExecutionStatus(task["execution_status"]) is not ExecutionStatus.NOT_STARTED:
+                raise InvalidTransitionError(
+                    "OpenHands conversation provisioning requires NOT_STARTED execution"
+                )
+            if connection.execute(
+                "SELECT 1 FROM preparations WHERE task_id = ?", (runtime.task_id,)
+            ).fetchone() is None:
+                raise OpenHandsRuntimeConflictError(
+                    "OpenHands conversation requires durable preparation metadata"
+                )
+            if connection.execute(
+                "SELECT 1 FROM baseline_assessments WHERE task_id = ?", (runtime.task_id,)
+            ).fetchone() is None:
+                raise OpenHandsRuntimeConflictError(
+                    "OpenHands conversation requires durable baseline metadata"
+                )
+            if connection.execute(
+                "SELECT 1 FROM intelligence_assessments WHERE task_id = ?", (runtime.task_id,)
+            ).fetchone() is None:
+                raise OpenHandsRuntimeConflictError(
+                    "OpenHands conversation requires durable intelligence metadata"
+                )
+            existing = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (runtime.task_id,)
+            ).fetchone()
+            if existing is not None:
+                current = self._openhands_runtime_from_row(existing)
+                if self._openhands_runtime_identity(current) != self._openhands_runtime_identity(runtime):
+                    raise OpenHandsRuntimeConflictError(
+                        "OpenHands task/conversation association is immutable"
+                    )
+                connection.commit()
+                return current
+            if task["conversation_id"] not in (None, runtime.conversation_id):
+                raise OpenHandsRuntimeConflictError(
+                    "task is already associated with another conversation"
+                )
+            try:
+                connection.execute(
+                    """INSERT INTO openhands_runtimes(
+                        task_id, conversation_id, agent_server_identity,
+                        agent_server_version, sdk_version, tools_version,
+                        agent_profile_id, native_agent_profile_id,
+                        native_agent_profile_revision, model_profile_id,
+                        native_model, profile_fingerprint, request_fingerprint,
+                        workspace_path, baseline_commit, runtime_status,
+                        execution_status, last_native_event_id,
+                        last_native_event_order, failure_code, failure_detail,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        runtime.task_id,
+                        runtime.conversation_id,
+                        runtime.agent_server_identity,
+                        runtime.agent_server_version,
+                        runtime.sdk_version,
+                        runtime.tools_version,
+                        runtime.agent_profile_id,
+                        runtime.native_agent_profile_id,
+                        runtime.native_agent_profile_revision,
+                        runtime.model_profile_id,
+                        runtime.native_model,
+                        runtime.profile_fingerprint,
+                        runtime.request_fingerprint,
+                        runtime.workspace_path,
+                        runtime.baseline_commit,
+                        runtime.runtime_status.value,
+                        runtime.execution_status.value,
+                        runtime.last_native_event_id,
+                        runtime.last_native_event_order,
+                        runtime.failure_code,
+                        runtime.failure_detail,
+                        runtime.created_at,
+                        runtime.updated_at,
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise OpenHandsRuntimeConflictError(
+                    "native conversation or workspace is already associated"
+                ) from exc
+            connection.execute(
+                """UPDATE tasks SET conversation_id = ?, updated_at = ?
+                WHERE task_id = ?""",
+                (runtime.conversation_id, runtime.updated_at, runtime.task_id),
+            )
+            event_type = (
+                "agent.recovery.required"
+                if runtime.runtime_status is OpenHandsRuntimeStatus.RECOVERY_REQUIRED
+                else "agent.conversation.created"
+            )
+            self._append_event(
+                connection,
+                task_id=runtime.task_id,
+                event_type=event_type,
+                stage="agent",
+                data={
+                    "conversationId": runtime.conversation_id,
+                    "runtimeStatus": runtime.runtime_status.value,
+                    "executionStarted": False,
+                    **(
+                        {"failureCode": runtime.failure_code}
+                        if runtime.failure_code is not None
+                        else {}
+                    ),
+                },
+                timestamp=runtime.updated_at,
+            )
+            connection.commit()
+            return runtime
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def mark_openhands_recovery_required(
+        self, task_id: str, *, failure_code: str, failure_detail: str
+    ) -> OpenHandsRuntimeRecord:
+        """Stop uncertain native operations without inferring execution success."""
+
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if row is None:
+                raise OpenHandsRuntimeConflictError(
+                    "cannot mark recovery before conversation identity is recorded"
+                )
+            current = self._openhands_runtime_from_row(row)
+            if current.runtime_status is OpenHandsRuntimeStatus.RECOVERY_REQUIRED:
+                if (
+                    current.failure_code != failure_code
+                    or current.failure_detail != failure_detail
+                ):
+                    raise OpenHandsRuntimeConflictError(
+                        "existing recovery metadata differs"
+                    )
+                connection.commit()
+                return current
+            candidate = OpenHandsRuntimeRecord(
+                **{
+                    **current.__dict__,
+                    "runtime_status": OpenHandsRuntimeStatus.RECOVERY_REQUIRED,
+                    "failure_code": failure_code,
+                    "failure_detail": failure_detail,
+                    "updated_at": now,
+                }
+            )
+            connection.execute(
+                """UPDATE openhands_runtimes
+                SET runtime_status = ?, failure_code = ?, failure_detail = ?, updated_at = ?
+                WHERE task_id = ?""",
+                (
+                    candidate.runtime_status.value,
+                    candidate.failure_code,
+                    candidate.failure_detail,
+                    candidate.updated_at,
+                    task_id,
+                ),
+            )
+            self._append_event(
+                connection,
+                task_id=task_id,
+                event_type="agent.recovery.required",
+                stage="agent",
+                data={
+                    "conversationId": candidate.conversation_id,
+                    "failureCode": candidate.failure_code,
+                    "executionStarted": False,
+                },
+                timestamp=now,
+            )
+            connection.execute(
+                "UPDATE tasks SET updated_at = ? WHERE task_id = ?", (now, task_id)
+            )
+            connection.commit()
+            return candidate
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def link_openhands_event(
+        self,
+        link: OpenHandsEventLink,
+        *,
+        context_attached: bool = False,
+    ) -> OpenHandsRuntimeRecord:
+        """Append a bounded native-event pointer and its product event atomically."""
+
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self._task_row(connection, link.task_id)
+            runtime_row = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (link.task_id,)
+            ).fetchone()
+            if runtime_row is None:
+                raise OpenHandsRuntimeConflictError(
+                    "native event cannot be linked before conversation association"
+                )
+            runtime = self._openhands_runtime_from_row(runtime_row)
+            if runtime.conversation_id != link.conversation_id:
+                raise OpenHandsRuntimeConflictError(
+                    "native event belongs to another conversation"
+                )
+            existing = connection.execute(
+                """SELECT * FROM openhands_event_links
+                WHERE task_id = ? AND native_event_id = ?""",
+                (link.task_id, link.native_event_id),
+            ).fetchone()
+            if existing is not None:
+                if self._openhands_event_link_from_row(existing) != link:
+                    raise OpenHandsRuntimeConflictError("native event link is immutable")
+                connection.commit()
+                return runtime
+            if runtime.runtime_status is OpenHandsRuntimeStatus.RECOVERY_REQUIRED:
+                raise OpenHandsRuntimeConflictError(
+                    "operator recovery is required before linking more native events"
+                )
+            if link.native_order != runtime.last_native_event_order + 1:
+                raise OpenHandsRuntimeConflictError(
+                    "native event links must be recorded in contiguous order"
+                )
+            event = self._append_event(
+                connection,
+                task_id=link.task_id,
+                event_type=(
+                    "agent.context.attached"
+                    if context_attached
+                    else "agent.event.observed"
+                ),
+                stage="agent",
+                data={
+                    "conversationId": link.conversation_id,
+                    "nativeEventOrder": link.native_order,
+                    "nativeKind": link.native_kind,
+                    "executionStarted": False,
+                },
+                timestamp=link.observed_at,
+            )
+            try:
+                connection.execute(
+                    """INSERT INTO openhands_event_links(
+                        task_id, native_event_id, conversation_id, native_order,
+                        native_kind, native_timestamp, observed_at,
+                        product_event_sequence
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        link.task_id,
+                        link.native_event_id,
+                        link.conversation_id,
+                        link.native_order,
+                        link.native_kind,
+                        link.native_timestamp,
+                        link.observed_at,
+                        event.sequence,
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise OpenHandsRuntimeConflictError(
+                    "native event id/order conflicts with recorded history"
+                ) from exc
+            next_status = (
+                OpenHandsRuntimeStatus.CONTEXT_ATTACHED
+                if context_attached
+                else runtime.runtime_status
+            )
+            connection.execute(
+                """UPDATE openhands_runtimes
+                SET runtime_status = ?, last_native_event_id = ?,
+                    last_native_event_order = ?, updated_at = ?
+                WHERE task_id = ?""",
+                (
+                    next_status.value,
+                    link.native_event_id,
+                    link.native_order,
+                    link.observed_at,
+                    link.task_id,
+                ),
+            )
+            connection.execute(
+                "UPDATE tasks SET updated_at = ? WHERE task_id = ?",
+                (link.observed_at, link.task_id),
+            )
+            updated = self._openhands_runtime_from_row(
+                connection.execute(
+                    "SELECT * FROM openhands_runtimes WHERE task_id = ?", (link.task_id,)
+                ).fetchone()
+            )
+            connection.commit()
+            return updated
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
     def list_events(self, task_id: str, *, after_sequence: int = 0) -> tuple[TaskEvent, ...]:
         if after_sequence < 0:
             raise ValueError("after_sequence cannot be negative")
@@ -1265,4 +1732,65 @@ class SQLiteTaskStore:
             summary_artifact_id=row["summary_artifact_id"],
             explanation=row["explanation"],
             completed_at=row["completed_at"],
+        )
+
+    @staticmethod
+    def _openhands_runtime_from_row(row: sqlite3.Row) -> OpenHandsRuntimeRecord:
+        return OpenHandsRuntimeRecord(
+            task_id=row["task_id"],
+            conversation_id=row["conversation_id"],
+            agent_server_identity=row["agent_server_identity"],
+            agent_server_version=row["agent_server_version"],
+            sdk_version=row["sdk_version"],
+            tools_version=row["tools_version"],
+            agent_profile_id=row["agent_profile_id"],
+            native_agent_profile_id=row["native_agent_profile_id"],
+            native_agent_profile_revision=row["native_agent_profile_revision"],
+            model_profile_id=row["model_profile_id"],
+            native_model=row["native_model"],
+            profile_fingerprint=row["profile_fingerprint"],
+            request_fingerprint=row["request_fingerprint"],
+            workspace_path=row["workspace_path"],
+            baseline_commit=row["baseline_commit"],
+            runtime_status=OpenHandsRuntimeStatus(row["runtime_status"]),
+            execution_status=ExecutionStatus(row["execution_status"]),
+            last_native_event_id=row["last_native_event_id"],
+            last_native_event_order=row["last_native_event_order"],
+            failure_code=row["failure_code"],
+            failure_detail=row["failure_detail"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+
+    @staticmethod
+    def _openhands_event_link_from_row(row: sqlite3.Row) -> OpenHandsEventLink:
+        return OpenHandsEventLink(
+            task_id=row["task_id"],
+            conversation_id=row["conversation_id"],
+            native_event_id=row["native_event_id"],
+            native_order=row["native_order"],
+            native_kind=row["native_kind"],
+            native_timestamp=row["native_timestamp"],
+            observed_at=row["observed_at"],
+        )
+
+    @staticmethod
+    def _openhands_runtime_identity(runtime: OpenHandsRuntimeRecord) -> tuple[Any, ...]:
+        return (
+            runtime.task_id,
+            runtime.conversation_id,
+            runtime.agent_server_identity,
+            runtime.agent_server_version,
+            runtime.sdk_version,
+            runtime.tools_version,
+            runtime.agent_profile_id,
+            runtime.native_agent_profile_id,
+            runtime.native_agent_profile_revision,
+            runtime.model_profile_id,
+            runtime.native_model,
+            runtime.profile_fingerprint,
+            runtime.request_fingerprint,
+            runtime.workspace_path,
+            runtime.baseline_commit,
+            runtime.created_at,
         )
