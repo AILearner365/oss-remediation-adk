@@ -1,0 +1,62 @@
+497104907 experiment:excluded:jar:1
+278254138 org.springframework.boot:spring-boot-starter-web:jar:3.3.4:compile
+858965925 org.springframework.boot:spring-boot-starter:jar:3.3.4:compile
+718057154 org.springframework.boot:spring-boot:jar:3.3.4:compile
+1792826268 org.springframework.boot:spring-boot-autoconfigure:jar:3.3.4:compile
+432112141 org.springframework.boot:spring-boot-starter-logging:jar:3.3.4:compile
+67570169 ch.qos.logback:logback-classic:jar:1.5.8:compile
+1796938191 ch.qos.logback:logback-core:jar:1.5.8:compile
+1670627211 org.slf4j:slf4j-api:jar:2.0.16:compile
+1993836574 org.apache.logging.log4j:log4j-to-slf4j:jar:2.23.1:compile
+1252204540 org.apache.logging.log4j:log4j-api:jar:2.23.1:compile
+2034610694 org.slf4j:jul-to-slf4j:jar:2.0.16:compile
+131343682 jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+1292487390 org.springframework:spring-core:jar:6.1.13:compile
+528965756 org.springframework:spring-jcl:jar:6.1.13:compile
+1267082248 org.yaml:snakeyaml:jar:2.2:compile
+1843324431 org.springframework.boot:spring-boot-starter-json:jar:3.3.4:compile
+1854053968 com.fasterxml.jackson.core:jackson-databind:jar:2.17.2:compile
+1252165500 com.fasterxml.jackson.core:jackson-annotations:jar:2.17.2:compile
+813583428 com.fasterxml.jackson.core:jackson-core:jar:2.17.2:compile
+713702106 com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.17.2:compile
+1342198213 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.17.2:compile
+247969246 com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.17.2:compile
+1276761134 org.springframework:spring-web:jar:6.1.13:compile
+926837661 org.springframework:spring-beans:jar:6.1.13:compile
+1700960966 io.micrometer:micrometer-observation:jar:1.13.4:compile
+1454942961 io.micrometer:micrometer-commons:jar:1.13.4:compile
+1417854124 org.springframework:spring-webmvc:jar:6.1.13:compile
+270812962 org.springframework:spring-aop:jar:6.1.13:compile
+1633770314 org.springframework:spring-context:jar:6.1.13:compile
+1914538677 org.springframework:spring-expression:jar:6.1.13:compile
+#
+858965925 718057154 compile
+858965925 1792826268 compile
+67570169 1796938191 compile
+67570169 1670627211 compile
+432112141 67570169 compile
+1993836574 1252204540 compile
+432112141 1993836574 compile
+432112141 2034610694 compile
+858965925 432112141 compile
+858965925 131343682 compile
+1292487390 528965756 compile
+858965925 1292487390 compile
+858965925 1267082248 compile
+278254138 858965925 compile
+1854053968 1252165500 compile
+1854053968 813583428 compile
+1843324431 1854053968 compile
+1843324431 713702106 compile
+1843324431 1342198213 compile
+1843324431 247969246 compile
+278254138 1843324431 compile
+1276761134 926837661 compile
+1700960966 1454942961 compile
+1276761134 1700960966 compile
+278254138 1276761134 compile
+1417854124 270812962 compile
+1417854124 1633770314 compile
+1417854124 1914538677 compile
+278254138 1417854124 compile
+497104907 278254138 compile

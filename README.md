@@ -2,6 +2,13 @@
 
 This repository contains an ADK-based OSS vulnerability remediation workflow for Java Spring Boot Maven applications.
 
+## Spring Boot Release Intelligence
+
+The standalone security comparison CLI uses Maven-selected dependencies and
+the validated S4 pipeline. See
+[Spring Boot Release Intelligence CLI](docs/spring-boot-release-intelligence.md),
+or run `./sbri evaluate --help`.
+
 ## Autonomous Remediation POC
 
 The approved independent single-agent POC is implemented in `autonomous_oss_remediation_agent`. Its operating instructions and fail-closed deployment requirements are in `autonomous_oss_remediation_agent/README.md`; implementation evidence and remaining deployment prerequisites are in `docs/AUTONOMOUS_OSS_REMEDIATION_IMPLEMENTATION_REVIEW.md`. The frozen research hypothesis and evaluation protocol for Challenge Before Commitment are in `docs/EXPERIMENT_1_CHALLENGE_BEFORE_COMMITMENT.md`.

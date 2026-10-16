@@ -1,0 +1,42 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] multi-parent                                                       [pom]
+[INFO] library                                                            [jar]
+[INFO] app                                                                [jar]
+[INFO]
+[INFO] ----------------------< experiment:multi-parent >-----------------------
+[INFO] Building multi-parent 1                                            [1/3]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- dependency:3.8.1:collect (default-cli) @ multi-parent ---
+[INFO]
+[INFO] -------------------------< experiment:library >-------------------------
+[INFO] Building library 1                                                 [2/3]
+[INFO]   from library/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- dependency:3.8.1:collect (default-cli) @ library ---
+[INFO]
+[INFO] ---------------------------< experiment:app >---------------------------
+[INFO] Building app 1                                                     [3/3]
+[INFO]   from app/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/10.1.31/tomcat-annotations-api-10.1.31.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat-annotations-api/10.1.31/tomcat-annotations-api-10.1.31.pom (1.5 kB at 1.9 kB/s)
+[INFO]
+[INFO] --- dependency:3.8.1:collect (default-cli) @ app ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for multi-parent 1:
+[INFO]
+[INFO] multi-parent ....................................... SUCCESS [  2.694 s]
+[INFO] library ............................................ SUCCESS [  0.042 s]
+[INFO] app ................................................ SUCCESS [  1.260 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.973 s
+[INFO] Finished at: 2026-10-14T04:59:02Z
+[INFO] ------------------------------------------------------------------------

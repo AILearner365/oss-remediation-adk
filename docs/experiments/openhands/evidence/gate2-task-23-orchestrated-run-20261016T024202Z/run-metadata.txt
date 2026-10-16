@@ -1,0 +1,18 @@
+control_branch=
+control_head=b865350d5949fe8cbd374085236bc8225ad401ae
+task_id=23
+vertex_project=deutschebank-aipocs
+vertex_location=us-central1
+model=vertex_ai/gemini-2.5-flash
+max_denials=3
+max_iterations=250
+engineering_judgment_guidance=0
+task_skill=0
+structured_guidance=0
+sbri_enabled=1
+57ed584371c05b62269fab1154e2f5628acaa007402af88607adfb66e3e67ad7  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/guidance/engineering-judgment.md
+a430a22e98c9da22c688de5c55ded351de89f9e4da79eb47c3d02511979c5a5c  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/guidance/general-engineering.md
+1e32f48816368bd62be00a79823b63a9e583c65f14e6b8cbebfad466252dd4c4  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/project-context/AGENTS.md
+c876f1040030302f491d7b5c8c82042d0c84571751dc94d874680ce8a8431dfb  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/skills/maven-dependency-evidence/SKILL.md
+774f3da4f8f7c32c54ffadc0125d4309435163a8900cc86fede708b1e029d260  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/skills/evidence-driven-dependency-remediation/SKILL.md
+10f2b00a77dde6052925f7b34150a2fb832e83c239eb6095ac448fc0f91980cb  /tmp/sbri-openhands-integration-X0R0qK/scripts/openhands/sbri_integration.py

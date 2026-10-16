@@ -26,6 +26,7 @@ if str(CONTROL_REPO) not in sys.path:
     sys.path.insert(0, str(CONTROL_REPO))
 
 from maven_repository_server import serve_maven_repository
+from scripts.openhands.sbri_integration import agent_message, run_pre_edit_intelligence
 
 from openhands.sdk import AgentContext, Conversation, LLM
 from openhands.sdk.event import HookExecutionEvent
@@ -49,6 +50,7 @@ ENGINEERING_GUIDANCE_ENV = "OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE"
 TASK_SKILL_ENV = "OPENHANDS_TASK_SKILL"
 STRUCTURED_ENV = "OPENHANDS_STRUCTURED_GUIDANCE"
 DECISION_ENV = "OPENHANDS_DECISION_GUIDANCE"
+SBRI_ENV = "OPENHANDS_SBRI"
 GENERAL_GUIDANCE = CONTROL_REPO / "scripts/openhands/guidance/general-engineering.md"
 PROJECT_GUIDANCE = CONTROL_REPO / "scripts/openhands/project-context/AGENTS.md"
 MAVEN_SKILL_NAME = "maven-dependency-evidence"
@@ -102,6 +104,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--decision-guidance", action=argparse.BooleanOptionalAction,
                         default=environment_flag(DECISION_ENV),
                         help="opt-in candidate decision Skill and Maven evidence Skill")
+    parser.add_argument("--sbri", action=argparse.BooleanOptionalAction,
+                        default=(environment_flag(SBRI_ENV) if SBRI_ENV in os.environ else True),
+                        help="provide applicable Spring Boot security tasks with pre-edit SBRI evidence")
+    parser.add_argument("--sbri-config", type=Path,
+                        help="optional SBRI JSON configuration for Maven/scanner settings")
     return parser.parse_args()
 
 
@@ -448,6 +455,14 @@ def main() -> int:
         validation_launcher = launcher_dir / "validate-remediation"
         shutil.copyfile(CONTROL_REPO / "scripts/openhands/validate-remediation", validation_launcher)
         validation_launcher.chmod(0o700)
+        sbri_launcher = launcher_dir / "sbri"
+        sbri_launcher.write_text(
+            "#!/bin/sh\n"
+            f"export PYTHONPATH={shlex.quote(str(CONTROL_REPO))}${{PYTHONPATH:+:$PYTHONPATH}}\n"
+            f"exec {shlex.quote(sys.executable)} {shlex.quote(str(CONTROL_REPO / 'sbri'))} \"$@\"\n",
+            encoding="utf-8",
+        )
+        sbri_launcher.chmod(0o700)
         terminal_validation_env = {
             "CONTROL_REPO": str(CONTROL_REPO),
             "GATE2_TARGET_REPO": str(target),
@@ -521,6 +536,27 @@ def main() -> int:
                 "read and apply the available evidence-driven-dependency-remediation "
                 "Agent Skill. It does not supersede the task constraints."
             )
+        sbri_record = run_pre_edit_intelligence(
+            control_repo=CONTROL_REPO,
+            project=target,
+            task=task,
+            state_dir=state_dir,
+            scanner=Path.home() / "bin" / "osv-scanner",
+            config=args.sbri_config.expanduser().resolve() if args.sbri_config else None,
+            enabled=args.sbri,
+        )
+        if sbri_record["status"] not in {"DISABLED", "NOT_APPLICABLE"}:
+            task += "\n\n<SBRI_PRE_EDIT_EVIDENCE>\n" + agent_message(sbri_record) + \
+                    "\n</SBRI_PRE_EDIT_EVIDENCE>"
+        print("SBRI_INTEGRATION_EVIDENCE=" + json.dumps({
+            key: sbri_record.get(key) for key in (
+                "status", "invoked", "reused", "duplicateExecutionAvoided", "exitCode",
+                "sourceUnchanged", "summaryPath", "resultPath", "reportPath", "evidencePath",
+                "agentContextCharacters", "agentContextApproxTokens", "deliveredBeforeAgentRun",
+                "rankForcedAsStrategy", "measurement", "outputBytes", "mavenCacheJarCount",
+                "mavenCacheJarBytes")
+        }, sort_keys=True))
+        print(f"OPENHANDS_SBRI_LAUNCHER={sbri_launcher}")
         print(
             "GUIDANCE_DELIVERY_EVIDENCE="
             + json.dumps(

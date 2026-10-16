@@ -1,0 +1,5 @@
+
+The following files have been resolved:
+   experiment:library:jar:1:compile
+   org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.31:compile
+   org.apache.tomcat:tomcat-annotations-api:jar:10.1.31:compile

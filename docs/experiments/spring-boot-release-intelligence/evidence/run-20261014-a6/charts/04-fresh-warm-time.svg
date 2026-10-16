@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">Fresh-cache vs warm-cache workload time</text>
+<line x1="90" y1="385" x2="865" y2="385" stroke="#334155"/>
+<text x="283.75" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">Fresh</text>
+<rect x="178.75" y="65.0" width="67" height="320.0" fill="#2563eb"/>
+<text x="212.25" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">183.2s</text>
+<rect x="248.75" y="74.60698689956331" width="67" height="310.3930131004367" fill="#16a34a"/>
+<text x="282.25" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">177.7s</text>
+<rect x="318.75" y="76.00436681222703" width="67" height="308.99563318777297" fill="#dc2626"/>
+<text x="352.25" y="77" text-anchor="middle" font-family="sans-serif" font-size="11">176.9s</text>
+<text x="671.25" y="410" text-anchor="middle" font-family="sans-serif" font-size="12">Warm</text>
+<rect x="566.25" y="135.7423580786026" width="67" height="249.2576419213974" fill="#2563eb"/>
+<text x="599.75" y="130.7423580786026" text-anchor="middle" font-family="sans-serif" font-size="11">142.7s</text>
+<rect x="636.25" y="121.5938864628821" width="67" height="263.4061135371179" fill="#16a34a"/>
+<text x="669.75" y="116.5938864628821" text-anchor="middle" font-family="sans-serif" font-size="11">150.8s</text>
+<rect x="706.25" y="120.89519650655018" width="67" height="264.1048034934498" fill="#dc2626"/>
+<text x="739.75" y="115.89519650655018" text-anchor="middle" font-family="sans-serif" font-size="11">151.2s</text>
+<rect x="90" y="438" width="13" height="13" fill="#2563eb"/>
+<text x="108" y="449" font-family="sans-serif" font-size="12">A2</text>
+<rect x="240" y="438" width="13" height="13" fill="#16a34a"/>
+<text x="258" y="449" font-family="sans-serif" font-size="12">A5</text>
+<rect x="390" y="438" width="13" height="13" fill="#dc2626"/>
+<text x="408" y="449" font-family="sans-serif" font-size="12">A6</text>
+<text x="90" y="470" font-family="sans-serif" font-size="11" fill="#475569">Same release/override/scenario workload; elapsed seconds</text>
+</svg>

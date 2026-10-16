@@ -1,0 +1,28 @@
+{
+  "attempts": [
+    {
+      "phase": "offline",
+      "result": "EXPECTED_TEST_FAILURE",
+      "test": "test_explicit_numeric_fixed_event_can_support_addressed",
+      "cause": "The historical expectation said UNKNOWN for 2.0.0 inside an introduced:0/fixed:2.0.1 interval",
+      "resolution": "Corrected the independent expectation to STILL_AFFECTED; implementation was retained"
+    },
+    {
+      "phase": "offline",
+      "result": "PASS",
+      "tests": 19
+    },
+    {
+      "phase": "live-fresh-cache",
+      "result": "PASS",
+      "original_cells": 16,
+      "expanded_cells": 28
+    },
+    {
+      "phase": "live-warm-cache-confirmation",
+      "result": "PASS",
+      "original_cells": 16,
+      "expanded_cells": 28
+    }
+  ]
+}

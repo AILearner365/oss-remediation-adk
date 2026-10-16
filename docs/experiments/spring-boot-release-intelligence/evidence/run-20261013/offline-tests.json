@@ -1,0 +1,9 @@
+{
+  "command": "python3 -m unittest tests.test_spring_boot_release_intelligence_contract tests.test_spring_boot_release_intelligence -v",
+  "original_contract_tests": 6,
+  "new_offline_tests": 6,
+  "tests_run": 12,
+  "failures": 0,
+  "errors": 0,
+  "result": "OK"
+}

@@ -1,0 +1,8 @@
+375781972 experiment:app:jar:1
+1835529707 experiment:library:jar:1:compile
+1332038894 org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.31:compile
+1042273835 org.apache.tomcat:tomcat-annotations-api:jar:10.1.31:compile
+#
+1332038894 1042273835 compile
+1835529707 1332038894 compile
+375781972 1835529707 compile

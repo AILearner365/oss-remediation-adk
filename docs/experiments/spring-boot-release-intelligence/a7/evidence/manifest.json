@@ -1,0 +1,7 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "candidate-run-summary.json": "bd04b73ee2ca702677371c5c1b9186d190bfa982d88e491e0c80ce7ff8343758",
+    "live-subset.json": "a05b68c321a7af2f51359f891205607581432ab334953617d90ecd5649f3ab37"
+  }
+}

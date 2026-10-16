@@ -1,0 +1,3167 @@
+{
+  "bootstrap_jar_paths": [
+    "com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar",
+    "com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar",
+    "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar",
+    "commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar",
+    "commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar",
+    "commons-io/commons-io/2.16.1/commons-io-2.16.1.jar",
+    "commons-logging/commons-logging/1.2/commons-logging-1.2.jar",
+    "io/airlift/aircompressor/0.27/aircompressor-0.27.jar",
+    "javax/inject/javax.inject/1/javax.inject-1.jar",
+    "org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar",
+    "org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar",
+    "org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar",
+    "org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar",
+    "org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar",
+    "org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar",
+    "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar",
+    "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar",
+    "org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar",
+    "org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar",
+    "org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar",
+    "org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar",
+    "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar",
+    "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar",
+    "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar",
+    "org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar",
+    "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar",
+    "org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar",
+    "org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar",
+    "org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar",
+    "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar",
+    "org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar",
+    "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar",
+    "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar",
+    "org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar",
+    "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar",
+    "org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar",
+    "org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar",
+    "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar",
+    "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar",
+    "org/ow2/asm/asm/9.7/asm-9.7.jar",
+    "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
+    "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar",
+    "org/tukaani/xz/1.9/xz-1.9.jar"
+  ],
+  "observation": {
+    "command": [
+      "mvn",
+      "-B",
+      "-Dmaven.repo.local=/tmp/sbri-a6-a5-control.xts9cA",
+      "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree",
+      "-DoutputType=tgf",
+      "-DoutputFile=/home/kavya_parivarababu/spring-boot-release-intelligence/docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/a5-qualification/bootstrap-control/project/dependency-tree.tgf"
+    ],
+    "elapsed_seconds": 13.737817970999913,
+    "log_file": "docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/a5-qualification/bootstrap-control/logs/project.log",
+    "mechanism": "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree",
+    "paths": [],
+    "preserves_dependency_paths": true,
+    "returncode": 0,
+    "root_artifacts": [
+      "experiment:bootstrap-control"
+    ],
+    "selected_artifacts": {
+      "experiment:bootstrap-control": "1"
+    },
+    "selected_version": null,
+    "stdout": "74 kB at 1.2 MB/s)\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar (12 kB at 21 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar (45 kB at 77 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar (80 kB at 137 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar (43 kB at 72 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar (125 kB at 210 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar (58 kB at 93 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar (4.2 kB at 6.6 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar (159 kB at 248 kB/s)\n[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar (151 kB at 231 kB/s)\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar (8.5 kB at 13 kB/s)\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar (41 kB at 60 kB/s)\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar (168 kB at 243 kB/s)\n[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar (6.7 MB at 7.0 MB/s)\n[INFO] Wrote dependency tree to: /home/kavya_parivarababu/spring-boot-release-intelligence/docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/a5-qualification/bootstrap-control/project/dependency-tree.tgf\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD SUCCESS\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  10.426 s\n[INFO] Finished at: 2026-10-14T04:55:46Z\n[INFO] ------------------------------------------------------------------------\n",
+    "storage": {
+      "cache_bytes_after": 17888924,
+      "cache_bytes_before": 0,
+      "delta": {
+        "categories": {
+          "application_dependency_jar": {
+            "bytes": 0,
+            "count": 0
+          },
+          "maven_metadata": {
+            "bytes": 0,
+            "count": 0
+          },
+          "other_binary": {
+            "bytes": 0,
+            "count": 0
+          },
+          "plugin_bootstrap_jar": {
+            "bytes": 14912596,
+            "count": 50
+          },
+          "pom": {
+            "bytes": 2936599,
+            "count": 169
+          },
+          "tracking_or_checksum": {
+            "bytes": 39729,
+            "count": 388
+          }
+        },
+        "changed_bytes": 17888924,
+        "changed_file_count": 607,
+        "files": [
+          {
+            "bytes": 202,
+            "category": "tracking_or_checksum",
+            "path": "com/github/cliftonlabs/json-simple/3.0.2/_remote.repositories"
+          },
+          {
+            "bytes": 35059,
+            "category": "plugin_bootstrap_jar",
+            "path": "com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar.sha1"
+          },
+          {
+            "bytes": 7473,
+            "category": "pom",
+            "path": "com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "com/github/luben/zstd-jni/1.5.5-11/_remote.repositories"
+          },
+          {
+            "bytes": 2009,
+            "category": "pom",
+            "path": "com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom.sha1"
+          },
+          {
+            "bytes": 200,
+            "category": "tracking_or_checksum",
+            "path": "com/github/luben/zstd-jni/1.5.6-3/_remote.repositories"
+          },
+          {
+            "bytes": 6650280,
+            "category": "plugin_bootstrap_jar",
+            "path": "com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar.sha1"
+          },
+          {
+            "bytes": 2008,
+            "category": "pom",
+            "path": "com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.pom.sha1"
+          },
+          {
+            "bytes": 177,
+            "category": "tracking_or_checksum",
+            "path": "commons-beanutils/commons-beanutils/1.8.3/_remote.repositories"
+          },
+          {
+            "bytes": 11198,
+            "category": "pom",
+            "path": "commons-beanutils/commons-beanutils/1.8.3/commons-beanutils-1.8.3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-beanutils/commons-beanutils/1.8.3/commons-beanutils-1.8.3.pom.sha1"
+          },
+          {
+            "bytes": 214,
+            "category": "tracking_or_checksum",
+            "path": "commons-beanutils/commons-beanutils/1.9.4/_remote.repositories"
+          },
+          {
+            "bytes": 246918,
+            "category": "plugin_bootstrap_jar",
+            "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar.sha1"
+          },
+          {
+            "bytes": 18005,
+            "category": "pom",
+            "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.pom.sha1"
+          },
+          {
+            "bytes": 174,
+            "category": "tracking_or_checksum",
+            "path": "commons-codec/commons-codec/1.16.1/_remote.repositories"
+          },
+          {
+            "bytes": 15675,
+            "category": "pom",
+            "path": "commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom.sha1"
+          },
+          {
+            "bytes": 208,
+            "category": "tracking_or_checksum",
+            "path": "commons-codec/commons-codec/1.17.0/_remote.repositories"
+          },
+          {
+            "bytes": 372608,
+            "category": "plugin_bootstrap_jar",
+            "path": "commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar.sha1"
+          },
+          {
+            "bytes": 17870,
+            "category": "pom",
+            "path": "commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "commons-collections/commons-collections/3.2.2/_remote.repositories"
+          },
+          {
+            "bytes": 588337,
+            "category": "plugin_bootstrap_jar",
+            "path": "commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar.sha1"
+          },
+          {
+            "bytes": 12403,
+            "category": "pom",
+            "path": "commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.11.0/_remote.repositories"
+          },
+          {
+            "bytes": 19729,
+            "category": "pom",
+            "path": "commons-io/commons-io/2.11.0/commons-io-2.11.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.11.0/commons-io-2.11.0.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.15.1/_remote.repositories"
+          },
+          {
+            "bytes": 19970,
+            "category": "pom",
+            "path": "commons-io/commons-io/2.15.1/commons-io-2.15.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.15.1/commons-io-2.15.1.pom.sha1"
+          },
+          {
+            "bytes": 202,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.16.1/_remote.repositories"
+          },
+          {
+            "bytes": 508826,
+            "category": "plugin_bootstrap_jar",
+            "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.jar.sha1"
+          },
+          {
+            "bytes": 19623,
+            "category": "pom",
+            "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.17.0/_remote.repositories"
+          },
+          {
+            "bytes": 20031,
+            "category": "pom",
+            "path": "commons-io/commons-io/2.17.0/commons-io-2.17.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.17.0/commons-io-2.17.0.pom.sha1"
+          },
+          {
+            "bytes": 168,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.5/_remote.repositories"
+          },
+          {
+            "bytes": 13290,
+            "category": "pom",
+            "path": "commons-io/commons-io/2.5/commons-io-2.5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-io/commons-io/2.5/commons-io-2.5.pom.sha1"
+          },
+          {
+            "bytes": 175,
+            "category": "tracking_or_checksum",
+            "path": "commons-logging/commons-logging/1.1.1/_remote.repositories"
+          },
+          {
+            "bytes": 18365,
+            "category": "pom",
+            "path": "commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.pom.sha1"
+          },
+          {
+            "bytes": 206,
+            "category": "tracking_or_checksum",
+            "path": "commons-logging/commons-logging/1.2/_remote.repositories"
+          },
+          {
+            "bytes": 61829,
+            "category": "plugin_bootstrap_jar",
+            "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.jar.sha1"
+          },
+          {
+            "bytes": 19206,
+            "category": "pom",
+            "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.pom.sha1"
+          },
+          {
+            "bytes": 165,
+            "category": "tracking_or_checksum",
+            "path": "io/airlift/airbase/112/_remote.repositories"
+          },
+          {
+            "bytes": 68789,
+            "category": "pom",
+            "path": "io/airlift/airbase/112/airbase-112.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "io/airlift/airbase/112/airbase-112.pom.sha1"
+          },
+          {
+            "bytes": 204,
+            "category": "tracking_or_checksum",
+            "path": "io/airlift/aircompressor/0.27/_remote.repositories"
+          },
+          {
+            "bytes": 254937,
+            "category": "plugin_bootstrap_jar",
+            "path": "io/airlift/aircompressor/0.27/aircompressor-0.27.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "io/airlift/aircompressor/0.27/aircompressor-0.27.jar.sha1"
+          },
+          {
+            "bytes": 5752,
+            "category": "pom",
+            "path": "io/airlift/aircompressor/0.27/aircompressor-0.27.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "io/airlift/aircompressor/0.27/aircompressor-0.27.pom.sha1"
+          },
+          {
+            "bytes": 196,
+            "category": "tracking_or_checksum",
+            "path": "javax/inject/javax.inject/1/_remote.repositories"
+          },
+          {
+            "bytes": 2497,
+            "category": "plugin_bootstrap_jar",
+            "path": "javax/inject/javax.inject/1/javax.inject-1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "javax/inject/javax.inject/1/javax.inject-1.jar.sha1"
+          },
+          {
+            "bytes": 612,
+            "category": "pom",
+            "path": "javax/inject/javax.inject/1/javax.inject-1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "javax/inject/javax.inject/1/javax.inject-1.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/13/_remote.repositories"
+          },
+          {
+            "bytes": 13974,
+            "category": "pom",
+            "path": "org/apache/apache/13/apache-13.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/13/apache-13.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/16/_remote.repositories"
+          },
+          {
+            "bytes": 15397,
+            "category": "pom",
+            "path": "org/apache/apache/16/apache-16.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/16/apache-16.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/18/_remote.repositories"
+          },
+          {
+            "bytes": 15667,
+            "category": "pom",
+            "path": "org/apache/apache/18/apache-18.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/18/apache-18.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/19/_remote.repositories"
+          },
+          {
+            "bytes": 15489,
+            "category": "pom",
+            "path": "org/apache/apache/19/apache-19.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/19/apache-19.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/21/_remote.repositories"
+          },
+          {
+            "bytes": 17107,
+            "category": "pom",
+            "path": "org/apache/apache/21/apache-21.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/21/apache-21.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/23/_remote.repositories"
+          },
+          {
+            "bytes": 18422,
+            "category": "pom",
+            "path": "org/apache/apache/23/apache-23.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/23/apache-23.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/29/_remote.repositories"
+          },
+          {
+            "bytes": 20721,
+            "category": "pom",
+            "path": "org/apache/apache/29/apache-29.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/29/apache-29.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/30/_remote.repositories"
+          },
+          {
+            "bytes": 23241,
+            "category": "pom",
+            "path": "org/apache/apache/30/apache-30.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/30/apache-30.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/31/_remote.repositories"
+          },
+          {
+            "bytes": 23531,
+            "category": "pom",
+            "path": "org/apache/apache/31/apache-31.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/31/apache-31.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/32/_remote.repositories"
+          },
+          {
+            "bytes": 24184,
+            "category": "pom",
+            "path": "org/apache/apache/32/apache-32.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/32/apache-32.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/33/_remote.repositories"
+          },
+          {
+            "bytes": 24184,
+            "category": "pom",
+            "path": "org/apache/apache/33/apache-33.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/33/apache-33.pom.sha1"
+          },
+          {
+            "bytes": 162,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/4/_remote.repositories"
+          },
+          {
+            "bytes": 4495,
+            "category": "pom",
+            "path": "org/apache/apache/4/apache-4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/4/apache-4.pom.sha1"
+          },
+          {
+            "bytes": 162,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/6/_remote.repositories"
+          },
+          {
+            "bytes": 12796,
+            "category": "pom",
+            "path": "org/apache/apache/6/apache-6.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/6/apache-6.pom.sha1"
+          },
+          {
+            "bytes": 162,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/7/_remote.repositories"
+          },
+          {
+            "bytes": 14430,
+            "category": "pom",
+            "path": "org/apache/apache/7/apache-7.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/7/apache-7.pom.sha1"
+          },
+          {
+            "bytes": 162,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/9/_remote.repositories"
+          },
+          {
+            "bytes": 15160,
+            "category": "pom",
+            "path": "org/apache/apache/9/apache-9.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/apache/9/apache-9.pom.sha1"
+          },
+          {
+            "bytes": 177,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-compress/1.26.1/_remote.repositories"
+          },
+          {
+            "bytes": 22371,
+            "category": "pom",
+            "path": "org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom.sha1"
+          },
+          {
+            "bytes": 214,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-compress/1.26.2/_remote.repositories"
+          },
+          {
+            "bytes": 1083634,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar.sha1"
+          },
+          {
+            "bytes": 22942,
+            "category": "pom",
+            "path": "org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.pom.sha1"
+          },
+          {
+            "bytes": 210,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-digester3/3.2/_remote.repositories"
+          },
+          {
+            "bytes": 241614,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar.sha1"
+          },
+          {
+            "bytes": 17589,
+            "category": "pom",
+            "path": "org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.pom.sha1"
+          },
+          {
+            "bytes": 172,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.10/_remote.repositories"
+          },
+          {
+            "bytes": 30549,
+            "category": "pom",
+            "path": "org/apache/commons/commons-lang3/3.10/commons-lang3-3.10.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.10/commons-lang3-3.10.pom.sha1"
+          },
+          {
+            "bytes": 172,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.11/_remote.repositories"
+          },
+          {
+            "bytes": 30032,
+            "category": "pom",
+            "path": "org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.pom.sha1"
+          },
+          {
+            "bytes": 174,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.14.0/_remote.repositories"
+          },
+          {
+            "bytes": 30894,
+            "category": "pom",
+            "path": "org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom.sha1"
+          },
+          {
+            "bytes": 208,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.17.0/_remote.repositories"
+          },
+          {
+            "bytes": 673587,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar.sha1"
+          },
+          {
+            "bytes": 31256,
+            "category": "pom",
+            "path": "org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/14/_remote.repositories"
+          },
+          {
+            "bytes": 31389,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/14/commons-parent-14.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/14/commons-parent-14.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/22/_remote.repositories"
+          },
+          {
+            "bytes": 41918,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/22/commons-parent-22.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/22/commons-parent-22.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/34/_remote.repositories"
+          },
+          {
+            "bytes": 55943,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/34/commons-parent-34.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/34/commons-parent-34.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/39/_remote.repositories"
+          },
+          {
+            "bytes": 61975,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/39/commons-parent-39.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/39/commons-parent-39.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/47/_remote.repositories"
+          },
+          {
+            "bytes": 77562,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/47/commons-parent-47.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/47/commons-parent-47.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/5/_remote.repositories"
+          },
+          {
+            "bytes": 16041,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/50/_remote.repositories"
+          },
+          {
+            "bytes": 75622,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/50/commons-parent-50.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/50/commons-parent-50.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/51/_remote.repositories"
+          },
+          {
+            "bytes": 77936,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/51/commons-parent-51.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/51/commons-parent-51.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/52/_remote.repositories"
+          },
+          {
+            "bytes": 79273,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/52/commons-parent-52.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/52/commons-parent-52.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/64/_remote.repositories"
+          },
+          {
+            "bytes": 77957,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/64/commons-parent-64.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/64/commons-parent-64.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/65/_remote.repositories"
+          },
+          {
+            "bytes": 77926,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/65/commons-parent-65.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/65/commons-parent-65.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/66/_remote.repositories"
+          },
+          {
+            "bytes": 77001,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/66/commons-parent-66.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/66/commons-parent-66.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/69/_remote.repositories"
+          },
+          {
+            "bytes": 77006,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/69/commons-parent-69.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/69/commons-parent-69.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/73/_remote.repositories"
+          },
+          {
+            "bytes": 77692,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/73/commons-parent-73.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/73/commons-parent-73.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/74/_remote.repositories"
+          },
+          {
+            "bytes": 77843,
+            "category": "pom",
+            "path": "org/apache/commons/commons-parent/74/commons-parent-74.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-parent/74/commons-parent-74.pom.sha1"
+          },
+          {
+            "bytes": 206,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-text/1.12.0/_remote.repositories"
+          },
+          {
+            "bytes": 251227,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar.sha1"
+          },
+          {
+            "bytes": 19840,
+            "category": "pom",
+            "path": "org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.pom.sha1"
+          },
+          {
+            "bytes": 200,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-core/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 168106,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 3908,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 226,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-integration-tools/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 50040,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 7750,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 212,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-apt/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 53877,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 2861,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 214,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 35212,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 5386,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 17036,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 2898,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 173,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-modules/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 2508,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-modules/2.0.0/doxia-modules-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-modules/2.0.0/doxia-modules-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 208,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-sink-api/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 11330,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 1391,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 212,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-model/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 85941,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 5827,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-renderer/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 43622,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 7378,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 175,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-sitetools/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 11966,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-sitetools/2.0.0/doxia-sitetools-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-sitetools/2.0.0/doxia-sitetools-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 212,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-skin-model/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 16392,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 3020,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 165,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 17220,
+            "category": "pom",
+            "path": "org/apache/maven/doxia/doxia/2.0.0/doxia-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/doxia/doxia/2.0.0/doxia-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 208,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-archiver/3.6.2/_remote.repositories"
+          },
+          {
+            "bytes": 26804,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar.sha1"
+          },
+          {
+            "bytes": 4386,
+            "category": "pom",
+            "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-model/3.0/_remote.repositories"
+          },
+          {
+            "bytes": 3892,
+            "category": "pom",
+            "path": "org/apache/maven/maven-model/3.0/maven-model-3.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-model/3.0/maven-model-3.0.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/15/_remote.repositories"
+          },
+          {
+            "bytes": 24003,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/15/maven-parent-15.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/15/maven-parent-15.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/30/_remote.repositories"
+          },
+          {
+            "bytes": 41321,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/30/maven-parent-30.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/30/maven-parent-30.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/33/_remote.repositories"
+          },
+          {
+            "bytes": 44155,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/33/maven-parent-33.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/33/maven-parent-33.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/34/_remote.repositories"
+          },
+          {
+            "bytes": 42838,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/34/maven-parent-34.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/34/maven-parent-34.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/39/_remote.repositories"
+          },
+          {
+            "bytes": 47971,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/39/maven-parent-39.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/39/maven-parent-39.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/41/_remote.repositories"
+          },
+          {
+            "bytes": 49873,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/41/maven-parent-41.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/41/maven-parent-41.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/42/_remote.repositories"
+          },
+          {
+            "bytes": 50444,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/42/maven-parent-42.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/42/maven-parent-42.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/43/_remote.repositories"
+          },
+          {
+            "bytes": 50343,
+            "category": "pom",
+            "path": "org/apache/maven/maven-parent/43/maven-parent-43.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-parent/43/maven-parent-43.pom.sha1"
+          },
+          {
+            "bytes": 174,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-plugin-api/3.0/_remote.repositories"
+          },
+          {
+            "bytes": 2288,
+            "category": "pom",
+            "path": "org/apache/maven/maven-plugin-api/3.0/maven-plugin-api-3.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven-plugin-api/3.0/maven-plugin-api-3.0.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven/3.0/_remote.repositories"
+          },
+          {
+            "bytes": 21885,
+            "category": "pom",
+            "path": "org/apache/maven/maven/3.0/maven-3.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/maven/3.0/maven-3.0.pom.sha1"
+          },
+          {
+            "bytes": 226,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/_remote.repositories"
+          },
+          {
+            "bytes": 207950,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar.sha1"
+          },
+          {
+            "bytes": 17998,
+            "category": "pom",
+            "path": "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/plugins/maven-plugins/43/_remote.repositories"
+          },
+          {
+            "bytes": 7467,
+            "category": "pom",
+            "path": "org/apache/maven/plugins/maven-plugins/43/maven-plugins-43.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/plugins/maven-plugins/43/maven-plugins-43.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-api/4.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 9763,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar.sha1"
+          },
+          {
+            "bytes": 2793,
+            "category": "pom",
+            "path": "org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.pom.sha1"
+          },
+          {
+            "bytes": 220,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-impl/4.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 20961,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar.sha1"
+          },
+          {
+            "bytes": 8763,
+            "category": "pom",
+            "path": "org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.pom.sha1"
+          },
+          {
+            "bytes": 216,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-api/1.4.1/_remote.repositories"
+          },
+          {
+            "bytes": 148983,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar.sha1"
+          },
+          {
+            "bytes": 2626,
+            "category": "pom",
+            "path": "org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-util/1.4.1/_remote.repositories"
+          },
+          {
+            "bytes": 167529,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar.sha1"
+          },
+          {
+            "bytes": 2805,
+            "category": "pom",
+            "path": "org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.pom.sha1"
+          },
+          {
+            "bytes": 174,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver/1.4.1/_remote.repositories"
+          },
+          {
+            "bytes": 18177,
+            "category": "pom",
+            "path": "org/apache/maven/resolver/maven-resolver/1.4.1/maven-resolver-1.4.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/resolver/maven-resolver/1.4.1/maven-resolver-1.4.1.pom.sha1"
+          },
+          {
+            "bytes": 228,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/_remote.repositories"
+          },
+          {
+            "bytes": 159293,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar.sha1"
+          },
+          {
+            "bytes": 11241,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.pom.sha1"
+          },
+          {
+            "bytes": 189,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.1.0/_remote.repositories"
+          },
+          {
+            "bytes": 5286,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.1.0/maven-common-artifact-filters-3.1.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.1.0/maven-common-artifact-filters-3.1.0.pom.sha1"
+          },
+          {
+            "bytes": 238,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/_remote.repositories"
+          },
+          {
+            "bytes": 58459,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar.sha1"
+          },
+          {
+            "bytes": 5374,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.pom.sha1"
+          },
+          {
+            "bytes": 232,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/_remote.repositories"
+          },
+          {
+            "bytes": 44959,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar.sha1"
+          },
+          {
+            "bytes": 32093,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.pom.sha1"
+          },
+          {
+            "bytes": 222,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-tree/3.3.0/_remote.repositories"
+          },
+          {
+            "bytes": 42883,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar.sha1"
+          },
+          {
+            "bytes": 6989,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/30/_remote.repositories"
+          },
+          {
+            "bytes": 4583,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/30/maven-shared-components-30.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/30/maven-shared-components-30.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/33/_remote.repositories"
+          },
+          {
+            "bytes": 5096,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/33/maven-shared-components-33.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/33/maven-shared-components-33.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/34/_remote.repositories"
+          },
+          {
+            "bytes": 5096,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/39/_remote.repositories"
+          },
+          {
+            "bytes": 3220,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/41/_remote.repositories"
+          },
+          {
+            "bytes": 3176,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/42/_remote.repositories"
+          },
+          {
+            "bytes": 3773,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/42/maven-shared-components-42.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/42/maven-shared-components-42.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/43/_remote.repositories"
+          },
+          {
+            "bytes": 3773,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-components/43/maven-shared-components-43.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-components/43/maven-shared-components-43.pom.sha1"
+          },
+          {
+            "bytes": 178,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.1.0/_remote.repositories"
+          },
+          {
+            "bytes": 4979,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.1.0/maven-shared-utils-3.1.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.1.0/maven-shared-utils-3.1.0.pom.sha1"
+          },
+          {
+            "bytes": 216,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 151103,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar.sha1"
+          },
+          {
+            "bytes": 5899,
+            "category": "pom",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom.sha1"
+          },
+          {
+            "bytes": 220,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/tools/velocity-tools-generic/3.1/_remote.repositories"
+          },
+          {
+            "bytes": 216933,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar.sha1"
+          },
+          {
+            "bytes": 2561,
+            "category": "pom",
+            "path": "org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.pom.sha1"
+          },
+          {
+            "bytes": 179,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/tools/velocity-tools-parent/3.1/_remote.repositories"
+          },
+          {
+            "bytes": 8015,
+            "category": "pom",
+            "path": "org/apache/velocity/tools/velocity-tools-parent/3.1/velocity-tools-parent-3.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/tools/velocity-tools-parent/3.1/velocity-tools-parent-3.1.pom.sha1"
+          },
+          {
+            "bytes": 178,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-core/2.3/_remote.repositories"
+          },
+          {
+            "bytes": 10473,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.pom.sha1"
+          },
+          {
+            "bytes": 216,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-core/2.4/_remote.repositories"
+          },
+          {
+            "bytes": 510500,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar.sha1"
+          },
+          {
+            "bytes": 11981,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-parent/2.3/_remote.repositories"
+          },
+          {
+            "bytes": 13829,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-engine-parent/2.3/velocity-engine-parent-2.3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-parent/2.3/velocity-engine-parent-2.3.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-parent/2.4/_remote.repositories"
+          },
+          {
+            "bytes": 9504,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-engine-parent/2.4/velocity-engine-parent-2.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-engine-parent/2.4/velocity-engine-parent-2.4.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-master/4/_remote.repositories"
+          },
+          {
+            "bytes": 7769,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-master/4/velocity-master-4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-master/4/velocity-master-4.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-master/7/_remote.repositories"
+          },
+          {
+            "bytes": 7923,
+            "category": "pom",
+            "path": "org/apache/velocity/velocity-master/7/velocity-master-7.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/apache/velocity/velocity-master/7/velocity-master-7.pom.sha1"
+          },
+          {
+            "bytes": 212,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-archiver/4.10.0/_remote.repositories"
+          },
+          {
+            "bytes": 225201,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar.sha1"
+          },
+          {
+            "bytes": 5826,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.pom.sha1"
+          },
+          {
+            "bytes": 175,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-archiver/4.9.2/_remote.repositories"
+          },
+          {
+            "bytes": 5990,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom.sha1"
+          },
+          {
+            "bytes": 178,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.2.3/_remote.repositories"
+          },
+          {
+            "bytes": 3997,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.2.3/plexus-classworlds-2.2.3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.2.3/plexus-classworlds-2.2.3.pom.sha1"
+          },
+          {
+            "bytes": 216,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/_remote.repositories"
+          },
+          {
+            "bytes": 52873,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar.sha1"
+          },
+          {
+            "bytes": 7911,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom.sha1"
+          },
+          {
+            "bytes": 188,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/1.5.4/_remote.repositories"
+          },
+          {
+            "bytes": 815,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-component-annotations/1.5.4/plexus-component-annotations-1.5.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/1.5.4/plexus-component-annotations-1.5.4.pom.sha1"
+          },
+          {
+            "bytes": 236,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 4227,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar.sha1"
+          },
+          {
+            "bytes": 750,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 188,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.1.0/_remote.repositories"
+          },
+          {
+            "bytes": 750,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom.sha1"
+          },
+          {
+            "bytes": 178,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-components/1.1.12/_remote.repositories"
+          },
+          {
+            "bytes": 3003,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-components/1.1.12/plexus-components-1.1.12.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-components/1.1.12/plexus-components-1.1.12.pom.sha1"
+          },
+          {
+            "bytes": 177,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/1.5.4/_remote.repositories"
+          },
+          {
+            "bytes": 4240,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-containers/1.5.4/plexus-containers-1.5.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/1.5.4/plexus-containers-1.5.4.pom.sha1"
+          },
+          {
+            "bytes": 177,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/2.0.0/_remote.repositories"
+          },
+          {
+            "bytes": 4805,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-containers/2.0.0/plexus-containers-2.0.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/2.0.0/plexus-containers-2.0.0.pom.sha1"
+          },
+          {
+            "bytes": 177,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/2.1.0/_remote.repositories"
+          },
+          {
+            "bytes": 4805,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom.sha1"
+          },
+          {
+            "bytes": 214,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/_remote.repositories"
+          },
+          {
+            "bytes": 11931,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar.sha1"
+          },
+          {
+            "bytes": 2075,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.pom.sha1"
+          },
+          {
+            "bytes": 218,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-interpolation/1.27/_remote.repositories"
+          },
+          {
+            "bytes": 85874,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar.sha1"
+          },
+          {
+            "bytes": 3021,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 3862,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.5.0/_remote.repositories"
+          },
+          {
+            "bytes": 4350,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-io/3.5.0/plexus-io-3.5.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.5.0/plexus-io-3.5.0.pom.sha1"
+          },
+          {
+            "bytes": 198,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.5.1/_remote.repositories"
+          },
+          {
+            "bytes": 79942,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar.sha1"
+          },
+          {
+            "bytes": 4350,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.pom.sha1"
+          },
+          {
+            "bytes": 204,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-utils/4.0.1/_remote.repositories"
+          },
+          {
+            "bytes": 192527,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar.sha1"
+          },
+          {
+            "bytes": 7829,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom.sha1"
+          },
+          {
+            "bytes": 210,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-velocity/2.2.0/_remote.repositories"
+          },
+          {
+            "bytes": 5671,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar.sha1"
+          },
+          {
+            "bytes": 4055,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.pom.sha1"
+          },
+          {
+            "bytes": 200,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-xml/3.0.1/_remote.repositories"
+          },
+          {
+            "bytes": 94331,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar.sha1"
+          },
+          {
+            "bytes": 3694,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.pom.sha1"
+          },
+          {
+            "bytes": 167,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/1.0.10/_remote.repositories"
+          },
+          {
+            "bytes": 8250,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/1.0.10/plexus-1.0.10.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/1.0.10/plexus-1.0.10.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/16/_remote.repositories"
+          },
+          {
+            "bytes": 27638,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/16/plexus-16.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/16/plexus-16.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/17/_remote.repositories"
+          },
+          {
+            "bytes": 28184,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/17/plexus-17.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/17/plexus-17.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/18/_remote.repositories"
+          },
+          {
+            "bytes": 29238,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/18/plexus-18.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/18/plexus-18.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/19/_remote.repositories"
+          },
+          {
+            "bytes": 25385,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/19/plexus-19.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/19/plexus-19.pom.sha1"
+          },
+          {
+            "bytes": 166,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/2.0.5/_remote.repositories"
+          },
+          {
+            "bytes": 17348,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/2.0.5/plexus-2.0.5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/2.0.5/plexus-2.0.5.pom.sha1"
+          },
+          {
+            "bytes": 166,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/2.0.6/_remote.repositories"
+          },
+          {
+            "bytes": 16763,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/2.0.6/plexus-2.0.6.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/2.0.6/plexus-2.0.6.pom.sha1"
+          },
+          {
+            "bytes": 164,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/5.1/_remote.repositories"
+          },
+          {
+            "bytes": 22504,
+            "category": "pom",
+            "path": "org/codehaus/plexus/plexus/5.1/plexus-5.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/codehaus/plexus/plexus/5.1/plexus-5.1.pom.sha1"
+          },
+          {
+            "bytes": 232,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/_remote.repositories"
+          },
+          {
+            "bytes": 433639,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar.sha1"
+          },
+          {
+            "bytes": 19618,
+            "category": "pom",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.pom.sha1"
+          },
+          {
+            "bytes": 232,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/_remote.repositories"
+          },
+          {
+            "bytes": 216303,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar.sha1"
+          },
+          {
+            "bytes": 17028,
+            "category": "pom",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.pom.sha1"
+          },
+          {
+            "bytes": 174,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/sisu-inject/0.9.0.M3/_remote.repositories"
+          },
+          {
+            "bytes": 23511,
+            "category": "pom",
+            "path": "org/eclipse/sisu/sisu-inject/0.9.0.M3/sisu-inject-0.9.0.M3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/eclipse/sisu/sisu-inject/0.9.0.M3/sisu-inject-0.9.0.M3.pom.sha1"
+          },
+          {
+            "bytes": 164,
+            "category": "tracking_or_checksum",
+            "path": "org/iq80/snappy/snappy/0.4/_remote.repositories"
+          },
+          {
+            "bytes": 14537,
+            "category": "pom",
+            "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.0/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.1/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.2/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.3/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.10.3/junit-bom-5.10.3.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.10.3/junit-bom-5.10.3.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.0/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.11.0/junit-bom-5.11.0.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.0/junit-bom-5.11.0.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.1/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.11.1/junit-bom-5.11.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.1/junit-bom-5.11.1.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.2/_remote.repositories"
+          },
+          {
+            "bytes": 5649,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.11.2/junit-bom-5.11.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.11.2/junit-bom-5.11.2.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.7.2/_remote.repositories"
+          },
+          {
+            "bytes": 5098,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom.sha1"
+          },
+          {
+            "bytes": 172,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.8.0-M1/_remote.repositories"
+          },
+          {
+            "bytes": 5686,
+            "category": "pom",
+            "path": "org/junit/junit-bom/5.8.0-M1/junit-bom-5.8.0-M1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/junit/junit-bom/5.8.0-M1/junit-bom-5.8.0-M1.pom.sha1"
+          },
+          {
+            "bytes": 182,
+            "category": "tracking_or_checksum",
+            "path": "org/ow2/asm/asm/9.7/_remote.repositories"
+          },
+          {
+            "bytes": 125428,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/ow2/asm/asm/9.7/asm-9.7.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/ow2/asm/asm/9.7/asm-9.7.jar.sha1"
+          },
+          {
+            "bytes": 2370,
+            "category": "pom",
+            "path": "org/ow2/asm/asm/9.7/asm-9.7.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/ow2/asm/asm/9.7/asm-9.7.pom.sha1"
+          },
+          {
+            "bytes": 163,
+            "category": "tracking_or_checksum",
+            "path": "org/ow2/ow2/1.5.1/_remote.repositories"
+          },
+          {
+            "bytes": 11290,
+            "category": "pom",
+            "path": "org/ow2/ow2/1.5.1/ow2-1.5.1.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/ow2/ow2/1.5.1/ow2-1.5.1.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.30/_remote.repositories"
+          },
+          {
+            "bytes": 3835,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.pom.sha1"
+          },
+          {
+            "bytes": 200,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.36/_remote.repositories"
+          },
+          {
+            "bytes": 41125,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar.sha1"
+          },
+          {
+            "bytes": 2743,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.5/_remote.repositories"
+          },
+          {
+            "bytes": 2689,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.pom.sha1"
+          },
+          {
+            "bytes": 173,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.30/_remote.repositories"
+          },
+          {
+            "bytes": 13806,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-parent/1.7.30/slf4j-parent-1.7.30.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.30/slf4j-parent-1.7.30.pom.sha1"
+          },
+          {
+            "bytes": 173,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.36/_remote.repositories"
+          },
+          {
+            "bytes": 14093,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom.sha1"
+          },
+          {
+            "bytes": 172,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.5/_remote.repositories"
+          },
+          {
+            "bytes": 11804,
+            "category": "pom",
+            "path": "org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom.sha1"
+          },
+          {
+            "bytes": 168,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/forge/forge-parent/5/_remote.repositories"
+          },
+          {
+            "bytes": 8363,
+            "category": "pom",
+            "path": "org/sonatype/forge/forge-parent/5/forge-parent-5.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/forge/forge-parent/5/forge-parent-5.pom.sha1"
+          },
+          {
+            "bytes": 168,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/forge/forge-parent/6/_remote.repositories"
+          },
+          {
+            "bytes": 10754,
+            "category": "pom",
+            "path": "org/sonatype/forge/forge-parent/6/forge-parent-6.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/forge/forge-parent/6/forge-parent-6.pom.sha1"
+          },
+          {
+            "bytes": 212,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/plexus/plexus-build-api/0.0.7/_remote.repositories"
+          },
+          {
+            "bytes": 8482,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar.sha1"
+          },
+          {
+            "bytes": 3204,
+            "category": "pom",
+            "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/inject/guice-bean/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 2606,
+            "category": "pom",
+            "path": "org/sonatype/sisu/inject/guice-bean/1.4.2/guice-bean-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/inject/guice-bean/1.4.2/guice-bean-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 172,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/inject/guice-plexus/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 3128,
+            "category": "pom",
+            "path": "org/sonatype/sisu/inject/guice-plexus/1.4.2/guice-plexus-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/inject/guice-plexus/1.4.2/guice-plexus-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 170,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-guice/2.1.7/_remote.repositories"
+          },
+          {
+            "bytes": 11061,
+            "category": "pom",
+            "path": "org/sonatype/sisu/sisu-guice/2.1.7/sisu-guice-2.1.7.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-guice/2.1.7/sisu-guice-2.1.7.pom.sha1"
+          },
+          {
+            "bytes": 176,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject-bean/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 5457,
+            "category": "pom",
+            "path": "org/sonatype/sisu/sisu-inject-bean/1.4.2/sisu-inject-bean-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject-bean/1.4.2/sisu-inject-bean-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 178,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject-plexus/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 5369,
+            "category": "pom",
+            "path": "org/sonatype/sisu/sisu-inject-plexus/1.4.2/sisu-inject-plexus-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject-plexus/1.4.2/sisu-inject-plexus-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 1249,
+            "category": "pom",
+            "path": "org/sonatype/sisu/sisu-inject/1.4.2/sisu-inject-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-inject/1.4.2/sisu-inject-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 171,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-parent/1.4.2/_remote.repositories"
+          },
+          {
+            "bytes": 7777,
+            "category": "pom",
+            "path": "org/sonatype/sisu/sisu-parent/1.4.2/sisu-parent-1.4.2.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/sisu/sisu-parent/1.4.2/sisu-parent-1.4.2.pom.sha1"
+          },
+          {
+            "bytes": 169,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/spice/spice-parent/15/_remote.repositories"
+          },
+          {
+            "bytes": 8358,
+            "category": "pom",
+            "path": "org/sonatype/spice/spice-parent/15/spice-parent-15.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/sonatype/spice/spice-parent/15/spice-parent-15.pom.sha1"
+          },
+          {
+            "bytes": 180,
+            "category": "tracking_or_checksum",
+            "path": "org/tukaani/xz/1.9/_remote.repositories"
+          },
+          {
+            "bytes": 116013,
+            "category": "plugin_bootstrap_jar",
+            "path": "org/tukaani/xz/1.9/xz-1.9.jar"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/tukaani/xz/1.9/xz-1.9.jar.sha1"
+          },
+          {
+            "bytes": 2047,
+            "category": "pom",
+            "path": "org/tukaani/xz/1.9/xz-1.9.pom"
+          },
+          {
+            "bytes": 40,
+            "category": "tracking_or_checksum",
+            "path": "org/tukaani/xz/1.9/xz-1.9.pom.sha1"
+          }
+        ]
+      },
+      "no_application_dependency_jars": true,
+      "peak_cache_bytes": 17888924,
+      "strict_claim": "NO_APPLICATION_DEPENDENCY_JARS; PLUGIN_BOOTSTRAP_BINARIES_RECORDED",
+      "transfers": {
+        "http_request_count": null,
+        "http_request_count_reason": "Maven CLI does not expose transport-level request counts",
+        "maven_reported_bytes": 17914827,
+        "successful_transfer_events": 219,
+        "transfer_attempt_events": 219
+      }
+    },
+    "target_paths": {},
+    "tree_file": "/home/kavya_parivarababu/spring-boot-release-intelligence/docs/experiments/spring-boot-release-intelligence/evidence/run-20261014-a6/a5-qualification/bootstrap-control/project/dependency-tree.tgf"
+  },
+  "purpose": "zero-dependency plugin/bootstrap attribution control",
+  "qualified_no_application_dependency_jars": true,
+  "reclassified_overlap_paths": [
+    "commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
+  ],
+  "unexplained_binary_paths": []
+}
