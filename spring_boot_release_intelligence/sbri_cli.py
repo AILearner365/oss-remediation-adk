@@ -58,7 +58,7 @@ def main(argv=None) -> int:
         (args.output / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
         write_report(result, args.output / "report.html")
         print(args.output / "result.json"); print(args.output / "report.html")
-        return 0 if result["status"] == "SUCCESS" else 3
+        return {"SUCCESS": 0, "PARTIAL": 3, "FAILURE": 2}.get(result["status"], 2)
     except Exception as error:
         print(f"sbri: {error}", file=sys.stderr)
         return 2

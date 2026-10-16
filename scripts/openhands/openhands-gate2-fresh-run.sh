@@ -41,6 +41,16 @@ publish_evidence() {
     [ -f "$state_dir/hook/last-validator.log" ] && cp -f "$state_dir/hook/last-validator.log" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/infrastructure-failure" ] && cp -f "$state_dir/hook/infrastructure-failure" "$EVIDENCE_DIR/" || true
     [ -f "$state_dir/hook/attempt-count" ] && cp -f "$state_dir/hook/attempt-count" "$EVIDENCE_DIR/" || true
+    if [ -f "$state_dir/sbri/latest.json" ]; then
+      PYTHONPATH="$CONTROL_REPO${PYTHONPATH:+:$PYTHONPATH}" python3 - \
+        "$state_dir/sbri/latest.json" "$EVIDENCE_DIR/sbri" <<'PY' || \
+        echo "WARNING: Unable to retain bounded SBRI evidence" >&2
+import sys
+from pathlib import Path
+from scripts.openhands.sbri_integration import retain_review_bundle
+retain_review_bundle(Path(sys.argv[1]), Path(sys.argv[2]))
+PY
+    fi
     for hook_artifact in "$state_dir"/hook/validation-attempt-*.json "$state_dir"/hook/validator-attempt-*.log; do
       [ -f "$hook_artifact" ] || continue
       cp -f "$hook_artifact" "$EVIDENCE_DIR/"
@@ -58,12 +68,14 @@ publish_evidence() {
       printf 'engineering_judgment_guidance=%s\n' "${OPENHANDS_ENGINEERING_JUDGMENT_GUIDANCE:-0}"
       printf 'task_skill=%s\n' "${OPENHANDS_TASK_SKILL:-0}"
       printf 'structured_guidance=%s\n' "${OPENHANDS_STRUCTURED_GUIDANCE:-0}"
+      printf 'sbri_enabled=%s\n' "${OPENHANDS_SBRI:-1}"
       sha256sum \
         "$CONTROL_REPO/scripts/openhands/guidance/engineering-judgment.md" \
         "$CONTROL_REPO/scripts/openhands/guidance/general-engineering.md" \
         "$CONTROL_REPO/scripts/openhands/project-context/AGENTS.md" \
         "$CONTROL_REPO/scripts/openhands/skills/maven-dependency-evidence/SKILL.md" \
-        "$CONTROL_REPO/scripts/openhands/skills/evidence-driven-dependency-remediation/SKILL.md"
+        "$CONTROL_REPO/scripts/openhands/skills/evidence-driven-dependency-remediation/SKILL.md" \
+        "$CONTROL_REPO/scripts/openhands/sbri_integration.py"
     } > "$EVIDENCE_DIR/run-metadata.txt"
 
     local events_dir conversation_id trajectory_dir

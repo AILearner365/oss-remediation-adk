@@ -152,7 +152,7 @@ class SbriTests(unittest.TestCase):
         self.assertEqual(["1.1"], findings[0]["fixed_versions"])
 
     def test_cli_exit_codes_for_complete_partial_and_baseline_failure(self):
-        for status, expected in (("SUCCESS", 0), ("PARTIAL", 3)):
+        for status, expected in (("SUCCESS", 0), ("PARTIAL", 3), ("FAILURE", 2)):
             with self.subTest(status=status), tempfile.TemporaryDirectory() as value:
                 output = Path(value) / "out"; output.mkdir()
                 result = result_fixture(); result["status"] = status

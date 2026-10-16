@@ -131,10 +131,16 @@ It:
 6. creates an isolated Git worktree;
 7. creates an isolated Gate 2 state directory;
 8. runs the deterministic baseline;
-9. launches the native OpenHands agent through Vertex Gemini 2.5 Flash;
-10. uses the current task contract from `GATE2-TASK.md`;
-11. uses native OpenHands Stop Hook completion control;
-12. preserves the conversation/runtime state for analysis.
+9. runs bounded SBRI pre-edit intelligence when the task and repository are applicable;
+10. launches the native OpenHands agent through Vertex Gemini 2.5 Flash;
+11. uses the current task contract from `GATE2-TASK.md`;
+12. uses native OpenHands Stop Hook completion control;
+13. preserves the conversation/runtime state for analysis.
+
+SBRI is not a new lifecycle stage or upgrade selector. Its bounded summary is
+delivered before the first agent action, while full artifacts remain in the
+task state directory. Disable it with `--no-sbri` or `OPENHANDS_SBRI=0`. See
+`SBRI-INTEGRATION.md` for applicability, caching, failure and evidence details.
 
 The target naming convention is:
 
@@ -247,6 +253,8 @@ It captures, when available:
 - event manifest/hashes;
 - final target Git branch/HEAD/status;
 - final tracked diff and diff statistics.
+- applicable pre-edit SBRI execution metadata, bounded summary, canonical
+  JSON/HTML and operative Maven/scanner evidence, excluding generated caches.
 
 ### Observable trajectory coverage
 
