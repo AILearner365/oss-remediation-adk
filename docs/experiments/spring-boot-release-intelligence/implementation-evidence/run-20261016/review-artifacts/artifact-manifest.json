@@ -1,0 +1,41 @@
+{
+  "schema": "sbri-review-artifact-manifest-v1",
+  "retention_timestamp_utc": "2026-10-16",
+  "retention_mode": "REUSED_BYTE_FOR_BYTE",
+  "regenerated": false,
+  "execution_commit": "4d2f4d68923265164836c4360af75ddba6c9a20c",
+  "branch": "spring-boot-release-intelligence-feasibility",
+  "associated_validation_evidence": "../live-validation.json",
+  "associated_validation_evidence_sha256": "dca8bf1d592110f64b6e38ad986d313db0cd2738d052d88c9af5f1a8b8e698bf",
+  "evaluated_spring_boot_versions": [
+    "3.3.4",
+    "3.3.5",
+    "3.3.7",
+    "3.3.8"
+  ],
+  "scanner": {
+    "provider": "osv-scanner",
+    "version": "2.6.0",
+    "inventory_format": "CycloneDX 1.5"
+  },
+  "artifacts": [
+    {
+      "name": "result.json",
+      "original_location": "/tmp/sbri-live/result.json",
+      "preserved_location": "result.json",
+      "sha256": "1c8e3ad5c128d7153eebf33c9f5c9801a8c0fc67d4ba7882f2ed666f536758ee",
+      "bytes": 523885,
+      "reused": true,
+      "byte_comparison": "IDENTICAL"
+    },
+    {
+      "name": "report.html",
+      "original_location": "/tmp/sbri-live/report.html",
+      "preserved_location": "report.html",
+      "sha256": "1e70341716228371c4ecad1a5a3a7ed9b9df99173022de904bd785fe5b980073",
+      "bytes": 103888,
+      "reused": true,
+      "byte_comparison": "IDENTICAL"
+    }
+  ]
+}
