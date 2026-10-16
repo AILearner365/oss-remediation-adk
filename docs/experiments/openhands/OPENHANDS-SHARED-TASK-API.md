@@ -113,7 +113,7 @@ non-`none` delivery modes are rejected.
 
 ## Persistence and lifecycle invariants
 
-SQLite schema version 2 retains these Change 1 tables:
+SQLite schema version 3 retains these Change 1 tables:
 
 - `tasks`: canonical request and hash, unique idempotency key, current product
   status, separate OpenHands/validation/delivery states, optional immutable
@@ -126,6 +126,10 @@ SQLite schema version 2 retains these Change 1 tables:
 
 Change 2 adds immutable `preparations` metadata through a tested in-place
 schema migration; it does not change these HTTP response contracts.
+Change 3 adds immutable `baseline_assessments` metadata and registers its
+content-addressed evidence through the existing artifact endpoint. It adds no
+public execution route and does not change task registration or read response
+shapes.
 
 SQLite foreign keys, WAL mode, `BEGIN IMMEDIATE` write transactions, and a busy
 timeout support concurrent registration. Registration writes the task and its

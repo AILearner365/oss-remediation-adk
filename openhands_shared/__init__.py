@@ -1,10 +1,21 @@
-"""Shared OpenHands task metadata and deterministic preparation foundation.
+"""Shared OpenHands task, preparation and deterministic baseline foundation.
 
-M2 Changes 1 and 2 deliberately contain no worker or agent execution.
+M2 Changes 1 through 3 deliberately contain no agent execution.
 """
+
+from .baseline import (
+    BaselineConfig,
+    BaselineError,
+    BaselineProfile,
+    BaselineRunEvidence,
+    DeterministicBaselineAssessor,
+    ExistingDeterministicBaselineRunner,
+)
 
 from .contracts import (
     ArtifactMetadata,
+    BaselineAssessmentStatus,
+    BaselineRecord,
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
@@ -23,15 +34,29 @@ from .preparation import (
     PreparationError,
     TrustedRepository,
 )
-from .store import IdempotencyConflictError, PreparationConflictError, SQLiteTaskStore
+from .store import (
+    BaselineConflictError,
+    IdempotencyConflictError,
+    PreparationConflictError,
+    SQLiteTaskStore,
+)
 
 __all__ = [
     "ArtifactMetadata",
+    "BaselineAssessmentStatus",
+    "BaselineConfig",
+    "BaselineConflictError",
+    "BaselineError",
+    "BaselineProfile",
+    "BaselineRecord",
+    "BaselineRunEvidence",
     "ContractValidationError",
     "DeliveryStatus",
     "ExecutionStatus",
     "IdempotencyConflictError",
+    "DeterministicBaselineAssessor",
     "DeterministicPreparer",
+    "ExistingDeterministicBaselineRunner",
     "PreparationConfig",
     "PreparationConflictError",
     "PreparationError",

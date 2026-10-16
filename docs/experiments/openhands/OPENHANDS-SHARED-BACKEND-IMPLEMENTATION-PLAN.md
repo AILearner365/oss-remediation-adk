@@ -236,6 +236,10 @@ This is the recommended first M2 implementation change.
 
 ### Change 3 — baseline adapter and durable artifacts
 
+Implemented on `openhands-service-integration`; operational details and offline
+evidence are recorded in
+[OPENHANDS-SHARED-BASELINE.md](OPENHANDS-SHARED-BASELINE.md).
+
 - Likely files: `baseline.py`, artifact helper in `store.py`, deterministic
   fixture tests.
 - Move/reuse: `MavenService`, scanner, constraints, execution budget and

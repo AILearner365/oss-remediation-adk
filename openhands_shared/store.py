@@ -16,6 +16,8 @@ from typing import Any
 
 from .contracts import (
     ArtifactMetadata,
+    BaselineAssessmentStatus,
+    BaselineRecord,
     DeliveryStatus,
     ExecutionStatus,
     PreparationRecord,
@@ -30,7 +32,7 @@ from .contracts import (
 )
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class TaskStoreError(RuntimeError):
@@ -57,6 +59,10 @@ class ArtifactConflictError(TaskStoreError):
 
 
 class PreparationConflictError(TaskStoreError):
+    pass
+
+
+class BaselineConflictError(TaskStoreError):
     pass
 
 
@@ -213,6 +219,9 @@ class SQLiteTaskStore:
             if version == 1:
                 self._migrate_v1_to_v2(connection)
                 version = 2
+            if version == 2:
+                self._migrate_v2_to_v3(connection)
+                version = 3
             if version != SCHEMA_VERSION:
                 raise TaskStoreError(f"unsupported task database schema version {row['version']}")
         except BaseException:
@@ -261,6 +270,55 @@ class SQLiteTaskStore:
                 BEGIN SELECT RAISE(ABORT, 'preparation metadata is immutable'); END"""
             )
             connection.execute("UPDATE schema_info SET version = 2 WHERE singleton = 1")
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+
+    @staticmethod
+    def _migrate_v2_to_v3(connection: sqlite3.Connection) -> None:
+        """Add immutable baseline assessment metadata without rebuilding data."""
+
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            current = connection.execute(
+                "SELECT version FROM schema_info WHERE singleton = 1"
+            ).fetchone()["version"]
+            if current == 3:
+                connection.commit()
+                return
+            if current != 2:
+                raise TaskStoreError(f"cannot migrate task database schema version {current}")
+            connection.execute(
+                """CREATE TABLE baseline_assessments (
+                    task_id TEXT PRIMARY KEY REFERENCES tasks(task_id) ON DELETE RESTRICT,
+                    baseline_commit TEXT NOT NULL,
+                    assessment_status TEXT NOT NULL CHECK (
+                        assessment_status IN ('COMPLETED', 'NO_TARGET_FINDINGS', 'FAILED_BUILD', 'FAILED_SCANNER')
+                    ),
+                    build_succeeded INTEGER NOT NULL CHECK (build_succeeded IN (0, 1)),
+                    scanner_outcome TEXT NOT NULL,
+                    finding_count INTEGER NOT NULL CHECK (finding_count >= 0),
+                    report_artifact_id TEXT NOT NULL,
+                    report_sha256 TEXT NOT NULL,
+                    tool_versions_json TEXT NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    FOREIGN KEY (task_id, report_artifact_id)
+                        REFERENCES artifacts(task_id, artifact_id) ON DELETE RESTRICT
+                )"""
+            )
+            connection.execute(
+                """CREATE TRIGGER baseline_assessments_immutable_update
+                BEFORE UPDATE ON baseline_assessments
+                BEGIN SELECT RAISE(ABORT, 'baseline metadata is immutable'); END"""
+            )
+            connection.execute(
+                """CREATE TRIGGER baseline_assessments_immutable_delete
+                BEFORE DELETE ON baseline_assessments
+                BEGIN SELECT RAISE(ABORT, 'baseline metadata is immutable'); END"""
+            )
+            connection.execute("UPDATE schema_info SET version = 3 WHERE singleton = 1")
             connection.commit()
         except BaseException:
             if connection.in_transaction:
@@ -353,6 +411,18 @@ class SQLiteTaskStore:
                 (task_id,),
             ).fetchone()
             return None if row is None else self._preparation_from_row(row)
+        finally:
+            connection.close()
+
+    def get_baseline(self, task_id: str) -> BaselineRecord | None:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM baseline_assessments WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            return None if row is None else self._baseline_from_row(row)
         finally:
             connection.close()
 
@@ -481,6 +551,131 @@ class SQLiteTaskStore:
             raise PreparationConflictError(
                 "preparation metadata could not be committed atomically"
             ) from exc
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def complete_baseline(
+        self,
+        baseline: BaselineRecord,
+        artifacts: tuple[ArtifactMetadata, ...],
+    ) -> TaskStatusSnapshot:
+        """Atomically register evidence and finish the BASELINING stage."""
+
+        target_status = {
+            BaselineAssessmentStatus.COMPLETED: TaskStatus.INTELLIGENCE,
+            BaselineAssessmentStatus.NO_TARGET_FINDINGS: TaskStatus.FAILED_VALIDATION,
+            BaselineAssessmentStatus.FAILED_BUILD: TaskStatus.FAILED_VALIDATION,
+            BaselineAssessmentStatus.FAILED_SCANNER: TaskStatus.FAILED_INFRASTRUCTURE,
+        }[baseline.assessment_status]
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, baseline.task_id)
+            preparation_row = connection.execute(
+                "SELECT * FROM preparations WHERE task_id = ?", (baseline.task_id,)
+            ).fetchone()
+            if preparation_row is None:
+                raise BaselineConflictError("baseline requires immutable preparation metadata")
+            preparation = self._preparation_from_row(preparation_row)
+            if baseline.baseline_commit != preparation.baseline_commit:
+                raise BaselineConflictError("baseline commit differs from immutable preparation")
+            existing = connection.execute(
+                "SELECT * FROM baseline_assessments WHERE task_id = ?", (baseline.task_id,)
+            ).fetchone()
+            if existing is not None:
+                if self._baseline_from_row(existing) != baseline:
+                    raise BaselineConflictError("baseline metadata is immutable")
+                status = self._status_from_row(task)
+                if status.status is not target_status:
+                    raise BaselineConflictError("baseline metadata and task status disagree")
+                connection.commit()
+                return status
+            if TaskStatus(task["status"]) is not TaskStatus.BASELINING:
+                raise InvalidTransitionError("baseline can complete only while the task is BASELINING")
+            if not artifacts:
+                raise BaselineConflictError("baseline completion requires artifact metadata")
+            report_artifacts = [item for item in artifacts if item.artifact_id == baseline.report_artifact_id]
+            if (
+                len(report_artifacts) != 1
+                or report_artifacts[0].task_id != baseline.task_id
+                or report_artifacts[0].sha256 != baseline.report_sha256
+            ):
+                raise BaselineConflictError("baseline report artifact does not match baseline metadata")
+            for artifact in artifacts:
+                if artifact.task_id != baseline.task_id:
+                    raise BaselineConflictError("baseline artifact belongs to another task")
+                try:
+                    connection.execute(
+                        """INSERT INTO artifacts(
+                            task_id, artifact_id, kind, relative_path, media_type,
+                            sha256, size_bytes, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            artifact.task_id,
+                            artifact.artifact_id,
+                            artifact.kind,
+                            artifact.relative_path,
+                            artifact.media_type,
+                            artifact.sha256,
+                            artifact.size_bytes,
+                            artifact.created_at,
+                        ),
+                    )
+                except sqlite3.IntegrityError as exc:
+                    raise BaselineConflictError("baseline artifact metadata conflicts with existing data") from exc
+            connection.execute(
+                """INSERT INTO baseline_assessments(
+                    task_id, baseline_commit, assessment_status, build_succeeded,
+                    scanner_outcome, finding_count, report_artifact_id,
+                    report_sha256, tool_versions_json, completed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    baseline.task_id,
+                    baseline.baseline_commit,
+                    baseline.assessment_status.value,
+                    int(baseline.build_succeeded),
+                    baseline.scanner_outcome,
+                    baseline.finding_count,
+                    baseline.report_artifact_id,
+                    baseline.report_sha256,
+                    canonical_json(dict(baseline.tool_versions)),
+                    baseline.completed_at,
+                ),
+            )
+            connection.execute(
+                "UPDATE tasks SET status = ?, stage = ?, updated_at = ? WHERE task_id = ?",
+                (
+                    target_status.value,
+                    _STATUS_STAGE[target_status],
+                    baseline.completed_at,
+                    baseline.task_id,
+                ),
+            )
+            event_type = (
+                "baseline.completed"
+                if baseline.assessment_status is BaselineAssessmentStatus.COMPLETED
+                else "baseline.failed"
+            )
+            self._append_event(
+                connection,
+                task_id=baseline.task_id,
+                event_type=event_type,
+                stage=_STATUS_STAGE[TaskStatus.BASELINING],
+                data={
+                    "assessmentStatus": baseline.assessment_status.value,
+                    "baselineCommit": baseline.baseline_commit,
+                    "reportArtifactId": baseline.report_artifact_id,
+                    "scannerOutcome": baseline.scanner_outcome,
+                },
+                timestamp=baseline.completed_at,
+            )
+            status = self._status_from_row(self._task_row(connection, baseline.task_id))
+            connection.commit()
+            return status
         except BaseException:
             if connection.in_transaction:
                 connection.rollback()
@@ -798,4 +993,19 @@ class SQLiteTaskStore:
             workspace_path=row["workspace_path"],
             local_branch=row["local_branch"],
             prepared_at=row["prepared_at"],
+        )
+
+    @staticmethod
+    def _baseline_from_row(row: sqlite3.Row) -> BaselineRecord:
+        return BaselineRecord(
+            task_id=row["task_id"],
+            baseline_commit=row["baseline_commit"],
+            assessment_status=BaselineAssessmentStatus(row["assessment_status"]),
+            build_succeeded=bool(row["build_succeeded"]),
+            scanner_outcome=row["scanner_outcome"],
+            finding_count=row["finding_count"],
+            report_artifact_id=row["report_artifact_id"],
+            report_sha256=row["report_sha256"],
+            tool_versions=json.loads(row["tool_versions_json"]),
+            completed_at=row["completed_at"],
         )

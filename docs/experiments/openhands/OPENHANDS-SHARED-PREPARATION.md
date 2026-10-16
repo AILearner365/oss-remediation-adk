@@ -137,3 +137,9 @@ locking; the non-POSIX fallback is process-local and must be strengthened before
 a multi-process Windows deployment. Change 2 intentionally has no private-remote
 credential adapter; an approved read-only repository identity mechanism is
 required before refreshing a private HTTPS origin in deployment.
+
+M2 Change 3 consumes this immutable record through the internal baseline
+adapter documented in
+[OPENHANDS-SHARED-BASELINE.md](OPENHANDS-SHARED-BASELINE.md). Its exact-commit
+and clean-worktree checks remain baseline-entry requirements; later stages use
+a separate identity rule for authorized agent modifications.

@@ -104,6 +104,13 @@ class ResultOutcome(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class BaselineAssessmentStatus(str, Enum):
+    COMPLETED = "COMPLETED"
+    NO_TARGET_FINDINGS = "NO_TARGET_FINDINGS"
+    FAILED_BUILD = "FAILED_BUILD"
+    FAILED_SCANNER = "FAILED_SCANNER"
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
@@ -481,6 +488,91 @@ class PreparationRecord:
             "workspacePath": self.workspace_path,
             "localBranch": self.local_branch,
             "preparedAt": self.prepared_at,
+        }
+
+
+@dataclass(frozen=True)
+class BaselineRecord:
+    """Immutable summary of a durable deterministic baseline assessment."""
+
+    task_id: str
+    baseline_commit: str
+    assessment_status: BaselineAssessmentStatus
+    build_succeeded: bool
+    scanner_outcome: str
+    finding_count: int
+    report_artifact_id: str
+    report_sha256: str
+    tool_versions: Mapping[str, Any]
+    completed_at: str
+    contract_version: str = CONTRACT_VERSION
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "baseline.taskId", maximum=128, pattern=IDENTIFIER)
+        object.__setattr__(
+            self,
+            "baseline_commit",
+            _string(self.baseline_commit, "baseline.baselineCommit", maximum=40, pattern=FULL_GIT_SHA).lower(),
+        )
+        if not isinstance(self.assessment_status, BaselineAssessmentStatus):
+            raise ContractValidationError("baseline.assessmentStatus is invalid")
+        if not isinstance(self.build_succeeded, bool):
+            raise ContractValidationError("baseline.buildSucceeded must be a boolean")
+        _string(self.scanner_outcome, "baseline.scannerOutcome", maximum=64, pattern=IDENTIFIER)
+        if isinstance(self.finding_count, bool) or not isinstance(self.finding_count, int) or self.finding_count < 0:
+            raise ContractValidationError("baseline.findingCount must be a non-negative integer")
+        _string(self.report_artifact_id, "baseline.reportArtifactId", maximum=128, pattern=IDENTIFIER)
+        _string(self.report_sha256, "baseline.reportSha256", maximum=64, pattern=SHA256)
+        object.__setattr__(
+            self,
+            "tool_versions",
+            MappingProxyType(_json_data(self.tool_versions, "baseline.toolVersions")),
+        )
+        _timestamp(self.completed_at, "baseline.completedAt")
+        if self.contract_version != CONTRACT_VERSION:
+            raise ContractValidationError("baseline.contractVersion is unsupported")
+        if self.assessment_status is BaselineAssessmentStatus.COMPLETED:
+            if (
+                not self.build_succeeded
+                or self.scanner_outcome != "COMPLETED_WITH_FINDINGS"
+                or self.finding_count < 1
+            ):
+                raise ContractValidationError(
+                    "completed baseline requires successful build, complete scan, and findings"
+                )
+        elif self.assessment_status is BaselineAssessmentStatus.NO_TARGET_FINDINGS:
+            if (
+                not self.build_succeeded
+                or self.scanner_outcome != "COMPLETED_CLEAN"
+                or self.finding_count != 0
+            ):
+                raise ContractValidationError(
+                    "no-findings baseline requires successful build and a complete clean scan"
+                )
+        elif self.assessment_status is BaselineAssessmentStatus.FAILED_BUILD:
+            if self.build_succeeded or self.scanner_outcome != "NOT_RUN" or self.finding_count != 0:
+                raise ContractValidationError(
+                    "failed-build baseline requires failed build and scanner not run"
+                )
+        elif self.assessment_status is BaselineAssessmentStatus.FAILED_SCANNER:
+            if self.scanner_outcome.startswith("COMPLETED_") or self.finding_count != 0:
+                raise ContractValidationError(
+                    "failed-scanner baseline requires an incomplete scanner outcome"
+                )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "contractVersion": self.contract_version,
+            "taskId": self.task_id,
+            "baselineCommit": self.baseline_commit,
+            "assessmentStatus": self.assessment_status.value,
+            "buildSucceeded": self.build_succeeded,
+            "scannerOutcome": self.scanner_outcome,
+            "findingCount": self.finding_count,
+            "reportArtifactId": self.report_artifact_id,
+            "reportSha256": self.report_sha256,
+            "toolVersions": dict(self.tool_versions),
+            "completedAt": self.completed_at,
         }
 
 

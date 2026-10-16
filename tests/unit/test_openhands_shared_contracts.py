@@ -4,6 +4,8 @@ import unittest
 
 from openhands_shared.contracts import (
     ArtifactMetadata,
+    BaselineAssessmentStatus,
+    BaselineRecord,
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
@@ -139,6 +141,30 @@ class SharedContractTests(unittest.TestCase):
                 **{
                     **record.__dict__,
                     "workspace_path": "relative/repository",
+                }
+            )
+
+    def test_baseline_contract_serializes_and_rejects_false_completion(self):
+        record = BaselineRecord(
+            task_id="task_" + "1" * 32,
+            baseline_commit="a" * 40,
+            assessment_status=BaselineAssessmentStatus.COMPLETED,
+            build_succeeded=True,
+            scanner_outcome="COMPLETED_WITH_FINDINGS",
+            finding_count=2,
+            report_artifact_id="baseline-report",
+            report_sha256="b" * 64,
+            tool_versions={"scanner": {"version": "2.6.0"}},
+            completed_at="2026-10-16T00:01:00.000Z",
+        )
+        self.assertEqual("COMPLETED", record.to_dict()["assessmentStatus"])
+        self.assertEqual(2, record.to_dict()["findingCount"])
+
+        with self.assertRaisesRegex(ContractValidationError, "successful build"):
+            BaselineRecord(
+                **{
+                    **record.__dict__,
+                    "build_succeeded": False,
                 }
             )
 
