@@ -521,7 +521,7 @@ class SharedIntelligenceSchemaMigrationTests(unittest.TestCase):
                 self.assertEqual(task_id, reopened.get_status(task_id).task_id)
                 self.assertIsNone(reopened.get_intelligence(task_id))
                 with sqlite3.connect(database) as check:
-                    self.assertEqual(5, check.execute("SELECT version FROM schema_info").fetchone()[0])
+                    self.assertEqual(6, check.execute("SELECT version FROM schema_info").fetchone()[0])
             finally:
                 reopened.close()
 

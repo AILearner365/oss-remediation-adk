@@ -1,7 +1,4 @@
-"""Shared OpenHands task lifecycle foundation through M2 Change 5.
-
-Change 5 provisions native conversations but deliberately cannot execute them.
-"""
+"""Shared OpenHands task lifecycle foundation through M2 Change 6."""
 
 from .baseline import (
     BaselineConfig,
@@ -19,6 +16,8 @@ from .contracts import (
     ContractValidationError,
     DeliveryStatus,
     ExecutionStatus,
+    ExecutionClaimRecord,
+    ExecutionDispatchStatus,
     IntelligenceOutcome,
     IntelligenceRecord,
     OpenHandsEventLink,
@@ -32,6 +31,10 @@ from .contracts import (
     TaskStatus,
     TaskStatusSnapshot,
     ValidationStatus,
+    ValidationAttemptRecord,
+    ValidationAttemptState,
+    ValidationOutcome,
+    StopHookDecision,
 )
 from .intelligence import (
     ExistingSbriRunner,
@@ -65,6 +68,20 @@ from .store import (
     OpenHandsRuntimeConflictError,
     PreparationConflictError,
     SQLiteTaskStore,
+    ExecutionClaimConflictError,
+    ValidationConflictError,
+)
+from .validation import (
+    ExistingDeterministicValidationRunner,
+    SharedValidationService,
+    SharedValidationError,
+    StopHookResponse,
+    ValidationConfig,
+    ValidationConfigurationError,
+    ValidationIdentityError,
+    ValidationInfrastructureError,
+    ValidationProfile,
+    ValidationRecoveryRequiredError,
 )
 
 __all__ = [
@@ -79,6 +96,9 @@ __all__ = [
     "ContractValidationError",
     "DeliveryStatus",
     "ExecutionStatus",
+    "ExecutionClaimRecord",
+    "ExecutionDispatchStatus",
+    "ExecutionClaimConflictError",
     "ExistingSbriRunner",
     "IdempotencyConflictError",
     "IntelligenceConfig",
@@ -118,4 +138,19 @@ __all__ = [
     "TaskStatusSnapshot",
     "TrustedRepository",
     "ValidationStatus",
+    "ValidationAttemptRecord",
+    "ValidationAttemptState",
+    "ValidationOutcome",
+    "StopHookDecision",
+    "ValidationConflictError",
+    "ExistingDeterministicValidationRunner",
+    "SharedValidationService",
+    "SharedValidationError",
+    "StopHookResponse",
+    "ValidationConfig",
+    "ValidationConfigurationError",
+    "ValidationIdentityError",
+    "ValidationInfrastructureError",
+    "ValidationProfile",
+    "ValidationRecoveryRequiredError",
 ]

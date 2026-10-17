@@ -113,7 +113,7 @@ non-`none` delivery modes are rejected.
 
 ## Persistence and lifecycle invariants
 
-SQLite schema version 5 retains these Change 1 tables:
+SQLite schema version 6 retains these Change 1 tables:
 
 - `tasks`: canonical request and hash, unique idempotency key, current product
   status, separate OpenHands/validation/delivery states, optional immutable
@@ -137,6 +137,11 @@ Change 5 adds native conversation association and bounded event-link metadata.
 The trusted internal operation is documented in
 [OPENHANDS-SHARED-AGENT-SERVER.md](OPENHANDS-SHARED-AGENT-SERVER.md). Task
 registration still cannot provision or run a conversation.
+Change 6 adds durable `execution_claims` and `validation_attempts`. A trusted
+internal worker may invoke the guarded native execution and Stop Hook adapter,
+but no public execution endpoint was added and `POST /v1/tasks` remains
+registration-only. See
+[OPENHANDS-SHARED-VALIDATION.md](OPENHANDS-SHARED-VALIDATION.md).
 
 SQLite foreign keys, WAL mode, `BEGIN IMMEDIATE` write transactions, and a busy
 timeout support concurrent registration. Registration writes the task and its

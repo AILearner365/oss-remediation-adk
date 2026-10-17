@@ -124,11 +124,12 @@ SBRI is never rerun by this adapter.
 
 The request attaches a native `HookConfig.stop` command from deployment-owned
 configuration. Placeholder success commands are rejected and the effective
-command hash is part of the profile fingerprint. This proves native request
-wiring only; the shared validator and denial/resume behavior are not implemented
-until Change 6.
+command hash is part of the profile fingerprint. Change 5 proved native request
+wiring only. Change 6 now supplies the shared validator, denial/resume policy,
+execution ownership and controlled `/run` boundary described in
+[OPENHANDS-SHARED-VALIDATION.md](OPENHANDS-SHARED-VALIDATION.md).
 
-Consequently Change 5 exposes no execution-start operation. Conversation
+Change 5 itself exposes no execution-start operation. Conversation
 creation and context attachment leave both native execution and product
 execution `NOT_STARTED`. A native status other than `idle` is an identity/
 recovery error. Native `finished` never changes validation to `PASSED`, never
@@ -187,12 +188,11 @@ conversation recovery, response loss before SQLite commit, message uncertainty,
 event ordering, payload non-copying, database restart/migration, credential
 isolation, missing/incompatible servers, dirty post-agent workspaces and the
 unvalidated-completion boundary. Existing shared-backend and Gate-2 regression
-tests remain unchanged except schema-version expectations advancing from 4 to 5.
+tests remain unchanged except later schema-version expectations advancing to 6.
 
 No deterministic no-model native-server test was added because the pinned
 packages are inspected but not installed in the repository test environment.
-Before operational execution, Change 6 must package and prove the complete
-validator/Stop Hook denial-resume contract. Deployment must also provide a
-fully locked 1.50.0 image and durable native persistence. Until then, the
-conversation is useful for native identity/Canvas monitoring only and cannot
-run.
+Change 6 packages the command boundary and proves the validator/Stop Hook
+policy with a pinned-shape fake server, but deployment must still provide a
+fully locked 1.50.0 image and durable native persistence and must prove the
+real no-model command-hook transport before operational execution.

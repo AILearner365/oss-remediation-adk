@@ -131,6 +131,29 @@ class OpenHandsRuntimeStatus(str, Enum):
     RECOVERY_REQUIRED = "RECOVERY_REQUIRED"
 
 
+class ExecutionDispatchStatus(str, Enum):
+    INTENT_RECORDED = "INTENT_RECORDED"
+    DISPATCHED = "DISPATCHED"
+    RECOVERY_REQUIRED = "RECOVERY_REQUIRED"
+
+
+class ValidationAttemptState(str, Enum):
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+
+
+class ValidationOutcome(str, Enum):
+    PASS = "PASS"
+    REMEDIATION_FAILURE = "REMEDIATION_FAILURE"
+    INFRASTRUCTURE_FAILURE = "INFRASTRUCTURE_FAILURE"
+    VALIDATOR_FAILURE = "VALIDATOR_FAILURE"
+
+
+class StopHookDecision(str, Enum):
+    ALLOW = "ALLOW"
+    DENY = "DENY"
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
@@ -937,6 +960,126 @@ class OpenHandsEventLink:
             "nativeTimestamp": self.native_timestamp,
             "observedAt": self.observed_at,
         }
+
+
+@dataclass(frozen=True)
+class ExecutionClaimRecord:
+    """Durable single-dispatch ownership for one native conversation run."""
+
+    task_id: str
+    conversation_id: str
+    worker_id: str
+    claim_token: str
+    dispatch_status: ExecutionDispatchStatus
+    intent_recorded_at: str
+    dispatched_at: str | None
+    recovery_code: str | None
+    updated_at: str
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "executionClaim.taskId", maximum=128, pattern=IDENTIFIER)
+        try:
+            UUID(self.conversation_id)
+        except (TypeError, ValueError) as exc:
+            raise ContractValidationError("executionClaim.conversationId must be a UUID") from exc
+        _string(self.worker_id, "executionClaim.workerId", maximum=128, pattern=IDENTIFIER)
+        _string(self.claim_token, "executionClaim.claimToken", maximum=128, pattern=IDENTIFIER)
+        if not isinstance(self.dispatch_status, ExecutionDispatchStatus):
+            raise ContractValidationError("executionClaim.dispatchStatus is invalid")
+        _timestamp(self.intent_recorded_at, "executionClaim.intentRecordedAt")
+        _timestamp(self.updated_at, "executionClaim.updatedAt")
+        if self.dispatched_at is not None:
+            _timestamp(self.dispatched_at, "executionClaim.dispatchedAt")
+        if self.recovery_code is not None:
+            _string(self.recovery_code, "executionClaim.recoveryCode", maximum=128, pattern=IDENTIFIER)
+        if self.dispatch_status is ExecutionDispatchStatus.DISPATCHED:
+            if self.dispatched_at is None or self.recovery_code is not None:
+                raise ContractValidationError("dispatched execution claim has inconsistent metadata")
+        elif self.dispatch_status is ExecutionDispatchStatus.RECOVERY_REQUIRED:
+            if self.recovery_code is None:
+                raise ContractValidationError("recovery execution claim requires a code")
+        elif self.dispatched_at is not None or self.recovery_code is not None:
+            raise ContractValidationError("execution intent cannot claim dispatch or recovery")
+
+
+@dataclass(frozen=True)
+class ValidationAttemptRecord:
+    """Durable independent validation verdict and exact repository identity."""
+
+    task_id: str
+    attempt: int
+    state: ValidationAttemptState
+    outcome: ValidationOutcome | None
+    hook_decision: StopHookDecision | None
+    report_artifact_id: str | None
+    report_sha256: str | None
+    validated_head: str | None
+    validated_tree: str | None
+    repository_state_sha256: str | None
+    original_finding_count: int | None
+    resolved_finding_count: int | None
+    remaining_finding_count: int | None
+    unknown_finding_count: int | None
+    new_prohibited_finding_count: int | None
+    constraints_passed: bool | None
+    bounded_feedback: str | None
+    conversation_id: str
+    native_hook_event_id: str | None
+    started_at: str
+    completed_at: str | None
+
+    def __post_init__(self) -> None:
+        _string(self.task_id, "validationAttempt.taskId", maximum=128, pattern=IDENTIFIER)
+        if isinstance(self.attempt, bool) or not isinstance(self.attempt, int) or self.attempt < 1:
+            raise ContractValidationError("validationAttempt.attempt must be positive")
+        try:
+            UUID(self.conversation_id)
+        except (TypeError, ValueError) as exc:
+            raise ContractValidationError("validationAttempt.conversationId must be a UUID") from exc
+        _timestamp(self.started_at, "validationAttempt.startedAt")
+        if self.native_hook_event_id is not None:
+            _string(self.native_hook_event_id, "validationAttempt.nativeHookEventId", maximum=128, pattern=IDENTIFIER)
+        counts = (
+            self.original_finding_count,
+            self.resolved_finding_count,
+            self.remaining_finding_count,
+            self.unknown_finding_count,
+            self.new_prohibited_finding_count,
+        )
+        if any(value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 0) for value in counts):
+            raise ContractValidationError("validation attempt finding counts must be non-negative")
+        if self.bounded_feedback is not None:
+            _string(self.bounded_feedback, "validationAttempt.boundedFeedback", maximum=4000)
+            reject_sensitive_input(self.bounded_feedback, "validationAttempt.boundedFeedback")
+        if self.state is ValidationAttemptState.RUNNING:
+            if any(value is not None for value in (
+                self.outcome, self.hook_decision, self.report_artifact_id,
+                self.report_sha256, self.validated_head, self.validated_tree,
+                self.repository_state_sha256, self.completed_at,
+            )):
+                raise ContractValidationError("running validation attempt cannot contain a verdict")
+            return
+        if self.state is not ValidationAttemptState.COMPLETED:
+            raise ContractValidationError("validationAttempt.state is invalid")
+        if self.outcome is None or self.hook_decision is None or self.completed_at is None:
+            raise ContractValidationError("completed validation attempt requires a verdict")
+        _timestamp(self.completed_at, "validationAttempt.completedAt")
+        for value, path, pattern in (
+            (self.report_artifact_id, "validationAttempt.reportArtifactId", IDENTIFIER),
+            (self.report_sha256, "validationAttempt.reportSha256", SHA256),
+            (self.validated_head, "validationAttempt.validatedHead", FULL_GIT_SHA),
+            (self.validated_tree, "validationAttempt.validatedTree", FULL_GIT_SHA),
+            (self.repository_state_sha256, "validationAttempt.repositoryStateSha256", SHA256),
+        ):
+            if value is None:
+                raise ContractValidationError(f"{path} is required")
+            _string(value, path, maximum=128, pattern=pattern)
+        if self.constraints_passed is None or any(value is None for value in counts):
+            raise ContractValidationError("completed validation attempt requires complete coverage metadata")
+        if self.outcome is ValidationOutcome.PASS and self.hook_decision is not StopHookDecision.ALLOW:
+            raise ContractValidationError("validation PASS must ALLOW stopping")
+        if self.outcome is not ValidationOutcome.PASS and self.hook_decision is StopHookDecision.DENY and not self.bounded_feedback:
+            raise ContractValidationError("validation DENY requires bounded feedback")
 
 
 @dataclass(frozen=True)

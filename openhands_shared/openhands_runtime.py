@@ -1,8 +1,7 @@
 """Fail-closed adapter for pinned OpenHands Agent Server 1.50.0.
 
-This component provisions a native conversation and attaches task context as a
-non-running native user event.  It deliberately has no operation that invokes
-``/run``: shared validator/Stop Hook parity belongs to M2 Change 6.
+This component provisions a native conversation, attaches task context, and
+provides the Change 6 controlled execution-start boundary.
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ from .contracts import (
     utc_now,
 )
 from .preparation import GitCommandError, GitRunner
-from .store import InvalidTransitionError, SQLiteTaskStore
+from .store import ExecutionClaimConflictError, InvalidTransitionError, SQLiteTaskStore
 
 
 PINNED_AGENT_SERVER_VERSION = "1.50.0"
@@ -100,6 +99,8 @@ class AgentServerTransport(Protocol):
         body: str | None = None,
     ) -> Mapping[str, Any]: ...
 
+    def run_conversation(self, conversation_id: str) -> None: ...
+
 
 class HttpAgentServerTransport:
     """Standard-library client whose auth headers never enter task payloads."""
@@ -163,6 +164,9 @@ class HttpAgentServerTransport:
             + urllib.parse.urlencode(query),
         )
 
+    def run_conversation(self, conversation_id: str) -> None:
+        self._request("POST", f"/api/conversations/{conversation_id}/run")
+
     def _request(
         self, method: str, path: str, *, payload: Mapping[str, Any] | None = None
     ) -> Mapping[str, Any]:
@@ -215,6 +219,7 @@ class OpenHandsAgentProfile:
     guidance_files: tuple[Path, ...]
     stop_hook_argv: tuple[str, ...]
     stop_hook_timeout_seconds: int = 1800
+    stop_hook_sha256: str | None = None
 
     def __post_init__(self) -> None:
         try:
@@ -262,6 +267,11 @@ class OpenHandsAgentProfile:
             )
         if not 1 <= self.stop_hook_timeout_seconds <= 3600:
             raise RuntimeConfigurationError("Stop Hook timeout is outside the approved bound")
+        if self.stop_hook_sha256 is not None and (
+            len(self.stop_hook_sha256) != 64
+            or any(character not in "0123456789abcdef" for character in self.stop_hook_sha256)
+        ):
+            raise RuntimeConfigurationError("Stop Hook executable SHA-256 is invalid")
 
 
 @dataclass(frozen=True)
@@ -296,7 +306,7 @@ class OpenHandsRuntimeConfig:
 
 
 class SharedOpenHandsRuntime:
-    """Provision and reconcile native conversations without executing them."""
+    """Provision native conversations and guard the single native run dispatch."""
 
     def __init__(
         self,
@@ -498,6 +508,139 @@ class SharedOpenHandsRuntime:
             self.store.link_openhands_event(link)
             existing.add(event_id)
         return self.store.list_openhands_event_links(task_id)
+
+    def start_execution(self, task_id: str, *, worker_id: str) -> OpenHandsRuntimeRecord:
+        """Claim once, record intent, then invoke native ``/run`` at most once."""
+
+        with self._task_lock(task_id):
+            runtime = self.store.get_openhands_runtime(task_id)
+            if runtime is None or runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED:
+                raise InvalidTransitionError("execution requires a context-attached native conversation")
+            existing_claim = self.store.get_execution_claim(task_id)
+            if existing_claim is not None:
+                if existing_claim.worker_id != worker_id:
+                    raise ExecutionClaimConflictError("task is already owned by another worker")
+                return self._reconcile_execution_claim(runtime, existing_claim)
+            request = self.store.get_request(task_id)
+            preparation, baseline, _intelligence, _summary = self._verified_inputs(task_id, request)
+            workspace = self._verify_workspace(request, preparation, allow_agent_changes=False)
+            profile = self.config.profile_for(request)
+            guidance, guidance_hashes = self._load_guidance(profile)
+            hook_command = self._hook_command(profile, task_id, workspace)
+            executable = Path(profile.stop_hook_argv[0])
+            if executable.is_symlink() or not executable.is_file() or not executable.stat().st_mode & 0o111:
+                raise RuntimeConfigurationError("configured Stop Hook executable is not installed and executable")
+            if profile.stop_hook_sha256 is None or _sha256(executable.read_bytes()) != profile.stop_hook_sha256:
+                raise RuntimeConfigurationError("Stop Hook executable differs from its approved SHA-256")
+            if task_id not in hook_command or str(workspace) not in hook_command:
+                raise RuntimeConfigurationError("Stop Hook command lacks durable task/workspace binding")
+            try:
+                config_index = profile.stop_hook_argv.index("--config") + 1
+                config_path = Path(profile.stop_hook_argv[config_index])
+            except (ValueError, IndexError) as exc:
+                raise RuntimeConfigurationError("Stop Hook command lacks deployment configuration") from exc
+            if not config_path.is_absolute() or config_path.is_symlink() or not config_path.is_file():
+                raise RuntimeConfigurationError("Stop Hook deployment configuration is unavailable")
+            from .stop_hook import load_stop_hook_config
+            try:
+                hook_database, validation_config = load_stop_hook_config(config_path)
+                validation_profile = validation_config.profile_for(request)
+            except Exception as exc:
+                raise RuntimeConfigurationError("Stop Hook deployment configuration is invalid") from exc
+            if (
+                hook_database != self.store.database_path.resolve()
+                or validation_config.artifact_root != self.config.artifact_root
+                or validation_profile.build_commands != request.acceptance.build_commands
+            ):
+                raise RuntimeConfigurationError("Stop Hook configuration differs from durable task service")
+            profile_fingerprint = self._profile_fingerprint(
+                profile, guidance_hashes, hook_command, request.agent.max_iterations
+            )
+            payload = self._conversation_request(
+                task_id=task_id,
+                conversation_id=runtime.conversation_id,
+                workspace=workspace,
+                request=request,
+                profile=profile,
+                guidance=guidance,
+                hook_command=hook_command,
+                profile_fingerprint=profile_fingerprint,
+            )
+            if _sha256(canonical_json(payload).encode("utf-8")) != runtime.request_fingerprint:
+                raise RuntimeIdentityError("native execution request differs from the provisioned identity")
+            conversation = self.transport.get_conversation(runtime.conversation_id)
+            if conversation is None:
+                raise RuntimeRecoveryRequiredError("native conversation is unavailable")
+            self._verify_conversation(
+                conversation,
+                payload=payload,
+                profile=profile,
+                guidance=guidance,
+                require_idle=True,
+            )
+            marker = self._context_marker(task_id, runtime.request_fingerprint)
+            if self._find_context_event(runtime.conversation_id, marker) is None:
+                raise RuntimeRecoveryRequiredError("expected task context event is missing")
+
+            claim = self.store.claim_execution(task_id, worker_id)
+            try:
+                self.transport.run_conversation(runtime.conversation_id)
+            except AgentServerUnavailableError as exc:
+                try:
+                    conversation = self.transport.get_conversation(runtime.conversation_id)
+                except AgentServerUnavailableError:
+                    conversation = None
+                native_status = None if conversation is None else conversation.get("execution_status")
+                if native_status in {"running", "finished"}:
+                    self.store.update_execution_dispatch(task_id, dispatched=True)
+                    return self.store.get_openhands_runtime(task_id) or runtime
+                self.store.update_execution_dispatch(
+                    task_id, dispatched=False, recovery_code="RUN_RESPONSE_UNCERTAIN"
+                )
+                raise RuntimeRecoveryRequiredError(
+                    "native /run outcome is uncertain; automatic redispatch is disabled"
+                ) from exc
+            self.store.update_execution_dispatch(task_id, dispatched=True)
+            return self.store.get_openhands_runtime(task_id) or runtime
+
+    def _reconcile_execution_claim(self, runtime: OpenHandsRuntimeRecord, claim: Any) -> OpenHandsRuntimeRecord:
+        if claim.dispatch_status.value == "DISPATCHED":
+            return runtime
+        if claim.dispatch_status.value == "RECOVERY_REQUIRED":
+            raise RuntimeRecoveryRequiredError("native execution dispatch requires operator recovery")
+        try:
+            conversation = self.transport.get_conversation(runtime.conversation_id)
+        except AgentServerUnavailableError:
+            conversation = None
+        native_status = None if conversation is None else conversation.get("execution_status")
+        if native_status in {"running", "finished"}:
+            self.store.update_execution_dispatch(runtime.task_id, dispatched=True)
+            return self.store.get_openhands_runtime(runtime.task_id) or runtime
+        self.store.update_execution_dispatch(
+            runtime.task_id, dispatched=False, recovery_code="RUN_INTENT_UNCERTAIN"
+        )
+        raise RuntimeRecoveryRequiredError(
+            "execution intent exists without observable dispatch; automatic /run is disabled"
+        )
+
+    def reconcile_execution(self, task_id: str) -> Any:
+        """Project native terminal state while preserving independent acceptance."""
+
+        runtime = self.store.get_openhands_runtime(task_id)
+        claim = self.store.get_execution_claim(task_id)
+        if runtime is None or claim is None:
+            raise InvalidTransitionError("task has no claimed native execution")
+        conversation = self.transport.get_conversation(runtime.conversation_id)
+        if conversation is None:
+            raise RuntimeRecoveryRequiredError("native conversation is unavailable")
+        status = conversation.get("execution_status")
+        if status == "finished":
+            return self.store.record_native_execution_terminal(task_id, completed=True)
+        if status in {"error", "failed"}:
+            return self.store.record_native_execution_terminal(task_id, completed=False)
+        if status in {"running", "paused", "idle"}:
+            return self.store.get_status(task_id)
+        raise AgentServerCompatibilityError("native execution status is unsupported")
 
     def _reconcile_recovery(self, runtime: OpenHandsRuntimeRecord) -> OpenHandsRuntimeRecord:
         if runtime.failure_code not in {
@@ -763,8 +906,9 @@ class SharedOpenHandsRuntime:
                     "stopHookCommandSha256": _sha256(hook_command.encode("utf-8")),
                     "stopHookTimeout": profile.stop_hook_timeout_seconds,
                     "maxIterations": max_iterations,
-                    "validatorParity": False,
-                    "executionEnabled": False,
+                    "stopHookExecutableSha256": profile.stop_hook_sha256,
+                    "validatorParity": profile.stop_hook_sha256 is not None,
+                    "executionEnabled": profile.stop_hook_sha256 is not None,
                 }
             ).encode("utf-8")
         )
@@ -868,11 +1012,16 @@ class SharedOpenHandsRuntime:
         payload: Mapping[str, Any],
         profile: OpenHandsAgentProfile,
         guidance: str,
+        require_idle: bool = True,
     ) -> None:
         if conversation.get("id") != payload["conversation_id"]:
             raise RuntimeIdentityError("native conversation id differs from deterministic id")
-        if conversation.get("execution_status") != "idle":
+        if require_idle and conversation.get("execution_status") != "idle":
             raise RuntimeIdentityError("native conversation is not idle/non-running")
+        if not require_idle and conversation.get("execution_status") not in {
+            "idle", "running", "paused", "finished", "error", "failed"
+        }:
+            raise RuntimeIdentityError("native conversation execution status is unsupported")
         workspace = conversation.get("workspace")
         if not isinstance(workspace, Mapping) or (
             workspace.get("working_dir") != payload["workspace"]["working_dir"]

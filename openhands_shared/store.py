@@ -19,6 +19,8 @@ from .contracts import (
     BaselineAssessmentStatus,
     BaselineRecord,
     DeliveryStatus,
+    ExecutionClaimRecord,
+    ExecutionDispatchStatus,
     ExecutionStatus,
     IntelligenceOutcome,
     IntelligenceRecord,
@@ -26,18 +28,23 @@ from .contracts import (
     OpenHandsRuntimeRecord,
     OpenHandsRuntimeStatus,
     PreparationRecord,
+    ResultOutcome,
     TaskEvent,
     TaskRequest,
     TaskResult,
     TaskStatus,
     TaskStatusSnapshot,
     ValidationStatus,
+    ValidationAttemptRecord,
+    ValidationAttemptState,
+    ValidationOutcome,
+    StopHookDecision,
     canonical_json,
     utc_now,
 )
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 class TaskStoreError(RuntimeError):
@@ -76,6 +83,14 @@ class IntelligenceConflictError(TaskStoreError):
 
 
 class OpenHandsRuntimeConflictError(TaskStoreError):
+    pass
+
+
+class ExecutionClaimConflictError(TaskStoreError):
+    pass
+
+
+class ValidationConflictError(TaskStoreError):
     pass
 
 
@@ -241,6 +256,9 @@ class SQLiteTaskStore:
             if version == 4:
                 self._migrate_v4_to_v5(connection)
                 version = 5
+            if version == 5:
+                self._migrate_v5_to_v6(connection)
+                version = 6
             if version != SCHEMA_VERSION:
                 raise TaskStoreError(f"unsupported task database schema version {row['version']}")
         except BaseException:
@@ -513,6 +531,129 @@ class SQLiteTaskStore:
                 connection.rollback()
             raise
 
+    @staticmethod
+    def _migrate_v5_to_v6(connection: sqlite3.Connection) -> None:
+        """Add durable execution ownership and independent validation attempts."""
+
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            current = connection.execute(
+                "SELECT version FROM schema_info WHERE singleton = 1"
+            ).fetchone()["version"]
+            if current == 6:
+                connection.commit()
+                return
+            if current != 5:
+                raise TaskStoreError(f"cannot migrate task database schema version {current}")
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS execution_claims (
+                    task_id TEXT PRIMARY KEY REFERENCES openhands_runtimes(task_id) ON DELETE RESTRICT,
+                    conversation_id TEXT NOT NULL UNIQUE,
+                    worker_id TEXT NOT NULL,
+                    claim_token TEXT NOT NULL UNIQUE,
+                    dispatch_status TEXT NOT NULL CHECK (
+                        dispatch_status IN ('INTENT_RECORDED', 'DISPATCHED', 'RECOVERY_REQUIRED')
+                    ),
+                    intent_recorded_at TEXT NOT NULL,
+                    dispatched_at TEXT,
+                    recovery_code TEXT,
+                    updated_at TEXT NOT NULL,
+                    CHECK (
+                        (dispatch_status = 'DISPATCHED' AND dispatched_at IS NOT NULL AND recovery_code IS NULL)
+                        OR (dispatch_status = 'RECOVERY_REQUIRED' AND recovery_code IS NOT NULL)
+                        OR (dispatch_status = 'INTENT_RECORDED' AND dispatched_at IS NULL AND recovery_code IS NULL)
+                    )
+                );
+                CREATE TABLE IF NOT EXISTS validation_attempts (
+                    task_id TEXT NOT NULL REFERENCES openhands_runtimes(task_id) ON DELETE RESTRICT,
+                    attempt INTEGER NOT NULL CHECK (attempt > 0),
+                    state TEXT NOT NULL CHECK (state IN ('RUNNING', 'COMPLETED')),
+                    outcome TEXT CHECK (outcome IN (
+                        'PASS', 'REMEDIATION_FAILURE', 'INFRASTRUCTURE_FAILURE', 'VALIDATOR_FAILURE'
+                    )),
+                    hook_decision TEXT CHECK (hook_decision IN ('ALLOW', 'DENY')),
+                    report_artifact_id TEXT,
+                    report_sha256 TEXT,
+                    validated_head TEXT,
+                    validated_tree TEXT,
+                    repository_state_sha256 TEXT,
+                    original_finding_count INTEGER CHECK (original_finding_count >= 0),
+                    resolved_finding_count INTEGER CHECK (resolved_finding_count >= 0),
+                    remaining_finding_count INTEGER CHECK (remaining_finding_count >= 0),
+                    unknown_finding_count INTEGER CHECK (unknown_finding_count >= 0),
+                    new_prohibited_finding_count INTEGER CHECK (new_prohibited_finding_count >= 0),
+                    constraints_passed INTEGER CHECK (constraints_passed IS NULL OR constraints_passed IN (0, 1)),
+                    bounded_feedback TEXT,
+                    conversation_id TEXT NOT NULL,
+                    native_hook_event_id TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    PRIMARY KEY (task_id, attempt),
+                    UNIQUE (task_id, native_hook_event_id),
+                    FOREIGN KEY (task_id, report_artifact_id)
+                        REFERENCES artifacts(task_id, artifact_id) ON DELETE RESTRICT,
+                    CHECK (
+                        (state = 'RUNNING' AND outcome IS NULL AND hook_decision IS NULL
+                         AND report_artifact_id IS NULL AND completed_at IS NULL)
+                        OR
+                        (state = 'COMPLETED' AND outcome IS NOT NULL AND hook_decision IS NOT NULL
+                         AND report_artifact_id IS NOT NULL AND report_sha256 IS NOT NULL
+                         AND validated_head IS NOT NULL AND validated_tree IS NOT NULL
+                         AND repository_state_sha256 IS NOT NULL AND completed_at IS NOT NULL)
+                    )
+                );
+                CREATE TRIGGER IF NOT EXISTS execution_claims_identity_immutable
+                BEFORE UPDATE ON execution_claims
+                WHEN OLD.task_id != NEW.task_id OR OLD.conversation_id != NEW.conversation_id
+                  OR OLD.worker_id != NEW.worker_id OR OLD.claim_token != NEW.claim_token
+                  OR OLD.intent_recorded_at != NEW.intent_recorded_at
+                BEGIN SELECT RAISE(ABORT, 'execution claim identity is immutable'); END;
+                CREATE TRIGGER IF NOT EXISTS execution_claims_no_delete BEFORE DELETE ON execution_claims
+                BEGIN SELECT RAISE(ABORT, 'execution claims cannot be deleted'); END;
+                CREATE TRIGGER IF NOT EXISTS execution_claims_terminal_immutable
+                BEFORE UPDATE ON execution_claims
+                WHEN OLD.dispatch_status IN ('DISPATCHED', 'RECOVERY_REQUIRED')
+                  AND (OLD.dispatch_status != NEW.dispatch_status
+                       OR OLD.dispatched_at IS NOT NEW.dispatched_at
+                       OR OLD.recovery_code IS NOT NEW.recovery_code)
+                BEGIN SELECT RAISE(ABORT, 'execution claim terminal state is immutable'); END;
+                CREATE TRIGGER IF NOT EXISTS validation_attempts_identity_immutable
+                BEFORE UPDATE ON validation_attempts
+                WHEN OLD.task_id != NEW.task_id OR OLD.attempt != NEW.attempt
+                  OR OLD.conversation_id != NEW.conversation_id OR OLD.started_at != NEW.started_at
+                BEGIN SELECT RAISE(ABORT, 'validation attempt identity is immutable'); END;
+                CREATE TRIGGER IF NOT EXISTS validation_attempts_no_delete BEFORE DELETE ON validation_attempts
+                BEGIN SELECT RAISE(ABORT, 'validation attempts cannot be deleted'); END;
+                CREATE TRIGGER IF NOT EXISTS validation_attempts_verdict_immutable
+                BEFORE UPDATE ON validation_attempts
+                WHEN OLD.state = 'COMPLETED' AND (
+                    OLD.state != NEW.state OR OLD.outcome IS NOT NEW.outcome
+                    OR OLD.hook_decision IS NOT NEW.hook_decision
+                    OR OLD.report_artifact_id IS NOT NEW.report_artifact_id
+                    OR OLD.report_sha256 IS NOT NEW.report_sha256
+                    OR OLD.validated_head IS NOT NEW.validated_head
+                    OR OLD.validated_tree IS NOT NEW.validated_tree
+                    OR OLD.repository_state_sha256 IS NOT NEW.repository_state_sha256
+                    OR OLD.original_finding_count IS NOT NEW.original_finding_count
+                    OR OLD.resolved_finding_count IS NOT NEW.resolved_finding_count
+                    OR OLD.remaining_finding_count IS NOT NEW.remaining_finding_count
+                    OR OLD.unknown_finding_count IS NOT NEW.unknown_finding_count
+                    OR OLD.new_prohibited_finding_count IS NOT NEW.new_prohibited_finding_count
+                    OR OLD.constraints_passed IS NOT NEW.constraints_passed
+                    OR OLD.bounded_feedback IS NOT NEW.bounded_feedback
+                    OR OLD.completed_at IS NOT NEW.completed_at
+                )
+                BEGIN SELECT RAISE(ABORT, 'validation verdict is immutable'); END;
+                UPDATE schema_info SET version = 6 WHERE singleton = 1;
+                """
+            )
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+
     def register_task(self, request: TaskRequest) -> TaskRegistration:
         # Revalidate direct Python callers as strictly as REST callers.
         request = TaskRequest.from_dict(request.to_dict())
@@ -647,6 +788,424 @@ class SQLiteTaskStore:
                 (task_id,),
             ).fetchall()
             return tuple(self._openhands_event_link_from_row(row) for row in rows)
+        finally:
+            connection.close()
+
+    def get_execution_claim(self, task_id: str) -> ExecutionClaimRecord | None:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM execution_claims WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            return None if row is None else self._execution_claim_from_row(row)
+        finally:
+            connection.close()
+
+    def claim_execution(self, task_id: str, worker_id: str) -> ExecutionClaimRecord:
+        """Record one irreversible dispatch intent before the external /run call."""
+
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, task_id)
+            runtime_row = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if runtime_row is None:
+                raise ExecutionClaimConflictError("execution requires a native conversation")
+            runtime = self._openhands_runtime_from_row(runtime_row)
+            if runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED:
+                raise ExecutionClaimConflictError("execution requires attached task context")
+            if TaskStatus(task["status"]) is not TaskStatus.AGENT_RUNNING:
+                raise InvalidTransitionError("execution can start only from AGENT_RUNNING")
+            existing = connection.execute(
+                "SELECT * FROM execution_claims WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if existing is not None:
+                current = self._execution_claim_from_row(existing)
+                if current.worker_id != worker_id:
+                    raise ExecutionClaimConflictError("task is already owned by another worker")
+                connection.commit()
+                return current
+            claim = ExecutionClaimRecord(
+                task_id=task_id,
+                conversation_id=runtime.conversation_id,
+                worker_id=worker_id,
+                claim_token=f"claim_{uuid.uuid4().hex}",
+                dispatch_status=ExecutionDispatchStatus.INTENT_RECORDED,
+                intent_recorded_at=now,
+                dispatched_at=None,
+                recovery_code=None,
+                updated_at=now,
+            )
+            connection.execute(
+                """INSERT INTO execution_claims(
+                    task_id, conversation_id, worker_id, claim_token, dispatch_status,
+                    intent_recorded_at, dispatched_at, recovery_code, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)""",
+                (
+                    claim.task_id, claim.conversation_id, claim.worker_id,
+                    claim.claim_token, claim.dispatch_status.value,
+                    claim.intent_recorded_at, claim.updated_at,
+                ),
+            )
+            connection.execute(
+                """UPDATE tasks SET execution_status = ?, updated_at = ? WHERE task_id = ?""",
+                (ExecutionStatus.RUNNING.value, now, task_id),
+            )
+            connection.execute(
+                """UPDATE openhands_runtimes SET execution_status = ?, updated_at = ?
+                WHERE task_id = ?""",
+                (ExecutionStatus.RUNNING.value, now, task_id),
+            )
+            self._append_event(
+                connection, task_id=task_id, event_type="agent.execution.intent-recorded",
+                stage="agent", data={"conversationId": claim.conversation_id}, timestamp=now,
+            )
+            connection.commit()
+            return claim
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def update_execution_dispatch(
+        self, task_id: str, *, dispatched: bool, recovery_code: str | None = None
+    ) -> ExecutionClaimRecord:
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT * FROM execution_claims WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if row is None:
+                raise ExecutionClaimConflictError("execution has no durable intent")
+            current = self._execution_claim_from_row(row)
+            desired = (
+                ExecutionDispatchStatus.DISPATCHED
+                if dispatched
+                else ExecutionDispatchStatus.RECOVERY_REQUIRED
+            )
+            if current.dispatch_status is desired:
+                connection.commit()
+                return current
+            if current.dispatch_status is not ExecutionDispatchStatus.INTENT_RECORDED:
+                raise ExecutionClaimConflictError("execution dispatch decision is already final")
+            if dispatched and recovery_code is not None:
+                raise ExecutionClaimConflictError("confirmed dispatch cannot have a recovery code")
+            if not dispatched and not recovery_code:
+                raise ExecutionClaimConflictError("uncertain dispatch requires a recovery code")
+            connection.execute(
+                """UPDATE execution_claims SET dispatch_status = ?, dispatched_at = ?,
+                    recovery_code = ?, updated_at = ? WHERE task_id = ?""",
+                (desired.value, now if dispatched else None, recovery_code, now, task_id),
+            )
+            self._append_event(
+                connection,
+                task_id=task_id,
+                event_type=("agent.execution.dispatched" if dispatched else "agent.execution.recovery-required"),
+                stage="agent",
+                data={"conversationId": current.conversation_id, **({"recoveryCode": recovery_code} if recovery_code else {})},
+                timestamp=now,
+            )
+            connection.commit()
+            return self._execution_claim_from_row(
+                connection.execute("SELECT * FROM execution_claims WHERE task_id = ?", (task_id,)).fetchone()
+            )
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def record_native_execution_terminal(
+        self, task_id: str, *, completed: bool
+    ) -> TaskStatusSnapshot:
+        """Reconcile native termination without ever inferring validation PASS."""
+
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, task_id)
+            runtime = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if runtime is None:
+                raise OpenHandsRuntimeConflictError("task has no native runtime")
+            execution = ExecutionStatus.COMPLETED if completed else ExecutionStatus.FAILED
+            if (
+                ExecutionStatus(task["execution_status"]) is execution
+                and ExecutionStatus(runtime["execution_status"]) is execution
+            ):
+                status = self._status_from_row(task)
+                connection.commit()
+                return status
+            current_status = TaskStatus(task["status"])
+            validation = ValidationStatus(task["validation_status"])
+            if completed and validation is ValidationStatus.PASSED:
+                next_status = TaskStatus.ACCEPTED
+            elif current_status is TaskStatus.FAILED_INFRASTRUCTURE:
+                next_status = current_status
+            elif completed:
+                next_status = TaskStatus.FAILED_VALIDATION
+            else:
+                next_status = TaskStatus.FAILED_INFRASTRUCTURE
+            if current_status in {TaskStatus.FAILED_VALIDATION, TaskStatus.CANCELLED}:
+                next_status = current_status
+            connection.execute(
+                """UPDATE tasks SET status = ?, stage = ?, execution_status = ?,
+                    accepted = ?, updated_at = ? WHERE task_id = ?""",
+                (next_status.value, _STATUS_STAGE[next_status], execution.value,
+                 int(validation is ValidationStatus.PASSED), now, task_id),
+            )
+            connection.execute(
+                "UPDATE openhands_runtimes SET execution_status = ?, updated_at = ? WHERE task_id = ?",
+                (execution.value, now, task_id),
+            )
+            self._append_event(
+                connection, task_id=task_id,
+                event_type=("agent.execution.completed" if completed else "agent.execution.failed"),
+                stage="agent", data={"accepted": validation is ValidationStatus.PASSED}, timestamp=now,
+            )
+            if next_status in {
+                TaskStatus.ACCEPTED,
+                TaskStatus.FAILED_VALIDATION,
+                TaskStatus.FAILED_INFRASTRUCTURE,
+            } and task["result_json"] is None:
+                attempt = connection.execute(
+                    """SELECT * FROM validation_attempts WHERE task_id = ? AND state = 'COMPLETED'
+                    ORDER BY attempt DESC LIMIT 1""", (task_id,),
+                ).fetchone()
+                if next_status is TaskStatus.ACCEPTED and (
+                    attempt is None or attempt["outcome"] != ValidationOutcome.PASS.value
+                ):
+                    raise ValidationConflictError("accepted task has no durable PASS attempt")
+                artifact_ids = tuple(
+                    row["artifact_id"] for row in connection.execute(
+                        "SELECT artifact_id FROM artifacts WHERE task_id = ? ORDER BY created_at, artifact_id",
+                        (task_id,),
+                    ).fetchall()
+                )
+                result = TaskResult(
+                    task_id=task_id,
+                    outcome=ResultOutcome(next_status.value),
+                    execution_status=execution,
+                    validation_status=validation,
+                    delivery_status=DeliveryStatus.NOT_REQUESTED,
+                    baseline_commit=runtime["baseline_commit"],
+                    validated_tree=attempt["validated_tree"] if attempt is not None else None,
+                    validation_attempt=attempt["attempt"] if attempt is not None else None,
+                    validation_report_artifact_id=(
+                        attempt["report_artifact_id"] if attempt is not None else None
+                    ),
+                    conversation_id=runtime["conversation_id"],
+                    artifact_ids=artifact_ids,
+                    completed_at=now,
+                )
+                connection.execute(
+                    "UPDATE tasks SET result_json = ? WHERE task_id = ?",
+                    (canonical_json(result.to_dict()), task_id),
+                )
+            connection.commit()
+            return self._status_from_row(self._task_row(connection, task_id))
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def begin_validation(self, task_id: str) -> ValidationAttemptRecord:
+        """Atomically reserve the next Stop Hook attempt and enter VALIDATING."""
+
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, task_id)
+            current = TaskStatus(task["status"])
+            running = connection.execute(
+                """SELECT * FROM validation_attempts WHERE task_id = ? AND state = 'RUNNING'
+                ORDER BY attempt DESC LIMIT 1""", (task_id,),
+            ).fetchone()
+            if running is not None:
+                connection.commit()
+                return self._validation_attempt_from_row(running)
+            if current is not TaskStatus.AGENT_RUNNING:
+                raise InvalidTransitionError("validation can start only from AGENT_RUNNING")
+            runtime = connection.execute(
+                "SELECT conversation_id FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            claim = connection.execute(
+                "SELECT dispatch_status FROM execution_claims WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if runtime is None or claim is None or claim["dispatch_status"] not in {
+                ExecutionDispatchStatus.DISPATCHED.value,
+                ExecutionDispatchStatus.RECOVERY_REQUIRED.value,
+            }:
+                raise ValidationConflictError("validation requires a durably dispatched execution")
+            attempt = int(task["validation_attempts"]) + 1
+            connection.execute(
+                """INSERT INTO validation_attempts(
+                    task_id, attempt, state, conversation_id, started_at
+                ) VALUES (?, ?, 'RUNNING', ?, ?)""",
+                (task_id, attempt, runtime["conversation_id"], now),
+            )
+            connection.execute(
+                """UPDATE tasks SET status = ?, stage = ?, validation_status = ?,
+                    validation_attempts = ?, accepted = 0, updated_at = ? WHERE task_id = ?""",
+                (TaskStatus.VALIDATING.value, _STATUS_STAGE[TaskStatus.VALIDATING],
+                 ValidationStatus.RUNNING.value, attempt, now, task_id),
+            )
+            self._append_event(
+                connection, task_id=task_id, event_type="validation.started",
+                stage="validation", data={"attempt": attempt, "conversationId": runtime["conversation_id"]},
+                timestamp=now,
+            )
+            connection.commit()
+            return self._validation_attempt_from_row(
+                connection.execute(
+                    "SELECT * FROM validation_attempts WHERE task_id = ? AND attempt = ?",
+                    (task_id, attempt),
+                ).fetchone()
+            )
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def complete_validation(
+        self, record: ValidationAttemptRecord, artifact: ArtifactMetadata
+    ) -> TaskStatusSnapshot:
+        """Commit immutable evidence, verdict, lifecycle and event in one transaction."""
+
+        if record.state is not ValidationAttemptState.COMPLETED:
+            raise ValidationConflictError("validation verdict must be complete")
+        if artifact.task_id != record.task_id or artifact.artifact_id != record.report_artifact_id or artifact.sha256 != record.report_sha256:
+            raise ValidationConflictError("validation artifact identity differs from verdict")
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, record.task_id)
+            existing = connection.execute(
+                "SELECT * FROM validation_attempts WHERE task_id = ? AND attempt = ?",
+                (record.task_id, record.attempt),
+            ).fetchone()
+            if existing is None:
+                raise ValidationConflictError("validation attempt was not reserved")
+            current = self._validation_attempt_from_row(existing)
+            if current.state is ValidationAttemptState.COMPLETED:
+                if current != record:
+                    raise ValidationConflictError("validation verdict is immutable")
+                connection.commit()
+                return self._status_from_row(task)
+            if TaskStatus(task["status"]) is not TaskStatus.VALIDATING:
+                raise InvalidTransitionError("task is not validating")
+            try:
+                connection.execute(
+                    """INSERT INTO artifacts(task_id, artifact_id, kind, relative_path,
+                        media_type, sha256, size_bytes, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (artifact.task_id, artifact.artifact_id, artifact.kind, artifact.relative_path,
+                     artifact.media_type, artifact.sha256, artifact.size_bytes, artifact.created_at),
+                )
+            except sqlite3.IntegrityError as exc:
+                prior = connection.execute(
+                    "SELECT * FROM artifacts WHERE task_id = ? AND artifact_id = ?",
+                    (artifact.task_id, artifact.artifact_id),
+                ).fetchone()
+                if prior is None or self._artifact_from_row(prior) != artifact:
+                    raise ArtifactConflictError("validation artifact conflicts with durable metadata") from exc
+            connection.execute(
+                """UPDATE validation_attempts SET state = ?, outcome = ?, hook_decision = ?,
+                    report_artifact_id = ?, report_sha256 = ?, validated_head = ?,
+                    validated_tree = ?, repository_state_sha256 = ?, original_finding_count = ?,
+                    resolved_finding_count = ?, remaining_finding_count = ?, unknown_finding_count = ?,
+                    new_prohibited_finding_count = ?, constraints_passed = ?, bounded_feedback = ?,
+                    completed_at = ? WHERE task_id = ? AND attempt = ?""",
+                (record.state.value, record.outcome.value, record.hook_decision.value,
+                 record.report_artifact_id, record.report_sha256, record.validated_head,
+                 record.validated_tree, record.repository_state_sha256, record.original_finding_count,
+                 record.resolved_finding_count, record.remaining_finding_count,
+                 record.unknown_finding_count, record.new_prohibited_finding_count,
+                 int(bool(record.constraints_passed)), record.bounded_feedback, record.completed_at,
+                 record.task_id, record.attempt),
+            )
+            if record.outcome is ValidationOutcome.PASS:
+                status, validation = TaskStatus.ACCEPTED, ValidationStatus.PASSED
+            elif record.outcome is ValidationOutcome.REMEDIATION_FAILURE and record.hook_decision is StopHookDecision.DENY:
+                status, validation = TaskStatus.AGENT_RUNNING, ValidationStatus.FAILED
+            elif record.outcome is ValidationOutcome.REMEDIATION_FAILURE:
+                status, validation = TaskStatus.FAILED_VALIDATION, ValidationStatus.FAILED
+            elif record.outcome is ValidationOutcome.INFRASTRUCTURE_FAILURE:
+                status, validation = TaskStatus.FAILED_INFRASTRUCTURE, ValidationStatus.INFRASTRUCTURE_ERROR
+            else:
+                status, validation = TaskStatus.FAILED_INFRASTRUCTURE, ValidationStatus.INFRASTRUCTURE_ERROR
+            connection.execute(
+                """UPDATE tasks SET status = ?, stage = ?, validation_status = ?,
+                    accepted = ?, updated_at = ? WHERE task_id = ?""",
+                (status.value, _STATUS_STAGE[status], validation.value,
+                 int(validation is ValidationStatus.PASSED), record.completed_at, record.task_id),
+            )
+            self._append_event(
+                connection, task_id=record.task_id, event_type="validation.completed",
+                stage="validation",
+                data={"attempt": record.attempt, "outcome": record.outcome.value,
+                      "decision": record.hook_decision.value,
+                      "reportArtifactId": record.report_artifact_id,
+                      "validatedTree": record.validated_tree},
+                timestamp=record.completed_at or utc_now(),
+            )
+            connection.commit()
+            return self._status_from_row(self._task_row(connection, record.task_id))
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def list_validation_attempts(self, task_id: str) -> tuple[ValidationAttemptRecord, ...]:
+        connection = self._connect()
+        try:
+            self._task_row(connection, task_id)
+            rows = connection.execute(
+                "SELECT * FROM validation_attempts WHERE task_id = ? ORDER BY attempt", (task_id,)
+            ).fetchall()
+            return tuple(self._validation_attempt_from_row(row) for row in rows)
+        finally:
+            connection.close()
+
+    def link_validation_hook_event(self, task_id: str, attempt: int, native_event_id: str) -> None:
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT native_hook_event_id FROM validation_attempts WHERE task_id = ? AND attempt = ?",
+                (task_id, attempt),
+            ).fetchone()
+            if row is None:
+                raise ValidationConflictError("validation attempt was not found")
+            if row["native_hook_event_id"] not in (None, native_event_id):
+                raise ValidationConflictError("validation attempt is linked to another native event")
+            connection.execute(
+                "UPDATE validation_attempts SET native_hook_event_id = ? WHERE task_id = ? AND attempt = ?",
+                (native_event_id, task_id, attempt),
+            )
+            connection.commit()
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
         finally:
             connection.close()
 
@@ -1793,4 +2352,44 @@ class SQLiteTaskStore:
             runtime.workspace_path,
             runtime.baseline_commit,
             runtime.created_at,
+        )
+
+    @staticmethod
+    def _execution_claim_from_row(row: sqlite3.Row) -> ExecutionClaimRecord:
+        return ExecutionClaimRecord(
+            task_id=row["task_id"],
+            conversation_id=row["conversation_id"],
+            worker_id=row["worker_id"],
+            claim_token=row["claim_token"],
+            dispatch_status=ExecutionDispatchStatus(row["dispatch_status"]),
+            intent_recorded_at=row["intent_recorded_at"],
+            dispatched_at=row["dispatched_at"],
+            recovery_code=row["recovery_code"],
+            updated_at=row["updated_at"],
+        )
+
+    @staticmethod
+    def _validation_attempt_from_row(row: sqlite3.Row) -> ValidationAttemptRecord:
+        return ValidationAttemptRecord(
+            task_id=row["task_id"],
+            attempt=row["attempt"],
+            state=ValidationAttemptState(row["state"]),
+            outcome=ValidationOutcome(row["outcome"]) if row["outcome"] else None,
+            hook_decision=StopHookDecision(row["hook_decision"]) if row["hook_decision"] else None,
+            report_artifact_id=row["report_artifact_id"],
+            report_sha256=row["report_sha256"],
+            validated_head=row["validated_head"],
+            validated_tree=row["validated_tree"],
+            repository_state_sha256=row["repository_state_sha256"],
+            original_finding_count=row["original_finding_count"],
+            resolved_finding_count=row["resolved_finding_count"],
+            remaining_finding_count=row["remaining_finding_count"],
+            unknown_finding_count=row["unknown_finding_count"],
+            new_prohibited_finding_count=row["new_prohibited_finding_count"],
+            constraints_passed=(bool(row["constraints_passed"]) if row["constraints_passed"] is not None else None),
+            bounded_feedback=row["bounded_feedback"],
+            conversation_id=row["conversation_id"],
+            native_hook_event_id=row["native_hook_event_id"],
+            started_at=row["started_at"],
+            completed_at=row["completed_at"],
         )

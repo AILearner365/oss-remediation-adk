@@ -58,7 +58,7 @@ def _contains(value: Any, text: str) -> bool:
 
 
 class FakeAgentServer:
-    """Pinned-shape in-process transport; it has deliberately no run method."""
+    """Pinned-shape in-process transport with a no-model run boundary."""
 
     def __init__(self):
         self.info = {
@@ -75,6 +75,8 @@ class FakeAgentServer:
         self.last_request: dict[str, Any] | None = None
         self.last_message: dict[str, Any] | None = None
         self.unavailable = False
+        self.run_calls = 0
+        self.fail_after_run = False
 
     def server_info(self):
         if self.unavailable:
@@ -147,6 +149,13 @@ class FakeAgentServer:
         if self.fail_after_message:
             self.fail_after_message = False
             raise AgentServerUnavailableError("offline response loss")
+
+    def run_conversation(self, conversation_id):
+        self.run_calls += 1
+        self.conversations[conversation_id]["execution_status"] = "running"
+        if self.fail_after_run:
+            self.fail_after_run = False
+            raise AgentServerUnavailableError("offline run response loss")
 
     def search_events(self, conversation_id, *, page_id=None, body=None):
         assert page_id is None
@@ -489,6 +498,32 @@ class SharedOpenHandsRuntimeIntegrationTests(unittest.TestCase):
                 "taskId": task_id,
                 "baselineCommit": self.commit,
                 "assessmentStatus": "COMPLETED",
+                "repository": {
+                    "url": LOGICAL_REPOSITORY,
+                    "baseRef": "refs/heads/main",
+                    "localBranch": branch,
+                },
+                "originalVulnerabilityFindings": [{
+                    "vulnerabilityId": "CVE-OFFLINE-1", "aliases": [], "severity": "HIGH",
+                    "dependency": {"groupId": "example", "artifactId": "demo", "packageName": "example:demo", "currentVersion": "1.0", "ecosystem": "Maven"},
+                    "fixedVersions": ["1.1"], "summary": "offline", "backendEvidence": {},
+                }],
+                "scan": {
+                    "succeeded": True,
+                    "findings": [{
+                        "vulnerabilityId": "CVE-OFFLINE-1", "aliases": [], "severity": "HIGH",
+                        "dependency": {"groupId": "example", "artifactId": "demo", "packageName": "example:demo", "currentVersion": "1.0", "ecosystem": "Maven"},
+                        "fixedVersions": ["1.1"], "summary": "offline", "backendEvidence": {},
+                    }],
+                    "outcome": "COMPLETED_WITH_FINDINGS",
+                    "backend": "osv",
+                    "evidence": {},
+                },
+                "constraints": {
+                    "javaVersions": ["17"],
+                    "springBootVersions": ["3.4.0"],
+                    "suppressionFiles": {},
+                },
             },
             sort_keys=True,
         ).encode()
@@ -625,7 +660,7 @@ class SharedOpenHandsRuntimeMigrationTests(unittest.TestCase):
                 self.assertIsNone(reopened.get_openhands_runtime(task_id))
                 with sqlite3.connect(database) as connection:
                     self.assertEqual(
-                        5, connection.execute("SELECT version FROM schema_info").fetchone()[0]
+                        6, connection.execute("SELECT version FROM schema_info").fetchone()[0]
                     )
             finally:
                 reopened.close()

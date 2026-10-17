@@ -293,10 +293,15 @@ any supplied `initial_message`, so the adapter creates an idle deterministic-id
 conversation without one and attaches context separately with `run=false`.
 There is no execution feature flag or `/run` call to accidentally enable.
 SQLite stores the native association and bounded event references; Agent Server
-continues to own full conversation persistence and streaming. Change 6 remains
-the required gate for shared validator/Stop Hook parity and agent execution.
+continues to own full conversation persistence and streaming. Change 6 is the
+implemented gate for shared validator/Stop Hook parity and controlled agent
+execution; Change 5 remains non-running when used by itself.
 
 ### Change 6 — validation/Stop Hook parity
+
+Implemented on `openhands-service-integration`; detailed contracts, pinned
+protocol findings, persistence and offline verification are recorded in
+[OPENHANDS-SHARED-VALIDATION.md](OPENHANDS-SHARED-VALIDATION.md).
 
 - Likely files: `validation.py`, packaged hook command, validator adapter tests.
 - Move/reuse: `DeterministicValidator`, attempt snapshots, concise feedback,
@@ -308,6 +313,14 @@ the required gate for shared validator/Stop Hook parity and agent execution.
 - Acceptance: only complete PASS enters ACCEPTED; validation feedback is visible
   in the same native conversation; restart does not lose attempt count.
 - Rollback: disable shared execution; no effect on frozen experiment.
+
+Actual Change 6 adds a trusted internal controlled `/run` operation only after
+the native conversation, context, profile, workspace, artifact hashes and
+installed Stop Hook command are re-verified. A durable single-worker intent is
+written before dispatch, and uncertain dispatch is never retried blindly. The
+native Stop Hook calls the shared adapter over the existing
+`DeterministicValidator`; only a complete report PASS enters `ACCEPTED`.
+Delivery remains disabled and `NOT_REQUESTED`.
 
 ### Change 7 — UI and thin experiment client parity (M3)
 
