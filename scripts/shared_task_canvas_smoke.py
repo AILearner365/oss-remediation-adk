@@ -64,8 +64,9 @@ def check(task_api: str, agent_server: str, canvas: str, task_id: str) -> dict:
     native_status = conv.get("execution_status")
     if native_status != "idle":
         raise SmokeFailure("native conversation must be idle (got " + repr(native_status) + ")")
-    if conv.get("hook_config") is None:
-        raise SmokeFailure("effective native Stop Hook is not visible; no launch permitted")
+    hook = conv.get("hook_config")
+    if not isinstance(hook, dict) or not isinstance(hook.get("stop"), list) or not hook["stop"]:
+        raise SmokeFailure("effective native Stop Hook is absent or invalid; no launch permitted")
 
     events = get_json(task_api, "/v1/tasks/" + task_id + "/events")
     if events.get("taskId") != task_id or not isinstance(events.get("events"), list):
@@ -77,14 +78,16 @@ def check(task_api: str, agent_server: str, canvas: str, task_id: str) -> dict:
     )
     # Native server event response varies by transport; confirm only a documented
     # object response here, without assuming fake-server-only field names.
-    if not native_events:
-        raise SmokeFailure("native event search returned no data")
+    native_items = native_events.get("items")
+    if not isinstance(native_items, list) or not native_items:
+        raise SmokeFailure("native event search returned no native events")
     url = canvas.rstrip("/") + "/conversations/" + urllib.parse.quote(conversation_id)
     return {
         "verdict": "API_MAPPING_PASSED__CANVAS_BROWSER_NOT_PROVEN",
         "taskId": task_id,
         "productStatus": task.get("status"),
         "productEventCount": len(events["events"]),
+        "nativeEventCount": len(native_items),
         "nativeConversationId": conversation_id,
         "nativeExecutionStatus": native_status,
         "effectiveHookVisible": True,
