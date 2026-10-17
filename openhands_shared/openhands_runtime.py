@@ -390,6 +390,7 @@ class SharedOpenHandsRuntime:
                     payload=payload,
                     profile=profile,
                     guidance=guidance,
+                    allow_pending_hook=True,
                 )
             except RuntimeIdentityError as exc:
                 recovery = self._runtime_record(
@@ -487,7 +488,150 @@ class SharedOpenHandsRuntime:
                 raise RuntimeRecoveryRequiredError(
                     "native context event requires operator-safe reconciliation"
                 )
+            try:
+                initialized = self.transport.get_conversation(conversation_id)
+                if initialized is None:
+                    raise RuntimeIdentityError(
+                        "native conversation disappeared after context attachment"
+                    )
+                self._verify_conversation(
+                    initialized,
+                    payload=payload,
+                    profile=profile,
+                    guidance=guidance,
+                )
+            except RuntimeIdentityError as exc:
+                self.store.mark_openhands_recovery_required(
+                    task_id,
+                    failure_code="CONVERSATION_IDENTITY_MISMATCH",
+                    failure_detail=(
+                        "Initialized native conversation identity requires operator review"
+                    ),
+                )
+                raise RuntimeRecoveryRequiredError(
+                    "initialized native conversation identity requires operator review"
+                ) from exc
             return self._link_context_event(runtime, context_event)
+
+    def recover_provisioning(self, task_id: str) -> OpenHandsRuntimeRecord:
+        """Explicitly recover a pre-execution hook-observation failure.
+
+        This operation never starts execution. It may attach the uniquely
+        marked context when it is provably absent, then requires the initialized
+        native conversation—including the effective Stop Hook—to match before
+        preserving the recovery history and advancing the current state.
+        """
+
+        with self._task_lock(task_id):
+            runtime = self.store.get_openhands_runtime(task_id)
+            if (
+                runtime is None
+                or runtime.runtime_status is not OpenHandsRuntimeStatus.RECOVERY_REQUIRED
+                or runtime.failure_code != "CONVERSATION_IDENTITY_MISMATCH"
+                or runtime.execution_status is not ExecutionStatus.NOT_STARTED
+            ):
+                raise RuntimeRecoveryRequiredError(
+                    "task is not eligible for explicit provisioning recovery"
+                )
+            request = self.store.get_request(task_id)
+            preparation, baseline, intelligence, summary = self._verified_inputs(
+                task_id, request
+            )
+            workspace = self._verify_workspace(
+                request, preparation, allow_agent_changes=False
+            )
+            profile = self.config.profile_for(request)
+            guidance, guidance_hashes = self._load_guidance(profile)
+            hook_command = self._hook_command(profile, task_id, workspace)
+            profile_fingerprint = self._profile_fingerprint(
+                profile, guidance_hashes, hook_command, request.agent.max_iterations
+            )
+            payload = self._conversation_request(
+                task_id=task_id,
+                conversation_id=runtime.conversation_id,
+                workspace=workspace,
+                request=request,
+                profile=profile,
+                guidance=guidance,
+                hook_command=hook_command,
+                profile_fingerprint=profile_fingerprint,
+            )
+            self._assert_credential_isolation(payload)
+            request_fingerprint = _sha256(canonical_json(payload).encode("utf-8"))
+            if (
+                request_fingerprint != runtime.request_fingerprint
+                or profile_fingerprint != runtime.profile_fingerprint
+                or baseline.baseline_commit != runtime.baseline_commit
+            ):
+                raise RuntimeIdentityError(
+                    "durable recovery identity differs from the original provisioning request"
+                )
+            self._verified_server()
+            conversation = self.transport.get_conversation(runtime.conversation_id)
+            if conversation is None:
+                raise RuntimeRecoveryRequiredError(
+                    "native recovery conversation is unavailable"
+                )
+            self._verify_conversation(
+                conversation,
+                payload=payload,
+                profile=profile,
+                guidance=guidance,
+                allow_pending_hook=True,
+            )
+            instruction = self._agent_instruction(
+                task_id,
+                request,
+                preparation,
+                baseline,
+                intelligence,
+                summary,
+                request_fingerprint,
+            )
+            reject_sensitive_input(instruction, "agentInstruction")
+            marker = self._context_marker(task_id, request_fingerprint)
+            context_event = self._find_context_event(runtime.conversation_id, marker)
+            if context_event is None:
+                try:
+                    self.transport.send_message(
+                        runtime.conversation_id,
+                        {
+                            "role": "user",
+                            "content": [{"type": "text", "text": instruction}],
+                            "run": False,
+                        },
+                    )
+                except AgentServerUnavailableError as exc:
+                    context_event = self._find_context_event(
+                        runtime.conversation_id, marker
+                    )
+                    if context_event is None:
+                        raise RuntimeRecoveryRequiredError(
+                            "explicit context recovery remains uncertain; resend is disabled"
+                        ) from exc
+                if context_event is None:
+                    context_event = self._find_context_event(
+                        runtime.conversation_id, marker
+                    )
+            if context_event is None:
+                raise RuntimeRecoveryRequiredError(
+                    "explicit recovery could not observe the native context event"
+                )
+            initialized = self.transport.get_conversation(runtime.conversation_id)
+            if initialized is None:
+                raise RuntimeRecoveryRequiredError(
+                    "native recovery conversation disappeared after initialization"
+                )
+            self._verify_conversation(
+                initialized,
+                payload=payload,
+                profile=profile,
+                guidance=guidance,
+            )
+            ready = self.store.complete_openhands_recovery(
+                task_id, expected_failure_code="CONVERSATION_IDENTITY_MISMATCH"
+            )
+            return self._link_context_event(ready, context_event)
 
     def synchronize_event_references(self, task_id: str) -> tuple[OpenHandsEventLink, ...]:
         """Project native identifiers/kinds only; native storage retains payloads."""
@@ -1013,6 +1157,7 @@ class SharedOpenHandsRuntime:
         profile: OpenHandsAgentProfile,
         guidance: str,
         require_idle: bool = True,
+        allow_pending_hook: bool = False,
     ) -> None:
         if conversation.get("id") != payload["conversation_id"]:
             raise RuntimeIdentityError("native conversation id differs from deterministic id")
@@ -1028,9 +1173,16 @@ class SharedOpenHandsRuntime:
             or workspace.get("kind") != "LocalWorkspace"
         ):
             raise RuntimeIdentityError("native conversation workspace differs from task workspace")
-        for key in ("max_iterations", "stuck_detection", "hook_config", "tags"):
+        for key in ("max_iterations", "stuck_detection", "tags"):
             if conversation.get(key) != payload[key]:
                 raise RuntimeIdentityError(f"native conversation {key} differs from approved request")
+        observed_hook = conversation.get("hook_config")
+        if observed_hook != payload["hook_config"] and not (
+            allow_pending_hook and observed_hook is None
+        ):
+            raise RuntimeIdentityError(
+                "native conversation hook_config differs from approved request"
+            )
         launched = conversation.get("launched_agent_profile")
         if not isinstance(launched, Mapping) or (
             launched.get("agent_profile_id") != profile.native_agent_profile_id

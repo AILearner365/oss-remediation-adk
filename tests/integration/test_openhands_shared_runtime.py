@@ -77,6 +77,8 @@ class FakeAgentServer:
         self.unavailable = False
         self.run_calls = 0
         self.fail_after_run = False
+        self.reveal_hook_on_message = True
+        self.hook_after_message: dict[str, Any] | None = None
 
     def server_info(self):
         if self.unavailable:
@@ -85,7 +87,11 @@ class FakeAgentServer:
 
     def get_conversation(self, conversation_id):
         value = self.conversations.get(conversation_id)
-        return None if value is None else copy.deepcopy(value)
+        if value is None:
+            return None
+        result = copy.deepcopy(value)
+        result.pop("_pending_hook_config", None)
+        return result
 
     def create_conversation(self, request):
         self.create_calls += 1
@@ -98,7 +104,10 @@ class FakeAgentServer:
                 "max_iterations": request["max_iterations"],
                 "stuck_detection": request["stuck_detection"],
                 "execution_status": "idle",
-                "hook_config": copy.deepcopy(request["hook_config"]),
+                # Pinned native 1.50.0 exposes the explicit hook only after
+                # lazy initialization on the first message, even with run=false.
+                "hook_config": None,
+                "_pending_hook_config": copy.deepcopy(request["hook_config"]),
                 "tags": copy.deepcopy(request["tags"]),
                 "launched_agent_profile": {
                     "agent_profile_id": NATIVE_PROFILE_ID,
@@ -138,6 +147,11 @@ class FakeAgentServer:
     def send_message(self, conversation_id, request):
         self.message_calls += 1
         self.last_message = copy.deepcopy(dict(request))
+        if self.reveal_hook_on_message:
+            pending = self.conversations[conversation_id]["_pending_hook_config"]
+            self.conversations[conversation_id]["hook_config"] = copy.deepcopy(
+                self.hook_after_message if self.hook_after_message is not None else pending
+            )
         self.events[conversation_id].append(
             {
                 "id": f"native-event-{len(self.events[conversation_id]) + 1}",
@@ -300,6 +314,59 @@ class SharedOpenHandsRuntimeIntegrationTests(unittest.TestCase):
         self.assertEqual(OpenHandsRuntimeStatus.CONTEXT_ATTACHED, runtime.runtime_status)
         self.assertEqual(1, self.server.message_calls)
         self.assertEqual(1, len(self.server.events[runtime.conversation_id]))
+
+    def test_pending_native_hook_is_verified_only_after_non_running_context(self):
+        task_id, _ = self._ready("pending-hook")
+
+        runtime = self._adapter().provision(task_id)
+
+        self.assertEqual(OpenHandsRuntimeStatus.CONTEXT_ATTACHED, runtime.runtime_status)
+        self.assertEqual(1, self.server.message_calls)
+        self.assertEqual(0, self.server.run_calls)
+        self.assertEqual(
+            self.server.last_request["hook_config"],
+            self.server.conversations[runtime.conversation_id]["hook_config"],
+        )
+
+    def test_missing_or_modified_initialized_hook_fails_closed(self):
+        missing_task, _ = self._ready("missing-initialized-hook")
+        self.server.reveal_hook_on_message = False
+        with self.assertRaises(RuntimeRecoveryRequiredError):
+            self._adapter().provision(missing_task)
+        missing = self.store.get_openhands_runtime(missing_task)
+        self.assertIsNotNone(missing)
+        self.assertEqual(OpenHandsRuntimeStatus.RECOVERY_REQUIRED, missing.runtime_status)
+        self.assertEqual(0, self.server.run_calls)
+
+        self.server.reveal_hook_on_message = True
+        self.server.hook_after_message = {"stop": []}
+        modified_task, _ = self._ready("modified-initialized-hook")
+        with self.assertRaises(RuntimeRecoveryRequiredError):
+            self._adapter().provision(modified_task)
+        modified = self.store.get_openhands_runtime(modified_task)
+        self.assertIsNotNone(modified)
+        self.assertEqual(OpenHandsRuntimeStatus.RECOVERY_REQUIRED, modified.runtime_status)
+        self.assertEqual(0, self.server.run_calls)
+
+    def test_explicit_recovery_reverifies_hook_without_duplicate_context_or_run(self):
+        task_id, _ = self._ready("explicit-hook-recovery")
+        self.server.reveal_hook_on_message = False
+        with self.assertRaises(RuntimeRecoveryRequiredError):
+            self._adapter().provision(task_id)
+        blocked = self.store.get_openhands_runtime(task_id)
+        self.assertIsNotNone(blocked)
+        self.assertEqual(1, self.server.message_calls)
+
+        native = self.server.conversations[blocked.conversation_id]
+        native["hook_config"] = copy.deepcopy(native["_pending_hook_config"])
+        recovered = self._adapter().recover_provisioning(task_id)
+
+        self.assertEqual(OpenHandsRuntimeStatus.CONTEXT_ATTACHED, recovered.runtime_status)
+        self.assertEqual(1, self.server.message_calls)
+        self.assertEqual(0, self.server.run_calls)
+        event_types = [event.type for event in self.store.list_events(task_id)]
+        self.assertIn("agent.recovery.required", event_types)
+        self.assertIn("agent.recovery.completed", event_types)
 
     def test_conversation_association_and_product_event_are_atomic(self):
         task_id, _ = self._ready("atomic")

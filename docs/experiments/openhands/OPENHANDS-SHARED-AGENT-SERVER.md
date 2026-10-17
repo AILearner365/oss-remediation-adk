@@ -192,8 +192,9 @@ tests remain unchanged except later schema-version expectations advancing to 6.
 
 The subsequent actual pinned-runtime gate is recorded in
 [OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md](OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md).
-It proved the native no-model conversation and command-hook transport, but also
-found that a fresh `1.50.0` conversation response omits `hook_config` until a
-server restart. The shared adapter correctly fails closed because it cannot
-verify the installed validation command. M3 and operational execution remain
-blocked pending a narrow safety-preserving resolution and gate rerun.
+It proved the native no-model conversation and command-hook transport and found
+that a fresh `1.50.0` conversation exposes the hook only after lazy
+initialization. The adapter now attaches uniquely marked context with
+`run=false`, then requires an immediate GET to expose the exact effective hook.
+The actual pinned-runtime rerun passed; missing or changed hooks still fail
+closed. Operational execution retains the independent remaining gates.

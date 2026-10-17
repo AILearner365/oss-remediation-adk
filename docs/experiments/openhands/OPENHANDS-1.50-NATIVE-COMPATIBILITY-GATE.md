@@ -1,6 +1,6 @@
 # OpenHands 1.50.0 native compatibility gate
 
-Status: **FAILED — M3 is blocked**. Date: 2026-10-17.
+Status: **PASSED for the scoped M2 native compatibility gate**. Date: 2026-10-17.
 
 This is the focused M2 acceptance gate for the shared backend. It exercised the
 actual OpenHands Agent Server, SDK and tools at `1.50.0` in disposable local
@@ -9,12 +9,12 @@ target repository; run Maven, OSV or remediation; push a target branch; or
 create a pull request. No upstream OpenHands source was patched.
 
 The native conversation and command Stop Hook protocols work in the tested
-runtime, including DENY continuation. The shared adapter nevertheless cannot
-safely provision a newly created conversation: the native creation response
-omits `hook_config` until the server is restarted, while the adapter correctly
-requires that configuration to be visible before execution can be enabled.
-The adapter therefore fails closed. This gate must be rerun after that mismatch
-has a narrow, safety-preserving resolution.
+runtime, including DENY continuation. Source tracing proved the fresh
+`hook_config: null` response is lazy native initialization, not response-model
+loss: a non-running context message installs and persists the effective hook.
+The adapter now performs a two-phase identity check and requires an immediate
+post-initialization GET to expose the exact effective hook. The actual pinned
+runtime rerun passed without a restart, external model or execution dispatch.
 
 ## Reproducible runtime
 
@@ -63,16 +63,16 @@ credentials. The existing host OpenHands installation was not changed.
 | Context event with `run=false` | PROVEN | Event returned successfully and conversation remained `idle`; the local provider received no request. |
 | Lookup and event search | PROVEN | Conversation lookup and paginated native event search returned the created records. |
 | Native persistence across restart | PROVEN | The same UUID, events, workspace and hook configuration reloaded from disposable native state. |
-| Native idempotent UUID reuse | PARTIAL | Pinned source and observed state support existing-conversation reuse; the product adapter is blocked before successful binding. |
+| Native idempotent UUID reuse | PROVEN | Fresh provision, immediate retry and post-restart retry reused one UUID, context event and SQLite association. |
 | Command Stop Hook transport | PROVEN | Actual native `/run` executions used a loopback-only deterministic provider and exercised all five hook fixtures below. |
-| Shared adapter conversation mapping | FAILED | Fresh creation returned `hook_config: null`; adapter rejected the identity, persisted recovery state and did not start execution. |
-| Profile/workspace/guidance/Skills serialization | PARTIAL | Native profile, workspace, hook and context were observed independently; the adapter could not complete its full verification/binding path. |
-| Intended prepared worktree | PARTIAL | Native execution used the exact disposable `LocalWorkspace`; the blocked adapter path did not run it. |
-| Native event links without payload copying | NOT PROVEN | Existing offline tests cover this, but the native adapter never reached binding in this gate. |
-| Product retry/reconciliation without duplicate run | PARTIAL | Deterministic native state survived restart and the adapter failed closed; successful product reconciliation was blocked. |
+| Shared adapter conversation mapping | PROVEN | Actual adapter provisioned the deterministic UUID after effective-hook verification and persisted it in SQLite. |
+| Profile/workspace/guidance/Skills serialization | PROVEN | Two-phase checks verified profile revision, model, worktree, guidance, Skill, terminal environment, tags and hook. |
+| Intended prepared worktree | PROVEN | Native conversation used the exact disposable prepared `LocalWorkspace` and stayed idle during provisioning. |
+| Native event links without payload copying | PROVEN | Actual context event identity was linked in SQLite; content remained in native storage. |
+| Product retry/reconciliation without duplicate run | PROVEN | Same-process and post-restart retries reused one conversation/context; adapter issued zero `/run` calls. |
 | Native finish cannot imply acceptance | PROVEN | Native fixtures reached `finished`; no durable validation PASS or accepted product result was created. The failed adapter task remained `NOT_STARTED`. |
 | Credential isolation | PROVEN | Server and local provider ran with a minimal environment and no external provider credentials; conversation profile used no secret refs. |
-| Worker ownership/network-loss reconciliation | NOT PROVEN | Covered only by offline fake-server tests; no ambiguous live dispatch was induced. |
+| Worker ownership/network-loss reconciliation | PARTIAL | Zero dispatch during provision/recovery was proven; ambiguous real `/run` response remains covered only offline. |
 | Hook access to validator state/artifacts | NOT PROVEN | Synthetic hook fixtures were used; Maven/scanner validation was intentionally prohibited. |
 | Canvas 1.24.0 end-to-end compatibility | NOT PROVEN | Canvas was not installed or exercised in this gate. Prior source inspection is not runtime proof. |
 
@@ -138,37 +138,59 @@ The existing shared rule—accept only a complete durable independent PASS—mus
 remain authoritative. Direct invocation of the product hook CLI is covered by
 the offline validation suite and is not counted as native transport evidence.
 
-## Blocking adapter mismatch
+## Root cause and correction
 
-The shared adapter was connected to this real server with a disposable product
-task. Native creation used the expected deterministic conversation UUID and
-stored the supplied hook. However, the immediate creation/lookup response
-exposed `hook_config: null`. The native metadata on disk contained the hook,
-and the hook later executed. After server restart, lookup exposed the complete
-configuration.
+The original run exposed `hook_config: null` on creation and immediate warm
+GET, although the hook later executed and appeared after cold reload. Pinned
+source tracing established the complete path:
 
-Pinned `1.50.0` returns HTTP 201 for a newly created UUID and HTTP 200 for an
-existing UUID, but the current transport deliberately returns only the parsed
-object. Accepting a null hook based on HTTP status would not prove that the
-required validation command was installed, and would weaken collision and
-recovery checks. No such workaround was made.
+1. `StartConversationRequest` validates the hook and
+   `ConversationService._start_conversation` copies it into
+   `StoredConversation`.
+2. `EventService` constructs `LocalConversation(...,
+   hook_config=self.stored.hook_config)`.
+3. `LocalConversation.__init__` assigns it to `_pending_hook_config`; fresh
+   `ConversationState.hook_config` remains null.
+4. `_compose_conversation_info` serializes that state unchanged, so creation
+   and immediate warm GET both accurately report null.
+5. `send_message` calls `_ensure_agent_ready` for the OpenHands agent. Lazy
+   plugin/Skill initialization merges hooks, assigns the effective result to
+   state, constructs the hook processor and persists the state.
+6. The subsequent GET and cold reload expose the installed configuration.
 
-The adapter raised `RuntimeIdentityError` for the mismatched hook, persisted
-`CONVERSATION_IDENTITY_MISMATCH`, set the runtime to `RECOVERY_REQUIRED`, and
-left execution `NOT_STARTED` and product acceptance false. This is the correct
-safe outcome, but it means actual shared-backend compatibility is **FAILED**.
-There were no source-code compatibility changes in this gate.
+This is initialization timing and a pending-versus-effective runtime
+representation, not a different response model or serialization omission.
+HTTP 201, the UUID and persisted request metadata remain insufficient proof.
+
+The correction first verifies every observable identity field while allowing
+only the exact pending representation (`hook_config is null`). It submits the
+uniquely marked context with `run=false`, observes that event, performs an
+immediate GET, and requires exact equality with the complete approved hook.
+Missing, partial, modified or still-null hooks fail closed. No delay, restart,
+request echo, upstream patch or model call is used.
+
+The actual rerun observed `null -> configured`, completed as
+`CONTEXT_ATTACHED`, linked one event, remained native `idle`, left execution
+`NOT_STARTED` and acceptance false, and issued zero `/run` calls. Same-process
+retry and a server/database restart reused the same UUID and context. A native
+conversation whose command was deliberately changed was rejected with
+`CONVERSATION_IDENTITY_MISMATCH` and `RECOVERY_REQUIRED`.
+
+`recover_provisioning(task_id)` is a trusted explicit recovery operation for
+that single pre-execution failure code. It reconstructs the original durable
+identity, never creates a second conversation, searches for the context marker
+before sending, never resends an uncertain event, never calls `/run`, and
+requires the full effective hook. It appends `agent.recovery.completed` without
+erasing the earlier recovery event. An actual controlled recovery ended
+`CONTEXT_ATTACHED`, idle and unaccepted with one linked event.
 
 ## Persistence, restart and remaining concerns
 
 Native conversations/events and product SQLite records have separate durable
 stores and must be backed up and reconciled together by stable UUID. This test
-proved native cold reload and product failure persistence, not successful
-end-to-end reconciliation. The following remain unresolved:
+proved native cold reload and successful product reconciliation. The following
+remain unresolved:
 
-- establish a pinned native response or API that exposes the effective hook on
-  fresh creation, or add another equally strong pre-run attestation; then rerun
-  this entire no-model gate;
 - exercise ownership and restart around an uncertain real `/run` response
   without risking a duplicate model execution;
 - exercise the real product validator and artifact availability in the hook
@@ -178,9 +200,8 @@ end-to-end reconciliation. The following remain unresolved:
 - perform a separately authorized live remediation after all no-model gates
   pass.
 
-The shared backend is **not ready for M3**. The recommended next action is a
-narrow compatibility investigation/fix for authoritative fresh-conversation
-hook verification, backed by an actual `1.50.0` regression fixture, followed
-by a rerun of this gate. Do not begin Canvas/client replacement, delivery or a
-live remediation on the strength of the native hook result alone.
-
+The blocking M2 native-compatibility condition is resolved, so M3 may begin as
+its own bounded change. This does **not** make the shared backend production
+ready: delivery and live remediation remain disabled until the remaining
+runtime, deployment, Canvas and separately authorized live-validation gates
+are met.

@@ -154,7 +154,10 @@ The subsequent
 proved `/run` command-hook transport, exit behavior, HookExecutionEvent fields,
 DENY feedback on the same conversation and native restart persistence using a
 loopback-only deterministic provider. It also found a blocking serialization
-mismatch: the fresh conversation response omits `hook_config`, so the shared
-adapter correctly refuses to provision or run it. Live Vertex/Gemini, Maven,
-OSV, product-validator execution and long-running ambiguous-dispatch recovery
-remain deliberately unverified and disabled.
+mismatch: the fresh conversation response omits `hook_config` until lazy native
+initialization. The adapter now uses non-running context attachment to trigger
+that supported initialization and requires the immediate GET to match the exact
+effective hook. The actual pinned-runtime rerun passed, including ALLOW,
+DENY/additional-context and fail-closed modified-hook checks. Live
+Vertex/Gemini, Maven, OSV, product-validator execution and long-running
+ambiguous-dispatch recovery remain deliberately unverified and disabled.

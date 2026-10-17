@@ -1827,6 +1827,72 @@ class SQLiteTaskStore:
         finally:
             connection.close()
 
+    def complete_openhands_recovery(
+        self, task_id: str, *, expected_failure_code: str
+    ) -> OpenHandsRuntimeRecord:
+        """Acknowledge one explicitly reverified, non-running native identity.
+
+        Historical recovery events remain append-only; only the runtime's
+        current condition is advanced so its verified context event can be
+        linked in a separate atomic operation.
+        """
+
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            task = self._task_row(connection, task_id)
+            row = connection.execute(
+                "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if row is None:
+                raise OpenHandsRuntimeConflictError("task has no native runtime")
+            current = self._openhands_runtime_from_row(row)
+            if (
+                current.runtime_status is not OpenHandsRuntimeStatus.RECOVERY_REQUIRED
+                or current.failure_code != expected_failure_code
+                or current.execution_status is not ExecutionStatus.NOT_STARTED
+                or ExecutionStatus(task["execution_status"])
+                is not ExecutionStatus.NOT_STARTED
+            ):
+                raise OpenHandsRuntimeConflictError(
+                    "native recovery condition differs from the explicit request"
+                )
+            connection.execute(
+                """UPDATE openhands_runtimes
+                SET runtime_status = ?, failure_code = NULL, failure_detail = NULL,
+                    updated_at = ? WHERE task_id = ?""",
+                (OpenHandsRuntimeStatus.CONVERSATION_READY.value, now, task_id),
+            )
+            self._append_event(
+                connection,
+                task_id=task_id,
+                event_type="agent.recovery.completed",
+                stage="agent",
+                data={
+                    "conversationId": current.conversation_id,
+                    "resolvedFailureCode": expected_failure_code,
+                    "executionStarted": False,
+                },
+                timestamp=now,
+            )
+            connection.execute(
+                "UPDATE tasks SET updated_at = ? WHERE task_id = ?", (now, task_id)
+            )
+            updated = self._openhands_runtime_from_row(
+                connection.execute(
+                    "SELECT * FROM openhands_runtimes WHERE task_id = ?", (task_id,)
+                ).fetchone()
+            )
+            connection.commit()
+            return updated
+        except BaseException:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        finally:
+            connection.close()
+
     def link_openhands_event(
         self,
         link: OpenHandsEventLink,
