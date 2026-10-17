@@ -324,6 +324,13 @@ Delivery remains disabled and `NOT_REQUESTED`.
 
 ### Change 7 — UI and thin experiment client parity (M3)
 
+Entry to this change is currently blocked by the failed
+[OpenHands 1.50.0 native compatibility gate](OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md).
+The pinned native runtime omits `hook_config` from a freshly created
+conversation response, preventing the shared adapter from proving the required
+validation command before execution. Resolve that mismatch without weakening
+the gate and rerun the no-model compatibility verification before starting M3.
+
 - Likely files: a task-specific Canvas App only if the pinned/supported Canvas
   extension contract passes a spike; otherwise an external minimal page; a new
   thin experiment client script and comparison tests.

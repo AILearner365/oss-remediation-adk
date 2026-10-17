@@ -149,9 +149,12 @@ tree drift, crashes around report/SQLite persistence, uncertain `/run`, worker
 competition, native event association, restart, API compatibility, credential
 isolation, and no live network/model/Maven/scanner use.
 
-Pinned 1.50.0 source was inspected for `/run`, command-hook exit codes, JSON
-fields, HookExecutionEvent, and same-conversation feedback. The pinned packages
-are not installed in the offline test environment, so an actual no-model Agent
-Server command-hook transport test remains required before deployment. Live
-Vertex/Gemini, Maven, OSV, denial/resume, and long-running restart compatibility
+The subsequent
+[actual pinned-runtime gate](OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md)
+proved `/run` command-hook transport, exit behavior, HookExecutionEvent fields,
+DENY feedback on the same conversation and native restart persistence using a
+loopback-only deterministic provider. It also found a blocking serialization
+mismatch: the fresh conversation response omits `hook_config`, so the shared
+adapter correctly refuses to provision or run it. Live Vertex/Gemini, Maven,
+OSV, product-validator execution and long-running ambiguous-dispatch recovery
 remain deliberately unverified and disabled.

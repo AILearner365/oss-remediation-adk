@@ -190,9 +190,10 @@ isolation, missing/incompatible servers, dirty post-agent workspaces and the
 unvalidated-completion boundary. Existing shared-backend and Gate-2 regression
 tests remain unchanged except later schema-version expectations advancing to 6.
 
-No deterministic no-model native-server test was added because the pinned
-packages are inspected but not installed in the repository test environment.
-Change 6 packages the command boundary and proves the validator/Stop Hook
-policy with a pinned-shape fake server, but deployment must still provide a
-fully locked 1.50.0 image and durable native persistence and must prove the
-real no-model command-hook transport before operational execution.
+The subsequent actual pinned-runtime gate is recorded in
+[OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md](OPENHANDS-1.50-NATIVE-COMPATIBILITY-GATE.md).
+It proved the native no-model conversation and command-hook transport, but also
+found that a fresh `1.50.0` conversation response omits `hook_config` until a
+server restart. The shared adapter correctly fails closed because it cannot
+verify the installed validation command. M3 and operational execution remain
+blocked pending a narrow safety-preserving resolution and gate rerun.
