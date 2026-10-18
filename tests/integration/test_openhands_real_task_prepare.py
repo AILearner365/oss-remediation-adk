@@ -29,6 +29,15 @@ class DurablePreparationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 setup.prepare(source, scanner, state)
 
+    def test_local_only_target_ignore_is_narrow(self):
+        from inspect import getsource
+        source = getsource(setup.prepare)
+        self.assertIn('local_source / ".git" / "info" / "exclude"', source)
+        self.assertIn('target/\\n', source)
+        self.assertNotIn('status.showUntrackedFiles', source)
+        self.assertNotIn('git add', source)
+        self.assertNotIn('git commit', source)
+
     def test_no_agent_execution_or_known_fix_in_objective(self):
         from inspect import getsource
         source = getsource(setup)
