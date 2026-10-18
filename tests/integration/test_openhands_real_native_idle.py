@@ -30,7 +30,7 @@ class RealIdleGuards(unittest.TestCase):
     def test_missing_store_never_calls_native(self):
         with tempfile.TemporaryDirectory() as tmp:
             from openhands_shared.store import SQLiteTaskStore
-            from openhands_shared.contracts import TaskNotFoundError
+            from openhands_shared.store import TaskNotFoundError
             with SQLiteTaskStore(Path(tmp) / "missing.sqlite3") as store:
                 with patch.object(step.native, "http", side_effect=AssertionError("No transport allowed")):
                     with self.assertRaises(TaskNotFoundError):
