@@ -188,6 +188,8 @@ def create_idle_native_conversation(
     """
     # Real remediation must provide the durable task's objective. Legacy POC
     # callers may omit it for synthetic lifecycle tests; no model runs here.
+    if str(request.get("agent", {}).get("llm", {}).get("model", "")).startswith("vertex_ai/") and initial_message is None:
+        raise HandoffError("Real Vertex task requires explicit registered objective before native creation")
     if initial_message is not None:
         if not isinstance(initial_message, str) or not initial_message.strip():
             raise HandoffError("Initial task objective must be nonempty")
