@@ -121,8 +121,22 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
         raise HandoffError("Native conversation ID differs from durable task identity")
     if payload.get("execution_status") != "idle":
         raise HandoffError("Native conversation is not idle; refusing automatic execution")
-    hook = request["hook_config"]["stop"][0]["hooks"][0]["command"]
-    if hook not in json.dumps(payload.get("hook_config") or {}):
+    # Compare parsed fields, not serialized JSON: command quoting is escaped
+    # by json.dumps(), so substring searching rejects valid native responses.
+    expected_hook = request["hook_config"]["stop"][0]["hooks"][0]
+    config = payload.get("hook_config")
+    try:
+        entries = config["stop"]
+        actual_hooks = [hook for group in entries for hook in group["hooks"]]
+    except (TypeError, KeyError):
+        raise HandoffError("Native response omitted the configured independent Stop Hook") from None
+    if not any(
+        isinstance(hook, Mapping)
+        and hook.get("type") == expected_hook["type"]
+        and hook.get("command") == expected_hook["command"]
+        and hook.get("timeout") == expected_hook["timeout"]
+        for hook in actual_hooks
+    ):
         raise HandoffError("Native response omitted the configured independent Stop Hook")
     workspace = payload.get("workspace")
     if not isinstance(workspace, Mapping) or workspace.get("working_dir") != request["workspace"]["working_dir"]:
