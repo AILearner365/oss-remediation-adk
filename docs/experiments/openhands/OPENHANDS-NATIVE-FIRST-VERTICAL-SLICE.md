@@ -573,3 +573,41 @@ Do **not** run if no 1.55.1 native server is active. A successful attach
 is `NATIVE_IDLE_ATTACHED_NOT_AUTHORIZED`, **not** authorization to
 run. The actual deterministic validation Stop Hook still needs controlled
 end-to-end execution verification. No model run until separate budget approval.
+
+## Real validator against unremediated isolated baseline (without fabricated dispatch)
+
+Cloud Shell successfully returned `NATIVE_IDLE_ATTACHED_NOT_AUTHORIZED`:
+task `task_a3e63e4dc3b5449c9142e4e2c34e0ac9`, conversation
+`c6f99951-2fac-4ce4-bc32-bf52c921cd83`; persisted Stop
+Hook and objective verified; no native `/run` has occurred.
+
+The actual `SharedValidationService.handle_stop` requires a durable
+execution claim, which is correctly absent on this idle task. It would
+be dishonest to create a fake dispatch claim just to trigger the hook.
+`scripts/openhands_real_validator_probe.py` instead invokes the
+**existing real** `ExistingDeterministicValidationRunner` with the
+persisted task contract, the verified immutable baseline artifact,
+and the persisted validation profile, against a **fresh disposable**
+Git checkout. This performs real Maven/OSV validation without
+mutating the live worktree, conversation, or SQLite execution records.
+It must reject the still-vulnerable baseline; a failed change-evidence
+check on an unchanged tree is expected. The probe explicitly does NOT
+claim a native Stop Hook event or a durable validator attempt.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_validator_probe.py' -v
+python3 scripts/openhands_real_validator_probe.py \
+  --database /tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3 \
+  --task-id task_a3e63e4dc3b5449c9142e4e2c34e0ac9 \
+  --hook-config /tmp/openhands-real-durable-task-20261018-v2/stop-hook.json
+```
+
+Successful real validator probe status:
+`PASS_UNREMEDIATED_BASELINE_REJECTED`, with fresh scan succeeded,
+remaining original findings >= 1, and validator `passed=false`.
+A deterministic-only pass does **not** prove the native HookExecutionEvent,
+the running Agent Server's Vertex runtime or cost-limited autonomous run.
+Those gates must remain outstanding. Never replay the native idle
+attachment on this task.
