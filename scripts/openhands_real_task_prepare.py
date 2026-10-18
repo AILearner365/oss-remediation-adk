@@ -66,6 +66,15 @@ def prepare(source: Path, scanner: Path, run_root: Path) -> dict:
     git("clone", "--quiet", "--no-local", str(remote), str(local_source))
     if git("-C", str(local_source), "rev-parse", "HEAD") != head:
         raise ValueError("Local isolated source does not match the approved baseline")
+    # Maven creates target/ during the deterministic build. Exclude ONLY
+    # generated target directories in this freshly cloned local Git repository;
+    # never alter the committed fixture or relax tracked-file cleanliness.
+    exclude = local_source / ".git" / "info" / "exclude"
+    if not exclude.is_file():
+        raise ValueError("Local clone Git exclude file is missing")
+    existing_excludes = exclude.read_text(encoding="utf-8")
+    exclude.write_text(existing_excludes + "\n# Isolated Maven build products\ntarget/\n",
+                       encoding="utf-8")
     database = run_root / "state" / "tasks.sqlite3"
     artifacts = run_root / "artifacts"
     build_profile = BaselineProfile(
@@ -149,6 +158,7 @@ def main() -> int:
     except Exception as exc:
         outcome = {"kind": "durable-real-maven-osv-task-preparation",
                    "status": "BLOCKED", "errorType": type(exc).__name__,
+                   "errorDetail": str(exc)[:300],
                    "nativeRunCalled": False, "modelExecutionAuthorized": False}
     print(json.dumps(outcome, sort_keys=True, indent=2))
     return 0 if outcome["status"] == "DURABLE_TASK_PREPARED_NOT_AUTHORIZED" else 1
