@@ -78,10 +78,20 @@ def build_request(
     # native conversation. Never allow claim-without-context or recovery here.
     from openhands_shared.contracts import ExecutionStatus
     if claim is None:
-        if (runtime.runtime_status is not OpenHandsRuntimeStatus.CONVERSATION_READY
+        if (runtime.runtime_status not in (
+                OpenHandsRuntimeStatus.CONVERSATION_READY,
+                OpenHandsRuntimeStatus.CONTEXT_ATTACHED,
+            )
                 or runtime.execution_status is not ExecutionStatus.NOT_STARTED
                 or status.execution_status is not ExecutionStatus.NOT_STARTED):
             raise HandoffError("Pre-execution provisioning requires an unstarted conversation")
+        # Re-reading a real, already-attached idle conversation is legitimate.
+        # However, do not accept a synthetic CONTEXT_ATTACHED state with no
+        # durable native message evidence. No execution claim is created here.
+        if runtime.runtime_status is OpenHandsRuntimeStatus.CONTEXT_ATTACHED and (
+                runtime.last_native_event_order < 1
+                or not runtime.last_native_event_id):
+            raise HandoffError("Attached native context lacks durable event evidence")
     elif (runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED
           or claim.dispatch_status not in (
               ExecutionDispatchStatus.DISPATCHED, ExecutionDispatchStatus.RECOVERY_REQUIRED
