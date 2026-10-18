@@ -199,10 +199,10 @@ def recover():
         attempts = snapshot["attempts"]
         checks = {
             "sameNativeConversation": before["conversationId"] == uid,
-            "interruptedAttemptPreserved": len(attempts) >= 2 and
-                attempts[0]["state"] == "RUNNING",
-            "secondAttemptValidatorFailure": len(attempts) >= 2 and
-                attempts[1]["outcome"] == "VALIDATOR_FAILURE",
+            "sameAttemptReconciled": len(attempts) == 1 and
+                attempts[0]["number"] == 1 and
+                attempts[0]["state"] == "COMPLETED" and
+                attempts[0]["outcome"] == "VALIDATOR_FAILURE",
             "validatorNotRerun": not (STATE / "validator-invoked.json").exists(),
             "neverAccepted": snapshot["accepted"] is False,
             "noPass": not any(x["outcome"] == "PASS" for x in attempts),
