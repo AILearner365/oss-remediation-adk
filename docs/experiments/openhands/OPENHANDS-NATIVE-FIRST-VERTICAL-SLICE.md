@@ -667,3 +667,38 @@ no event evidence remains; a new regression assertion verifies the
 legitimate attached state. No task metadata or native conversation
 was altered by this code change. Rerun the audit and inspect its
 unproven Vertex/package and hard-budget flags; no model execution.
+
+## Explicit authorization for first real run (2026-10-18)
+
+The user explicitly authorized **one potentially billable Gemini 2.5 Flash
+autonomous remediation run** using the already-attached native conversation
+`c6f99951-2fac-4ce4-bc32-bf52c921cd83`, real task
+`task_a3e63e4dc3b5449c9142e4e2c34e0ac9`,
+up to 12 agent iterations and 2 validation denials, no automatic PR.
+This accepts the disclosed limitation that iteration count is NOT a
+hard financial/token/time cap. The user confirmed after restart that
+matching server processes inherited
+`VERTEXAI_PROJECT=deutschebank-aipocs` and
+`VERTEXAI_LOCATION=us-central1`. Native persistence was rechecked: idle
+conversation and Stop Hook both present. Full paid Vertex provider use
+and the live Stop Hook event remain to be proven.
+
+One-shot operator CLI: `scripts/openhands_real_dispatch_once.py`.
+It pins task/conversation/model, validates existing native persisted
+idle config and iteration cap, claims durable execution intent via
+`dispatch_native_once` before sending one `/run`, and **never retries**
+ambiguous dispatch. No task preparation, restart, or conversation creation.
+Run the offline guard tests first:
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_dispatch_once.py' -v
+python3 scripts/openhands_real_dispatch_once.py --approve-billable-run I_AUTHORIZE_ONE_BILLABLE_VERTEX_RUN
+```
+
+The CLI returns `DISPATCHED` only for an accepted server request, **not**
+accepted remediation. No follow-up /run is allowed. On `BLOCKED`, preserve
+status, claim, and native event history for operator reconciliation.
+After dispatch, inspect native events and durable stop-hook validator attempt
+for PASS/DENY or bounded failure, and preserve failure evidence.
