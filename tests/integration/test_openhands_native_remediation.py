@@ -180,6 +180,8 @@ class NativeFirstHandoffTests(unittest.TestCase):
             self.store.get_openhands_runtime(self.data["taskId"]),
             runtime_status=OpenHandsRuntimeStatus.CONVERSATION_READY,
             execution_status=ExecutionStatus.NOT_STARTED,
+            last_native_event_id=None,
+            last_native_event_order=0,
         )
         request = native_first.build_request(
             proxy, self.data["taskId"],
