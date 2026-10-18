@@ -1,0 +1,6 @@
+{
+  "canvasVersion": "1.27.1",
+  "expectedAgentServer": "1.54.0",
+  "failure": "Canvas UI ingress is unavailable",
+  "verdict": "FAILED"
+}
