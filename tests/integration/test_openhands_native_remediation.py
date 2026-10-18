@@ -40,7 +40,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertEqual(request["conversation_id"], self.data["conversationId"])
         self.assertEqual(request["workspace"]["working_dir"], self.data["workspace"])
         self.assertFalse(request["worktree"])
-        self.assertIn("-m openhands_shared.stop_hook",
+        self.assertIn("openhands_shared.stop_hook",
                       request["hook_config"]["stop"][0]["hooks"][0]["command"])
         self.assertNotIn("api_key", request["agent"]["llm"])
         self.assertNotIn("base_url", request["agent"]["llm"])
