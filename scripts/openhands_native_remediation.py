@@ -181,6 +181,72 @@ def create_idle_native_conversation(
     return validate_native_response(persisted, request)
 
 
+
+def dispatch_native_once(
+    store: SQLiteTaskStore,
+    task_id: str,
+    *,
+    worker_id: str,
+    request: Mapping[str, Any],
+    http: Callable[..., Mapping[str, Any]],
+) -> str:
+    """Guard native /run with one durable claim and fail-closed reconciliation.
+
+    Before first dispatch, verify the native idle conversation, exact workspace
+    and actual Stop Hook. On ambiguous transport failure, /run is NEVER retried.
+    A persisted dispatch claim means native execution, not security acceptance.
+    """
+    from openhands_shared.contracts import ExecutionDispatchStatus, OpenHandsRuntimeStatus
+    runtime = store.get_openhands_runtime(task_id)
+    if (runtime is None or runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED
+            or runtime.conversation_id != request["conversation_id"]):
+        raise HandoffError("Native dispatch requires bound context-attached task identity")
+    claim = store.get_execution_claim(task_id)
+    if claim is not None:
+        if claim.worker_id != worker_id or claim.conversation_id != runtime.conversation_id:
+            raise HandoffError("Native dispatch already belongs to another identity")
+        if claim.dispatch_status is ExecutionDispatchStatus.DISPATCHED:
+            return "ALREADY_DISPATCHED"
+        if claim.dispatch_status is ExecutionDispatchStatus.RECOVERY_REQUIRED:
+            raise HandoffError("Native dispatch requires explicit recovery; automatic retry disabled")
+        # An intent may have reached the server even if its response was lost.
+        # Never send /run again, regardless of what GET currently reports.
+        try:
+            status = http("GET", f"/api/conversations/{runtime.conversation_id}").get("execution_status")
+        except Exception:
+            status = None
+        if status in {"running", "finished"}:
+            store.update_execution_dispatch(task_id, dispatched=True)
+            return "RECONCILED_DISPATCHED"
+        store.update_execution_dispatch(
+            task_id, dispatched=False, recovery_code="NATIVE_INTENT_UNCERTAIN"
+        )
+        raise HandoffError("Native dispatch intent cannot safely be replayed")
+
+    persisted = http("GET", f"/api/conversations/{runtime.conversation_id}?include_skills=true")
+    validate_native_response(persisted, request)
+    if store.get_status(task_id).accepted:
+        raise HandoffError("Accepted task must not be re-executed")
+    store.claim_execution(task_id, worker_id)
+    try:
+        http("POST", f"/api/conversations/{runtime.conversation_id}/run", {}, timeout=20)
+    except Exception as exc:
+        try:
+            observed = http("GET", f"/api/conversations/{runtime.conversation_id}")
+            status = observed.get("execution_status")
+        except Exception:
+            status = None
+        if status in {"running", "finished"}:
+            store.update_execution_dispatch(task_id, dispatched=True)
+            return "RECONCILED_DISPATCHED"
+        store.update_execution_dispatch(
+            task_id, dispatched=False, recovery_code="NATIVE_RUN_RESPONSE_UNCERTAIN"
+        )
+        raise HandoffError("Native /run response uncertain; automatic redispatch disabled") from exc
+    store.update_execution_dispatch(task_id, dispatched=True)
+    return "DISPATCHED"
+
+
 def show_safe_summary(request: Mapping[str, Any]) -> dict[str, Any]:
     """Never print/store LLM credentials from the full native request."""
     return {
