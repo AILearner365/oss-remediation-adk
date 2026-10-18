@@ -1,0 +1,39 @@
+{
+  "accepted": false,
+  "canvasVersion": "1.27.1",
+  "case": "infrastructure",
+  "checks": {
+    "correctOutcome": true,
+    "nativeHookObserved": true,
+    "nativeTerminal": true,
+    "noAcceptance": true,
+    "noIndependentPass": true,
+    "terminalAllowWithoutPass": true
+  },
+  "conversationId": "cab01630-3565-5f3b-9597-616f37e0cbd3",
+  "executionStatus": "finished",
+  "modelRequests": 1,
+  "nativeHookEvents": 1,
+  "nativeHookOutcomes": [
+    {
+      "blocked": false,
+      "exitCode": 0,
+      "success": true
+    }
+  ],
+  "notProven": [
+    "Real Maven/OSV infrastructure behavior",
+    "Network/OS-level process kill recovery",
+    "End-to-end restart recovery",
+    "Delivery authorization"
+  ],
+  "serverVersion": "1.55.1",
+  "validationAttempts": 1,
+  "validationOutcomes": [
+    "INFRASTRUCTURE_FAILURE"
+  ],
+  "validationStates": [
+    "COMPLETED"
+  ],
+  "verdict": "PASS"
+}
