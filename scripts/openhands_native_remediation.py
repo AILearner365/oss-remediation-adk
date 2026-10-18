@@ -84,7 +84,10 @@ def build_request(
         raise HandoffError("Stop Hook database differs from authoritative task store")
     request = store.get_request(task_id)
     config.profile_for(request)
-    executable = [sys.executable, "-m", "openhands_shared.stop_hook",
+    # Native hook subprocess may start inside the disposable task worktree,
+    # not the control repository. Set the import root explicitly.
+    bootstrap = "import sys,runpy;sys.path.insert(0," + repr(str(ROOT)) + ");runpy.run_module('openhands_shared.stop_hook',run_name='__main__')"
+    executable = [sys.executable, "-c", bootstrap,
                   "--config", str(hook_config.resolve()),
                   "--task-id", task_id, "--workspace", str(workspace)]
     llm: dict[str, Any] = {"model": model, "usage_id": "native-remediation", "stream": False}
