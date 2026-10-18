@@ -125,7 +125,7 @@ def create() -> str:
         "agent": {"kind": "Agent", "llm": {
             "model": "openai/gpt-4o-mini", "api_key": "only-local-poc",
             "base_url": "http://127.0.0.1:" + str(PORT) + "/v1",
-            "usage_id": "openhands-native-hook-poc2", "stream": False,
+            "usage_id": "openhands-native-hook-poc2", "stream": False, "api_mode": "chat",
             "num_retries": 0}},
         "hook_config": {"stop": [{"matcher": "*", "hooks": [
             {"type": "command", "command": hook_command(), "timeout": 15}
