@@ -1,0 +1,31 @@
+{
+  "canvasVersion": "1.27.1",
+  "checks": {
+    "canvasStaticFrontendHttp": "PASS",
+    "hookProtocolStandalone": {
+      "mockFail": "PASS",
+      "mockPass": "PASS"
+    },
+    "nativeEventsReadable": "PASS",
+    "nativeServerSdkVersion": "PASS",
+    "nativeStopHookAttached": "PASS",
+    "normalConversationCreated": "PASS",
+    "normalIdleNoModelCall": "PASS",
+    "remediationConversationCreated": "PASS",
+    "remediationIdleNoModelCall": "PASS"
+  },
+  "expectedAgentServer": "1.54.0",
+  "normalConversationId": "bd6117a7-5721-41cb-9424-3413181fa423",
+  "notProven": [
+    "Canvas browser rendering",
+    "Native /run executing Stop Hook",
+    "Real Maven/OSV baseline",
+    "Vertex ADC",
+    "Real remediation and delivery"
+  ],
+  "remediationConversationId": "d718b6cf-7892-4add-a797-127c3f69ab95",
+  "serverCapabilities": [
+    "idempotent_conversation_create_v1"
+  ],
+  "verdict": "NATIVE_API_SMOKE_PASSED__BROWSER_AND_NATIVE_HOOK_RUN_NOT_PROVEN"
+}
