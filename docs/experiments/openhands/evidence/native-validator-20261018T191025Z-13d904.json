@@ -1,0 +1,34 @@
+{
+  "canvasVersion": "1.27.1",
+  "checks": {
+    "acceptedByExistingService": false,
+    "existingValidatorCalledFromNativeHook": true,
+    "feedbackSeenByModel": true,
+    "firstIndependentOutcomeFail": true,
+    "laterIndependentOutcomePass": false,
+    "nativeAllowObserved": true,
+    "nativeDenialObserved": true,
+    "nativeFinished": true
+  },
+  "conversationId": "a9617b32-9a2e-53e1-a927-f35a3a24f668",
+  "executionStatus": "finished",
+  "fixtureRepairByCoordinator": true,
+  "modelRequestCount": 4,
+  "nativeBlockedDecisions": 3,
+  "nativeStopHookEvents": 4,
+  "notProven": [
+    "Real Maven/OSV scanner execution",
+    "Agent-produced repository fix",
+    "Tamper-resistant production validator isolation",
+    "Final GitHub delivery"
+  ],
+  "serverVersion": "1.55.1",
+  "validationAttemptCount": 4,
+  "validationOutcomes": [
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE"
+  ],
+  "verdict": "NOT_PROVEN"
+}
