@@ -132,12 +132,28 @@ python3 scripts/openhands_native_recovery_poc.py publish
 
 The recovery harness checks that the launcher PID differs from the
 start stage's PID. It uses a fresh fixture at
-`/tmp/openhands-native-poc-1271-server-1551/hook-poc4-recovery-restart-v1`.
+`/tmp/openhands-native-poc-1271-server-1551/hook-poc4-recovery-restart-v2`.
 If the same-conversation continuation API does not support this
 sequence, the result is NOT_PROVEN; investigate native events instead
 of claiming recovery.
 
 The recovered report is
-`~/openhands-native-poc-reports/native-recovery-poc4-restart-v1.json`.
+`~/openhands-native-poc-reports/native-recovery-poc4-restart-v2.json`.
 No previous POC evidence is overwritten. It is not a delivery or
 security remediation acceptance test.
+
+## Restart-v1 diagnostic and correction (2026-10-18)
+
+The initial native start stage was **NOT_PROVEN**. It produced five
+`HookExecutionEvent` records, each exit code 2 / blocked true, but the
+task store contained **zero** validation attempts. Root cause: the
+POC recovery script's `argparse` accepted only `start`, `recover`,
+`publish`; the native hook called the missing `hook` subcommand.
+Argument parsing exited 2 before `begin_validation()`.
+
+Correction: explicitly dispatch `hook`, add an offline CLI-dispatch
+regression test, and use fresh **restart-v2** state. The restart-v1
+conversation and its start-report are preserved. Exit code 2 does not
+prove independent validation denial unless a durable attempt corroborates
+it. Run offline tests and **only the start stage first**; review its
+snapshot before attempting a server restart.
