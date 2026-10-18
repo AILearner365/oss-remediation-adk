@@ -24,7 +24,7 @@ from openhands_shared.stop_hook import load_stop_hook_config
 from openhands_shared.store import SQLiteTaskStore
 from openhands_shared.validation import SharedValidationService
 
-CASE = "restart-v1"
+CASE = "restart-v2"
 STATE = None
 REPORT = None
 REPO = Path(__file__).resolve().parents[1]
@@ -256,9 +256,11 @@ def publish():
 def main():
     configure()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("start", "recover", "publish"))
+    parser.add_argument("action", choices=("start", "recover", "publish", "hook"))
     args = parser.parse_args()
     try:
+        if args.action == "hook":
+            return hook()
         if args.action == "start":
             return 0 if start()["verdict"] == "PASS" else 1
         if args.action == "recover":
