@@ -90,3 +90,27 @@ python3 -m unittest discover -s tests/integration -p 'test_openhands_native_reme
 python3 scripts/openhands_native_idle_create_poc.py
 ```
 Expected report: `~/openhands-native-poc-reports/native-idle-create-v2.json`.
+
+## Native idle-create v2 initialization discovery and v3 correction
+
+A user read-only GET demonstrated that POC3 had a Stop Hook, while
+new native-idle-create-v2 immediately after POST had `hook_config=null`.
+Attaching one initial user message using native `POST /events` with
+`run=false` made `hook_config` appear while conversation remained `idle`.
+The create-only helper now follows the observed native initialization
+sequence: **POST conversation → POST initial user event with run=false →
+GET persisted conversation → verify exact hook, workspace, ID and idle state**.
+There is still no `/run` and no LLM request.
+
+V2 state is retained; v3 uses a fresh isolated task fixture.
+The offline tests assert exact call ordering, `run=false`, and rejection
+when the native server fails to persist the Stop Hook.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 scripts/openhands_native_idle_create_poc.py
+```
+
+Expected report: `~/openhands-native-poc-reports/native-idle-create-v3.json`.
