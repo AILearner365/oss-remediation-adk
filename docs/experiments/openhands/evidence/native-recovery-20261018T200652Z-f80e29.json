@@ -1,0 +1,36 @@
+{
+  "case": "restart-v2",
+  "checks": {
+    "launcherRestartObserved": true,
+    "nativeFinished": true,
+    "nativeRecoveryHookObserved": true,
+    "neverAccepted": true,
+    "noPass": true,
+    "sameAttemptReconciled": true,
+    "sameNativeConversation": true,
+    "validatorNotRerun": true
+  },
+  "conversationId": "f54c8c3f-ef27-5971-b8b2-2ce141a73f70",
+  "executionStatus": "finished",
+  "nativeStopEvents": 2,
+  "notProven": [
+    "Real OS kill",
+    "Real Maven/OSV",
+    "Delivery authorization"
+  ],
+  "serverVersion": "1.55.1",
+  "snapshot": {
+    "accepted": false,
+    "attempts": [
+      {
+        "conversationId": "f54c8c3f-ef27-5971-b8b2-2ce141a73f70",
+        "number": 1,
+        "outcome": "VALIDATOR_FAILURE",
+        "state": "COMPLETED"
+      }
+    ],
+    "taskStatus": "FAILED_INFRASTRUCTURE"
+  },
+  "stage": "recovered",
+  "verdict": "PASS"
+}
