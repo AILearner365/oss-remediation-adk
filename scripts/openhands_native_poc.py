@@ -260,6 +260,35 @@ def wait_ready() -> dict:
     raise Failure("Timed out waiting for Agent Server: " + last + "; see " + str(LOG_FILE))
 
 
+def wait_canvas_ready() -> None:
+    """Wait for the official launcher to serve Canvas after Agent Server starts.
+
+    The Agent Server /server_info endpoint can become available before the
+    ingress proxy and static frontend are ready, especially after a restart.
+    """
+    deadline = time.monotonic() + 120
+    last = "not ready"
+    request = urllib.request.Request(
+        f"http://127.0.0.1:{INGRESS}/", headers={"Accept": "text/html"}
+    )
+    while time.monotonic() < deadline:
+        if owned_pid() is None:
+            raise Failure("Canvas launcher exited while waiting for HTTP ingress")
+        try:
+            with LOOPBACK.open(request, timeout=5) as response:
+                body = response.read(16384)
+                if response.status == 200 and b"<html" in body.lower():
+                    return
+                last = f"HTTP {response.status}, HTML missing"
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            last = type(exc).__name__
+        time.sleep(2)
+    raise Failure(
+        "Canvas ingress did not become ready within 120s after Agent Server; "
+        f"last observation: {last}. Inspect {LOG_FILE}"
+    )
+
+
 def create_fixture(kind: str, conv_id: str) -> Path:
     workspace = ROOT / "fixtures" / kind
     workspace.mkdir(parents=True, exist_ok=True)
@@ -406,7 +435,8 @@ def run() -> None:
         warm_native_packages(env)
     launch(env)
     wait_ready()
-    log("Native server ready; verifying idle integration (NO LLM RUN)")
+    wait_canvas_ready()
+    log("Native server and Canvas ingress ready; verifying idle integration (NO LLM RUN)")
     result = main_probe()
     record(result)
     log("API smoke PASSED. Open Canvas via Cloud Shell Web Preview on port " + str(INGRESS))
