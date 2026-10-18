@@ -35,6 +35,7 @@ STATE = ROOT / ("hook-poc3-" + CASE_ID)
 REPORT = native.RESULT_DIR / ("native-validator-poc-1.55.1-" + CASE_ID + ".json")
 MARKER = "DETERMINISTIC_VALIDATION_FAILED"
 PORT = 12997
+REPAIR_BYTES = b"POC3-REPAIRED\\n"
 
 
 def read_json(path: Path, default=None):
@@ -58,7 +59,7 @@ class ArtifactRunner:
 
     def run(self, repository, request, profile, baseline_document, attempt, runtime_root):
         marker = Path(repository) / "poc3-repaired.txt"
-        passed = marker.is_file() and marker.read_bytes() == b"POC3-REPAIRED\\n"
+        passed = marker.is_file() and marker.read_bytes() == REPAIR_BYTES
         result = report(passed=passed, remaining=0 if passed else 1)
         return result
 
@@ -182,7 +183,7 @@ def repair_after_denial(data, messages, uid):
             raise native.Failure("Repair checkpoint requires exactly one durable remediation failure")
     finally:
         store.close()
-    target.write_bytes(b"POC3-REPAIRED\\n")
+    target.write_bytes(REPAIR_BYTES)
     write_json(STATE / "repair-checkpoint.json",
                {"afterNativeDenial": True, "priorValidationAttempts": 1})
 
