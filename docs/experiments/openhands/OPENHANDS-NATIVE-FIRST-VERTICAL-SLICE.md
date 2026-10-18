@@ -409,3 +409,37 @@ python3 scripts/openhands_native_vertex_check.py
 Current truth: environment reuse and native task-context wiring are coded,
 but real-task setup, Vertex extra availability, ADC freshness, real Stop Hook
 execution and cost limits remain **NOT PROVEN**.
+
+## Real shared Maven/OSV runner integration probe
+
+The standalone Maven/OSV baseline/fixed comparison was completed, but
+that **does not** prove the repository's real shared deterministic runner
+can build and classify OSV 2.6.0. To close that gap without a model call,
+`scripts/openhands_real_shared_baseline_probe.py` uses the **actual**
+`ExistingDeterministicBaselineRunner` with the existing
+`MavenConfig`, `ScannerConfig`, `BaselineProfile`, and `TaskRequest`
+types. It hashes and pins the configured scanner, checks the immutable
+baseline POM against exact Git commit, clones the source into a fresh
+disposable `/tmp` checkout and builds/scans **only the copy**. It uses
+the full four-level OSV severity scope, expecting the original SnakeYAML
+advisory. It does not call OpenHands or Vertex.
+
+Run offline tests first, then authorize this **deterministic-only** Maven
+build/OSV scan (network/downloads may occur; no model inference):
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_shared_baseline_probe.py' -v
+python3 scripts/openhands_real_shared_baseline_probe.py \
+  --scanner "$(command -v osv-scanner)"
+```
+
+`PASS` is only evidence that this shared baseline runner correctly
+classifies the real single-dependency vulnerability on the current Cloud
+Shell. It is **not** durable task registration/baseline, not the actual
+`ExistingDeterministicValidationRunner` Stop Hook, and not a native agent
+run. Do not silently promote this probe result to task acceptance. Next
+integrate durable task registration/preparation/intelligence-disabled
+baseline with the native Stop Hook, and verify the 1.55.1 server's Vertex
+extra before asking for explicit, cost-bounded `/run` authorization.
