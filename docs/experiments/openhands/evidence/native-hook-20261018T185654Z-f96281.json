@@ -1,0 +1,58 @@
+{
+  "canvasVersion": "1.27.1",
+  "checks": {
+    "finishReturned": true,
+    "firstCompletionDenied": true,
+    "nativeStopHookInvokedTwice": true,
+    "sameConversationRetriedWithFeedback": true,
+    "subsequentHookAllowed": true
+  },
+  "conversationId": "86816589-4a23-47ff-a483-b31485fed638",
+  "executionStatus": "finished",
+  "feedbackSeenInLaterModelRequest": true,
+  "fixtureDecisions": [
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "hookInvocations": 5,
+  "mockModelRequests": 5,
+  "nativeHookEventObserved": true,
+  "nativeHookEvents": 5,
+  "nativeStopEvents": [
+    {
+      "blocked": true,
+      "exit_code": 2,
+      "success": false
+    },
+    {
+      "blocked": true,
+      "exit_code": 2,
+      "success": false
+    },
+    {
+      "blocked": true,
+      "exit_code": 2,
+      "success": false
+    },
+    {
+      "blocked": true,
+      "exit_code": 2,
+      "success": false
+    },
+    {
+      "blocked": false,
+      "exit_code": 0,
+      "success": true
+    }
+  ],
+  "notProven": [
+    "Real independent Maven/OSV validation",
+    "Vertex ADC",
+    "GitHub delivery"
+  ],
+  "serverVersion": "1.55.1",
+  "verdict": "PASS"
+}
