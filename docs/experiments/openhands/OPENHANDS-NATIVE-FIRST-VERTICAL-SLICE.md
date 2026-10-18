@@ -71,3 +71,22 @@ This checks native conversation creation but does **not** yet remove the legacy
 provisioning records used solely by the fixture setup. The next work is to
 replace that prerequisite cleanly for new tasks before removing the older
 runtime adapter.
+
+## Idle create v1 failure and v2 correction
+
+Offline handoff tests: 7 passed. Live idle-create v1 failed at native
+`POST /api/conversations` with HTTP 422 and error
+`loc=["body","tags"], type=value_error`. Native OpenHands conversation
+tags require lowercase alphanumeric keys; the bridge sent `taskId`.
+The v2 correction uses `taskid`, adds an offline key-format regression
+assertion, and uses fresh disposable `native-idle-create-v2` state.
+Retain v1 failure evidence; do not overwrite it. No model execution occurred.
+
+Run the same commands with the updated branch:
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 scripts/openhands_native_idle_create_poc.py
+```
+Expected report: `~/openhands-native-poc-reports/native-idle-create-v2.json`.
