@@ -25,8 +25,12 @@ def command(args: list[str], cwd: Path, *, timeout: int = 15) -> dict:
 
 
 def preflight(repository: Path, scanner_executable: Path) -> dict:
-    repository = repository.expanduser().resolve(strict=True)
-    scanner_executable = scanner_executable.expanduser().resolve(strict=True)
+    repository = repository.expanduser()
+    scanner_executable = scanner_executable.expanduser()
+    if repository.is_symlink() or scanner_executable.is_symlink():
+        raise ValueError("Repository and scanner cannot be symbolic links")
+    repository = repository.resolve(strict=True)
+    scanner_executable = scanner_executable.resolve(strict=True)
     if not repository.is_dir():
         raise ValueError("Repository must be an existing directory")
     if scanner_executable.is_symlink() or not scanner_executable.is_file():
