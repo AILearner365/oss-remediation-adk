@@ -114,8 +114,13 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertIn(registered.objective, objective)
         self.assertIn("Independent", objective.replace("independent", "Independent"))
         request = self.build()
+        # This shared fixture already has a DISPATCHED execution claim.
+        # Verify idle-message construction does not mutate that claim.
+        claim_before = self.store.get_execution_claim(self.data["taskId"])
         sent = []
+        observed_endpoints = []
         def fake_http(method, endpoint, payload=None, **kwargs):
+            observed_endpoints.append((method, endpoint))
             if endpoint == "/api/conversations?include_skills=true":
                 return {"id": request["conversation_id"]}
             if endpoint.endswith("/events"):
@@ -128,7 +133,8 @@ class NativeFirstHandoffTests(unittest.TestCase):
         )
         self.assertEqual(sent[0]["content"][0]["text"], objective)
         self.assertIs(sent[0]["run"], False)
-        self.assertIsNone(self.store.get_execution_claim(self.data["taskId"]))
+        self.assertEqual(claim_before, self.store.get_execution_claim(self.data["taskId"]))
+        self.assertFalse(any("/run" in endpoint for _, endpoint in observed_endpoints))
 
     def test_vertex_idle_requires_registered_objective(self):
         request = self.build()
