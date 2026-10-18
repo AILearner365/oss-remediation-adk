@@ -247,6 +247,20 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertEqual(sum(method == "POST" for method, _ in calls), 1)
         self.assertEqual(claim[0].dispatch_status, ExecutionDispatchStatus.RECOVERY_REQUIRED)
 
+    def test_synthetic_repair_bytes_match_validator_exactly(self):
+        from openhands_native_validator_poc import ArtifactRunner, REPAIR_BYTES
+        with tempfile.TemporaryDirectory() as directory:
+            marker = Path(directory) / "poc3-repaired.txt"
+            runner = ArtifactRunner()
+            before = runner.run(directory, None, None, None, 1, directory)
+            self.assertFalse(before["passed"])
+            marker.write_bytes(REPAIR_BYTES)
+            after = runner.run(directory, None, None, None, 2, directory)
+            self.assertTrue(after["passed"])
+            marker.write_bytes(b"POC3-REPAIRED" + bytes([10]))
+            actual_newline = runner.run(directory, None, None, None, 3, directory)
+            self.assertFalse(actual_newline["passed"])
+
     def test_model_key_not_in_safe_summary_and_remote_override_rejected(self):
         payload = self.build(api_key="dummy-local-credential",
                              base_url="http://127.0.0.1:12997/v1")
