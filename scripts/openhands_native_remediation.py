@@ -153,9 +153,32 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
 
 
 
+def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
+    """Ground real native initial message in the registered immutable task.
+
+    Do not include the preverified fixed candidate or host/model credentials.
+    """
+    task = store.get_request(task_id)
+    if not task.objective.strip():
+        raise HandoffError("Registered remediation objective is empty")
+    checks = ", ".join(task.acceptance.build_commands)
+    severities = ", ".join(task.acceptance.severity_scope)
+    return (
+        "Remediation objective: " + task.objective + "\n"
+        "Mandatory build commands: " + checks + "\n"
+        "Scanner severity scope: " + severities + "\n"
+        "Constraints: keep Java version unchanged; no finding suppressions; "
+        "respect task policy and independent deterministic validation.\n"
+        "Investigate credible strategies before editing. Do not assume any "
+        "candidate version is safe without evidence."
+    )
+
+
 def create_idle_native_conversation(
     request: Mapping[str, Any],
     http: Callable[..., Mapping[str, Any]],
+    *,
+    initial_message: str | None = None,
 ) -> str:
     """Create native conversation and verify persisted config; NEVER call /run.
 
@@ -163,6 +186,13 @@ def create_idle_native_conversation(
     response that differs from the task's workspace, identity or stop hook.
     A failed post-creation check is a blocker, not authorization to execute.
     """
+    # Real remediation must provide the durable task's objective. Legacy POC
+    # callers may omit it for synthetic lifecycle tests; no model runs here.
+    if initial_message is not None:
+        if not isinstance(initial_message, str) or not initial_message.strip():
+            raise HandoffError("Initial task objective must be nonempty")
+        if len(initial_message) > 20000:
+            raise HandoffError("Initial task objective exceeds bound")
     uid = str(request["conversation_id"])
     created = http("POST", "/api/conversations?include_skills=true", dict(request), timeout=90)
     if str(created.get("id", created.get("conversation_id", ""))) != uid:
@@ -171,7 +201,7 @@ def create_idle_native_conversation(
     # event is attached. run=False is essential: never start the model here.
     http("POST", f"/api/conversations/{uid}/events", {
         "role": "user",
-        "content": [{"type": "text", "text": (
+        "content": [{"type": "text", "text": initial_message if initial_message is not None else (
             "Review this task in the prepared workspace. Independent Stop Hook "
             "validation is mandatory before completion."
         )}],
