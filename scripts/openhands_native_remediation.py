@@ -110,7 +110,7 @@ def build_request(
                 "type": "command", "command": shlex.join(executable), "timeout": 3600
             }]
         }]},
-        "tags": {"taskId": task_id, "purpose": "independent-remediation"},
+        "tags": {"taskid": task_id, "purpose": "independent-remediation"},
     }
 
 
