@@ -144,6 +144,25 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
     return uid
 
 
+
+def create_idle_native_conversation(
+    request: Mapping[str, Any],
+    http: Callable[..., Mapping[str, Any]],
+) -> str:
+    """Create native conversation and verify persisted config; NEVER call /run.
+
+    The native API is authoritative for conversation state. Reject any server
+    response that differs from the task's workspace, identity or stop hook.
+    A failed post-creation check is a blocker, not authorization to execute.
+    """
+    uid = str(request["conversation_id"])
+    created = http("POST", "/api/conversations?include_skills=true", dict(request), timeout=90)
+    if str(created.get("id", created.get("conversation_id", ""))) != uid:
+        raise HandoffError("Created native conversation does not match task identity")
+    persisted = http("GET", f"/api/conversations/{uid}?include_skills=true")
+    return validate_native_response(persisted, request)
+
+
 def show_safe_summary(request: Mapping[str, Any]) -> dict[str, Any]:
     """Never print/store LLM credentials from the full native request."""
     return {
