@@ -84,3 +84,60 @@ Removal/simplification decisions follow specific verified coverage.
 The `hook-crash` case intentionally lacks an independent validation
 result; this is a fail-open native execution experiment, **not** evidence
 of successful remediation or permission to deliver.
+
+## Interrupted validator attempt and native restart recovery
+
+This is a **two-stage native test**, separate from the four completed cases.
+
+The first native Stop Hook durably reserves attempt 1 in the existing
+SQLiteTaskStore, then exits with code 37 *before* any validation report is
+written. Native OpenHands may finish despite the hook error. The test
+requires the task to remain unaccepted and attempt 1 to remain `RUNNING`.
+
+After the native stack restarts, stage two reuses **the same persisted native
+conversation, task ID, worktree and baseline**. The next real native Stop Hook
+invocation calls the existing `SharedValidationService.handle_stop()`.
+The store reuses the original `RUNNING` attempt; the service records
+`VALIDATOR_FAILURE` for the missing immutable report, **without calling the
+validator runner again**. The result must remain unaccepted even if the
+native conversation finishes.
+
+This injects a **hook-command exit** at the durable reservation boundary;
+it does **not** simulate a genuine OS kill or interrupt real Maven/OSV work.
+
+First run offline tests, then the start phase:
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_recovery_poc.py' -v
+python3 scripts/openhands_native_recovery_poc.py start
+```
+
+Only if `start` reports PASS, restart the **owned** 1.55.1 stack using
+the existing safe scripts. POC1's normal/remediation conversation state
+and previous evidence are preserved.
+
+```bash
+python3 scripts/openhands_native_poc.py stop --server-version 1.55.1
+python3 scripts/openhands_native_poc.py run --server-version 1.55.1
+```
+
+Then explicitly attempt native recovery of the same conversation:
+
+```bash
+python3 scripts/openhands_native_recovery_poc.py recover
+python3 scripts/openhands_native_recovery_poc.py publish
+```
+
+The recovery harness checks that the launcher PID differs from the
+start stage's PID. It uses a fresh fixture at
+`/tmp/openhands-native-poc-1271-server-1551/hook-poc4-recovery-restart-v1`.
+If the same-conversation continuation API does not support this
+sequence, the result is NOT_PROVEN; investigate native events instead
+of claiming recovery.
+
+The recovered report is
+`~/openhands-native-poc-reports/native-recovery-poc4-restart-v1.json`.
+No previous POC evidence is overwritten. It is not a delivery or
+security remediation acceptance test.
