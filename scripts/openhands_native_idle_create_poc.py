@@ -14,7 +14,7 @@ import openhands_native_validator_poc as fixture
 import openhands_native_remediation as handoff
 from openhands_shared.store import SQLiteTaskStore
 
-CASE = "native-idle-create-v1"
+CASE = "native-idle-create-v2"
 
 
 def main():
