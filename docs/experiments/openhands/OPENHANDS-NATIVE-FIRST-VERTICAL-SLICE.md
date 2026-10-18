@@ -142,3 +142,28 @@ python3 scripts/openhands_native_idle_create_poc.py
 
 Expected v4 report: `~/openhands-native-poc-reports/native-idle-create-v4.json`.
 No model requests are sent.
+
+## Native one-shot dispatch guard (offline tests first)
+
+`dispatch_native_once()` now uses native Agent Server endpoints for one
+`/run` dispatch, with no custom conversation API. Preconditions are durable
+`CONTEXT_ATTACHED` identity and an independent Stop Hook verified via native
+GET while `idle`. It records `claim_execution` **before** native POST
+`/run` and then marks `DISPATCHED` only after a successful response or
+observable native `running/finished` state.
+
+A second call with the same dispatched claim returns `ALREADY_DISPATCHED`
+without sending `/run`. Lost POST responses are reconciled by native GET.
+When the POST outcome cannot be proven, the durable claim transitions to
+`RECOVERY_REQUIRED`, and later calls cannot resend `/run` automatically.
+The same fail-closed rule applies to an existing unconfirmed intent.
+The native `finished` state alone never implies security acceptance.
+
+Two new offline tests simulate normal dispatch and an ambiguous connection
+loss, enforcing only one POST and no duplicate dispatch.
+
+**Scope restriction:** do not invoke this against v4's existing idle conversation.
+Its Stop Hook uses the real validation CLI with a synthetic task fixture;
+executing it would not constitute a valid real Maven/OSV experiment. A
+separate fixture with explicitly synthetic Stop Hook and local-only MockLLM
+will be needed for the next live /run test. No paid model call is authorized.
