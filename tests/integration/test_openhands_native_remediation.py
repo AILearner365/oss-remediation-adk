@@ -86,9 +86,13 @@ class NativeFirstHandoffTests(unittest.TestCase):
         seen = []
         def fake_http(method, endpoint, payload=None, **kwargs):
             seen.append((method, endpoint))
-            if method == "POST":
+            if endpoint == "/api/conversations?include_skills=true":
                 self.assertEqual(payload, request)
                 return {"id": request["conversation_id"]}
+            if endpoint.endswith("/events"):
+                self.assertEqual(method, "POST")
+                self.assertIs(payload["run"], False)
+                return {"id": "event-id"}
             return {"id": request["conversation_id"], "execution_status": "idle",
                     "workspace": request["workspace"],
                     "hook_config": request["hook_config"]}
@@ -99,6 +103,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         )
         self.assertEqual(seen, [
             ("POST", "/api/conversations?include_skills=true"),
+            ("POST", f'/api/conversations/{request["conversation_id"]}/events'),
             ("GET", f'/api/conversations/{request["conversation_id"]}?include_skills=true')
         ])
         self.assertFalse(any("/run" in endpoint for _, endpoint in seen))
@@ -106,8 +111,11 @@ class NativeFirstHandoffTests(unittest.TestCase):
     def test_create_idle_rejects_persisted_config_without_hook(self):
         request = self.build()
         def fake_http(method, endpoint, payload=None, **kwargs):
-            if method == "POST":
+            if endpoint == "/api/conversations?include_skills=true":
                 return {"id": request["conversation_id"]}
+            if endpoint.endswith("/events"):
+                self.assertIs(payload["run"], False)
+                return {}
             return {"id": request["conversation_id"], "execution_status": "idle",
                     "workspace": request["workspace"], "hook_config": {}}
         with self.assertRaises(native_first.HandoffError):
