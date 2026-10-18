@@ -7,7 +7,7 @@ hints. Never mutates the user's baseline or existing Maven/OSV evidence.
 from __future__ import annotations
 
 import argparse
-from contextlib import TemporaryDirectory
+from tempfile import TemporaryDirectory
 import hashlib
 import json
 from pathlib import Path
