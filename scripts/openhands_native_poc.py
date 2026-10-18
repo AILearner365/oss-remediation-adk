@@ -242,6 +242,19 @@ def warm_native_packages(env: dict[str, str]) -> None:
              "--with", f"openhands-sdk=={SERVER}", "--with", f"openhands-tools=={SERVER}",
              "--with", f"openhands-workspace=={SERVER}", "--with", "posthog>=6,<7",
              "agent-server", "--help"], env=env)
+    if SERVER == "1.55.1":
+        # Use exactly the same uvx package requirements as the official
+        # launcher. Verify dependency resolution before opening the server.
+        command(["uvx", "--from", f"openhands-agent-server=={SERVER}",
+                 "--with", f"openhands-sdk=={SERVER}",
+                 "--with", f"openhands-tools=={SERVER}",
+                 "--with", f"openhands-workspace=={SERVER}",
+                 "--with", "posthog>=6,<7",
+                 "python", "-c",
+                 "from importlib.metadata import version; "
+                 "assert version('litellm') == '1.105.1', version('litellm'); "
+                 "import litellm; import mcp.types"], env=env)
+        log("Verified pinned LiteLLM import preflight")
     command(["uvx", "--from", f"openhands-automation=={AUTOMATION}",
              "uvicorn", "--help"], env=env)
     stamp.write_text(fingerprint + "\n", encoding="utf-8")
