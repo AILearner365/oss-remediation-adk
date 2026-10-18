@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Disposable OpenHands Canvas 1.27.1 / Agent Server 1.54.0 Cloud Shell smoke.
+"""Disposable OpenHands Canvas 1.27.1 / Agent Server 1.54.0 or 1.55.1 smoke.
 
 One command: python3 scripts/openhands_native_poc.py run
 No model execution, build, scanner, git push, custom task API or SQLite.
@@ -23,7 +23,9 @@ import urllib.request
 import uuid
 
 CANVAS = "1.27.1"
-SERVER = "1.54.0"  # Canvas 1.27.1's own published default
+SERVER = "1.54.0"  # default; CLI may opt into 1.55.1
+CANVAS_DEFAULT_SERVER = "1.54.0"  # published Canvas 1.27.1 default
+SUPPORTED_SERVERS = ("1.54.0", "1.55.1")
 AUTOMATION = "1.19.3"  # Canvas 1.27.1's own published default
 ROOT = Path(os.environ.get("OH_POC_TMP", "/tmp/openhands-native-poc-1271")).resolve()
 RESULT_DIR = Path(os.environ.get("OH_POC_REPORTS", str(Path.home() / "openhands-native-poc-reports"))).expanduser().resolve()
@@ -38,6 +40,36 @@ IDENTITIES = ROOT / "identities.json"
 REPORT = RESULT_DIR / "native-integration-smoke.json"
 LOG_FILE = ROOT / "canvas.log"
 LOOPBACK = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+def configure_server_version(version: str) -> None:
+    """Select a fully separate disposable stack before performing any operation.
+
+    Keep 1.54.0's existing /tmp paths, ports and published report unchanged.
+    The 1.55.1 test uses a different native state, conversation IDs, ports,
+    credentials and report; it never opens 1.54.0's persisted conversations.
+    """
+    global SERVER, ROOT, INGRESS, BACKEND, AUTOMATION_PORT, FRONTEND_PORT
+    global BIN, PID_FILE, KEY_FILE, IDENTITIES, REPORT, LOG_FILE
+    if version not in SUPPORTED_SERVERS:
+        raise ValueError(f"Unsupported server version: {version}")
+    SERVER = version
+    newer = version == "1.55.1"
+    ROOT = Path(os.environ.get(
+        "OH_POC_TMP", "/tmp/openhands-native-poc-1271-server-1551" if newer
+        else "/tmp/openhands-native-poc-1271"
+    )).resolve()
+    INGRESS = int(os.environ.get("OH_POC_PORT", "8091" if newer else "8090"))
+    BACKEND = int(os.environ.get("OH_POC_BACKEND_PORT", "18910" if newer else "18900"))
+    AUTOMATION_PORT = int(os.environ.get("OH_POC_AUTOMATION_PORT", "18911" if newer else "18901"))
+    FRONTEND_PORT = int(os.environ.get("OH_POC_FRONTEND_PORT", "18912" if newer else "18902"))
+    BIN = ROOT / "npm" / "bin" / "agent-canvas"
+    PID_FILE = ROOT / "launcher.pid"
+    KEY_FILE = ROOT / "session-key.txt"
+    IDENTITIES = ROOT / "identities.json"
+    REPORT = RESULT_DIR / ("native-integration-smoke-1.55.1.json" if newer
+                           else "native-integration-smoke.json")
+    LOG_FILE = ROOT / "canvas.log"
 
 
 class Failure(Exception):
@@ -160,7 +192,7 @@ def canvas_install(env: dict[str, str]) -> None:
         raise Failure("Canvas version verification failed")
     # Source of truth is the package, not our expectation.
     defaults = json.loads((package.parent / "config" / "defaults.json").read_text(encoding="utf-8"))
-    if defaults.get("versions", {}).get("agentServer") != SERVER or defaults.get("versions", {}).get("automation") != AUTOMATION:
+    if defaults.get("versions", {}).get("agentServer") != CANVAS_DEFAULT_SERVER or defaults.get("versions", {}).get("automation") != AUTOMATION:
         raise Failure("Upstream Canvas default versions changed; inspect before proceeding")
     log("Verified official Canvas launcher and matched default backend versions")
 
@@ -439,7 +471,7 @@ def run() -> None:
     log("Native server and Canvas ingress ready; verifying idle integration (NO LLM RUN)")
     result = main_probe()
     record(result)
-    log("API smoke PASSED. Open Canvas via Cloud Shell Web Preview on port " + str(INGRESS))
+    log("API smoke PASSED for Server/SDK " + SERVER + ". Open Canvas via Cloud Shell Web Preview on port " + str(INGRESS))
     log("Remediation conversation: " + result["remediationCanvasUrl"])
     log("Normal conversation: " + result["normalCanvasUrl"])
     log("To test persistence: run 'stop', then 'run' again within the same Cloud Shell session")
@@ -479,6 +511,8 @@ def publish() -> None:
     # Selectively publish only expected, credential-free diagnostic keys.
     keys = ("canvasVersion", "expectedAgentServer", "checks", "notProven", "serverCapabilities",
             "normalConversationId", "remediationConversationId", "verdict", "failure")
+    if data.get("expectedAgentServer") != SERVER:
+        raise Failure("Report version mismatch; run the selected server test before publishing")
     sanitized = {k: data[k] for k in keys if k in data}
     destination.write_text(json.dumps(sanitized, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     relative = str(destination.relative_to(repo))
@@ -492,7 +526,10 @@ def cli() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("run", "probe", "stop", "status", "hook", "publish"))
     parser.add_argument("--verdict", default=None)
+    parser.add_argument("--server-version", choices=SUPPORTED_SERVERS,
+                        default="1.54.0", help="Server/SDK pin; 1.55.1 uses separate ports and temporary state")
     args = parser.parse_args()
+    configure_server_version(args.server_version)
     if args.action == "hook":
         if not args.verdict:
             parser.error("hook requires --verdict")
