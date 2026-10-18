@@ -21,15 +21,8 @@ from openhands_shared.contracts import (OpenHandsRuntimeRecord, OpenHandsRuntime
 CASE = "native-idle-create-v4"
 
 
-def main():
-    native.configure_server_version("1.55.1")
-    state = native.ROOT / CASE
-    report = native.RESULT_DIR / (CASE + ".json")
-    native.wait_ready()
-    native.wait_canvas_ready()
-    if state.exists():
-        raise native.Failure("Idle-create fixture already exists: preserve evidence and do not overwrite")
-    state.mkdir(parents=True)
+def prepare_fixture(state: Path):
+    """Create prepared, unstarted task without the legacy runtime adapter."""
     # Prepare the deterministic task directly; do not invoke the legacy
     # runtime adapter's provision() or start_execution().
     test = fixture.SharedValidationIntegrationTests(
@@ -73,6 +66,20 @@ def main():
     except Exception:
         test.tearDown()
         raise
+    return data, now
+
+
+
+def main():
+    native.configure_server_version("1.55.1")
+    state = native.ROOT / CASE
+    report = native.RESULT_DIR / (CASE + ".json")
+    native.wait_ready()
+    native.wait_canvas_ready()
+    if state.exists():
+        raise native.Failure("Idle-create fixture already exists: preserve evidence and do not overwrite")
+    state.mkdir(parents=True)
+    data, now = prepare_fixture(state)
     store = SQLiteTaskStore(Path(data["database"]))
     try:
         request = handoff.build_request(
