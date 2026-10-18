@@ -130,6 +130,14 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertIs(sent[0]["run"], False)
         self.assertIsNone(self.store.get_execution_claim(self.data["taskId"]))
 
+    def test_vertex_idle_requires_registered_objective(self):
+        request = self.build()
+        request["agent"]["llm"]["model"] = "vertex_ai/gemini-2.5-flash"
+        with self.assertRaises(native_first.HandoffError):
+            native_first.create_idle_native_conversation(
+                request, lambda *a, **k: self.fail("Vertex must not contact server")
+            )
+
     def test_empty_real_objective_rejected_before_network(self):
         with self.assertRaises(native_first.HandoffError):
             native_first.create_idle_native_conversation(
