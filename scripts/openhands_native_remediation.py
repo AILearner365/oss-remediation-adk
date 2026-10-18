@@ -159,6 +159,16 @@ def create_idle_native_conversation(
     created = http("POST", "/api/conversations?include_skills=true", dict(request), timeout=90)
     if str(created.get("id", created.get("conversation_id", ""))) != uid:
         raise HandoffError("Created native conversation does not match task identity")
+    # Server 1.55.1 exposes the effective hook_config after an initial user
+    # event is attached. run=False is essential: never start the model here.
+    http("POST", f"/api/conversations/{uid}/events", {
+        "role": "user",
+        "content": [{"type": "text", "text": (
+            "Review this task in the prepared workspace. Independent Stop Hook "
+            "validation is mandatory before completion."
+        )}],
+        "run": False,
+    })
     persisted = http("GET", f"/api/conversations/{uid}?include_skills=true")
     return validate_native_response(persisted, request)
 
