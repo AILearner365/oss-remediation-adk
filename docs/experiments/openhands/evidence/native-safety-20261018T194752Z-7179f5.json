@@ -1,0 +1,61 @@
+{
+  "accepted": false,
+  "canvasVersion": "1.27.1",
+  "case": "exhausted",
+  "checks": {
+    "correctOutcome": true,
+    "denialBeforeTermination": true,
+    "nativeHookObserved": true,
+    "nativeTerminal": true,
+    "noAcceptance": true,
+    "noIndependentPass": true,
+    "terminalAllowWithoutPass": true
+  },
+  "conversationId": "4af29956-ce5f-5204-ac50-178543d4cf10",
+  "executionStatus": "finished",
+  "modelRequests": 4,
+  "nativeHookEvents": 4,
+  "nativeHookOutcomes": [
+    {
+      "blocked": true,
+      "exitCode": 2,
+      "success": false
+    },
+    {
+      "blocked": true,
+      "exitCode": 2,
+      "success": false
+    },
+    {
+      "blocked": true,
+      "exitCode": 2,
+      "success": false
+    },
+    {
+      "blocked": false,
+      "exitCode": 0,
+      "success": true
+    }
+  ],
+  "notProven": [
+    "Real Maven/OSV infrastructure behavior",
+    "Network/OS-level process kill recovery",
+    "End-to-end restart recovery",
+    "Delivery authorization"
+  ],
+  "serverVersion": "1.55.1",
+  "validationAttempts": 4,
+  "validationOutcomes": [
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE",
+    "REMEDIATION_FAILURE"
+  ],
+  "validationStates": [
+    "COMPLETED",
+    "COMPLETED",
+    "COMPLETED",
+    "COMPLETED"
+  ],
+  "verdict": "PASS"
+}
