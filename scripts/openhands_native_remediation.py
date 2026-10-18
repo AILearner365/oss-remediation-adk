@@ -61,9 +61,9 @@ def build_request(
     baseline = store.get_baseline(task_id)
     runtime = store.get_openhands_runtime(task_id)
     claim = store.get_execution_claim(task_id)
-    if preparation is None or baseline is None or runtime is None or claim is None:
-        raise HandoffError("Missing durable preparation, baseline, runtime identity or dispatch claim")
-    if claim.conversation_id != runtime.conversation_id:
+    if preparation is None or baseline is None or runtime is None:
+        raise HandoffError("Missing durable preparation, baseline or runtime identity")
+    if claim is not None and claim.conversation_id != runtime.conversation_id:
         raise HandoffError("Dispatch and runtime conversation identities differ")
     try:
         UUID(runtime.conversation_id)
@@ -73,12 +73,20 @@ def build_request(
     if not workspace.is_dir():
         raise HandoffError("Prepared repository workspace is missing")
     from openhands_shared.contracts import OpenHandsRuntimeStatus, ExecutionDispatchStatus
-    if runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED:
-        raise HandoffError("Native task context has not been attached")
-    if claim.dispatch_status not in (
-        ExecutionDispatchStatus.DISPATCHED, ExecutionDispatchStatus.RECOVERY_REQUIRED
-    ):
-        raise HandoffError("Native execution dispatch is not established")
+    # Provisioning occurs before any /run or execution claim. Previously the
+    # legacy adapter had to fabricate a dispatched task merely to create the
+    # native conversation. Never allow claim-without-context or recovery here.
+    from openhands_shared.contracts import ExecutionStatus
+    if claim is None:
+        if (runtime.runtime_status is not OpenHandsRuntimeStatus.CONVERSATION_READY
+                or runtime.execution_status is not ExecutionStatus.NOT_STARTED
+                or status.execution_status is not ExecutionStatus.NOT_STARTED):
+            raise HandoffError("Pre-execution provisioning requires an unstarted conversation")
+    elif (runtime.runtime_status is not OpenHandsRuntimeStatus.CONTEXT_ATTACHED
+          or claim.dispatch_status not in (
+              ExecutionDispatchStatus.DISPATCHED, ExecutionDispatchStatus.RECOVERY_REQUIRED
+          )):
+        raise HandoffError("Existing execution claim is not consistent with native context")
     db, config = load_stop_hook_config(hook_config.resolve(strict=True))
     if db != store.database_path.resolve():
         raise HandoffError("Stop Hook database differs from authoritative task store")
