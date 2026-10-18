@@ -54,6 +54,9 @@ class NativeFirstHandoffTests(unittest.TestCase):
         }
         self.assertEqual(native_first.validate_native_response(response, request),
                          self.data["conversationId"])
+        # Quoted Python bootstrap must be accepted as a literal command.
+        import json
+        self.assertIn("\\\"", json.dumps(request["hook_config"]))
         for key, val in (
             ("id", "wrong"), ("execution_status", "finished"),
             ("workspace", {"working_dir": "/tmp/foreign"}),
@@ -62,6 +65,19 @@ class NativeFirstHandoffTests(unittest.TestCase):
             corrupt = {**response, key: val}
             with self.subTest(key=key), self.assertRaises(native_first.HandoffError):
                 native_first.validate_native_response(corrupt, request)
+
+    def test_native_response_rejects_modified_hook_command(self):
+        request = self.build()
+        import copy
+        modified = copy.deepcopy(request["hook_config"])
+        modified["stop"][0]["hooks"][0]["command"] = "exit 0"
+        with self.assertRaises(native_first.HandoffError):
+            native_first.validate_native_response({
+                "id": request["conversation_id"],
+                "execution_status": "idle",
+                "workspace": request["workspace"],
+                "hook_config": modified,
+            }, request)
 
     def test_model_key_not_in_safe_summary_and_remote_override_rejected(self):
         payload = self.build(api_key="dummy-local-credential",
