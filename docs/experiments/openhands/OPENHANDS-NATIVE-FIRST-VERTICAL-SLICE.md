@@ -443,3 +443,53 @@ run. Do not silently promote this probe result to task acceptance. Next
 integrate durable task registration/preparation/intelligence-disabled
 baseline with the native Stop Hook, and verify the 1.55.1 server's Vertex
 extra before asking for explicit, cost-bounded `/run` authorization.
+
+## Durable controlled Maven task and real Stop Hook preparation
+
+User supplied the historical larger Gate-2 comparison repository
+`https://github.com/AILearner365/maven-multimodule-app`, branch
+`main-runrunning`; GitHub inspection on 2026-10-18 showed commit
+`9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`. This is a
+**reference** for subsequent broader evaluation, not the first isolated
+one-vulnerability run. Do not silently swap it into the SnakeYAML acceptance
+case or modify the reference repository.
+
+The first real run stays the independently proven, disposable single-module
+SnakeYAML scenario. `scripts/openhands_real_task_prepare.py` is the
+pre-execution vertical-slice assembly, not another synthetic validation
+runner. It mirrors the known local fixture into a **new local-only bare
+repository** and isolated trusted checkout, then invokes the existing
+`DeterministicPreparer`, `DeterministicBaselineAssessor` with its **real**
+Maven/OSV runner, and `SharedIntelligenceAssessor` in disabled mode.
+It persists the task, exact-commit preparation, baseline reports and
+intelligence outcome. It generates a credential-free, restricted-permission
+Stop Hook config for the existing `openhands_shared.stop_hook` /
+`ExistingDeterministicValidationRunner` path, and verifies configuration
+parsing/profile selection. **It does not execute that validator, create
+a native conversation, start /run, or execute the model.** The task ends
+in `AGENT_RUNNING` with execution `NOT_STARTED`, which is not acceptance.
+
+Run from Cloud Shell (deterministic Maven and OSV may access Maven/OSV
+services; model calls are prohibited):
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_task_prepare.py' -v
+python3 scripts/openhands_real_task_prepare.py \
+  --scanner "$(command -v osv-scanner)" \
+  --run-root "/tmp/openhands-real-durable-task-20261018-v1"
+```
+
+The run-root is intentionally one-shot: if it exists, preparation fails
+closed and does **not** overwrite existing task evidence. Retain the exact
+output (task ID, database, workspace, validation config). A clean
+`DURABLE_TASK_PREPARED_NOT_AUTHORIZED` is the expected preparation result.
+Do not report `READY_FOR_EXECUTION_AUTHORIZATION` before verifying
+native persisted hooks, actual Server 1.55.1 Vertex dependencies, and
+run budget/cost controls.
+
+After this checkpoint: create/reconcile the native 1.55.1 idle conversation,
+bind the real task objective, verify the persisted hook, exercise the
+actual validator against the real baseline without a model call where
+safe, then request explicit cost authorization before any `/run`.
