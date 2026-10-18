@@ -1,6 +1,6 @@
 # POC 3: Native OpenHands Stop Hook to existing independent validation service
 
-**Status:** implementation and offline test committed; live Cloud Shell result pending.
+**Status:** first live Cloud Shell run was NOT_PROVEN (four REMEDIATION_FAILURE attempts, no durable PASS). Corrected synchronization fixture committed for a second run; result pending.
 
 ## Objective
 
@@ -28,7 +28,7 @@ architecture decision, not a prerequisite to exercising real native hooks.
   report used by the existing service. It does NOT execute Maven or OSV.
 - The local mock model from POC2 requests the native FinishTool.
 - First attempt: marker missing -> independent service FAIL -> native DENY.
-- After the native denied completion event, the **test coordinator** writes
+- At the following mock-model request containing native DENY feedback, a synchronous test-coordinator checkpoint first verifies the native denial event and exactly one durable failure, then writes
   the expected marker, simulating an external fix. **The agent does not
   implement the repair** in this test.
 - Next attempt: independent service validates current repository state;
@@ -37,9 +37,32 @@ architecture decision, not a prerequisite to exercising real native hooks.
   native blocked/allowed events, model feedback, and finished status.
 
 The fixture is separated from POC2 under
-`/tmp/openhands-native-poc-1271-server-1551/hook-poc3-service-v1`.
+`/tmp/openhands-native-poc-1271-server-1551/hook-poc3-service-v2`.
 Prepared task artifacts live in another dedicated temporary directory
 created by the existing test fixture. No real project checkout is modified.
+
+## First-run finding and corrected checkpoint
+
+First evidence: `native-validator-20261018T191025Z-13d904.json`.
+The native integration worked (four hook events, three DENYs, feedback to the
+model), but all four independent validation attempts returned
+`REMEDIATION_FAILURE`. The fourth native Stop Hook ALLOW was a **bounded
+failure termination**, not validation success; accepted was false.
+
+Likely cause: the original coordinator polled native events once per second,
+while the local mock model could complete repeated FinishTool attempts before
+the coordinator wrote the simulated repair file.
+
+The second fixture (**service-v2**) replaces this race with a synchronous
+checkpoint on the *next model request after native DENY feedback*. Before
+returning another FinishTool call, the checkpoint requires both (a) a native
+blocked Stop Hook event with exit code 2, and (b) exactly one recorded
+`REMEDIATION_FAILURE`. Only then does the coordinator create the repair.
+This is deterministic test synchronization, **not a remediation agent edit**.
+
+Preserve the original POC3 fixture. Do not clean the prior state.
+A later native ALLOW alone never proves acceptance: PASS still requires the
+existing service's durable `PASS` result and validated Git state.
 
 ## Cloud Shell commands
 
@@ -64,7 +87,7 @@ sanitized JSON, leave the temporary evidence intact, and investigate
 native and validator events; do not erase or rerun against the same fixture.
 
 Evidence is saved at
-`~/openhands-native-poc-reports/native-validator-poc-1.55.1-service-v1.json`
+`~/openhands-native-poc-reports/native-validator-poc-1.55.1-service-v2.json`
 and optionally pushed under
 `docs/experiments/openhands/evidence/native-validator-*.json`.
 
