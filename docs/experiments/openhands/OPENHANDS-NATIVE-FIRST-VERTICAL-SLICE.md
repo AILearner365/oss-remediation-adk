@@ -114,3 +114,31 @@ python3 scripts/openhands_native_idle_create_poc.py
 ```
 
 Expected report: `~/openhands-native-poc-reports/native-idle-create-v3.json`.
+
+## Native-first provisioning without legacy runtime dispatch (v4)
+
+The v3 live smoke passed native idle creation, Stop Hook persistence and
+identity checks. The new v4 fixture uses the existing deterministic task
+preparation/baseline/intelligence and SQLite runtime identity contract, but
+**does not** call the 1.50.0 legacy adapter's `provision()` or
+`start_execution()`. It records a `CONVERSATION_READY / NOT_STARTED`
+native identity, creates and initializes the OpenHands 1.55.1 conversation
+using native API endpoints with `run=false`, verifies Stop Hook and workspace,
+and links the unique native initial `MessageEvent` as
+`CONTEXT_ATTACHED`. No execution claim is created.
+
+A new offline test asserts that a not-started native identity can construct
+the handoff without a dispatch claim and that inconsistent context states
+are rejected. A successful smoke demonstrates removal of the **fixture**
+legacy provisioning dependency; it does not yet prove production end-to-end
+real Maven/OSV remediation or native execution safety. v1-v3 are preserved.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 scripts/openhands_native_idle_create_poc.py
+```
+
+Expected v4 report: `~/openhands-native-poc-reports/native-idle-create-v4.json`.
+No model requests are sent.
