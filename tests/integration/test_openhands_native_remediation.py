@@ -156,6 +156,97 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 model="openai/gpt-4o-mini",
             )
 
+    def test_dispatch_native_once_claims_before_run_and_never_repeats(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        from openhands_shared.contracts import (
+            OpenHandsRuntimeStatus, ExecutionDispatchStatus
+        )
+        request = self.build()
+        uid = request["conversation_id"]
+        store = Mock()
+        store.get_openhands_runtime.return_value = SimpleNamespace(
+            runtime_status=OpenHandsRuntimeStatus.CONTEXT_ATTACHED,
+            conversation_id=uid,
+        )
+        store.get_status.return_value = SimpleNamespace(accepted=False)
+        current = [None]
+        store.get_execution_claim.side_effect = lambda task: current[0]
+        def claim(task, worker):
+            self.assertIsNone(current[0])
+            current[0] = SimpleNamespace(
+                worker_id=worker, conversation_id=uid,
+                dispatch_status=ExecutionDispatchStatus.INTENT_RECORDED,
+            )
+        store.claim_execution.side_effect = claim
+        def update(task, *, dispatched, recovery_code=None):
+            current[0].dispatch_status = (ExecutionDispatchStatus.DISPATCHED if dispatched
+                                          else ExecutionDispatchStatus.RECOVERY_REQUIRED)
+        store.update_execution_dispatch.side_effect = update
+        called = []
+        def http(method, path, payload=None, **kwargs):
+            called.append((method, path))
+            if method == "GET":
+                return {"id": uid, "execution_status": "idle",
+                        "workspace": request["workspace"],
+                        "hook_config": request["hook_config"]}
+            self.assertEqual(current[0].dispatch_status, ExecutionDispatchStatus.INTENT_RECORDED)
+            return {}
+        self.assertEqual(native_first.dispatch_native_once(
+            store, self.data["taskId"], worker_id="worker", request=request, http=http
+        ), "DISPATCHED")
+        self.assertEqual(native_first.dispatch_native_once(
+            store, self.data["taskId"], worker_id="worker", request=request, http=http
+        ), "ALREADY_DISPATCHED")
+        self.assertEqual([method for method, _ in called], ["GET", "POST"])
+        self.assertEqual(store.claim_execution.call_count, 1)
+
+    def test_uncertain_dispatch_never_replays_run(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        from openhands_shared.contracts import (
+            OpenHandsRuntimeStatus, ExecutionDispatchStatus
+        )
+        request = self.build()
+        uid = request["conversation_id"]
+        store = Mock()
+        store.get_openhands_runtime.return_value = SimpleNamespace(
+            runtime_status=OpenHandsRuntimeStatus.CONTEXT_ATTACHED,
+            conversation_id=uid,
+        )
+        store.get_status.return_value = SimpleNamespace(accepted=False)
+        claim = [None]
+        store.get_execution_claim.side_effect = lambda _: claim[0]
+        store.claim_execution.side_effect = lambda task, worker: claim.__setitem__(
+            0, SimpleNamespace(worker_id=worker, conversation_id=uid,
+                               dispatch_status=ExecutionDispatchStatus.INTENT_RECORDED)
+        )
+        def update(task, *, dispatched, recovery_code=None):
+            claim[0].dispatch_status = (
+                ExecutionDispatchStatus.DISPATCHED if dispatched
+                else ExecutionDispatchStatus.RECOVERY_REQUIRED)
+        store.update_execution_dispatch.side_effect = update
+        calls = []
+        def http(method, path, payload=None, **kwargs):
+            calls.append((method, path))
+            if method == "POST":
+                raise ConnectionError("response lost")
+            if path.endswith("include_skills=true"):
+                return {"id": uid, "execution_status": "idle",
+                        "workspace": request["workspace"],
+                        "hook_config": request["hook_config"]}
+            return {"execution_status": "idle"}
+        with self.assertRaises(native_first.HandoffError):
+            native_first.dispatch_native_once(
+                store, self.data["taskId"], worker_id="worker", request=request, http=http
+            )
+        with self.assertRaises(native_first.HandoffError):
+            native_first.dispatch_native_once(
+                store, self.data["taskId"], worker_id="worker", request=request, http=http
+            )
+        self.assertEqual(sum(method == "POST" for method, _ in calls), 1)
+        self.assertEqual(claim[0].dispatch_status, ExecutionDispatchStatus.RECOVERY_REQUIRED)
+
     def test_model_key_not_in_safe_summary_and_remote_override_rejected(self):
         payload = self.build(api_key="dummy-local-credential",
                              base_url="http://127.0.0.1:12997/v1")
