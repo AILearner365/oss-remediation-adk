@@ -611,3 +611,41 @@ A deterministic-only pass does **not** prove the native HookExecutionEvent,
 the running Agent Server's Vertex runtime or cost-limited autonomous run.
 Those gates must remain outstanding. Never replay the native idle
 attachment on this task.
+
+## Native runtime + budget readiness audit (no inference)
+
+Cloud Shell confirmed the actual independent validator performed Maven/OSV on
+the disposable still-vulnerable baseline and reported
+`PASS_UNREMEDIATED_BASELINE_REJECTED`, 1 remaining and 0 resolved,
+`REMEDIATION_FAILURE`, no native /run, no task mutation.
+
+The next step is `scripts/openhands_native_execution_readiness.py`.
+It reads the registered task and exact persisted native hook, GETs
+`/server_info` and the already-attached conversation, and attempts a
+**read-only package metadata** check using the running server process's
+virtualenv path if discoverable. It never reads or prints secrets,
+imports Vertex, refreshes ADC, calls Gemini, creates a conversation, modifies
+SQLite, or dispatches /run. Process metadata not resolvable means
+`nativeVertexDependenciesDetected=false`, **not** proof of absence.
+Presence of google-auth/Vertex wheel metadata is likewise **not**
+functional Vertex provider/credential verification.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_execution_readiness.py' -v
+python3 scripts/openhands_native_execution_readiness.py \
+  --database /tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3 \
+  --task-id task_a3e63e4dc3b5449c9142e4e2c34e0ac9 \
+  --hook-config /tmp/openhands-real-durable-task-20261018-v2/stop-hook.json
+```
+
+**Cost safety:** `max_iterations=12` and `max_validation_denials=2`
+are native/task policy limits. They are not a hard money, token, or wall
+clock limit. Currently there is **no proven external hard budget guard**;
+the audit intentionally leaves `executionAuthorization=false`.
+Never claim that basic loop bounds enforce an actual maximum Vertex bill.
+Before /run, document controls verified on the deployed runtime, the
+maximum accepted financial exposure, and obtain separate explicit
+authorization. Native Stop Hook events will only be proven under genuine
+authorized execution; do not fabricate dispatch state.
