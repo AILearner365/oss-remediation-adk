@@ -31,8 +31,13 @@ class NativeSafetyOfflineTests(unittest.TestCase):
                 for _ in range(num):
                     with patch("sys.stdin", io.StringIO('{"event_type":"Stop"}')):
                         with patch("sys.stdout", new_callable=io.StringIO) as output:
-                            code = safety.hook()
-                    results.append((code, json.loads(output.getvalue())["decision"]))
+                            if case == "hook-crash":
+                                with self.assertRaises(SystemExit) as raised:
+                                    safety.hook()
+                                results.append((raised.exception.code, None))
+                            else:
+                                code = safety.hook()
+                                results.append((code, json.loads(output.getvalue())["decision"]))
                 store = SQLiteTaskStore(Path(data["database"]))
                 try:
                     attempts = store.list_validation_attempts(data["taskId"])
