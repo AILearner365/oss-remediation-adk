@@ -58,4 +58,33 @@ class POCChecks(unittest.TestCase):
             self.assertEqual(r2['checks']['remediationConversationReused'],'PASS')
             self.assertEqual(r2['checks']['normalConversationReused'],'PASS')
 
+    def test_version_configuration_is_isolated(self):
+        from unittest.mock import patch
+        fields = ("SERVER", "ROOT", "INGRESS", "BACKEND", "AUTOMATION_PORT",
+                  "FRONTEND_PORT", "BIN", "PID_FILE", "KEY_FILE",
+                  "IDENTITIES", "REPORT", "LOG_FILE")
+        original = {key: getattr(poc, key) for key in fields}
+        try:
+            with patch.dict("os.environ", {}, clear=True):
+                poc.configure_server_version("1.54.0")
+                old_root = poc.ROOT
+                old_report = poc.REPORT
+                self.assertEqual(poc.INGRESS, 8090)
+                poc.configure_server_version("1.55.1")
+                self.assertEqual(poc.SERVER, "1.55.1")
+                self.assertEqual(poc.INGRESS, 8091)
+                self.assertEqual(poc.BACKEND, 18910)
+                self.assertNotEqual(poc.ROOT, old_root)
+                self.assertNotEqual(poc.REPORT, old_report)
+                self.assertNotEqual(poc.KEY_FILE.parent, old_root)
+                self.assertTrue(str(poc.REPORT).endswith("native-integration-smoke-1.55.1.json"))
+                poc.configure_server_version("1.54.0")
+                self.assertEqual(poc.ROOT, old_root)
+                self.assertEqual(poc.REPORT, old_report)
+                with self.assertRaises(ValueError):
+                    poc.configure_server_version("1.53.0")
+        finally:
+            for key, value in original.items():
+                setattr(poc, key, value)
+
 if __name__=='__main__': unittest.main()
