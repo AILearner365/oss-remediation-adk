@@ -227,3 +227,53 @@ python3 scripts/openhands_native_execution_poc.py run
 
 A v2 PASS demonstrates native synthetic feedback and validator-authorized
 acceptance; it does not demonstrate autonomous agent-made remediation.
+
+## First real Maven/OSV remediation gate: preparation (not execution)
+
+The Cloud Shell user reported `native-execution-v2` PASS and 11/11
+offline tests. A limited, explicitly user-reported summary is committed at
+`docs/experiments/openhands/evidence/native-execution-v2-user-verified-20261018.json`.
+The raw report remains on Cloud Shell and has not been independently uploaded.
+The synthetic test used a coordinator-applied repair; it is not evidence of
+autonomous vulnerability remediation.
+
+The first *real* test must start with an independently reproducible,
+**disposable** Maven repository, a clean exact Git commit, a known vulnerable
+dependency/finding, a trusted approved OSV scanner binary, and a validator
+configuration that matches the task acceptance criteria. Do not use a
+production repository as the first scenario. The existing
+`ExistingDeterministicBaselineRunner` and
+`ExistingDeterministicValidationRunner` must run the real Maven build and
+OSV scanner; neither the synthetic ArtifactRunner nor a mock repair marker
+is sufficient for this acceptance gate.
+
+A read-only preflight script now checks basic prerequisites without editing
+or scanning the repository:
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_remediation_preflight.py' -v
+python3 scripts/openhands_real_remediation_preflight.py \
+  --repository /absolute/path/to/disposable-maven-repo \
+  --scanner /absolute/path/to/approved/osv-scanner
+```
+
+`READY_FOR_BASELINE_SETUP` means only: clean Git root and pom.xml present,
+Maven responds to `-version`, and the explicitly supplied scanner binary
+responds to `--version`. It is **not** a vulnerability baseline, scanner
+approval, complete validation setup, or authorization to run an agent.
+No scanner scan, Maven goal, dependency download or model call occurs.
+A missing scanner or repository blocks progress rather than being guessed.
+
+After preflight: capture the exact commit and scanner identity; run Maven build
+and a real OSV baseline using the existing deterministic services; record
+target advisory identities and a verified fixed-version candidate; confirm
+that a deterministic fixed version builds and reduces target findings.
+Then assemble an agent task/instruction from that authoritative baseline
+and invoke native OpenHands with durable dispatch + independent real Stop Hook.
+Obtain **explicit authorization before any paid model execution**. Finish with
+full independent validation, exact workspace state binding and only then
+possible safe delivery. The agent's native `finished` event is never PASS.
+
+Current status: real Maven/OSV preflight code committed; no real baseline,
+model execution, scanner output or GitHub PR has been claimed.
