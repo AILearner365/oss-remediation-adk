@@ -12,7 +12,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import secrets
-import subprocess
 import sys
 import threading
 import time
@@ -202,11 +201,12 @@ def execute() -> dict:
             "feedbackSeenInLaterModelRequest": any(x.get("feedbackSeen") for x in calls[1:]),
             "fixtureDecisions": [x.get("accepted") for x in hooks],
             "nativeHookEventObserved": actual_native,
+            "nativeStopEvents": [{"blocked": e.get("blocked"), "success": e.get("success"), "exit_code": e.get("exit_code")} for e in hook_events],
             "checks": {
                 "nativeStopHookInvokedTwice": len(hooks) >= 2 and actual_native,
-                "firstCompletionDenied": bool(hooks) and hooks[0].get("accepted") is False,
+                "firstCompletionDenied": bool(hooks) and hooks[0].get("accepted") is False and any(e.get("blocked") is True for e in hook_events),
                 "sameConversationRetriedWithFeedback": len(calls) >= 2 and any(x.get("feedbackSeen") for x in calls[1:]),
-                "subsequentHookAllowed": any(x.get("accepted") is True for x in hooks[1:]),
+                "subsequentHookAllowed": any(x.get("accepted") is True for x in hooks[1:]) and any(e.get("blocked") is False and e.get("success") is True for e in hook_events),
                 "finishReturned": status == "finished",
             },
             "notProven": ["Real independent Maven/OSV validation", "Vertex ADC", "GitHub delivery"],
@@ -239,7 +239,7 @@ def publish() -> None:
         time.strftime("native-hook-%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(3) + ".json")
     keys = ("serverVersion", "canvasVersion", "conversationId", "executionStatus",
             "hookInvocations", "nativeHookEvents", "mockModelRequests", "feedbackSeenInLaterModelRequest",
-            "fixtureDecisions", "nativeHookEventObserved", "checks", "notProven", "verdict")
+            "fixtureDecisions", "nativeHookEventObserved", "nativeStopEvents", "checks", "notProven", "verdict")
     save(destination, {k: data[k] for k in keys if k in data})
     rel = str(destination.relative_to(repo))
     native.command(["git", "-C", str(repo), "add", "--", rel])
