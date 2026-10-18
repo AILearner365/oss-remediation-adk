@@ -200,3 +200,30 @@ The report is in
 `~/openhands-native-poc-reports/native-execution-v1.json`. Do not
 re-run an already attempted v1 fixture, and preserve it on any failure.
 A passing test is not evidence of agent-written Maven vulnerability repairs.
+
+## Native execution v1 result and exact-marker correction
+
+Cloud Shell v1: 10 offline tests PASS; live verdict **NOT_PROVEN**.
+Native finished, exactly one /run, repeat dispatch ALREADY_DISPATCHED,
+four native Stop Hook events and four model requests, with independent
+outcomes REMEDIATION_FAILURE x4. The coordinator repaired the fixture after
+verified DENY and the mock model saw feedback, but the validator never
+observed the expected exact marker. Consequently there was no false
+independent acceptance.
+
+Root cause: the existing synthetic ArtifactRunner requires the literal
+two bytes `\\` + `n` at the end of its marker, while the new execution
+coordinator wrote an actual newline. Both now use one shared
+`REPAIR_BYTES` constant. Offline regression asserts that matching bytes
+yield PASS while a newline yields FAIL. Previous v1 state/report are
+preserved; next live scenario is `native-execution-v2`.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 scripts/openhands_native_execution_poc.py run
+```
+
+A v2 PASS demonstrates native synthetic feedback and validator-authorized
+acceptance; it does not demonstrate autonomous agent-made remediation.
