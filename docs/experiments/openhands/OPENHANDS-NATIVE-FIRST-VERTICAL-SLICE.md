@@ -277,3 +277,68 @@ possible safe delivery. The agent's native `finished` event is never PASS.
 
 Current status: real Maven/OSV preflight code committed; no real baseline,
 model execution, scanner output or GitHub PR has been claimed.
+
+## Vertex Gemini 2.5 Flash autonomous run — preparation/authorization boundary
+
+User selected **Vertex AI Gemini 2.5 Flash** for the first real autonomous
+SnakeYAML remediation, and explicitly required inspection of the
+execution/cost boundary **before any billable model call**.
+
+Verified Cloud Shell source evidence (reported by user):
+- disposable baseline repo `/tmp/openhands-real-remediation-snakeyaml-v1`,
+  original short Git commit `f44f94c`
+- Java 21, Maven 3.9.16, OSV scanner available
+- baseline `mvn clean verify` exit 0; OSV reported exactly one finding:
+  `org.yaml:snakeyaml:1.33`, `GHSA-mjmj-j48q-9wg2`
+- separate fixed comparison `/tmp/openhands-real-remediation-snakeyaml-fixed-v1`:
+  Maven exit 0, OSV exit 0, zero OSV findings.
+- Baseline Maven created untracked `target/`; no tracked POM edit was reported.
+  The plan verifier checks tracked POM identity; the eventual native worktree
+  must be created from the immutable baseline commit rather than copying
+  generated files.
+
+The nonexecuting preparation utility:
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_autonomous_run_plan.py' -v
+python3 scripts/openhands_autonomous_run_plan.py --scanner "$(command -v osv-scanner)"
+```
+
+It checks immutable Git/POM identity and both existing OSV reports, hashes
+the observed scanner binary, and emits a credential-free manifest to STDOUT.
+It does not modify the repository or perform any network request, Maven
+command, scanner scan, native conversation creation, or Vertex call. The
+fixed candidate's POM/version is **not** passed to the agent objective.
+
+### Explicit authorization boundary
+
+Current state: `PREPARED_NOT_AUTHORIZED`. **Neither selecting the model,
+running the plan script, nor creating an idle conversation authorizes
+billable model execution.** Before a native `/run`:
+1. Configure Vertex ADC/service account and project/region outside the
+   agent-visible prompt; prove the exact model ID is routable without
+   exposing credentials in the native conversation or evidence.
+2. Verify real `ExistingDeterministicBaselineRunner` and the **real**
+   `ExistingDeterministicValidationRunner` with Maven and OSV against a
+   disposable Git worktree; bind target findings and acceptable constraints.
+   No synthetic `ArtifactRunner` or preselected version as an answer.
+3. Ensure a native 1.55.1 conversation contains the actual task objective,
+   exact worktree and real Stop Hook. Verify native persisted Hook first,
+   and preserve unique durable dispatch intent, stop-hook feedback and
+   PASS evidence. The current `create_idle_native_conversation` has
+   generic guidance only and is **not** a complete real-task launcher.
+4. Freeze a concrete invocation budget (`max_iterations`), stop-hook denial
+   bound, a realistic dollar/token ceiling and abort/monitoring mechanisms
+   verified against the selected Vertex billing setup. The $ ceiling is
+   **not yet calculated or enforced**; `max_iterations` alone is not a
+   dollar cap. Native model requests, retries, context growth, and scanner
+   network traffic can all affect use/cost.
+5. Obtain a **separate explicit user go/no-go authorization** naming the
+   model, bounded budget and approved scenario, *then* enable `/run`.
+   Do not interpret this selection as that authorization.
+
+Model interaction is strictly blocked in this preparation stage.
+Outputs from existing local scans are verified scenario evidence only;
+the autonomous agent must discover/evaluate the fix itself. Delivery remains
+out of scope until a real independent PASS and exact Git state binding.
