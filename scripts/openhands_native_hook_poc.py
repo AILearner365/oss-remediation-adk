@@ -78,6 +78,9 @@ class MockLLM(BaseHTTPRequestHandler):
             calls.append({"index": len(calls) + 1, "feedbackSeen": reflected,
                           "finishToolAdvertised": bool(finish)})
             save(STATE / "model-requests.json", calls)
+            callback = getattr(self.server, "on_model_request", None)
+            if callback is not None:
+                callback(messages, calls)
             if not finish:
                 # Do not pretend that arbitrary text is an SDK FinishTool call.
                 self.send_error(422, "Native FinishTool not advertised")
