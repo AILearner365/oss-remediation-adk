@@ -79,6 +79,38 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 "hook_config": modified,
             }, request)
 
+    def test_create_idle_calls_native_only_and_verifies_persisted_hook(self):
+        request = self.build()
+        seen = []
+        def fake_http(method, endpoint, payload=None, **kwargs):
+            seen.append((method, endpoint))
+            if method == "POST":
+                self.assertEqual(payload, request)
+                return {"id": request["conversation_id"]}
+            return {"id": request["conversation_id"], "execution_status": "idle",
+                    "workspace": request["workspace"],
+                    "hook_config": request["hook_config"]}
+
+        self.assertEqual(
+            native_first.create_idle_native_conversation(request, fake_http),
+            request["conversation_id"]
+        )
+        self.assertEqual(seen, [
+            ("POST", "/api/conversations?include_skills=true"),
+            ("GET", f'/api/conversations/{request["conversation_id"]}?include_skills=true')
+        ])
+        self.assertFalse(any("/run" in endpoint for _, endpoint in seen))
+
+    def test_create_idle_rejects_persisted_config_without_hook(self):
+        request = self.build()
+        def fake_http(method, endpoint, payload=None, **kwargs):
+            if method == "POST":
+                return {"id": request["conversation_id"]}
+            return {"id": request["conversation_id"], "execution_status": "idle",
+                    "workspace": request["workspace"], "hook_config": {}}
+        with self.assertRaises(native_first.HandoffError):
+            native_first.create_idle_native_conversation(request, fake_http)
+
     def test_model_key_not_in_safe_summary_and_remote_override_rejected(self):
         payload = self.build(api_key="dummy-local-credential",
                              base_url="http://127.0.0.1:12997/v1")
