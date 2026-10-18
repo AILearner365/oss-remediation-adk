@@ -342,3 +342,70 @@ Model interaction is strictly blocked in this preparation stage.
 Outputs from existing local scans are verified scenario evidence only;
 the autonomous agent must discover/evaluate the fix itself. Delivery remains
 out of scope until a real independent PASS and exact Git state binding.
+
+## Native 1.55.1 reuse of existing Vertex/ADC configuration (no model calls)
+
+A repository review confirmed the original Gate-2 setup already defines
+`openhands_resolve_vertex_env`, `openhands_verify_vertex_adc` and
+`vertex-adc-preflight.py`. The earlier request to rediscover project/region
+by manually inspecting unset environment variables was unnecessary: the
+Cloud Shell POC resolver applies its own fallback. That fallback is acceptable
+for the existing disposable POC **only**; never treat it as evidence of an
+approved production billing project. Do not add project-specific credentials
+or tokens to Git, prompts, native events or reports.
+
+Committed preparation changes:
+
+- `scripts/openhands_native_vertex_check.py` invokes **only**
+  `openhands_resolve_vertex_env` from the existing script and prints
+  project/location and evidence flags. It does not call
+  `openhands_sync_gcloud_project`, `verify_vertex` (three billable model
+  completions), ADC refresh, the Agent Server, or a model.
+- `scripts/openhands_native_remediation.py` now has
+  `render_task_objective(store, task_id)`, using the persisted immutable
+  task objective and acceptance criteria. The
+  `create_idle_native_conversation(..., initial_message=...)` path delivers
+  this exact text in an initial native message with `run:false`. For
+  `vertex_ai/` models the call **fails closed** when that explicit task text
+  is missing. Synthetic mock-LLM fixture callers retain their generic text
+  for native lifecycle tests.
+- These edits do not modify the frozen `scripts/openhands/*` POC or the
+  native 1.55.1 launcher. No billable model execution is authorized.
+
+Offline verification:
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_vertex_check.py' -v
+python3 scripts/openhands_native_vertex_check.py
+```
+
+### Known remaining integration gates (do not claim readiness)
+
+1. In the **actual 1.55.1 Agent Server runtime**, verify
+   `openhands-sdk[vertex]` provider dependencies and compatibility with the
+   existing preflight; the current `openhands_native_poc.py` warms
+   `openhands-sdk==1.55.1` without the explicit `[vertex]` extra.
+   Do not assume a 1.50.0 Canvas patch also applies to 1.55.1.
+2. Perform existing ADC preflight in that same runtime. The earlier
+   missing-email Cloud Shell refresh regression means that a historical
+   successful Gemini run cannot prove current ADC refresh. This preflight
+   performs auth-network requests, not model inference, and must not
+   expose credentials.
+3. Create a real task in the durable store, with actual
+   `ExistingDeterministicBaselineRunner` results and a deployment-owned
+   Stop Hook configuration using the verified OSV scanner 2.6.0 and binary
+   SHA-256. Ensure `ExistingDeterministicValidationRunner` is the configured
+   Stop Hook (not a synthetic marker runner). Bind a fresh disposable worktree
+   to the original `f44f94c...` baseline.
+4. Bind the real task message to the idle native 1.55.1 conversation, verify
+   actual persisted Hook and idle state, and preserve no /run execution claim.
+5. Freeze and test iteration, runtime, cancellation and **real cost** limits,
+   present the explicit budget, and get a separate user authorization before
+   any model inference or native `/run`.
+
+Current truth: environment reuse and native task-context wiring are coded,
+but real-task setup, Vertex extra availability, ADC freshness, real Stop Hook
+execution and cost limits remain **NOT PROVEN**.
