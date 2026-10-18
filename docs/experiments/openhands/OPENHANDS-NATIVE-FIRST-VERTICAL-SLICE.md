@@ -522,3 +522,54 @@ python3 scripts/openhands_real_task_prepare.py \
 
 This remains deterministic preparation only: no Agent Server call,
 native /run, or paid model inference.
+
+## Real durable task: verified native idle attachment checkpoint
+
+Cloud Shell durable preparation PASSED after isolating Maven `target/`
+outputs in the local mirror. Immutable task:
+`task_a3e63e4dc3b5449c9142e4e2c34e0ac9`, database
+`/tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3`,
+validator config
+`/tmp/openhands-real-durable-task-20261018-v2/stop-hook.json`.
+
+New `scripts/openhands_real_native_idle.py` supports two separate modes:
+
+* `inspect` (default): **read-only** durable task baseline/advisory/artifact
+  SHA256 and Stop Hook config checks; no Agent Server calls.
+* `attach-idle`: requires an **already running** official Canvas
+  1.27.1 / Agent Server 1.55.1 localhost stack. It records one native
+  runtime ID, sends the registered objective with `run:false`, verifies
+  persisted workspace and independent Stop Hook, then durably indexes one
+  initial native message. It does not start/restart Canvas, dispatch
+  `/run`, or perform Gemini inference. On a failure after recording a
+  runtime, preserve evidence and reconcile manually; do not retry creation
+  automatically. Native server's Vertex-capable dependencies and
+  any inference-time costs remain unproven.
+
+First perform the **read-only** inspection and offline tests:
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_native_idle.py' -v
+python3 scripts/openhands_real_native_idle.py \
+  --database /tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3 \
+  --task-id task_a3e63e4dc3b5449c9142e4e2c34e0ac9 \
+  --hook-config /tmp/openhands-real-durable-task-20261018-v2/stop-hook.json
+```
+
+Only after inspected evidence passes and the native local 1.55.1
+stack is confirmed available, run the **one-shot** explicit attachment:
+
+```bash
+python3 scripts/openhands_real_native_idle.py \
+  --database /tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3 \
+  --task-id task_a3e63e4dc3b5449c9142e4e2c34e0ac9 \
+  --hook-config /tmp/openhands-real-durable-task-20261018-v2/stop-hook.json \
+  --mode attach-idle
+```
+
+Do **not** run if no 1.55.1 native server is active. A successful attach
+is `NATIVE_IDLE_ATTACHED_NOT_AUTHORIZED`, **not** authorization to
+run. The actual deterministic validation Stop Hook still needs controlled
+end-to-end execution verification. No model run until separate budget approval.
