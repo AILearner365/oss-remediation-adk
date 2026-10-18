@@ -181,7 +181,7 @@ def execute() -> dict:
                 save(STATE / "verdict.json", {"accepted": True})
                 transitioned = True
             status = native.http("GET", f"/api/conversations/{conv}").get("execution_status")
-            if status != "running" and transitioned:
+            if status in ("finished", "error", "stuck", "paused", "waiting_for_confirmation"):
                 break
             time.sleep(1)
         rows = event_rows(conv)
@@ -216,6 +216,14 @@ def execute() -> dict:
         print("[hook-poc] " + result["verdict"] + "; report: " + str(REPORT))
         return result
     finally:
+        # Do not leave a native run retrying against a stopped mock endpoint.
+        if conv:
+            try:
+                state = native.http("GET", f"/api/conversations/{conv}").get("execution_status")
+                if state == "running":
+                    native.http("POST", f"/api/conversations/{conv}/interrupt", {}, timeout=10)
+            except Exception:
+                pass
         server.shutdown()
         server.server_close()
 
