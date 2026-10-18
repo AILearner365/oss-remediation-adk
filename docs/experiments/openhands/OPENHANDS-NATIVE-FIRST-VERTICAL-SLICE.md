@@ -493,3 +493,32 @@ After this checkpoint: create/reconcile the native 1.55.1 idle conversation,
 bind the real task objective, verify the persisted hook, exercise the
 actual validator against the real baseline without a model call where
 safe, then request explicit cost authorization before any `/run`.
+
+### First durable-task run: workspace-cleanliness blocker
+
+Cloud Shell reported the three offline tests PASS, but real preparation
+returned `BaselineWorkspaceError` and stopped before producing the durable
+prepared-task verdict. Inspection of the assessor reveals that it checks
+Git cleanliness **after** Maven/OSV; an unignored Maven `target/` output is a
+plausible source of the failure. Exact dirty paths were not captured by
+the initial exception-only result, so the cause is **not yet proven**.
+
+The correction adds only `target/` to `trusted-source/.git/info/exclude`
+in the freshly cloned **isolated task mirror** before preparation. This
+does not change the committed fixture, original source, remote, or other
+untracked-file detection; tracked POM changes remain visible. Failed
+preparation output now includes a bounded safe error description for
+diagnosis. Failed run state is retained. Use a **new** run root; never
+delete or reuse the previously blocked root automatically.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_task_prepare.py' -v
+python3 scripts/openhands_real_task_prepare.py \
+  --scanner "$(command -v osv-scanner)" \
+  --run-root "/tmp/openhands-real-durable-task-20261018-v2"
+```
+
+This remains deterministic preparation only: no Agent Server call,
+native /run, or paid model inference.
