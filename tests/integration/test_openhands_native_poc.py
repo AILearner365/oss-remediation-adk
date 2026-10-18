@@ -58,6 +58,27 @@ class POCChecks(unittest.TestCase):
             self.assertEqual(r2['checks']['remediationConversationReused'],'PASS')
             self.assertEqual(r2['checks']['normalConversationReused'],'PASS')
 
+    def test_litellm_constraint_is_scoped_to_1551(self):
+        from unittest.mock import patch
+        old = {name: getattr(poc, name) for name in
+               ("SERVER", "ROOT", "KEY_FILE", "BIN", "PID_FILE", "IDENTITIES",
+                "INGRESS", "BACKEND", "AUTOMATION_PORT", "FRONTEND_PORT",
+                "REPORT", "LOG_FILE")}
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                with patch.dict("os.environ", {"OH_POC_TMP": d}, clear=True):
+                    poc.configure_server_version("1.55.1")
+                    env = poc.environment()
+                    constraint = Path(env["UV_CONSTRAINT"])
+                    self.assertTrue(constraint.is_file())
+                    self.assertEqual(constraint.read_text().strip(),
+                                     "litellm==" + poc.POC_LITELLM_PIN)
+                    poc.configure_server_version("1.54.0")
+                    self.assertNotIn("UV_CONSTRAINT", poc.environment())
+        finally:
+            for name, value in old.items():
+                setattr(poc, name, value)
+
     def test_version_configuration_is_isolated(self):
         from unittest.mock import patch
         fields = ("SERVER", "ROOT", "INGRESS", "BACKEND", "AUTOMATION_PORT",
