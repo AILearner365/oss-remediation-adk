@@ -154,6 +154,7 @@ def start():
             "nativeFinished": execution == "finished",
         }
         result = {
+            "launcherPid": native.owned_pid(),
             "case": CASE, "stage": "interrupted", "serverVersion": native.SERVER,
             "conversationId": uid, "executionStatus": execution,
             "snapshot": snapshot, "nativeStopEvents": len(hooks),
@@ -179,6 +180,8 @@ def recover():
     uid = data["conversationId"]
     if before.get("conversationId") != uid:
         raise native.Failure("Conversation identity changed")
+    if before.get("launcherPid") is None or before["launcherPid"] == native.owned_pid():
+        raise native.Failure("Agent Server restart not demonstrated; stop and run the owned launcher first")
     bridge.write_json(STATE / "recovery-attempted.json", {"conversationId": uid})
     server = start_mock()
     try:
@@ -199,6 +202,7 @@ def recover():
         attempts = snapshot["attempts"]
         checks = {
             "sameNativeConversation": before["conversationId"] == uid,
+            "launcherRestartObserved": before.get("launcherPid") != native.owned_pid(),
             "sameAttemptReconciled": len(attempts) == 1 and
                 attempts[0]["number"] == 1 and
                 attempts[0]["state"] == "COMPLETED" and
