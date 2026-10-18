@@ -108,6 +108,35 @@ class NativeFirstHandoffTests(unittest.TestCase):
         ])
         self.assertFalse(any("/run" in endpoint for _, endpoint in seen))
 
+    def test_real_initial_message_uses_registered_objective_without_dispatch(self):
+        objective = native_first.render_task_objective(self.store, self.data["taskId"])
+        registered = self.store.get_request(self.data["taskId"])
+        self.assertIn(registered.objective, objective)
+        self.assertIn("Independent", objective.replace("independent", "Independent"))
+        request = self.build()
+        sent = []
+        def fake_http(method, endpoint, payload=None, **kwargs):
+            if endpoint == "/api/conversations?include_skills=true":
+                return {"id": request["conversation_id"]}
+            if endpoint.endswith("/events"):
+                sent.append(payload)
+                return {"id": "init"}
+            return {"id": request["conversation_id"], "execution_status": "idle",
+                    "workspace": request["workspace"], "hook_config": request["hook_config"]}
+        native_first.create_idle_native_conversation(
+            request, fake_http, initial_message=objective
+        )
+        self.assertEqual(sent[0]["content"][0]["text"], objective)
+        self.assertIs(sent[0]["run"], False)
+        self.assertIsNone(self.store.get_execution_claim(self.data["taskId"]))
+
+    def test_empty_real_objective_rejected_before_network(self):
+        with self.assertRaises(native_first.HandoffError):
+            native_first.create_idle_native_conversation(
+                self.build(), lambda *a, **k: self.fail("Unexpected request"),
+                initial_message=" "
+            )
+
     def test_create_idle_rejects_persisted_config_without_hook(self):
         request = self.build()
         def fake_http(method, endpoint, payload=None, **kwargs):
