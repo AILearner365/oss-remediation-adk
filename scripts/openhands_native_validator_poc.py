@@ -189,10 +189,20 @@ def execute():
             finally:
                 store.close()
             if attempts and not mutated:
-                # Controlled external fixture change, NOT an agent-generated
-                # fix. Existing service independently checks the next state.
-                Path(data["workspace"], "poc3-repaired.txt").write_bytes(b"POC3-REPAIRED\\n")
-                mutated = True
+                # Wait for the *native* rejected completion before changing
+                # the fixture, never race against an in-flight validator.
+                native_events = collect_events(uid)
+                denied = any(
+                    x.get("kind") == "HookExecutionEvent"
+                    and str(x.get("hook_event_type", "")).lower() == "stop"
+                    and x.get("blocked") is True
+                    and x.get("exit_code") == 2
+                    for x in native_events
+                )
+                if denied:
+                    # Controlled external fixture change, NOT an agent fix.
+                    Path(data["workspace"], "poc3-repaired.txt").write_bytes(b"POC3-REPAIRED\\n")
+                    mutated = True
             status = native.http("GET", f"/api/conversations/{uid}").get("execution_status")
             if status in ("finished", "error", "stuck", "paused", "waiting_for_confirmation"):
                 break
