@@ -16,6 +16,46 @@ from openhands_shared.validation import SharedValidationService
 
 
 class NativeValidationBridgeTests(unittest.TestCase):
+    def test_fixture_repair_waits_for_native_denial_and_one_durable_failure(self):
+        from unittest.mock import patch
+        old = poc.STATE
+        with tempfile.TemporaryDirectory() as d:
+            poc.STATE = Path(d) / "case"
+            poc.STATE.mkdir()
+            task_root = None
+            try:
+                data = poc.fixture_setup()
+                task_root = Path(data["database"]).parents[1]
+                uid = data["conversationId"]
+                target = Path(data["workspace"]) / "poc3-repaired.txt"
+                # No native feedback -> cannot repair.
+                poc.repair_after_denial(data, [{"role": "user", "content": "start"}], uid)
+                self.assertFalse(target.exists())
+                # Feedback without native hook event is rejected.
+                with patch.object(poc, "collect_events", return_value=[]):
+                    with self.assertRaises(poc.native.Failure):
+                        poc.repair_after_denial(data, [{"content": poc.MARKER}], uid)
+                self.assertFalse(target.exists())
+                # Native DENY alone is insufficient without a completed attempt.
+                events = [{"kind": "HookExecutionEvent", "hook_event_type": "Stop",
+                           "blocked": True, "exit_code": 2}]
+                with patch.object(poc, "collect_events", return_value=events):
+                    with self.assertRaises(poc.native.Failure):
+                        poc.repair_after_denial(data, [{"content": poc.MARKER}], uid)
+                self.assertFalse(target.exists())
+                with patch("sys.stdin", io.StringIO('{"event_type":"Stop"}')):
+                    with patch("sys.stdout", new_callable=io.StringIO):
+                        self.assertEqual(poc.native_hook(), 2)
+                with patch.object(poc, "collect_events", return_value=events):
+                    poc.repair_after_denial(data, [{"content": poc.MARKER}], uid)
+                self.assertTrue(target.is_file())
+                checkpoint = poc.read_json(poc.STATE / "repair-checkpoint.json")
+                self.assertEqual(checkpoint["priorValidationAttempts"], 1)
+            finally:
+                poc.STATE = old
+                if task_root and task_root.is_dir():
+                    shutil.rmtree(task_root, ignore_errors=True)
+
     def test_real_service_denies_until_repo_state_changes(self):
         old = poc.STATE
         with tempfile.TemporaryDirectory() as d:
