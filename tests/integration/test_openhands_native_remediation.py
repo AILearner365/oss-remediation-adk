@@ -198,6 +198,20 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 hook_config=Path(self.data["hookConfig"]),
                 model="openai/gpt-4o-mini",
             )
+        # A genuinely attached and still-unstarted conversation can be
+        # inspected again without inventing a dispatch claim.
+        proxy.get_openhands_runtime.return_value = replace(
+            proxy.get_openhands_runtime.return_value,
+            last_native_event_id="native-initial-event-1",
+            last_native_event_order=1,
+        )
+        request_again = native_first.build_request(
+            proxy, self.data["taskId"],
+            hook_config=Path(self.data["hookConfig"]),
+            model="openai/gpt-4o-mini",
+        )
+        self.assertEqual(request_again["conversation_id"], self.data["conversationId"])
+        self.assertIsNone(proxy.get_execution_claim.return_value)
 
     def test_dispatch_native_once_claims_before_run_and_never_repeats(self):
         from types import SimpleNamespace
