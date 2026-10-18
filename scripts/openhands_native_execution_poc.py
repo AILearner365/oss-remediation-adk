@@ -20,13 +20,13 @@ import openhands_native_poc as native
 import openhands_native_hook_poc as mock
 import openhands_native_idle_create_poc as setup
 import openhands_native_remediation as bridge
-from openhands_native_validator_poc import ArtifactRunner
+from openhands_native_validator_poc import ArtifactRunner, REPAIR_BYTES
 from openhands_shared.contracts import OpenHandsEventLink, OpenHandsRuntimeStatus
 from openhands_shared.stop_hook import load_stop_hook_config
 from openhands_shared.store import SQLiteTaskStore
 from openhands_shared.validation import SharedValidationService
 
-CASE = "native-execution-v1"
+CASE = "native-execution-v2"
 PORT = 12997
 MARKER = "DETERMINISTIC_VALIDATION_FAILED"
 
@@ -115,7 +115,7 @@ def execute():
             attempts = store.list_validation_attempts(data["taskId"])
             if not denied or len(attempts) != 1 or attempts[0].outcome.value != "REMEDIATION_FAILURE":
                 raise native.Failure("Coordinator repair attempted without verified failed validation and native DENY")
-            (Path(data["workspace"]) / "poc3-repaired.txt").write_bytes(b"POC3-REPAIRED\n")
+            (Path(data["workspace"]) / "poc3-repaired.txt").write_bytes(REPAIR_BYTES)
             repaired[0] = True
         server.on_model_request = repair_on_feedback
 
