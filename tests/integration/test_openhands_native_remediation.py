@@ -121,6 +121,41 @@ class NativeFirstHandoffTests(unittest.TestCase):
         with self.assertRaises(native_first.HandoffError):
             native_first.create_idle_native_conversation(request, fake_http)
 
+    def test_pre_execution_native_identity_requires_no_dispatch_claim(self):
+        from dataclasses import replace
+        from unittest.mock import Mock
+        from openhands_shared.contracts import (
+            OpenHandsRuntimeStatus, ExecutionStatus
+        )
+        proxy = Mock(wraps=self.store)
+        proxy.get_execution_claim.return_value = None
+        proxy.get_status.return_value = replace(
+            self.store.get_status(self.data["taskId"]),
+            execution_status=ExecutionStatus.NOT_STARTED,
+        )
+        proxy.get_openhands_runtime.return_value = replace(
+            self.store.get_openhands_runtime(self.data["taskId"]),
+            runtime_status=OpenHandsRuntimeStatus.CONVERSATION_READY,
+            execution_status=ExecutionStatus.NOT_STARTED,
+        )
+        request = native_first.build_request(
+            proxy, self.data["taskId"],
+            hook_config=Path(self.data["hookConfig"]),
+            model="openai/gpt-4o-mini",
+        )
+        self.assertEqual(request["conversation_id"], self.data["conversationId"])
+        # A not-started task cannot claim that native context has been sent.
+        proxy.get_openhands_runtime.return_value = replace(
+            proxy.get_openhands_runtime.return_value,
+            runtime_status=OpenHandsRuntimeStatus.CONTEXT_ATTACHED,
+        )
+        with self.assertRaises(native_first.HandoffError):
+            native_first.build_request(
+                proxy, self.data["taskId"],
+                hook_config=Path(self.data["hookConfig"]),
+                model="openai/gpt-4o-mini",
+            )
+
     def test_model_key_not_in_safe_summary_and_remote_override_rejected(self):
         payload = self.build(api_key="dummy-local-credential",
                              base_url="http://127.0.0.1:12997/v1")
