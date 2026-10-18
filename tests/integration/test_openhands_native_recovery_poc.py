@@ -14,6 +14,15 @@ from openhands_shared.store import SQLiteTaskStore
 
 
 class RecoveryOfflineTests(unittest.TestCase):
+    def test_native_hook_action_dispatches_without_argparse_exit_two(self):
+        with patch.object(recovery, "configure"), patch.object(
+            recovery, "hook", return_value=37
+        ) as invoked, patch.object(
+            sys, "argv", ["openhands_native_recovery_poc.py", "hook"]
+        ):
+            self.assertEqual(recovery.main(), 37)
+            invoked.assert_called_once_with()
+
     def test_interrupted_attempt_without_report_cannot_accept(self):
         old = (recovery.STATE, bridge.STATE)
         with tempfile.TemporaryDirectory() as d:
