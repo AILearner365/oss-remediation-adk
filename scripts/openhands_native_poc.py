@@ -26,6 +26,7 @@ CANVAS = "1.27.1"
 SERVER = "1.54.0"  # default; CLI may opt into 1.55.1
 CANVAS_DEFAULT_SERVER = "1.54.0"  # published Canvas 1.27.1 default
 SUPPORTED_SERVERS = ("1.54.0", "1.55.1")
+POC_LITELLM_PIN = "1.105.1"
 AUTOMATION = "1.19.3"  # Canvas 1.27.1's own published default
 ROOT = Path(os.environ.get("OH_POC_TMP", "/tmp/openhands-native-poc-1271")).resolve()
 RESULT_DIR = Path(os.environ.get("OH_POC_REPORTS", str(Path.home() / "openhands-native-poc-reports"))).expanduser().resolve()
@@ -151,6 +152,12 @@ def environment() -> dict[str, str]:
     if not KEY_FILE.is_file():
         write_private(KEY_FILE, secrets.token_urlsafe(36))
     env = dict(os.environ)
+    if SERVER == "1.55.1":
+        constraint = ROOT / "litellm-constraint.txt"
+        constraint.write_text(f"litellm=={POC_LITELLM_PIN}\n", encoding="utf-8")
+        env["UV_CONSTRAINT"] = str(constraint)
+    else:
+        env.pop("UV_CONSTRAINT", None)
     env.update({
         "UV_CACHE_DIR": str(ROOT / "uv-cache"),
         "UV_TOOL_DIR": str(ROOT / "uv-tools"),
@@ -227,7 +234,8 @@ def assert_ports_free() -> None:
 def warm_native_packages(env: dict[str, str]) -> None:
     """Official CLI waits only 60s for backend readiness; prewarm exact uvx deps."""
     stamp = ROOT / "packages-ready.txt"
-    if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == f"{SERVER}|{AUTOMATION}":
+    fingerprint = f"{SERVER}|{AUTOMATION}|{POC_LITELLM_PIN if SERVER == '1.55.1' else 'unconstrained'}"
+    if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == fingerprint:
         return
     log("Preparing pinned SDK/Agent Server and Automation in /tmp before Canvas startup")
     command(["uvx", "--from", f"openhands-agent-server=={SERVER}",
@@ -236,7 +244,7 @@ def warm_native_packages(env: dict[str, str]) -> None:
              "agent-server", "--help"], env=env)
     command(["uvx", "--from", f"openhands-automation=={AUTOMATION}",
              "uvicorn", "--help"], env=env)
-    stamp.write_text(f"{SERVER}|{AUTOMATION}\n", encoding="utf-8")
+    stamp.write_text(fingerprint + "\n", encoding="utf-8")
 
 
 def launch(env: dict[str, str]) -> None:
