@@ -28,7 +28,7 @@ from openhands_shared.store import SQLiteTaskStore
 from openhands_shared.validation import SharedValidationService
 from tests.integration.test_openhands_shared_validation import SharedValidationIntegrationTests, report
 
-CASE_ID = "service-v1"
+CASE_ID = "service-v2"
 CASE_NAME = "validator-service"
 ROOT = native.ROOT
 STATE = ROOT / ("hook-poc3-" + CASE_ID)
@@ -159,6 +159,34 @@ def collect_events(uid):
     return native.http("GET", f"/api/conversations/{uid}/events/search?limit=100&sort_order=TIMESTAMP").get("items", [])
 
 
+def repair_after_denial(data, messages, uid):
+    """Synchronize fixture repair before the first retried mock Finish call."""
+    if MARKER not in json.dumps(messages):
+        return
+    target = Path(data["workspace"]) / "poc3-repaired.txt"
+    if target.exists():
+        return
+    events = collect_events(uid)
+    denied = any(
+        e.get("kind") == "HookExecutionEvent"
+        and str(e.get("hook_event_type", "")).lower() == "stop"
+        and e.get("blocked") is True and e.get("exit_code") == 2
+        for e in events
+    )
+    if not denied:
+        raise native.Failure("Feedback appeared without verified native DENY")
+    store = SQLiteTaskStore(Path(data["database"]))
+    try:
+        attempts = store.list_validation_attempts(data["taskId"])
+        if len(attempts) != 1 or attempts[0].outcome.value != "REMEDIATION_FAILURE":
+            raise native.Failure("Repair checkpoint requires exactly one durable remediation failure")
+    finally:
+        store.close()
+    target.write_bytes(b"POC3-REPAIRED\\n")
+    write_json(STATE / "repair-checkpoint.json",
+               {"afterNativeDenial": True, "priorValidationAttempts": 1})
+
+
 def execute():
     native.configure_server_version("1.55.1")
     native.wait_ready()
@@ -179,34 +207,15 @@ def execute():
     try:
         data = fixture_setup()
         uid = native_create(data)
+        server.on_model_request = lambda messages, calls: repair_after_denial(data, messages, uid)
         native.http("POST", f"/api/conversations/{uid}/run", {}, timeout=20)
         deadline = time.monotonic() + 120
-        mutated = False
         while time.monotonic() < deadline:
-            store = SQLiteTaskStore(Path(data["database"]))
-            try:
-                attempts = store.list_validation_attempts(data["taskId"])
-            finally:
-                store.close()
-            if attempts and not mutated:
-                # Wait for the *native* rejected completion before changing
-                # the fixture, never race against an in-flight validator.
-                native_events = collect_events(uid)
-                denied = any(
-                    x.get("kind") == "HookExecutionEvent"
-                    and str(x.get("hook_event_type", "")).lower() == "stop"
-                    and x.get("blocked") is True
-                    and x.get("exit_code") == 2
-                    for x in native_events
-                )
-                if denied:
-                    # Controlled external fixture change, NOT an agent fix.
-                    Path(data["workspace"], "poc3-repaired.txt").write_bytes(b"POC3-REPAIRED\\n")
-                    mutated = True
             status = native.http("GET", f"/api/conversations/{uid}").get("execution_status")
             if status in ("finished", "error", "stuck", "paused", "waiting_for_confirmation"):
                 break
             time.sleep(1)
+        mutated = bool(read_json(STATE / "repair-checkpoint.json", {}).get("afterNativeDenial"))
         status = native.http("GET", f"/api/conversations/{uid}").get("execution_status")
         rows = collect_events(uid)
         hook_events = [x for x in rows if x.get("kind") == "HookExecutionEvent" and
@@ -230,6 +239,7 @@ def execute():
             "laterIndependentOutcomePass": bool(outcomes) and outcomes[-1] == "PASS",
             "nativeAllowObserved": any(x.get("blocked") is False and x.get("exit_code") == 0 for x in hook_events),
             "acceptedByExistingService": accepted and verified,
+            "repairAfterFirstNativeDenial": mutated,
             "nativeFinished": status == "finished",
         }
         result = {
