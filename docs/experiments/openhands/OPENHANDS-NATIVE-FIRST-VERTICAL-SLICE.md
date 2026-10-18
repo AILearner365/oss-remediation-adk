@@ -649,3 +649,21 @@ Before /run, document controls verified on the deployed runtime, the
 maximum accepted financial exposure, and obtain separate explicit
 authorization. Native Stop Hook events will only be proven under genuine
 authorized execution; do not fabricate dispatch state.
+
+### Readiness audit initial BLOCKED and correction
+
+Cloud Shell returned all four offline audit tests PASS, then
+`HandoffError: Pre-execution provisioning requires an unstarted conversation`.
+The real task had already reached `CONTEXT_ATTACHED` after its
+`run:false` native initial message, with execution still
+`NOT_STARTED`. The native handoff's request builder previously
+supported only `CONVERSATION_READY` for unclaimed tasks, incorrectly
+blocking read-only reinspection of an already attached idle conversation.
+
+The correction permits `CONTEXT_ATTACHED` while unstarted **only
+when durable native initial-message ID/order evidence exists**.
+The previous test rejecting a fabricated context-attached state with
+no event evidence remains; a new regression assertion verifies the
+legitimate attached state. No task metadata or native conversation
+was altered by this code change. Rerun the audit and inspect its
+unproven Vertex/package and hard-budget flags; no model execution.
