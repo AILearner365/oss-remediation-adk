@@ -23,6 +23,7 @@ MARKER = "POC2_VALIDATION_FAILED__RETRY_REQUIRED"
 PORT = 12997
 STATE = native.ROOT / "hook-poc2"
 REPORT = native.RESULT_DIR / "native-hook-poc-1.55.1.json"
+CASE_ID = "litellm1051"
 
 
 def json_file(path: Path, default):
@@ -108,7 +109,7 @@ def hook_command() -> str:
     import shlex
     return " ".join(shlex.quote(x) for x in
         [sys.executable, str(Path(__file__).resolve()), "hook",
-         "--server-version", "1.55.1"])
+         "--server-version", "1.55.1", "--case-id", CASE_ID])
 
 
 def create() -> str:
@@ -155,8 +156,8 @@ def event_rows(conv: str):
 def execute() -> dict:
     native.configure_server_version("1.55.1")
     global STATE, REPORT
-    STATE = native.ROOT / "hook-poc2"
-    REPORT = native.RESULT_DIR / "native-hook-poc-1.55.1.json"
+    STATE = native.ROOT / ("hook-poc2-" + CASE_ID)
+    REPORT = native.RESULT_DIR / ("native-hook-poc-1.55.1-" + CASE_ID + ".json")
     native.wait_ready()
     native.wait_canvas_ready()
     if STATE.exists() and any(STATE.iterdir()):
@@ -260,11 +261,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("run", "hook", "publish"))
     parser.add_argument("--server-version", default="1.55.1", choices=("1.55.1",))
+    parser.add_argument("--case-id", default="litellm1051", choices=("litellm1051",))
     args = parser.parse_args()
     native.configure_server_version("1.55.1")
-    global STATE, REPORT
-    STATE = native.ROOT / "hook-poc2"
-    REPORT = native.RESULT_DIR / "native-hook-poc-1.55.1.json"
+    global STATE, REPORT, CASE_ID
+    CASE_ID = args.case_id
+    STATE = native.ROOT / ("hook-poc2-" + CASE_ID)
+    REPORT = native.RESULT_DIR / ("native-hook-poc-1.55.1-" + CASE_ID + ".json")
     try:
         if args.action == "hook":
             return hook_cli()
