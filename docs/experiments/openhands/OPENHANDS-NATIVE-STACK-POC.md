@@ -72,6 +72,61 @@ This command verifies you are on `openhands-service-integration` with the correc
 
 These are deliberately separate follow-up gates. Do **not** mistake `NATIVE_API_SMOKE_PASSED__BROWSER_AND_NATIVE_HOOK_RUN_NOT_PROVEN` for end-to-end remediation success.
 
+## Second compatibility pass: SDK / Agent Server 1.55.1
+
+**Status: runner option committed; actual Cloud Shell 1.55.1 run pending.**
+This compares Canvas 1.27.1 against newer Agent Server / SDK / tools /
+workspace 1.55.1, using the official published Canvas launcher with
+`OH_AGENT_SERVER_VERSION=1.55.1`. Canvas remains unmodified. Its bundled
+1.54.0 server version stays the expected *Canvas packaging default*; the
+runtime version is checked independently through native `/server_info`.
+
+**Limited-memory Cloud Shell: stop the 1.54.0 launcher first.** Do not delete
+its `/tmp` directory or conversation state. 1.55.1 gets independent ports,
+credentials, conversations, npm/uv dependencies and evidence. Stop and run
+a version-specific POC when switching versions:
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_poc.py' -v
+python3 scripts/openhands_native_poc.py stop
+python3 scripts/openhands_native_poc.py run --server-version 1.55.1
+python3 scripts/openhands_native_poc.py publish --server-version 1.55.1
+```
+
+For 1.55.1, use Cloud Shell Web Preview **port 8091**, not 8090.
+No real LLM calls are made; do not press Run or configure the fake LLM.
+To recheck a controlled restart on 1.55.1, use:
+
+```bash
+python3 scripts/openhands_native_poc.py stop --server-version 1.55.1
+python3 scripts/openhands_native_poc.py run --server-version 1.55.1
+python3 scripts/openhands_native_poc.py publish --server-version 1.55.1
+```
+
+Version-specific paths:
+
+| Property | 1.54.0 baseline | 1.55.1 compatibility |
+| --- | --- | --- |
+| Web Preview port | 8090 | 8091 |
+| Agent Server port | 18900 | 18910 |
+| Automation port | 18901 | 18911 |
+| Disposable root | `/tmp/openhands-native-poc-1271` | `/tmp/openhands-native-poc-1271-server-1551` |
+| Persistent small report | `native-integration-smoke.json` | `native-integration-smoke-1.55.1.json` |
+
+`publish --server-version 1.55.1` refuses to publish a report
+for the other version. The published report includes the selected SDK /
+Agent Server version, native API checks, and any failure; it contains
+no credentials or raw logs. If a launch fails, inspect
+`/tmp/openhands-native-poc-1271-server-1551/canvas.log` and
+`install.log` locally.
+
+This is a **compatibility smoke test**, not evidence that 1.55.1's hook
+execution, Vertex ADC, browser rendering, or remediation validation
+are complete. The SDK change can alter native API schemas even when
+the frontend loads, so failures should be recorded before adding workarounds.
+
 ## Source-based version decisions
 
 - Canvas 1.27.1 `config/defaults.json` pins Agent Server 1.54.0 and Automation 1.19.3, minimum compatible server 1.51.0.
