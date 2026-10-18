@@ -167,3 +167,36 @@ Its Stop Hook uses the real validation CLI with a synthetic task fixture;
 executing it would not constitute a valid real Maven/OSV experiment. A
 separate fixture with explicitly synthetic Stop Hook and local-only MockLLM
 will be needed for the next live /run test. No paid model call is authorized.
+
+## Native-first execution + synthetic Stop Hook live test (v1)
+
+`scripts/openhands_native_execution_poc.py` runs a fresh disposable
+`native-execution-v1` task and native 1.55.1 conversation. It uses the
+previously proven direct-native fixture (`CONVERSATION_READY`, no legacy
+adapter), calls native `POST /run` using `dispatch_native_once()` with an
+existing SQLite execution intent, and requests a duplicate dispatch to prove
+it does **not** call `/run` a second time.
+
+A loopback-only HTTP mock advertises the SDK FinishTool. A **synthetic**
+native Stop Hook invokes `SharedValidationService` with `ArtifactRunner`,
+which checks a disposable marker, **never** Maven/OSV. On first independent
+FAIL, native Stop Hook must DENY. The *test coordinator*, not the agent,
+creates the repair marker only after verifying the native DENY event and first
+durable REMEDIATION_FAILURE. The subsequent mock Finish must receive the
+failed-validation feedback and produce a durable PASS before security
+acceptance. Results distinguish synthetic coordinator repair from real
+agent-generated edits.
+
+```bash
+cd ~/oss-remediation-adk
+git pull --ff-only origin openhands-service-integration
+python3 -m unittest discover -s tests/integration -p 'test_openhands_native_remediation.py' -v
+python3 scripts/openhands_native_execution_poc.py run
+```
+
+The smoke runs the **native agent with a local mock model** and invokes an
+explicitly synthetic validator; no paid LLM, Maven, OSV or GitHub delivery.
+The report is in
+`~/openhands-native-poc-reports/native-execution-v1.json`. Do not
+re-run an already attempted v1 fixture, and preserve it on any failure.
+A passing test is not evidence of agent-written Maven vulnerability repairs.
