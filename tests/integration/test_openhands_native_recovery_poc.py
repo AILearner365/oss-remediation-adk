@@ -38,9 +38,9 @@ class RecoveryOfflineTests(unittest.TestCase):
                 self.assertEqual(__import__("json").loads(output.getvalue())["decision"], "allow")
                 after = recovery.status_snapshot(data)
                 self.assertFalse(after["accepted"])
-                self.assertEqual(len(after["attempts"]), 2)
-                self.assertEqual(after["attempts"][0]["state"], "RUNNING")
-                self.assertEqual(after["attempts"][1]["outcome"], "VALIDATOR_FAILURE")
+                self.assertEqual(len(after["attempts"]), 1)
+                self.assertEqual(after["attempts"][0]["state"], "COMPLETED")
+                self.assertEqual(after["attempts"][0]["outcome"], "VALIDATOR_FAILURE")
                 self.assertFalse((recovery.STATE / "validator-invoked.json").exists())
                 self.assertEqual({x["conversationId"] for x in after["attempts"]},
                                  {data["conversationId"]})
