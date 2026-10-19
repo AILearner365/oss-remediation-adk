@@ -974,11 +974,19 @@ class SQLiteTaskStore:
                 event_type=("agent.execution.completed" if completed else "agent.execution.failed"),
                 stage="agent", data={"accepted": validation is ValidationStatus.PASSED}, timestamp=now,
             )
+            request_mode = json.loads(task["request_json"])["delivery"]["mode"]
+            if next_status is TaskStatus.ACCEPTED and request_mode == "github_pr":
+                connection.execute(
+                    "UPDATE tasks SET delivery_status = ? WHERE task_id = ?",
+                    (DeliveryStatus.PENDING.value, task_id),
+                )
             if next_status in {
                 TaskStatus.ACCEPTED,
                 TaskStatus.FAILED_VALIDATION,
                 TaskStatus.FAILED_INFRASTRUCTURE,
-            } and task["result_json"] is None:
+            } and task["result_json"] is None and not (
+                next_status is TaskStatus.ACCEPTED and request_mode == "github_pr"
+            ):
                 attempt = connection.execute(
                     """SELECT * FROM validation_attempts WHERE task_id = ? AND state = 'COMPLETED'
                     ORDER BY attempt DESC LIMIT 1""", (task_id,),
