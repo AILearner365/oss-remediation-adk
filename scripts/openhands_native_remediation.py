@@ -149,7 +149,13 @@ def build_request(
     # Native hook subprocess may start inside the disposable task worktree,
     # not the control repository. Set the import root explicitly.
     bootstrap = "import sys,runpy;sys.path.insert(0," + repr(str(ROOT)) + ");runpy.run_module('openhands_shared.stop_hook',run_name='__main__')"
-    executable = [sys.executable, "-c", bootstrap,
+    # Independent validation executes under a stable local interpreter, not the
+    # SDK's temporary uv build environment (which disappears after uv exits).
+    # The validator only needs project/OSV dependencies, never the native SDK.
+    validator_python = Path("/usr/bin/python3")
+    if not validator_python.is_file():
+        raise HandoffError("Stable system Python for independent validator is unavailable")
+    executable = [str(validator_python), "-c", bootstrap,
                   "--config", str(hook_config.resolve()),
                   "--task-id", task_id, "--workspace", str(workspace)]
     llm: dict[str, Any] = {"model": model, "usage_id": "native-remediation", "stream": False}
@@ -203,29 +209,11 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
         actual_hooks = [hook for group in entries for hook in group["hooks"]]
     except (TypeError, KeyError):
         raise HandoffError("Native response omitted the configured independent Stop Hook") from None
-    def matches_persisted_hook(hook: Mapping[str, Any]) -> bool:
-        if hook.get("type") != expected_hook["type"] or hook.get("timeout") != expected_hook["timeout"]:
-            return False
-        try:
-            actual_argv = shlex.split(hook["command"])
-            expected_argv = shlex.split(expected_hook["command"])
-        except (KeyError, TypeError, ValueError):
-            return False
-        # The original uv launcher may have persisted an ephemeral Python
-        # executable path. It can disappear after the launcher exits. Require
-        # an exact match for every command argument except argv[0], and verify
-        # the original executable is an absolute Python path. Do not require
-        # an expired uv build path to remain on disk.
-        return (
-            len(actual_argv) == len(expected_argv)
-            and len(actual_argv) >= 9
-            and actual_argv[1:] == expected_argv[1:]
-            and Path(actual_argv[0]).is_absolute()
-            and Path(actual_argv[0]).name.startswith("python")
-        )
-
     if not any(
-        isinstance(hook, Mapping) and matches_persisted_hook(hook)
+        isinstance(hook, Mapping)
+        and hook.get("type") == expected_hook["type"]
+        and hook.get("command") == expected_hook["command"]
+        and hook.get("timeout") == expected_hook["timeout"]
         for hook in actual_hooks
     ):
         raise HandoffError("Native response omitted the configured independent Stop Hook")
