@@ -27,9 +27,9 @@ class RealDispatchGuards(unittest.TestCase):
         self.assertNotIn("claim_execution(", source)
 
     def test_approved_identity_is_pinned(self):
-        self.assertEqual(dispatch.CONVERSATION, "c6f99951-2fac-4ce4-bc32-bf52c921cd83")
+        self.assertEqual(dispatch.CONVERSATION, "0de4c085-fced-4714-a995-856929e32afc")
         self.assertEqual(dispatch.MODEL, "vertex_ai/gemini-2.5-flash")
-        self.assertEqual(dispatch.TASK, "task_a3e63e4dc3b5449c9142e4e2c34e0ac9")
+        self.assertEqual(dispatch.TASK, "task_93531f4571724ab183e2e2defea6def8")
 
 
 if __name__ == "__main__":
