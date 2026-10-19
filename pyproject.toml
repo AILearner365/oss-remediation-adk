@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "native-oss-remediation"
+version = "0.1.0"
+description = "Native OpenHands remediation with independent Maven/OSV acceptance"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+native = ["openhands-sdk[vertex]==1.55.1", "openhands-tools==1.55.1"]
+
+[project.scripts]
+oss-remediate = "native_remediation.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["native_remediation*"]

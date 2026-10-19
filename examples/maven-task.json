@@ -1,0 +1,40 @@
+{
+  "repository": "AILearner365/maven-multimodule-app",
+  "base_branch": "main-runrunning",
+  "base_sha": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+  "goal": "Resolve baseline OSS vulnerabilities with a credible evidence-backed solution while preserving build, tests and Java compatibility.",
+  "model": "vertex_ai/gemini-2.5-flash",
+  "limits": {
+    "max_iterations": 40,
+    "max_cycles": 3,
+    "max_runs": 2,
+    "command_seconds": 900,
+    "validation_seconds": 2400,
+    "task_seconds": 7200
+  },
+  "policy": {
+    "allowed_paths": ["pom.xml", "**/pom.xml"],
+    "protected_paths": [],
+    "protected_properties": ["java.version", "maven.compiler.release"],
+    "allowed_removed_dependencies": [],
+    "allow_major_upgrades": false,
+    "allow_downgrades": false,
+    "max_remaining_findings": 0,
+    "target_ids": [],
+    "minimum_tests": 1
+  },
+  "constraints": [],
+  "tools": {
+    "maven": "mvn",
+    "osv": "osv-scanner",
+    "profiles": [],
+    "checks": [],
+    "sbri_reference": null,
+    "research_reference": null
+  },
+  "delivery": {
+    "repository": "AILearner365/maven-multimodule-app",
+    "base_branch": "main-runrunning",
+    "draft": true
+  }
+}
