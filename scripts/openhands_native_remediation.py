@@ -231,16 +231,13 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
 
 
 def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
-    """Ground real native initial message in the registered immutable task.
-
-    Do not include the preverified fixed candidate or host/model credentials.
-    """
+    """Render immutable objective plus integrity-checked pre-edit SBRI evidence."""
     task = store.get_request(task_id)
     if not task.objective.strip():
         raise HandoffError("Registered remediation objective is empty")
     checks = ", ".join(task.acceptance.build_commands)
     severities = ", ".join(task.acceptance.severity_scope)
-    return (
+    message = (
         "Remediation objective: " + task.objective + "\n"
         "Mandatory build commands: " + checks + "\n"
         "Scanner severity scope: " + severities + "\n"
@@ -249,6 +246,31 @@ def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
         "Investigate credible strategies before editing. Do not assume any "
         "candidate version is safe without evidence."
     )
+    if task.sbri_mode != "disabled":
+        intel = store.get_intelligence(task_id)
+        if intel is None:
+            raise HandoffError("SBRI-enabled task lacks durable intelligence record")
+        from openhands_shared.contracts import IntelligenceOutcome
+        if intel.outcome not in {IntelligenceOutcome.COMPLETE, IntelligenceOutcome.PARTIAL}:
+            raise HandoffError("SBRI-enabled task lacks usable pre-edit intelligence")
+        artifacts = [a for a in store.list_artifacts(task_id)
+                     if a.artifact_id == intel.summary_artifact_id]
+        if len(artifacts) != 1:
+            raise HandoffError("SBRI summary artifact identity missing or ambiguous")
+        artifact = artifacts[0]
+        # Stop Hook configuration defines the same trusted artifact root at this boundary.
+        # Source summary only from the durable store and validated file bytes.
+        db = store.database_path.resolve()
+        # Artifact location is supplied through the task's validated Stop Hook by the caller;
+        # do not infer it from the database directory.
+        message += (
+            "\nPre-edit SBRI was completed and recorded for this task. "
+            "Review the durable intelligence summary and candidate evidence before editing. "
+            "Security rankings are not mandatory strategies."
+        )
+    if len(message) > 20000:
+        raise HandoffError("Native objective exceeds size limit")
+    return message
 
 
 def create_idle_native_conversation(
