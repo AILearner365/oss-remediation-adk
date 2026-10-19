@@ -36,7 +36,7 @@ def baseline(project: Path, expected: str, output: Path, scanner: str) -> dict:
     output.mkdir(parents=True, mode=0o700)
     checks = [
         ("maven", ["mvn", "-B", "-ntp", "clean", "verify"], 1800),
-        ("osv", [scanner, "scan", "source", "-r", str(project), "--format", "json", "--data-source=osv"], 600),
+        ("osv", [scanner, "scan", "source", "-r", str(project), "--format", "json", "--data-source=native"], 600),
     ]
     runs = {}
     for name, command, timeout in checks:
