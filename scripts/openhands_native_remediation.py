@@ -116,13 +116,22 @@ def build_request(
         llm["api_mode"] = "chat"
     if api_key is not None:
         llm["api_key"] = api_key
+    # OpenHands 1.55.1 AgentBase defaults tools to an empty list.
+    # Use the native CLI default coding-tool names, not a second tool harness.
+    # The upstream 1.55.1 preset selects Terminal, FileEditor, TaskTracker
+    # (browser disabled in CLI mode); built-in Finish/Think remain SDK defaults.
+    coding_tools = [
+        {"name": "TerminalTool", "params": {}},
+        {"name": "FileEditorTool", "params": {}},
+        {"name": "TaskTrackerTool", "params": {}},
+    ]
     return {
         "conversation_id": runtime.conversation_id,
         "workspace": {"working_dir": str(workspace)},
         "worktree": False,
         "autotitle": False,
         "max_iterations": max_iterations,
-        "agent": {"kind": "Agent", "llm": llm},
+        "agent": {"kind": "Agent", "llm": llm, "tools": coding_tools,\n                  "system_prompt_kwargs": {"cli_mode": True}},
         "hook_config": {"stop": [{
             "matcher": "*", "hooks": [{
                 "type": "command", "command": shlex.join(executable), "timeout": 3600
