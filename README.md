@@ -2,7 +2,17 @@
 
 This repository contains an ADK-based OSS vulnerability remediation workflow for Java Spring Boot Maven applications.
 
-## Native OpenHands remediation product
+## Native OpenHands direct smoke (verified)
+
+Native Agent Server/SDK 1.55.1 with Canvas 1.27.1 and Gemini 2.5 Flash completed
+one file-only task through independent Stop Hook validation and automatic
+[draft PR #214](https://github.com/AILearner365/maven-multimodule-app/pull/214),
+without the custom product service or database. See the
+[minimal implementation, reproduction steps and limitations](docs/experiments/openhands/OPENHANDS-NATIVE-WIRING-SMOKE.md)
+and [sanitized live evidence](docs/experiments/openhands/evidence/native-wiring-20261019.json).
+This proves native wiring, not real vulnerability remediation.
+
+## Existing OpenHands remediation product (separate path)
 
 Start with `python3 scripts/openhands_service.py start`. REST, CLI and the
 submission UI share one remediation backend with independent Maven/OSV validation,
