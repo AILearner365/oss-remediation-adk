@@ -268,14 +268,16 @@ def warm_native_packages(env: dict[str, str]) -> None:
     if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == fingerprint:
         return
     log("Preparing pinned SDK/Agent Server and Automation in /tmp before Canvas startup")
-    command(["uvx", "--from", f"openhands-agent-server=={SERVER}",
+    vertex_extra = (["--with", f"openhands-sdk[vertex]=={SERVER}"]
+                    if SERVER == "1.55.1" else [])
+    command(["uvx", *vertex_extra, "--from", f"openhands-agent-server=={SERVER}",
              "--with", f"openhands-sdk=={SERVER}", "--with", f"openhands-tools=={SERVER}",
              "--with", f"openhands-workspace=={SERVER}", "--with", "posthog>=6,<7",
              "agent-server", "--help"], env=env)
     if SERVER == "1.55.1":
         # Use exactly the same uvx package requirements as the official
         # launcher. Verify dependency resolution before opening the server.
-        command(["uvx", "--from", f"openhands-agent-server=={SERVER}",
+        command(["uvx", *vertex_extra, "--from", f"openhands-agent-server=={SERVER}",
                  "--with", f"openhands-sdk=={SERVER}",
                  "--with", f"openhands-tools=={SERVER}",
                  "--with", f"openhands-workspace=={SERVER}",
@@ -283,7 +285,8 @@ def warm_native_packages(env: dict[str, str]) -> None:
                  "python", "-c",
                  "from importlib.metadata import version; "
                  "assert version('litellm') == '1.105.1', version('litellm'); "
-                 "import litellm; import mcp.types"], env=env)
+                 "import litellm; import mcp.types; "
+                 "assert version('google-cloud-aiplatform')"], env=env)
         log("Verified pinned LiteLLM import preflight with Vertex extra requested for Agent Server")
     command(["uvx", "--from", f"openhands-automation=={AUTOMATION}",
              "uvicorn", "--help"], env=env)
