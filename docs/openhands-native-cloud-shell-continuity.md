@@ -127,3 +127,22 @@ python3 scripts/openhands_real_app_baseline.py --project ~/openhands-real-app-po
 ```
 
 Baseline performs `mvn -B -ntp clean verify` and records OSV Scanner 2.x source scan in local files. It may download Maven dependencies and contact OSV. `summary.json` records exit codes and output checksums without printing full scan logs. A scanner exit code alone is not a vulnerability count or proof of success; review the JSON report and scanner stderr before accepting findings. A Maven failure blocks OSV stage. No durable task registration, SBRI assessment, OpenHands inference or GitHub branch/PR push occurs in these commands. If branch SHA changes, stop and review rather than substituting a newer commit silently. For readiness in Cloud Shell after refresh, see setup instructions above.
+
+## Baseline-linked SBRI pre-edit assessment
+
+Use the already verified original Maven and OSV evidence. This is a separate SBRI assessment, **not** a durable task registration or a model run. SBRI may run Maven/OSV on candidate release workspaces, download dependencies, and take several minutes.
+
+```bash
+cd ~/oss-remediation-adk
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_app_*.py' -q
+python3 scripts/openhands_real_app_sbri.py \\
+  --project ~/openhands-real-app-poc/checkout-1 \\
+  --maven-evidence ~/openhands-real-app-poc/baseline-1 \\
+  --osv-evidence ~/openhands-real-app-poc/osv-retry-1 \\
+  --expected-commit 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 \\
+  --scanner ~/bin/osv-scanner \\
+  --max-candidates 3 \\
+  --output ~/openhands-real-app-poc/sbri-1
+```
+
+The collector uses the established release selection policy, automatically selecting up to three next stable patches in the current line. If no candidates are found, review the structured result; do not assume latest means safe. A fresh unique output directory is required for each new assessment. Preserve `sbri-1/sbri/latest.json`, `assessment-summary.json`, `result.json`, and referenced evidence. Review completeness, exact findings arithmetic, candidate dependencies, and compatibility risk before registering an agent task. A stored SBRI security ranking is not an upgrade instruction.
