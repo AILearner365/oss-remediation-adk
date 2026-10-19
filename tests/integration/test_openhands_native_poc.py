@@ -1,5 +1,7 @@
 import importlib.util
 import json
+import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -78,6 +80,45 @@ class POCChecks(unittest.TestCase):
         finally:
             for name, value in old.items():
                 setattr(poc, name, value)
+
+    def test_vertex_wrapper_targets_only_pinned_native_agent_server(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            uvx = root / "real-uvx"
+            uvx.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\"\n", encoding="utf-8")
+            uvx.chmod(0o700)
+            with patch.object(poc, "ROOT", root), patch.object(poc, "SERVER", "1.55.1"), \
+                 patch.object(poc.shutil, "which", return_value=str(uvx)):
+                env = {"PATH": os.environ.get("PATH", "")}
+                poc.install_vertex_uvx_wrapper(env)
+                wrapper = Path(env["PATH"].split(os.pathsep)[0]) / "uvx"
+                self.assertTrue(wrapper.is_file())
+                target = subprocess.check_output(
+                    [str(wrapper), "--from", "openhands-agent-server==1.55.1",
+                     "--with", "openhands-sdk==1.55.1", "agent-server"],
+                    text=True
+                ).splitlines()
+                self.assertEqual(target[:2], ["--with", "openhands-sdk[vertex]==1.55.1"])
+                self.assertIn("openhands-agent-server==1.55.1", target)
+                other = subprocess.check_output(
+                    [str(wrapper), "--from", "openhands-automation==1.19.3", "uvicorn"],
+                    text=True
+                ).splitlines()
+                self.assertEqual(other, ["--from", "openhands-automation==1.19.3", "uvicorn"])
+
+    def test_vertex_preflight_uses_same_extra(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as td:
+            called = []
+            with patch.object(poc, "ROOT", Path(td)), \
+                 patch.object(poc, "SERVER", "1.55.1"), \
+                 patch.object(poc, "command", side_effect=lambda args, **kwargs: called.append(args) or ""):
+                poc.warm_native_packages({"PATH": os.environ.get("PATH", "")})
+            self.assertEqual(len(called), 3)
+            for args in called[:2]:
+                self.assertIn("openhands-sdk[vertex]==1.55.1", args)
+            self.assertIn("google-cloud-aiplatform", " ".join(called[1]))
 
     def test_version_configuration_is_isolated(self):
         from unittest.mock import patch
