@@ -424,8 +424,8 @@ class TaskRequest:
             raise ContractValidationError("request.intelligence.sbri.mode is unsupported")
         delivery = _object(obj["delivery"], "request.delivery")
         _strict_keys(delivery, {"mode"}, set(), "request.delivery")
-        if delivery["mode"] != "none":
-            raise ContractValidationError("request.delivery.mode must be 'none' in M2 Change 1")
+        if delivery["mode"] not in {"none", "github_pr"}:
+            raise ContractValidationError("request.delivery.mode must be none or github_pr")
         metadata = _object(obj["metadata"], "request.metadata")
         _strict_keys(metadata, {"source"}, {"correlationId"}, "request.metadata")
         source = _string(metadata["source"], "request.metadata.source", maximum=32)
