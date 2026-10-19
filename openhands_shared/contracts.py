@@ -444,7 +444,7 @@ class TaskRequest:
             acceptance=AcceptanceCriteria.from_dict(obj["acceptance"]),
             agent=AgentProfile.from_dict(obj["agent"]),
             sbri_mode=sbri_mode,
-            delivery_mode="none",
+            delivery_mode=delivery["mode"],
             source=source,
             correlation_id=correlation,
         )
