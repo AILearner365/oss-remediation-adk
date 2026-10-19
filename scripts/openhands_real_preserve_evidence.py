@@ -82,7 +82,26 @@ def preserve(task_id: str, hook: Path, destination: Path, *, check_native: bool 
             if original_path.is_symlink() or digest(original_path) != original.sha256:
                 raise ValueError("Inherited baseline report checksum mismatch")
             shutil.copyfile(original_path, share / "baseline-report.json")
-            # Preserve a metadata-only action/hook timeline, never messages, shell\n        # output, prompts, model reasoning, or API/session key material.\n        native.configure_server_version("1.55.1")\n        cid = summary["conversationId"]\n        page = native.http("GET", f"/api/conversations/{cid}/events/search?limit=100&sort_order=TIMESTAMP")\n        items = page.get("items", [])\n        if len(items) >= 100 or page.get("has_more") is True:\n            raise ValueError("Native event page may be incomplete; do not call evidence complete")\n        timeline = [{"id": e.get("id"), "kind": e.get("kind"),\n                     "timestamp": e.get("timestamp"),\n                     "hookDecisionBlocked": e.get("blocked") if e.get("kind") == "HookExecutionEvent" else None,\n                     "hookExitCode": e.get("exit_code") if e.get("kind") == "HookExecutionEvent" else None}\n                    for e in items]\n        event_file = share / "native-event-metadata.json"\n        event_file.write_text(json.dumps(timeline, indent=2, sort_keys=True) + "\\n", encoding="utf-8")\n        manifest = {
+            # Preserve metadata only, not prompts, shell output, or credentials.
+            native.configure_server_version("1.55.1")
+            cid = summary["conversationId"]
+            page = native.http("GET", f"/api/conversations/{cid}/events/search?limit=100&sort_order=TIMESTAMP")
+            items = page.get("items", [])
+            if len(items) >= 100 or page.get("has_more") is True:
+                raise ValueError("Native event page may be incomplete")
+            timeline = [
+                {
+                    "id": event.get("id"),
+                    "kind": event.get("kind"),
+                    "timestamp": event.get("timestamp"),
+                    "hookDecisionBlocked": event.get("blocked") if event.get("kind") == "HookExecutionEvent" else None,
+                    "hookExitCode": event.get("exit_code") if event.get("kind") == "HookExecutionEvent" else None,
+                }
+                for event in items
+            ]
+            event_file = share / "native-event-metadata.json"
+            event_file.write_text(json.dumps(timeline, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            manifest = {
                 "status": "EVIDENCE_PRESERVED",
                 "audit": summary,
                 "sourceTaskId": store.get_request(task_id).correlation_id,
