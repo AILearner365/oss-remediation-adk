@@ -34,7 +34,8 @@ class FinalizeSafetyTests(unittest.TestCase):
         store.get_execution_claim.return_value = None
         context = MagicMock()
         context.__enter__.return_value = store
-        with patch.object(mod, "load_stop_hook_config", return_value=(Path("/tmp/tasks.sqlite3"), object())), \
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(mod, "load_stop_hook_config", return_value=(Path("/tmp/tasks.sqlite3"), object())), \
              patch.object(mod, "SQLiteTaskStore", return_value=context), \
              patch.object(mod.native, "http") as api:
             hook = Path(directory) / "hook.json"
