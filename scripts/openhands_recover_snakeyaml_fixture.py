@@ -35,8 +35,8 @@ def git(*args: str, cwd: Path, data: bytes | None = None) -> str:
 
 
 def recover(*, materialize: bool) -> None:
-    if TARGET.exists() or TARGET.is_symlink():
-        raise ValueError("Refusing to overwrite existing fixture directory")
+    if TARGET.is_symlink():
+        raise ValueError("Refusing symlinked fixture directory")
     if not SOURCE.is_file() or SOURCE.is_symlink():
         raise ValueError("Versioned source POM absent or symlinked")
     pom = SOURCE.read_bytes()
@@ -79,6 +79,29 @@ def recover(*, materialize: bool) -> None:
         print("Dry run only; use --materialize to create the verified disposable fixture")
         return
 
+    if TARGET.exists():
+        # Resume only an identical partial recovery; never overwrite work.
+        if not TARGET.is_dir() or not (TARGET / ".git").is_dir():
+            raise ValueError("Existing target is not an ordinary Git repository")
+        if git("rev-parse", "HEAD", cwd=TARGET) != EXPECTED:
+            raise ValueError("Existing HEAD differs from approved commit")
+        if git("ls-tree", "-r", "--name-only", "HEAD", cwd=TARGET) != "pom.xml":
+            raise ValueError("Existing commit contains unexpected files")
+        existing_pom = TARGET / "pom.xml"
+        if not existing_pom.is_file() or existing_pom.is_symlink():
+            raise ValueError("Existing POM missing or symlinked")
+        if existing_pom.read_bytes() != pom:
+            raise ValueError("Existing POM differs; refusing changes")
+        if git("status", "--porcelain", cwd=TARGET) not in ("?? pom.xml", ""):
+            raise ValueError("Existing fixture has unexpected changes")
+        print("Verified exact partial recovery; repairing Git index only")
+        git("reset", "--mixed", "HEAD", cwd=TARGET)
+        if git("status", "--porcelain", cwd=TARGET):
+            raise ValueError("Fixture still not clean")
+        print("RECOVERED: original fixture at", TARGET)
+        print("HEAD:", EXPECTED)
+        return
+
     TARGET.mkdir(mode=0o700)
     git("init", "-q", "-b", "main", cwd=TARGET)
     (TARGET / "pom.xml").write_bytes(pom)
@@ -91,6 +114,9 @@ def recover(*, materialize: bool) -> None:
            data=match) != EXPECTED:
         raise ValueError("Commit hash mismatch")
     git("update-ref", "refs/heads/main", EXPECTED, cwd=TARGET)
+    # update-ref does not populate the index; reset --mixed does, without
+    # modifying the working-tree POM.
+    git("reset", "--mixed", "HEAD", cwd=TARGET)
     if git("rev-parse", "HEAD", cwd=TARGET) != EXPECTED:
         raise ValueError("Materialized HEAD differs from expected commit")
     if git("status", "--porcelain", cwd=TARGET):
