@@ -3,7 +3,6 @@
 from .config import RemediationRequest
 from .journal import CaptureStatus, DeliveryEligibility, RemediationOutcome, ValidationStatus
 from .models import Outcome, RunResult
-from .orchestrator import AutonomousRemediationOrchestrator
 
 __all__ = [
     "AutonomousRemediationOrchestrator",
@@ -15,3 +14,11 @@ __all__ = [
     "RunResult",
     "ValidationStatus",
 ]
+
+
+def __getattr__(name: str):
+    """Keep legacy orchestration opt-in; deterministic imports need no ADK."""
+    if name == "AutonomousRemediationOrchestrator":
+        from .orchestrator import AutonomousRemediationOrchestrator
+        return AutonomousRemediationOrchestrator
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
