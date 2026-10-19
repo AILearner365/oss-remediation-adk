@@ -40,6 +40,12 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertEqual(request["conversation_id"], self.data["conversationId"])
         self.assertEqual(request["workspace"]["working_dir"], self.data["workspace"])
         self.assertFalse(request["worktree"])
+        self.assertEqual(
+            [tool["name"] for tool in request["agent"]["tools"]],
+            ["TerminalTool", "FileEditorTool", "TaskTrackerTool"]
+        )
+        self.assertTrue(request["agent"]["system_prompt_kwargs"]["cli_mode"])
+        self.assertTrue(all(not tool["params"] for tool in request["agent"]["tools"]))
         self.assertEqual(request["tags"]["taskid"], self.data["taskId"])
         self.assertTrue(all(key.isalnum() and key.islower() for key in request["tags"]))
         self.assertIn("openhands_shared.stop_hook",
