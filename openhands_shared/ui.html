@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OSS remediation</title>
+<style>body{font:16px system-ui;max-width:1100px;margin:32px auto;padding:0 20px;color:#182c38}input,textarea,select,button{font:inherit;padding:8px;margin:6px}input,textarea{width:90%}button{cursor:pointer}pre{background:#f1f5f7;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:600px;overflow:auto}label{display:block}a{color:#005cbf}.task{padding:10px;border-bottom:1px solid #ddd}#error{color:#a00}</style>
+<h1>OSS remediation</h1><p>Prepare evidence, authorize one native OpenHands run, inspect independent validation, then authorize draft PR delivery.</p>
+<label>Product API key (kept in this tab)<input id="key" type="password" autocomplete="off"></label><button id="connect">Connect / refresh tasks</button>
+<form id="submit"><h2>Submit a task</h2>
+<label>Repository URL<input id="repository" required value="https://github.com/AILearner365/maven-multimodule-app.git"></label>
+<label>Base branch<input id="branch" required value="main-runrunning"></label>
+<label>Objective<textarea id="objective" required>Investigate and remediate actionable OSS vulnerabilities. Preserve application behavior and independently verify the outcome.</textarea></label>
+<label>SBRI <select id="sbri"><option value="auto">Enabled</option><option value="disabled">Disabled</option></select></label>
+<label>Delivery <select id="delivery"><option value="github_pr">Draft GitHub PR after separate authorization</option><option value="none">Result only</option></select></label>
+<button>Submit (no model execution)</button></form>
+<p id="error" role="alert"></p><h2>Tasks</h2><div id="tasks"></div>
+<h2 id="selected">Task details</h2><div id="actions"></div><pre id="details">Connect to inspect durable tasks.</pre>
+<script>
+const el=id=>document.getElementById(id);let selected=null,selectedPhase=null;
+el('key').value=sessionStorage.getItem('remediationKey')||'';
+async function api(path='',method='GET',value,headers={}){sessionStorage.setItem('remediationKey',el('key').value);const r=await fetch('/v1/remediations'+path,{method,headers:{'Authorization':'Bearer '+el('key').value,'Content-Type':'application/json',...headers},body:value===undefined?undefined:JSON.stringify(value)});const v=await r.json();if(!r.ok)throw Error(v.error||r.status);return v;}
+async function safe(fn){try{el('error').textContent='';await fn();}catch(e){el('error').textContent=e.message;}}
+function display(value){el('details').textContent=typeof value==='string'?value:JSON.stringify(value,null,2);}
+function button(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=()=>safe(fn);el('actions').append(b);}
+async function list(){const v=await api();el('tasks').replaceChildren();for(const t of v.tasks){const row=document.createElement('div');row.className='task';const b=document.createElement('button');b.textContent=t.taskId+' — '+t.productPhase;b.onclick=()=>safe(()=>inspect(t.taskId));row.append(b);el('tasks').append(row);}const active=v.tasks.find(t=>t.taskId===selected);if(active&&active.productPhase!==selectedPhase)await inspect(selected);}
+async function inspect(id){selected=id;const t=await api('/'+id);selectedPhase=t.productPhase;el('selected').textContent=id;el('actions').replaceChildren();display(t);
+button('Status',()=>inspect(id));button('Native activity',async()=>{async function page(cursor){const v=await api('/'+id+'/events'+(cursor?'?pageId='+encodeURIComponent(cursor):''));display(v);if(v.native&&v.native.next_page_id)button('Earlier native events',()=>page(v.native.next_page_id));}await page();});button('Result and validation',async()=>display(await api('/'+id+'/result')));button('Diff',async()=>display((await api('/'+id+'/diff')).diff));
+button('Evidence',async()=>{const reports=await api('/'+id+'/reports');display(reports);for(const a of reports.artifacts)button('Open '+a.artifactId,async()=>display(await api('/'+id+'/artifacts/'+encodeURIComponent(a.artifactId))));});
+if(t.productPhase==='AWAITING_EXECUTION_AUTHORIZATION')button('Authorize paid native run',async()=>{if(confirm('Authorize this paid Vertex run?\n'+JSON.stringify(t.executionOffer,null,2))){display(await api('/'+id+'/execute','POST',t.executionOffer));await list();}});
+if(['ACCEPTED','RECOVERY_REQUIRED'].includes(t.productPhase))button('Review draft PR delivery',async()=>{let plan;plan=await api('/'+id+'/delivery-plan');display(plan);button('Authorize push and draft PR',async()=>{if(confirm('Push accepted tree '+plan.validatedTree+' and open a draft PR on '+plan.repository+'?'))display(await api('/'+id+'/delivery','POST',{authorize:true,baseCommit:plan.baseCommit,validatedTree:plan.validatedTree,branch:plan.branch}));});});
+if(t.productPhase==='RECOVERY_REQUIRED')button('Reconcile (never redispatch)',async()=>display(await api('/'+id+'/reconcile','POST',{})));
+if(t.nativeConversationUrl){const a=document.createElement('a');a.textContent='Open native Canvas conversation (preview port 8091)';a.href=t.nativeConversationUrl;a.target='_blank';a.rel='noopener';el('actions').append(a);}const d=await api('/'+id+'/delivery');if(d&&d.pr_url){const a=document.createElement('a');a.textContent='Open draft PR';a.href=d.pr_url;a.target='_blank';a.rel='noopener';el('actions').append(a);}}
+el('connect').onclick=()=>safe(list);el('submit').onsubmit=e=>{e.preventDefault();safe(async()=>{let k=sessionStorage.getItem('pendingSubmission')||'ui-'+crypto.randomUUID();sessionStorage.setItem('pendingSubmission',k);const result=await api('','POST',{repository:{url:el('repository').value,baseRef:'refs/heads/'+el('branch').value},objective:el('objective').value,intelligence:{sbri:{mode:el('sbri').value}},delivery:{mode:el('delivery').value,draft:true}},{'Idempotency-Key':k});sessionStorage.removeItem('pendingSubmission');await list();await inspect(result.taskId);});};
+setInterval(()=>{if(el('key').value)safe(list);},10000);
+</script></html>

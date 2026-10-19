@@ -11,6 +11,18 @@ import openhands_service as service
 
 
 class ProductStartupTests(unittest.TestCase):
+    def test_native_children_receive_runtime_configuration_without_operator_tokens(self):
+        settings = {"PATH": "/usr/bin", "VERTEXAI_PROJECT": "project", "VERTEXAI_LOCATION": "us-central1",
+            "UV_CONSTRAINT": "/tmp/pins", "OH_CANVAS_SAFE_STATE_DIR": "/home/durable/native",
+            "LOCAL_BACKEND_API_KEY": "native-session", "GITHUB_TOKEN": "github-secret",
+            "OPENAI_API_KEY": "unrelated-provider-secret", "REMEDIATION_API_KEY": "product-secret",
+            "AWS_SECRET_ACCESS_KEY": "aws-secret"}
+        child = service.native_environment(settings)
+        self.assertEqual(child["VERTEXAI_PROJECT"], "project")
+        self.assertEqual(child["LOCAL_BACKEND_API_KEY"], "native-session")
+        self.assertEqual(child["UV_CONSTRAINT"], "/tmp/pins")
+        self.assertFalse(any(value.endswith("secret") for value in child.values()))
+
     def test_persistent_native_state_and_keys(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -22,7 +34,8 @@ class ProductStartupTests(unittest.TestCase):
                 self.assertEqual(env["LOCAL_BACKEND_API_KEY"], temp_key.read_text())
                 self.assertTrue(Path(env["OPENHANDS_AGENT_SERVER_CONFIG_PATH"]).is_file())
                 cfg = json.loads(Path(env["OPENHANDS_AGENT_SERVER_CONFIG_PATH"]).read_text())
-                self.assertEqual(cfg["session_api_key"], env["LOCAL_BACKEND_API_KEY"])
+                self.assertEqual(cfg["session_api_keys"], [env["LOCAL_BACKEND_API_KEY"]])
+                self.assertEqual(Path(cfg["conversations_path"]), root / "persistent/canvas/dev_conversations")
                 self.assertTrue(Path(cfg["conversations_path"]).is_dir())
                 self.assertEqual(stat.S_IMODE((root / "persistent" / "session-key.txt").stat().st_mode), 0o600)
                 previous = env["LOCAL_BACKEND_API_KEY"]

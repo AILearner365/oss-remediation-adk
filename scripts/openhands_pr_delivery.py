@@ -37,7 +37,13 @@ TASK_ID = re.compile(r"^task_[0-9a-f]{32}$")
 
 
 def git(path: Path, *args: str) -> str:
-    process = subprocess.run(["git", "-C", str(path), *args],
+    # A delivery child never needs the product's GitHub API token. Git uses
+    # the operator's existing HTTPS credential helper; repository hooks and
+    # fsmonitor programs cannot run with control-plane credentials.
+    environment = {k: v for k, v in os.environ.items() if k not in {
+        "GITHUB_TOKEN", "GH_TOKEN", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"}}
+    process = subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false",
+                             "-C", str(path), *args], env=environment,
                              capture_output=True, text=True, timeout=60, check=False)
     if process.returncode:
         raise ValueError("Git prerequisite failed; inspect repository locally")
@@ -61,20 +67,15 @@ def plan(task_id: str, hook: Path, *, expected_base: str, source_repo: str = REP
         workspace = Path(prep.workspace_path).resolve(strict=True)
         if workspace.is_symlink():
             raise ValueError("Unsafe workspace")
-        if git(workspace, "rev-parse", "HEAD") != expected_base:
-            raise ValueError("Workspace HEAD is not authorized base commit")
-        if git(workspace, "status", "--porcelain", "--untracked-files=all"):
-            # Accepted remediation is normally an uncommitted tracked diff.
-            untracked = git(workspace, "ls-files", "--others", "--exclude-standard")
-            if untracked:
-                raise ValueError("Untracked workspace content requires operator review")
-        diff = git(workspace, "diff", "--name-only", "HEAD", "--")
+        git(workspace, "merge-base", "--is-ancestor", expected_base, "HEAD")
+        # The independent validator captures tracked, staged and new files in
+        # this exact tree. Review that accepted snapshot, including agent-made
+        # commits, rather than imposing a POM-only or unstaged-edit recipe.
+        diff = git(workspace, "diff", "--no-ext-diff", "--name-only", expected_base,
+                   summary["validatedTree"], "--")
         changed = sorted(line for line in diff.splitlines() if line)
-        if not changed or any(not (x == "pom.xml" or x.endswith("/pom.xml")) for x in changed):
-            raise ValueError("Delivery only accepts tracked Maven pom.xml edits")
-        staged = git(workspace, "diff", "--cached", "--name-only")
-        if staged:
-            raise ValueError("Staged files are not permitted")
+        if not changed:
+            raise ValueError("Delivery requires validated changes")
         branch = "openhands/remediate-" + task_id
         return {"status": "READY_FOR_EXPLICIT_PR_APPROVAL", "taskId": task_id,
                 "repository": REPO, "base": BASE, "baseCommit": expected_base,
@@ -171,50 +172,136 @@ def record_delivery(database: Path, task_id: str, url: str, commit: str) -> None
         db.commit()
 
 
-def deliver(details: dict, approval: str, token: str) -> dict:
-    if approval != APPROVAL or not token:
-        raise ValueError("Explicit PR approval and GitHub token required")
-    workspace = Path(details["workspace"])
-    if details["status"] != "READY_FOR_EXPLICIT_PR_APPROVAL" or details["repository"] != REPO:
-        raise ValueError("Invalid approved delivery plan")
-    # All remote checks before any mutation; no force push or base-branch write.
-    branch_info = request_github("GET", "/branches/" + BASE, token)
-    if branch_info["commit"]["sha"] != details["baseCommit"]:
-        raise ValueError("Remote base moved; require new baseline and acceptance")
-    branch = details["branch"]
+def delivery_claim(database: Path, task_id: str):
+    with sqlite3.connect(database, timeout=30) as db:
+        db.row_factory = sqlite3.Row
+        if not db.execute("SELECT 1 FROM sqlite_master WHERE name='openhands_delivery_claims'").fetchone():
+            return None
+        row = db.execute("SELECT * FROM openhands_delivery_claims WHERE task_id=?", (task_id,)).fetchone()
+        return dict(row) if row else None
+
+
+def _optional_branch(branch: str, token: str):
+    from urllib.parse import quote
     try:
-        existing = request_github("GET", "/branches/" + branch.replace("/", "%2F"), token)
-        raise ValueError("Delivery branch already exists; inspect it, never overwrite")
+        return request_github("GET", "/branches/" + quote(branch, safe=""), token)
     except ValueError as exc:
         if "HTTP 404" not in str(exc):
             raise
-    # Before any local commit, independently repeat acceptance/tree verification.
-    refreshed = plan(details["taskId"], Path(details["hookConfig"]),
-                     expected_base=details["baseCommit"])
-    if refreshed["changedFiles"] != details["changedFiles"] or refreshed["validatedTree"] != details["validatedTree"]:
-        raise ValueError("Delivery plan drift")
-    database, _ = load_stop_hook_config(Path(details["hookConfig"]).resolve(strict=True))
-    claim_delivery(database, details)
-    git(workspace, "checkout", "-b", branch)
-    git(workspace, "add", "--", *details["changedFiles"])
-    git(workspace, "-c", "user.name=OpenHands Remediation",
-        "-c", "user.email=openhands-remediation@users.noreply.github.com",
-        "commit", "-m", "Remediate validated Maven vulnerabilities")
-    # Use existing Git credential helper; don't log tokens or embed in Git URL.
-    git(workspace, "push", URL, "HEAD:refs/heads/" + branch)
-    body = ("Independent validation passed.\n\n"
-            "Task: " + details["taskId"] + "\n"
-            "Validated tree: " + details["validatedTree"] + "\n"
-            "Resolved vulnerabilities: " + str(details["findingCountResolved"]) + "\n"
-            "Changes: " + ", ".join(details["changedFiles"]) + "\n")
-    payload = request_github("POST", "/pulls", token, {
-        "title": "Remediate Maven vulnerabilities (" + details["taskId"] + ")",
-        "head": branch, "base": BASE, "body": body, "draft": True})
-    commit_sha = git(workspace, "rev-parse", "HEAD")
-    record_delivery(database, details["taskId"], payload["html_url"], commit_sha)
+        return None
+
+
+def _delivery_commit(workspace: Path, details: dict) -> str:
+    # Commit the accepted Git tree directly; leave the independently validated
+    # workspace/index/HEAD untouched. This is also restart-safe before push.
+    env = {**{k: v for k, v in os.environ.items() if k not in {"GITHUB_TOKEN", "GH_TOKEN"}},
+           "GIT_AUTHOR_NAME": "OpenHands Remediation",
+           "GIT_AUTHOR_EMAIL": "openhands-remediation@users.noreply.github.com",
+           "GIT_COMMITTER_NAME": "OpenHands Remediation",
+           "GIT_COMMITTER_EMAIL": "openhands-remediation@users.noreply.github.com"}
+    result = subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "-C", str(workspace),
+        "commit-tree", details["validatedTree"], "-p", details["baseCommit"]],
+        input="Remediate validated Maven vulnerabilities (" + details["taskId"] + ")\n",
+        capture_output=True, text=True, env=env, timeout=30)
+    if result.returncode or not SHA.fullmatch(result.stdout.strip()):
+        raise ValueError("Cannot create delivery commit")
+    return result.stdout.strip()
+
+
+def deliver(details: dict, approval: str, token: str) -> dict:
+    if approval != APPROVAL or not token:
+        raise ValueError("Explicit PR approval and GitHub token required")
+    if (details.get("status") != "READY_FOR_EXPLICIT_PR_APPROVAL"
+            or details.get("repository") != REPO or details.get("base") != BASE
+            or not TASK_ID.fullmatch(details.get("taskId", ""))
+            or details.get("branch") != "openhands/remediate-" + details["taskId"]
+            or not SHA.fullmatch(details.get("baseCommit", ""))
+            or not SHA.fullmatch(details.get("validatedTree", ""))):
+        raise ValueError("Invalid approved delivery plan")
+    workspace = Path(details["workspace"])
+    database, config = load_stop_hook_config(Path(details["hookConfig"]).resolve(strict=True))
+    prior = delivery_claim(database, details["taskId"])
+    if prior and (prior["base_commit"], prior["validated_tree"], prior["delivery_branch"]) != (
+            details["baseCommit"], details["validatedTree"], details["branch"]):
+        raise ValueError("Delivery claim identity mismatch")
+    # Independent acceptance is rechecked before every attempt. Native finish
+    # alone cannot authorize push. Reconciliation does not rerun a scanner.
+    from openhands_shared.validation import SharedValidationService
+    with SQLiteTaskStore(database) as store:
+        request = store.get_request(details["taskId"])
+        prep = store.get_preparation(details["taskId"])
+        attempts = store.list_validation_attempts(details["taskId"])
+        status = store.get_status(details["taskId"])
+        if (request.repository.url != URL or request.repository.base_ref != "refs/heads/" + BASE
+                or request.repository.expected_commit != details["baseCommit"]
+                or request.delivery_mode != "github_pr" or prep is None
+                or Path(prep.workspace_path).resolve() != workspace.resolve()
+                or not status.accepted or status.validation_status.value != "PASSED"
+                or not attempts or attempts[-1].outcome.value != "PASS"
+                or attempts[-1].validated_tree != details["validatedTree"]
+                or not SharedValidationService(store, config).verify_validated_state(details["taskId"], attempts[-1].attempt)):
+            raise ValueError("Accepted task or validated tree changed")
+        if prior and prior["state"] == "PR_CREATED":
+            return {"status": "PR_CREATED", "url": prior["pr_url"], "commit": prior["commit_sha"],
+                    "taskId": details["taskId"], "branch": details["branch"], "reconciled": True}
+    branch_info = request_github("GET", "/branches/" + BASE, token)
+    if branch_info["commit"]["sha"] != details["baseCommit"]:
+        raise ValueError("Remote base moved; require new baseline and acceptance")
+    remote = _optional_branch(details["branch"], token)
+    if not prior:
+        if remote:
+            raise ValueError("Unclaimed delivery branch already exists; never overwrite")
+        refreshed = plan(details["taskId"], Path(details["hookConfig"]), expected_base=details["baseCommit"])
+        for key in ("changedFiles", "validatedTree", "workspace", "branch"):
+            if refreshed[key] != details[key]:
+                raise ValueError("Delivery plan drift")
+        claim_delivery(database, details)
+        prior = delivery_claim(database, details["taskId"])
+    commit = prior["commit_sha"]
+    if not commit:
+        if remote:
+            raise ValueError("Remote branch without durable commit intent; inspect ownership")
+        commit = _delivery_commit(workspace, details)
+        with sqlite3.connect(database, timeout=30) as db:
+            db.execute("UPDATE openhands_delivery_claims SET commit_sha=? WHERE task_id=? AND commit_sha IS NULL",
+                       (commit, details["taskId"]))
+        commit = delivery_claim(database, details["taskId"])["commit_sha"]
+    if (git(workspace, "show", "-s", "--format=%T", commit) != details["validatedTree"]
+            or git(workspace, "show", "-s", "--format=%P", commit) != details["baseCommit"]):
+        raise ValueError("Delivery commit differs from accepted tree/base")
+    if remote:
+        if remote["commit"]["sha"] != commit:
+            raise ValueError("Remote task branch differs from durable delivery commit; never overwrite")
+    else:
+        # Create-only compare-and-swap: fail even if a competing branch points
+        # to an ancestor. An empty lease requires the ref to be absent.
+        git(workspace, "push", "--force-with-lease=refs/heads/" + details["branch"] + ":",
+            URL, commit + ":refs/heads/" + details["branch"])
+        remote = _optional_branch(details["branch"], token)
+        if not remote or remote["commit"]["sha"] != commit:
+            raise ValueError("Push response uncertain; reconcile remote before retry")
+    from urllib.parse import urlencode
+    query = urlencode({"state": "all", "head": REPO.split("/")[0] + ":" + details["branch"], "base": BASE})
+    existing = request_github("GET", "/pulls?" + query, token)
+    if len(existing) > 1:
+        raise ValueError("Ambiguous task PRs require inspection")
+    if existing:
+        payload = existing[0]
+    else:
+        body = ("Independent validation passed.\n\nTask: " + details["taskId"] +
+                "\nValidated tree: " + details["validatedTree"] +
+                "\nResolved vulnerabilities: " + str(details["findingCountResolved"]) + "\n")
+        payload = request_github("POST", "/pulls", token, {
+            "title": "Remediate Maven vulnerabilities (" + details["taskId"] + ")",
+            "head": details["branch"], "base": BASE, "body": body, "draft": True})
+    if (payload.get("head", {}).get("sha") != commit or payload.get("head", {}).get("ref") != details["branch"]
+            or payload.get("base", {}).get("ref") != BASE or payload.get("base", {}).get("repo", {}).get("full_name") != REPO
+            or payload.get("draft") is not True or payload.get("state") != "open"
+            or not payload.get("html_url", "").startswith("https://github.com/" + REPO + "/pull/")):
+        raise ValueError("Existing PR is not the exact open draft authorized for this task")
+    record_delivery(database, details["taskId"], payload["html_url"], commit)
     return {"status": "PR_CREATED", "url": payload["html_url"], "number": payload["number"],
-            "commit": commit_sha, "branch": branch,
-            "taskId": details["taskId"], "noModelRun": True}
+            "commit": commit, "branch": details["branch"], "taskId": details["taskId"], "noModelRun": True}
 
 
 def main() -> int:

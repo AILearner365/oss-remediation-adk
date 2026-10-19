@@ -1,6 +1,6 @@
 # OpenHands autonomous remediation: product integration contract
 
-Status: stabilization in progress (not a POC). This record supersedes ad-hoc run instructions; it is not proof that end-to-end deployment has passed.
+Status: shared product workflow implemented; paid remediation and live GitHub delivery remain unverified. Use the [operator guide](openhands-product-operations.md) and [acceptance evidence](verification/openhands-product-20261019/report.md). This contract is not a claim of full external acceptance.
 
 ## Outcome
 
@@ -28,17 +28,19 @@ A user submits a Java/Maven repository and remediation goal by API, UI or CLI. T
 1. Original SDK/controlled OpenHands POC proves execution concepts; reuse its native Skills, tooling and deterministic validator rather than reproducing its experimental harness.
 2. Real app `AILearner365/maven-multimodule-app`, `main-runrunning`, baseline commit `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`: Maven/OSV completed; 50 baseline findings; SBRI COMPLETE. Native idle conversation `883a70da-4986-4ed5-9576-006fcd84846d` linked to `task_943461f6ed864a2baf96642c61746bd0`. This conversation has **not** run Gemini; its original Stop Hook persisted an expired ephemeral Python path. Do not dispatch it until independently validated recovery/replacement.
 3. The corrected stable Hook construction affects **new** conversations. It does not rewrite the old immutable native conversation.
-4. Product startup, persistent native state, API submission/run/results, Canvas submission/results, agent-produced multi-module remediation, final validator/feedback and actual draft PR require end-to-end verification. No synthetic test may be reported as proof of these outcomes.
+4. Product startup, real-app API submission, Maven/OSV baseline (50 findings), SBRI COMPLETE, native idle handoff, UI evidence access and same-conversation service restart are now verified. Paid agent-produced remediation, real Stop Hook execution/feedback and actual draft PR still require separately authorized end-to-end verification. Offline tests are not proof of these external outcomes.
 5. Acceptance is one automated vertical slice: fresh session startup -> API submission -> one native agent -> failure/feedback if needed -> independent PASS -> authorized draft PR -> recover/read same task through UI and API after restart, with bounded cost and evidence. Record failures as real implementation defects, not as reasons to add more orchestration layers.
 
-## File responsibility (current transitional implementation)
+## File responsibility
 
-- `scripts/openhands_service.py`: one **candidate** service-mode startup using the existing pinned native launcher. Its persistent Agent Server configuration still needs a live restart drill; do not assume startup tests prove persistence.
+- `scripts/openhands_service.py`: supported start/stop/restart, pinned package reuse, persistent keys/native state, prerequisite and API/UI readiness checks. Reuses the proven published Canvas launcher functions from `openhands_native_poc.py`, without invoking its probes or smoke conversations.
+- `openhands_shared/product.py`: one task lifecycle, application-stage coordination, explicit execution/delivery authorization, native observation and recovery. A small job row supplements the existing transactional store; native events stay in Agent Server.
+- `openhands_shared/server.py`, `cli.py`, `ui.html`: authenticated product REST endpoints, thin HTTP CLI and minimal application submission/evidence UI. `python -m openhands_shared` now uses that CLI. Generic Canvas chat cannot express the remediation submission/approval contract; Canvas remains available for native conversation activity.
 - `scripts/openhands_native_remediation.py`: native request/handoff, verified Stop Hook, one-shot dispatch.
 - `openhands_shared/baseline.py`, `intelligence.py`, `validation.py`: deterministic stages.
-- `openhands_shared/api.py`: registration/read-only only, **not** yet full remediation triggering.
-- `scripts/openhands_pr_delivery.py`: independent approval-gated draft PR; live delivery and recovery not yet proven.
-- The many `openhands_real_*` and `openhands_native_*poc*` entrypoints are experimental drivers and transitional test tools. Do not make a product operator run them in sequence.
+- `openhands_shared/api.py`: legacy metadata facade retained for fixture compatibility; not the supported product server.
+- `scripts/openhands_pr_delivery.py`: independent approval-gated exact-tree draft PR and durable remote reconciliation; partial push/PR failures tested with local Git and a fake GitHub transport. Live GitHub delivery remains unverified.
+- The `openhands_real_*` and synthetic `openhands_native_*poc*` commands remain regression references, not operator stages. The delivery audit function and native bootstrap/handoff functions are reused directly; no experimental command chain is executed by the product.
 
 ## Do not repeat
 

@@ -53,6 +53,7 @@ from .contracts import (
 )
 from .preparation import GitCommandError, GitRunner
 from .store import SQLiteTaskStore
+from .tool_environment import tool_environment
 
 
 class SharedValidationError(RuntimeError):
@@ -176,12 +177,7 @@ class ExistingDeterministicValidationRunner:
                 enable_autonomous_shell=False,
                 allow_network=True,
             ),
-            environment={
-                "PATH": os.defpath,
-                "LANG": "C.UTF-8",
-                "LC_ALL": "C.UTF-8",
-                "HOME": str(execution_home),
-            },
+            environment=tool_environment(execution_home),
         )
         scanner = create_scanner(
             profile.scanner, workspace, runner, trace, maven_config=profile.maven

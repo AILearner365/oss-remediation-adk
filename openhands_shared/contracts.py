@@ -1028,6 +1028,14 @@ class ValidationAttemptRecord:
     started_at: str
     completed_at: str | None
 
+    def to_dict(self) -> dict[str, Any]:
+        from dataclasses import fields
+        def camel(name: str) -> str:
+            first, *rest = name.split("_")
+            return first + "".join(part.title() for part in rest)
+        return {camel(item.name): (value.value if isinstance(value, Enum) else value)
+                for item in fields(self) for value in (getattr(self, item.name),)}
+
     def __post_init__(self) -> None:
         _string(self.task_id, "validationAttempt.taskId", maximum=128, pattern=IDENTIFIER)
         if isinstance(self.attempt, bool) or not isinstance(self.attempt, int) or self.attempt < 1:

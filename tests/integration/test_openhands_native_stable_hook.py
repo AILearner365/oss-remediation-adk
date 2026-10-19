@@ -18,8 +18,8 @@ def native_pair(command):
     config = {"stop": [{"matcher": "*", "hooks": [hook]}]}
     request = {"conversation_id": "example-id", "hook_config": config,
                "workspace": {"working_dir": "/tmp/isolated"},
-               "agent": {"tools": tools, "agent_context": context}}
-    persisted = {"id": "example-id", "execution_status": "idle", "hook_config": config,
+               "max_iterations": 12, "agent": {"llm": {"model": "vertex_ai/gemini-2.5-flash"}, "tools": tools, "agent_context": context}}
+    persisted = {"id": "example-id", "execution_status": "idle", "max_iterations": 12, "hook_config": config,
                  "workspace": request["workspace"], "agent": request["agent"]}
     return request, persisted
 

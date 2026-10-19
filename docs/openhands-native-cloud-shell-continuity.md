@@ -1,5 +1,10 @@
 # OpenHands native POC: Cloud Shell continuity and next live target
 
+Historical handoff. Current product startup, submission and recovery instructions
+are in [Native OpenHands remediation operations](openhands-product-operations.md).
+See its linked acceptance report for the new API-submitted real-app task and
+verified native persistence; do not replay the experimental command chain below.
+
 Status: 2026-10-19. This is a factual handoff and recovery checklist, **not** a claim that fresh-Cloud-Shell bootstrap is already automated.
 
 ## Repositories

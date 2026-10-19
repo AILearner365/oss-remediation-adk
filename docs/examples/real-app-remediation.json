@@ -1,0 +1,15 @@
+{
+  "repository": {
+    "url": "https://github.com/AILearner365/maven-multimodule-app.git",
+    "baseRef": "refs/heads/main-runrunning",
+    "expectedCommit": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78"
+  },
+  "objective": "Investigate and remediate actionable OSS vulnerabilities in this multi-module Maven application. Preserve application behavior and independently verify the outcome.",
+  "constraints": {
+    "javaVersionUnchanged": true,
+    "prohibitSuppressions": true,
+    "prohibitedNewSeverities": ["CRITICAL", "HIGH"]
+  },
+  "intelligence": {"sbri": {"mode": "auto"}},
+  "delivery": {"mode": "github_pr", "draft": true}
+}

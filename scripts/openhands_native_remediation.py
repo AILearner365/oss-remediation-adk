@@ -226,6 +226,10 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
         raise HandoffError("Native conversation ID differs from durable task identity")
     if payload.get("execution_status") != "idle":
         raise HandoffError("Native conversation is not idle; refusing automatic execution")
+    if payload.get("max_iterations") != request.get("max_iterations"):
+        raise HandoffError("Native iteration budget differs from authorized task")
+    if (payload.get("agent") or {}).get("llm", {}).get("model") != request["agent"]["llm"]["model"]:
+        raise HandoffError("Native model differs from authorized task")
     # Compare parsed fields, not serialized JSON: command quoting is escaped
     # by json.dumps(), so substring searching rejects valid native responses.
     expected_hook = request["hook_config"]["stop"][0]["hooks"][0]
@@ -235,7 +239,7 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
         actual_hooks = [hook for group in entries for hook in group["hooks"]]
     except (TypeError, KeyError):
         raise HandoffError("Native response omitted the configured independent Stop Hook") from None
-    if not any(
+    if len(actual_hooks) != 1 or len(entries) != 1 or entries[0].get("matcher") != "*" or not any(
         isinstance(hook, Mapping)
         and hook.get("type") == expected_hook["type"]
         and hook.get("command") == expected_hook["command"]
@@ -284,7 +288,7 @@ def render_task_objective(store: SQLiteTaskStore, task_id: str, *, hook_config: 
         if intel is None:
             raise HandoffError("SBRI-enabled task lacks durable intelligence record")
         from openhands_shared.contracts import IntelligenceOutcome
-        if intel.outcome not in {IntelligenceOutcome.COMPLETE, IntelligenceOutcome.PARTIAL}:
+        if intel.outcome not in {IntelligenceOutcome.COMPLETE, IntelligenceOutcome.PARTIAL, IntelligenceOutcome.NOT_APPLICABLE}:
             raise HandoffError("SBRI-enabled task lacks usable pre-edit intelligence")
         artifacts = [a for a in store.list_artifacts(task_id)
                      if a.artifact_id == intel.summary_artifact_id]

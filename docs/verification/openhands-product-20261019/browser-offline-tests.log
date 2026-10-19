@@ -1,0 +1,18 @@
+127.0.0.1 - - [19/Oct/2026 21:34:24] "GET / HTTP/1.1" 200 6027
+127.0.0.1 - - [19/Oct/2026 21:34:24] "GET /v1/remediations HTTP/1.1" 200 13
+127.0.0.1 - - [19/Oct/2026 21:34:25] "POST /v1/remediations HTTP/1.1" 202 139
+127.0.0.1 - - [19/Oct/2026 21:34:25] "GET /v1/remediations HTTP/1.1" 200 1250
+127.0.0.1 - - [19/Oct/2026 21:34:25] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d HTTP/1.1" 200 1245
+127.0.0.1 - - [19/Oct/2026 21:34:25] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d/delivery HTTP/1.1" 200 4
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations HTTP/1.1" 200 1414
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d HTTP/1.1" 200 1401
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d/delivery HTTP/1.1" 200 4
+127.0.0.1 - - [19/Oct/2026 21:34:34] "POST /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d/execute HTTP/1.1" 202 1379
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations HTTP/1.1" 200 1393
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d HTTP/1.1" 200 1380
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d/delivery HTTP/1.1" 200 4
+127.0.0.1 - - [19/Oct/2026 21:34:34] "GET /v1/remediations/task_382b5da09cdf41de93566bff2b6f309d/events HTTP/1.1" 200 2568
+----------------------------------------------------------------------
+Ran 1 test in 14.659s
+
+OK

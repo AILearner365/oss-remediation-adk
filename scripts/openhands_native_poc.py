@@ -313,6 +313,16 @@ def launch(env: dict[str, str]) -> None:
                              cwd=str(ROOT), stdout=f, stderr=subprocess.STDOUT, env=env,
                              start_new_session=True, stdin=subprocess.DEVNULL)
     write_private(PID_FILE, str(p.pid))
+    # /usr/bin/env may still be handing off to node when Popen returns. Do not
+    # mistake that brief exec transition for a foreign PID at readiness time.
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:
+        try:
+            if owned_pid() == p.pid:
+                break
+        except Failure:
+            pass
+        time.sleep(0.05)
 
 
 def http(method: str, path: str, payload: dict | None = None, *, timeout: int = 15) -> dict:

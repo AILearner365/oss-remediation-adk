@@ -41,6 +41,7 @@ from .contracts import (
 )
 from .preparation import GitCommandError, GitRunner
 from .store import InvalidTransitionError, SQLiteTaskStore
+from .tool_environment import tool_environment
 
 
 REPORT_ARTIFACT_ID = "baseline-report"
@@ -188,12 +189,7 @@ class ExistingDeterministicBaselineRunner:
                 enable_autonomous_shell=False,
                 allow_network=True,
             ),
-            environment={
-                "PATH": os.defpath,
-                "LANG": "C.UTF-8",
-                "LC_ALL": "C.UTF-8",
-                "HOME": str(runtime_home),
-            },
+            environment=tool_environment(runtime_home),
         )
         scanner = create_scanner(
             profile.scanner,

@@ -1,0 +1,16 @@
+[poc] Stopping only the owned launcher PID 24373
+[poc] /tmp free: 29232 MiB; /home free: 92 MiB
+[poc] Memory available: 3870 MiB
+[poc] Reusing temporary published Canvas 1.27.1
+[poc] Starting official Canvas 1.27.1 stack on loopback 8091; server 1.55.1
+{
+  "api": "http://127.0.0.1:8080/v1/remediations",
+  "canvas": "http://127.0.0.1:8091/",
+  "config": "/home/kavya_parivarababu/.openhands/oss-remediation/product/config.json",
+  "keyFile": "/home/kavya_parivarababu/.openhands/oss-remediation/product/api-key.txt",
+  "noModelRun": true,
+  "noSmokeConversation": true,
+  "state": "/home/kavya_parivarababu/.openhands/oss-remediation/product",
+  "status": "PRODUCT_RUNNING",
+  "ui": "http://127.0.0.1:8080"
+}

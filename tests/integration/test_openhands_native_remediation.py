@@ -73,7 +73,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
     def test_native_response_rejects_missing_hook_wrong_workspace_or_id(self):
         request = self.build()
         response = {
-            "id": request["conversation_id"], "execution_status": "idle",
+            "id": request["conversation_id"], "execution_status": "idle", "max_iterations": request["max_iterations"],
             "workspace": request["workspace"], "hook_config": request["hook_config"],
             "agent": request["agent"],
         }
@@ -94,7 +94,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
     def test_native_response_rejects_missing_agent_capabilities(self):
         request = self.build()
         response = {
-            "id": request["conversation_id"], "execution_status": "idle",
+            "id": request["conversation_id"], "execution_status": "idle", "max_iterations": request["max_iterations"],
             "workspace": request["workspace"],
             "hook_config": request["hook_config"], "agent": request["agent"],
         }
@@ -115,7 +115,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         with self.assertRaises(native_first.HandoffError):
             native_first.validate_native_response({
                 "id": request["conversation_id"],
-                "execution_status": "idle",
+                "execution_status": "idle", "max_iterations": request["max_iterations"],
                 "workspace": request["workspace"],
                 "hook_config": modified,
             }, request)
@@ -132,7 +132,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 self.assertEqual(method, "POST")
                 self.assertIs(payload["run"], False)
                 return {"id": "event-id"}
-            return {"id": request["conversation_id"], "execution_status": "idle",
+            return {"id": request["conversation_id"], "execution_status": "idle", "max_iterations": request["max_iterations"],
                     "workspace": request["workspace"],
                     "hook_config": request["hook_config"],
                     "agent": request["agent"]}
@@ -149,7 +149,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertFalse(any("/run" in endpoint for _, endpoint in seen))
 
     def test_real_initial_message_uses_registered_objective_without_dispatch(self):
-        objective = native_first.render_task_objective(self.store, self.data["taskId"])
+        objective = native_first.render_task_objective(self.store, self.data["taskId"], hook_config=Path(self.data["hookConfig"]))
         registered = self.store.get_request(self.data["taskId"])
         self.assertIn(registered.objective, objective)
         self.assertIn("Independent", objective.replace("independent", "Independent"))
@@ -166,7 +166,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
             if endpoint.endswith("/events"):
                 sent.append(payload)
                 return {"id": "init"}
-            return {"id": request["conversation_id"], "execution_status": "idle",
+            return {"id": request["conversation_id"], "execution_status": "idle", "max_iterations": request["max_iterations"],
                     "workspace": request["workspace"], "hook_config": request["hook_config"], "agent": request["agent"]}
         native_first.create_idle_native_conversation(
             request, fake_http, initial_message=objective
@@ -199,7 +199,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
             if endpoint.endswith("/events"):
                 self.assertIs(payload["run"], False)
                 return {}
-            return {"id": request["conversation_id"], "execution_status": "idle",
+            return {"id": request["conversation_id"], "execution_status": "idle", "max_iterations": request["max_iterations"],
                     "workspace": request["workspace"], "hook_config": {}}
         with self.assertRaises(native_first.HandoffError):
             native_first.create_idle_native_conversation(request, fake_http)
@@ -286,7 +286,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         def http(method, path, payload=None, **kwargs):
             called.append((method, path))
             if method == "GET":
-                return {"id": uid, "execution_status": "idle",
+                return {"id": uid, "execution_status": "idle", "max_iterations": request["max_iterations"],
                         "workspace": request["workspace"],
                         "hook_config": request["hook_config"],
                         "agent": request["agent"]}
@@ -332,7 +332,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
             if method == "POST":
                 raise ConnectionError("response lost")
             if path.endswith("include_skills=true"):
-                return {"id": uid, "execution_status": "idle",
+                return {"id": uid, "execution_status": "idle", "max_iterations": request["max_iterations"],
                         "workspace": request["workspace"],
                         "hook_config": request["hook_config"],
                         "agent": request["agent"]}

@@ -2,6 +2,15 @@
 
 This repository contains an ADK-based OSS vulnerability remediation workflow for Java Spring Boot Maven applications.
 
+## Native OpenHands remediation product
+
+Start with `python3 scripts/openhands_service.py start`. REST, CLI and the
+submission UI share one remediation backend with independent Maven/OSV validation,
+durable task recovery and separately authorized draft-PR delivery. Startup and
+submission do not run a paid model. See the
+[operator guide](docs/openhands-product-operations.md) and
+[acceptance evidence](docs/verification/openhands-product-20261019/report.md).
+
 ## Spring Boot Release Intelligence
 
 The standalone security comparison CLI uses Maven-selected dependencies and
