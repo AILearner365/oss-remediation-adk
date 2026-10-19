@@ -25,6 +25,8 @@ if str(ROOT) not in sys.path:
 from openhands_real_run_audit import audit
 from openhands_shared.stop_hook import load_stop_hook_config
 from openhands_shared.store import SQLiteTaskStore
+from openhands_shared.contracts import (TaskResult, ResultOutcome, ExecutionStatus,
+    ValidationStatus, DeliveryStatus, canonical_json)
 
 REPO = "AILearner365/maven-multimodule-app"
 BASE = "main-runrunning"
@@ -119,6 +121,10 @@ def claim_delivery(database: Path, details: dict) -> None:
         if db.execute("SELECT 1 FROM openhands_delivery_claims WHERE task_id = ?",
                       (details["taskId"],)).fetchone():
             raise ValueError("Delivery already claimed; inspect GitHub and durable state, do not replay")
+        if db.execute("UPDATE tasks SET status = ?, stage = ?, delivery_status = ? "
+                      "WHERE task_id = ? AND status = ? AND delivery_status = ? AND result_json IS NULL",
+                      ("DELIVERING", "delivery", "RUNNING", details["taskId"], "ACCEPTED", "PENDING")).rowcount != 1:
+            raise ValueError("Task is not awaiting an unclaimed authorized delivery")
         db.execute("""INSERT INTO openhands_delivery_claims
             (task_id, base_commit, validated_tree, delivery_branch, state)
             VALUES (?, ?, ?, ?, 'CLAIMED')""",
@@ -134,9 +140,34 @@ def record_delivery(database: Path, task_id: str, url: str, commit: str) -> None
                          (task_id,)).fetchone()
         if row != ("CLAIMED",):
             raise ValueError("Delivery claim absent or already completed")
+        task = db.execute("SELECT status, execution_status, validation_status, delivery_status "
+                          "FROM tasks WHERE task_id = ?", (task_id,)).fetchone()
+        if task != ("DELIVERING", "COMPLETED", "PASSED", "RUNNING"):
+            raise ValueError("Durable task is not in validated delivery-running state")
+        attempt = db.execute("""SELECT attempt, validated_tree, report_artifact_id
+            FROM validation_attempts WHERE task_id = ? AND state = 'COMPLETED' AND outcome = 'PASS'
+            ORDER BY attempt DESC LIMIT 1""", (task_id,)).fetchone()
+        runtime = db.execute("SELECT baseline_commit, conversation_id FROM openhands_runtimes WHERE task_id = ?",
+                             (task_id,)).fetchone()
+        if attempt is None or runtime is None:
+            raise ValueError("Validated evidence or native execution association missing")
+        artifact_ids = tuple(row[0] for row in db.execute(
+            "SELECT artifact_id FROM artifacts WHERE task_id = ? ORDER BY created_at, artifact_id", (task_id,)))
+        result = TaskResult(task_id=task_id, outcome=ResultOutcome.SUCCEEDED,
+                            execution_status=ExecutionStatus.COMPLETED,
+                            validation_status=ValidationStatus.PASSED,
+                            delivery_status=DeliveryStatus.COMPLETED,
+                            baseline_commit=runtime[0], validated_tree=attempt[1],
+                            validation_attempt=attempt[0], validation_report_artifact_id=attempt[2],
+                            conversation_id=runtime[1], pull_request_url=url, artifact_ids=artifact_ids)
         db.execute("""UPDATE openhands_delivery_claims
             SET state = 'PR_CREATED', pr_url = ?, commit_sha = ? WHERE task_id = ?""",
             (url, commit, task_id))
+        if db.execute("""UPDATE tasks SET status = 'SUCCEEDED', stage = 'complete',
+                    delivery_status = 'COMPLETED', result_json = ?, updated_at = ?
+                    WHERE task_id = ? AND status = 'DELIVERING' AND result_json IS NULL""",
+                    (canonical_json(result.to_dict()), result.completed_at, task_id)).rowcount != 1:
+            raise ValueError("Delivery result race; no overwrite permitted")
         db.commit()
 
 
