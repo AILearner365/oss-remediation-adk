@@ -8,6 +8,7 @@ This module constructs/verifies the handoff; it does not start a paid model.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from importlib import metadata
 import json
 from pathlib import Path
@@ -230,7 +231,7 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
     return uid
 
 
-def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
+def render_task_objective(store: SQLiteTaskStore, task_id: str, *, hook_config: Path | None = None) -> str:
     """Render immutable objective plus integrity-checked pre-edit SBRI evidence."""
     task = store.get_request(task_id)
     if not task.objective.strip():
@@ -257,16 +258,25 @@ def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
                      if a.artifact_id == intel.summary_artifact_id]
         if len(artifacts) != 1:
             raise HandoffError("SBRI summary artifact identity missing or ambiguous")
+        if hook_config is None:
+            raise HandoffError("SBRI-enabled handoff requires trusted Stop Hook artifact root")
+        db, config = load_stop_hook_config(hook_config.resolve(strict=True))
+        if db != store.database_path.resolve():
+            raise HandoffError("SBRI evidence database does not match authoritative task store")
         artifact = artifacts[0]
-        # Stop Hook configuration defines the same trusted artifact root at this boundary.
-        # Source summary only from the durable store and validated file bytes.
-        db = store.database_path.resolve()
-        # Artifact location is supplied through the task's validated Stop Hook by the caller;
-        # do not infer it from the database directory.
+        path = (config.artifact_root / artifact.relative_path).resolve(strict=True)
+        if not path.is_relative_to(config.artifact_root.resolve()) or not path.is_file():
+            raise HandoffError("SBRI summary artifact path escapes trusted root")
+        body = path.read_bytes()
+        if len(body) != artifact.size_bytes or hashlib.sha256(body).hexdigest() != artifact.sha256:
+            raise HandoffError("SBRI summary artifact integrity check failed")
+        summary = body.decode("utf-8")
+        if len(summary) > 12000:
+            raise HandoffError("SBRI summary exceeds native context bound")
         message += (
-            "\nPre-edit SBRI was completed and recorded for this task. "
-            "Review the durable intelligence summary and candidate evidence before editing. "
-            "Security rankings are not mandatory strategies."
+            "\nPre-edit SBRI evidence (security intelligence, not an upgrade instruction):\\n"
+            + summary
+            + "\\nEvaluate other credible strategies and validate all selected changes."
         )
     if len(message) > 20000:
         raise HandoffError("Native objective exceeds size limit")
