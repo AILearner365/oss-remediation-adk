@@ -122,7 +122,7 @@ def attach_idle(store: SQLiteTaskStore, task_id: str, config: Path) -> dict:
         store, task_id, hook_config=config, model=MODEL,
         max_iterations=min(request.agent.max_iterations, 12)
     )
-    initial = handoff.render_task_objective(store, task_id)
+    initial = handoff.render_task_objective(store, task_id, hook_config=config)
     handoff.create_idle_native_conversation(payload, native.http, initial_message=initial)
     event_page = native.http(
         "GET", f"/api/conversations/{conversation_id}/events/search?limit=100&sort_order=TIMESTAMP"
