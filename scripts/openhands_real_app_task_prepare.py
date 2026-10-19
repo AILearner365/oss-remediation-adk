@@ -112,6 +112,14 @@ def prepare(source: Path, scanner: Path, run_root: Path) -> dict:
         prep = DeterministicPreparer(
             store, PreparationConfig(workspace_root=run_root / "workspaces",
                                      repositories=(trusted,))).prepare(task_id)
+        workspace_exclude = Path(prep.workspace_path) / ".git" / "info" / "exclude"
+        if not workspace_exclude.is_file():
+            raise ValueError("Prepared task workspace lacks local Git exclude")
+        workspace_exclude.write_text(
+            workspace_exclude.read_text(encoding="utf-8") +
+            "\n# Generated Maven outputs in disposable task workspace\ntarget/\n",
+            encoding="utf-8",
+        )
         baseline = DeterministicBaselineAssessor(
             store, BaselineConfig(artifact_root=artifacts, profiles=(build_profile,))).assess(task_id)
         if baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED:
