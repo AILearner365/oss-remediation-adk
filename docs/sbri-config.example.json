@@ -1,8 +1,0 @@
-{
-  "maven": "mvn",
-  "profiles": ["production"],
-  "modules": ["service"],
-  "scopes": ["compile", "runtime"],
-  "scanner": "osv-scanner",
-  "timeout": 300
-}

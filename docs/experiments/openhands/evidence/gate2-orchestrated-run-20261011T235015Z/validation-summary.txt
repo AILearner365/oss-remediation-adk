@@ -1,5 +1,0 @@
-==> GATE 2 INDEPENDENT VALIDATION SUMMARY
-Attempt 1: FAIL - resolved 21/26; remaining 5; scan=COMPLETED_WITH_FINDINGS; scanned_poms=5
-  Failed checks: target_findings_resolved, no_new_prohibited_findings, spring_boot_version_policy
-Final independent validation: FAIL
-==> End Gate 2 validation summary

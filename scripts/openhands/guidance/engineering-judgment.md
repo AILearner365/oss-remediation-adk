@@ -1,5 +1,0 @@
-- Before a consequential engineering change, verify decision-critical facts against current authoritative evidence rather than relying on remembered or assumed versions, capabilities, or compatibility. Where materially different credible approaches exist, compare their constraints, compatibility, maintainability, and downstream impact before selecting one.
-- When observations contradict a strategy, reconsider its underlying assumptions and revise the strategy rather than persisting without justification.
-- Distinguish tool/environment failures from invalid engineering assumptions. Do not attribute failures to infrastructure without supporting evidence.
-- Preserve explicit task constraints when selecting or changing strategies.
-- Before declaring completion, validate the final state against the entire goal and its evidence requirements. Missing or incomplete validation does not establish success.

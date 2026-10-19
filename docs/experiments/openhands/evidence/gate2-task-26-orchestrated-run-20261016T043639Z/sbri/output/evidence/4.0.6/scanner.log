@@ -1,5 +1,0 @@
-Warning: --sbom has been deprecated in favor of -L
-Scanning dir /home/kavya_parivarababu/.openhands/gate2/task-26-stop-hook/sbri/899b2954a00e62d3fd53bd6af467d7a41d487c8a38b5c9eb8da6bc918d92ce4a/output/evidence/4.0.6/scan-root
-Starting filesystem walk for root: /
-Scanned /home/kavya_parivarababu/.openhands/gate2/task-26-stop-hook/sbri/899b2954a00e62d3fd53bd6af467d7a41d487c8a38b5c9eb8da6bc918d92ce4a/output/evidence/4.0.6/inventory.cdx.json file and found 62 packages
-End status: 1 dirs visited, 2 inodes visited, 1 Extract calls, 14.179894ms elapsed, 14.180188ms wall time

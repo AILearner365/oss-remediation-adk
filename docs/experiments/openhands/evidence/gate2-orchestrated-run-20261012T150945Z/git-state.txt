@@ -1,5 +1,0 @@
-branch=openhands-poc-task-21-stop-hook
-head=048ab65a6c7efe99d2a88dfc487fb05b0c0b2c8b
-status_begin
-status_end
-diff_base=9ea1b0ed5ca255db0fc7c659d050896d3ed5db78

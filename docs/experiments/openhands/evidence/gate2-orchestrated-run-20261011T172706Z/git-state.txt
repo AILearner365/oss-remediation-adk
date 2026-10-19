@@ -1,5 +1,0 @@
-branch=openhands-poc-task-18-stop-hook
-head=df3cf53cc03244123a53c39336a7cd46a8b43f87
-status_begin
-?? osv-results.json
-status_end

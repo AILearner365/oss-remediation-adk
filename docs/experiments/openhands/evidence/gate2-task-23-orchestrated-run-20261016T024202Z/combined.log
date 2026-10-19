@@ -1,6 +1,0 @@
-==> OpenHands Gate 2 orchestrated run
-==> Run logs: /home/kavya_parivarababu/.openhands/gate2/run-logs/task-23-run-20261016T024202Z
-==> Repository evidence: /tmp/sbri-openhands-integration-X0R0qK/docs/experiments/openhands/evidence/gate2-task-23-orchestrated-run-20261016T024202Z
-==> Task: 23
-==> Stage 1/3: STARTUP / PREPARE
-ERROR: Required command not found: node

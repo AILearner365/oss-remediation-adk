@@ -1,3 +1,0 @@
- pom.xml          | 18 +++++++++++++++---
- task-web/pom.xml | 10 ++++++++++
- 2 files changed, 25 insertions(+), 3 deletions(-)

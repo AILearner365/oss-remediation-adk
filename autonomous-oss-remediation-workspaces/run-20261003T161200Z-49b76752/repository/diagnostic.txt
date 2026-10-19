@@ -1,2 +1,0 @@
-ADAPTER_MODE=stream
-The fixture service consumes records incrementally; batch mode is not supported.

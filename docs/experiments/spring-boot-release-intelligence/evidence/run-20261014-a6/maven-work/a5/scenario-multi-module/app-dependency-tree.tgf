@@ -1,8 +1,0 @@
-917156101 experiment:app:jar:1
-143239336 experiment:library:jar:1:compile
-254358847 org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.31:compile
-57638267 org.apache.tomcat:tomcat-annotations-api:jar:10.1.31:compile
-#
-254358847 57638267 compile
-143239336 254358847 compile
-917156101 143239336 compile

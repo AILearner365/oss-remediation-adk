@@ -1,5 +1,0 @@
-Warning: --sbom has been deprecated in favor of -L
-Scanning dir /tmp/sbri-selection-range-state/sbri/1f57ffac8f1a49a45bc41b29b7f4f394c8bad655b6c482d8bf919657c17c9145/output/evidence/4.1.1/scan-root
-Starting filesystem walk for root: /
-Scanned /tmp/sbri-selection-range-state/sbri/1f57ffac8f1a49a45bc41b29b7f4f394c8bad655b6c482d8bf919657c17c9145/output/evidence/4.1.1/inventory.cdx.json file and found 61 packages
-End status: 1 dirs visited, 2 inodes visited, 1 Extract calls, 5.677851ms elapsed, 5.678114ms wall time

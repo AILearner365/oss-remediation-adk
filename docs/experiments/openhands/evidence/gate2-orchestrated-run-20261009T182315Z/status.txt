@@ -1,3 +1,0 @@
-stage=COMPLETE
-exit_code=0
-result=PASS
