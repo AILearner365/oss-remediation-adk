@@ -53,6 +53,8 @@ def plan(task_id: str, hook: Path, *, expected_base: str, source_repo: str = REP
             raise ValueError("Task contract is not bound to approved remote")
         if request.repository.base_ref != "refs/heads/" + BASE or request.repository.expected_commit != expected_base:
             raise ValueError("Task base binding differs from explicit approval")
+        if request.delivery_mode != "github_pr":
+            raise ValueError("Task does not authorize GitHub PR delivery; contract integration required")
         workspace = Path(prep.workspace_path).resolve(strict=True)
         if workspace.is_symlink():
             raise ValueError("Unsafe workspace")
