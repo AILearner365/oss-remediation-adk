@@ -37,16 +37,25 @@ def git(*args: str) -> str:
 
 
 def prepare_recovery(store: SQLiteTaskStore, original: str, hook: Path) -> dict:
-    evidence = verify_stored(store, original, hook)
-    runtime = store.get_openhands_runtime(original)
+    # The original attempt is dispatched, so the idle-task guard used for the\n    # NEW task must not be applied to it. Verify its immutable evidence here.\n    runtime = store.get_openhands_runtime(original)
     claim = store.get_execution_claim(original)
     if runtime is None or claim is None or claim.conversation_id != runtime.conversation_id:
         raise ValueError("Original task is not the dispatched, identified attempt")
+    if claim.dispatch_status.value != "DISPATCHED":
+        raise ValueError("Original dispatch claim is not DISPATCHED")
+    if store.get_status(original).accepted:
+        raise ValueError("Original task is already accepted")
     old = store.get_request(original)
     prep = store.get_preparation(original)
     baseline = store.get_baseline(original)
     intel = store.get_intelligence(original)
-    if baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED or intel.outcome is not IntelligenceOutcome.DISABLED:
+    if (prep is None or baseline is None or intel is None
+            or baseline.baseline_commit != "f44f94c2b2ec553fc3276e36e6a99a0dcc4cd13a"
+            or prep.baseline_commit != baseline.baseline_commit
+            or old.repository.expected_commit != baseline.baseline_commit
+            or baseline.finding_count != 1
+            or baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED
+            or intel.outcome is not IntelligenceOutcome.DISABLED):
         raise ValueError("Only the exact verified completed baseline with disabled intelligence can be inherited")
     base = Path(hook).resolve(strict=True).parent
     artifacts = store.list_artifacts(original)
@@ -59,6 +68,15 @@ def prepare_recovery(store: SQLiteTaskStore, original: str, hook: Path) -> dict:
         body = path.read_bytes()
         if len(body) != artifact.size_bytes or hashlib.sha256(body).hexdigest() != artifact.sha256:
             raise ValueError("Original evidence artifact checksum differs")
+    report_artifact = next((a for a in artifacts if a.artifact_id == baseline.report_artifact_id), None)
+    if report_artifact is None or report_artifact.sha256 != baseline.report_sha256:
+        raise ValueError("Original baseline report metadata mismatch")
+    report = json.loads((artifact_root / report_artifact.relative_path).read_text(encoding="utf-8"))
+    findings = report.get("originalVulnerabilityFindings", [])
+    if len(findings) != 1 or "GHSA-mjmj-j48q-9wg2" not in {
+        findings[0].get("vulnerabilityId"), *findings[0].get("aliases", [])
+    }:
+        raise ValueError("Original baseline target advisory is not verified")
     source = Path(prep.source_path).resolve(strict=True)
     if git("-C", str(source), "rev-parse", "HEAD") != baseline.baseline_commit:
         raise ValueError("Trusted isolated source commit changed")
