@@ -22,6 +22,9 @@ def verify_agent() -> dict:
     from openhands.sdk import AgentContext, LLM
     from openhands.sdk.skills import load_skills_from_dir
     from openhands.tools.preset.default import get_default_agent
+    from openhands.tools.terminal import TerminalTool
+    from openhands.tools.file_editor import FileEditorTool
+    from openhands.tools.task_tracker import TaskTrackerTool
 
     skills_path = ROOT / "scripts/openhands/skills"
     _, _, available = load_skills_from_dir(skills_path)
@@ -42,9 +45,9 @@ def verify_agent() -> dict:
     )})
     data = agent.model_dump(mode="json")
     names = [item["name"] for item in data["tools"]]
-    required = {"TerminalTool", "FileEditorTool", "TaskTrackerTool"}
+    required = {TerminalTool.name, FileEditorTool.name, TaskTrackerTool.name}
     if not required.issubset(names):
-        raise ValueError(f"Native CLI preset missing tools: {sorted(required-set(names))}")
+        raise ValueError(f"Native CLI preset missing tools: {sorted(required-set(names))}; actual={names}")
     context = data.get("agent_context") or {}
     actual_skills = [item["name"] for item in context.get("skills", [])]
     if actual_skills != list(selected) or context.get("system_message_suffix") != general:
