@@ -111,6 +111,9 @@ def claim_delivery(database: Path, details: dict) -> None:
             pr_url TEXT, commit_sha TEXT,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )""")
+        if db.execute("SELECT 1 FROM openhands_delivery_claims WHERE task_id = ?",
+                      (details["taskId"],)).fetchone():
+            raise ValueError("Delivery already claimed; inspect GitHub and durable state, do not replay")
         task = db.execute(
             "SELECT request_json, status, accepted, validation_status FROM tasks WHERE task_id = ?",
             (details["taskId"],)).fetchone()
@@ -118,9 +121,6 @@ def claim_delivery(database: Path, details: dict) -> None:
             raise ValueError("Delivery claim requires durable accepted validation")
         if json.loads(task[0])["delivery"]["mode"] != "github_pr":
             raise ValueError("Registered task does not authorize GitHub PR delivery")
-        if db.execute("SELECT 1 FROM openhands_delivery_claims WHERE task_id = ?",
-                      (details["taskId"],)).fetchone():
-            raise ValueError("Delivery already claimed; inspect GitHub and durable state, do not replay")
         if db.execute("UPDATE tasks SET status = ?, stage = ?, delivery_status = ? "
                       "WHERE task_id = ? AND status = ? AND delivery_status = ? AND result_json IS NULL",
                       ("DELIVERING", "delivery", "RUNNING", details["taskId"], "ACCEPTED", "PENDING")).rowcount != 1:
