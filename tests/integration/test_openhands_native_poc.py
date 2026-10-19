@@ -68,7 +68,7 @@ class POCChecks(unittest.TestCase):
                 "REPORT", "LOG_FILE")}
         try:
             with tempfile.TemporaryDirectory() as d:
-                with patch.dict("os.environ", {"OH_POC_TMP": d}, clear=True):
+                with patch.dict("os.environ", {"OH_POC_TMP": d, "PATH": os.environ.get("PATH", "")}, clear=True):
                     poc.configure_server_version("1.55.1")
                     env = poc.environment()
                     constraint = Path(env["UV_CONSTRAINT"])
