@@ -39,13 +39,23 @@ def verify_stored(store: SQLiteTaskStore, task_id: str, hook_config: Path) -> di
         raise ValueError("Task must be AGENT_RUNNING / NOT_STARTED / unaccepted")
     if prep is None or baseline is None or intel is None:
         raise ValueError("Durable task preparation, baseline or intelligence missing")
-    if (prep.baseline_commit != EXPECTED_COMMIT
+    real_app = request.repository.url.rstrip("/").removesuffix(".git") == (
+        "https://github.com/AILearner365/maven-multimodule-app")
+    if real_app:
+        if (prep.baseline_commit != request.repository.expected_commit
+            or baseline.baseline_commit != prep.baseline_commit
+            or baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED
+            or baseline.finding_count < 1
+            or request.repository.base_ref != "refs/heads/main-runrunning"):
+            raise ValueError("Real application durable baseline identity or findings mismatch")
+        if request.sbri_mode != "auto" or intel.outcome.value not in {"COMPLETE", "PARTIAL"}:
+            raise ValueError("Real-app native attachment requires completed SBRI intelligence")
+    elif (prep.baseline_commit != EXPECTED_COMMIT
         or baseline.baseline_commit != EXPECTED_COMMIT
         or baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED
-        or baseline.finding_count != 1):
+        or baseline.finding_count != 1
+        or request.repository.expected_commit != EXPECTED_COMMIT):
         raise ValueError("Controlled immutable baseline does not match approved one-finding case")
-    if request.repository.expected_commit != EXPECTED_COMMIT:
-        raise ValueError("Task repository commit differs from durable baseline")
     if not Path(prep.workspace_path).is_dir():
         raise ValueError("Prepared workspace unavailable")
     db, config = handoff.load_stop_hook_config(hook_config.resolve(strict=True))
@@ -61,13 +71,17 @@ def verify_stored(store: SQLiteTaskStore, task_id: str, hook_config: Path) -> di
         raise ValueError("Durable baseline report failed checksum verification")
     value = json.loads(body)
     findings = value.get("originalVulnerabilityFindings", [])
-    if len(findings) != 1:
-        raise ValueError("Original baseline finding inventory differs")
-    f = findings[0]
-    identifiers = {f.get("vulnerabilityId"), *f.get("aliases", [])}
-    if "GHSA-mjmj-j48q-9wg2" not in identifiers:
-        raise ValueError("Target advisory not present in immutable baseline evidence")
-    return {"baselineAdvisoryVerified": True, "taskUnstarted": True,
+    if real_app:
+        if not findings or len(findings) != baseline.finding_count:
+            raise ValueError("Real-app baseline findings differ from immutable report")
+    else:
+        if len(findings) != 1:
+            raise ValueError("Original baseline finding inventory differs")
+        f = findings[0]
+        identifiers = {f.get("vulnerabilityId"), *f.get("aliases", [])}
+        if "GHSA-mjmj-j48q-9wg2" not in identifiers:
+            raise ValueError("Target advisory not present in immutable baseline evidence")
+    return {"baselineAdvisoryVerified": not real_app, "realAppBaselineVerified": real_app, "taskUnstarted": True,
             "hookConfigValidated": True, "baselineArtifactVerified": True,
             "workspace": prep.workspace_path, "findingCount": baseline.finding_count}
 
