@@ -114,3 +114,16 @@ New task contracts may explicitly set `delivery.mode=github_pr`; existing `none`
 **Not yet proven**: a live PR, automatic reconciliation of a pushed branch when GitHub POST fails, nor comprehensive compatibility with all older contract test suites. The generic shared store does not yet expose a first-class `get_delivery_claim` API; this utility uses SQLite directly. A new target-repository remediation task must still be prepared and independently accepted before a preview can return READY. Never manually edit existing durable task contracts or bypass the claim.
 
 Offline regression checks: `python3 -m unittest discover -s tests/integration -p 'test_openhands_pr_*.py' -q` plus the previous OpenHands and validation suites. These do not access GitHub or run Gemini.
+
+## New real Maven application: isolated checkout and baseline (no Gemini)
+
+Reference: `AILearner365/maven-multimodule-app`, branch `main-runrunning`; last verified SHA `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`. First verify the reference SHA is still current. Use a **new destination** on each preparation attempt; scripts will block reuse rather than delete any evidence.
+
+```bash
+cd ~/oss-remediation-adk
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_app_*.py' -q
+python3 scripts/openhands_real_app_prepare.py --expected-commit 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 --destination ~/openhands-real-app-poc/checkout-1
+python3 scripts/openhands_real_app_baseline.py --project ~/openhands-real-app-poc/checkout-1 --expected-commit 9ea1b0ed5ca255db0fc7c659d050896d3ed5db78 --evidence ~/openhands-real-app-poc/baseline-1
+```
+
+Baseline performs `mvn -B -ntp clean verify` and records OSV Scanner 2.x source scan in local files. It may download Maven dependencies and contact OSV. `summary.json` records exit codes and output checksums without printing full scan logs. A scanner exit code alone is not a vulnerability count or proof of success; review the JSON report and scanner stderr before accepting findings. A Maven failure blocks OSV stage. No durable task registration, SBRI assessment, OpenHands inference or GitHub branch/PR push occurs in these commands. If branch SHA changes, stop and review rather than substituting a newer commit silently. For readiness in Cloud Shell after refresh, see setup instructions above.
