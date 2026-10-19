@@ -88,12 +88,14 @@ def preserve(task_id: str, hook: Path, destination: Path, *, check_native: bool 
                 "sourceTaskId": store.get_request(task_id).correlation_id,
                 "files": {
                     "shareable/validation-report.json": digest(copied),
-                    "shareable/baseline-report.json": digest(share / "baseline-report.json"),\n                    "shareable/native-event-metadata.json": digest(event_file),
+                    "shareable/baseline-report.json": digest(share / "baseline-report.json"),
+                    "shareable/native-event-metadata.json": digest(event_file),
                     "private/tasks.sqlite3": digest(backup),
                     "private/working-tree.patch": digest(patch),
                 },
                 "warning": "Private SQLite and patch may contain sensitive content. Do not publish them.",
-                "nativeEventTranscriptArchived": False,\n                "nativeEventMetadataArchived": True,
+                "nativeEventTranscriptArchived": False,
+                "nativeEventMetadataArchived": True,
             }
         (share / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         return {"status": "EVIDENCE_PRESERVED", "directory": str(dest),
