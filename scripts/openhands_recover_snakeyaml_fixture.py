@@ -92,8 +92,10 @@ def recover(*, materialize: bool) -> None:
             raise ValueError("Existing POM missing or symlinked")
         if existing_pom.read_bytes() != pom:
             raise ValueError("Existing POM differs; refusing changes")
-        if git("status", "--porcelain", cwd=TARGET) not in ("?? pom.xml", ""):
+        if git("status", "--porcelain", cwd=TARGET) not in ("D  pom.xml\n?? pom.xml", "?? pom.xml", ""):
             raise ValueError("Existing fixture has unexpected changes")
+        if git("ls-files", "--stage", cwd=TARGET):
+            raise ValueError("Existing index is not empty; refusing automatic repair")
         print("Verified exact partial recovery; repairing Git index only")
         git("reset", "--mixed", "HEAD", cwd=TARGET)
         if git("status", "--porcelain", cwd=TARGET):
