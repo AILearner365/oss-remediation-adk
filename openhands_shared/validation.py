@@ -403,12 +403,38 @@ class SharedValidationService:
             raise ValidationIdentityError("baseline report is unreadable") from exc
         if (
             not isinstance(document, Mapping)
-            or document.get("taskId") != task_id
             or document.get("baselineCommit") != preparation.baseline_commit
             or not isinstance(document.get("originalVulnerabilityFindings"), list)
             or len(document.get("originalVulnerabilityFindings")) != baseline.finding_count
         ):
             raise ValidationIdentityError("baseline report identity or finding inventory is invalid")
+        if document.get("taskId") != task_id:
+            # A recovered task inherits the original immutable baseline report.
+            # Its correlation is a provenance reference, not a trust exemption.
+            original_id = request.correlation_id
+            if not original_id or document.get("taskId") != original_id or original_id == task_id:
+                raise ValidationIdentityError("baseline report belongs to another task without recovery provenance")
+            old_request = self.store.get_request(original_id)
+            old_preparation = self.store.get_preparation(original_id)
+            old_baseline = self.store.get_baseline(original_id)
+            old_artifacts = {item.artifact_id: item for item in self.store.list_artifacts(original_id)}
+            original_artifact = old_artifacts.get(baseline.report_artifact_id)
+            if (
+                old_preparation is None or old_baseline is None or original_artifact is None
+                or old_baseline.report_sha256 != baseline.report_sha256
+                or original_artifact.sha256 != baseline_artifact.sha256
+                or original_artifact.relative_path != baseline_artifact.relative_path
+                or old_preparation.baseline_commit != preparation.baseline_commit
+                or old_request.repository != request.repository
+                or old_request.objective != request.objective
+                or old_request.constraints != request.constraints
+                or old_request.acceptance != request.acceptance
+                or old_request.agent != request.agent
+                or old_request.sbri_mode != request.sbri_mode
+                or old_request.delivery_mode != request.delivery_mode
+            ):
+                raise ValidationIdentityError("reused baseline provenance or contract mismatch")
+            self._verify_artifact(original_artifact)
         return preparation, document, workspace
 
     def _verify_workspace(self, request: TaskRequest, preparation: Any) -> Path:
@@ -420,7 +446,19 @@ class SharedValidationService:
             _, workspace_common = self.git.run(workspace, ["rev-parse", "--git-common-dir"], operation="validation_workspace_identity")
             _, source_common = self.git.run(source, ["rev-parse", "--git-common-dir"], operation="validation_source_identity")
             if _common_path(workspace, workspace_common) != _common_path(source, source_common):
-                raise ValidationIdentityError("task workspace belongs to another repository")
+                # Recovery uses a separate git clone rather than a linked worktree.
+                # Require an explicit, content-verified lineage to the trusted source.
+                if not request.correlation_id:
+                    raise ValidationIdentityError("task workspace belongs to another repository")
+                old_prep = self.store.get_preparation(request.correlation_id)
+                if old_prep is None or Path(old_prep.source_path).resolve() != source.resolve():
+                    raise ValidationIdentityError("recovery workspace source does not match provenance")
+                _, origin = self.git.run(workspace, ["remote", "get-url", "origin"], operation="validation_recovery_origin")
+                if Path(origin.strip()).resolve() != source.resolve():
+                    raise ValidationIdentityError("recovery clone origin differs from trusted source")
+                _, source_head = self.git.run(source, ["rev-parse", "HEAD"], operation="validation_recovery_source_commit")
+                if source_head.strip() != preparation.baseline_commit:
+                    raise ValidationIdentityError("recovery trusted source commit has changed")
             code, branch = self.git.run(workspace, ["symbolic-ref", "--quiet", "HEAD"], operation="validation_branch", allowed_return_codes=frozenset({0, 1}))
             if code != 0 or branch != f"refs/heads/{preparation.local_branch}":
                 raise ValidationIdentityError("task workspace is on another branch")
