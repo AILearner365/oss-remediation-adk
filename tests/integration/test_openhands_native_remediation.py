@@ -42,7 +42,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.assertFalse(request["worktree"])
         self.assertEqual(
             [tool["name"] for tool in request["agent"]["tools"]],
-            ["TerminalTool", "FileEditorTool", "TaskTrackerTool"]
+            ["terminal", "file_editor", "task_tracker"]
         )
         self.assertTrue(request["agent"]["system_prompt_kwargs"]["cli_mode"])
         self.assertTrue(all(not tool["params"] for tool in request["agent"]["tools"]))
