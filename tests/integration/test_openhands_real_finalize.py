@@ -1,5 +1,6 @@
 """Fail-closed tests of native task finalization without running model/tools."""
 from pathlib import Path
+import tempfile
 import sys
 import unittest
 from types import SimpleNamespace
@@ -15,12 +16,15 @@ class FinalizeSafetyTests(unittest.TestCase):
         store.get_execution_claim.return_value = SimpleNamespace(conversation_id="native-one")
         context = MagicMock()
         context.__enter__.return_value = store
-        with patch.object(mod, "load_stop_hook_config", return_value=(Path("/tmp/tasks.sqlite3"), object())), \
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(mod, "load_stop_hook_config", return_value=(Path("/tmp/tasks.sqlite3"), object())), \
              patch.object(mod, "SQLiteTaskStore", return_value=context), \
              patch.object(mod.native, "http", return_value={"execution_status": "running"}), \
              patch.object(mod, "SharedValidationService") as service:
+            hook = Path(directory) / "hook.json"
+            hook.write_text("{}", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "not finished"):
-                mod.finalize("task-one", Path("/tmp/hook.json"))
+                mod.finalize("task-one", hook)
             service.assert_not_called()
             store.record_native_execution_terminal.assert_not_called()
 
@@ -33,8 +37,10 @@ class FinalizeSafetyTests(unittest.TestCase):
         with patch.object(mod, "load_stop_hook_config", return_value=(Path("/tmp/tasks.sqlite3"), object())), \
              patch.object(mod, "SQLiteTaskStore", return_value=context), \
              patch.object(mod.native, "http") as api:
+            hook = Path(directory) / "hook.json"
+            hook.write_text("{}", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "not bound"):
-                mod.finalize("task-one", Path("/tmp/hook.json"))
+                mod.finalize("task-one", hook)
             api.assert_not_called()
 
     def test_no_dispatch_or_retry_mechanism(self):
