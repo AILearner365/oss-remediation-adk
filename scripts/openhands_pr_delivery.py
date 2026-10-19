@@ -49,7 +49,7 @@ def plan(task_id: str, hook: Path, *, expected_base: str, source_repo: str = REP
     with SQLiteTaskStore(db) as store:
         request = store.get_request(task_id)
         prep = store.get_preparation(task_id)
-        if prep is None or request.repository.url.rstrip("/") != URL.removesuffix(".git"):
+        if prep is None or request.repository.url.rstrip("/").removesuffix(".git") != URL.removesuffix(".git"):
             raise ValueError("Task contract is not bound to approved remote")
         if request.repository.base_ref != "refs/heads/" + BASE or request.repository.expected_commit != expected_base:
             raise ValueError("Task base binding differs from explicit approval")
