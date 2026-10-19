@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-shot real Maven/OSV durable task preparation; no OpenHands API or LLM.
+"""Real multi-module Maven/OSV durable preparation; no OpenHands API or LLM.
 
 The source is the verified real multi-module Maven application repository. Git mirroring
 is confined to a fresh run root; source repository and remote GitHub untouched.
@@ -149,7 +149,7 @@ def prepare(source: Path, scanner: Path, run_root: Path) -> dict:
             "validationConfig": str(stop_config),
             "model": MODEL, "nativeConversationCreated": False,
             "nativeRunCalled": False, "modelExecutionAuthorized": False,
-            "nextGates": ["Verify baseline advisory identity in durable report",
+            "nextGates": ["Inspect authoritative multi-module baseline findings and SBRI evidence",
                           "Create/verify 1.55.1 native conversation with real task and persisted hook",
                           "Verify native server Vertex extra and enforced cost bounds",
                           "Obtain explicit separate authorization for model execution"],
