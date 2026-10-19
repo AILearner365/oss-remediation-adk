@@ -71,3 +71,38 @@ test -f /tmp/openhands-real-durable-task-recovered-v1/stop-hook.json
 ## Operating rule
 
 Successful existing fixture acceptance remains valid even if `/tmp` vanishes. Missing temporary state is not proof that the previous accepted remediation failed. A new real application scenario requires its own baseline, evidence, explicit paid-run approval and delivery authorization.
+
+## New setup and delivery commands (2026-10-19)
+
+Read-only readiness report (safe on fresh Cloud Shell):
+
+```bash
+cd ~/oss-remediation-adk
+python3 scripts/openhands_cloud_shell_setup.py
+```
+
+Explicitly install/start the pinned 1.55.1 smoke stack (may download packages, creates *idle smoke* conversations but **does not execute Gemini**, and does not restore task state):
+
+```bash
+python3 scripts/openhands_cloud_shell_setup.py --start-native
+```
+
+Delivery preview for a **newly accepted task actually bound to** `https://github.com/AILearner365/maven-multimodule-app`, `refs/heads/main-runrunning` and its exact current commit:
+
+```bash
+python3 scripts/openhands_pr_delivery.py --task-id task_<NEW_TASK_ID> \\
+  --hook-config /path/to/new/stop-hook.json \\
+  --expected-base <40-HEX-GIT-SHA>
+```
+
+Default is no-push. An authorized later invocation may supply `--approve-delivery I_AUTHORIZE_PUSH_AND_PR` and `GITHUB_TOKEN` for GitHub API access; the Git push also requires locally available Git credentials. **Do not** use the old SnakeYAML task: its contract URL is a placeholder and delivery mode was `none`. Never publish private evidence attachments.
+
+Implementation scope caveat: the delivery utility is initially standalone, not yet a durable transactional delivery stage in the shared task store. It is therefore **not certified for unattended use**. Failure after branch push requires manual inspection, not blind retry. The repo-targeted real-app baseline/setup path and a clean-environment recovery drill remain to be implemented and verified. Existing generic delivery mode contract is still `none` and must not be bypassed. No live push or PR has been tested.
+
+Offline checks:
+
+```bash
+python3 -m unittest discover -s tests/integration -p 'test_openhands_pr_delivery.py' -q
+python3 -m unittest discover -s tests/integration -p 'test_openhands_real_*.py' -q
+python3 -m unittest discover -s tests/integration -p 'test_openhands_shared_validation.py' -q
+```
