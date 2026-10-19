@@ -78,6 +78,26 @@ def remediation_agent_context() -> dict[str, Any]:
     ).model_dump(mode="json")
 
 
+def stable_stop_hook_command(*, task_id: str, workspace: Path, hook_config: Path) -> str:
+    """Build a stable, independent validator command for Cloud Shell.
+
+    Never capture sys.executable from a temporary uv SDK build environment.
+    The independent Maven/OSV validator runs with the supported system Python.
+    """
+    validator = Path("/usr/bin/python3")
+    if not validator.is_file():
+        raise HandoffError("Independent validator requires stable /usr/bin/python3")
+    bootstrap = (
+        "import sys,runpy;sys.path.insert(0," + repr(str(ROOT)) +
+        ");runpy.run_module('openhands_shared.stop_hook',run_name='__main__')"
+    )
+    return shlex.join([
+        str(validator), "-c", bootstrap,
+        "--config", str(hook_config.resolve(strict=True)),
+        "--task-id", task_id, "--workspace", str(workspace.resolve(strict=True)),
+    ])
+
+
 def build_request(
     store: SQLiteTaskStore,
     task_id: str,
@@ -146,18 +166,9 @@ def build_request(
         raise HandoffError("Stop Hook database differs from authoritative task store")
     request = store.get_request(task_id)
     config.profile_for(request)
-    # Native hook subprocess may start inside the disposable task worktree,
-    # not the control repository. Set the import root explicitly.
-    bootstrap = "import sys,runpy;sys.path.insert(0," + repr(str(ROOT)) + ");runpy.run_module('openhands_shared.stop_hook',run_name='__main__')"
-    # Independent validation executes under a stable local interpreter, not the
-    # SDK's temporary uv build environment (which disappears after uv exits).
-    # The validator only needs project/OSV dependencies, never the native SDK.
-    validator_python = Path("/usr/bin/python3")
-    if not validator_python.is_file():
-        raise HandoffError("Stable system Python for independent validator is unavailable")
-    executable = [str(validator_python), "-c", bootstrap,
-                  "--config", str(hook_config.resolve()),
-                  "--task-id", task_id, "--workspace", str(workspace)]
+    stop_command = stable_stop_hook_command(
+        task_id=task_id, workspace=workspace, hook_config=hook_config
+    )
     llm: dict[str, Any] = {"model": model, "usage_id": "native-remediation", "stream": False}
     if base_url is not None:
         if not base_url.startswith("http://127.0.0.1:") and not base_url.startswith("http://localhost:"):
@@ -186,7 +197,7 @@ def build_request(
                   "agent_context": remediation_agent_context()},
         "hook_config": {"stop": [{
             "matcher": "*", "hooks": [{
-                "type": "command", "command": shlex.join(executable), "timeout": 3600
+                "type": "command", "command": stop_command, "timeout": 3600
             }]
         }]},
         "tags": {"taskid": task_id, "purpose": "independent-remediation"},
