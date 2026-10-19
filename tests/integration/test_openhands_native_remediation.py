@@ -275,7 +275,8 @@ class NativeFirstHandoffTests(unittest.TestCase):
             if method == "GET":
                 return {"id": uid, "execution_status": "idle",
                         "workspace": request["workspace"],
-                        "hook_config": request["hook_config"]}
+                        "hook_config": request["hook_config"],
+                        "agent": request["agent"]}
             self.assertEqual(current[0].dispatch_status, ExecutionDispatchStatus.INTENT_RECORDED)
             return {}
         self.assertEqual(native_first.dispatch_native_once(
@@ -320,7 +321,8 @@ class NativeFirstHandoffTests(unittest.TestCase):
             if path.endswith("include_skills=true"):
                 return {"id": uid, "execution_status": "idle",
                         "workspace": request["workspace"],
-                        "hook_config": request["hook_config"]}
+                        "hook_config": request["hook_config"],
+                        "agent": request["agent"]}
             return {"execution_status": "idle"}
         with self.assertRaises(native_first.HandoffError):
             native_first.dispatch_native_once(
