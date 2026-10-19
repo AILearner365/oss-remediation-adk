@@ -8,6 +8,7 @@ This module constructs/verifies the handoff; it does not start a paid model.
 from __future__ import annotations
 
 import argparse
+from importlib import metadata
 import json
 from pathlib import Path
 import shlex
@@ -34,8 +35,31 @@ def _nonempty(value: str, name: str) -> str:
     return value
 
 
+def require_native_sdk_environment() -> None:
+    """Fail closed when a real handoff uses a non-pinned Python interpreter.
+
+    Importing the SDK is deferred to real agent serialization; offline unit
+    tests and read-only task inspection remain usable from system Python.
+    """
+    for package in ("openhands-sdk", "openhands-tools"):
+        try:
+            installed = metadata.version(package)
+        except metadata.PackageNotFoundError as exc:
+            raise HandoffError(
+                f"Real native handoff requires {package}==1.55.1 in the "
+                "invoking Python environment; run the launcher using the "
+                "existing Agent Server uvx Python, not system python3"
+            ) from exc
+        if installed != "1.55.1":
+            raise HandoffError(
+                f"Real native handoff requires {package}==1.55.1; "
+                f"found {installed}. Use the existing Agent Server uvx Python."
+            )
+
+
 def remediation_agent_context() -> dict[str, Any]:
     """Serialize approved native Skills and general guidance without model use."""
+    require_native_sdk_environment()
     from openhands.sdk import AgentContext
     from openhands.sdk.skills import load_skills_from_dir
 
