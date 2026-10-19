@@ -17,6 +17,7 @@ class NativeSbriHandoffTests(unittest.TestCase):
             root = Path(d)
             text = "Boot 4.0.8 addresses 38 of 50 baseline findings; 12 remain.\n"
             (root / "summary.txt").write_text(text)
+            (root / "hook.json").write_text("{}")
             artifact = SimpleNamespace(artifact_id="intelligence-summary",
                 relative_path="summary.txt", size_bytes=len(text.encode()),
                 sha256=hashlib.sha256(text.encode()).hexdigest())
