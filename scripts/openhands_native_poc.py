@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shlex
 import shutil
 import signal
 import socket
@@ -181,7 +182,36 @@ def environment() -> dict[str, str]:
     # An old test's custom source or Git ref must not override official versions.
     for item in ("OH_AGENT_SERVER_GIT_REF", "OH_AGENT_SERVER_LOCAL_PATH", "OH_AUTOMATION_GIT_REF", "OH_AUTOMATION_LOCAL_PATH"):
         env.pop(item, None)
+    install_vertex_uvx_wrapper(env)
     return env
+
+
+def install_vertex_uvx_wrapper(env: dict[str, str]) -> None:
+    """Inject the Vertex extra into Canvas's *actual* pinned Agent Server uvx.
+
+    Canvas 1.27.1 builds its own uvx command, independent of our prewarm.
+    Do not patch its installed source or affect Automation/other uvx calls.
+    """
+    if SERVER != "1.55.1":
+        return
+    real_uvx = shutil.which("uvx", path=env.get("PATH"))
+    if not real_uvx:
+        raise Failure("uvx unavailable for pinned Vertex Agent Server")
+    wrapper_dir = ROOT / "vertex-uvx-bin"
+    wrapper_dir.mkdir(parents=True, exist_ok=True)
+    wrapper = wrapper_dir / "uvx"
+    script = (
+        "#!/bin/sh\n"
+        "for arg do\n"
+        "  if [ \"$arg\" = 'openhands-agent-server==1.55.1' ]; then\n"
+        f"    exec {shlex.quote(real_uvx)} --with 'openhands-sdk[vertex]==1.55.1' \"$@\"\n"
+        "  fi\n"
+        "done\n"
+        f"exec {shlex.quote(real_uvx)} \"$@\"\n"
+    )
+    write_private(wrapper, script)
+    wrapper.chmod(0o700)
+    env["PATH"] = str(wrapper_dir) + os.pathsep + env.get("PATH", "")
 
 
 def canvas_install(env: dict[str, str]) -> None:
@@ -234,7 +264,7 @@ def assert_ports_free() -> None:
 def warm_native_packages(env: dict[str, str]) -> None:
     """Official CLI waits only 60s for backend readiness; prewarm exact uvx deps."""
     stamp = ROOT / "packages-ready.txt"
-    fingerprint = f"{SERVER}|{AUTOMATION}|{POC_LITELLM_PIN if SERVER == '1.55.1' else 'unconstrained'}"
+    fingerprint = f"{SERVER}|{AUTOMATION}|{POC_LITELLM_PIN if SERVER == '1.55.1' else 'unconstrained'}|{'vertex-extra-1' if SERVER == '1.55.1' else 'standard'}"
     if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == fingerprint:
         return
     log("Preparing pinned SDK/Agent Server and Automation in /tmp before Canvas startup")
@@ -254,7 +284,7 @@ def warm_native_packages(env: dict[str, str]) -> None:
                  "from importlib.metadata import version; "
                  "assert version('litellm') == '1.105.1', version('litellm'); "
                  "import litellm; import mcp.types"], env=env)
-        log("Verified pinned LiteLLM import preflight")
+        log("Verified pinned LiteLLM import preflight with Vertex extra requested for Agent Server")
     command(["uvx", "--from", f"openhands-automation=={AUTOMATION}",
              "uvicorn", "--help"], env=env)
     stamp.write_text(fingerprint + "\n", encoding="utf-8")
