@@ -13,6 +13,7 @@ from importlib import metadata
 import json
 from pathlib import Path
 import shlex
+import subprocess
 import sys
 from typing import Any, Callable, Mapping
 from uuid import UUID
@@ -87,6 +88,20 @@ def stable_stop_hook_command(*, task_id: str, workspace: Path, hook_config: Path
     validator = Path("/usr/bin/python3")
     if not validator.is_file():
         raise HandoffError("Independent validator requires stable /usr/bin/python3")
+    # Verify the *hook's* runtime, not the SDK's temporary uv interpreter.
+    # Check imports only; never invoke Maven/OSV or mutate task state here.
+    try:
+        ready = subprocess.run(
+            [str(validator), "-c",
+             "import sys;sys.path.insert(0," + repr(str(ROOT)) +
+             ");import openhands_shared.stop_hook"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=15, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise HandoffError("Independent validator Python is not executable") from exc
+    if ready.returncode != 0:
+        raise HandoffError("Independent validator dependencies unavailable in system Python")
     bootstrap = (
         "import sys,runpy;sys.path.insert(0," + repr(str(ROOT)) +
         ");runpy.run_module('openhands_shared.stop_hook',run_name='__main__')"
