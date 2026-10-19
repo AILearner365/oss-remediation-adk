@@ -37,7 +37,9 @@ def git(*args: str) -> str:
 
 
 def prepare_recovery(store: SQLiteTaskStore, original: str, hook: Path) -> dict:
-    # The original attempt is dispatched, so the idle-task guard used for the\n    # NEW task must not be applied to it. Verify its immutable evidence here.\n    runtime = store.get_openhands_runtime(original)
+    # The original attempt is dispatched; do not apply the new-task idle guard.
+    # Verify the original immutable evidence independently.
+    runtime = store.get_openhands_runtime(original)
     claim = store.get_execution_claim(original)
     if runtime is None or claim is None or claim.conversation_id != runtime.conversation_id:
         raise ValueError("Original task is not the dispatched, identified attempt")
