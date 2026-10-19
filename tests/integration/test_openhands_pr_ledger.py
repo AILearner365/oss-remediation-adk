@@ -14,19 +14,28 @@ class DeliveryLedgerTests(unittest.TestCase):
             details = {'taskId': 'task_' + 'a' * 32, 'baseCommit': 'b' * 40,
                        'validatedTree': 'c' * 40, 'branch': 'openhands/remediate-task-' + 'a' * 32}
             with sqlite3.connect(db) as conn:
-                conn.execute('CREATE TABLE tasks (task_id TEXT PRIMARY KEY, request_json TEXT, status TEXT, accepted INTEGER, validation_status TEXT)')
-                conn.execute('INSERT INTO tasks VALUES (?, ?, ?, ?, ?)',
+                conn.execute('CREATE TABLE tasks (task_id TEXT PRIMARY KEY, request_json TEXT, status TEXT, stage TEXT, accepted INTEGER, validation_status TEXT, delivery_status TEXT, result_json TEXT, updated_at TEXT, execution_status TEXT)')
+                conn.execute('INSERT INTO tasks VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                              (details['taskId'], json.dumps({'delivery': {'mode': 'github_pr'}}),
-                              'ACCEPTED', 1, 'PASSED'))
+                              'ACCEPTED', 'accepted', 1, 'PASSED', 'PENDING', None, '', 'COMPLETED'))
             delivery.claim_delivery(db, details)
             with self.assertRaisesRegex(ValueError, 'already claimed'):
                 delivery.claim_delivery(db, details)
+            with sqlite3.connect(db) as conn:
+                conn.execute('CREATE TABLE validation_attempts (task_id TEXT, attempt INTEGER, validated_tree TEXT, report_artifact_id TEXT, state TEXT, outcome TEXT)')
+                conn.execute('INSERT INTO validation_attempts VALUES (?, 1, ?, ?, ?, ?)',
+                             (details['taskId'], 'c'*40, 'validation-report', 'COMPLETED', 'PASS'))
+                conn.execute('CREATE TABLE openhands_runtimes (task_id TEXT, baseline_commit TEXT, conversation_id TEXT)')
+                conn.execute('INSERT INTO openhands_runtimes VALUES (?, ?, ?)', (details['taskId'], 'b'*40, 'conv-123'))
+                conn.execute('CREATE TABLE artifacts (task_id TEXT, artifact_id TEXT, created_at TEXT)')
             delivery.record_delivery(db, details['taskId'], 'https://github.com/example/pr/1', 'd' * 40)
             with self.assertRaisesRegex(ValueError, 'already completed'):
                 delivery.record_delivery(db, details['taskId'], 'https://github.com/example/pr/2', 'e' * 40)
             with sqlite3.connect(db) as conn:
                 status, url = conn.execute('SELECT state, pr_url FROM openhands_delivery_claims').fetchone()
             self.assertEqual(status, 'PR_CREATED')
+            with sqlite3.connect(db) as conn:
+                self.assertEqual(conn.execute('SELECT status FROM tasks').fetchone()[0], 'SUCCEEDED')
             self.assertEqual(url, 'https://github.com/example/pr/1')
 
     def test_none_mode_never_claims(self):
