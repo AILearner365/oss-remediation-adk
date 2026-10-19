@@ -21,6 +21,7 @@ from openhands_shared.store import SQLiteTaskStore
 from openhands_real_recovery_prepare import DATABASE, HOOK, ORIGINAL, prepare_recovery
 from openhands_real_native_idle import attach_idle
 from openhands_real_preserve_evidence import TASK, preserve
+from openhands_real_finalize import finalize
 
 
 def main() -> int:
@@ -30,6 +31,9 @@ def main() -> int:
     prepare.add_argument("--database", type=Path, default=DATABASE)
     prepare.add_argument("--hook-config", type=Path, default=HOOK)
     prepare.add_argument("--original-task", default=ORIGINAL)
+    finish = commands.add_parser("finalize", help="verify native termination, independent PASS, and reconcile durable acceptance")
+    finish.add_argument("--task-id", default=TASK)
+    finish.add_argument("--hook-config", type=Path, default=HOOK)
     archive = commands.add_parser("preserve", help="verify accepted task and archive evidence locally")
     archive.add_argument("--task-id", default=TASK)
     archive.add_argument("--hook-config", type=Path, default=HOOK)
@@ -46,6 +50,8 @@ def main() -> int:
                           "taskId": created["taskId"],
                           "conversationId": idle["conversationId"],
                           "baselineEvidenceReused": True, "nativeRunCalled": False}
+        elif args.command == "finalize":
+            result = finalize(args.task_id, args.hook_config)
         else:
             result = preserve(args.task_id, args.hook_config, args.destination)
     except Exception as exc:
@@ -53,7 +59,7 @@ def main() -> int:
                   "errorDetail": str(exc)[:220],
                   "doNotRetryWithoutInspection": True, "nativeRunCalled": False}
     print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result["status"] in {"IDLE_ATTACHED_NOT_AUTHORIZED", "EVIDENCE_PRESERVED"} else 1
+    return 0 if result["status"] in {"IDLE_ATTACHED_NOT_AUTHORIZED", "EVIDENCE_PRESERVED", "FINALIZED_VERIFIED_ACCEPTED"} else 1
 
 
 if __name__ == "__main__":
