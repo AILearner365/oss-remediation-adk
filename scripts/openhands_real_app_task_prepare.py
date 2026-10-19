@@ -43,7 +43,10 @@ def git(*args: str) -> str:
 def prepare(source: Path, scanner: Path, run_root: Path) -> dict:
     if source.is_symlink() or scanner.is_symlink() or run_root.is_symlink():
         raise ValueError("Symlinked source, scanner or run root is not permitted")
-    source, scanner = source.resolve(strict=True), scanner.resolve(strict=True)
+    try:
+        source, scanner = source.resolve(strict=True), scanner.resolve(strict=True)
+    except (FileNotFoundError, NotADirectoryError) as exc:
+        raise ValueError("Required source repository or scanner does not exist") from exc
     if run_root.exists():
         raise ValueError("Run root already exists: refuse replacement or replay")
     if not source.is_dir() or not scanner.is_file():
