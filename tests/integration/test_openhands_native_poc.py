@@ -81,6 +81,31 @@ class POCChecks(unittest.TestCase):
             for name, value in old.items():
                 setattr(poc, name, value)
 
+    def test_vertex_project_location_propagate_to_child_server(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as td:
+            with patch.object(poc, "ROOT", Path(td)), \
+                 patch.object(poc, "KEY_FILE", Path(td) / "session-key.txt"), \
+                 patch.object(poc, "SERVER", "1.55.1"), \
+                 patch.object(poc, "install_vertex_uvx_wrapper"):
+                with patch.dict(os.environ, {
+                    "GOOGLE_CLOUD_PROJECT": "deutschebank-aipocs",
+                    "VERTEXAI_LOCATION": "us-central1",
+                }, clear=True):
+                    env = poc.environment()
+                self.assertEqual(env["VERTEXAI_PROJECT"], "deutschebank-aipocs")
+                self.assertEqual(env["GOOGLE_CLOUD_PROJECT"], "deutschebank-aipocs")
+                self.assertEqual(env["VERTEXAI_LOCATION"], "us-central1")
+                with patch.dict(os.environ, {
+                    "VERTEXAI_PROJECT": "explicit-project",
+                    "VERTEXAI_LOCATION": "europe-west1",
+                    "GOOGLE_CLOUD_PROJECT": "different-default",
+                }, clear=True):
+                    explicit = poc.environment()
+                self.assertEqual(explicit["VERTEXAI_PROJECT"], "explicit-project")
+                self.assertEqual(explicit["GOOGLE_CLOUD_PROJECT"], "explicit-project")
+                self.assertEqual(explicit["VERTEXAI_LOCATION"], "europe-west1")
+
     def test_vertex_wrapper_targets_only_pinned_native_agent_server(self):
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as td:
