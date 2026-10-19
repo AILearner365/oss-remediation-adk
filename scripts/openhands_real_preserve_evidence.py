@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from openhands_real_run_audit import TASK, HOOK, audit
+import openhands_native_poc as native
 from openhands_shared.stop_hook import load_stop_hook_config
 from openhands_shared.store import SQLiteTaskStore
 
@@ -81,18 +82,18 @@ def preserve(task_id: str, hook: Path, destination: Path, *, check_native: bool 
             if original_path.is_symlink() or digest(original_path) != original.sha256:
                 raise ValueError("Inherited baseline report checksum mismatch")
             shutil.copyfile(original_path, share / "baseline-report.json")
-            manifest = {
+            # Preserve a metadata-only action/hook timeline, never messages, shell\n        # output, prompts, model reasoning, or API/session key material.\n        native.configure_server_version("1.55.1")\n        cid = summary["conversationId"]\n        page = native.http("GET", f"/api/conversations/{cid}/events/search?limit=100&sort_order=TIMESTAMP")\n        items = page.get("items", [])\n        if len(items) >= 100 or page.get("has_more") is True:\n            raise ValueError("Native event page may be incomplete; do not call evidence complete")\n        timeline = [{"id": e.get("id"), "kind": e.get("kind"),\n                     "timestamp": e.get("timestamp"),\n                     "hookDecisionBlocked": e.get("blocked") if e.get("kind") == "HookExecutionEvent" else None,\n                     "hookExitCode": e.get("exit_code") if e.get("kind") == "HookExecutionEvent" else None}\n                    for e in items]\n        event_file = share / "native-event-metadata.json"\n        event_file.write_text(json.dumps(timeline, indent=2, sort_keys=True) + "\\n", encoding="utf-8")\n        manifest = {
                 "status": "EVIDENCE_PRESERVED",
                 "audit": summary,
                 "sourceTaskId": store.get_request(task_id).correlation_id,
                 "files": {
                     "shareable/validation-report.json": digest(copied),
-                    "shareable/baseline-report.json": digest(share / "baseline-report.json"),
+                    "shareable/baseline-report.json": digest(share / "baseline-report.json"),\n                    "shareable/native-event-metadata.json": digest(event_file),
                     "private/tasks.sqlite3": digest(backup),
                     "private/working-tree.patch": digest(patch),
                 },
                 "warning": "Private SQLite and patch may contain sensitive content. Do not publish them.",
-                "nativeEventTranscriptArchived": False,
+                "nativeEventTranscriptArchived": False,\n                "nativeEventMetadataArchived": True,
             }
         (share / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         return {"status": "EVIDENCE_PRESERVED", "directory": str(dest),
