@@ -115,14 +115,21 @@ def prepare(source: Path, scanner: Path, run_root: Path) -> dict:
         prep = DeterministicPreparer(
             store, PreparationConfig(workspace_root=run_root / "workspaces",
                                      repositories=(trusted,))).prepare(task_id)
-        workspace_exclude = Path(prep.workspace_path) / ".git" / "info" / "exclude"
-        if not workspace_exclude.is_file():
-            raise ValueError("Prepared task workspace lacks local Git exclude")
-        workspace_exclude.write_text(
-            workspace_exclude.read_text(encoding="utf-8") +
-            "\n# Generated Maven outputs in disposable task workspace\ntarget/\n",
-            encoding="utf-8",
-        )
+        common_git = Path(git("-C", str(prep.workspace_path), "rev-parse", "--git-common-dir"))
+        if not common_git.is_absolute():
+            common_git = Path(prep.workspace_path) / common_git
+        common_git = common_git.resolve(strict=True)
+        trusted_git = Path(git("-C", str(local_source), "rev-parse", "--git-common-dir"))
+        if not trusted_git.is_absolute():
+            trusted_git = local_source / trusted_git
+        if common_git != trusted_git.resolve(strict=True):
+            raise ValueError("Task worktree is not linked to isolated trusted source")
+        workspace_exclude = common_git / "info" / "exclude"
+        if not workspace_exclude.is_file() or workspace_exclude.is_symlink():
+            raise ValueError("Isolated Git common exclude missing")
+        if "target/" not in workspace_exclude.read_text(encoding="utf-8").splitlines():
+            with workspace_exclude.open("a", encoding="utf-8") as exclude_file:
+                exclude_file.write("\n# Maven generated outputs in isolated worktrees\ntarget/\n")
         baseline = DeterministicBaselineAssessor(
             store, BaselineConfig(artifact_root=artifacts, profiles=(build_profile,))).assess(task_id)
         if baseline.assessment_status is not BaselineAssessmentStatus.COMPLETED:
