@@ -21,12 +21,12 @@ import openhands_native_remediation as handoff
 from openhands_shared.store import SQLiteTaskStore
 from openhands_shared.contracts import ExecutionStatus, OpenHandsRuntimeStatus, TaskStatus
 
-TASK = "task_a3e63e4dc3b5449c9142e4e2c34e0ac9"
-CONVERSATION = "c6f99951-2fac-4ce4-bc32-bf52c921cd83"
+TASK = "task_93531f4571724ab183e2e2defea6def8"
+CONVERSATION = "0de4c085-fced-4714-a995-856929e32afc"
 MODEL = "vertex_ai/gemini-2.5-flash"
-DATABASE = Path("/tmp/openhands-real-durable-task-20261018-v2/state/tasks.sqlite3")
-HOOK = Path("/tmp/openhands-real-durable-task-20261018-v2/stop-hook.json")
-WORKER = "operator-approved-native-real-v1"
+DATABASE = Path("/tmp/openhands-real-durable-task-recovered-v1/state/tasks.sqlite3")
+HOOK = Path("/tmp/openhands-real-durable-task-recovered-v1/stop-hook.json")
+WORKER = "operator-approved-native-recovered-v1"
 ACK = "I_AUTHORIZE_ONE_BILLABLE_VERTEX_RUN"
 
 
