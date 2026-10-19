@@ -106,3 +106,11 @@ python3 -m unittest discover -s tests/integration -p 'test_openhands_pr_delivery
 python3 -m unittest discover -s tests/integration -p 'test_openhands_real_*.py' -q
 python3 -m unittest discover -s tests/integration -p 'test_openhands_shared_validation.py' -q
 ```
+
+## Durable PR delivery integration update
+
+New task contracts may explicitly set `delivery.mode=github_pr`; existing `none` tasks retain their semantics. For PR-mode tasks, native terminal reconciliation keeps acceptance pending delivery instead of freezing a no-delivery result. `openhands_pr_delivery.py` checks exact repository/base SHA, audit PASS, expected workspace, and tracked Maven POM-only changes. Before a branch/commit/push, an irreversible claim is stored in `openhands_delivery_claims` and the durable task advances to `DELIVERING`. After the draft PR is created, PR URL, commit SHA and terminal `SUCCEEDED` / `COMPLETED` result are written transactionally. Failed external operations leave `CLAIMED` for manual reconciliation; re-execution is blocked.
+
+**Not yet proven**: a live PR, automatic reconciliation of a pushed branch when GitHub POST fails, nor comprehensive compatibility with all older contract test suites. The generic shared store does not yet expose a first-class `get_delivery_claim` API; this utility uses SQLite directly. A new target-repository remediation task must still be prepared and independently accepted before a preview can return READY. Never manually edit existing durable task contracts or bypass the claim.
+
+Offline regression checks: `python3 -m unittest discover -s tests/integration -p 'test_openhands_pr_*.py' -q` plus the previous OpenHands and validation suites. These do not access GitHub or run Gemini.
