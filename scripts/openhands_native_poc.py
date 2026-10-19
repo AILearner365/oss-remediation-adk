@@ -154,6 +154,15 @@ def environment() -> dict[str, str]:
         write_private(KEY_FILE, secrets.token_urlsafe(36))
     env = dict(os.environ)
     if SERVER == "1.55.1":
+        # Canvas spawns the Agent Server as a child process. Explicitly carry
+        # the same project/location used by the existing Cloud Shell Vertex
+        # resolver into LiteLLM; Google ADC alone is not sufficient for it to
+        # resolve project_id (observed in the first native real task run).
+        project = env.get("VERTEXAI_PROJECT") or env.get("GOOGLE_CLOUD_PROJECT") or "deutschebank-aipocs"
+        location = env.get("VERTEXAI_LOCATION") or "us-central1"
+        env["VERTEXAI_PROJECT"] = project
+        env["VERTEXAI_LOCATION"] = location
+        env["GOOGLE_CLOUD_PROJECT"] = project
         constraint = ROOT / "litellm-constraint.txt"
         constraint.write_text(f"litellm=={POC_LITELLM_PIN}\n", encoding="utf-8")
         env["UV_CONSTRAINT"] = str(constraint)
