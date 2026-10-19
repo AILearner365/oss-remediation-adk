@@ -14,6 +14,8 @@ from openhands_shared.store import SQLiteTaskStore
 
 class NativeFirstHandoffTests(unittest.TestCase):
     def setUp(self):
+        self.context_patch = patch.object(native_first, "remediation_agent_context", return_value={"skills": [{"name": "dependency-remediation-decision"}, {"name": "maven-dependency-evidence"}], "system_message_suffix": "General guidance"})
+        self.context_patch.start()
         self.old = fixture_support.STATE
         self.temp = tempfile.TemporaryDirectory()
         fixture_support.STATE = Path(self.temp.name) / "fixture"
@@ -23,6 +25,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         self.store = SQLiteTaskStore(Path(self.data["database"]))
 
     def tearDown(self):
+        self.context_patch.stop()
         self.store.close()
         fixture_support.STATE = self.old
         shutil.rmtree(self.task_root, ignore_errors=True)
@@ -59,6 +62,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
         response = {
             "id": request["conversation_id"], "execution_status": "idle",
             "workspace": request["workspace"], "hook_config": request["hook_config"],
+            "agent": request["agent"],
         }
         self.assertEqual(native_first.validate_native_response(response, request),
                          self.data["conversationId"])
@@ -73,6 +77,22 @@ class NativeFirstHandoffTests(unittest.TestCase):
             corrupt = {**response, key: val}
             with self.subTest(key=key), self.assertRaises(native_first.HandoffError):
                 native_first.validate_native_response(corrupt, request)
+
+    def test_native_response_rejects_missing_agent_capabilities(self):
+        request = self.build()
+        response = {
+            "id": request["conversation_id"], "execution_status": "idle",
+            "workspace": request["workspace"],
+            "hook_config": request["hook_config"], "agent": request["agent"],
+        }
+        for agent in (
+            {},
+            {**request["agent"], "tools": []},
+            {**request["agent"], "agent_context": {"skills": [], "system_message_suffix": "General guidance"}},
+            {**request["agent"], "agent_context": {"skills": request["agent"]["agent_context"]["skills"]}},
+        ):
+            with self.subTest(agent=agent), self.assertRaises(native_first.HandoffError):
+                native_first.validate_native_response({**response, "agent": agent}, request)
 
     def test_native_response_rejects_modified_hook_command(self):
         request = self.build()
@@ -101,7 +121,8 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 return {"id": "event-id"}
             return {"id": request["conversation_id"], "execution_status": "idle",
                     "workspace": request["workspace"],
-                    "hook_config": request["hook_config"]}
+                    "hook_config": request["hook_config"],
+                    "agent": request["agent"]}
 
         self.assertEqual(
             native_first.create_idle_native_conversation(request, fake_http),
@@ -133,7 +154,7 @@ class NativeFirstHandoffTests(unittest.TestCase):
                 sent.append(payload)
                 return {"id": "init"}
             return {"id": request["conversation_id"], "execution_status": "idle",
-                    "workspace": request["workspace"], "hook_config": request["hook_config"]}
+                    "workspace": request["workspace"], "hook_config": request["hook_config"], "agent": request["agent"]}
         native_first.create_idle_native_conversation(
             request, fake_http, initial_message=objective
         )
