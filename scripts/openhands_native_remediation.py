@@ -121,9 +121,9 @@ def build_request(
     # The upstream 1.55.1 preset selects Terminal, FileEditor, TaskTracker
     # (browser disabled in CLI mode); built-in Finish/Think remain SDK defaults.
     coding_tools = [
-        {"name": "TerminalTool", "params": {}},
-        {"name": "FileEditorTool", "params": {}},
-        {"name": "TaskTrackerTool", "params": {}},
+        {"name": "terminal", "params": {}},
+        {"name": "file_editor", "params": {}},
+        {"name": "task_tracker", "params": {}},
     ]
     return {
         "conversation_id": runtime.conversation_id,
