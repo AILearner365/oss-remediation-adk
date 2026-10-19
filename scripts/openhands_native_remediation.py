@@ -34,6 +34,25 @@ def _nonempty(value: str, name: str) -> str:
     return value
 
 
+def remediation_agent_context() -> dict[str, Any]:
+    """Serialize approved native Skills and general guidance without model use."""
+    from openhands.sdk import AgentContext
+    from openhands.sdk.skills import load_skills_from_dir
+
+    _, _, available = load_skills_from_dir(ROOT / "scripts/openhands/skills")
+    selected = ("dependency-remediation-decision", "maven-dependency-evidence")
+    if any(name not in available for name in selected):
+        raise HandoffError("Required native remediation Skills unavailable")
+    guidance = (ROOT / "scripts/openhands/guidance/general-engineering.md").read_text(encoding="utf-8").strip()
+    if not guidance:
+        raise HandoffError("General engineering guidance is empty")
+    return AgentContext(
+        skills=[available[name] for name in selected],
+        system_message_suffix=guidance,
+        load_public_skills=False,
+    ).model_dump(mode="json")
+
+
 def build_request(
     store: SQLiteTaskStore,
     task_id: str,
@@ -132,7 +151,8 @@ def build_request(
         "autotitle": False,
         "max_iterations": max_iterations,
         "agent": {"kind": "Agent", "llm": llm, "tools": coding_tools,
-                  "system_prompt_kwargs": {"cli_mode": True}},
+                  "system_prompt_kwargs": {"cli_mode": True},
+                  "agent_context": remediation_agent_context()},
         "hook_config": {"stop": [{
             "matcher": "*", "hooks": [{
                 "type": "command", "command": shlex.join(executable), "timeout": 3600
@@ -169,8 +189,21 @@ def validate_native_response(payload: Mapping[str, Any], request: Mapping[str, A
     workspace = payload.get("workspace")
     if not isinstance(workspace, Mapping) or workspace.get("working_dir") != request["workspace"]["working_dir"]:
         raise HandoffError("Native workspace differs from validated task workspace")
+    agent = payload.get("agent") or {}
+    expected_agent = request.get("agent") or {}
+    expected_tools = [t["name"] for t in expected_agent.get("tools", [])]
+    actual_tools = [t.get("name") for t in (agent.get("tools") or [])]
+    if not expected_tools or not set(expected_tools).issubset(actual_tools):
+        raise HandoffError("Native response omitted required coding tools")
+    expected_context = expected_agent.get("agent_context") or {}
+    actual_context = agent.get("agent_context") or {}
+    expected_skills = [s["name"] for s in expected_context.get("skills", [])]
+    actual_skills = [s.get("name") for s in (actual_context.get("skills") or [])]
+    if not expected_skills or actual_skills != expected_skills:
+        raise HandoffError("Native response omitted selected remediation Skills")
+    if actual_context.get("system_message_suffix") != expected_context.get("system_message_suffix"):
+        raise HandoffError("Native response omitted approved engineering guidance")
     return uid
-
 
 
 def render_task_objective(store: SQLiteTaskStore, task_id: str) -> str:
