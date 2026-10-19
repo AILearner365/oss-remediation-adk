@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sqlite3
 import sys
 import urllib.error
 import urllib.request
@@ -96,6 +97,49 @@ def request_github(method: str, endpoint: str, token: str, data: dict | None = N
         raise ValueError("GitHub API delivery request failed with HTTP " + str(exc.code)) from None
 
 
+
+def claim_delivery(database: Path, details: dict) -> None:
+    """Write an irreversible delivery claim before the first external mutation."""
+    with sqlite3.connect(database, timeout=30) as db:
+        db.execute("BEGIN IMMEDIATE")
+        db.execute("""CREATE TABLE IF NOT EXISTS openhands_delivery_claims (
+            task_id TEXT PRIMARY KEY, base_commit TEXT NOT NULL,
+            validated_tree TEXT NOT NULL, delivery_branch TEXT NOT NULL,
+            state TEXT NOT NULL CHECK (state IN ('CLAIMED', 'PR_CREATED')),
+            pr_url TEXT, commit_sha TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""")
+        task = db.execute(
+            "SELECT request_json, status, accepted, validation_status FROM tasks WHERE task_id = ?",
+            (details["taskId"],)).fetchone()
+        if task is None or task[1] != "ACCEPTED" or task[2] != 1 or task[3] != "PASSED":
+            raise ValueError("Delivery claim requires durable accepted validation")
+        if json.loads(task[0])["delivery"]["mode"] != "github_pr":
+            raise ValueError("Registered task does not authorize GitHub PR delivery")
+        if db.execute("SELECT 1 FROM openhands_delivery_claims WHERE task_id = ?",
+                      (details["taskId"],)).fetchone():
+            raise ValueError("Delivery already claimed; inspect GitHub and durable state, do not replay")
+        db.execute("""INSERT INTO openhands_delivery_claims
+            (task_id, base_commit, validated_tree, delivery_branch, state)
+            VALUES (?, ?, ?, ?, 'CLAIMED')""",
+            (details["taskId"], details["baseCommit"], details["validatedTree"], details["branch"]))
+        db.commit()
+
+
+def record_delivery(database: Path, task_id: str, url: str, commit: str) -> None:
+    """Record one successful PR result; never silently overwrite a prior record."""
+    with sqlite3.connect(database, timeout=30) as db:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute("SELECT state FROM openhands_delivery_claims WHERE task_id = ?",
+                         (task_id,)).fetchone()
+        if row != ("CLAIMED",):
+            raise ValueError("Delivery claim absent or already completed")
+        db.execute("""UPDATE openhands_delivery_claims
+            SET state = 'PR_CREATED', pr_url = ?, commit_sha = ? WHERE task_id = ?""",
+            (url, commit, task_id))
+        db.commit()
+
+
 def deliver(details: dict, approval: str, token: str) -> dict:
     if approval != APPROVAL or not token:
         raise ValueError("Explicit PR approval and GitHub token required")
@@ -118,6 +162,8 @@ def deliver(details: dict, approval: str, token: str) -> dict:
                      expected_base=details["baseCommit"])
     if refreshed["changedFiles"] != details["changedFiles"] or refreshed["validatedTree"] != details["validatedTree"]:
         raise ValueError("Delivery plan drift")
+    database, _ = load_stop_hook_config(Path(details["hookConfig"]).resolve(strict=True))
+    claim_delivery(database, details)
     git(workspace, "checkout", "-b", branch)
     git(workspace, "add", "--", *details["changedFiles"])
     git(workspace, "-c", "user.name=OpenHands Remediation",
@@ -133,8 +179,10 @@ def deliver(details: dict, approval: str, token: str) -> dict:
     payload = request_github("POST", "/pulls", token, {
         "title": "Remediate Maven vulnerabilities (" + details["taskId"] + ")",
         "head": branch, "base": BASE, "body": body, "draft": True})
+    commit_sha = git(workspace, "rev-parse", "HEAD")
+    record_delivery(database, details["taskId"], payload["html_url"], commit_sha)
     return {"status": "PR_CREATED", "url": payload["html_url"], "number": payload["number"],
-            "commit": git(workspace, "rev-parse", "HEAD"), "branch": branch,
+            "commit": commit_sha, "branch": branch,
             "taskId": details["taskId"], "noModelRun": True}
 
 
