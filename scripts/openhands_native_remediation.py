@@ -274,9 +274,9 @@ def render_task_objective(store: SQLiteTaskStore, task_id: str, *, hook_config: 
         if len(summary) > 12000:
             raise HandoffError("SBRI summary exceeds native context bound")
         message += (
-            "\nPre-edit SBRI evidence (security intelligence, not an upgrade instruction):\\n"
+            "\nPre-edit SBRI evidence (security intelligence, not an upgrade instruction):\n"
             + summary
-            + "\\nEvaluate other credible strategies and validate all selected changes."
+            + "\nEvaluate other credible strategies and validate all selected changes."
         )
     if len(message) > 20000:
         raise HandoffError("Native objective exceeds size limit")
