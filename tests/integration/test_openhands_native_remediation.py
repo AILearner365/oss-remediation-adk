@@ -38,6 +38,19 @@ class NativeFirstHandoffTests(unittest.TestCase):
             model="openai/gpt-4o-mini", **kwargs
         )
 
+    def test_native_sdk_environment_guard_requires_exact_pins(self):
+        with patch.object(native_first.metadata, "version", side_effect=lambda name: "1.55.1"):
+            native_first.require_native_sdk_environment()
+        with patch.object(native_first.metadata, "version", side_effect=lambda name: "1.54.0"):
+            with self.assertRaisesRegex(native_first.HandoffError, "requires"):
+                native_first.require_native_sdk_environment()
+        with patch.object(
+            native_first.metadata, "version",
+            side_effect=native_first.metadata.PackageNotFoundError("openhands-sdk")
+        ):
+            with self.assertRaisesRegex(native_first.HandoffError, "Agent Server uvx Python"):
+                native_first.require_native_sdk_environment()
+
     def test_official_request_reuses_prepared_identity_and_actual_validator(self):
         request = self.build()
         self.assertEqual(request["conversation_id"], self.data["conversationId"])
