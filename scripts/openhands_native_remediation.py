@@ -131,7 +131,8 @@ def build_request(
         "worktree": False,
         "autotitle": False,
         "max_iterations": max_iterations,
-        "agent": {"kind": "Agent", "llm": llm, "tools": coding_tools,\n                  "system_prompt_kwargs": {"cli_mode": True}},
+        "agent": {"kind": "Agent", "llm": llm, "tools": coding_tools,
+                  "system_prompt_kwargs": {"cli_mode": True}},
         "hook_config": {"stop": [{
             "matcher": "*", "hooks": [{
                 "type": "command", "command": shlex.join(executable), "timeout": 3600
