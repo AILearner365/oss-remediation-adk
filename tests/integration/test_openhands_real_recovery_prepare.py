@@ -12,9 +12,10 @@ class RecoveryTests(unittest.TestCase):
     def test_absent_original_blocks_before_registration(self):
         from unittest.mock import Mock
         fake = Mock()
-        with patch.object(recovery, "verify_stored", side_effect=ValueError("missing baseline")):
-            with self.assertRaisesRegex(ValueError, "missing baseline"):
-                recovery.prepare_recovery(fake, "task_absent", Path("/tmp/not-present"))
+        fake.get_openhands_runtime.return_value = None
+        fake.get_execution_claim.return_value = None
+        with self.assertRaisesRegex(ValueError, "not the dispatched"):
+            recovery.prepare_recovery(fake, "task_absent", Path("/tmp/not-present"))
         fake.register_task.assert_not_called()
 
     def test_never_runs_scanner_model_or_mutates_original(self):
@@ -28,6 +29,8 @@ class RecoveryTests(unittest.TestCase):
         self.assertNotIn("update_execution_dispatch(", body)
         self.assertIn('new_contract["metadata"]["correlationId"] = original', body)
         self.assertIn("verify_stored(store, new_id, hook)", body)
+        self.assertNotIn("verify_stored(store, original, hook)", body)
+        self.assertIn("Original baseline target advisory is not verified", body)
         self.assertIn("baselineReexecuted", getsource(recovery))
 
 
