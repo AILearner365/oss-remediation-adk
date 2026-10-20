@@ -1,4 +1,12 @@
-# Native product operation
+# Autonomous OSS Vulnerability Remediation — diagnostic operation
+
+**Normal product execution is blocked on native preparation integration.**
+The existing commands below describe the preserved external diagnostic sequence,
+not a native-owned preparation workflow. The installed 1.55.1 mechanisms do not
+establish all mandatory pre-inference failure/recovery/trust guarantees; see
+[the source-backed blocker](NATIVE-PREPARATION-BLOCKER.md). No new wrapper or
+SessionStart preparation hook was implemented. Do not treat these commands as a
+workaround or as authorization to launch a product run.
 
 Implementation entry point: `python3 -m native_remediation` (or the optional
 `oss-remediate` package entry point). No product server, API, UI, database,
@@ -7,7 +15,7 @@ Use the existing native Agent Server/SDK/tools **1.55.1**, Canvas **1.27.1**.
 Model configuration is explicit in task JSON; no model is called by import,
 `check-task`, `prepare`, `doctor`, `attach` or `status`.
 
-## Inputs and preparation
+## Preserved diagnostic inputs and preparation
 
 `examples/maven-task.json` is a concrete editable example, **not authorization to
 execute it**. Its base SHA comes from the earlier smoke; re-resolve and approve
@@ -70,7 +78,7 @@ Primary Maven interface references:
 The checked installed OSV 2.6.0 `scan source --help` supports `--sbom` (deprecated
 but supported), `--all-packages`, `--all-vulns`, and `--config`.
 
-## Native attachment and explicit execution
+## Preserved native attachment and explicit diagnostic execution
 
 Start/reuse the official native installation independently. Preserve its session
 key/conversations. Do not start the historical product service. This repository

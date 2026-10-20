@@ -1,4 +1,13 @@
-# Stage B implementation and proof
+# Autonomous OSS Vulnerability Remediation — implementation and proof
+
+**Correction status (2026-10-20): native preparation migration BLOCKED.**
+The source-backed [native prerequisite investigation](NATIVE-PREPARATION-BLOCKER.md)
+found no reviewed supported mechanism satisfying all required A–F guarantees.
+The original implementation below is preserved diagnostic work, not completed
+normal product execution. No lifecycle code was migrated, removed or hidden in a
+wrapper. Product naming/package metadata and documentation were corrected.
+Development is on `autonomous-oss-remediation`; `openhands-native-product` remains
+at the verified prior implementation commit.
 
 Implemented against `PRODUCT-CONTRACT.md` and `ENGINEERING-HANDOFF.md`, starting
 at `4dcc2fe79d6dc04fc1a3bab6cda2a79301d56b25` on `openhands-native-product`.
@@ -19,6 +28,7 @@ left by branch switches are ignored and preserved, not product dependencies.
 
 | Capability | Status | Evidence / limit |
 | --- | --- | --- |
+| Native-owned trusted preparation and COMPLETE before first inference | **BLOCKED / NOT IMPLEMENTED** | SessionStart non-blocking; prompt denial consumable; hook errors fail open; remote execute_tool unsupported; native bash not a run prerequisite; no separate trust domain |
 | Native Gemini -> Stop -> independent tree-bound PASS -> draft PR | **PROVEN (prior one-file smoke)** | [PR #214](https://github.com/AILearner365/maven-multimodule-app/pull/214); conversation `05f7716a-90bc-4ec5-a90e-01b7a4de5fa0`; [sanitized evidence at f72e5308](https://github.com/AILearner365/oss-remediation-adk/blob/f72e5308704960ee911f382f96bf0b7948435216/docs/experiments/openhands/evidence/native-wiring-20261019.json) |
 | New product request follows actual native extension contracts | **PROVEN offline** | Parsed with installed Server/SDK 1.55.1, no API submission/model execution |
 | Deterministic safety boundaries and recovery | **PARTIAL** | Offline Git tests and controlled process/remote doubles; no production crash/isolation proof |
@@ -61,11 +71,36 @@ test boundaries, **not successful end-to-end remediation evidence**. They perfor
 no network, model, target-repository build or PR operations. Product code does not
 use them. No model or remediation PR was created during implementation.
 
-Recorded verification: 21 tests passed under the installed native 1.55.1 Python,
+Prior implementation verification: 21 tests passed under the installed native 1.55.1 Python,
 including its actual creation/hook schema. The stdlib-only run passed 20 tests
 and skipped only that optional installed-SDK test. Example task validation,
 Python syntax checks and staged whitespace/credential checks also passed.
 
-Next single step: review the concrete task JSON against a freshly approved base,
-then authorize `prepare` to produce the first product Maven/OSV baseline (no model).
-Resolve any real coverage/toolchain blocker before authorizing one native run.
+## Native versus custom responsibility map after correction
+
+| Responsibility | Native OpenHands | Custom code retained / unresolved |
+| --- | --- | --- |
+| Conversation, reasoning/coding lifecycle, history | Agent Server/SDK, one Agent, native tools and optional Canvas | Thin API configuration/submission diagnostics; no model loop/history mirror |
+| Trusted preparation before inference | No verified supported prerequisite satisfying all guarantees | Existing deterministic preparation remains an external diagnostic; migration stopped, not made a normal product stage |
+| Baseline and acceptance evidence | Hook/session identity can associate native events | Task/base/tree-bound Maven/OSV checks and immutable evidence remain necessary; OS trust isolation is not implemented |
+| Acceptance and feedback | Supported native Stop invocation/deny continuation | Independent PASS/FAIL/INCONCLUSIVE and bounded intent/outcome records retained; agent self-check is not acceptance |
+| Draft delivery | Native Stop calls short-lived adapter | Authorized destination/base, exact tree, create-only branch, draft verification, claims/reconciliation retained unchanged |
+| Recovery | Native persistence/events/run semantics | Local evidence, budgets, run/delivery claims and explicit reconciliation retained; no native preparation transaction discovered |
+
+Agent capabilities remain native terminal, file editor and task tracker. Maven
+and OSV use the configured executable paths; optional SBRI/research references
+are supplied in the task and usable through the terminal. They are not bespoke
+tool wrappers or mandatory strategies. Current configuration exposes these
+references but has not proven end-to-end availability/isolation in a real product
+run; no additional capability framework was introduced in this correction.
+
+Correction checks: all 26 tests passed in the native runtime (five focused
+contract probes plus the prior suite); the stdlib run passed 20 and skipped six
+SDK-dependent checks. They demonstrate limitations rather than proving
+a successful native preparation flow. Native inspection used only GET requests.
+No target build, model inference or remediation PR occurred.
+
+Next prerequisite: establish the missing supported native pre-inference/recovery
+contract and actual trust boundary before migration or live product execution.
+Do not replace that prerequisite with another external prepare/attach/run wrapper
+or unapproved framework upgrade.

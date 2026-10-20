@@ -1,0 +1,35 @@
+{
+  "reviewDate": "2026-10-20",
+  "decision": "BLOCKED_NATIVE_PREPARATION_MIGRATION",
+  "sdkVersion": "1.55.1",
+  "agentServerVersion": "1.55.1",
+  "toolsVersion": "1.55.1",
+  "readOnlyApiChecks": {
+    "serverInfoVerified": true,
+    "openApiVerified": true,
+    "runRequestBody": null,
+    "conversationCreationPreparationFields": [],
+    "remoteSdkExecuteToolEndpoint": false,
+    "bashExecutionEndpoints": [
+      "/api/bash/execute_bash_command",
+      "/api/conversations/{runtime_conversation_id}/bash/execute_bash_command"
+    ],
+    "bashResultIsNotARunPrerequisite": true,
+    "mutatingRequests": 0,
+    "modelCalls": 0
+  },
+  "missingContract": "A supported remote conversation prerequisite that runs trusted preparation before inference, durably requires COMPLETE on every run/recovery, fails closed on hook/process errors and isolates preparation authority from agent/repository build execution.",
+  "installedSourceSha256": {
+    "sdk/hooks/manager.py": "a312c00ef088dfe92a4499a4176b39d6a1fcecbf13f06c883e0da365a09b02ff",
+    "sdk/hooks/conversation_hooks.py": "6f48d8cd5e9b6698556d0eabead862428ffcd0637c39e3fe34766300fba69256",
+    "sdk/hooks/executor.py": "97e3c76219abc55ac1b5ac7794e0f8aa56dcac001fc01f336ceaac5319f6b711",
+    "sdk/conversation/impl/local_conversation.py": "b09c3a59ea5e2ecd651f6bbc36464ad769182243d2f470844bd0f4872a5d3bea",
+    "sdk/conversation/impl/remote_conversation.py": "e9e1b23f2c5a75bdfd997b42ae5ba305839455f94538c2123fe596111b3ca93e",
+    "sdk/conversation/state.py": "7e488ee6cb483f35b852bcb0900f5f49e0490a2b5bf28d6387d869d207727360",
+    "sdk/agent/agent.py": "0fe8c703580ae6a6ae2dba97a0bc1966811950d224b4672a3d6af33001d30c92",
+    "agent_server/conversation_router.py": "e83670c8aff962de673aca92774235b4d29ecab2b4a1aed964ca1c235e0a6430",
+    "agent_server/event_service.py": "e27f06977e79e3bd3d15f592e3436eac8b857ac71d58fe066c20b2d46921095e",
+    "agent_server/bash_router.py": "f0511a4c115755a6f94ffd94e6ae1436f970f6c368ae722e5454e870307b4fc5"
+  },
+  "scope": "Installed pinned source and official contracts only. No runtime patches, lifecycle migration, model run, target repository edits or PR creation. Existing externally gated diagnostic code is preserved, not certified as the required product workflow."
+}

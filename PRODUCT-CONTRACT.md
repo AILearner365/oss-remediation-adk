@@ -1,6 +1,11 @@
-# Product contract — Native OpenHands OSS remediation
+# Product contract — Autonomous OSS Vulnerability Remediation
 
-Status: **engineering requirements / handoff**, not implementation or proof of remediation. Based on the previously agreed autonomous problem-solving operating model, Maven/OSV and SBRI experiments, and verified native smoke at `f72e5308704960ee911f382f96bf0b7948435216`. Do not reinterpret earlier experiments as mandatory architecture.
+Status: **partial implementation; native preparation migration BLOCKED** on the
+inspected OpenHands 1.55.1 installation. OpenHands is the implementation framework,
+not the product identity. Preserved diagnostics at `11431b428a69f4525679bda5880bf0a0d05137bc`
+do not yet satisfy the mandatory native-owned preparation contract below.
+The verified Milestone 1 smoke remains at `f72e5308704960ee911f382f96bf0b7948435216`.
+See [source evidence and exact blocker](docs/NATIVE-PREPARATION-BLOCKER.md).
 
 ## Outcome and operating model
 
@@ -23,11 +28,36 @@ Given an approved repository revision and a remediation objective, autonomously 
 Native OpenHands Agent Server/SDK handles conversations, agent execution, supported tools and hook invocation; Canvas is optional native observation, not a separate product UI. Model used in proven smoke: `vertex_ai/gemini-2.5-flash` with Vertex AI. Configuration must be explicit and replaceable. Native version proven: SDK/Server/tools 1.55.1, Canvas 1.27.1. Verify extension contracts against installed code before implementing.
 
 Minimal integration responsibilities:
-1. **Preparation/submit**: receive task definition (repo/ref + approved base SHA, goal, constraints, acceptance policy, limits, authorized delivery target), establish clean isolated workspace, baseline/evidence; submit a native conversation once; resolve and verify effective hooks before running (1.55.1 hook initialization occurs on first `run:false` message).
+1. **Preparation/submit**: native conversation/workflow initialization must own
+   trusted deterministic workspace preparation and baseline, with an explicit
+   COMPLETE prerequisite before any inference. It receives repo/ref + approved
+   SHA, goal, constraints, acceptance policy, limits and authorized destination.
+   Effective hooks must be resolved before running (1.55.1 initializes hooks on
+   the first `run:false` message). The preserved external prepare/attach/run
+   diagnostics are not an implementation of this native ownership requirement.
 2. **Agent capabilities**: grant needed repository, shell, Maven, OSV/scanner, research and optionally SBRI/release-intelligence access with bounded permissions. Reuse/copy/rework experimental code freely; agent selects when to use capabilities. SBRI is a helper, not an obligatory Spring Boot strategy; current test scanner is OSV, production candidate JFrog Xray requires a separate adapter/verification.
 3. **Independent validation**: apply task-specific acceptance contract to an immutable captured candidate Git tree and baseline. Check actual resolved dependency set and findings, remaining/new vulnerabilities, applicable upgrade policy, Maven build/tests and repository constraints. Explicitly distinguish scanner errors, incomplete coverage and unknowns from PASS. Ensure paths/dependency source are available as required. Record attempt evidence and provide actionable failure context through native Stop Hook; accepted completion requires proof for the exact conversation, approved base and validated tree.
 4. **Delivery**: after independent PASS only, bind output to the validated Git tree, verify remote base/destination, create-only branch/commit, and confirm an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation must block, not duplicate blindly. Fail closed at the product acceptance level even if native hook-command failures can fail open.
 5. **Recovery/evidence**: use native conversation/events plus small durable task/intent/outcome/validation/delivery artifacts as needed, without reimplementing native history, task API, UI or lifecycle database. Keep secrets out of workspaces and committed artifacts. Avoid unrestricted retries.
+
+### Mandatory pre-inference guarantees
+
+Normal product execution must establish all of these through supported native
+extensions: (A) preparation inside the conversation lifecycle, (B) completion
+before any Gemini inference, (C) failure prevents inference, (D) evidence bound
+to that conversation, (E) recovery cannot silently skip/duplicate preparation,
+and (F) preparation authority isolated from agent-controlled content/commands.
+Preparation is deterministic code, never an agent-selected reasoning step.
+Untrusted Maven build logic must not gain trusted evidence/credential authority.
+
+The inspected installation does not provide a verified mechanism satisfying all
+six. SessionStart is not a blocking gate; UserPromptSubmit denial is consumed,
+and hook infrastructure errors can fail open. Remote `execute_tool()` is
+unsupported. Native bash execution has no enforced dependency on subsequent
+`/run`. Current hook/build processes do not establish separate OS trust domains.
+The migration is stopped; no wrapper, patched SDK or custom orchestrator is an
+acceptable substitute. Existing validator/delivery code remains available for
+diagnostic verification, not certified normal product execution.
 
 ## Inputs and outputs
 
@@ -51,4 +81,8 @@ Engineering has discretion over internal file layout and adapters. It must show 
 
 ## Immediate execution boundary
 
-This commit is **Stage A** only: consolidate contract in a clean branch. No Gemini call, runtime install, target-repo edit, delivery PR or remediation run authorized by this document. Stage B may implement and offline-test integration with Codex. Paid/model runs and external delivery require explicit separate authorization.
+Only code/documentation changes, focused offline checks and read-only native
+capability inspection are authorized for this correction. No Gemini call,
+runtime install/upgrade, target-repo edit, delivery PR or remediation run is
+authorized. Product development is on `autonomous-oss-remediation`; the original
+`openhands-native-product` branch and its implementation are retained unchanged.

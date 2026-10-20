@@ -1,1 +1,1 @@
-"""Native execution, independent acceptance, no product server or database."""
+"""Autonomous OSS Vulnerability Remediation: native OpenHands integration."""

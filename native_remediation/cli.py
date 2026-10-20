@@ -1,4 +1,9 @@
-"""Short commands around the native runtime; no daemon, polling loop or database."""
+"""Autonomous OSS Vulnerability Remediation diagnostic integration commands.
+
+Native preparation migration is blocked on the installed 1.55.1 contract.
+The preserved prepare/attach/run sequence is diagnostic, not a compliant native
+product workflow. See docs/NATIVE-PREPARATION-BLOCKER.md. No daemon or database.
+"""
 import argparse
 import json
 from pathlib import Path
