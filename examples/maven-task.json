@@ -33,8 +33,6 @@
     "research_reference": null
   },
   "delivery": {
-    "repository": "AILearner365/maven-multimodule-app",
-    "base_branch": "main-runrunning",
-    "draft": true
+    "mode": "report_only"
   }
 }

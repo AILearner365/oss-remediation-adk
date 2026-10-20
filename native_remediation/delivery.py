@@ -37,6 +37,8 @@ class GitHub:
 def deliver(state, accepted, *, github=None):
     require_independent_authority()
     state, bound, task = context(state)
+    if task["delivery"]["mode"] != "draft_pr" or not task["delivery"]["authorized"]:
+        raise Blocked("Draft delivery not explicitly authorized; report_only never mutates GitHub")
     if bound.get("executionFramework"):
         from .runtime import require_preparation
         require_preparation(state)

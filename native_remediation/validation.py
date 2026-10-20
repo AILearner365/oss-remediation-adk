@@ -61,8 +61,19 @@ def resolved_inventory(source, effective):
     if roots != set(models) or not packages:
         raise Blocked("Missing reactor dependency graphs or zero external dependencies")
     properties = {g + ":" + a: props for (g, a, _), props in models.items()}
+    java = {}
+    for project in projects:
+        coordinate = project.findtext("groupId") + ":" + project.findtext("artifactId")
+        configuration = {}
+        for plugin in project.findall("build/plugins/plugin"):
+            if plugin.findtext("artifactId") == "maven-compiler-plugin":
+                configuration.update({k: plugin.findtext("configuration/" + k)
+                                      for k in ("source", "target", "release")})
+        java[coordinate] = configuration
+    from .capabilities import discover_boot
     return dict(modules=sorted(properties), properties=properties,
-                packages=[dict(name=n, version=v) for n, v in sorted(packages)], graphs=graphs)
+                packages=[dict(name=n, version=v) for n, v in sorted(packages)], graphs=graphs,
+                spring_boot=discover_boot(source), java_configuration=java)
 
 
 def sbom(packages):
@@ -168,7 +179,7 @@ def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
         config = directory / "osv-scanner.toml"
         config.write_text("# Trusted validator: no vulnerability ignore entries.\n")
         version = run([tool["osv"], "--version"], "scanner-version")
-        if version["exitCode"] or not re.search(r"osv-scanner version: 2\.6\.0\b", version["stdout"]):
+        if version["exitCode"] or not re.search(r"osv-scanner version: " + re.escape(task["scanner"]["version"]) + r"\b", version["stdout"]):
             raise Blocked("OSV 2.6.0 required for the verified CLI contract")
         scan = run([tool["osv"], "scan", "source", "--sbom=" + str(directory / "bom.cdx.json"),
                     "--format=json", "--all-packages", "--all-vulns", "--config=" + str(config)], "scan")
@@ -198,15 +209,43 @@ def compare(baseline, candidate, policy):
             return dict(outcome="INCONCLUSIVE", reasons=["Resolved dependency/scanner coverage is incomplete"])
     reasons, unknown = [], []
     before, after = baseline["inventory"], candidate["inventory"]
+    java_keys = ("java.version", "maven.compiler.release", "maven.compiler.source", "maven.compiler.target")
+    old_java = {m: {k: p.get(k) for k in java_keys} for m, p in before["properties"].items()}
+    new_java = {m: {k: p.get(k) for k in java_keys} for m, p in after["properties"].items()}
+    java_policy = policy.get("java", {"allow_change": False, "allowed_versions": []})
+    if not java_policy["allow_change"] and (old_java != new_java
+            or before.get("java_configuration") != after.get("java_configuration")):
+        reasons.append("Java language/compiler configuration change not authorized")
+    allowed_java = java_policy["allowed_versions"]
+    java_values = [v for p in new_java.values() for v in p.values() if v]
+    java_values += [v for p in after.get("java_configuration", {}).values() for v in p.values() if v]
+    if allowed_java and any(v not in allowed_java for v in java_values):
+        reasons.append("Java version outside the approved set")
     if before["modules"] != after["modules"]:
         unknown.append("Reactor module coverage changed")
     versions = lambda inventory: {p["name"]: set(q["version"] for q in inventory["packages"]
         if p["name"] == q["name"]) for p in inventory["packages"]}
     old, new = versions(before), versions(after)
+    boot_policy = policy.get("spring_boot", dict(patch=True, minor=True, major=False, downgrade=False))
+    boot_pairs = [(before.get("spring_boot"), after.get("spring_boot"))]
+    boot_pairs += [(a, b) for coordinate in set(old) & set(new) if coordinate.startswith("org.springframework.boot:")
+                   for a in old[coordinate] for b in new[coordinate]]
+    for previous, current in boot_pairs:
+        if previous == current:
+            continue
+        if not previous or not current or not re.fullmatch(r"\d+\.\d+\.\d+", previous) or not re.fullmatch(r"\d+\.\d+\.\d+", current):
+            unknown.append("Spring Boot controller/release movement needs verified evidence")
+            continue
+        a, b = tuple(map(int, previous.split("."))), tuple(map(int, current.split(".")))
+        movement = "downgrade" if b < a else "major" if b[0] != a[0] else "minor" if b[1] != a[1] else "patch"
+        if not boot_policy[movement]:
+            reasons.append("Spring Boot " + movement + " movement not authorized")
     missing = set(old) - set(new) - set(policy["allowed_removed_dependencies"])
     if missing:
         unknown.append("Dependencies disappeared without approval: " + ", ".join(sorted(missing)))
     for coordinate in set(old) & set(new):
+        if coordinate.startswith("org.springframework.boot:"):
+            continue  # Category-specific policy; other transitive families retain generic constraints.
         if old[coordinate] == new[coordinate]:
             continue
         def release(value):

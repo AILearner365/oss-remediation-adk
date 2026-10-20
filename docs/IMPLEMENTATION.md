@@ -8,8 +8,8 @@ preflight, container mounts/cleanup, custom terminal shell_path, forced network=
 and container-path baseline instructions. No replacement infrastructure or runner.
 
 native.open_conversation uses LocalWorkspace(state/workspace), native TerminalTool
-with terminal_type=subprocess, TaskTrackerTool and the small existing data-only
-CycleEvidenceTool. SDK 1.55.1 owns initialization, lazy tools/hooks, reasoning,
+with terminal_type=subprocess, TaskTrackerTool, data-only CycleEvidenceTool,
+ValidateRemediationTool and SbriIntelligenceTool. SDK 1.55.1 owns initialization, lazy tools/hooks, reasoning,
 persistence/resume and events. No model call occurs in construction. Persisted
 state is not silently replaced or migrated from old Docker-mode configuration.
 
@@ -51,10 +51,11 @@ No additional architecture/infrastructure was designed to conceal the limitation
 | Conversation/history/agent loop | Conversation, stable UUID, persistence_dir, agent=None resume | native.open_conversation; real idle construction/restoration, no inference |
 | Agent commands | LocalWorkspace + native persistent TerminalTool | Real safe workspace command and persistent shell execute_tool probes; ordinary network/proxies permitted |
 | Preparation/baseline gate | Standard explicit caller ordering before send_message/run | runtime.prepare_task/require_preparation; actual idle SDK + fixture baseline; failures/tampering/stale/coverage block |
-| Goal-driven reasoning/cycles | One Agent and native task_tracker | native.INSTRUCTIONS + journal/CycleEvidenceTool; quality not live-proven |
+| Goal-driven reasoning/cycles | One Agent, task_tracker, AgentContext Skills | Stable general context + decision/Maven Skills; optional concise journal records; quality not live-proven |
+| Self-check / SBRI | Native ToolDefinition/execute_tool | capabilities.py reuses validator/CLI, separate evidence/budgets, no acceptance authority |
 | Independent completion | Native HookConfig.stop command/denial | runtime.hook; real adapter denies missing preparation; controlled PASS/FAIL/INCONCLUSIVE checks |
 | Acceptance | Hook invokes deterministic Python checks | Existing Maven/OSV/policy/coverage/immutable-tree code; real build blocked by missing independent authority |
-| Draft delivery | After Stop PASS only | Existing identity/digest/base/tree/create-only/idempotency guards tested with local Git and remote doubles; real delivery blocked |
+| Delivery policy | Stop PASS precedes accepted completion | Default report_only; explicit draft_pr authorization plus identity/digest/base/tree/create-only/idempotency guards; real delivery blocked |
 | Recovery | Native events/state/stats | Minimal task/evidence/run/attempt/delivery claims + locks retained, no history mirror |
 | Trust isolation | NOT provided by LocalWorkspace | Outside-workspace records are organizational only; live guard fails closed |
 
@@ -75,7 +76,7 @@ Official sources:
 [standalone examples](https://github.com/OpenHands/software-agent-sdk/tree/main/examples/01_standalone_sdk).
 Installed source and real no-model tests determine version compatibility.
 
-Focused verification: 31 tests pass in installed SDK Python; 24 product/local
+Focused verification: 41 tests pass in installed SDK Python; 33 product/local/parity
 tests pass with stdlib Python. Covers actual local command/terminal persistence,
 SDK idle persistence/restore, Docker-free fixture preparation, durable gate/failure/
 resume checks, native Stop denial, cycle evidence, controlled Maven/OSV outputs,
@@ -87,3 +88,34 @@ Mocks/fixtures are explicitly not live proof. No Gemini, real Maven/OSV analysis
 target modification, new PR or remote-server probe ran. Historical PR #214 and
 earlier evidence remain intact. Persistent ADC, local-claim durability and Canvas
 rendering remain unverified deployment limits, in addition to the security blocker.
+
+## Behavioral alignment with the POC
+
+See [parity and source evidence](POC-PARITY.md) and [configuration](CONFIGURATION.md).
+guidance.load uses the installed SDK load_skills_from_dir; AgentContext selects
+the decision/Maven pair and disables ambient discovery. The real SDK renderer
+delivers both bodies for the initial task and advertises native Skill discovery.
+guidance.json hashes sources and rendered context, explicitly NOT model use.
+Selected Skills must match on resume; changed configuration is rejected, not migrated.
+
+capabilities.self_validate uses validation.evaluate/compare with the pinned task,
+baseline and actual candidate export. It retains separate self-validation UUID
+records and cannot write Stop acceptance or spend its attempts. SBRI calls the
+existing evaluate CLI with validated versions OR ranges and scopes, bounded
+claims/fingerprints and reuse; no SBRI engine is duplicated. The executable is
+currently absent, so live intelligence is unavailable. Missing/partial assessments
+are not clean findings. SBRI ranks never select a remediation strategy.
+
+journal keeps optional concise decision/outcome records and readable legacy
+records. They express rationale/uncertainty, not a model reasoning transcript or
+acceptance. Automatic evidence.capture runs at preparation and pre/post-run even
+without agent reports: native event count/digest/location and stats, environment
+capabilities/proxy-presence only, Git tree/diff/status, artifact references. Native
+events remain the sole action/observation history; no duplicate logger/watchers.
+COMPLETE binds any pre-edit SBRI result too; interruption cannot silently skip it.
+
+runtime.complete separates VALIDATED/report_only from confirmed DELIVERED and
+BOUNDED_FAILURE. delivery.deliver independently rejects missing explicit draft_pr
+authorization. Original validation/delivery safeguards remain; no live guard was
+removed. Tests cover actual SDK tool dispatch with mocked capability results,
+not live Maven/OSV/SBRI execution or Gemini compliance.

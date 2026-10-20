@@ -9,7 +9,7 @@ from .files import Blocked, lock
 
 
 class CycleAction(Action):
-    record_type: Literal["intent", "outcome"]
+    record_type: Literal["decision", "intent", "outcome"]
     document: dict
 
 
@@ -35,8 +35,10 @@ class CycleExecutor(ToolExecutor):
 class CycleEvidenceTool(ToolDefinition):
     @classmethod
     def create(cls, conv_state):
-        return [cls(description="Record concise cycle intent before edits, or honest outcome before finishing. "
-                    "This is agent-authored evidence, never independent acceptance.",
+        return [cls(description="At a material strategy choice/change, optionally record decision: strategy, rationale; "
+                    "observations/evidence_refs optional. At completion record outcome: summary, goal_status "
+                    "(candidate_ready or bounded_failure); remaining_uncertainty/evidence_refs optional. "
+                    "Not required per command/edit or to authorize acceptance. Legacy intent is supported for old records.",
                     action_type=CycleAction, observation_type=CycleObservation, executor=CycleExecutor())]
 
 

@@ -21,17 +21,24 @@ def parser():
         prep.add_argument("--task", type=Path, required=True)
         prep.add_argument("--state", type=Path, required=True)
         if name == "start":
-            prep.add_argument("--authorize-run-and-delivery", action="store_true")
-    for name in ("doctor", "run", "resume", "status", "reconcile-delivery", "hook", "record"):
+            prep.add_argument("--authorize-model-execution", "--authorize-run-and-delivery",
+                              dest="authorize_run_and_delivery", action="store_true")
+    for name in ("doctor", "run", "resume", "status", "reconcile-delivery", "hook", "record", "self-validate", "sbri"):
         p = sub.add_parser(name)
         p.add_argument("--state", type=Path, required=True)
         if name in ("run", "resume"):
-            p.add_argument("--authorize-run-and-delivery", action="store_true")
+            p.add_argument("--authorize-model-execution", "--authorize-run-and-delivery",
+                           dest="authorize_run_and_delivery", action="store_true")
         if name == "resume":
             p.add_argument("--reason", required=True)
         if name == "record":
-            p.add_argument("--kind", choices=("intent", "outcome"), required=True)
+            p.add_argument("--kind", choices=("decision", "intent", "outcome"), required=True)
             p.add_argument("--document", type=Path, required=True)
+        if name == "sbri":
+            selection = p.add_mutually_exclusive_group()
+            selection.add_argument("--versions", nargs="+")
+            selection.add_argument("--ranges", nargs="+")
+            p.add_argument("--scopes", nargs="+")
     return root
 
 
@@ -41,7 +48,7 @@ def execute(args):
         return dict(outcome="VALID_TASK", repository=task["repository"], model=task["model"])
     if args.action in ("start", "prepare"):
         if args.action == "start" and not args.authorize_run_and_delivery:
-            raise Blocked("Explicit authorization required for paid execution and draft delivery")
+            raise Blocked("Explicit authorization required for paid model execution; task policy separately controls delivery")
         bound = runtime.prepare_task(read(args.task), args.state)
         if args.action == "start":
             return runtime.dispatch(args.state)
@@ -51,6 +58,10 @@ def execute(args):
     if args.action == "record":
         with lock(args.state):
             return journal.record(args.state, args.kind, read(args.document))
+    if args.action in ("self-validate", "sbri"):
+        from . import capabilities
+        return capabilities.self_validate(args.state) if args.action == "self-validate" else capabilities.sbri(
+            args.state, versions=args.versions, ranges=args.ranges, scopes=args.scopes)
     state, bound, task = context(args.state)
     if args.action == "reconcile-delivery":
         with lock(state):
@@ -66,7 +77,7 @@ def execute(args):
         return preflight.check(task)
     if args.action in ("run", "resume"):
         if not args.authorize_run_and_delivery:
-            raise Blocked("Explicit authorization required for paid execution and PASS-only draft delivery")
+            raise Blocked("Explicit authorization required for paid model execution; task policy separately controls delivery")
         return runtime.dispatch(state, resume_reason=args.reason if args.action == "resume" else None)
     from .native import open_conversation
     conversation = open_conversation(state, bound, task)

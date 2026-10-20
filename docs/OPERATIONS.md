@@ -17,9 +17,12 @@ dependency downloads; OSV/network research are not artificially disabled.
 They were not exercised over the network by offline tests.
 
 Optional SBRI/research references point to host scripts/docs, not container paths.
-They remain evidence sources selected by the one native agent, never a required
-SBRI stage or fixed Spring Boot upgrade strategy. No special capability framework
-or bespoke ordinary-command tool was added.
+An optional pre-edit SBRI applicability check supplies bounded evidence before
+the task message; unavailable/non-applicable intelligence is not a security
+conclusion and does not replace baseline COMPLETE. sbri_intelligence permits
+additional version/range/scope investigations using the existing CLI. The CLI is
+currently not installed here: no live SBRI capability is claimed. No fixed Boot
+strategy, second engine or mandatory successful SBRI stage is introduced.
 
 ## Trust limitation and fail-closed behavior
 
@@ -54,18 +57,22 @@ The implemented flow is:
    digest, repository, approved SHA/tree, baseline digest and completion time.
 4. Recheck evidence/deadline/base/first-run workspace, then send_message/run.
 5. One native agent investigates, selects strategies, edits, self-tests/reassesses.
-6. Native Stop validates independently; deny with feedback or exact-tree PASS delivery.
+6. Native Stop validates independently; deny with feedback or record exact-tree PASS.
+7. report_only returns VALIDATED without remote mutation. Explicitly authorized
+   draft_pr verifies delivery before allowing accepted completion.
 
 These entry points preserve that flow, but remain subject to the security blocker:
 ```bash
 python -m native_remediation check-task --task /private/approved-task.json
 python -m native_remediation prepare --task /private/approved-task.json --state /private/new-task
-python -m native_remediation start --task /private/approved-task.json --state /private/new-task --authorize-run-and-delivery
-python -m native_remediation run --state /private/task --authorize-run-and-delivery
-python -m native_remediation resume --state /private/task --reason "documented interruption" --authorize-run-and-delivery
+python -m native_remediation start --task /private/approved-task.json --state /private/new-task --authorize-model-execution
+python -m native_remediation run --state /private/task --authorize-model-execution
+python -m native_remediation resume --state /private/task --reason "documented interruption" --authorize-model-execution
 python -m native_remediation status --state /private/task
 python -m native_remediation doctor --state /private/task
 python -m native_remediation reconcile-delivery --state /private/task
+python -m native_remediation self-validate --state /private/task
+python -m native_remediation sbri --state /private/task --ranges 4.1.x --scopes compile runtime
 ```
 
 check-task is offline validation, not readiness or permission. The example base is
@@ -81,8 +88,16 @@ Run claims, a lifetime execution lock, explicit bounded resume and existing deli
 reconciliation remain. Old Docker-mode state is preserved, not silently migrated.
 
 Native terminal performs ordinary inspection/editing/Maven/OSV/research commands.
-task_tracker is native. cycle_evidence takes structured intent before material
-edits and honest outcome before Finish; those records never constitute acceptance.
+task_tracker is native. General engineering context is stable; two native Skills
+are selected through AgentContext and keyword-loaded by the initial task. No
+ambient user/public/project Skill discovery is enabled. guidance.json records
+source/render hashes and triggered names, not a claim of model use or compliance.
+cycle_evidence records concise material decisions and outcomes when useful, not
+every command/edit. Missing explicit outcome is recorded honestly at Stop and
+still requires independent validation. Legacy intent records remain readable.
+validate_remediation calls the same full-project validator into self-validation/;
+it never writes authoritative attempts/feedback/results/delivery or spends Stop
+attempts. sbri_intelligence is optional evidence, not acceptance or compatibility.
 The model loop, task history and tool execution are native SDK facilities.
 execute_tool is tested for safe no-inference probes, not required for trusted
 deterministic Python preparation. Host project plugin discovery is another reason
@@ -97,7 +112,7 @@ remain mandatory. Build-plugin/JDK/OS findings require separate verified checks.
 FAIL and INCONCLUSIVE never become PASS; self-checks and native finish do not accept.
 
 Repeated rejected tree/cycle reuses feedback. Budget exhaustion/bounded failure
-may terminate natively without acceptance or PR. Only exact-tree independent PASS
+may terminate natively without acceptance or PR. Only explicitly authorized exact-tree independent PASS
 can enter the retained draft delivery contract: authorized repository/base SHA,
 commit parent/tree, create-only branch, exact open draft head/base checks, durable
 claim and positive reconciliation; uncertain push/POST is never blindly repeated.
@@ -123,14 +138,14 @@ rendering remains unverified. Historical remote evidence/probes are preserved;
 they were not repeated.
 
 ```bash
-python3 -S -m unittest tests_native.test_product tests_native.test_local_execution -v
+python3 -S -m unittest tests_native.test_product tests_native.test_local_execution tests_native.test_parity -v
 # Installed SDK Python:
-python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution -v
+python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution tests_native.test_parity tests_native.test_sdk_parity -v
 python3 -S -m compileall -q native_remediation tests_native
 git diff --check
 ```
 
-31 native-runtime tests and 24 stdlib tests pass. Actual native workspace/terminal/
+41 native-runtime tests and 33 stdlib tests pass. Actual native workspace/terminal/
 persistence/Stop probes use safe temporary directories and no inference. Executable
 Maven/OSV stand-ins and controlled pipeline outputs are not real toolchain or
 remediation proof. SDK execute_command emits non-fatal ResourceWarnings; no SDK

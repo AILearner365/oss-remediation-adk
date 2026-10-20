@@ -17,3 +17,6 @@ oss-remediate = "native_remediation.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["native_remediation*"]
+
+[tool.setuptools.package-data]
+native_remediation = ["guidance/*.md", "skills/*/SKILL.md"]

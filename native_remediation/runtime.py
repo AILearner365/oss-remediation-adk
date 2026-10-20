@@ -31,6 +31,10 @@ def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None):
     write(state / "task.json", bound, exclusive=True)
     conversation = factory(state, bound, task)
     try:
+        if factory is open_conversation:
+            from .guidance import delivery_evidence
+            write(state / "guidance.json", delivery_evidence(conversation.agent.agent_context,
+                task_message(state, bound, task, dict(findings=[]))))
         with lock(state):
             write(state / "preparation-intent.json", dict(conversationId=bound["conversationId"],
                   taskDigest=bound["taskDigest"], at=time.time()), exclusive=True)
@@ -44,15 +48,30 @@ def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None):
             write(state / "baseline.json", baseline, exclusive=True)
             if baseline["outcome"] != "COMPLETE" or baseline["tree"] != tree:
                 raise Blocked("Baseline incomplete; no task message or model execution permitted")
+            if task["sbri"]["pre_edit"]:
+                from .capabilities import sbri
+                # SBRI holds its own evidence lock; run below outside this lock.
+                intelligence_pending = True
+            else:
+                intelligence_pending = False
             receipt = dict(outcome="COMPLETE", conversationId=bound["conversationId"],
                 taskDigest=bound["taskDigest"], repository=task["repository"],
                 baseCommit=task["base_sha"], baseTree=tree, baselineDigest=digest(baseline),
                 completedAt=time.time())
+        if intelligence_pending:
+            write(state / "sbri-pre-edit.json", sbri(state), exclusive=True)
+        with lock(state):
+            receipt.update(completedAt=time.time(), sbriDigest=digest(read(state / "sbri-pre-edit.json"))
+                           if (state / "sbri-pre-edit.json").exists() else None)
             write(state / "preparation.json", receipt, exclusive=True)
             require_preparation(state)
         return bound
     finally:
-        conversation.close()
+        from .evidence import capture
+        try:
+            capture(state, "preparation", conversation)
+        finally:
+            conversation.close()
 
 
 def require_preparation(state):
@@ -67,6 +86,8 @@ def require_preparation(state):
         taskDigest=bound["taskDigest"], repository=task["repository"], baseCommit=task["base_sha"],
         baseTree=text(state / "workspace", "rev-parse", task["base_sha"] + "^{tree}"),
         baselineDigest=digest(baseline))
+    if "sbriDigest" in receipt:
+        expected["sbriDigest"] = digest(read(state / "sbri-pre-edit.json")) if (state / "sbri-pre-edit.json").exists() else None
     coverage = baseline.get("coverage", {})
     packages = baseline.get("inventory", {}).get("packages", [])
     count = len({(p["name"], p["version"]) for p in packages})
@@ -147,10 +168,19 @@ def dispatch(state, *, resume_reason=None, factory=None, preflight=None):
                     verify_ready(conversation, state, task)
                 write(state / "runs" / f"{len(runs) + 1}.json", dict(conversationId=bound["conversationId"],
                     state="RUN_INTENT", reason=resume_reason, at=time.time()), exclusive=True)
+                from .guidance import delivery_evidence
+                if factory is open_conversation:
+                    write(state / "guidance.json", delivery_evidence(conversation.agent.agent_context, message))
+            from .evidence import capture
+            capture(state, "pre-run", conversation)
             conversation.run()
             return status(state, conversation)
         finally:
-            conversation.close()
+            from .evidence import capture
+            try:
+                capture(state, "post-run", conversation)
+            finally:
+                conversation.close()
 
 
 def hook(state, event, *, evaluator=None, delivery=deliver):
@@ -174,7 +204,7 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
             write(state / "result.json", dict(outcome="BOUNDED_FAILURE", conversationId=bound["conversationId"], journal=outcome))
             return dict(decision="allow", reason="BOUNDED FAILURE recorded; not accepted, no delivery")
         changed = check_paths(workspace, task, tree)
-        if not changed:
+        if not changed and task["delivery"]["mode"] == "draft_pr":
             raise Blocked("No deliverable change; report bounded failure rather than success")
         attempts = state / "attempts"
         previous = sorted(attempts.glob("*/validation.json"), key=lambda p: int(p.parent.name))
@@ -183,9 +213,7 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
         if previous:
             accepted = read(previous[-1])
             if accepted["outcome"] == "PASS" and accepted["validatedTree"] == tree:
-                delivered = delivery(state, accepted)
-                write(state / "result.json", dict(outcome="DELIVERED", **delivered))
-                return dict(decision="allow", reason="Independent PASS; draft PR confirmed: " + delivered["prUrl"])
+                return complete(state, accepted, delivery=delivery)
             if accepted["validatedTree"] == tree and accepted.get("cycle") == outcome["cycle"]:
                 return dict(decision="deny", reason="Candidate already rejected in this cycle",
                     additionalContext="Review recorded validation feedback and reassess before a new bounded cycle; no repeated scan was run.")
@@ -214,11 +242,28 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
                 write(state / "result.json", dict(outcome="BOUNDED_FAILURE", validation=accepted))
                 return dict(decision="allow", reason="BOUNDED FAILURE; independent validation did not pass; no delivery")
             return dict(decision="deny", reason="Independent " + accepted["outcome"],
-                        additionalContext="Reassess facts/candidates and record the next bounded cycle. "
+                        additionalContext="Reassess facts/candidates using this evidence; preserve a concise material decision when useful. "
                         + str(accepted["reasons"])[:3000])
-        delivered = delivery(state, accepted)
-        write(state / "result.json", dict(outcome="DELIVERED", **delivered))
-        return dict(decision="allow", reason="Independent PASS; draft PR confirmed: " + delivered["prUrl"])
+        return complete(state, accepted, delivery=delivery)
+
+
+def complete(state, accepted, *, delivery=deliver):
+    _, bound, task = context(state)
+    if (accepted.get("outcome") != "PASS" or accepted.get("taskDigest") != bound["taskDigest"]
+            or accepted.get("conversationId") != bound["conversationId"]
+            or snapshot(state / "workspace", task) != accepted["validatedTree"]):
+        raise Blocked("Completion requires exact-tree independent PASS")
+    if task["delivery"]["mode"] == "report_only":
+        write(state / "result.json", dict(outcome="VALIDATED", validationOutcome="PASS",
+            remediationSuccess=True, deliveryStatus="NOT_REQUESTED", validatedTree=accepted["validatedTree"],
+            conversationId=bound["conversationId"], attempt=accepted["attempt"]))
+        return dict(decision="allow", reason="Independent PASS; report_only, no branch push or PR")
+    if not task["delivery"]["authorized"]:
+        raise Blocked("Independent PASS retained; draft delivery is not explicitly authorized")
+    delivered = delivery(state, accepted)
+    write(state / "result.json", dict(outcome="DELIVERED", validationOutcome="PASS",
+          remediationSuccess=True, deliveryStatus="CONFIRMED", **delivered))
+    return dict(decision="allow", reason="Independent PASS; draft PR confirmed: " + delivered["prUrl"])
 
 
 def status(state, conversation=None):
@@ -240,6 +285,13 @@ def status(state, conversation=None):
             raise Blocked("Delivery result lacks exact-tree independent acceptance")
         if native_status != "finished":
             result = dict(result, outcome="DELIVERED_AWAITING_NATIVE_FINISH")
+    if result["outcome"] == "VALIDATED":
+        accepted = read(state / "attempts" / str(result["attempt"]) / "validation.json")
+        if (accepted["outcome"] != "PASS" or accepted["validatedTree"] != result["validatedTree"]
+                or accepted["taskDigest"] != bound["taskDigest"] or accepted["conversationId"] != bound["conversationId"]):
+            raise Blocked("Report-only result lacks bound independent acceptance")
+        if native_status != "finished":
+            result = dict(result, outcome="VALIDATED_AWAITING_NATIVE_FINISH")
     return dict(conversationId=bound["conversationId"], goal=task["goal"],
                 nativeStatus=native_status, modelUsage=usage, result=result,
                 validation=read(state / "feedback.json") if (state / "feedback.json").exists() else None,

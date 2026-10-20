@@ -16,7 +16,7 @@ from native_remediation.files import Blocked, digest, read, write
 def task_input(sha="a" * 40):
     return dict(repository="AILearner365/maven-multimodule-app", base_branch="main-runrunning", base_sha=sha,
         goal="Resolve baseline vulnerabilities without regressions", policy=dict(minimum_tests=1),
-        delivery=dict(repository="AILearner365/maven-multimodule-app", base_branch="main-runrunning", draft=True))
+        delivery=dict(mode="draft_pr", authorized=True, repository="AILearner365/maven-multimodule-app", base_branch="main-runrunning", draft=True))
 
 
 def evaluation(tree, vulnerable=False):

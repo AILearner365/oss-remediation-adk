@@ -15,9 +15,9 @@ Historical Milestone 1 smoke remains at f72e5308704960ee911f382f96bf0b7948435216
 
 ## Outcome and operating model
 
-Given an approved repository revision and a remediation objective, autonomously investigate, select and implement a credible solution, independently verify it, and deliver *only a verified result* as a GitHub draft PR. If the goal cannot be met within policy/budget, return an evidence-backed bounded failure, not a fictional success. The general operating model is technology-neutral; Java Maven OSS remediation is the first application.
+Given an approved repository revision and a remediation objective, autonomously investigate, select and implement a credible solution, independently verify it, and report the outcome. The default report_only policy never pushes or creates a PR. Explicitly authorized draft_pr delivery publishes only an independently verified exact tree. If the goal cannot be met within policy/budget, return an evidence-backed bounded failure, not a fictional success. Java Maven OSS remediation is the first application.
 
-**Lifecycle**: stable task/constraints -> read-only discovery -> facts, uncertainty and assumptions -> success criteria -> credible candidates covering the *whole* goal -> chosen strategy (cycle intent) -> investigation/implementation -> reassessment and agent self-checks -> cycle outcome -> independent deterministic validation -> succeed or next bounded cycle -> final resolution -> safe delivery.
+**Lifecycle**: stable task/constraints -> deterministic baseline COMPLETE -> autonomous discovery and credible whole-goal strategies -> investigation/implementation -> reassessment and self-checks -> native Stop independent validation -> deny with evidence or verified outcome -> authorized delivery if requested. Preserve concise rationale at material decisions and concise final outcome/uncertainty, through native messages or optional structured records; no per-command questionnaire or mandatory pre-edit intent form.
 
 **Invariants**:
 - Goal over chosen strategy; no prescribed Spring Boot upgrades or forced recipe.
@@ -49,7 +49,7 @@ Minimal integration responsibilities:
    Native hooks/tools are verified after lazy initialization before run.
 2. **Agent capabilities**: grant needed repository, shell, Maven, OSV/scanner, research and optionally SBRI/release-intelligence access with bounded permissions. Reuse/copy/rework experimental code freely; agent selects when to use capabilities. SBRI is a helper, not an obligatory Spring Boot strategy; current test scanner is OSV, production candidate JFrog Xray requires a separate adapter/verification.
 3. **Independent validation**: apply task-specific acceptance contract to an immutable captured candidate Git tree and baseline. Check actual resolved dependency set and findings, remaining/new vulnerabilities, applicable upgrade policy, Maven build/tests and repository constraints. Explicitly distinguish scanner errors, incomplete coverage and unknowns from PASS. Ensure paths/dependency source are available as required. Record attempt evidence and provide actionable failure context through native Stop Hook; accepted completion requires proof for the exact conversation, approved base and validated tree.
-4. **Delivery**: after independent PASS only, bind output to the validated Git tree, verify remote base/destination, create-only branch/commit, and confirm an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation must block, not duplicate blindly. Fail closed at the product acceptance level even if native hook-command failures can fail open.
+4. **Delivery**: report_only preserves independent validation without remote writes. Explicitly authorized draft_pr after independent PASS binds output to the validated Git tree, verifies remote base/destination, uses a create-only branch/commit, and confirms an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation blocks, never blindly duplicates. Native hook-command failures cannot establish product success.
 5. **Recovery/evidence**: use native conversation/events plus small durable task/intent/outcome/validation/delivery artifacts as needed, without reimplementing native history, task API, UI or lifecycle database. Keep secrets out of workspaces and committed artifacts. Avoid unrestricted retries.
 
 ### Mandatory pre-inference guarantees
@@ -79,9 +79,9 @@ not a blocker to the local SDK lifecycle APIs themselves.
 
 ## Inputs and outputs
 
-Minimal task input: repository and approved base (branch + immutable SHA), remediation goal, acceptance policy/constraints, resource/time limits, authorized PR destination, tool/credential references (never credentials in agent prompt). Baseline may be generated as deterministic preparation; do not force user-supplied CVE lists as the only workflow.
+Required task input: repository, approved base branch and immutable SHA, and remediation goal. Approved values override documented defaults where permitted; unknown inputs fail closed. Policy/checks describe additional hard constraints. Delivery destination and explicit authorization are required only for draft_pr. Credentials are never task values. See the implemented [configuration reference](docs/CONFIGURATION.md). Baseline is deterministic preparation, not a mandatory user-supplied CVE list.
 
-Output: deterministic baseline; per-cycle facts/assumptions, candidate rationale and intent/outcome; actual resolved dependencies and scanner coverage; changed files and immutable Git tree; independent PASS/FAIL/INCONCLUSIVE per attempt with reasons; final summary; verified PR URL **or** bounded failure/blocked result. Keep interfaces straightforward, documented and adjustable; avoid speculative DSLs or large schemas.
+Output: native event/action/observation trajectory and usage stats; automatic phase evidence with Git diff/tree and stable artifact references; concise material decision/outcome records when supplied (absence is explicit, never fabricated); baseline/resolved dependencies/scanner coverage; separate self-check and independent PASS/FAIL/INCONCLUSIVE reports; verified PR URL only when authorized, otherwise report-only, bounded failure or blocked result. See [parity/evidence](docs/POC-PARITY.md).
 
 ## Proven versus unproven
 
@@ -101,7 +101,7 @@ defaults for remediation. No live model or target PR is authorized here.
 
 ## Implementation discipline
 
-Build a **clean tree**, copying only purposeful code from parent/history. Follow the conventions of installed OpenHands, but do not prematurely prescribe packages/files; choose the minimum cohesive set with tests. No custom server, UI, SQLite, lifecycle coordinator, second agent or competing orchestration engine unless a truly missing capability is demonstrated. No gratuitous abstraction, recipes, forced alternatives or unrelated refactors. "Low footprint" is a result of clear responsibilities, not an arbitrary line-count goal.
+Preserve the existing implementation and useful historical evidence; extract only purposeful code. Follow installed OpenHands conventions. No custom server, UI, SQLite, lifecycle coordinator, second agent or competing orchestration engine. No gratuitous abstraction, recipes, forced alternatives or unrelated refactors.
 
 Engineering has discretion over internal file layout and adapters. It must show concrete mapping from this contract to code and tests, and a short proof table (PROVEN/PARTIAL/NOT PROVEN). Do not declare success on unit tests alone. Security-sensitive operations must be checked before externally creating PRs or running model calls.
 

@@ -43,6 +43,11 @@ def check(task):
     report = dict(sdkVersion="1.55.1")
     if task["model"].startswith("vertex_ai/"):
         report["adc"] = vertex_adc()
+    if task["delivery"]["mode"] == "report_only":
+        report["githubDelivery"] = "NOT_REQUESTED"
+        return report
+    if not task["delivery"]["authorized"]:
+        raise Blocked("Draft delivery policy is not explicitly authorized")
     gh = GitHub(task["repository"])
     repo = gh.request("GET", "")
     if not repo or not repo.get("permissions", {}).get("push"):
