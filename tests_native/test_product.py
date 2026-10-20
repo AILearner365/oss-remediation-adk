@@ -227,6 +227,11 @@ class OfflineGitHub:
 class DeliveryTests(GitFixture):
     def setUp(self):
         super().setUp()
+        # Test the delivery contract in isolation; this does not establish a
+        # same-user host security boundary or authorize real GitHub mutation.
+        authority = patch.object(delivery, "require_independent_authority")
+        authority.start()
+        self.addCleanup(authority.stop)
         self.acceptance = self.accepted()
         self.remote = OfflineGitHub(self.task, self.bound["conversationId"])
         real_text = delivery.text
@@ -287,6 +292,28 @@ class OfflineConversation:
 
 
 class RuntimeTests(GitFixture):
+    def test_host_authority_gap_blocks_live_run_build_and_delivery(self):
+        self.prepared()
+        with patch.object(runtime, "prepare") as clone:
+            with self.assertRaisesRegex(Blocked, "authority separation"):
+                runtime.prepare_task(self.task, self.state / "blocked-preparation",
+                                     factory=lambda *a: OfflineConversation())
+            clone.assert_not_called()
+        with patch.object(runtime, "verify_base") as remote:
+            with self.assertRaisesRegex(Blocked, "authority separation"):
+                runtime.dispatch(self.state, factory=lambda *a: self.fail("Must not initialize/run"))
+            remote.assert_not_called()
+        self.assertFalse((self.state / "runs").exists())
+        with patch.object(validation, "command") as build:
+            with self.assertRaisesRegex(Blocked, "authority separation"):
+                validation.evaluate(self.workspace, self.baseline["tree"], self.task,
+                                    self.state / "untrusted-evaluation", deadline=time.time() + 5)
+            build.assert_not_called()
+        with patch.object(delivery, "GitHub") as github:
+            with self.assertRaisesRegex(Blocked, "authority separation"):
+                delivery.deliver(self.state, {})
+            github.assert_not_called()
+
     def prepared(self):
         self.bound["executionFramework"] = "standalone-sdk-1.55.1"
         write(self.state / "task.json", self.bound)
@@ -332,12 +359,12 @@ class RuntimeTests(GitFixture):
             return self.baseline
         destination = self.state / "new"
         runtime.prepare_task(self.task, destination, factory=factory, preparer=prepare,
-                             evaluator=evaluate, sandbox_check=lambda task: None)
+                             evaluator=evaluate)
         self.assertEqual(events, ["initialize", "prepare", "baseline"])
         self.assertEqual(conversation.runs, 0)
         self.assertFalse(conversation.state.events)
         runtime.require_preparation(destination)
-        with patch.object(runtime, "verify_base"), patch("native_remediation.sandbox.check"), patch("native_remediation.sandbox.stop_agent"):
+        with patch.object(runtime, "verify_base"), patch.object(runtime, "require_independent_authority"):
             runtime.dispatch(destination, factory=lambda *a: conversation, preflight=lambda task: {})
         self.assertEqual(conversation.runs, 1)
         with self.assertRaises(FileExistsError):
@@ -346,8 +373,7 @@ class RuntimeTests(GitFixture):
         failed_conversation = OfflineConversation()
         with self.assertRaises(Blocked):
             runtime.prepare_task(self.task, broken, factory=lambda *a: failed_conversation, preparer=prepare,
-                evaluator=lambda *a, **kw: dict(self.baseline, outcome="INCONCLUSIVE"),
-                sandbox_check=lambda task: None)
+                evaluator=lambda *a, **kw: dict(self.baseline, outcome="INCONCLUSIVE"))
         self.assertFalse((broken / "preparation.json").exists())
         with self.assertRaises(Blocked):
             runtime.dispatch(broken, factory=lambda *a: self.fail("Must not restore or run"))
@@ -356,7 +382,7 @@ class RuntimeTests(GitFixture):
     def test_successful_gate_dispatches_once_and_recovery_rechecks_receipt(self):
         self.prepared()
         conversation = OfflineConversation()
-        with patch.object(runtime, "verify_base"), patch("native_remediation.sandbox.check"), patch("native_remediation.sandbox.stop_agent"):
+        with patch.object(runtime, "verify_base"), patch.object(runtime, "require_independent_authority"):
             runtime.dispatch(self.state, factory=lambda *a: conversation, preflight=lambda task: {})
             self.assertEqual(conversation.runs, 1)
             self.assertEqual(len(conversation.state.events), 1)

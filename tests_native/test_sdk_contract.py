@@ -20,6 +20,32 @@ except ImportError:
 
 @unittest.skipIf(Conversation is None, "Requires installed standalone SDK 1.55.1")
 class InstalledSdkTests(unittest.TestCase):
+    def test_native_terminal_persists_shell_without_launcher_or_model(self):
+        from openhands.tools.terminal import TerminalAction
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            task = load_task(task_input())
+            self.assertNotIn("sandbox", task)
+            bound = dict(task=task, taskDigest=digest(task), conversationId=str(uuid.uuid4()))
+            write(state / "task.json", bound)
+            with patch.object(LLM, "completion", side_effect=AssertionError("Inference forbidden")):
+                conversation = open_conversation(state, bound, task)
+                try:
+                    terminal = conversation.agent.tools[0]
+                    self.assertEqual(terminal.params, dict(terminal_type="subprocess"))
+                    self.assertEqual(Path(conversation.workspace.working_dir), state / "workspace")
+                    direct = conversation.workspace.execute_command("printf SDK_WORKSPACE_FIXTURE", timeout=5)
+                    self.assertEqual(direct.exit_code, 0)
+                    self.assertIn("SDK_WORKSPACE_FIXTURE", direct.stdout)
+                    first = conversation.execute_tool("terminal", TerminalAction(
+                        command="export OSS_FIXTURE_VALUE=SDK_PERSISTENT_FIXTURE", timeout=5))
+                    self.assertFalse(first.is_error)
+                    second = conversation.execute_tool("terminal", TerminalAction(
+                        command='printf "%s" "$OSS_FIXTURE_VALUE"', timeout=5))
+                    self.assertFalse(second.is_error)
+                    self.assertIn("SDK_PERSISTENT_FIXTURE", second.text)
+                finally:
+                    conversation.close()
     def test_initialize_and_restore_real_sdk_without_inference(self):
         with tempfile.TemporaryDirectory() as directory:
             state = Path(directory)
@@ -73,7 +99,7 @@ class InstalledSdkTests(unittest.TestCase):
         from openhands.sdk.hooks.manager import HookManager
         with tempfile.TemporaryDirectory() as directory:
             state = Path(directory)
-            control = state / "control"
+            control = state / "workspace"
             control.mkdir()
             task = load_task(task_input())
             uid = uuid.uuid4()
@@ -102,13 +128,26 @@ class InstalledSdkTests(unittest.TestCase):
 
 @unittest.skipIf(Conversation is None, "Requires installed standalone SDK 1.55.1")
 class InstalledEvidenceToolTests(GitFixture):
+    def test_actual_idle_sdk_and_fixture_preparation_need_no_docker(self):
+        import shutil
+        from native_remediation.runtime import prepare_task, require_preparation
+        destination = self.state / "prepared-fixture"
+        def prepare(state, task):
+            shutil.copytree(self.workspace, state / "workspace", dirs_exist_ok=True)
+            return state / "workspace"
+        with patch.object(LLM, "completion", side_effect=AssertionError("Inference forbidden")):
+            bound = prepare_task(self.task, destination, preparer=prepare,
+                                 evaluator=lambda *a, **kw: self.baseline)
+            _, verified, _ = require_preparation(destination)
+            self.assertEqual(bound["conversationId"], verified["conversationId"])
+            self.assertFalse((destination / "sandbox-shell").exists())
+
     def test_supported_local_execute_tool_records_intent_without_inference(self):
         from openhands.sdk import Tool
         from native_remediation.evidence_tool import CycleAction, CycleEvidenceTool
         from native_remediation.journal import INTENT_FIELDS
         from native_remediation.files import read
-        control = self.state / "control"
-        control.mkdir()
+        control = self.workspace
         with patch.object(LLM, "completion", side_effect=AssertionError("Inference forbidden")):
             conversation = Conversation(agent=Agent(llm=LLM(model=self.task["model"]),
                 tools=[Tool(name=CycleEvidenceTool.name)]), workspace=LocalWorkspace(working_dir=control),

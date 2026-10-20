@@ -10,7 +10,7 @@ from urllib.parse import quote
 import uuid
 import xml.etree.ElementTree as ET
 
-from .files import Blocked, digest, write
+from .files import Blocked, command, digest, write, require_independent_authority
 from .repository import export
 
 TREE_FILE = "native-remediation-dependencies.json"
@@ -124,9 +124,8 @@ def test_counts(source):
 
 def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
     if runner is None:
-        from functools import partial
-        from .sandbox import run
-        runner = partial(run, task=task)
+        require_independent_authority()
+        runner = command
     directory.mkdir(parents=True, exist_ok=False)
     result = dict(tree=tree, outcome="INCONCLUSIVE", reasons=[], commands=[])
     try:

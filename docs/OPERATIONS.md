@@ -1,155 +1,137 @@
-# Autonomous OSS Vulnerability Remediation — standalone SDK operations
+# Autonomous OSS Vulnerability Remediation — local SDK operations
 
-## Runtime and prerequisites
+## Actual execution model
 
-Use the existing Python 3.12+ environment with `openhands-sdk[vertex]==1.55.1`
-and `openhands-tools==1.55.1`. No Agent Server, session key, Canvas, product service,
-database or watcher is required. Commands run in the foreground; OpenHands owns
-the single agent loop. Never run these paid/delivery commands without authorization.
+Use the existing Python 3.12+ environment with SDK/tools 1.55.1 and installed
+Cloud Shell Git, Java/Maven, OSV Scanner 2.6.0 and gh. LocalWorkspace's working
+directory is `state/workspace`, the actual isolated Git worktree. TerminalTool
+uses the native subprocess-backed persistent host shell, without shell_path or
+Docker. No image, image preflight, forced offline mode or network override exists.
 
-An approved task pins repository, base branch/SHA, goal, deterministic constraints,
-policy, limits and draft destination. `examples/maven-task.json` is illustrative,
-not current approval of its old smoke base. Extra constraints require real check
-argv; scanner counts do not prove arbitrary free-text goals. Allowed change paths,
-major-version/downgrade policy, dependency removals, protected properties and
-test/finding budgets remain explicit. No mandatory Spring Boot upgrade or SBRI step.
+Existing Maven/OSV validation uses the bounded local argv helper in files.py
+(no shell injection or automatic retries). PATH, HOME, Java/TLS settings and
+uppercase/lowercase HTTP(S)/ALL/NO_PROXY settings are retained. Explicit model/GitHub
+credential variables are omitted from build children, but host file/metadata
+access is NOT prevented. Host Maven settings/proxies can supply authorized normal
+dependency downloads; OSV/network research are not artificially disabled.
+They were not exercised over the network by offline tests.
 
-Set `sandbox.image` to an **existing local Docker image ID**
-(`sha256:` plus 64 lowercase hex digits). Tags and automatic pulls are refused.
-The image must provide trusted bash, Git, Java/Maven, OSV Scanner 2.6.0, and the
-task's optional tools/references and offline dependency/vulnerability data.
-Executables/check paths in the task refer to the image, not host executables.
-The image must support the host numeric UID/GID and HOME=/tmp. Provisioning is an
-operator prerequisite, not an automatic package-install/model step.
+Optional SBRI/research references point to host scripts/docs, not container paths.
+They remain evidence sources selected by the one native agent, never a required
+SBRI stage or fixed Spring Boot upgrade strategy. No special capability framework
+or bespoke ordinary-command tool was added.
 
-There is currently **no image installed**, and no real container/toolchain run
-has been proved here. Containers have `--network=none`: no metadata-server access,
-Internet, arbitrary dependency downloads or online research. The approved image/
-offline repositories must satisfy dependency/plugin/OSV data needs, or preparation
-fails closed. Networked deployment needs reviewed credential-safe egress; no
-network override is offered. SBRI/research references are optional image-local
-evidence, not claims that web research is available.
+## Trust limitation and fail-closed behavior
 
-Docker daemon/host kernel, operator-owned image, SDK installation, private state
-and operator home/plugins are trusted. Do not mount Docker sockets, host home,
-ADC files or credentials into the image. Do not run two different trusted control
-processes against one task outside the provided execution lock.
+Trusted task/policy, preparation receipts, baseline/acceptance records, SDK
+persistence, journals, claims and credentials live outside the agent repository.
+Private files/locks protect against accidental edits/other users, not the same
+host user. No agent tool grants direct acceptance/delivery operations; the
+cycle_evidence tool records agent-authored data only. An unrestricted shell still
+can access sibling files, HOME, credentials and processes. LocalWorkspace is not
+a sandbox, cwd is not containment, and production security isolation is not claimed.
 
-## Lifecycle and commands
+The mandatory guarantee that agent commands and repository builds cannot alter
+trusted records or access delivery credentials is **not supported here**.
+files.require_independent_authority() raises Blocked before normal model dispatch,
+default real build/acceptance, and GitHub delivery (including reconciliation).
+No model-cost authorization flag disables it. This prevents knowingly claiming
+trusted independent acceptance in the unsupported environment.
 
+Consequently normal live start/prepare/run/delivery are NOT ready to execute:
+prepare initializes the idle SDK then refuses untrusted preparation before
+clone/build; it cannot issue COMPLETE. SDK initialization alone is available without
+inference. Safe temporary test fixtures explicitly inject known outputs/mock
+the authority guard; these seams are not a deployment mechanism or an end-to-end
+success. No new isolation infrastructure is introduced by this correction.
+
+## Preserved lifecycle and interfaces
+
+The implemented flow is:
+1. Initialize/restore Conversation without inference.
+2. Deterministically prepare the approved repository/base and collect baseline.
+3. Issue preparation.json only on COMPLETE, bound to native conversation, task
+   digest, repository, approved SHA/tree, baseline digest and completion time.
+4. Recheck evidence/deadline/base/first-run workspace, then send_message/run.
+5. One native agent investigates, selects strategies, edits, self-tests/reassesses.
+6. Native Stop validates independently; deny with feedback or exact-tree PASS delivery.
+
+These entry points preserve that flow, but remain subject to the security blocker:
 ```bash
 python -m native_remediation check-task --task /private/approved-task.json
-# Normal execution: initializes SDK, prepares/gates, sends objective, runs.
-python -m native_remediation start --task /private/approved-task.json \
-  --state /private/persistent/new-task --authorize-run-and-delivery
-# Diagnostic preparation only: no task message, inference or delivery.
-python -m native_remediation prepare --task /private/approved-task.json \
-  --state /private/persistent/new-task
-# Run an already prepared idle task after separate authorization:
-python -m native_remediation run --state /private/persistent/new-task \
-  --authorize-run-and-delivery
+python -m native_remediation prepare --task /private/approved-task.json --state /private/new-task
+python -m native_remediation start --task /private/approved-task.json --state /private/new-task --authorize-run-and-delivery
+python -m native_remediation run --state /private/task --authorize-run-and-delivery
+python -m native_remediation resume --state /private/task --reason "documented interruption" --authorize-run-and-delivery
+python -m native_remediation status --state /private/task
+python -m native_remediation doctor --state /private/task
+python -m native_remediation reconcile-delivery --state /private/task
 ```
 
-`start` does not hide remote orchestration: it uses only local SDK objects and
-trusted deterministic Python preparation, followed by SDK send_message/run.
-`execute_tool()` is supported locally but unnecessary for this trusted validator;
-it bypasses agent security checks and is not used as a preparation proof.
+check-task is offline validation, not readiness or permission. The example base is
+historical, not fresh approval. Doctor performs current-runtime ADC refresh and
+read-only GitHub checks; it does not prove trust separation. No server/session-key
+argument, attach stage, watcher or custom lifecycle engine exists.
 
-A native conversation is created before preparation without inference. Git clones
-only the approved base and creates the isolated worktree. Repository build code
-executes only in restricted containers. Baseline must be COMPLETE before a durable
-`preparation.json` is issued, bound to task digest, native conversation, repository,
-approved commit/tree and baseline digest. Every run/recovery checks that receipt,
-task deadline, first-run workspace, remote base, sandbox and credentials. Missing,
-tampered, stale or incomplete evidence blocks execution, regardless of messages.
-Interrupted preparation is not automatically repeated; preserve evidence and
-diagnose. Existing state directories are never overwritten.
+Native state/events/stats persist under state/conversations/<UUID-hex>. The same
+ID/directory restores the saved agent using agent=None; task-pinned settings are
+checked, excluding only SDK-generated prompt time. Missing persistence or missing/
+incomplete/stale/tampered preparation blocks rather than recreating or rebaselining.
+Run claims, a lifetime execution lock, explicit bounded resume and existing delivery
+reconciliation remain. Old Docker-mode state is preserved, not silently migrated.
 
-SDK history/state live in `state/conversations/<UUID-hex>/`. The SDK automatically
-restores the same ID; missing persistence after preparation intent blocks rather
-than creating a replacement. Preparation never sends the task or calls run().
-Sending the task lazily initializes native tools/hooks; effective hooks/tools are
-checked before run(). No model call occurs in initialization or preparation.
+Native terminal performs ordinary inspection/editing/Maven/OSV/research commands.
+task_tracker is native. cycle_evidence takes structured intent before material
+edits and honest outcome before Finish; those records never constitute acceptance.
+The model loop, task history and tool execution are native SDK facilities.
+execute_tool is tested for safe no-inference probes, not required for trusted
+deterministic Python preparation. Host project plugin discovery is another reason
+not to treat repository-controlled content as safe before lazy initialization.
 
-LocalWorkspace points to the trusted empty `state/control`, not repository
-contents. Inside the native terminal, that same pathname is the repository mount.
-This keeps repository plugins/skills/configuration away from host SDK discovery.
-The native terminal performs inspection/editing/testing via normal shell commands;
-the host file-editor tool is intentionally not exposed. Native task_tracker is
-available; `cycle_evidence(record_type, document)` records concise structured
-intent/outcome, not private reasoning or acceptance. Record intent before edits.
-The tool takes data only, never a path or command. Baseline is read-only at
-`/baseline.json` and `/baseline/` in the terminal.
+## Acceptance/delivery safeguards retained
 
-## Independent Stop and delivery
+Exact Git blobs are exported independently of export-ignore/subst attributes.
+Maven clean install/tests, resolved reactor project-dependency coverage, effective
+POMs, test counts, task-specific constraints and OSV 2.6.0 exact package coverage
+remain mandatory. Build-plugin/JDK/OS findings require separate verified checks.
+FAIL and INCONCLUSIVE never become PASS; self-checks and native finish do not accept.
 
-Native Stop calls the existing short-lived CLI hook. It verifies conversation/
-control-workspace identity and preparation, stops the agent container (including
-background descendants), captures the actual candidate Git tree and runs independent
-Maven/OSV acceptance. On denial, use native terminal `reset=true` to start a new
-isolated shell for reassessment; no new agent or conversation is created.
+Repeated rejected tree/cycle reuses feedback. Budget exhaustion/bounded failure
+may terminate natively without acceptance or PR. Only exact-tree independent PASS
+can enter the retained draft delivery contract: authorized repository/base SHA,
+commit parent/tree, create-only branch, exact open draft head/base checks, durable
+claim and positive reconciliation; uncertain push/POST is never blindly repeated.
+The local trust guard prevents actual delivery while independence is unestablished.
 
-Acceptance exports exact Git blobs (not export-ignore-sensitive archives), builds
-with Maven clean install/tests, resolves project dependency graphs across the
-reactor, checks effective POMs/test coverage and task constraints, and executes OSV
-2.6.0 with exact package coverage and no trusted suppressions. Build-plugin/JDK/OS
-vulnerabilities are outside the project-dependency scanner scope; tasks needing
-them require separately verified checks. Errors or unknown coverage cannot PASS.
-Raw source/build outputs are not trusted acceptance decisions. Command stdout/
-stderr and parsed acceptance are written by host code outside writable mounts.
+Host background processes cannot be reliably quiesced by these SDK facilities.
+A Git tree snapshot is immutable but does not establish host authority isolation.
+Native command hook infrastructure may fail open; status still refuses product
+success without trusted PASS/delivery. These limitations are not hidden by tests.
 
-FAIL/INCONCLUSIVE returns feedback for bounded reassessment; identical tree/cycle
-does not rescan. Explicit BOUNDED_FAILURE may allow native termination but never
-acceptance/delivery. Only independent PASS permits delivery of the exact tested
-tree to the authorized base/destination. Create-only branch behavior, commit parent/
-tree checks, draft/head/base verification, durable claims and positive reconciliation
-are preserved. Ambiguous push/POST never authorizes duplicate mutation.
+## Credentials, observation and verification
 
-Native hook infrastructure can fail open if the command cannot start. Therefore
-native finish/allow is never product success: status requires trusted exact-tree
-PASS and confirmed draft evidence. The outer SDK caller also stops remaining agent
-containers after run/close; inability to establish quiescence blocks acceptance.
+Keep existing credentials outside task/workspace files and prompts. Vertex ADC
+preflight uses the current SDK Python/environment and >=300-second refreshed
+tokens. Persistent ADC discovery remains a deployment concern; no keys are created.
+Existing gh credentials are used only by the trusted delivery adapter, whose
+normal path is now blocked before client/credential acquisition. Same-user terminal
+access to those credentials is precisely the unsupported guarantee, not prevented
+merely by this API separation.
 
-## Recovery, credentials and observation
+SDK state is local, not automatically registered in Agent Server/Canvas. Browser
+rendering remains unverified. Historical remote evidence/probes are preserved;
+they were not repeated.
 
 ```bash
-python -m native_remediation status --state /private/persistent/task
-python -m native_remediation doctor --state /private/persistent/task
-python -m native_remediation resume --state /private/persistent/task \
-  --reason "documented interrupted execution" --authorize-run-and-delivery
-python -m native_remediation reconcile-delivery --state /private/persistent/task
-```
-
-Resume restores native SDK history and rechecks preparation; never regenerates
-baseline or creates another conversation. Run/time/cycle budgets and per-task
-lifetime execution lock prevent concurrent/unbounded execution. Run intents are
-retained because native persistence alone cannot reconcile external delivery.
-A task message without a run intent is an ambiguous interruption: inspect, do not
-replay. Uncertain delivery is reconciled from existing independent PASS/claim only.
-
-Vertex ADC is refreshed by the exact current SDK Python/environment, requiring
->=300 seconds validity; no Agent Server process discovery remains. Use persistent
-private user ADC and explicit GOOGLE_APPLICATION_CREDENTIALS plus VERTEXAI_PROJECT/
-VERTEXAI_LOCATION. No service-account key or credentials in task inputs/prompt/
-containers. GitHub uses the existing authorized gh credentials on the host only.
-Doctor/preflight performs credential refresh/read-only GitHub checks, no inference.
-
-Status reads native local state/stats without running; no mirrored event database.
-Standalone SDK conversations are not automatically registered in Agent Server or
-Canvas. Browser rendering remains unverified; local native persistence is the
-observation source. Old remote task state/evidence is retained, not auto-migrated.
-
-## Offline verification
-
-```bash
-python3 -S -m unittest tests_native.test_product tests_native.test_sandbox -v
-# Installed SDK Python (includes real no-inference construction/resume/Stop):
-python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_sandbox -v
-python3 -S -m native_remediation check-task --task examples/maven-task.json
+python3 -S -m unittest tests_native.test_product tests_native.test_local_execution -v
+# Installed SDK Python:
+python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution -v
 python3 -S -m compileall -q native_remediation tests_native
 git diff --check
 ```
 
-Historical remote contract probes are preserved separately; they need not be
-repeated for standalone SDK verification. No offline result is live remediation,
-container security certification, real OSV coverage or GitHub delivery proof.
+31 native-runtime tests and 24 stdlib tests pass. Actual native workspace/terminal/
+persistence/Stop probes use safe temporary directories and no inference. Executable
+Maven/OSV stand-ins and controlled pipeline outputs are not real toolchain or
+remediation proof. SDK execute_command emits non-fatal ResourceWarnings; no SDK
+patch was made. No model, real target build, target edit, network analysis or PR ran.

@@ -14,6 +14,19 @@ class Blocked(RuntimeError):
     pass
 
 
+def require_independent_authority():
+    """No same-user host execution can enforce the required authority separation.
+
+    Deliberately no bypass flag: authorizing model cost is not authorizing loss
+    of the independent acceptance/credential boundary. Fixtures may mock this
+    guard; that is not a deployment mechanism or live proof.
+    """
+    raise Blocked("LocalWorkspace/TerminalTool execute as the host user: independent "
+                  "preparation/acceptance records and delivery credentials cannot be protected "
+                  "from agent commands or repository build code. Required authority separation "
+                  "is unsupported; live execution/acceptance/delivery blocked.")
+
+
 def read(path):
     return json.loads(Path(path).read_text())
 
@@ -49,9 +62,11 @@ def lock(state):
 
 
 def environment():
-    # Never pass control-plane/model credentials to Maven/scanner/Git children.
+    # Omit explicit control-plane/model credential variables, not a host sandbox.
     allowed = {"PATH", "HOME", "USER", "LANG", "LC_ALL", "JAVA_HOME", "SSL_CERT_FILE",
-               "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "TMPDIR"}
+               "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "TMPDIR",
+               "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY",
+               "http_proxy", "https_proxy", "all_proxy", "no_proxy"}
     return {k: v for k, v in os.environ.items() if k in allowed}
 
 

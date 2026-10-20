@@ -1,34 +1,38 @@
 # Autonomous OSS Vulnerability Remediation
 
-A single autonomous engineering agent built on the **standalone OpenHands Python
-SDK 1.55.1**. No Agent Server, custom server, database, scheduler, UI or model loop.
-Branch: `autonomous-oss-remediation`; `openhands-native-product` remains preserved.
+One autonomous engineering agent using the **standalone OpenHands SDK/tools 1.55.1**.
+Branch: `autonomous-oss-remediation`. No custom server, database, scheduler,
+UI, model loop, Docker image, shell launcher or offline-only network requirement.
 
-**Implemented and offline-verified, not live-proven remediation.** The SDK
-conversation is created idle, deterministic preparation completes, and a durable
-identity-bound baseline receipt is checked before sending the objective and
-calling `conversation.run()`. Recovery restores native persistence and checks
-the receipt again. Independent native Stop validation alone can authorize delivery.
+The local path uses `LocalWorkspace(state/workspace)` and native persistent
+`TerminalTool` with the host shell. Existing deterministic Maven/OSV code uses
+the existing bounded local argv executor and host tools/proxies. Native
+Conversation persistence/resume, the durable COMPLETE preparation gate, cycle
+evidence, Stop validation and exact-tree PASS-only draft-delivery logic remain.
 
-Agent commands use the native TerminalTool with a container shell; repository
-builds are also containerized. The host holds preparation/acceptance evidence and
-delivery credentials. There is no unsafe host-execution fallback. An approved,
-locally provisioned immutable toolchain image is required and is **not present in
-the current environment**. Network is disabled inside these containers; arbitrary
-online Maven resolution/research is not yet supported. See the actual limits in
-[operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATION.md)
-and the [contract](PRODUCT-CONTRACT.md).
+**LocalWorkspace is not a sandbox.** Private state/policy/preparation/acceptance
+records and SDK persistence are outside the repository workspace. No agent tool
+provides acceptance/delivery authority. However a same-user shell or repository
+build can still access those files and host credentials. Directory placement,
+0600 permissions, stripped environment variables and instructions do not enforce
+separation from that same OS user.
 
-Offline checks (no model, target modifications or PR):
+**Live product execution remains BLOCKED on that exact mandatory trust guarantee.**
+`require_independent_authority()` refuses real repository build/acceptance, model
+dispatch and GitHub delivery; there is no bypass flag or replacement infrastructure.
+Safe trusted temporary fixtures test the local mechanisms without claiming this
+boundary exists. This is not a Docker/image or remote Agent Server limitation.
+
+Read [operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATION.md),
+[contract](PRODUCT-CONTRACT.md) and [handoff](ENGINEERING-HANDOFF.md).
+Offline checks:
 ```bash
 python3 -S -m native_remediation check-task --task examples/maven-task.json
-python3 -S -m unittest tests_native.test_product tests_native.test_sandbox -v
-# In the existing SDK 1.55.1 Python environment:
-python -m unittest tests_native.test_sdk_contract -v
+python3 -S -m unittest tests_native.test_product tests_native.test_local_execution -v
+# Existing installed SDK Python:
+python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution -v
 ```
 
-The previous remote-server blocker is retained as [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
-not a blocker to the standalone SDK calling pattern. Milestone 1 evidence and
-PR #214 remain at commit `f72e5308704960ee911f382f96bf0b7948435216`; they prove
-the prior one-file smoke, not this Maven/OSV product path. No live run is authorized
-by this README or by passing offline tests.
+No Gemini execution, target modification, real Maven/OSV analysis or PR is authorized.
+Historical smoke/PR #214 at f72e5308704960ee911f382f96bf0b7948435216 remains separate
+evidence, not proof of this product's security or full remediation behavior.

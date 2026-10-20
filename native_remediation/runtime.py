@@ -4,26 +4,25 @@ import uuid
 
 from .contract import context, load_task
 from .delivery import deliver
-from .files import Blocked, digest, lock, read, write
+from .files import Blocked, digest, lock, read, write, require_independent_authority
 from .journal import final_outcome
 from .native import task_message
 from .repository import check_paths, prepare, snapshot, text, verify_base
 from .validation import compare, evaluate
 
 
-def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None, sandbox_check=None):
+def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None):
     """Create an idle native conversation, then deterministic preparation only.
 
     An interrupted preparation is never silently repeated. No task message or
     model execution is possible here.
     """
     from pathlib import Path
-    from . import sandbox
     from .native import open_conversation
+    default_preparation = preparer is None and evaluator is None
     factory = factory or open_conversation
     preparer = preparer or prepare
     evaluator = evaluator or evaluate
-    sandbox_check = sandbox_check or sandbox.check
     task = load_task(task)
     state = Path(state).expanduser().resolve()
     state.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -35,7 +34,8 @@ def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None, sa
         with lock(state):
             write(state / "preparation-intent.json", dict(conversationId=bound["conversationId"],
                   taskDigest=bound["taskDigest"], at=time.time()), exclusive=True)
-            sandbox_check(task)
+            if default_preparation:
+                require_independent_authority()
             workspace = preparer(state, task)
             tree = text(workspace, "rev-parse", task["base_sha"] + "^{tree}")
             baseline = evaluator(workspace, tree, task, state / "baseline", deadline=min(
@@ -84,19 +84,18 @@ def require_preparation(state):
 def dispatch(state, *, resume_reason=None, factory=None, preflight=None):
     """Application gate around the official SDK run; OpenHands owns every step."""
     import fcntl
-    from . import sandbox
     from .native import open_conversation
     from .preflight import check
     factory = factory or open_conversation
     preflight = preflight or check
     state, bound, task = require_preparation(state)
+    require_independent_authority()
     # A separate lifetime lock avoids deadlocking synchronous Stop/journal hooks.
     with (state / "execution.lock").open("a") as execution:
         try:
             fcntl.flock(execution, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             raise Blocked("Another SDK process owns this task; never execute concurrently") from None
-        sandbox.stop_agent(state)
         with lock(state):
             require_preparation(state)
             if (state / "result.json").exists() or (state / "delivery.json").exists():
@@ -108,7 +107,6 @@ def dispatch(state, *, resume_reason=None, factory=None, preflight=None):
             if not runs and snapshot(state / "workspace", task) != read(state / "baseline.json")["tree"]:
                 raise Blocked("Workspace drifted before first model execution")
             verify_base(task)
-            sandbox.check(task)
             preflight(task)
         conversation = factory(state, bound, task)
         try:
@@ -153,13 +151,13 @@ def dispatch(state, *, resume_reason=None, factory=None, preflight=None):
             return status(state, conversation)
         finally:
             conversation.close()
-            sandbox.stop_agent(state)
 
 
 def hook(state, event, *, evaluator=None, delivery=deliver):
     state, bound, task = context(state)
+    default_acceptance = evaluator is None
     evaluator = evaluator or evaluate
-    working_dir = state / ("control" if bound.get("executionFramework") else "workspace")
+    working_dir = state / "workspace"
     with lock(state):
         if (event.get("event_type") != "Stop" or event.get("session_id") != bound["conversationId"]
                 or event.get("metadata", {}).get("reason") != "agent_finished"
@@ -167,8 +165,8 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
             raise Blocked("Native Stop event identity mismatch")
         if bound.get("executionFramework"):
             require_preparation(state)
-            from .sandbox import stop_agent
-            stop_agent(state)
+        if default_acceptance:
+            require_independent_authority()
         workspace = state / "workspace"
         tree = snapshot(workspace, task)
         outcome = final_outcome(state, tree)

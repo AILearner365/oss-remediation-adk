@@ -63,8 +63,6 @@ def execute(args):
             write(state / "result.json", dict(outcome="DELIVERED", **delivered))
             return delivered
     if args.action == "doctor":
-        from .sandbox import check
-        check(task)
         return preflight.check(task)
     if args.action in ("run", "resume"):
         if not args.authorize_run_and_delivery:

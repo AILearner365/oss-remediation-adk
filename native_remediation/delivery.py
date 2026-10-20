@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 
 from .contract import context
-from .files import Blocked, digest, read, write
+from .files import Blocked, digest, read, write, require_independent_authority
 from .repository import commit_tree, snapshot, text, url
 
 
@@ -35,12 +35,11 @@ class GitHub:
 
 
 def deliver(state, accepted, *, github=None):
+    require_independent_authority()
     state, bound, task = context(state)
     if bound.get("executionFramework"):
         from .runtime import require_preparation
-        from .sandbox import stop_agent
         require_preparation(state)
-        stop_agent(state)
     workspace = state / "workspace"
     if (accepted.get("outcome") != "PASS" or accepted.get("conversationId") != bound["conversationId"]
             or accepted.get("baseCommit") != task["base_sha"] or accepted.get("taskDigest") != bound["taskDigest"]):

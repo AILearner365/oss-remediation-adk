@@ -1,12 +1,15 @@
 # Product contract — Autonomous OSS Vulnerability Remediation
 
-Status: **standalone SDK implementation, offline-verified; no live remediation
-proof**. OpenHands is the framework, not the product identity. Use SDK/tools 1.55.1,
+Status: **local standalone SDK implementation; live execution BLOCKED on
+independent authority, no live remediation proof**. Use SDK/tools 1.55.1,
 not an Agent Server extension. Normal execution creates/restores a local native
 conversation, prepares deterministically, gates on durable COMPLETE evidence, then
 sends the task and calls run(). Missing evidence blocks initial/recovery execution.
-Deployment is currently blocked on an approved local sandbox/toolchain image;
-networked resolution/research and real container isolation remain unverified.
+No Docker image/launcher or offline-only networking is required. LocalWorkspace
+and native TerminalTool execute on the host, not in a sandbox. Same-user shell/
+build code can access trusted records and credentials outside its working directory;
+the mandatory authority separation below is not established. Live build/acceptance,
+model dispatch and delivery fail closed on that exact unsupported guarantee.
 See [implementation](docs/IMPLEMENTATION.md) and [operations](docs/OPERATIONS.md).
 Historical Milestone 1 smoke remains at f72e5308704960ee911f382f96bf0b7948435216.
 
@@ -60,17 +63,19 @@ and (F) preparation authority isolated from agent-controlled content/commands.
 Preparation is deterministic code, never an agent-selected reasoning step.
 Untrusted Maven build logic must not gain trusted evidence/credential authority.
 
-These are implemented through the standalone caller gate and durable receipt,
-not SessionStart or remote /run. SDK history is restored natively. Trusted state
-and delivery credentials stay on the host; agent terminal/build commands use
-restricted containers with explicit writable raw-source mounts only. The host
-LocalWorkspace is a separate trusted control directory to avoid repository plugin
-execution. No host file-editor/arbitrary execution capability is exposed. A small
-SDK cycle-evidence tool accepts data only and never grants acceptance authority.
-Actual container/toolchain security is not yet deployment-verified; an approved
-immutable local image is required, and containers have no network. The earlier
-remote gate limitations remain [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
-not a reason to reject the supported standalone sequence.
+A–E have an implementation through the standalone caller gate, durable receipt
+and native SDK persistence, with scoped offline verification. F is **not satisfied**
+by host LocalWorkspace/TerminalTool or local Maven. State/policy/preparation/
+acceptance records and credentials remain outside the repository, but that is
+organizational separation, not protection from the same user. No agent tool
+provides acceptance/delivery operations; shell filesystem/process access is still
+unrestricted. SDK lazy repository plugin loading can also execute repository code.
+files.require_independent_authority blocks live dispatch, default untrusted builds/
+acceptance and delivery before treating those records as independently trusted.
+There is no override flag, new isolation design or weakened acceptance rule.
+Safe fixtures may replace this guard to verify contracts, never as live proof.
+The earlier remote limitations remain [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
+not a blocker to the local SDK lifecycle APIs themselves.
 
 ## Inputs and outputs
 
@@ -84,13 +89,13 @@ Output: deterministic baseline; per-cycle facts/assumptions, candidate rationale
 
 **NOT PROVEN by smoke:** Maven/OSV validator under native Stop Hook; full goal remediation; cycles/denials on this adapter; agent reasoning quality; policy/scanner coverage; production durability/recovery; Canvas browser activity; secure production multi-user isolation. Earlier experiments support design but are not equivalent to production proof.
 
-Known limits: no provisioned sandbox image or live container/toolchain proof;
-network-disabled commands require offline dependencies/OSV/research evidence;
-persistent ADC setup and durable local claims remain deployment responsibilities;
-native command-hook infrastructure can fail open but cannot by itself establish
-product success. SDK host and container share a numeric UID, not filesystem/process
-authority; the container boundary must be verified on deployment. The native
-terminal handles edits because host FileEditor would breach that boundary.
+Known limits: same-user host authority cannot enforce the independent trust
+guarantee, so normal live execution/acceptance/delivery remain blocked. Host network
+and proxy settings are allowed, not forced offline; real Maven/OSV/research and
+full remediation were not exercised. Persistent ADC and durable local claims
+remain deployment responsibilities. Native command-hook infrastructure can fail
+open but cannot itself establish product success. Background process quiescence
+and production-grade security isolation are not claimed for host LocalWorkspace.
 Historical smoke-specific iteration/whitelist restrictions are not acceptance
 defaults for remediation. No live model or target PR is authorized here.
 

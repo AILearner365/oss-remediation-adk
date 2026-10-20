@@ -1,47 +1,42 @@
-# Autonomous OSS Vulnerability Remediation — engineering handoff
+# Autonomous OSS Vulnerability Remediation — handoff
 
-Product branch: `autonomous-oss-remediation`. Preserve the original local/remote
-`openhands-native-product` branch at `11431b428a69f4525679bda5880bf0a0d05137bc`.
-Read [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) and [operations](docs/OPERATIONS.md).
+Continue on `autonomous-oss-remediation`; preserve `openhands-native-product`
+at 11431b428a69f4525679bda5880bf0a0d05137bc and all previous evidence/history.
 
-## Implemented direction
+The selected framework is standalone OpenHands SDK/tools 1.55.1. LocalWorkspace
+uses the actual repository path; native TerminalTool uses its normal persistent
+host shell. Mandatory sandbox.image, Docker checks/launcher/cleanup and forced
+network=none were removed. Existing bounded local command execution supplies
+Maven/OSV and retains configured proxy variables. No new runner/framework/service.
 
-Use the official standalone OpenHands SDK/tools 1.55.1. `native.open_conversation`
-uses Conversation, LocalWorkspace, persistence_dir, conversation_id and explicit
-native Stop hooks. The supported caller sequence is idle SDK initialization,
-trusted deterministic preparation/baseline, durable COMPLETE gate, send_message,
-run. This replaces remote HTTP creation, lazy-hook attachment reconciliation and
-remote dispatch. No SDK internals were changed and no second agent loop was added.
+The lifecycle implementation remains idle SDK creation/restore, deterministic
+preparation, durable identity-bound COMPLETE, send_message/run, native Stop,
+independent acceptance and PASS-only exact-tree draft delivery. SDK owns history,
+status and reasoning; application records only task/evidence/budgets/claims.
+Retain all policy/scanner/coverage, intent/outcome/reassessment and delivery guards.
 
-Keep existing repository/policy checks, exact Git exports, Maven/OSV coverage and
-PASS/FAIL/INCONCLUSIVE acceptance, bounded intent/outcome records, and draft-only
-exact-tree delivery with claims/reconciliation. Native SDK persistence owns history
-and execution state. The application owns only task/evidence/budgets/side-effect claims.
+**Do not claim authority isolation.** State and credentials are outside the
+workspace, but LocalWorkspace/TerminalTool and Maven execute as the host user.
+They can access sibling state/home/credentials, create background processes, and
+load repository code/plugins. A working directory is not a process/filesystem
+boundary. No agent-facing acceptance/delivery tool is provided, which does not
+remove that physical authority.
 
-LocalWorkspace itself is not an isolation boundary. Host control workspace is
-private, not the agent repository. Native terminal shell_path enters a restricted,
-short-lived Docker container. Only repository files are writable to the agent;
-Git metadata and baseline are read-only. Repository builds see only raw source,
-build cache and explicitly supplied scanner inputs, never trusted decisions or
-credentials. A small SDK cycle_evidence tool records untrusted agent-authored
-intent/outcome without granting acceptance or arbitrary host execution.
+The mandatory inability of agent/build code to modify trusted decisions or obtain
+delivery credentials is therefore unsupported in this local deployment. Existing
+production build/acceptance, dispatch and delivery paths fail closed with a
+specific Blocked error. There is deliberately no security-override flag. Offline
+fixtures may replace that guard to verify the retained contracts; this is not a
+runtime alternative, live authorization or security proof.
 
-## Verified versus remaining
+31 focused tests pass in installed SDK Python (24 stdlib product/local checks).
+Real SDK tests cover idle persistence, retained Stop denial, evidence-tool use,
+host workspace commands and persistent terminal invocation without inference.
+Maven/OSV stand-ins and controlled outputs do not prove real analysis. The SDK
+workspace command helper emits non-fatal ResourceWarnings in this installation;
+vendor code is untouched.
 
-Focused offline tests cover idle native SDK creation/restoration without inference,
-preparation ordering/failure, durable evidence and one-shot/bounded recovery gates,
-native Stop denial, independent validation and exact-tree delivery. Container
-launch policy is tested with doubles, not a live isolation or remediation proof.
-Historical remote probes remain available but are not repeated by these checks.
-
-The environment has no approved local toolchain image. Provision an immutable
-image ID and offline dependencies/SBRI/research references, then verify the real
-container boundary/toolchain without inference. Network is deliberately disabled;
-online Maven/OSV/research requires separately reviewed egress controls that cannot
-expose host/cloud credentials. Do not enable bridge/host networking as a shortcut.
-Persistent ADC, local-claim durability and Canvas browser rendering remain
-deployment/unverified limitations. SDK conversations are not automatically visible
-in the old Agent Server/Canvas.
-
-No model call, live remediation, target edit or PR is authorized. Do not claim
-full live readiness from mocks or repeat the remote-server architecture investigation.
+See [operations](docs/OPERATIONS.md) and [proof map](docs/IMPLEMENTATION.md).
+The unresolved decision is the mandatory authority requirement in the selected
+same-user host environment, not SDK lifecycle support or image provisioning.
+Do not invent infrastructure, weaken acceptance, run Gemini or create target PRs.
