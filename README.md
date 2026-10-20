@@ -39,9 +39,9 @@ Read [operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATIO
 Offline checks:
 ```bash
 python3 -S -m native_remediation check-task --task examples/maven-task.json
-python3 -S -m unittest tests_native.test_product tests_native.test_local_execution tests_native.test_parity -v
+python3 -S -m unittest discover -s tests_native -v
 # Existing installed SDK Python:
-python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution tests_native.test_parity tests_native.test_sdk_parity -v
+python -m unittest discover -s tests_native -v
 ```
 
 No Gemini execution, target modification, real Maven/OSV analysis or PR is authorized.

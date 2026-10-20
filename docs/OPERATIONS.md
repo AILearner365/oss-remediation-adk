@@ -73,6 +73,7 @@ python -m native_remediation doctor --state /private/task
 python -m native_remediation reconcile-delivery --state /private/task
 python -m native_remediation self-validate --state /private/task
 python -m native_remediation sbri --state /private/task --ranges 4.1.x --scopes compile runtime
+python -m native_remediation sbri --state /private/task --refresh
 ```
 
 check-task is offline validation, not readiness or permission. The example base is
@@ -118,6 +119,36 @@ commit parent/tree, create-only branch, exact open draft head/base checks, durab
 claim and positive reconciliation; uncertain push/POST is never blindly repeated.
 The local trust guard prevents actual delivery while independence is unestablished.
 
+## P1 baseline and execution semantics
+
+Baseline COMPLETE requires matching reactor graphs/resolved inventory, exact OSV
+coverage, configured minimum tests and successful required checks. All existing
+tools.checks and constraints are baseline AND candidate invariants; there is no
+automatic final-only exemption. Vulnerability findings may exist in a reliable
+baseline, but missing coverage, failed required checks and invalid evidence cannot
+start the agent. Receipt creation and every dispatch/resume recheck this contract.
+
+Native PreToolUse requires explicit finite positive terminal timeouts within
+command_seconds and remaining task admission time. Use native polling/interrupts;
+Ctrl-C/Ctrl-D/Ctrl-Z control inputs remain available after expiry. A native timeout
+returns control, not a guarantee to kill the command/background descendants.
+task_seconds gates dispatch, terminal admission and deterministic evaluations; it
+is NOT an enforced hard wall-clock kill switch for conversation.run(). Deterministic
+Maven/OSV/SBRI still use bounded commands and existing process-group cleanup. Hook
+infrastructure can fail open in SDK 1.55.1; direct execute_tool bypasses action
+hooks. Production remains P0-blocked, not protected by this policy alone.
+
+Both pre-edit and agent SBRI calls automatically forward approved Maven profiles,
+scopes and timeouts. Fresh successful results are reused, expired results refreshed,
+and known inconclusive results retried after sbri.retry_seconds within the total
+call budget. An operator may request --refresh; no refresh input is added to the
+agent tool. Interrupted/uncertain claims do not replay. Ordinary execution/report
+failures retain reasons/raw references and do not invalidate an otherwise complete
+baseline; integrity/authority violations still block. Cache summary/canonical JSON
+checksums detect altered evidence, not same-user authority attacks. Raw command
+logs stay private. Backend and scanner identity hashes plus optional backend_version
+label aid provenance; TTL does not prove external advisory/publication freshness.
+
 Host background processes cannot be reliably quiesced by these SDK facilities.
 A Git tree snapshot is immutable but does not establish host authority isolation.
 Native command hook infrastructure may fail open; status still refuses product
@@ -138,14 +169,16 @@ rendering remains unverified. Historical remote evidence/probes are preserved;
 they were not repeated.
 
 ```bash
-python3 -S -m unittest tests_native.test_product tests_native.test_local_execution tests_native.test_parity -v
+python3 -S -m unittest discover -s tests_native -v
 # Installed SDK Python:
-python -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution tests_native.test_parity tests_native.test_sdk_parity -v
+python -m unittest discover -s tests_native -v
 python3 -S -m compileall -q native_remediation tests_native
 git diff --check
 ```
 
-41 native-runtime tests and 33 stdlib tests pass. Actual native workspace/terminal/
+The complete discovered suite includes P1 regressions and SDK-specific tests.
+Historical remote Agent Server probes skip when that package is not installed;
+no remote service is required. Actual native workspace/terminal/
 persistence/Stop probes use safe temporary directories and no inference. Executable
 Maven/OSV stand-ins and controlled pipeline outputs are not real toolchain or
 remediation proof. SDK execute_command emits non-fatal ResourceWarnings; no SDK

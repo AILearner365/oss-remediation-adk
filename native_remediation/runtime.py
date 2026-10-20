@@ -8,7 +8,7 @@ from .files import Blocked, digest, lock, read, write, require_independent_autho
 from .journal import final_outcome
 from .native import task_message
 from .repository import check_paths, prepare, snapshot, text, verify_base
-from .validation import compare, evaluate
+from .validation import compare, evaluate, require_baseline
 
 
 def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None):
@@ -46,8 +46,7 @@ def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None):
                 bound["createdAt"] + task["limits"]["task_seconds"],
                 time.time() + task["limits"]["validation_seconds"]))
             write(state / "baseline.json", baseline, exclusive=True)
-            if baseline["outcome"] != "COMPLETE" or baseline["tree"] != tree:
-                raise Blocked("Baseline incomplete; no task message or model execution permitted")
+            require_baseline(baseline, tree, task)
             if task["sbri"]["pre_edit"]:
                 from .capabilities import sbri
                 # SBRI holds its own evidence lock; run below outside this lock.
@@ -86,6 +85,7 @@ def require_preparation(state):
         taskDigest=bound["taskDigest"], repository=task["repository"], baseCommit=task["base_sha"],
         baseTree=text(state / "workspace", "rev-parse", task["base_sha"] + "^{tree}"),
         baselineDigest=digest(baseline))
+    require_baseline(baseline, expected["baseTree"], task)
     if "sbriDigest" in receipt:
         expected["sbriDigest"] = digest(read(state / "sbri-pre-edit.json")) if (state / "sbri-pre-edit.json").exists() else None
     coverage = baseline.get("coverage", {})
@@ -245,6 +245,32 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
                         additionalContext="Reassess facts/candidates using this evidence; preserve a concise material decision when useful. "
                         + str(accepted["reasons"])[:3000])
         return complete(state, accepted, delivery=delivery)
+
+
+def terminal_hook(state, event):
+    """Native PreToolUse policy; bound foreground waits, not a process sandbox.
+
+    Direct SDK execute_tool bypasses native action hooks and is trusted-caller
+    functionality, not a product agent execution path. Hook infrastructure can
+    fail open in the installed SDK; this does not establish P0 authority.
+    """
+    import math
+    state, bound, task = context(state)
+    if (event.get("event_type") != "PreToolUse" or event.get("tool_name") != "terminal"
+            or event.get("session_id") != bound["conversationId"]
+            or event.get("working_dir") != str(state / "workspace")):
+        raise Blocked("Native terminal event identity mismatch")
+    action = event.get("tool_input") or {}
+    if action.get("is_input") is True and action.get("command") in ("C-c", "C-d", "C-z"):
+        return dict(decision="allow", reason="Terminal control input")
+    require_preparation(state)
+    timeout = action.get("timeout")
+    maximum = min(task["limits"]["command_seconds"],
+                  bound["createdAt"] + task["limits"]["task_seconds"] - time.time())
+    if (type(timeout) not in (float, int) or not math.isfinite(timeout) or not 0 < timeout <= maximum):
+        return dict(decision="deny", reason="Terminal needs an explicit finite timeout in (0, " + str(maximum) + "] seconds",
+                    additionalContext="Use native soft-timeout/polling and interrupt when necessary; no command was started.")
+    return dict(decision="allow", reason="Foreground wait within configured command/task admission budget")
 
 
 def complete(state, accepted, *, delivery=deliver):

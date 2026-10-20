@@ -30,8 +30,10 @@ authorization and independent PASS. Respect bounds and report honest failure.
 def hook_config(state, task):
     from openhands.sdk.hooks import HookConfig
     hook = shlex.join([sys.executable, str(ENTRY), "hook", "--state", str(state)])
+    terminal = shlex.join([sys.executable, str(ENTRY), "terminal-hook", "--state", str(state)])
     return HookConfig(stop=[dict(matcher="*", hooks=[dict(type="command", command=hook,
-        timeout=task["limits"]["validation_seconds"] + 300)])])
+        timeout=task["limits"]["validation_seconds"] + 300)])],
+        pre_tool_use=[dict(matcher="terminal", hooks=[dict(type="command", command=terminal, timeout=10)])])
 
 
 def open_conversation(state, bound, task):
@@ -54,7 +56,8 @@ def open_conversation(state, bound, task):
     workspace.mkdir(exist_ok=True, mode=0o700)
     agent = Agent(llm=LLM(model=task["model"], usage_id="oss-remediation",
                          stream=False, num_retries=0, timeout=120),
-        tools=[Tool(name=TerminalTool.name, params=dict(terminal_type="subprocess")),
+        tools=[Tool(name=TerminalTool.name, params=dict(terminal_type="subprocess",
+                    no_change_timeout_seconds=min(10, task["limits"]["command_seconds"]))),
                Tool(name=TaskTrackerTool.name), Tool(name=CycleEvidenceTool.name),
                Tool(name=ValidateRemediationTool.name), Tool(name=SbriIntelligenceTool.name)],
         system_prompt_kwargs=dict(cli_mode=True), agent_context=AgentContext(
@@ -99,6 +102,7 @@ def task_message(state, bound, task, baseline):
         + "\nUse validate_remediation for complete-project self-checks; it never accepts or delivers."
         + "\nNative terminal executes on the host; edit via ordinary shell tools. It is not a sandbox."
         + "\nUse authorized host networking/proxies for Maven, OSV and research."
+        + "\nTerminal commands/polls require an explicit positive timeout no greater than limits.command_seconds or the remaining task admission budget. Native timeouts return control; they do not kill background processes. Ctrl-C/Ctrl-D remain available."
         + "\nRepository is the terminal's initial directory. Use /tmp for scratch files."
         + "\nOptional decision record: strategy, rationale; observations/evidence_refs optional."
         + "\nOptional outcome: summary, goal_status; remaining_uncertainty/evidence_refs optional."

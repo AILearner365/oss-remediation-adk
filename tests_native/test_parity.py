@@ -150,8 +150,11 @@ class CapabilityParityTests(GitFixture):
         def runner(argv, cwd, timeout, output):
             calls.append(argv)
             destination = Path(argv[argv.index("--output") + 1])
-            write(destination / "result.json", dict(status="SUCCESS", releases=[dict(version="4.0.8",
-                  assessment_status="COMPLETE", rank=1)], execution=dict(release_selection=dict(mode="explicit"))))
+            selected = ["4.0.8"] if "--releases" in argv else ["4.1.1"]
+            write(destination / "result.json", dict(schema_version="1.0", status="SUCCESS",
+                releases=[dict(version=v, assessment_status="COMPLETE", rank=1) for v in ["4.0.6", *selected]],
+                execution=dict(profiles=[], scopes=argv[argv.index("--scopes") + 1].split(","),
+                               release_selection=dict(mode="explicit", resolved_candidates=selected))))
             return dict(exitCode=0, timedOut=False)
         first = capabilities.sbri(self.state, scopes=["test"], runner=runner)
         self.assertEqual(first["status"], "COMPLETE")

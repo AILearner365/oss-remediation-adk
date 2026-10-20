@@ -76,8 +76,8 @@ Official sources:
 [standalone examples](https://github.com/OpenHands/software-agent-sdk/tree/main/examples/01_standalone_sdk).
 Installed source and real no-model tests determine version compatibility.
 
-Focused verification: 41 tests pass in installed SDK Python; 33 product/local/parity
-tests pass with stdlib Python. Covers actual local command/terminal persistence,
+At the behavioral-parity milestone, 41 tests passed in SDK Python and 33
+product/local/parity tests passed with stdlib Python. That coverage included local command/terminal persistence,
 SDK idle persistence/restore, Docker-free fixture preparation, durable gate/failure/
 resume checks, native Stop denial, cycle evidence, controlled Maven/OSV outputs,
 safe executable stand-ins, proxy propagation, exact-tree delivery/reconciliation,
@@ -119,3 +119,34 @@ BOUNDED_FAILURE. delivery.deliver independently rejects missing explicit draft_p
 authorization. Original validation/delivery safeguards remain; no live guard was
 removed. Tests cover actual SDK tool dispatch with mocked capability results,
 not live Maven/OSV/SBRI execution or Gemini compliance.
+
+## P1 correction status
+
+The historical [readiness review](SDK-P0-P1-READINESS-REVIEW.md) is preserved as a
+snapshot, not overwritten. P0 implementation is deferred: files.py, the
+unconditional require_independent_authority guard, delivery.py, evidence.py and
+the POC Skills/general guidance are unchanged in this correction.
+
+| Issue | Implemented correction | Evidence and limits |
+| --- | --- | --- |
+| Artificial Boot downgrades | validation.module_versions recovers ownership from existing reactor graphs. compare checks each module's movement, skips identical sets, and leaves unresolved changed sets INCONCLUSIVE rather than inventing pairings | test_p1.BootPolicyTests: unchanged, patch/minor/major, real/mixed downgrade, module swaps, invalid and absent ownership. PROVEN offline |
+| Strict baseline | require_baseline validates COMPLETE, tree, graphs/inventory, modules/properties, coverage, tests and findings before receipt and at every preparation check. evaluate enforces minimum tests. Existing checks/constraints remain mandatory on BOTH baseline and candidate; no final-only exemption was needed or added | StrictBaselineTests: incomplete/invalid evidence never reaches dispatch, no COMPLETE receipt on bad graph evidence, configured invariant failure remains FAIL in both phases. PROVEN offline |
+| SBRI approved graph | Same adapter for pre-edit/tool forwards --profiles and --timeout automatically; agent schema remains versions/ranges/scopes only | Profiled reuse fixtures plus actual pinned historical sbri_cli.py parser with fixture Evaluator; backend/network analysis NOT PROVEN |
+| Optional failures | Missing/malformed/partial/failed reports retain UNAVAILABLE/INCONCLUSIVE, reasons, private command/raw references; source/task/cache integrity still blocks | SbriCorrectionTests include successful preparation despite malformed optional output, interrupted claims, unknown termination, task/tree/cache tampering. PROVEN offline |
+| Cache validity | Request binds tree/task/conversation/profiles/candidates/scopes/config and executable identities. COMPLETE TTL and known-failure cooldown trigger bounded refresh/retry; operator --refresh, no new agent argument. Interrupted/uncertain execution never blindly repeats. Summary/canonical checksums preserve evidence integrity | Expiry, reuse, different candidates/scopes/tree/backend/settings, refresh, budget and corruption fixtures. PROVEN offline; backend_version is an approved label, not a version probe; external advisory freshness and installed backend dependencies are not snapshotted |
+| Terminal waits | Native synchronous PreToolUse terminal hook denies missing, nonfinite or excessive timeout and validates task/preparation identity. Explicit native timeout bounds foreground waits; no-change timeout also capped. Existing Stop Hook and process cleanup retained | Real native HookEventProcessor marks actions blocked; real terminal sleep fixture returns at native timeout and permits interrupt, without run()/LLM. PROVEN offline, not a hard process lifetime/task wall-clock boundary |
+
+Full discovery command is `python -m unittest discover -s tests_native -v` in
+the pinned SDK/Tools 1.55.1 runtime. The complete suite includes prior acceptance,
+delivery, resume, Skills and self-validation separation tests. Historical remote
+Agent Server probes are preserved and skip when that optional package is absent.
+Verification on 2026-10-20: 75 discovered, 70 passed and five historical
+Agent Server probes skipped; stdlib-only discovery: 60 passed and 15 expected
+SDK/Agent Server skips. Compile, shell syntax, task-schema and diff checks passed.
+SBRI is not installed/discoverable here; actual retained CLI parsing uses a
+fixture backend and makes no publication/scanner request. Full SBRI analysis,
+Gemini behavior and live remediation remain NOT PROVEN. No target changes or PRs.
+
+Native hook infrastructure can fail open; execute_tool bypasses action hooks.
+The task duration is explicitly an admission/evaluation deadline, not a hard
+run() deadline. P0 remains BLOCKED and is neither implemented nor waived by P1.

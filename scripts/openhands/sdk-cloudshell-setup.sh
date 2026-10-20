@@ -90,7 +90,7 @@ case "${1:-}" in
   test)
     check_install || die "SDK missing; run prepare"
     cd "$REPO"
-    "$PY" -m unittest tests_native.test_product tests_native.test_sdk_contract tests_native.test_local_execution tests_native.test_parity tests_native.test_sdk_parity -v
+    "$PY" -m unittest discover -s tests_native -v
     ;;
   python)
     check_install || die "SDK missing; run prepare"

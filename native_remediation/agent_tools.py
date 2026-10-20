@@ -67,6 +67,7 @@ class SbriIntelligenceTool(ToolDefinition):
     def create(cls, conv_state):
         return [cls(description="Optional existing SBRI CLI intelligence on the current tree. "
             "Request explicit versions OR release ranges, optional scopes; omitted inputs use approved task defaults. "
+            "Approved Maven profiles and tool settings are forwarded automatically; fresh cached results are reused, stale/known-inconclusive results retried within budget. "
             "Coverage/rank is bounded evidence, not compatibility or a prescribed Boot upgrade. "
             "Unavailable/partial results do not mean zero findings. Results retain raw evidence and reuse matching requests.",
             action_type=SbriAction, observation_type=EvidenceObservation, executor=SbriExecutor())]

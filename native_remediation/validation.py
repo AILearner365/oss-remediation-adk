@@ -133,6 +133,61 @@ def test_counts(source):
     return count
 
 
+def module_versions(inventory):
+    """Recover ownership from existing resolved graphs, never pair version sets.
+
+    Older records without graphs have no module ownership evidence.
+    """
+    graphs = inventory.get("graphs")
+    if not graphs:
+        return None
+    roots = [row["graph"] for row in graphs]
+    identity = lambda node: tuple(node[k] for k in ("groupId", "artifactId", "version"))
+    reactor = {identity(root) for root in roots}
+    modules = {}
+    for root in roots:
+        module = root["groupId"] + ":" + root["artifactId"]
+        if module in modules:
+            raise ValueError("Duplicate reactor module")
+        packages = modules[module] = {}
+        def walk(node):
+            coordinates = identity(node)
+            if any(not isinstance(v, str) or not v or "${" in v for v in coordinates):
+                raise ValueError("Unresolved graph identity")
+            if coordinates not in reactor:
+                packages.setdefault(coordinates[0] + ":" + coordinates[1], set()).add(coordinates[2])
+            for child in node.get("children", []):
+                walk(child)
+        walk(root)
+    if set(modules) != set(inventory["modules"]):
+        raise ValueError("Incomplete module ownership evidence")
+    actual = {(name, version) for packages in modules.values() for name, versions in packages.items()
+              for version in versions}
+    if actual != {(p["name"], p["version"]) for p in inventory["packages"]}:
+        raise ValueError("Graph/package inventory disagreement")
+    return modules
+
+
+def require_baseline(baseline, tree, task):
+    """COMPLETE includes resolution, all configured checks and exact coverage."""
+    try:
+        inventory, coverage = baseline["inventory"], baseline["coverage"]
+        packages = {(p["name"], p["version"]) for p in inventory["packages"]}
+        valid = (baseline["outcome"] == "COMPLETE" and baseline["tree"] == tree
+            and not baseline.get("reasons") and bool(packages)
+            and coverage.get("complete") is True
+            and type(coverage.get("expected")) is int and type(coverage.get("scanned")) is int
+            and coverage.get("expected") == coverage.get("scanned") == len(packages)
+            and type(baseline["tests"]) is int and baseline["tests"] >= task["policy"]["minimum_tests"]
+            and isinstance(baseline["findings"], list)
+            and set(inventory["properties"]) == set(inventory["modules"])
+            and bool(module_versions(inventory)))
+    except (KeyError, TypeError, ValueError, AttributeError):
+        valid = False
+    if not valid:
+        raise Blocked("Baseline incomplete/invalid: require build, tests, checks, reactor graphs and complete OSV coverage")
+
+
 def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
     if runner is None:
         require_independent_authority()
@@ -174,6 +229,9 @@ def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
             raise Blocked("Maven dependency resolution/effective model failed")
         inventory = resolved_inventory(source, effective)
         result.update(inventory=inventory, tests=test_counts(source))
+        if result["tests"] < task["policy"]["minimum_tests"]:
+            result["outcome"] = "FAIL"
+            raise Blocked("Executed tests below the configured minimum")
         write(directory / "resolved.json", inventory)
         write(directory / "bom.cdx.json", sbom(inventory["packages"]))
         config = directory / "osv-scanner.toml"
@@ -228,8 +286,27 @@ def compare(baseline, candidate, policy):
     old, new = versions(before), versions(after)
     boot_policy = policy.get("spring_boot", dict(patch=True, minor=True, major=False, downgrade=False))
     boot_pairs = [(before.get("spring_boot"), after.get("spring_boot"))]
-    boot_pairs += [(a, b) for coordinate in set(old) & set(new) if coordinate.startswith("org.springframework.boot:")
-                   for a in old[coordinate] for b in new[coordinate]]
+    try:
+        old_modules, new_modules = module_versions(before), module_versions(after)
+    except (ValueError, KeyError, TypeError, AttributeError):
+        old_modules = new_modules = None
+        unknown.append("Spring Boot module ownership evidence is invalid")
+    groups = [(old, new, "aggregate (module ownership unavailable)")]
+    if old_modules is not None and new_modules is not None:
+        groups = [(old_modules[m], new_modules[m], m) for m in set(old_modules) & set(new_modules)]
+    for previous, current, owner in groups:
+        for coordinate in set(previous) | set(current):
+            a, b = previous.get(coordinate, set()), current.get(coordinate, set())
+            if not coordinate.startswith("org.springframework.boot:") or a == b:
+                continue
+            if len(a) == len(b) == 1:
+                boot_pairs.append((next(iter(a)), next(iter(b))))
+            else:
+                unknown.append("Ambiguous Spring Boot version movement: " + owner + ":" + coordinate)
+                if (a and b and not boot_policy["downgrade"] and all(re.fullmatch(r"\d+\.\d+\.\d+", v) for v in a | b)
+                        and min(tuple(map(int, v.split("."))) for v in b)
+                        < min(tuple(map(int, v.split("."))) for v in a)):
+                    reasons.append("Spring Boot downgrade movement not authorized")
     for previous, current in boot_pairs:
         if previous == current:
             continue

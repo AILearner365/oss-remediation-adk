@@ -29,7 +29,10 @@ specific Blocked error. There is deliberately no security-override flag. Offline
 fixtures may replace that guard to verify the retained contracts; this is not a
 runtime alternative, live authorization or security proof.
 
-41 focused tests pass in installed SDK Python (33 stdlib product/local/parity checks).
+The P1 correction suite uses full `unittest discover -s tests_native`, including
+the existing product/local/parity/SDK checks and new test_p1/test_sdk_p1 regressions.
+Pinned SDK run: 70 passed, five optional Agent Server probes skipped (75 total).
+Stdlib-only run: 60 passed, 15 expected skips. No paid inference or live analysis.
 Real SDK tests cover idle persistence, retained Stop denial, evidence-tool use,
 host workspace commands and persistent terminal invocation without inference.
 Maven/OSV stand-ins and controlled outputs do not prove real analysis. The SDK
@@ -47,3 +50,14 @@ Task/config defaults and permitted overrides are in [configuration](docs/CONFIGU
 The unresolved decision is the mandatory authority requirement in the selected
 same-user host environment, not SDK lifecycle support or image provisioning.
 Do not invent infrastructure, weaken acceptance, run Gemini or create target PRs.
+
+P1 corrections preserve strict baseline requirements and unchanged P0 refusal.
+Boot comparisons use retained reactor-module ownership; ambiguous changed sets
+do not pass. Approved Maven profiles flow into both SBRI entry points. Optional
+SBRI failures retain bounded results, with checksummed TTL/cooldown reuse and
+operator refresh; unknown execution never automatically replays. The actual
+historical CLI parser is fixture-tested, but the SBRI backend remains unavailable.
+Native PreToolUse bounds terminal foreground wait requests; task_seconds is an
+admission/evaluation deadline, not a hard wall-clock process limit. These changes
+do not resolve native hook fail-open behavior or P0 host authority. See the
+[P1 proof map](docs/IMPLEMENTATION.md#p1-correction-status) for exact limits.

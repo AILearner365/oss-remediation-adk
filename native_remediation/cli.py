@@ -23,7 +23,7 @@ def parser():
         if name == "start":
             prep.add_argument("--authorize-model-execution", "--authorize-run-and-delivery",
                               dest="authorize_run_and_delivery", action="store_true")
-    for name in ("doctor", "run", "resume", "status", "reconcile-delivery", "hook", "record", "self-validate", "sbri"):
+    for name in ("doctor", "run", "resume", "status", "reconcile-delivery", "hook", "terminal-hook", "record", "self-validate", "sbri"):
         p = sub.add_parser(name)
         p.add_argument("--state", type=Path, required=True)
         if name in ("run", "resume"):
@@ -39,6 +39,7 @@ def parser():
             selection.add_argument("--versions", nargs="+")
             selection.add_argument("--ranges", nargs="+")
             p.add_argument("--scopes", nargs="+")
+            p.add_argument("--refresh", action="store_true", help="Refresh completed intelligence within the existing call budget; never replay uncertain claims")
     return root
 
 
@@ -55,13 +56,15 @@ def execute(args):
         return dict(outcome="BASELINE_COMPLETE", conversationId=bound["conversationId"])
     if args.action == "hook":
         return runtime.hook(args.state, json.load(sys.stdin))
+    if args.action == "terminal-hook":
+        return runtime.terminal_hook(args.state, json.load(sys.stdin))
     if args.action == "record":
         with lock(args.state):
             return journal.record(args.state, args.kind, read(args.document))
     if args.action in ("self-validate", "sbri"):
         from . import capabilities
         return capabilities.self_validate(args.state) if args.action == "self-validate" else capabilities.sbri(
-            args.state, versions=args.versions, ranges=args.ranges, scopes=args.scopes)
+            args.state, versions=args.versions, ranges=args.ranges, scopes=args.scopes, refresh=args.refresh)
     state, bound, task = context(args.state)
     if args.action == "reconcile-delivery":
         with lock(state):
@@ -92,17 +95,18 @@ def main():
     try:
         result = execute(args)
         print(json.dumps(result, sort_keys=True))
-        if args.action == "hook" and result.get("decision") == "deny":
+        if args.action in ("hook", "terminal-hook") and result.get("decision") == "deny":
             raise SystemExit(2)
     except Exception as exc:
         # Native command hooks can fail open for uncaught errors; emit explicit
         # DENY for all handled failures. Product status still requires PASS + delivery.
-        if args.action == "hook":
+        if args.action in ("hook", "terminal-hook"):
             reason = str(exc)[:1000] if isinstance(exc, Blocked) else "Validator infrastructure error: " + type(exc).__name__
             result = dict(decision="deny", reason=reason,
                           additionalContext=reason + ". Inspect evidence; do not claim success or perform delivery yourself.")
             try:
-                write(args.state / "hook-error.json", dict(errorType=type(exc).__name__, reason=reason, at=time.time()))
+                if args.action == "hook":
+                    write(args.state / "hook-error.json", dict(errorType=type(exc).__name__, reason=reason, at=time.time()))
             except Exception:
                 pass
             print(json.dumps(result))

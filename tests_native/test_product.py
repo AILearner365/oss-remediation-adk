@@ -22,7 +22,9 @@ def task_input(sha="a" * 40):
 def evaluation(tree, vulnerable=False):
     return dict(tree=tree, outcome="COMPLETE", reasons=[], tests=2,
         inventory=dict(modules=["app:root"], properties={"app:root": {"java.version": "21"}},
-            packages=[dict(name="org.example:library", version="1.0.0" if vulnerable else "1.0.1")], graphs=[]),
+            packages=[dict(name="org.example:library", version="1.0.0" if vulnerable else "1.0.1")],
+            graphs=[dict(path="target/" + validation.TREE_FILE, graph=dict(groupId="app", artifactId="root", version="1",
+                children=[dict(groupId="org.example", artifactId="library", version="1.0.0" if vulnerable else "1.0.1")]))]),
         coverage=dict(expected=1, scanned=1, complete=True),
         findings=[dict(package="org.example:library", version="1.0.0", ids=["GHSA-test", "CVE-test"])] if vulnerable else [])
 
@@ -160,10 +162,12 @@ class ScannerTests(unittest.TestCase):
         old, new = evaluation("base", True), evaluation("candidate")
         policy = load_task(task_input())["policy"]
         new["inventory"]["packages"][0]["version"] = "2.0.0"
+        new["inventory"]["graphs"][0]["graph"]["children"][0]["version"] = "2.0.0"
         self.assertEqual(validation.compare(old, new, policy)["outcome"], "FAIL")
         policy["allow_major_upgrades"] = True
         self.assertEqual(validation.compare(old, new, policy)["outcome"], "PASS")
         new["inventory"]["packages"][0]["version"] = "2.0.0-RC1"
+        new["inventory"]["graphs"][0]["graph"]["children"][0]["version"] = "2.0.0-RC1"
         self.assertEqual(validation.compare(old, new, policy)["outcome"], "INCONCLUSIVE")
 
 

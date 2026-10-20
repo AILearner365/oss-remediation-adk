@@ -32,7 +32,7 @@ class InstalledSdkTests(unittest.TestCase):
                 conversation = open_conversation(state, bound, task)
                 try:
                     terminal = conversation.agent.tools[0]
-                    self.assertEqual(terminal.params, dict(terminal_type="subprocess"))
+                    self.assertEqual(terminal.params, dict(terminal_type="subprocess", no_change_timeout_seconds=10))
                     self.assertEqual(Path(conversation.workspace.working_dir), state / "workspace")
                     direct = conversation.workspace.execute_command("printf SDK_WORKSPACE_FIXTURE", timeout=5)
                     self.assertEqual(direct.exit_code, 0)

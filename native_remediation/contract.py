@@ -24,7 +24,8 @@ DEFAULTS = {
                  "project_context": ""},
     "scanner": {"type": "osv", "version": "2.6.0"},
     "sbri": {"mode": "auto", "pre_edit": True, "executable": None,
-             "versions": [], "ranges": [], "scopes": ["compile", "runtime"], "max_candidates": 12},
+             "versions": [], "ranges": [], "scopes": ["compile", "runtime"], "max_candidates": 12,
+             "cache_seconds": 3600, "retry_seconds": 60, "backend_version": None},
     "delivery": {"mode": "report_only"},
 }
 
@@ -96,6 +97,10 @@ def load_task(value):
     for key, pattern in (("versions", r"\d+\.\d+\.\d+"), ("ranges", r"\d+\.\d+\.x")):
         if not isinstance(sbri[key], list) or any(not isinstance(v, str) or not re.fullmatch(pattern, v) for v in sbri[key]):
             raise Blocked("Invalid SBRI " + key)
+    if (any(type(sbri[k]) is not int or not 1 <= sbri[k] <= 86400 for k in ("cache_seconds", "retry_seconds"))
+            or sbri["backend_version"] is not None and (not isinstance(sbri["backend_version"], str)
+                                                       or not sbri["backend_version"].strip())):
+        raise Blocked("Invalid SBRI cache lifetime/retry interval/backend version label")
     if sbri["versions"] and sbri["ranges"] or len(sbri["versions"]) > sbri["max_candidates"]:
         raise Blocked("SBRI versions/ranges are exclusive and candidate count is bounded")
     for key in ("allowed_paths", "protected_paths", "protected_properties", "allowed_removed_dependencies", "target_ids"):

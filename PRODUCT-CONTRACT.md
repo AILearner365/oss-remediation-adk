@@ -47,6 +47,11 @@ Minimal integration responsibilities:
    Missing/incomplete/stale evidence or failure blocks paid execution. Normal
    `start` includes this sequence; diagnostic `prepare` is not mandatory externally.
    Native hooks/tools are verified after lazy initialization before run.
+   All configured tools.checks/constraints are required baseline and candidate
+   invariants; failed checks are never ignored to permit startup. COMPLETE also
+   requires matching reactor graphs/inventory, exact scanner coverage and the
+   configured minimum tests. Vulnerability-goal comparison remains a subsequent
+   acceptance decision, not a demand that the vulnerable baseline already be clean.
 2. **Agent capabilities**: grant needed repository, shell, Maven, OSV/scanner, research and optionally SBRI/release-intelligence access with bounded permissions. Reuse/copy/rework experimental code freely; agent selects when to use capabilities. SBRI is a helper, not an obligatory Spring Boot strategy; current test scanner is OSV, production candidate JFrog Xray requires a separate adapter/verification.
 3. **Independent validation**: apply task-specific acceptance contract to an immutable captured candidate Git tree and baseline. Check actual resolved dependency set and findings, remaining/new vulnerabilities, applicable upgrade policy, Maven build/tests and repository constraints. Explicitly distinguish scanner errors, incomplete coverage and unknowns from PASS. Ensure paths/dependency source are available as required. Record attempt evidence and provide actionable failure context through native Stop Hook; accepted completion requires proof for the exact conversation, approved base and validated tree.
 4. **Delivery**: report_only preserves independent validation without remote writes. Explicitly authorized draft_pr after independent PASS binds output to the validated Git tree, verifies remote base/destination, uses a create-only branch/commit, and confirms an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation blocks, never blindly duplicates. Native hook-command failures cannot establish product success.
@@ -98,6 +103,11 @@ open but cannot itself establish product success. Background process quiescence
 and production-grade security isolation are not claimed for host LocalWorkspace.
 Historical smoke-specific iteration/whitelist restrictions are not acceptance
 defaults for remediation. No live model or target PR is authorized here.
+The P0 authority correction remains deferred; its unconditional guard is unchanged.
+Native terminal wait policy is a PreToolUse check, not an isolation boundary.
+task_seconds is a dispatch/tool-admission/evaluation deadline, not a hard
+wall-clock kill switch for the native run or its background processes. See the
+[configuration reference](docs/CONFIGURATION.md) for exact timeout/cache semantics.
 
 ## Implementation discipline
 
