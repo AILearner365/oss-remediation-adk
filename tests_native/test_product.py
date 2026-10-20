@@ -397,6 +397,10 @@ class RuntimeTests(GitFixture):
                              preflight=lambda task: {})
             self.assertEqual(conversation.runs, 2)
             self.assertEqual(len(conversation.state.events), 2)
+            with self.assertRaisesRegex(Blocked, "run budget"):
+                runtime.dispatch(self.state, resume_reason="exceeds max_runs",
+                    factory=lambda *a: self.fail("Recovery budget must block before restoration"))
+            self.assertEqual(conversation.runs, 2)
             (self.state / "preparation.json").unlink()
             with self.assertRaises(Blocked):
                 runtime.dispatch(self.state, resume_reason="must block", factory=lambda *a: conversation)

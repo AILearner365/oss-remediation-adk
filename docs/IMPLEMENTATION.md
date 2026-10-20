@@ -1,5 +1,10 @@
 # Autonomous OSS Vulnerability Remediation — local SDK implementation
 
+Latest scoped verification: [P1 assessment and retained actual SBRI evidence](SDK-P0-P1-READINESS-REVIEW.md#current-verification-assessment--2026-10-20).
+The P1 correction counts and fixture-only SBRI statements below describe the
+earlier implementation checkpoint; the newer report distinguishes actual backend
+diagnostics from still-blocked product execution. P0 remains deferred/unchanged.
+
 ## Correction from a8ba73c6
 
 Removed native_remediation/sandbox.py and its Docker-policy tests; both remain

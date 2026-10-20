@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 import tempfile
+import sys
+import time
 import unittest
 from unittest.mock import patch
 
@@ -9,6 +11,23 @@ from native_remediation.files import command, environment
 
 
 class LocalExecutionTests(unittest.TestCase):
+    def test_command_timeout_kills_process_group_and_retains_diagnostics(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / "child-survived"
+            child = "import time,pathlib;time.sleep(1);pathlib.Path(" + repr(str(marker)) + ").touch()"
+            parent = ("import subprocess,sys,time;subprocess.Popen([sys.executable,'-c',"
+                      + repr(child) + "]);print('TIMEOUT_FIXTURE',flush=True);time.sleep(10)")
+            started = time.monotonic()
+            result = command([sys.executable, "-c", parent], root, 0.3, root / "command.json")
+            self.assertTrue(result["timedOut"])
+            self.assertLess(result["exitCode"], 0)
+            self.assertIn("TIMEOUT_FIXTURE", result["stdout"])
+            self.assertLess(time.monotonic() - started, 3)
+            time.sleep(1.1)  # Harmless child's marker would exist if cleanup missed it.
+            self.assertFalse(marker.exists())
+            self.assertTrue((root / "command.json").is_file())
+
     def test_existing_local_runner_executes_maven_osv_standins_without_docker(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

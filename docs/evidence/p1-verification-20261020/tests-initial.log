@@ -1,0 +1,119 @@
+[10/20/26 22:01:15] INFO     Created new conversation               state.py:592
+                             21fc443c-9f21-459d-95cd-1dd17371f9cd
+[10/20/26 22:01:15] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:01:15] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:01:15] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:01:15] INFO     Loaded 1 tools from spec                base.py:596
+[10/20/26 22:01:15] INFO     Created new conversation               state.py:592
+                             db89fe5a-a5d3-4363-883c-4ead4f0948be
+[10/20/26 22:01:15] INFO     Resumed conversation                   state.py:567
+                             db89fe5a-a5d3-4363-883c-4ead4f0948be
+                             from persistent storage
+[10/20/26 22:01:15] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping: Blocked by hook
+[10/20/26 22:01:15] INFO     Created new conversation               state.py:592
+                             590b1761-38ce-4c7d-8a10-005063484c0b
+[10/20/26 22:01:15] INFO     $ printf SDK_WORKSPACE_FIXTURE        command.py:99
+SDK_WORKSPACE_FIXTURE/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[10/20/26 22:01:15] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:01:15] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpmf4tc_jl/conversations/59
+                             0b176138ce4c7d8a10005063484c0b
+[10/20/26 22:01:15] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:01:16] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpmf4tc_jl/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:01:16] INFO     Loaded 5 tools from spec                base.py:596
+[10/20/26 22:01:18] INFO     Created new conversation               state.py:592
+                             07c94ad6-aa1f-443c-b0e3-725a66671951
+[10/20/26 22:01:18] INFO     Loaded 0 tools from spec                base.py:596
+[10/20/26 22:01:18] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping:
+                             Preparation/baseline
+                             evidence missing or
+                             invalid; no model
+                             execution permitted
+[10/20/26 22:01:18] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:01:19] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/20/26 22:01:19] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/20/26 22:01:19] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:01:19] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:01:19] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:01:19] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmp4xtryl4s/conversations/05
+                             f7716a90bc4ec5a90e01b7a4de5fa0
+[10/20/26 22:01:20] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmp4xtryl4s/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:01:20] INFO     Loaded 5 tools from spec                base.py:596
+[10/20/26 22:01:21] WARNING  Expected exactly one PS1    terminal_session.py:400
+                             metadata block before
+                             command execution, but got
+                             0 (content_length=540)
+[10/20/26 22:01:21] INFO     Created new conversation               state.py:592
+                             a935ee96-11a3-48f1-ad29-1bfb3eed3ace
+[10/20/26 22:01:21] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:01:21] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:01:21] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:01:21] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:01:21] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:01:21] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:01:21] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpvb4caprp/conversations/a9
+                             35ee9611a348f1ad291bfb3eed3ace
+[10/20/26 22:01:22] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpvb4caprp/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:01:22] INFO     Loaded 5 tools from spec                base.py:596
+======================================================================
+FAIL: test_native_terminal_timeout_returns_control_then_allows_interrupt (test_sdk_p1.NativeP1Tests.test_native_terminal_timeout_returns_control_then_allows_interrupt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests_native/test_sdk_p1.py", line 54, in test_native_terminal_timeout_returns_control_then_allows_interrupt
+    self.assertIn("timed out", "\n".join(c.text for c in result.to_llm_content))
+AssertionError: 'timed out' not found in '[An error occurred during execution.]\n\n[Below is the output of the previous command.]\n\x1b[?2004l\x1b[?2004h\n\ntrue\n\x1b[?2004l\n[Your command "sleep 5" is NOT executed. The previous command is still running - You CANNOT send new commands until the previous command is completed. By setting `is_input` to `true`, you can interact with the current process: You may wait longer to see additional output by sending empty command \'\', send other commands to interact with the current process, send keys ("C-c", "C-z", "C-d") to interrupt/kill the previous command before sending your new command, or use the timeout parameter in terminal for future commands.]'
+
+----------------------------------------------------------------------
+Ran 75 tests in 34.420s
+
+FAILED (failures=1, skipped=5)

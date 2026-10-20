@@ -1,0 +1,115 @@
+[10/20/26 22:03:26] INFO     Created new conversation               state.py:592
+                             4841e807-4ae3-4705-81fd-2771f5a5f68f
+[10/20/26 22:03:26] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:03:26] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:03:27] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:03:27] INFO     Loaded 1 tools from spec                base.py:596
+[10/20/26 22:03:27] INFO     Created new conversation               state.py:592
+                             409aa078-ef98-4ff3-9c67-46fb83a0377e
+[10/20/26 22:03:27] INFO     Resumed conversation                   state.py:567
+                             409aa078-ef98-4ff3-9c67-46fb83a0377e
+                             from persistent storage
+[10/20/26 22:03:27] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping: Blocked by hook
+[10/20/26 22:03:27] INFO     Created new conversation               state.py:592
+                             0f4af9ad-49f9-4928-bfc8-9f9cdf88687a
+[10/20/26 22:03:27] INFO     $ printf SDK_WORKSPACE_FIXTURE        command.py:99
+SDK_WORKSPACE_FIXTURE/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[10/20/26 22:03:27] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:03:27] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpq297rzdp/conversations/0f
+                             4af9ad49f94928bfc89f9cdf88687a
+[10/20/26 22:03:27] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:03:28] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpq297rzdp/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:03:28] INFO     Loaded 5 tools from spec                base.py:596
+[10/20/26 22:03:28] INFO     Created new conversation               state.py:592
+                             988fb0c4-b1d8-4c78-8bfc-078067279e92
+[10/20/26 22:03:28] INFO     Loaded 0 tools from spec                base.py:596
+[10/20/26 22:03:28] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping:
+                             Preparation/baseline
+                             evidence missing or
+                             invalid; no model
+                             execution permitted
+[10/20/26 22:03:28] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:03:28] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/20/26 22:03:28] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/20/26 22:03:29] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:03:29] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmp1f6scts5/conversations/05
+                             f7716a90bc4ec5a90e01b7a4de5fa0
+[10/20/26 22:03:29] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:03:29] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:03:30] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmp1f6scts5/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:03:30] INFO     Loaded 5 tools from spec                base.py:596
+[10/20/26 22:03:33] INFO     Created new conversation               state.py:592
+                             96c4b5b2-164e-4035-8774-d9dccb158237
+[10/20/26 22:03:33] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:03:33] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:03:33] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/20/26 22:03:33] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/20/26 22:03:33] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:03:33] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpydhswvc4/conversations/96
+                             c4b5b2164e40358774d9dccb158237
+[10/20/26 22:03:33] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:03:34] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpydhswvc4/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:03:34] INFO     Loaded 5 tools from spec                base.py:596
+======================================================================
+FAIL: test_native_terminal_timeout_returns_control_then_allows_interrupt (test_sdk_p1.NativeP1Tests.test_native_terminal_timeout_returns_control_then_allows_interrupt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/kavya_parivarababu/oss-remediation-adk/tests_native/test_sdk_p1.py", line 62, in test_native_terminal_timeout_returns_control_then_allows_interrupt
+    self.assertTrue(result.timeout)
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 79 tests in 30.348s
+
+FAILED (failures=1, skipped=5)

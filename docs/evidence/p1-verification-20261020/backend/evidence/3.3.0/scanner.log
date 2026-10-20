@@ -1,0 +1,5 @@
+Warning: --sbom has been deprecated in favor of -L
+Scanning dir /tmp/p1-verification.hjRNA4/backend-output/evidence/3.3.0/scan-root
+Starting filesystem walk for root: /
+Scanned /tmp/p1-verification.hjRNA4/backend-output/evidence/3.3.0/inventory.cdx.json file and found 11 packages
+End status: 1 dirs visited, 2 inodes visited, 1 Extract calls, 785.5µs elapsed, 785.652µs wall time

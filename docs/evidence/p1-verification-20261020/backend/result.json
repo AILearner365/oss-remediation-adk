@@ -1,0 +1,1527 @@
+{
+  "application": {
+    "controller": "parent",
+    "original_pom_sha256": "c13825f58565ac1ecca18a2e8bcb67915f8ca1eab1f77eef10e097ccf8767bb2",
+    "original_spring_boot_version": "3.3.0",
+    "project_id": "sbri-profile-fixture",
+    "project_path": "/tmp/p1-verification.hjRNA4/project"
+  },
+  "dependencies": [
+    {
+      "boot_managed_default": "1.13.0",
+      "coordinate": "io.micrometer:micrometer-commons",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8",
+          "io.micrometer:micrometer-observation:1.13.0",
+          "io.micrometer:micrometer-commons:1.13.0"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.13.0"
+    },
+    {
+      "boot_managed_default": "1.13.0",
+      "coordinate": "io.micrometer:micrometer-observation",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8",
+          "io.micrometer:micrometer-observation:1.13.0"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.13.0"
+    },
+    {
+      "boot_managed_default": "3.14.0",
+      "coordinate": "org.apache.commons:commons-lang3",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-j288-q9x7-2f5v",
+          "aliases": [
+            "CVE-2025-48924"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.18.0"
+          ],
+          "identity": "org.apache.commons:commons-lang3|GHSA-j288-q9x7-2f5v",
+          "package": "org.apache.commons:commons-lang3",
+          "score": 6.5,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "3.14.0"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.apache.commons:commons-text:1.12.0",
+          "org.apache.commons:commons-lang3:3.14.0"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "3.14.0"
+    },
+    {
+      "boot_managed_default": null,
+      "coordinate": "org.apache.commons:commons-text",
+      "direct": true,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "INDEPENDENT_DIRECT",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.apache.commons:commons-text:1.12.0"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.12.0"
+    },
+    {
+      "boot_managed_default": "3.3.0",
+      "coordinate": "org.springframework.boot:spring-boot",
+      "direct": true,
+      "findings": [
+        {
+          "advisory_id": "GHSA-rc42-6c7j-7h5r",
+          "aliases": [
+            "CVE-2025-22235"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.3.11",
+            "3.4.5"
+          ],
+          "identity": "org.springframework.boot:spring-boot|GHSA-rc42-6c7j-7h5r",
+          "package": "org.springframework.boot:spring-boot",
+          "score": 7.3,
+          "severity": "HIGH",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "3.3.0"
+        },
+        {
+          "advisory_id": "GHSA-wwpq-f5c3-7hvx",
+          "aliases": [
+            "CVE-2026-40973"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.5.14",
+            "4.0.6"
+          ],
+          "identity": "org.springframework.boot:spring-boot|GHSA-wwpq-f5c3-7hvx",
+          "package": "org.springframework.boot:spring-boot",
+          "score": 7.0,
+          "severity": "HIGH",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "3.3.0"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "3.3.0"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-aop",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8",
+          "org.springframework:spring-aop:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-beans",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8",
+          "org.springframework:spring-beans:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-context",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-4gc7-5j7h-4qph",
+          "aliases": [
+            "CVE-2024-38820"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.1.14"
+          ],
+          "identity": "org.springframework:spring-context|GHSA-4gc7-5j7h-4qph",
+          "package": "org.springframework:spring-context",
+          "score": 5.3,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        },
+        {
+          "advisory_id": "GHSA-4wp7-92pw-q264",
+          "aliases": [
+            "CVE-2025-22233"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.1.20",
+            "6.2.7"
+          ],
+          "identity": "org.springframework:spring-context|GHSA-4wp7-92pw-q264",
+          "package": "org.springframework:spring-context",
+          "score": 3.1,
+          "severity": "LOW",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-core",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-659m-px2c-25wj",
+          "aliases": [
+            "CVE-2026-41848"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-core|GHSA-659m-px2c-25wj",
+          "package": "org.springframework:spring-core",
+          "score": 3.7,
+          "severity": "LOW",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        },
+        {
+          "advisory_id": "GHSA-jmp9-x22r-554x",
+          "aliases": [
+            "CVE-2025-41249"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.11"
+          ],
+          "identity": "org.springframework:spring-core|GHSA-jmp9-x22r-554x",
+          "package": "org.springframework:spring-core",
+          "score": 7.5,
+          "severity": "HIGH",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-core:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-expression",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-9f52-rjqv-25qv",
+          "aliases": [
+            "CVE-2026-41852"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-9f52-rjqv-25qv",
+          "package": "org.springframework:spring-expression",
+          "score": 3.7,
+          "severity": "LOW",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        },
+        {
+          "advisory_id": "GHSA-r5w3-xv2f-j59q",
+          "aliases": [
+            "CVE-2026-41850"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-r5w3-xv2f-j59q",
+          "package": "org.springframework:spring-expression",
+          "score": 7.5,
+          "severity": "HIGH",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        },
+        {
+          "advisory_id": "GHSA-wxpp-56q6-5pcg",
+          "aliases": [
+            "CVE-2026-41851"
+          ],
+          "evidence_reference": "evidence/3.3.0/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-wxpp-56q6-5pcg",
+          "package": "org.springframework:spring-expression",
+          "score": 5.3,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.0/scanner.json",
+          "version": "6.1.8"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-context:6.1.8",
+          "org.springframework:spring-expression:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "6.1.8",
+      "coordinate": "org.springframework:spring-jcl",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.0",
+          "org.springframework:spring-core:6.1.8",
+          "org.springframework:spring-jcl:6.1.8"
+        ]
+      ],
+      "release": "3.3.0",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.8"
+    },
+    {
+      "boot_managed_default": "1.13.1",
+      "coordinate": "io.micrometer:micrometer-commons",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10",
+          "io.micrometer:micrometer-observation:1.13.1",
+          "io.micrometer:micrometer-commons:1.13.1"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.13.1"
+    },
+    {
+      "boot_managed_default": "1.13.1",
+      "coordinate": "io.micrometer:micrometer-observation",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10",
+          "io.micrometer:micrometer-observation:1.13.1"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.13.1"
+    },
+    {
+      "boot_managed_default": "3.14.0",
+      "coordinate": "org.apache.commons:commons-lang3",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-j288-q9x7-2f5v",
+          "aliases": [
+            "CVE-2025-48924"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.18.0"
+          ],
+          "identity": "org.apache.commons:commons-lang3|GHSA-j288-q9x7-2f5v",
+          "package": "org.apache.commons:commons-lang3",
+          "score": 6.5,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "3.14.0"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.apache.commons:commons-text:1.12.0",
+          "org.apache.commons:commons-lang3:3.14.0"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "3.14.0"
+    },
+    {
+      "boot_managed_default": null,
+      "coordinate": "org.apache.commons:commons-text",
+      "direct": true,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "INDEPENDENT_DIRECT",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.apache.commons:commons-text:1.12.0"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "1.12.0"
+    },
+    {
+      "boot_managed_default": "3.3.1",
+      "coordinate": "org.springframework.boot:spring-boot",
+      "direct": true,
+      "findings": [
+        {
+          "advisory_id": "GHSA-rc42-6c7j-7h5r",
+          "aliases": [
+            "CVE-2025-22235"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.3.11",
+            "3.4.5"
+          ],
+          "identity": "org.springframework.boot:spring-boot|GHSA-rc42-6c7j-7h5r",
+          "package": "org.springframework.boot:spring-boot",
+          "score": 7.3,
+          "severity": "HIGH",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "3.3.1"
+        },
+        {
+          "advisory_id": "GHSA-wwpq-f5c3-7hvx",
+          "aliases": [
+            "CVE-2026-40973"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "3.5.14",
+            "4.0.6"
+          ],
+          "identity": "org.springframework.boot:spring-boot|GHSA-wwpq-f5c3-7hvx",
+          "package": "org.springframework.boot:spring-boot",
+          "score": 7.0,
+          "severity": "HIGH",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "3.3.1"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "3.3.1"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-aop",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10",
+          "org.springframework:spring-aop:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-beans",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10",
+          "org.springframework:spring-beans:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-context",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-4gc7-5j7h-4qph",
+          "aliases": [
+            "CVE-2024-38820"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.1.14"
+          ],
+          "identity": "org.springframework:spring-context|GHSA-4gc7-5j7h-4qph",
+          "package": "org.springframework:spring-context",
+          "score": 5.3,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        },
+        {
+          "advisory_id": "GHSA-4wp7-92pw-q264",
+          "aliases": [
+            "CVE-2025-22233"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.1.20",
+            "6.2.7"
+          ],
+          "identity": "org.springframework:spring-context|GHSA-4wp7-92pw-q264",
+          "package": "org.springframework:spring-context",
+          "score": 3.1,
+          "severity": "LOW",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-core",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-659m-px2c-25wj",
+          "aliases": [
+            "CVE-2026-41848"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-core|GHSA-659m-px2c-25wj",
+          "package": "org.springframework:spring-core",
+          "score": 3.7,
+          "severity": "LOW",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        },
+        {
+          "advisory_id": "GHSA-jmp9-x22r-554x",
+          "aliases": [
+            "CVE-2025-41249"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.11"
+          ],
+          "identity": "org.springframework:spring-core|GHSA-jmp9-x22r-554x",
+          "package": "org.springframework:spring-core",
+          "score": 7.5,
+          "severity": "HIGH",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-core:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-expression",
+      "direct": false,
+      "findings": [
+        {
+          "advisory_id": "GHSA-9f52-rjqv-25qv",
+          "aliases": [
+            "CVE-2026-41852"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-9f52-rjqv-25qv",
+          "package": "org.springframework:spring-expression",
+          "score": 3.7,
+          "severity": "LOW",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        },
+        {
+          "advisory_id": "GHSA-r5w3-xv2f-j59q",
+          "aliases": [
+            "CVE-2026-41850"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-r5w3-xv2f-j59q",
+          "package": "org.springframework:spring-expression",
+          "score": 7.5,
+          "severity": "HIGH",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        },
+        {
+          "advisory_id": "GHSA-wxpp-56q6-5pcg",
+          "aliases": [
+            "CVE-2026-41851"
+          ],
+          "evidence_reference": "evidence/3.3.1/scanner.json",
+          "fixed_evidence_status": "KNOWN",
+          "fixed_versions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "identity": "org.springframework:spring-expression|GHSA-wxpp-56q6-5pcg",
+          "package": "org.springframework:spring-expression",
+          "score": 5.3,
+          "severity": "MEDIUM",
+          "source": "evidence/3.3.1/scanner.json",
+          "version": "6.1.10"
+        }
+      ],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-context:6.1.10",
+          "org.springframework:spring-expression:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    },
+    {
+      "boot_managed_default": "6.1.10",
+      "coordinate": "org.springframework:spring-jcl",
+      "direct": false,
+      "findings": [],
+      "introduced": false,
+      "limitations": [],
+      "management_source": null,
+      "module_occurrences": [
+        "root"
+      ],
+      "override_source": null,
+      "ownership": "BOOT_MANAGED",
+      "paths": [
+        [
+          "example.diagnostic:sbri-profile-fixture:1.0.0",
+          "org.springframework.boot:spring-boot:3.3.1",
+          "org.springframework:spring-core:6.1.10",
+          "org.springframework:spring-jcl:6.1.10"
+        ]
+      ],
+      "release": "3.3.1",
+      "removed_from_release": [],
+      "scope": "compile",
+      "selected_version": "6.1.10"
+    }
+  ],
+  "errors": [],
+  "evidence": {
+    "coverage": "Complete compile/runtime Maven-selected inventory for each successfully assessed release",
+    "directory": "evidence",
+    "http_metrics": {
+      "cache_hits": 38,
+      "elapsed_seconds": 5.7567407530009405,
+      "network_failures": 0,
+      "network_requests": 73,
+      "response_bytes": 1054366,
+      "retries": 0
+    },
+    "limitations": [
+      "Security-only ranking; compatibility not assessed",
+      "Private repositories, large reactors and all packaging scopes remain unverified"
+    ]
+  },
+  "execution": {
+    "discovered_modules": [],
+    "elapsed_seconds": 41.34622944800003,
+    "evaluated_releases": [
+      "3.3.0",
+      "3.3.1"
+    ],
+    "maven": "/opt/maven/bin/mvn",
+    "maven_version": "Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)",
+    "modules": [],
+    "original_project_unchanged": true,
+    "other_severities": "None; all scanner severity categories selected",
+    "profiles": [
+      "intelligence-fixture"
+    ],
+    "release_selection": {
+      "baseline": "3.3.0",
+      "candidate_count": 1,
+      "exclusion_reporting": "Filters are recorded, but individual excluded metadata versions are not enumerated.",
+      "max_candidates": 1,
+      "metadata": {
+        "sha256": "2d5c42a7312f688e64759aa0b6fc68253f06b96ab652156c047b4d120221160c",
+        "source": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/maven-metadata.xml"
+      },
+      "mode": "explicit",
+      "prereleases_allowed": false,
+      "requested": [
+        "3.3.1"
+      ],
+      "resolved_candidates": [
+        "3.3.1"
+      ],
+      "selection_filters": {
+        "forward_from_baseline_only": true,
+        "published_only": true,
+        "stable_numeric_only": true
+      },
+      "source": "cli"
+    },
+    "requested_releases": [
+      "3.3.1"
+    ],
+    "scopes": [
+      "compile",
+      "runtime"
+    ],
+    "selected_severities": [
+      "CRITICAL",
+      "HIGH",
+      "MEDIUM",
+      "LOW",
+      "UNKNOWN"
+    ]
+  },
+  "findings": [
+    {
+      "advisory_id": "GHSA-j288-q9x7-2f5v",
+      "aliases": [
+        "CVE-2025-48924"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.18.0"
+      ],
+      "identity": "org.apache.commons:commons-lang3|GHSA-j288-q9x7-2f5v",
+      "package": "org.apache.commons:commons-lang3",
+      "release": "3.3.0",
+      "score": 6.5,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "3.14.0"
+    },
+    {
+      "advisory_id": "GHSA-rc42-6c7j-7h5r",
+      "aliases": [
+        "CVE-2025-22235"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.3.11",
+        "3.4.5"
+      ],
+      "identity": "org.springframework.boot:spring-boot|GHSA-rc42-6c7j-7h5r",
+      "package": "org.springframework.boot:spring-boot",
+      "release": "3.3.0",
+      "score": 7.3,
+      "severity": "HIGH",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "3.3.0"
+    },
+    {
+      "advisory_id": "GHSA-wwpq-f5c3-7hvx",
+      "aliases": [
+        "CVE-2026-40973"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.5.14",
+        "4.0.6"
+      ],
+      "identity": "org.springframework.boot:spring-boot|GHSA-wwpq-f5c3-7hvx",
+      "package": "org.springframework.boot:spring-boot",
+      "release": "3.3.0",
+      "score": 7.0,
+      "severity": "HIGH",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "3.3.0"
+    },
+    {
+      "advisory_id": "GHSA-4gc7-5j7h-4qph",
+      "aliases": [
+        "CVE-2024-38820"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.1.14"
+      ],
+      "identity": "org.springframework:spring-context|GHSA-4gc7-5j7h-4qph",
+      "package": "org.springframework:spring-context",
+      "release": "3.3.0",
+      "score": 5.3,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-4wp7-92pw-q264",
+      "aliases": [
+        "CVE-2025-22233"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.1.20",
+        "6.2.7"
+      ],
+      "identity": "org.springframework:spring-context|GHSA-4wp7-92pw-q264",
+      "package": "org.springframework:spring-context",
+      "release": "3.3.0",
+      "score": 3.1,
+      "severity": "LOW",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-659m-px2c-25wj",
+      "aliases": [
+        "CVE-2026-41848"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-core|GHSA-659m-px2c-25wj",
+      "package": "org.springframework:spring-core",
+      "release": "3.3.0",
+      "score": 3.7,
+      "severity": "LOW",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-jmp9-x22r-554x",
+      "aliases": [
+        "CVE-2025-41249"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.11"
+      ],
+      "identity": "org.springframework:spring-core|GHSA-jmp9-x22r-554x",
+      "package": "org.springframework:spring-core",
+      "release": "3.3.0",
+      "score": 7.5,
+      "severity": "HIGH",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-9f52-rjqv-25qv",
+      "aliases": [
+        "CVE-2026-41852"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-9f52-rjqv-25qv",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.0",
+      "score": 3.7,
+      "severity": "LOW",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-r5w3-xv2f-j59q",
+      "aliases": [
+        "CVE-2026-41850"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-r5w3-xv2f-j59q",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.0",
+      "score": 7.5,
+      "severity": "HIGH",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-wxpp-56q6-5pcg",
+      "aliases": [
+        "CVE-2026-41851"
+      ],
+      "displayed": true,
+      "disposition": "ORIGINAL",
+      "evidence_reference": "evidence/3.3.0/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-wxpp-56q6-5pcg",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.0",
+      "score": 5.3,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.0/scanner.json",
+      "version": "6.1.8"
+    },
+    {
+      "advisory_id": "GHSA-j288-q9x7-2f5v",
+      "aliases": [
+        "CVE-2025-48924"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.18.0"
+      ],
+      "identity": "org.apache.commons:commons-lang3|GHSA-j288-q9x7-2f5v",
+      "package": "org.apache.commons:commons-lang3",
+      "release": "3.3.1",
+      "score": 6.5,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "3.14.0"
+    },
+    {
+      "advisory_id": "GHSA-rc42-6c7j-7h5r",
+      "aliases": [
+        "CVE-2025-22235"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.3.11",
+        "3.4.5"
+      ],
+      "identity": "org.springframework.boot:spring-boot|GHSA-rc42-6c7j-7h5r",
+      "package": "org.springframework.boot:spring-boot",
+      "release": "3.3.1",
+      "score": 7.3,
+      "severity": "HIGH",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "3.3.1"
+    },
+    {
+      "advisory_id": "GHSA-wwpq-f5c3-7hvx",
+      "aliases": [
+        "CVE-2026-40973"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "3.5.14",
+        "4.0.6"
+      ],
+      "identity": "org.springframework.boot:spring-boot|GHSA-wwpq-f5c3-7hvx",
+      "package": "org.springframework.boot:spring-boot",
+      "release": "3.3.1",
+      "score": 7.0,
+      "severity": "HIGH",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "3.3.1"
+    },
+    {
+      "advisory_id": "GHSA-4gc7-5j7h-4qph",
+      "aliases": [
+        "CVE-2024-38820"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.1.14"
+      ],
+      "identity": "org.springframework:spring-context|GHSA-4gc7-5j7h-4qph",
+      "package": "org.springframework:spring-context",
+      "release": "3.3.1",
+      "score": 5.3,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-4wp7-92pw-q264",
+      "aliases": [
+        "CVE-2025-22233"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.1.20",
+        "6.2.7"
+      ],
+      "identity": "org.springframework:spring-context|GHSA-4wp7-92pw-q264",
+      "package": "org.springframework:spring-context",
+      "release": "3.3.1",
+      "score": 3.1,
+      "severity": "LOW",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-659m-px2c-25wj",
+      "aliases": [
+        "CVE-2026-41848"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-core|GHSA-659m-px2c-25wj",
+      "package": "org.springframework:spring-core",
+      "release": "3.3.1",
+      "score": 3.7,
+      "severity": "LOW",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-jmp9-x22r-554x",
+      "aliases": [
+        "CVE-2025-41249"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.11"
+      ],
+      "identity": "org.springframework:spring-core|GHSA-jmp9-x22r-554x",
+      "package": "org.springframework:spring-core",
+      "release": "3.3.1",
+      "score": 7.5,
+      "severity": "HIGH",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-9f52-rjqv-25qv",
+      "aliases": [
+        "CVE-2026-41852"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-9f52-rjqv-25qv",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.1",
+      "score": 3.7,
+      "severity": "LOW",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-r5w3-xv2f-j59q",
+      "aliases": [
+        "CVE-2026-41850"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-r5w3-xv2f-j59q",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.1",
+      "score": 7.5,
+      "severity": "HIGH",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    },
+    {
+      "advisory_id": "GHSA-wxpp-56q6-5pcg",
+      "aliases": [
+        "CVE-2026-41851"
+      ],
+      "displayed": true,
+      "disposition": "REMAINING",
+      "evidence_reference": "evidence/3.3.1/scanner.json",
+      "fixed_evidence_status": "KNOWN",
+      "fixed_versions": [
+        "6.2.19",
+        "7.0.8"
+      ],
+      "identity": "org.springframework:spring-expression|GHSA-wxpp-56q6-5pcg",
+      "package": "org.springframework:spring-expression",
+      "release": "3.3.1",
+      "score": 5.3,
+      "severity": "MEDIUM",
+      "source": "evidence/3.3.1/scanner.json",
+      "version": "6.1.10"
+    }
+  ],
+  "override_notes": [],
+  "releases": [
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        }
+      },
+      "evidence": {
+        "maven": "evidence/3.3.0/dependency-tree.tgf",
+        "scanner": "evidence/3.3.0/scanner.json"
+      },
+      "rank": null,
+      "recommendation": "Baseline",
+      "version": "3.3.0"
+    },
+    {
+      "assessment_status": "COMPLETE",
+      "counts": {
+        "addressed": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "new": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "UNKNOWN": 0
+        },
+        "original": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        },
+        "remaining": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        },
+        "total": {
+          "CRITICAL": 0,
+          "HIGH": 4,
+          "LOW": 3,
+          "MEDIUM": 3,
+          "UNKNOWN": 0
+        }
+      },
+      "evidence": {
+        "maven": "evidence/3.3.1/dependency-tree.tgf",
+        "scanner": "evidence/3.3.1/scanner.json"
+      },
+      "rank": 1,
+      "recommendation": "Preferred \u2014 best measured security result",
+      "version": "3.3.1"
+    }
+  ],
+  "scanner": {
+    "inventory_format": "CycloneDX 1.5",
+    "provider": "osv-scanner",
+    "snapshot_comparable": true,
+    "version": "osv-scanner version: 2.6.0"
+  },
+  "schema_version": "1.0",
+  "status": "SUCCESS"
+}

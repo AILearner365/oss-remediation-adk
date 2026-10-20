@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Harmless diagnostic fixture: no application code, never a remediation target. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.0</version>
+    <relativePath/>
+  </parent>
+  <groupId>example.diagnostic</groupId>
+  <artifactId>sbri-profile-fixture</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
+  </dependencies>
+  <profiles>
+    <profile>
+      <id>intelligence-fixture</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-text</artifactId>
+          <version>1.12.0</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+</project>

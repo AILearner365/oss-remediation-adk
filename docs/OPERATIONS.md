@@ -14,14 +14,18 @@ uppercase/lowercase HTTP(S)/ALL/NO_PROXY settings are retained. Explicit model/G
 credential variables are omitted from build children, but host file/metadata
 access is NOT prevented. Host Maven settings/proxies can supply authorized normal
 dependency downloads; OSV/network research are not artificially disabled.
-They were not exercised over the network by offline tests.
+Offline unit tests do not exercise those network paths. A separate controlled
+retained-SBRI backend diagnostic exercised real Maven/OSV networking; see the
+[verification evidence](SDK-P0-P1-READINESS-REVIEW.md#current-verification-assessment--2026-10-20).
 
 Optional SBRI/research references point to host scripts/docs, not container paths.
 An optional pre-edit SBRI applicability check supplies bounded evidence before
 the task message; unavailable/non-applicable intelligence is not a security
 conclusion and does not replace baseline COMPLETE. sbri_intelligence permits
 additional version/range/scope investigations using the existing CLI. The CLI is
-currently not installed here: no live SBRI capability is claimed. No fixed Boot
+currently not installed here. The historical backend was verified directly from
+a temporary Git extraction on an authored fixture, not through the P0-blocked
+product adapter; no live product SBRI capability is claimed. No fixed Boot
 strategy, second engine or mandatory successful SBRI stage is introduced.
 
 ## Trust limitation and fail-closed behavior

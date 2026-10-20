@@ -66,6 +66,19 @@ def file_sha256(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def diagnostic_text(value):
+    """Bound optional-tool feedback using the installed SDK's secret redactor.
+
+    Full command output stays in private evidence, never in task prompts.
+    This redactor is best-effort, not an authority/isolation boundary.
+    """
+    try:
+        from openhands.sdk.utils.redact import redact_text_secrets
+    except ImportError:
+        return "Inspect private evidence (SDK diagnostic redactor unavailable)"
+    return redact_text_secrets(str(value))[-2000:]
+
+
 def executable_identity(executable):
     resolved = shutil.which(str(executable))
     if not resolved:
@@ -189,9 +202,15 @@ def sbri(state, *, versions=None, ranges=None, scopes=None, refresh=False, runne
             else:
                 failure.append("SBRI result.json is missing")
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
-        failure.append("Optional SBRI execution/report failure: " + type(exc).__name__)
+        write(attempt / "execution-error.json", dict(type=type(exc).__name__, message=str(exc)))
+        failure.append("Optional SBRI execution/report failure: " + type(exc).__name__
+                       + ": " + diagnostic_text(exc))
         unavailable = isinstance(exc, (FileNotFoundError, PermissionError))
         retryable = not isinstance(exc, subprocess.TimeoutExpired)
+    if execution and (execution.get("exitCode") != 0 or execution.get("timedOut")):
+        failure.append("SBRI command exitCode=" + str(execution.get("exitCode"))
+                       + ", timedOut=" + str(execution.get("timedOut")) + ": "
+                       + diagnostic_text(execution.get("stderr") or execution.get("stdout") or "No command output"))
     if raw_sha is None and raw_path.is_file():
         try:
             raw_sha = file_sha256(raw_path)
@@ -222,6 +241,10 @@ def sbri(state, *, versions=None, ranges=None, scopes=None, refresh=False, runne
         baseline=boot, scopes=config["scopes"], selection=selection,
         releases=releases, errors=raw.get("errors", []), reasons=failure,
         execution={k: execution.get(k) for k in ("exitCode", "timedOut", "seconds")},
+        commandEvidence=(str((attempt / "command.json").relative_to(state))
+                         if (attempt / "command.json").is_file() else None),
+        executionErrorEvidence=(str((attempt / "execution-error.json").relative_to(state))
+                                if (attempt / "execution-error.json").is_file() else None),
         evidence=str(attempt.relative_to(state)), resultPath=str((output / "result.json").relative_to(state)),
         compatibility="NOT_ASSESSED", candidateCoverage="Only recorded successfully assessed releases/scopes",
         rankIsNotStrategy=True, reused=False, retryable=retryable, rawSha256=raw_sha, completedAt=time.time())

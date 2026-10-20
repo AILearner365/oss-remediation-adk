@@ -1,0 +1,33 @@
+test_native_pre_tool_hook_marks_action_blocked_before_execution (tests_native.test_sdk_p1.NativeP1Tests.test_native_pre_tool_hook_marks_action_blocked_before_execution) ... [10/20/26 22:04:08] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:04:08] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/20/26 22:04:08] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+ok
+test_native_terminal_timeout_returns_control_then_allows_interrupt (tests_native.test_sdk_p1.NativeP1Tests.test_native_terminal_timeout_returns_control_then_allows_interrupt) ... [10/20/26 22:04:08] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/20/26 22:04:08] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/20/26 22:04:08] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmps700har4/conversations/05
+                             f7716a90bc4ec5a90e01b7a4de5fa0
+[10/20/26 22:04:08] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/20/26 22:04:09] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmps700har4/workspace, username:
+                             None, terminal_type: subprocess
+[10/20/26 22:04:09] INFO     Loaded 5 tools from spec                base.py:596
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.010s
+
+OK

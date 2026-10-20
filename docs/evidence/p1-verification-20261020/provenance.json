@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-20",
+  "implementation_before_verification": "0669c1b4cd6e32124f89f1cd3340289a35c20a6e",
+  "historical_backend_commit": "e5d160cb6080e5c6ed8fef16ca4ba42ab6106c8f",
+  "historical_backend_branch": "openhands-poc-evaluation",
+  "backend_materialization": "git archive of sbri and spring_boot_release_intelligence only; no source changes or installed package changes",
+  "backend_source_sha256": {
+    "sbri": "b925383b94d56930acb31d488f125e92b3feae4710ac97fad8be32a1699677e7",
+    "spring_boot_release_intelligence/sbri_cli.py": "d068816ab4a5d6f6898f5ff6ef680bed4245d18ea39baf6ac4d76377d50ff053",
+    "spring_boot_release_intelligence/standalone.py": "e3ee7ca282a5d3185c9cfc4cf41ffb044086e22895a9b5909a1cecd4b59cf897"
+  },
+  "python": "/tmp/openhands-sdk-1.55.1/venv/bin/python",
+  "versions": {
+    "openhands-sdk": "1.55.1",
+    "openhands-tools": "1.55.1",
+    "maven": "3.9.16",
+    "java": "21.0.12.1",
+    "osv-scanner": "2.6.0",
+    "jsonschema": "4.26.0"
+  },
+  "diagnostic_root": "/tmp/p1-verification.hjRNA4",
+  "fixture": "tests_native/fixtures/sbri-profile/pom.xml",
+  "fixture_sha256_before_and_after": "c13825f58565ac1ecca18a2e8bcb67915f8ca1eab1f77eef10e097ccf8767bb2",
+  "backend_command": [
+    "/tmp/openhands-sdk-1.55.1/venv/bin/python", "/tmp/p1-verification.hjRNA4/sbri", "evaluate",
+    "--project", "/tmp/p1-verification.hjRNA4/project",
+    "--output", "/tmp/p1-verification.hjRNA4/backend-output",
+    "--releases", "3.3.1", "--max-candidates", "1",
+    "--profiles", "intelligence-fixture", "--scopes", "compile,runtime",
+    "--maven", "/opt/maven/bin/mvn",
+    "--scanner", "/home/kavya_parivarababu/bin/osv-scanner", "--timeout", "120"
+  ],
+  "backend_exit_code": 0,
+  "backend_status": "SUCCESS",
+  "backend_result_sha256": "306b2c48f3aa9487eaff15dfaf207428f50b2f09f92da8690a5e139ec83632e8",
+  "negative_release": {"value": "0.0.0", "exit_code": 2, "stderr": "invalid-release.stderr"},
+  "profile_disabled": {
+    "exit_code": 0,
+    "command": "mvn -B -q -Dmaven.repo.local=<root>/backend-output/evidence/maven-repository -P!intelligence-fixture org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree -DoutputType=tgf -DoutputFile=<root>/profile-disabled.tgf",
+    "working_directory": "<root>/project"
+  },
+  "execution_kind": "Direct retained CLI diagnostic on authored fixture; NOT product dispatch, self-validation, independent acceptance or remediation",
+  "authority_guard": "UNCHANGED; no production adapter runner injection or guard override for the real backend experiment",
+  "omitted": "Maven binaries/cache, HTTP cache, report.html and disposable backend working copies; original diagnostic directory is temporary",
+  "model_calls": 0,
+  "remote_delivery_actions": 0
+}

@@ -1,0 +1,24 @@
+1434940020 example.diagnostic:sbri-profile-fixture:jar:1.0.0
+1916677384 org.springframework.boot:spring-boot:jar:3.3.1:compile
+7162498 org.springframework:spring-core:jar:6.1.10:compile
+351297720 org.springframework:spring-jcl:jar:6.1.10:compile
+82750270 org.springframework:spring-context:jar:6.1.10:compile
+728740247 org.springframework:spring-aop:jar:6.1.10:compile
+783339262 org.springframework:spring-beans:jar:6.1.10:compile
+1512759723 org.springframework:spring-expression:jar:6.1.10:compile
+736888459 io.micrometer:micrometer-observation:jar:1.13.1:compile
+2103044456 io.micrometer:micrometer-commons:jar:1.13.1:compile
+1429610243 org.apache.commons:commons-text:jar:1.12.0:compile
+1478269879 org.apache.commons:commons-lang3:jar:3.14.0:compile
+#
+7162498 351297720 compile
+1916677384 7162498 compile
+82750270 728740247 compile
+82750270 783339262 compile
+82750270 1512759723 compile
+736888459 2103044456 compile
+82750270 736888459 compile
+1916677384 82750270 compile
+1434940020 1916677384 compile
+1429610243 1478269879 compile
+1434940020 1429610243 compile

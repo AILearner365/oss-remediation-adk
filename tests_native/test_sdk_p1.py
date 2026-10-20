@@ -47,13 +47,30 @@ class NativeP1Tests(PreparedFixture):
             conversation = native.open_conversation(self.state, self.bound, self.task)
             try:
                 # execute_tool is a trusted SDK probe and bypasses action hooks.
-                conversation.execute_tool("terminal", TerminalAction(command="true", timeout=1))
+                ready = conversation.execute_tool("terminal", TerminalAction(command="true", timeout=5))
+                # The SDK wait timeout is soft, including for shell warm-up.
+                for _ in range(3):
+                    if ready.metadata.exit_code != -1:
+                        break
+                    ready = conversation.execute_tool("terminal", TerminalAction(command="", timeout=5))
+                self.assertFalse(ready.is_error)
+                self.assertEqual(ready.metadata.exit_code, 0,
+                                 "Shell warm-up did not finish; timeout probe not submitted")
                 started = time.monotonic()
                 result = conversation.execute_tool("terminal", TerminalAction(command="sleep 5", timeout=0.1))
                 self.assertLess(time.monotonic() - started, 4)
+                self.assertFalse(result.is_error, "Timeout command must actually be submitted")
+                # SDK 1.55.1 leaves observation.timeout at its default False;
+                # foreground timeout is represented by metadata and suffix.
+                self.assertEqual(result.metadata.exit_code, -1)
                 self.assertIn("timed out", "\n".join(c.text for c in result.to_llm_content))
                 interrupted = conversation.execute_tool("terminal", TerminalAction(command="C-c", is_input=True))
                 self.assertFalse(interrupted.is_error)
+                recovered = conversation.execute_tool("terminal", TerminalAction(
+                    command="printf TERMINAL_RECOVERED", timeout=5))
+                self.assertFalse(recovered.is_error)
+                self.assertEqual(recovered.metadata.exit_code, 0)
+                self.assertIn("TERMINAL_RECOVERED", recovered.text)
             finally:
                 conversation.close()
 

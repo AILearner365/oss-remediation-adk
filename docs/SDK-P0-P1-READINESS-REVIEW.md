@@ -1,5 +1,145 @@
 # OpenHands SDK P0 and P1 readiness review
 
+## Current verification assessment — 2026-10-20
+
+This update supersedes the P1 findings in the original review retained below.
+Implementation entering verification: `0669c1b4cd6e32124f89f1cd3340289a35c20a6e`.
+**Not live-ready: P0 remains BLOCKED/deferred and unchanged.** No Gemini, target
+remediation, target-repository edits, pushes to a target or PR creation occurred.
+Only the product branch is delivered. No SDK upgrade or authority workaround.
+
+### Evidence-based status
+
+| Area | Assessment | What is actually established |
+| --- | --- | --- |
+| P0 independent authority | NOT PROVEN / BLOCKED | The unconditional `files.require_independent_authority()` and its execution paths remain unchanged. No same-user isolation guarantee is implemented or waived. |
+| P1-A strict baseline | PROVEN offline | `StrictBaselineTests` rejects failed/incomplete/stale/tampered evidence before SDK dispatch; graph/inventory/coverage/tests and configured checks remain mandatory. Checks are baseline AND candidate invariants by the approved contract, not final-only goals. No baseline relaxation was required. |
+| P1-A Boot comparison | PROVEN offline | `BootPolicyTests` covers unchanged sets, module patch/minor/major moves, real/mixed/swapped downgrades, ambiguous ownership and independent root-controller/module-override movement. Root upgrade cannot hide a module downgrade; a major controller change cannot hide behind pinned modules. These are retained-graph fixtures, not live multi-module Maven remediation proof. |
+| P1-B retained SBRI CLI/backend | PROVEN for controlled fixture | Actual historical CLI, Maven, Maven Central metadata and OSV executed successfully: 3.3.0 baseline and selected 3.3.1, both COMPLETE, profile enabled, 11 resolved/input packages per release. Not a model-selected strategy or independent acceptance. |
+| P1-B product adapter | PARTIAL | Approved profiles, cache identity/reuse/retry, response handling and tool dispatch pass fixtures. Real CLI parsing was previously verified with a fixture Evaluator. Direct backend evidence now verifies the retained engine, but guarded product pre-edit/tool-to-backend execution remains NOT PROVEN. No `sbri` is installed on PATH; backend was extracted temporarily from Git, not silently installed. |
+| P1-C Skills/native tools | PROVEN offline; behavior PARTIAL | Real SDK constructs/resumes a conversation without inference, loads/renders native Skills and dispatches registered tools. Native hooks/terminal execute harmless probes. Model use, reasoning quality and autonomous reassessment remain NOT PROVEN. |
+| Timeout/recovery | PROVEN scoped offline | Native waits return control; interruption and a subsequent command work. PreToolUse rejects missing/excessive waits. Deterministic runner kills its timed-out process group/child. Expired tasks block initial dispatch and recovery; missing receipts and exhausted run budget block recovery. No hard task wall-clock kill or background-process containment is claimed. |
+| Stop acceptance/delivery | PROVEN offline contracts; live NOT PROVEN | Separate self-check/Stop authority, deny/PASS, report-only, explicit draft authorization, exact-tree guards and uncertain delivery reconciliation pass test doubles. No actual Maven Stop acceptance or GitHub mutation was exercised. |
+
+### Actual SBRI execution and retained evidence
+
+Authoritative backend snapshot: `openhands-poc-evaluation` at
+`e5d160cb6080e5c6ed8fef16ca4ba42ab6106c8f`. Only `sbri` and
+`spring_boot_release_intelligence/` were extracted with `git archive` into
+`/tmp/p1-verification.hjRNA4`; no historical source was modified. The authored
+fixture is [tests_native/fixtures/sbri-profile/pom.xml](../tests_native/fixtures/sbri-profile/pom.xml).
+No application code, tests, credentials or target checkout was used.
+
+Exact argv, source/fixture hashes, versions and exit codes are in
+[provenance.json](evidence/p1-verification-20261020/provenance.json). The run used:
+
+```text
+<pinned-python> <extracted>/sbri evaluate --project <fixture-copy> --output <output>
+  --releases 3.3.1 --max-candidates 1 --profiles intelligence-fixture
+  --scopes compile,runtime --maven /opt/maven/bin/mvn
+  --scanner /home/kavya_parivarababu/bin/osv-scanner --timeout 120
+```
+
+Exit 0, schema 1.0, SUCCESS, no errors, approximately 41.35 seconds. Maven 3.9.16,
+Java 21.0.12.1 and OSV 2.6.0 were real installed tools, not stand-ins. Explicit
+selection was checked against authoritative Maven metadata (its URL/hash are in
+the result). A separate rejected `--releases 0.0.0` invocation exited 2 with the
+actual useful error retained in `invalid-release.stderr`. It made no evaluation.
+Range selection remains fixture/source-verified, not exercised by this backend run.
+
+Durable [evidence directory](evidence/p1-verification-20261020/) retains:
+
+- Original `backend/result.json`, both Maven TGF trees, generated SBOMs, raw OSV
+  responses and Maven/scanner logs; `SHA256SUMS` protects copy consistency.
+- Original backend schema and schema validation using jsonschema 4.26.0.
+- `profile-disabled.tgf`: an actual additional Maven tree collection with
+  `-P!intelligence-fixture` removes Commons Text. With the approved profile,
+  Commons Text 1.12.0 and its transitive dependency are present in BOTH releases.
+- `tests-pinned.log`, `tests-stdlib.log`, `terminal-focused.log`, and the initial
+  unsuccessful terminal-probe logs (trailing padding whitespace normalized);
+  these are test evidence, not agent trajectories. Reused fixture conversation
+  IDs in those logs are not new executions of the historical conversations.
+
+`RetainedBackendEvidenceTests` verifies TGF external compile/runtime packages =
+SBOM components = per-release result dependency records (11 each). Scanner logs
+confirm 11 packages extracted per SBOM. Boot and Spring resolved versions move
+between releases; retained ownership/defaults/findings references can be inspected.
+The original fixture POM SHA is identical before/after. Both releases retain ten
+unique findings (four HIGH, three MEDIUM, three LOW); **no complete remediation is
+claimed**. The old backend's ranking is supporting security evidence only.
+
+Coverage qualification: this is one module with an active profile, not evidence
+of complete arbitrary-reactor/test/plugin/private-repository coverage. OSV output
+omits nonvulnerable packages; its result length alone cannot prove full coverage.
+This backend uses deprecated `--sbom` (still accepted by 2.6.0), not the independent
+validator's stronger coverage contract. Raw advisory data is a time-specific
+network snapshot, not a permanent guarantee. Maven/HTTP caches, generated HTML and
+disposable working copies are omitted from Git; full temporary originals remain
+at the diagnostic path but are not durable. Committed paths above are durable.
+
+### Minimal corrections made during verification
+
+`capabilities.sbri` previously returned only an exception class or generic missing
+report, losing the actual ordinary failure reason. It now retains private
+`execution-error.json`, exposes existing `command.json`/error evidence references,
+and includes bounded stderr (stdout fallback) and exception details using the
+installed SDK redactor. Without the optional SDK, feedback points to private
+evidence rather than exposing raw diagnostics. Raw private command output remains
+available; redaction is best-effort, not a new credential/isolation guarantee.
+Malformed/unavailable/failed optional results remain INCONCLUSIVE/UNAVAILABLE;
+integrity errors still block. No acceptance/cache/delivery authority was changed.
+Real harmless failing-process tests verify actual stderr, private 0600 evidence,
+redacted feedback and launch-error details, in addition to existing fixtures.
+
+The first full discovery failed only the terminal timeout probe: its one-second
+warm-up had not finished before the next command. An intermediate probe exposed
+that SDK 1.55.1 leaves `TerminalObservation.timeout` at its default False; installed
+`terminal_session.py` represents foreground timeout in `metadata.exit_code == -1`
+and rendered suffix instead. The test now waits boundedly for warm-up, verifies
+the timeout command really ran, uses the supported observation metadata/text,
+interrupts it and verifies the next command. No SDK internals were patched.
+
+### Tests and remaining proof boundaries
+
+Pinned SDK/Tools **1.55.1** full discovery:
+
+```sh
+OPENHANDS_SUPPRESS_BANNER=1 /tmp/openhands-sdk-1.55.1/venv/bin/python -m unittest discover -s tests_native -v
+python3 -S -m unittest discover -s tests_native -q
+```
+
+Final pinned result: **83 discovered, 78 passed, 5 skipped**, 36.303 seconds.
+Stdlib-only fallback: **83 discovered, 67 passed, 16 skipped**, 34.869 seconds.
+Counts and individual test names (verbose pinned run) are recorded in
+`tests-pinned.log` and `tests-stdlib.log`. The pinned suite includes all existing native SDK tests and
+new diagnostics, process cleanup, root/override comparison, deadline and retained
+real-backend consistency/schema/hash tests. Five historical remote Agent Server
+probes skip because that package is absent; they are not standalone regressions
+and were not re-investigated. SDK fixture tests trap model completion; injected
+evaluators/authority mocks are test-only, never real product/backend execution.
+Compileall, shell syntax for `scripts/openhands/sdk-cloudshell-setup.sh`, task
+configuration validation and `git diff --check` are additional checks. SDK
+LocalWorkspace emits nonfatal unclosed-pipe ResourceWarnings; terminal probes can
+emit PS1 metadata warnings. These vendor behaviors are retained, not suppressed
+as evidence of security or reliability.
+
+The task deadline is checked before dispatch/resume, new terminal work and
+deterministic evaluation. It cannot terminate an ongoing model/tool/background
+process exactly at expiry. Native timeout is a **soft foreground wait**, unlike
+the deterministic helper's process-group kill. Native hook infrastructure can
+fail open; trusted direct `execute_tool()` bypasses action hooks. None of these
+is a security boundary or a resolution of P0.
+
+Remaining blockers/gaps: independent host authority (deferred P0); installed and
+versioned backend deployment; real product adapter invocation with its guard
+intact; full multi-module/private-repository SBRI behavior; actual model strategy,
+validation feedback/reassessment and end-to-end acceptance/delivery. Those cannot
+be established by passing offline fixtures. **P1 verification is PARTIAL overall;
+controlled live readiness is NOT PROVEN.** A separately authorized live run also
+requires resolving P0 first; this verification authorizes neither.
+
+## Original review snapshot (before P1 corrections)
+
 Review date: 2026-10-20. Repository: AILearner365/oss-remediation-adk.
 Branch: autonomous-oss-remediation.
 Reviewed implementation: `ce62775dd956b19965cc5b8c50334f1dd72b1d03`.

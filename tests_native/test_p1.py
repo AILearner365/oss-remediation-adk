@@ -53,6 +53,20 @@ class BootPolicyTests(unittest.TestCase):
         self.policy["spring_boot"]["patch"] = False
         self.assertEqual(self.outcome({"app:a": "4.0.8", "app:b": "4.1.1"}), "FAIL")
 
+    def test_root_controller_and_module_override_are_compared_independently(self):
+        self.before["inventory"]["spring_boot"] = "4.0.6"
+        after = boot_evaluation({"app:a": "4.0.8", "app:b": "4.1.1"})
+        after["inventory"]["spring_boot"] = "4.0.8"
+        self.assertEqual(validation.compare(self.before, after, self.policy)["outcome"], "PASS")
+        # Root patch approval must not conceal a module's explicit downgrade.
+        overridden = boot_evaluation({"app:a": "4.0.8", "app:b": "4.1.0"})
+        overridden["inventory"]["spring_boot"] = "4.0.8"
+        self.assertEqual(validation.compare(self.before, overridden, self.policy)["outcome"], "FAIL")
+        # Controller policy applies even when modules pin the old resolved versions.
+        pinned = deepcopy(self.before)
+        pinned["inventory"]["spring_boot"] = "5.0.0"
+        self.assertEqual(validation.compare(self.before, pinned, self.policy)["outcome"], "FAIL")
+
     def test_real_and_mixed_downgrades_fail_even_when_global_sets_match(self):
         for modules in ({"app:a": "4.0.5", "app:b": "4.1.1"},
                         {"app:a": "4.0.8", "app:b": "4.1.0"},
@@ -97,6 +111,18 @@ class PreparedFixture(GitFixture):
 
 
 class StrictBaselineTests(PreparedFixture):
+    def test_expired_task_blocks_dispatch_and_recovery_before_authority_or_sdk(self):
+        self.prepared()
+        self.bound["createdAt"] = time.time() - self.task["limits"]["task_seconds"] - 1
+        write(self.state / "task.json", self.bound)
+        for reason in (None, "simulated restart after deadline"):
+            with self.subTest(reason=reason), patch.object(runtime, "require_independent_authority",
+                    side_effect=AssertionError("Expired task reached authority gate")):
+                with self.assertRaises(Blocked):
+                    runtime.dispatch(self.state, resume_reason=reason,
+                        factory=lambda *a: self.fail("Expired task must not initialize or run"))
+        self.assertFalse((self.state / "runs").exists())
+
     def test_invalid_baselines_block_before_authority_or_dispatch(self):
         mutations = [lambda b: b.update(outcome="FAIL"), lambda b: b.update(outcome="INCONCLUSIVE"),
             lambda b: b.update(reasons=["Required check failed"]), lambda b: b.update(tests=0),
@@ -271,6 +297,33 @@ class SbriCorrectionTests(PreparedFixture):
         result = capabilities.sbri(self.state, refresh=True, runner=lambda *a: dict(exitCode=0, timedOut=False))
         self.assertEqual(result["status"], "INCONCLUSIVE")
         self.assertIn("missing", result["reasons"][0])
+
+    def test_real_fixture_command_failure_preserves_private_output_and_safe_feedback(self):
+        from native_remediation.files import command
+        self.backend.write_text("#!/bin/sh\nprintf 'sbri: Maven profile dependency unavailable; api_key=fixture-secret\\n' >&2\nexit 2\n")
+        result = capabilities.sbri(self.state, runner=command)
+        self.assertEqual(result["status"], "INCONCLUSIVE")
+        private = read(self.state / result["commandEvidence"])
+        self.assertEqual(private["exitCode"], 2)
+        self.assertIn("Maven profile dependency unavailable", private["stderr"])
+        self.assertIn("fixture-secret", private["stderr"])
+        self.assertNotIn("fixture-secret", str(result["reasons"]))
+        try:
+            import openhands.sdk
+        except ImportError:
+            pass  # Without SDK, feedback points to private evidence, not raw text.
+        else:
+            self.assertIn("Maven profile dependency unavailable", str(result["reasons"]))
+        self.assertEqual((self.state / result["commandEvidence"]).stat().st_mode & 0o777, 0o600)
+
+    def test_exception_diagnostic_retains_actual_reason(self):
+        def vanished(*args):
+            raise FileNotFoundError("SBRI fixture launcher disappeared")
+        result = capabilities.sbri(self.state, runner=vanished)
+        self.assertEqual(result["status"], "UNAVAILABLE")
+        self.assertEqual(read(self.state / result["executionErrorEvidence"]),
+            dict(type="FileNotFoundError", message="SBRI fixture launcher disappeared"))
+        self.assertIsNone(result["commandEvidence"])
 
     def test_partial_or_wrong_profiles_and_scopes_never_mean_complete(self):
         for field in ("partial", "profiles", "scopes", "missing-release"):
