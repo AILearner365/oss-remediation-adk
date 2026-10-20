@@ -1,43 +1,47 @@
 # Autonomous OSS Vulnerability Remediation — engineering handoff
 
-Read [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) fully. It governs behavior and
-trust boundaries. Product branch: `autonomous-oss-remediation`, created from
-verified `11431b428a69f4525679bda5880bf0a0d05137bc`. The local and remote
-`openhands-native-product` branches remain preserved at that commit; no history
-rewrite, old branch deletion or target-application branch change is required.
+Product branch: `autonomous-oss-remediation`. Preserve the original local/remote
+`openhands-native-product` branch at `11431b428a69f4525679bda5880bf0a0d05137bc`.
+Read [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) and [operations](docs/OPERATIONS.md).
 
-## Current engineering result
+## Implemented direction
 
-The native preparation migration is **blocked**, not implemented or live-proven.
-The installed native Server/SDK 1.55.1 and actual API schema were inspected before
-lifecycle changes. [The bounded investigation](docs/NATIVE-PREPARATION-BLOCKER.md)
-identifies the missing prerequisite/failure/recovery/isolation contracts and
-records reproducible no-model checks. No alternative orchestration engine,
-wrapper, SDK patch, framework upgrade or new service was introduced.
+Use the official standalone OpenHands SDK/tools 1.55.1. `native.open_conversation`
+uses Conversation, LocalWorkspace, persistence_dir, conversation_id and explicit
+native Stop hooks. The supported caller sequence is idle SDK initialization,
+trusted deterministic preparation/baseline, durable COMPLETE gate, send_message,
+run. This replaces remote HTTP creation, lazy-hook attachment reconciliation and
+remote dispatch. No SDK internals were changed and no second agent loop was added.
 
-Preserve the existing preparation, Maven/OSV graph/coverage checks, independent
-validator, native prompt/Stop integration, intent/outcome records and exact-tree
-GitHub draft-delivery guards. The existing external prepare/attach/run sequence
-is diagnostic scaffolding, not native-owned product execution. Do not relabel it
-as complete or merely combine it into a single command.
+Keep existing repository/policy checks, exact Git exports, Maven/OSV coverage and
+PASS/FAIL/INCONCLUSIVE acceptance, bounded intent/outcome records, and draft-only
+exact-tree delivery with claims/reconciliation. Native SDK persistence owns history
+and execution state. The application owns only task/evidence/budgets/side-effect claims.
 
-Milestone 1 evidence remains at `f72e5308704960ee911f382f96bf0b7948435216`:
-native conversation `05f7716a-90bc-4ec5-a90e-01b7a4de5fa0`, Gemini, one-file
-independent PASS, validated tree/base binding and actual draft PR #214. This does
-not prove trusted native pre-inference preparation or real OSS remediation.
+LocalWorkspace itself is not an isolation boundary. Host control workspace is
+private, not the agent repository. Native terminal shell_path enters a restricted,
+short-lived Docker container. Only repository files are writable to the agent;
+Git metadata and baseline are read-only. Repository builds see only raw source,
+build cache and explicitly supplied scanner inputs, never trusted decisions or
+credentials. A small SDK cycle_evidence tool records untrusted agent-authored
+intent/outcome without granting acceptance or arbitrary host execution.
 
-## Execution boundary and next action
+## Verified versus remaining
 
-No model call, new remediation PR or target modification is authorized by this
-handoff. Do not proceed to a live product run while the mandatory native gate is
-unresolved. The next engineering prerequisite is a verified supported native
-pre-inference/recovery contract and an actual trust boundary for preparation and
-repository builds. No OpenHands version change or framework comparison is
-pre-approved. Existing offline safety checks remain useful independently.
+Focused offline tests cover idle native SDK creation/restoration without inference,
+preparation ordering/failure, durable evidence and one-shot/bounded recovery gates,
+native Stop denial, independent validation and exact-tree delivery. Container
+launch policy is tested with doubles, not a live isolation or remediation proof.
+Historical remote probes remain available but are not repeated by these checks.
 
-Keep one autonomous reasoning/coding agent and the existing operating model:
-stable task, verified facts/uncertainty, credible whole-goal candidates,
-evidence-backed strategy, implementation/reassessment, self-checks, honest
-intent/outcome, independent acceptance and bounded failure. Optional SBRI is
-evidence, never a required Spring Boot strategy. Keep product-oriented names;
-retain `native_remediation` imports and OpenHands SDK names for compatibility.
+The environment has no approved local toolchain image. Provision an immutable
+image ID and offline dependencies/SBRI/research references, then verify the real
+container boundary/toolchain without inference. Network is deliberately disabled;
+online Maven/OSV/research requires separately reviewed egress controls that cannot
+expose host/cloud credentials. Do not enable bridge/host networking as a shortcut.
+Persistent ADC, local-claim durability and Canvas browser rendering remain
+deployment/unverified limitations. SDK conversations are not automatically visible
+in the old Agent Server/Canvas.
+
+No model call, live remediation, target edit or PR is authorized. Do not claim
+full live readiness from mocks or repeat the remote-server architecture investigation.

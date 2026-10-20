@@ -1,9 +1,4 @@
-"""Autonomous OSS Vulnerability Remediation diagnostic integration commands.
-
-Native preparation migration is blocked on the installed 1.55.1 contract.
-The preserved prepare/attach/run sequence is diagnostic, not a compliant native
-product workflow. See docs/NATIVE-PREPARATION-BLOCKER.md. No daemon or database.
-"""
+"""Autonomous OSS Vulnerability Remediation using the standalone OpenHands SDK."""
 import argparse
 import json
 from pathlib import Path
@@ -12,7 +7,6 @@ import time
 
 from .contract import context, load_task
 from .files import Blocked, lock, read, write
-from .native import Native
 from . import journal, preflight, runtime
 from .delivery import deliver
 
@@ -22,19 +16,17 @@ def parser():
     sub = root.add_subparsers(dest="action", required=True)
     validate = sub.add_parser("check-task", help="Offline contract validation only")
     validate.add_argument("--task", type=Path, required=True)
-    prep = sub.add_parser("prepare", help="Clone approved revision; build/resolve/scan baseline, no model")
-    prep.add_argument("--task", type=Path, required=True)
-    prep.add_argument("--state", type=Path, required=True)
-    for name in ("attach", "doctor", "run", "resume", "status", "reconcile-delivery", "hook", "record"):
+    for name in ("start", "prepare"):
+        prep = sub.add_parser(name, help="Initialize SDK and prepare baseline" + ("; then execute" if name == "start" else "; no inference"))
+        prep.add_argument("--task", type=Path, required=True)
+        prep.add_argument("--state", type=Path, required=True)
+        if name == "start":
+            prep.add_argument("--authorize-run-and-delivery", action="store_true")
+    for name in ("doctor", "run", "resume", "status", "reconcile-delivery", "hook", "record"):
         p = sub.add_parser(name)
         p.add_argument("--state", type=Path, required=True)
-        if name in ("attach", "doctor", "run", "resume", "status"):
-            p.add_argument("--server", default="http://127.0.0.1:18910")
-            p.add_argument("--key-file", type=Path, required=True)
         if name in ("run", "resume"):
             p.add_argument("--authorize-run-and-delivery", action="store_true")
-        if name == "attach":
-            p.add_argument("--reconcile", action="store_true", help="Inspect/reuse the claimed idle conversation; never repeat create")
         if name == "resume":
             p.add_argument("--reason", required=True)
         if name == "record":
@@ -47,8 +39,12 @@ def execute(args):
     if args.action == "check-task":
         task = load_task(read(args.task))
         return dict(outcome="VALID_TASK", repository=task["repository"], model=task["model"])
-    if args.action == "prepare":
+    if args.action in ("start", "prepare"):
+        if args.action == "start" and not args.authorize_run_and_delivery:
+            raise Blocked("Explicit authorization required for paid execution and draft delivery")
         bound = runtime.prepare_task(read(args.task), args.state)
+        if args.action == "start":
+            return runtime.dispatch(args.state)
         return dict(outcome="BASELINE_COMPLETE", conversationId=bound["conversationId"])
     if args.action == "hook":
         return runtime.hook(args.state, json.load(sys.stdin))
@@ -66,17 +62,20 @@ def execute(args):
             delivered = deliver(state, accepted)
             write(state / "result.json", dict(outcome="DELIVERED", **delivered))
             return delivered
-    native = Native(args.server, args.key_file)
     if args.action == "doctor":
-        return preflight.check(native, task)
-    if args.action == "attach":
-        return runtime.attach(state, native, reconcile=args.reconcile)
+        from .sandbox import check
+        check(task)
+        return preflight.check(task)
     if args.action in ("run", "resume"):
         if not args.authorize_run_and_delivery:
             raise Blocked("Explicit authorization required for paid execution and PASS-only draft delivery")
-        preflight.check(native, task)
-        return runtime.dispatch(state, native, resume_reason=args.reason if args.action == "resume" else None)
-    return runtime.status(state, native)
+        return runtime.dispatch(state, resume_reason=args.reason if args.action == "resume" else None)
+    from .native import open_conversation
+    conversation = open_conversation(state, bound, task)
+    try:
+        return runtime.status(state, conversation)
+    finally:
+        conversation.close()
 
 
 def main():

@@ -17,16 +17,17 @@ DEFAULTS = {
                "max_remaining_findings": 0, "target_ids": [], "minimum_tests": 0},
     "tools": {"maven": "mvn", "osv": "osv-scanner", "profiles": [], "checks": [],
               "sbri_reference": None, "research_reference": None},
+    "sandbox": {"image": None},
 }
 
 
 def load_task(value):
     task = deepcopy(DEFAULTS)
     if not isinstance(value, dict) or set(value) - {"repository", "base_branch", "base_sha",
-            "goal", "constraints", "model", "limits", "policy", "tools", "delivery"}:
+            "goal", "constraints", "model", "limits", "policy", "tools", "delivery", "sandbox"}:
         raise Blocked("Unknown task fields")
     for key, item in value.items():
-        if key in ("limits", "policy", "tools"):
+        if key in ("limits", "policy", "tools", "sandbox"):
             if not isinstance(item, dict) or set(item) - set(task[key]):
                 raise Blocked("Unknown " + key + " fields")
             task[key].update(item)
@@ -60,6 +61,9 @@ def load_task(value):
         if type(p[key]) is not int or p[key] < 0:
             raise Blocked("Invalid acceptance count")
     tools = task["tools"]
+    image = task["sandbox"]["image"]
+    if image is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
+        raise Blocked("Sandbox requires an immutable local Docker image ID (sha256:...), not a tag")
     if (not isinstance(tools["profiles"], list) or not all(re.fullmatch(r"[\w.-]+", x) for x in tools["profiles"])
             or not isinstance(tools["checks"], list) or not all(isinstance(c, list) and c
                 and all(isinstance(x, str) and x for x in c) for c in tools["checks"])):

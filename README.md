@@ -1,38 +1,34 @@
 # Autonomous OSS Vulnerability Remediation
 
-OpenHands is the native autonomous agent framework, not the product identity.
-Development branch: `autonomous-oss-remediation`; the previous
-`openhands-native-product` branch is preserved at `11431b428a69f4525679bda5880bf0a0d05137bc`.
+A single autonomous engineering agent built on the **standalone OpenHands Python
+SDK 1.55.1**. No Agent Server, custom server, database, scheduler, UI or model loop.
+Branch: `autonomous-oss-remediation`; `openhands-native-product` remains preserved.
 
-**Status: native pre-inference preparation migration is BLOCKED.** Installed
-OpenHands 1.55.1 does not establish all required failure, recovery and trust
-guarantees through the reviewed supported facilities. See the
-[exact source/API evidence](docs/NATIVE-PREPARATION-BLOCKER.md).
-The existing Maven/OSV validator, native agent/Stop integration, bounded records
-and exact-tree draft delivery remain preserved as diagnostic implementation work.
-The external prepare/attach/run sequence is not a compliant normal product flow.
-No wrapper, custom service, SDK patch or orchestration engine was added.
+**Implemented and offline-verified, not live-proven remediation.** The SDK
+conversation is created idle, deterministic preparation completes, and a durable
+identity-bound baseline receipt is checked before sending the objective and
+calling `conversation.run()`. Recovery restores native persistence and checks
+the receipt again. Independent native Stop validation alone can authorize delivery.
 
-Read [operations and commands](docs/OPERATIONS.md) and the
-[requirement mapping / proof table](docs/IMPLEMENTATION.md).
-The governing requirements remain [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) and
-[ENGINEERING-HANDOFF.md](ENGINEERING-HANDOFF.md). Offline safety checks pass, but
-do not prove the missing lifecycle contract or real Maven/OSV remediation under
-the native hook.
+Agent commands use the native TerminalTool with a container shell; repository
+builds are also containerized. The host holds preparation/acceptance evidence and
+delivery credentials. There is no unsafe host-execution fallback. An approved,
+locally provisioned immutable toolchain image is required and is **not present in
+the current environment**. Network is disabled inside these containers; arbitrary
+online Maven resolution/research is not yet supported. See the actual limits in
+[operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATION.md)
+and the [contract](PRODUCT-CONTRACT.md).
 
-The parent commit `f72e5308704960ee911f382f96bf0b7948435216` retains the verified native OpenHands smoke and historical experiment repository **for reference only**. The product branch's tree starts clean by design: do not merge the experimental tree back wholesale.
-
-Goal: an autonomous, evidence-driven Java Maven OSS remediation workflow, executed by native OpenHands and gated by independent deterministic validation before GitHub draft-PR delivery. Preserve native API/SDK/Canvas and built-in hook semantics, not an invented service/API/UI/database.
-
-Offline entry commands (no model or external mutation):
-
+Offline checks (no model, target modifications or PR):
 ```bash
 python3 -S -m native_remediation check-task --task examples/maven-task.json
-python3 -S -m unittest discover -s tests_native -v
+python3 -S -m unittest tests_native.test_product tests_native.test_sandbox -v
+# In the existing SDK 1.55.1 Python environment:
+python -m unittest tests_native.test_sdk_contract -v
 ```
 
-The `native_remediation` import path, `oss-remediate` diagnostic CLI and existing
-delivery-branch naming remain compatible with stored hooks/claims. `prepare`,
-`attach`, `run` and `resume` are preserved diagnostics, not the required native
-preparation integration. No example, test pass or prior smoke authorizes a model
-call or target PR. Do not launch normal product execution while the gate is blocked.
+The previous remote-server blocker is retained as [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
+not a blocker to the standalone SDK calling pattern. Milestone 1 evidence and
+PR #214 remain at commit `f72e5308704960ee911f382f96bf0b7948435216`; they prove
+the prior one-file smoke, not this Maven/OSV product path. No live run is authorized
+by this README or by passing offline tests.

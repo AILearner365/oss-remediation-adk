@@ -1,11 +1,14 @@
 # Product contract — Autonomous OSS Vulnerability Remediation
 
-Status: **partial implementation; native preparation migration BLOCKED** on the
-inspected OpenHands 1.55.1 installation. OpenHands is the implementation framework,
-not the product identity. Preserved diagnostics at `11431b428a69f4525679bda5880bf0a0d05137bc`
-do not yet satisfy the mandatory native-owned preparation contract below.
-The verified Milestone 1 smoke remains at `f72e5308704960ee911f382f96bf0b7948435216`.
-See [source evidence and exact blocker](docs/NATIVE-PREPARATION-BLOCKER.md).
+Status: **standalone SDK implementation, offline-verified; no live remediation
+proof**. OpenHands is the framework, not the product identity. Use SDK/tools 1.55.1,
+not an Agent Server extension. Normal execution creates/restores a local native
+conversation, prepares deterministically, gates on durable COMPLETE evidence, then
+sends the task and calls run(). Missing evidence blocks initial/recovery execution.
+Deployment is currently blocked on an approved local sandbox/toolchain image;
+networked resolution/research and real container isolation remain unverified.
+See [implementation](docs/IMPLEMENTATION.md) and [operations](docs/OPERATIONS.md).
+Historical Milestone 1 smoke remains at f72e5308704960ee911f382f96bf0b7948435216.
 
 ## Outcome and operating model
 
@@ -25,16 +28,22 @@ Given an approved repository revision and a remediation objective, autonomously 
 
 ## Native-first integration boundaries
 
-Native OpenHands Agent Server/SDK handles conversations, agent execution, supported tools and hook invocation; Canvas is optional native observation, not a separate product UI. Model used in proven smoke: `vertex_ai/gemini-2.5-flash` with Vertex AI. Configuration must be explicit and replaceable. Native version proven: SDK/Server/tools 1.55.1, Canvas 1.27.1. Verify extension contracts against installed code before implementing.
+Standalone native OpenHands SDK/tools 1.55.1 owns conversations, the agent loop,
+events/state persistence, tools and hooks. The application uses its standard local
+caller sequence, not a custom reasoning loop or remote service. Model configured:
+`vertex_ai/gemini-2.5-flash`; configuration is explicit/replaceable. Prior smoke
+used Server/SDK 1.55.1 and Canvas 1.27.1; standalone state is not automatically
+registered in those services. Verify installed APIs, not upstream main assumptions.
 
 Minimal integration responsibilities:
-1. **Preparation/submit**: native conversation/workflow initialization must own
-   trusted deterministic workspace preparation and baseline, with an explicit
-   COMPLETE prerequisite before any inference. It receives repo/ref + approved
-   SHA, goal, constraints, acceptance policy, limits and authorized destination.
-   Effective hooks must be resolved before running (1.55.1 initializes hooks on
-   the first `run:false` message). The preserved external prepare/attach/run
-   diagnostics are not an implementation of this native ownership requirement.
+1. **Preparation/run**: initialize the idle native SDK conversation first; execute
+   trusted deterministic preparation/baseline without inference. The supported
+   caller then checks a durable COMPLETE receipt bound to native conversation,
+   task/repository/base/tree/baseline digest before send_message/run. Resume checks
+   the same receipt and native persistence; never infer readiness from messages.
+   Missing/incomplete/stale evidence or failure blocks paid execution. Normal
+   `start` includes this sequence; diagnostic `prepare` is not mandatory externally.
+   Native hooks/tools are verified after lazy initialization before run.
 2. **Agent capabilities**: grant needed repository, shell, Maven, OSV/scanner, research and optionally SBRI/release-intelligence access with bounded permissions. Reuse/copy/rework experimental code freely; agent selects when to use capabilities. SBRI is a helper, not an obligatory Spring Boot strategy; current test scanner is OSV, production candidate JFrog Xray requires a separate adapter/verification.
 3. **Independent validation**: apply task-specific acceptance contract to an immutable captured candidate Git tree and baseline. Check actual resolved dependency set and findings, remaining/new vulnerabilities, applicable upgrade policy, Maven build/tests and repository constraints. Explicitly distinguish scanner errors, incomplete coverage and unknowns from PASS. Ensure paths/dependency source are available as required. Record attempt evidence and provide actionable failure context through native Stop Hook; accepted completion requires proof for the exact conversation, approved base and validated tree.
 4. **Delivery**: after independent PASS only, bind output to the validated Git tree, verify remote base/destination, create-only branch/commit, and confirm an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation must block, not duplicate blindly. Fail closed at the product acceptance level even if native hook-command failures can fail open.
@@ -43,21 +52,25 @@ Minimal integration responsibilities:
 ### Mandatory pre-inference guarantees
 
 Normal product execution must establish all of these through supported native
-extensions: (A) preparation inside the conversation lifecycle, (B) completion
+SDK facilities and the explicit trusted caller sequence: (A) preparation associated
+with the initialized native conversation, (B) completion
 before any Gemini inference, (C) failure prevents inference, (D) evidence bound
 to that conversation, (E) recovery cannot silently skip/duplicate preparation,
 and (F) preparation authority isolated from agent-controlled content/commands.
 Preparation is deterministic code, never an agent-selected reasoning step.
 Untrusted Maven build logic must not gain trusted evidence/credential authority.
 
-The inspected installation does not provide a verified mechanism satisfying all
-six. SessionStart is not a blocking gate; UserPromptSubmit denial is consumed,
-and hook infrastructure errors can fail open. Remote `execute_tool()` is
-unsupported. Native bash execution has no enforced dependency on subsequent
-`/run`. Current hook/build processes do not establish separate OS trust domains.
-The migration is stopped; no wrapper, patched SDK or custom orchestrator is an
-acceptable substitute. Existing validator/delivery code remains available for
-diagnostic verification, not certified normal product execution.
+These are implemented through the standalone caller gate and durable receipt,
+not SessionStart or remote /run. SDK history is restored natively. Trusted state
+and delivery credentials stay on the host; agent terminal/build commands use
+restricted containers with explicit writable raw-source mounts only. The host
+LocalWorkspace is a separate trusted control directory to avoid repository plugin
+execution. No host file-editor/arbitrary execution capability is exposed. A small
+SDK cycle-evidence tool accepts data only and never grants acceptance authority.
+Actual container/toolchain security is not yet deployment-verified; an approved
+immutable local image is required, and containers have no network. The earlier
+remote gate limitations remain [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
+not a reason to reject the supported standalone sequence.
 
 ## Inputs and outputs
 
@@ -71,7 +84,15 @@ Output: deterministic baseline; per-cycle facts/assumptions, candidate rationale
 
 **NOT PROVEN by smoke:** Maven/OSV validator under native Stop Hook; full goal remediation; cycles/denials on this adapter; agent reasoning quality; policy/scanner coverage; production durability/recovery; Canvas browser activity; secure production multi-user isolation. Earlier experiments support design but are not equivalent to production proof.
 
-Known limitations to address proportionately: temporary Cloud Shell ADC discovery workaround; local-only claim persistence; native command hook may fail open on process failure; shared OS user between agent and hook; old one-file submitter's 3-iteration/terminal-only/no-retry restrictions and hook exact-file whitelist are *smoke-specific*, not product defaults.
+Known limits: no provisioned sandbox image or live container/toolchain proof;
+network-disabled commands require offline dependencies/OSV/research evidence;
+persistent ADC setup and durable local claims remain deployment responsibilities;
+native command-hook infrastructure can fail open but cannot by itself establish
+product success. SDK host and container share a numeric UID, not filesystem/process
+authority; the container boundary must be verified on deployment. The native
+terminal handles edits because host FileEditor would breach that boundary.
+Historical smoke-specific iteration/whitelist restrictions are not acceptance
+defaults for remediation. No live model or target PR is authorized here.
 
 ## Implementation discipline
 

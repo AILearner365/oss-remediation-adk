@@ -1,5 +1,13 @@
 # Native preparation contract — bounded inspection result
 
+> Historical remote Agent Server investigation, retained unchanged below. The
+> product now uses the officially supported standalone SDK caller sequence:
+> initialize conversation, deterministic preparation, durable COMPLETE gate,
+> send_message/run, native persistence/resume. The remote /run prerequisite
+> requirement is no longer the selected execution contract. See
+> [current implementation and deployment limits](IMPLEMENTATION.md). No remote
+> investigation or probe was repeated for this migration.
+
 Product: **Autonomous OSS Vulnerability Remediation**. Reviewed 2026-10-20,
 installed Agent Server/SDK/tools **1.55.1**, existing Canvas **1.27.1**.
 **Decision: no reviewed supported mechanism satisfies all mandatory A–F

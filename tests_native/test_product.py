@@ -265,34 +265,112 @@ class DeliveryTests(GitFixture):
         self.assertEqual(self.remote.posts, 1)
 
 
-class OfflineNative:
+class OfflineConversation:
+    """Local SDK boundary double only; never live execution evidence."""
     def __init__(self):
-        self.config, self.calls, self.messages = None, [], []
-    def versions(self):
-        return {}
-    def request(self, method, endpoint, body=None):
-        self.calls.append((method, endpoint, body))
-        if endpoint.startswith("/api/conversations?"):
-            self.config = body
-            return {}
-        if endpoint.endswith("/events"):
-            self.messages.append(dict(kind="MessageEvent", llm_message=dict(role=body["role"], content=body["content"])))
-            return {}
-        if "/events/search?" in endpoint:
-            return dict(items=self.messages)
-        if method == "GET":
-            return dict(self.config, id=self.config["conversation_id"], execution_status="idle")
-        return dict(success=True)
+        from types import SimpleNamespace
+        self.state = SimpleNamespace(execution_status=SimpleNamespace(value="idle"), events=[],
+            stats=SimpleNamespace(model_dump=lambda **kw: {}))
+        self.runs, self.closed = 0, False
+    def send_message(self, text):
+        from types import SimpleNamespace
+        MessageEvent = type("MessageEvent", (), {})
+        event = MessageEvent()
+        event.source, event.text = "user", text
+        event.llm_message = SimpleNamespace(content=[SimpleNamespace(text=text)])
+        self.state.events.append(event)
+    def run(self):
+        self.runs += 1
+        self.state.execution_status.value = "paused"
+    def close(self):
+        self.closed = True
 
 
 class RuntimeTests(GitFixture):
-    def test_idle_attachment_reconciliation_never_repeats_create_or_message(self):
-        server = OfflineNative()
-        runtime.attach(self.state, server)
-        runtime.attach(self.state, server, reconcile=True)
-        self.assertEqual(sum(method == "POST" and endpoint.startswith("/api/conversations?")
-                             for method, endpoint, _ in server.calls), 1)
-        self.assertEqual(len(server.messages), 1)
+    def prepared(self):
+        self.bound["executionFramework"] = "standalone-sdk-1.55.1"
+        write(self.state / "task.json", self.bound)
+        write(self.state / "preparation.json", dict(outcome="COMPLETE",
+            conversationId=self.bound["conversationId"], taskDigest=self.bound["taskDigest"],
+            repository=self.task["repository"], baseCommit=self.task["base_sha"],
+            baseTree=self.baseline["tree"], baselineDigest=digest(self.baseline), completedAt=time.time()))
+
+    def test_missing_incomplete_stale_or_tampered_preparation_blocks_run(self):
+        factory = lambda *a: self.fail("No SDK run/restore before evidence gate")
+        for mode in ("missing", "incomplete", "stale", "tampered", "wrong_identity", "coverage"):
+            self.prepared()
+            if mode == "missing":
+                (self.state / "preparation.json").unlink()
+            elif mode == "tampered":
+                write(self.state / "baseline.json", dict(self.baseline, tests=999))
+            elif mode == "stale":
+                write(self.state / "preparation.json", dict(read(self.state / "preparation.json"), completedAt=0))
+            elif mode == "coverage":
+                broken = dict(self.baseline, coverage=dict(expected=1, scanned=0, complete=False))
+                write(self.state / "baseline.json", broken)
+                write(self.state / "preparation.json", dict(read(self.state / "preparation.json"), baselineDigest=digest(broken)))
+            else:
+                key = "outcome" if mode == "incomplete" else "conversationId"
+                write(self.state / "preparation.json", dict(read(self.state / "preparation.json"), **{key: "wrong"}))
+            with self.subTest(mode=mode), self.assertRaises((Blocked, FileNotFoundError)):
+                runtime.dispatch(self.state, factory=factory)
+            write(self.state / "baseline.json", self.baseline)
+
+    def test_preparation_creates_conversation_first_and_never_sends_or_runs(self):
+        import shutil
+        events = []
+        conversation = OfflineConversation()
+        def factory(*args):
+            events.append("initialize")
+            return conversation
+        def prepare(state, task):
+            events.append("prepare")
+            shutil.copytree(self.workspace, state / "workspace")
+            return state / "workspace"
+        def evaluate(*args, **kwargs):
+            events.append("baseline")
+            return self.baseline
+        destination = self.state / "new"
+        runtime.prepare_task(self.task, destination, factory=factory, preparer=prepare,
+                             evaluator=evaluate, sandbox_check=lambda task: None)
+        self.assertEqual(events, ["initialize", "prepare", "baseline"])
+        self.assertEqual(conversation.runs, 0)
+        self.assertFalse(conversation.state.events)
+        runtime.require_preparation(destination)
+        with patch.object(runtime, "verify_base"), patch("native_remediation.sandbox.check"), patch("native_remediation.sandbox.stop_agent"):
+            runtime.dispatch(destination, factory=lambda *a: conversation, preflight=lambda task: {})
+        self.assertEqual(conversation.runs, 1)
+        with self.assertRaises(FileExistsError):
+            runtime.prepare_task(self.task, destination, factory=factory)
+        broken = self.state / "failed"
+        failed_conversation = OfflineConversation()
+        with self.assertRaises(Blocked):
+            runtime.prepare_task(self.task, broken, factory=lambda *a: failed_conversation, preparer=prepare,
+                evaluator=lambda *a, **kw: dict(self.baseline, outcome="INCONCLUSIVE"),
+                sandbox_check=lambda task: None)
+        self.assertFalse((broken / "preparation.json").exists())
+        with self.assertRaises(Blocked):
+            runtime.dispatch(broken, factory=lambda *a: self.fail("Must not restore or run"))
+        self.assertEqual(failed_conversation.runs, 0)
+
+    def test_successful_gate_dispatches_once_and_recovery_rechecks_receipt(self):
+        self.prepared()
+        conversation = OfflineConversation()
+        with patch.object(runtime, "verify_base"), patch("native_remediation.sandbox.check"), patch("native_remediation.sandbox.stop_agent"):
+            runtime.dispatch(self.state, factory=lambda *a: conversation, preflight=lambda task: {})
+            self.assertEqual(conversation.runs, 1)
+            self.assertEqual(len(conversation.state.events), 1)
+            with self.assertRaises(Blocked):
+                runtime.dispatch(self.state, factory=lambda *a: conversation)
+            # Simulated process restoration uses the persisted native history.
+            runtime.dispatch(self.state, resume_reason="offline recovery", factory=lambda *a: conversation,
+                             preflight=lambda task: {})
+            self.assertEqual(conversation.runs, 2)
+            self.assertEqual(len(conversation.state.events), 2)
+            (self.state / "preparation.json").unlink()
+            with self.assertRaises(Blocked):
+                runtime.dispatch(self.state, resume_reason="must block", factory=lambda *a: conversation)
+            self.assertEqual(conversation.runs, 2)
 
     def test_hook_command_returns_explicit_deny_on_invalid_event(self):
         proc = subprocess.run([sys.executable, "-S", "-m", "native_remediation", "hook", "--state", str(self.state)],
@@ -313,19 +391,6 @@ class RuntimeTests(GitFixture):
         self.assertEqual(result["decision"], "allow")
         self.assertEqual(read(self.state / "result.json")["outcome"], "BOUNDED_FAILURE")
 
-    def test_idle_attach_initializes_before_effective_check_and_dispatches_once(self):
-        server = OfflineNative()
-        runtime.attach(self.state, server)
-        message = [body for _, endpoint, body in server.calls if endpoint.endswith("/events")][0]
-        self.assertFalse(message["run"])
-        self.assertEqual(len(server.config["agent"]["tools"]), 3)
-        self.assertTrue((self.state / "attached.json").is_file())
-        with patch.object(runtime, "verify_base") as check_base:
-            runtime.dispatch(self.state, server)
-            with self.assertRaises(Blocked):
-                runtime.dispatch(self.state, server)
-            check_base.assert_called_once_with(self.task)
-        self.assertEqual(sum(endpoint.endswith("/run") for _, endpoint, _ in server.calls), 1)
 
     def test_hook_pass_and_deny_have_distinct_authority(self):
         tree = self.candidate()
@@ -356,5 +421,8 @@ class RuntimeTests(GitFixture):
 
     def test_native_finished_alone_is_not_product_success(self):
         class Finished:
-            def request(self, *args): return dict(execution_status="finished")
+            def __init__(self):
+                from types import SimpleNamespace
+                self.state = SimpleNamespace(execution_status=SimpleNamespace(value="finished"),
+                    stats=SimpleNamespace(model_dump=lambda **kw: {}))
         self.assertEqual(runtime.status(self.state, Finished())["result"]["outcome"], "BLOCKED")

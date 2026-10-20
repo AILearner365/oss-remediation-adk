@@ -36,6 +36,11 @@ class GitHub:
 
 def deliver(state, accepted, *, github=None):
     state, bound, task = context(state)
+    if bound.get("executionFramework"):
+        from .runtime import require_preparation
+        from .sandbox import stop_agent
+        require_preparation(state)
+        stop_agent(state)
     workspace = state / "workspace"
     if (accepted.get("outcome") != "PASS" or accepted.get("conversationId") != bound["conversationId"]
             or accepted.get("baseCommit") != task["base_sha"] or accepted.get("taskDigest") != bound["taskDigest"]):

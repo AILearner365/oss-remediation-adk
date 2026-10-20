@@ -1,4 +1,4 @@
-"""Short-lived preparation, native submission, explicit dispatch and Stop gate."""
+"""Standalone SDK initialization/preparation/run gate and independent native Stop."""
 import time
 import uuid
 
@@ -6,124 +6,169 @@ from .contract import context, load_task
 from .delivery import deliver
 from .files import Blocked, digest, lock, read, write
 from .journal import final_outcome
-from .native import request_config, task_message, verify_effective
+from .native import task_message
 from .repository import check_paths, prepare, snapshot, text, verify_base
 from .validation import compare, evaluate
 
 
-def prepare_task(task, state):
+def prepare_task(task, state, *, factory=None, preparer=None, evaluator=None, sandbox_check=None):
+    """Create an idle native conversation, then deterministic preparation only.
+
+    An interrupted preparation is never silently repeated. No task message or
+    model execution is possible here.
+    """
+    from pathlib import Path
+    from . import sandbox
+    from .native import open_conversation
+    factory = factory or open_conversation
+    preparer = preparer or prepare
+    evaluator = evaluator or evaluate
+    sandbox_check = sandbox_check or sandbox.check
     task = load_task(task)
-    state = state.expanduser().resolve()
+    state = Path(state).expanduser().resolve()
     state.mkdir(mode=0o700, parents=True, exist_ok=False)
-    bound = dict(task=task, taskDigest=digest(task), conversationId=str(uuid.uuid4()), createdAt=time.time())
+    bound = dict(task=task, taskDigest=digest(task), conversationId=str(uuid.uuid4()),
+                 executionFramework="standalone-sdk-1.55.1", createdAt=time.time())
     write(state / "task.json", bound, exclusive=True)
-    workspace = prepare(state, task)
-    (state / "agent").mkdir(mode=0o700)
-    tree = text(workspace, "rev-parse", task["base_sha"] + "^{tree}")
-    baseline = evaluate(workspace, tree, task, state / "baseline", deadline=min(
-        bound["createdAt"] + task["limits"]["task_seconds"], time.time() + task["limits"]["validation_seconds"]))
-    write(state / "baseline.json", baseline, exclusive=True)
-    if baseline["outcome"] != "COMPLETE":
-        write(state / "result.json", dict(outcome="BLOCKED", reasons=baseline["reasons"]))
-        raise Blocked("Baseline incomplete; inspect evidence, no model dispatch permitted")
-    return bound
+    conversation = factory(state, bound, task)
+    try:
+        with lock(state):
+            write(state / "preparation-intent.json", dict(conversationId=bound["conversationId"],
+                  taskDigest=bound["taskDigest"], at=time.time()), exclusive=True)
+            sandbox_check(task)
+            workspace = preparer(state, task)
+            tree = text(workspace, "rev-parse", task["base_sha"] + "^{tree}")
+            baseline = evaluator(workspace, tree, task, state / "baseline", deadline=min(
+                bound["createdAt"] + task["limits"]["task_seconds"],
+                time.time() + task["limits"]["validation_seconds"]))
+            write(state / "baseline.json", baseline, exclusive=True)
+            if baseline["outcome"] != "COMPLETE" or baseline["tree"] != tree:
+                raise Blocked("Baseline incomplete; no task message or model execution permitted")
+            receipt = dict(outcome="COMPLETE", conversationId=bound["conversationId"],
+                taskDigest=bound["taskDigest"], repository=task["repository"],
+                baseCommit=task["base_sha"], baseTree=tree, baselineDigest=digest(baseline),
+                completedAt=time.time())
+            write(state / "preparation.json", receipt, exclusive=True)
+            require_preparation(state)
+        return bound
+    finally:
+        conversation.close()
 
 
-def attach(state, native, *, reconcile=False):
+def require_preparation(state):
+    """Revalidate durable evidence on every run/recovery, never trust a message."""
     state, bound, task = context(state)
-    with lock(state):
+    try:
+        receipt = read(state / "preparation.json")
         baseline = read(state / "baseline.json")
-        if baseline["outcome"] != "COMPLETE":
-            raise Blocked("Complete deterministic baseline required")
-        if snapshot(state / "workspace", task) != baseline["tree"]:
-            raise Blocked("Workspace changed before native attachment")
-        native.versions()
-        config = request_config(state, bound, task)
-        uid = bound["conversationId"]
-        if reconcile:
-            if read(state / "submission.json")["request"] != config:
-                raise Blocked("Persisted submission differs; cannot reconcile")
-            actual = native.request("GET", f"/api/conversations/{uid}")
-            if actual["execution_status"] != "idle":
-                raise Blocked("Only idle attachment can be reconciled")
-            events = native.request("GET", f"/api/conversations/{uid}/events/search?limit=100&sort_order=TIMESTAMP")
-            rows = events.get("items", [])
-            messages = [e for e in rows if e.get("kind") == "MessageEvent"]
-            if (events.get("next_page_id") or len(rows) >= 100
-                    or any(e.get("kind") in ("ActionEvent", "ObservationEvent") for e in rows)
-                    or len(messages) > 1):
-                raise Blocked("Ambiguous/executed native history; do not replay attachment")
-            if messages and messages[0].get("llm_message", {}).get("content") != [dict(type="text",
-                    text=task_message(state, bound, task, baseline))]:
-                # Native content adds serialization defaults such as cache_prompt.
-                content = messages[0].get("llm_message", {}).get("content", [])
-                if len(content) != 1 or content[0].get("text") != task_message(state, bound, task, baseline):
-                    raise Blocked("Existing native message differs from bound task")
-        else:
-            write(state / "submission.json", dict(state="CREATE_INTENT", request=config), exclusive=True)
-            native.request("POST", "/api/conversations?include_skills=true", config)
-            messages = []
-        # This initializes pending hooks without inference in 1.55.1.
-        if not messages:
-            native.request("POST", f"/api/conversations/{uid}/events", dict(role="user", run=False,
-                content=[dict(type="text", text=task_message(state, bound, task, baseline))]))
-        actual = native.request("GET", f"/api/conversations/{uid}")
-        verify_effective(actual, config)
-        if actual["execution_status"] != "idle":
-            raise Blocked("Unexpected native execution during idle attachment")
-        if not (state / "attached.json").exists():
-            write(state / "attached.json", dict(conversationId=uid, effectiveHooksVerified=True), exclusive=True)
-        return dict(conversationId=uid, status="idle")
+    except (FileNotFoundError, ValueError):
+        raise Blocked("Preparation/baseline evidence missing or invalid; no model execution permitted") from None
+    expected = dict(outcome="COMPLETE", conversationId=bound["conversationId"],
+        taskDigest=bound["taskDigest"], repository=task["repository"], baseCommit=task["base_sha"],
+        baseTree=text(state / "workspace", "rev-parse", task["base_sha"] + "^{tree}"),
+        baselineDigest=digest(baseline))
+    coverage = baseline.get("coverage", {})
+    packages = baseline.get("inventory", {}).get("packages", [])
+    count = len({(p["name"], p["version"]) for p in packages})
+    if (bound.get("executionFramework") != "standalone-sdk-1.55.1"
+            or any(receipt.get(k) != v for k, v in expected.items())
+            or baseline.get("outcome") != "COMPLETE" or baseline.get("tree") != receipt["baseTree"]
+            or not count or coverage.get("complete") is not True
+            or coverage.get("expected") != count or coverage.get("scanned") != count
+            or not bound["createdAt"] <= receipt.get("completedAt", 0) <= time.time()
+            or time.time() >= bound["createdAt"] + task["limits"]["task_seconds"]):
+        raise Blocked("Preparation missing, incomplete, stale or identity/evidence mismatch")
+    return state, bound, task
 
 
-def dispatch(state, native, *, resume_reason=None):
-    state, bound, task = context(state)
-    with lock(state):
-        if (state / "result.json").exists() or (state / "delivery.json").exists():
-            raise Blocked("Task has a result/delivery intent; inspect or reconcile, do not run")
-        if time.time() >= bound["createdAt"] + task["limits"]["task_seconds"]:
-            raise Blocked("Task time budget exhausted")
-        read(state / "attached.json")
-        runs = list((state / "runs").glob("*.json"))
-        if (runs and not resume_reason) or len(runs) >= task["limits"]["max_runs"]:
-            raise Blocked("Run already claimed or run budget exhausted; explicit bounded recovery required")
-        verify_base(task)
-        if not runs and snapshot(state / "workspace", task) != read(state / "baseline.json")["tree"]:
-            raise Blocked("Workspace drifted before the first model dispatch")
-        uid = bound["conversationId"]
-        native.versions()
-        actual = native.request("GET", f"/api/conversations/{uid}")
-        verify_effective(actual, request_config(state, bound, task))
-        if actual["execution_status"] not in ("idle", "paused", "stuck", "error"):
-            raise Blocked("Native conversation is running/terminal; never dispatch again")
-        if resume_reason:
-            for reservation in (state / "attempts").glob("*/intent.json"):
-                validation = reservation.with_name("validation.json")
-                if not validation.exists():
-                    write(validation, dict(outcome="INCONCLUSIVE", reasons=["Interrupted attempt; explicit recovery: " + resume_reason],
-                        validatedTree=read(reservation)["tree"], attempt=int(reservation.parent.name)), exclusive=True)
-            # Explicitly authorized recovery carries evidence, not a new reasoning engine.
-            feedback = read(state / "feedback.json") if (state / "feedback.json").exists() else {}
-            native.request("POST", f"/api/conversations/{uid}/events", dict(role="user", run=False,
-                content=[dict(type="text", text="Bounded recovery: " + resume_reason
+def dispatch(state, *, resume_reason=None, factory=None, preflight=None):
+    """Application gate around the official SDK run; OpenHands owns every step."""
+    import fcntl
+    from . import sandbox
+    from .native import open_conversation
+    from .preflight import check
+    factory = factory or open_conversation
+    preflight = preflight or check
+    state, bound, task = require_preparation(state)
+    # A separate lifetime lock avoids deadlocking synchronous Stop/journal hooks.
+    with (state / "execution.lock").open("a") as execution:
+        try:
+            fcntl.flock(execution, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise Blocked("Another SDK process owns this task; never execute concurrently") from None
+        sandbox.stop_agent(state)
+        with lock(state):
+            require_preparation(state)
+            if (state / "result.json").exists() or (state / "delivery.json").exists():
+                raise Blocked("Task has a result/delivery intent; reconcile, do not run")
+            runs = list((state / "runs").glob("*.json"))
+            if ((runs and not resume_reason) or (resume_reason and not runs)
+                    or len(runs) >= task["limits"]["max_runs"]):
+                raise Blocked("Run already claimed or run budget exhausted; explicit bounded recovery required")
+            if not runs and snapshot(state / "workspace", task) != read(state / "baseline.json")["tree"]:
+                raise Blocked("Workspace drifted before first model execution")
+            verify_base(task)
+            sandbox.check(task)
+            preflight(task)
+        conversation = factory(state, bound, task)
+        try:
+            observed = conversation.state.execution_status.value
+            if observed not in ("idle", "paused", "stuck", "error", "running"):
+                raise Blocked("Native conversation is terminal; do not restart")
+            message = task_message(state, bound, task, read(state / "baseline.json"))
+            messages = [e for e in conversation.state.events if getattr(e, "source", None) == "user"
+                        and type(e).__name__ == "MessageEvent"]
+            if not runs:
+                if messages:
+                    raise Blocked("Unexpected message before first claimed run; inspect native history")
+                conversation.send_message(message)
+            else:
+                if not messages:
+                    raise Blocked("Missing original task in persisted native history")
+                if [getattr(c, "text", None) for c in messages[0].llm_message.content] != [message]:
+                    raise Blocked("Persisted original task differs; do not resume")
+                # No replacement conversation, baseline rerun or history mirroring.
+                with lock(state):
+                    for reservation in (state / "attempts").glob("*/intent.json"):
+                        if not reservation.with_name("validation.json").exists():
+                            write(reservation.with_name("validation.json"), dict(outcome="INCONCLUSIVE",
+                                reasons=["Interrupted attempt; explicit recovery: " + resume_reason],
+                                validatedTree=read(reservation)["tree"], attempt=int(reservation.parent.name)),
+                                exclusive=True)
+                feedback = read(state / "feedback.json") if (state / "feedback.json").exists() else {}
+                conversation.send_message("Bounded recovery: " + resume_reason
                     + "\nStable task digest: " + bound["taskDigest"]
                     + "\nGoal: " + task["goal"] + "\nAcceptance policy: " + str(task["policy"])
                     + "\nCurrent candidate tree: " + snapshot(state / "workspace", task)
-                    + "\nReview journal intent/outcome, current Git state and feedback: " + str(feedback)
-                    + "\nReassess the whole goal; do not automatically repeat the prior strategy.")]))
-        write(state / "runs" / f"{len(runs) + 1}.json", dict(conversationId=uid,
-            state="RUN_INTENT", reason=resume_reason, at=time.time()), exclusive=True)
-        native.request("POST", f"/api/conversations/{uid}/run", {})
-        return dict(conversationId=uid, dispatched=True)
+                    + "\nValidation feedback: " + str(feedback)
+                    + "\nReview cycle records; reassess the whole goal, not just the prior strategy.")
+            with lock(state):
+                require_preparation(state)
+                if factory is open_conversation:
+                    from .native import verify_ready
+                    verify_ready(conversation, state, task)
+                write(state / "runs" / f"{len(runs) + 1}.json", dict(conversationId=bound["conversationId"],
+                    state="RUN_INTENT", reason=resume_reason, at=time.time()), exclusive=True)
+            conversation.run()
+            return status(state, conversation)
+        finally:
+            conversation.close()
+            sandbox.stop_agent(state)
 
 
-def hook(state, event, *, evaluator=evaluate, delivery=deliver):
+def hook(state, event, *, evaluator=None, delivery=deliver):
     state, bound, task = context(state)
+    evaluator = evaluator or evaluate
+    working_dir = state / ("control" if bound.get("executionFramework") else "workspace")
     with lock(state):
         if (event.get("event_type") != "Stop" or event.get("session_id") != bound["conversationId"]
                 or event.get("metadata", {}).get("reason") != "agent_finished"
-                or event.get("working_dir") != str(state / "workspace")):
+                or event.get("working_dir") != str(working_dir)):
             raise Blocked("Native Stop event identity mismatch")
+        if bound.get("executionFramework"):
+            require_preparation(state)
+            from .sandbox import stop_agent
+            stop_agent(state)
         workspace = state / "workspace"
         tree = snapshot(workspace, task)
         outcome = final_outcome(state, tree)
@@ -178,13 +223,13 @@ def hook(state, event, *, evaluator=evaluate, delivery=deliver):
         return dict(decision="allow", reason="Independent PASS; draft PR confirmed: " + delivered["prUrl"])
 
 
-def status(state, native=None):
+def status(state, conversation=None):
     state, bound, task = context(state)
     result = read(state / "result.json") if (state / "result.json").exists() else dict(outcome="PENDING")
     native_status, usage = None, None
-    if native:
-        observed = native.request("GET", f"/api/conversations/{bound['conversationId']}")
-        native_status, usage = observed["execution_status"], observed.get("stats")
+    if conversation:
+        native_status = conversation.state.execution_status.value
+        usage = conversation.state.stats.model_dump(mode="json")
     # A native fail-open finish without independent evidence is explicitly blocked.
     if native_status in ("finished", "stuck", "error") and result["outcome"] == "PENDING":
         result = dict(outcome="BLOCKED" if native_status == "finished" else "BOUNDED_FAILURE",

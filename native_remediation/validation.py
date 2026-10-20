@@ -10,7 +10,7 @@ from urllib.parse import quote
 import uuid
 import xml.etree.ElementTree as ET
 
-from .files import Blocked, command, digest, write
+from .files import Blocked, digest, write
 from .repository import export
 
 TREE_FILE = "native-remediation-dependencies.json"
@@ -122,7 +122,11 @@ def test_counts(source):
     return count
 
 
-def evaluate(workspace, tree, task, directory, *, deadline, runner=command):
+def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
+    if runner is None:
+        from functools import partial
+        from .sandbox import run
+        runner = partial(run, task=task)
     directory.mkdir(parents=True, exist_ok=False)
     result = dict(tree=tree, outcome="INCONCLUSIVE", reasons=[], commands=[])
     try:
@@ -143,7 +147,7 @@ def evaluate(workspace, tree, task, directory, *, deadline, runner=command):
             return record
         tool = task["tools"]
         prefix = [tool["maven"], "-B", "-ntp", "-Dstyle.color=never",
-                  "-Dmaven.repo.local=" + str(workspace.parent / "maven-cache")]
+                  "-Dmaven.repo.local=" + str(source.parent / "maven-cache")]
         if tool["profiles"]:
             prefix += ["-P" + ",".join(tool["profiles"])]
         # Install includes verify/tests and makes reactor artifacts resolvable in
@@ -152,7 +156,8 @@ def evaluate(workspace, tree, task, directory, *, deadline, runner=command):
         if build["exitCode"]:
             result["outcome"] = "FAIL"
             raise Blocked("Maven build/tests failed; see private build evidence")
-        effective = directory / "effective-pom.xml"
+        # A raw build output, not a writable mount of the trusted evidence directory.
+        effective = source / "target" / "effective-pom.xml"
         resolve = run(prefix + [DEPENDENCY_GOAL, EFFECTIVE_GOAL, "-DoutputType=json",
             "-DoutputFile=target/" + TREE_FILE, "-Doutput=" + str(effective), "-Dverbose=false"], "resolve")
         if resolve["exitCode"]:
