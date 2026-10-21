@@ -1,0 +1,9 @@
+{
+  "attempt": 2,
+  "conversationId": "4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2",
+  "deliveryStatus": "NOT_REQUESTED",
+  "outcome": "VALIDATED",
+  "remediationSuccess": true,
+  "validatedTree": "2006b2bf3c0d8f0fbacd1b0851d65cf9242b92bc",
+  "validationOutcome": "PASS"
+}

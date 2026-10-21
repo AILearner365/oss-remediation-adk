@@ -1,0 +1,30 @@
+{
+  "attempt": 1,
+  "baseCommit": "461fdfcadf9a933b8dc89d6ae530a1f71c2bf567",
+  "baselineDigest": "e24b26f431b6ef755f87a884606596ae18500b9919acc1f26742c3e124a931d1",
+  "candidateDigest": "09341bd75975ca551580c970cce8a97890a3f05157e709e2d8bcc0a5072bfae6",
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "conversationId": "4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2",
+  "cycle": 0,
+  "introduced": [],
+  "outcome": "FAIL",
+  "reasons": [
+    "Remaining vulnerabilities exceed acceptance policy"
+  ],
+  "remaining": [
+    {
+      "affected": [],
+      "ids": [
+        "CVE-fixture",
+        "GHSA-fixture"
+      ],
+      "package": "org.example:library",
+      "summary": "",
+      "version": "1.0.0"
+    }
+  ],
+  "taskDigest": "f0ee82aae72d460ff5e7ac689ca49622b0f630d9309498d2cc16335f8c78def0",
+  "validatedTree": "bb678f442f72302b2616d0b01f125c77457c1565"
+}

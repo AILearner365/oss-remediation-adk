@@ -1,0 +1,89 @@
+{
+  "authority": "OPTIONAL_INTELLIGENCE_ONLY",
+  "baseline": "4.0.6",
+  "candidateCoverage": "Only recorded successfully assessed releases/scopes",
+  "commandEvidence": "sbri/ba2122902b5e20ec1dd213e2f497d3bbb19dc8e4ee7410fe7d7784064bd665d5/command.json",
+  "compatibility": "NOT_ASSESSED",
+  "completedAt": 1792545945.1733832,
+  "errors": [],
+  "evidence": "sbri/ba2122902b5e20ec1dd213e2f497d3bbb19dc8e4ee7410fe7d7784064bd665d5",
+  "execution": {
+    "exitCode": 0,
+    "seconds": 0.262,
+    "timedOut": false
+  },
+  "executionErrorEvidence": null,
+  "rankIsNotStrategy": true,
+  "rawSha256": "0a2bb19c827b816b009848184f67db2325e6c8aed53819c629b7f1e25aa2a8fd",
+  "reasons": [],
+  "releases": [
+    {
+      "assessment_status": "COMPLETE",
+      "version": "4.0.6"
+    },
+    {
+      "assessment_status": "COMPLETE",
+      "version": "4.0.8"
+    }
+  ],
+  "request": {
+    "config": {
+      "backend_version": null,
+      "cache_seconds": 3600,
+      "executable": "/tmp/tmpc9u7q3dl/sbri-fixture",
+      "max_candidates": 12,
+      "mode": "on",
+      "pre_edit": true,
+      "ranges": [],
+      "retry_seconds": 60,
+      "scopes": [
+        "compile",
+        "runtime"
+      ],
+      "versions": [
+        "4.0.8"
+      ]
+    },
+    "conversationId": "4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2",
+    "executable": {
+      "mtimeNs": 1792545944180920838,
+      "path": "/tmp/tmpc9u7q3dl/sbri-fixture",
+      "sha256": "3bb5689836b9ef88f3d637da1956008c8345d06bf8cfb666baff284da739905f"
+    },
+    "maven": {
+      "mtimeNs": 1778708166000000000,
+      "path": "/opt/maven/bin/mvn",
+      "sha256": "f9381d0cb98abaaf9592dae421eddc497e84ed9bfb723b84c111d1350863c3a2"
+    },
+    "osv": {
+      "mtimeNs": 1789616551365527263,
+      "path": "/home/kavya_parivarababu/bin/osv-scanner",
+      "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
+    },
+    "profiles": [
+      "approved-fixture"
+    ],
+    "scanner": {
+      "type": "osv",
+      "version": "2.6.0"
+    },
+    "taskDigest": "f0ee82aae72d460ff5e7ac689ca49622b0f630d9309498d2cc16335f8c78def0",
+    "tree": "289f9101f5caec0f6d31bd59fc6b859e4cf67b92"
+  },
+  "resultPath": "sbri/ba2122902b5e20ec1dd213e2f497d3bbb19dc8e4ee7410fe7d7784064bd665d5/output/result.json",
+  "retryable": true,
+  "reused": false,
+  "scopes": [
+    "compile",
+    "runtime"
+  ],
+  "selection": {
+    "resolved_candidates": [
+      "4.0.8"
+    ]
+  },
+  "sourceStatus": "SUCCESS",
+  "status": "COMPLETE",
+  "taskDigest": "f0ee82aae72d460ff5e7ac689ca49622b0f630d9309498d2cc16335f8c78def0",
+  "tree": "289f9101f5caec0f6d31bd59fc6b859e4cf67b92"
+}

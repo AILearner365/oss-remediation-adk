@@ -1,0 +1,79 @@
+{
+  "authority": "OPTIONAL_INTELLIGENCE_ONLY",
+  "baseline": "4.0.6",
+  "candidateCoverage": "Only recorded successfully assessed releases/scopes",
+  "commandEvidence": "sbri/acda81d44babe50f999e1d34b19f99509cda1843e57fd546ca645af0b8fdca39/command.json",
+  "compatibility": "NOT_ASSESSED",
+  "completedAt": 1792545954.1927044,
+  "errors": [],
+  "evidence": "sbri/acda81d44babe50f999e1d34b19f99509cda1843e57fd546ca645af0b8fdca39",
+  "execution": {
+    "exitCode": 2,
+    "seconds": 0.284,
+    "timedOut": false
+  },
+  "executionErrorEvidence": null,
+  "rankIsNotStrategy": true,
+  "rawSha256": null,
+  "reasons": [
+    "SBRI result.json is missing",
+    "SBRI command exitCode=2, timedOut=False: sbri fixture: approved profile repository unavailable\n"
+  ],
+  "releases": [],
+  "request": {
+    "config": {
+      "backend_version": null,
+      "cache_seconds": 3600,
+      "executable": "/tmp/tmpswkh2pzn/sbri-fixture",
+      "max_candidates": 12,
+      "mode": "on",
+      "pre_edit": true,
+      "ranges": [],
+      "retry_seconds": 60,
+      "scopes": [
+        "compile",
+        "runtime"
+      ],
+      "versions": [
+        "4.0.8"
+      ]
+    },
+    "conversationId": "d7826be2-d99f-4bfd-ba3c-b84b98fc0173",
+    "executable": {
+      "mtimeNs": 1792545953311949339,
+      "path": "/tmp/tmpswkh2pzn/sbri-fixture",
+      "sha256": "77e58ed3893677ecc9fc7726630ac9215aefa901f17c28208b54abdaee941dc4"
+    },
+    "maven": {
+      "mtimeNs": 1778708166000000000,
+      "path": "/opt/maven/bin/mvn",
+      "sha256": "f9381d0cb98abaaf9592dae421eddc497e84ed9bfb723b84c111d1350863c3a2"
+    },
+    "osv": {
+      "mtimeNs": 1789616551365527263,
+      "path": "/home/kavya_parivarababu/bin/osv-scanner",
+      "sha256": "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108"
+    },
+    "profiles": [
+      "approved-fixture"
+    ],
+    "scanner": {
+      "type": "osv",
+      "version": "2.6.0"
+    },
+    "taskDigest": "7591c15b367592de126a2a26a9aa9570e6a522520e311519cf76d41c40337de0",
+    "tree": "289f9101f5caec0f6d31bd59fc6b859e4cf67b92"
+  },
+  "resultPath": "sbri/acda81d44babe50f999e1d34b19f99509cda1843e57fd546ca645af0b8fdca39/output/result.json",
+  "retryable": true,
+  "reused": false,
+  "scopes": [
+    "compile",
+    "runtime"
+  ],
+  "selection": {},
+  "sourceStatus": null,
+  "status": "INCONCLUSIVE",
+  "taskDigest": "7591c15b367592de126a2a26a9aa9570e6a522520e311519cf76d41c40337de0",
+  "tree": "289f9101f5caec0f6d31bd59fc6b859e4cf67b92"
+}

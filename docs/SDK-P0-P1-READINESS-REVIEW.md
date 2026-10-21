@@ -1,5 +1,116 @@
 # OpenHands SDK P0 and P1 readiness review
 
+## Connected product workflow verification — 2026-10-21
+
+Starting implementation: `3cdc978b8ccf170bcee712d4ba2b5480d6817872`.
+**Scoped offline integration PROVEN; guarded live readiness NOT PROVEN. P0
+remains deferred/BLOCKED, unchanged.** This update adds tests/evidence only:
+no production modules, Skills, policies, timeouts, cache or delivery contracts
+were modified. The earlier SBRI/backend and individual-gate evidence below is
+reused, not repeated as a new network experiment.
+
+### What actually executed
+
+[ConnectedWorkflowTests](../tests_native/test_workflow_integration.py) exercises
+production `runtime.prepare_task`, `require_preparation`, `dispatch`, `hook`,
+`complete`, `status`, capabilities, journal/evidence and repository functions.
+The default `native.open_conversation` factory remains in use, including native
+configuration verification and real SDK persistence/restore, Skills, messages,
+`Conversation.run()`, `Agent.step()`, tool-call parsing/dispatch, terminal commands,
+PreToolUse hooks, Stop interception, feedback insertion and event persistence.
+It does **not** replace the agent step or implement another agent/model loop.
+
+Six authored `LLM.generate()` responses specify tool calls; one additional
+invocation (the fourth) raises an intentional test interruption after Stop denial. Paid
+completion is trapped, runtime model-metadata lookup is mocked, token usage/cost
+remain zero. **No autonomous reasoning, candidate selection or model
+reassessment was demonstrated.** SDK processing of scripted responses is real;
+the response content is a test fixture, not Gemini output.
+
+Explicit, test-scoped boundaries (all absent from production):
+
+- Runtime/capability references to `require_independent_authority` are mocked
+  only inside unittest contexts. The real guard definition/call sites are unchanged.
+- Approved repository preparation copies an authored local Git fixture. Base
+  verification checks its local SHA; preflight is injected. No target checkout,
+  credentials or GitHub connection is used.
+- The real validator exports each actual Git tree and parses build/graph/scanner
+  evidence; Maven/OSV command outputs come from
+  [workflow_fixture.runner](../tests_native/workflow_fixture.py). Their vulnerable
+  or clean outcome follows the exported POM version, not a sequence of assigned
+  PASS verdicts. Profile arguments must contain the approved Maven profile.
+- The real SBRI adapter/cache executes an authored subprocess CLI fixture, not
+  the historical SBRI engine. The earlier actual backend diagnostic remains
+  separate evidence; this test does not connect that real engine to the product.
+- The native command-hook executor runs a real Stop subprocess, but its command
+  is substituted **only by the test** to select `workflow_fixture.py hook` with
+  the fixture evaluator. Persisted product hook configuration and event display
+  retain the original production command; that displayed command is NOT proof
+  that the production CLI acceptance command ran. Terminal hooks are unchanged.
+- GitHub constructors are failure traps in parent and Stop subprocess. There is
+  no production bypass flag, isolation implementation or alternative live launcher.
+
+### Transition proof matrix
+
+PROVEN below means an executed, asserted **offline integration transition within
+these injected boundaries**, never live acceptance or security isolation.
+
+| Transition | Status | Executed evidence / remaining boundary |
+| --- | --- | --- |
+| 1. Baseline COMPLETE → dispatch | PROVEN offline | Real preparation issues a bound receipt after fixture Maven/OSV parsing. Changing baseline to INCONCLUSIVE blocks dispatch before generation; restoring the original complete evidence permits the real SDK run. Broader malformed/stale cases reuse `StrictBaselineTests` and `RuntimeTests`. Real trusted build authority remains NOT PROVEN. |
+| 2. Pre-edit SBRI → native agent tool | PROVEN offline; real backend wiring PARTIAL | Actual adapter forwards approved profiles to a fixture subprocess, retains COMPLETE, then native tool execution reuses the same tree/profile-bound cache; exactly one SBRI intent. Backend output is a fixture, not real release intelligence in this test. |
+| 3. Optional SBRI failure → preparation/tool result | PROVEN offline | A subprocess exits 2 with an actual fixture error. Baseline/receipt remain COMPLETE; native tool returns cached INCONCLUSIVE with useful stderr reasons/private command evidence, not zero findings. This second scenario uses native `execute_tool`, not another model-loop run. |
+| 4. Scripted response → controlled edit | PROVEN offline; autonomous behavior NOT PROVEN | Real Agent dispatch, PreToolUse and TerminalTool append a comment in local `pom.xml`; the candidate tree changes but its vulnerable version remains. No direct test write performs the agent's candidate edits. |
+| 5. Finish → independent denial/feedback | PROVEN offline | Actual SDK Finish triggers the native Stop subprocess; real acceptance compares the exported candidate, records attempt 1 FAIL, returns exit 2/deny and inserts usable reassessment feedback into native history. Build/scanner outputs remain fixtures. |
+| 6. Corrected candidate → independent PASS | PROVEN offline | A later scripted terminal call changes the fixture dependency version; independent attempt 2 evaluates that new tree, compares policy/findings and allows completion. Native status is finished; report-only result is VALIDATED. |
+| 7. Interruption → native restore/current state | PROVEN scoped offline | Intentional response-boundary interruption persists ERROR; production dispatch with an explicit resume reason restores the same conversation, includes the current rejected tree/prior feedback, and keeps prior attempt files AND native event bytes unchanged. Two durable run claims; no baseline rerun. Process/host failure recovery remains PARTIAL. |
+| 8. Self-check PASS → no acceptance/delivery | PROVEN offline | Native validate_remediation invokes the same evaluator separately. Its corrected-tree PASS has AGENT_SELF_CHECK_ONLY authority; no result/delivery exists and Stop count stays one until the final independent attempt. |
+| 9. Final result → consistent evidence | PROVEN offline | Conversation/task/base identities, final Git tree, second validation, result, feedback and phase evidence agree. Latest evidence digest/event count and existing reference paths are checked against persisted files. |
+| 10. Report-only → no remote mutation | PROVEN offline | VALIDATED / PASS / NOT_REQUESTED, no delivery claim; parent/subprocess GitHub traps are never called. Explicit draft authorization/reconciliation remain covered by existing safe delivery tests, not this scenario. |
+
+### Evidence and reproduction
+
+Retained results: [evidence/product-workflow-20261021/](evidence/product-workflow-20261021/).
+Each scenario has `facts.json`, baseline/preparation/SBRI records and, where
+applicable, rejected/accepted validation, feedback and final result. Facts retain
+the exact native Stop events, event-type/count/manifest information, zero model
+usage, prior artifact/event hashes and explicit injected-boundary labels.
+These are **selected fixture evidence**, not complete durable task-state exports:
+referenced workspace, full native event log, private command/source directories
+and phase snapshots were temporary and cleaned by unittest after assertions.
+Manifest hashes establish what was checked, not a reconstructable full trajectory.
+Fixture conversation IDs are not live remediation runs.
+
+```sh
+OPENHANDS_SUPPRESS_BANNER=1 /tmp/openhands-sdk-1.55.1/venv/bin/python -m unittest tests_native.test_workflow_integration -v
+OPENHANDS_SUPPRESS_BANNER=1 /tmp/openhands-sdk-1.55.1/venv/bin/python -m unittest discover -s tests_native -v
+python3 -S -m unittest discover -s tests_native -q
+```
+
+For optional selected-evidence export, set the **test-only** environment variable
+`OSS_TEST_WORKFLOW_EVIDENCE` to a fresh temporary directory. Each test creates a
+new subdirectory and refuses overwrites. No product logging/persistence mechanism
+was added. `connected-focused.log`, `tests-pinned.log` and `tests-stdlib.log` record
+the exact outcomes (padding whitespace normalized). SDK/Tools versions are both
+1.55.1. The intentional interruption appears as an SDK error in passing test logs;
+it is the recovery fixture, not a failed test or model call. Existing nonfatal SDK
+ResourceWarnings/PS1 warnings are not patched or treated as live proof.
+
+Final results: focused connected tests **2 passed** (12.351 seconds); complete
+pinned suite **85 discovered, 80 passed, 5 skipped** (46.118 seconds).
+The five skips are the unchanged historical Agent Server probes (package absent).
+Stdlib-only fallback **85 discovered, 67 passed, 18 skipped** (41.257 seconds);
+the two new SDK-dependent tests skip there, as expected. Test compileall and
+`git diff --check` passed. `git diff HEAD -- native_remediation` was empty:
+all production code, including P0 and existing contracts, is unchanged.
+
+No Gemini, real target modification, network SBRI/Maven analysis, live delivery,
+PR, Docker or remote Agent Server run occurred. P0 remains the live-execution
+blocker. Real preflight/auth/backend wiring, protected acceptance authority,
+autonomous model behavior and live full-remediation acceptance/delivery remain
+**NOT PROVEN**. This connected test narrows the orchestration evidence gap; it
+does not establish controlled live readiness or permission to bypass P0.
+
 ## Current verification assessment — 2026-10-20
 
 This update supersedes the P1 findings in the original review retained below.

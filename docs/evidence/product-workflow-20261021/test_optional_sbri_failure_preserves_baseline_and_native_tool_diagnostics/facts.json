@@ -1,0 +1,29 @@
+{
+  "commandEvidence": {
+    "exitCode": 2,
+    "seconds": 0.284,
+    "stderr": "sbri fixture: approved profile repository unavailable\n",
+    "stdout": "",
+    "timedOut": false
+  },
+  "conversationId": "d7826be2-d99f-4bfd-ba3c-b84b98fc0173",
+  "diagnostics": [
+    "SBRI result.json is missing",
+    "SBRI command exitCode=2, timedOut=False: sbri fixture: approved profile repository unavailable\n"
+  ],
+  "execution": "REAL_SDK_LOOP_WITH_SCRIPTED_TEST_RESPONSES_NOT_AUTONOMOUS_REASONING",
+  "injected": [
+    "LLM.generate response sequence; completion forbidden",
+    "runtime/capabilities authority test mocks",
+    "local repository copy and local base check; fixture preflight",
+    "Maven/OSV process outputs, parsed by real validator",
+    "SBRI executable is an authored subprocess fixture",
+    "Stop subprocess command selects test helper with injected evaluator"
+  ],
+  "modelCalls": 0,
+  "nativeToolReused": true,
+  "preparation": "COMPLETE",
+  "remoteMutations": 0,
+  "resultPresent": false,
+  "sbriStatus": "INCONCLUSIVE"
+}

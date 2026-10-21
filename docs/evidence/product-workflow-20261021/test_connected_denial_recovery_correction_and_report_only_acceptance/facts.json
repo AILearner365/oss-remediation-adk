@@ -1,0 +1,139 @@
+{
+  "baselineGate": "INCOMPLETE_BLOCKED_COMPLETE_PERMITTED",
+  "conversationId": "4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2",
+  "eventCount": 21,
+  "eventManifestDigest": "ec4a3e721cafac260ad5de264634d9c5c19d92c1fe6e86e68649d142a7f7f9a8",
+  "eventTypes": {
+    "ActionEvent": 6,
+    "ConversationErrorEvent": 1,
+    "HookExecutionEvent": 4,
+    "MessageEvent": 3,
+    "ObservationEvent": 6,
+    "SystemPromptEvent": 1
+  },
+  "execution": "REAL_SDK_LOOP_WITH_SCRIPTED_TEST_RESPONSES_NOT_AUTONOMOUS_REASONING",
+  "fixtureInterruptions": 1,
+  "injected": [
+    "LLM.generate response sequence; completion forbidden",
+    "runtime/capabilities authority test mocks",
+    "local repository copy and local base check; fixture preflight",
+    "Maven/OSV process outputs, parsed by real validator",
+    "SBRI executable is an authored subprocess fixture",
+    "Stop subprocess command selects test helper with injected evaluator"
+  ],
+  "modelCalls": 0,
+  "modelUsage": {
+    "usage_to_metrics": {
+      "oss-remediation": {
+        "accumulated_cost": 0.0,
+        "accumulated_token_usage": {
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0,
+          "completion_tokens": 0,
+          "context_window": 0,
+          "model": "vertex_ai/gemini-2.5-flash",
+          "per_turn_token": 0,
+          "prompt_tokens": 0,
+          "reasoning_tokens": 0,
+          "response_id": ""
+        },
+        "costs": [],
+        "max_budget_per_task": null,
+        "model_name": "vertex_ai/gemini-2.5-flash",
+        "response_latencies": [],
+        "token_usages": []
+      }
+    }
+  },
+  "nativeStatus": "finished",
+  "phaseEvidenceReferences": {
+    "attempts": "attempts",
+    "baseline.json": "baseline.json",
+    "feedback.json": "feedback.json",
+    "guidance.json": "guidance.json",
+    "preparation.json": "preparation.json",
+    "result.json": "result.json",
+    "runs": "runs",
+    "sbri": "sbri",
+    "sbri-pre-edit.json": "sbri-pre-edit.json",
+    "self-validation": "self-validation",
+    "task.json": "task.json"
+  },
+  "priorAttemptHashesUnchanged": {
+    "attempts/1/candidate/bom.cdx.json": "9c424834cd4303caee00f0b28c6a8d6bc70484f01aa4accb4f8f25efe9d7a44b",
+    "attempts/1/candidate/build.json": "86da2d2015bd6e3c7a1e8b5b532cd53f2f7d2729d2d5f32e42f7aa8862dd45e1",
+    "attempts/1/candidate/evaluation.json": "298c43db03245cc75367839d6e18ad300b9754524debeaa66033f44e5e03d342",
+    "attempts/1/candidate/osv-scanner.toml": "9b4e5af3afb4f68ff73f9b2911768f049801bc6467440897567d20e667cc5e7d",
+    "attempts/1/candidate/resolve.json": "86da2d2015bd6e3c7a1e8b5b532cd53f2f7d2729d2d5f32e42f7aa8862dd45e1",
+    "attempts/1/candidate/resolved.json": "423f2b4d9b4c3dce7e70c44ef835b19a91b7aae3861a1f15ee9b3f984f9d4a7c",
+    "attempts/1/candidate/scan.json": "14d3966ea41436c640cbb14b8cba31c360a0d80d39906370ea3d92a4695a282e",
+    "attempts/1/candidate/scanner-version.json": "e6c2e27db9c59cc32302f4d2e5d891e722d02673d495daa610b2f6b224be25e1",
+    "attempts/1/candidate/source/pom.xml": "ea8e785b7b76c1520ea6bf588fc737553ac7e2936d717a8707220a57d8bb906e",
+    "attempts/1/candidate/source/target/effective-pom.xml": "0cba767d3a4deb2f16dcb07c4ca5a180c2f8f7f0a9973fbc5968950d580f3d5b",
+    "attempts/1/candidate/source/target/native-remediation-dependencies.json": "2b5d6a8fd60d665a04acc596b8a3304b14537cb0ce1cc3295d302c60ce0b614a",
+    "attempts/1/candidate/source/target/surefire-reports/TEST-fixture.xml": "94b828f7c7af04c3598f70310d860f003d759c8fe4ad5265217ac0f9d4493c6a",
+    "attempts/1/evaluation.json": "298c43db03245cc75367839d6e18ad300b9754524debeaa66033f44e5e03d342",
+    "attempts/1/intent.json": "373171cb4054bfc531413b10e6095655c4ee5adbb794cb2f75e49b53dca080a6",
+    "attempts/1/validation.json": "202f422a860571fcaca2383c44bb8d0773c3e848ae93456511a256b4e9d587fa"
+  },
+  "priorNativeEventHashesUnchanged": {
+    "event-00000-b947f9f9-b3eb-4a13-8e21-71cff7bc4d3f.json": "36ee17890fba3b1bc7fcf56893616db3e0e9dc340d37d0837280728b07b3ce90",
+    "event-00001-83284dec-6e92-4cc4-9a40-246e7b6d70c0.json": "d5fe789660a72d7f0cae8dcc8bec72f3982c73c923801752405f7bb085c66d45",
+    "event-00002-4a381e97-90d1-4469-9548-a97a1606eae2.json": "ecb9f1953826480fab8d91cf4920189fbdb4118df82953bc5b338681ce5f1039",
+    "event-00003-58c6e60e-6dd0-41ea-915e-40cbe8300e1e.json": "ef70c5cb37dc4771fb20ffb8b7e462ac9b78c87a85a30d3d52f54827fa63eb91",
+    "event-00004-bac5cf52-13f4-4111-b59c-d1768ea3d59d.json": "38737c0eaccf58e5c3e6811f46f2ca53f29024f662c5fd5fe907ecb67ac7ca6a",
+    "event-00005-bbf49563-06b1-421e-bd1c-2491cd0471b3.json": "88954d8a29c46bd42020d69a1169ea077d2b78ffe8feb6e2ef87c76e055beddf",
+    "event-00006-e77f7e2d-68f8-4e26-ab41-26764b608c4e.json": "b162c6562fe17879a78f702282f7d11f90f08977eb8666530570ffa31c24795e",
+    "event-00007-e94c9876-2edc-4a60-8256-588f9f18100b.json": "dd28b8f276d58cb61d88a643c1ed5e430e731b1cd76d49326fdcde3f27fef965",
+    "event-00008-9c629d66-d83a-497c-b805-a85c6078d7bf.json": "369992390f334f59a683db8f4bb0a230755469530627bdd5973b434c8f77a014",
+    "event-00009-211820f3-4ba0-4f26-9925-70ea76113218.json": "163443718a1c6a6f1d1a4cca11fbc6f9f5727531b86fe6c9805e40eb181c52f3",
+    "event-00010-9aa3cb78-6aa6-4965-808f-f50e34a7386e.json": "18497e93138c994abed6c9a25ea582d3694031040c3dbacfe7cff8ba1152b917",
+    "event-00011-b451019c-8a03-48eb-ab26-fce8507dfef0.json": "f1d59911792c9c97e7ea283d5dfd579cde5cd49b870d23bc15e68eb8580f81f6"
+  },
+  "rejectedTree": "bb678f442f72302b2616d0b01f125c77457c1565",
+  "remoteMutations": 0,
+  "runs": 2,
+  "sbri": "PRE_EDIT_AND_AGENT_TOOL_SHARED_PROFILE_BOUND_CACHE",
+  "scriptedResponses": 6,
+  "selfValidation": "PASS_DID_NOT_ACCEPT_OR_CONSUME_STOP_ATTEMPT",
+  "stopEvents": [
+    {
+      "additional_context": "Reassess facts/candidates using this evidence; preserve a concise material decision when useful. ['Remaining vulnerabilities exceed acceptance policy']",
+      "blocked": true,
+      "exit_code": 2,
+      "hook_command": "/tmp/openhands-sdk-1.55.1/venv/bin/python /home/kavya_parivarababu/oss-remediation-adk/native_remediation/__main__.py hook --state /tmp/tmpc9u7q3dl/product",
+      "hook_event_type": "Stop",
+      "hook_input": {
+        "reason": "agent_finished"
+      },
+      "id": "211820f3-4ba0-4f26-9925-70ea76113218",
+      "kind": "HookExecutionEvent",
+      "parent_id": "9c629d66-d83a-497c-b805-a85c6078d7bf",
+      "reason": "Independent FAIL",
+      "source": "hook",
+      "stderr": "",
+      "stdout": "{\"decision\": \"deny\", \"reason\": \"Independent FAIL\", \"additionalContext\": \"Reassess facts/candidates using this evidence; preserve a concise material decision when useful. ['Remaining vulnerabilities exceed acceptance policy']\"}\n",
+      "success": false,
+      "timestamp": "2026-10-21T01:25:49.301900"
+    },
+    {
+      "blocked": false,
+      "exit_code": 0,
+      "hook_command": "/tmp/openhands-sdk-1.55.1/venv/bin/python /home/kavya_parivarababu/oss-remediation-adk/native_remediation/__main__.py hook --state /tmp/tmpc9u7q3dl/product",
+      "hook_event_type": "Stop",
+      "hook_input": {
+        "reason": "agent_finished"
+      },
+      "id": "0e103a38-88fe-4b88-8db6-a1cf3b6640e5",
+      "kind": "HookExecutionEvent",
+      "parent_id": "4298ff36-46fc-4817-90ff-98f0d76e1ffd",
+      "reason": "Independent PASS; report_only, no branch push or PR",
+      "source": "hook",
+      "stderr": "",
+      "stdout": "{\"decision\": \"allow\", \"reason\": \"Independent PASS; report_only, no branch push or PR\"}\n",
+      "success": true,
+      "timestamp": "2026-10-21T01:25:52.971151"
+    }
+  ],
+  "validatedTree": "2006b2bf3c0d8f0fbacd1b0851d65cf9242b92bc"
+}

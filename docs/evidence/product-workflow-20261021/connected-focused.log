@@ -1,0 +1,104 @@
+test_connected_denial_recovery_correction_and_report_only_acceptance (tests_native.test_workflow_integration.ConnectedWorkflowTests.test_connected_denial_recovery_correction_and_report_only_acceptance) ... [10/21/26 01:25:44] INFO     Created new conversation               state.py:592
+                             4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2
+[10/21/26 01:25:44] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/21/26 01:25:44] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/21/26 01:25:45] INFO     Resumed conversation                   state.py:567
+                             4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2
+                             from persistent storage
+[10/21/26 01:25:45] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/21/26 01:25:45] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/21/26 01:25:45] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpc9u7q3dl/product/conversa
+                             tions/4b0e73094c4f45c09b693a10e51
+                             b1bc2
+[10/21/26 01:25:46] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpc9u7q3dl/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/21/26 01:25:46] INFO     Loaded 5 tools from spec                base.py:596
+[10/21/26 01:25:46] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/21/26 01:25:46] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/21/26 01:25:46] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/21/26 01:25:46] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py:1507: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+  warnings.warn(
+[10/21/26 01:25:49] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping: Independent
+                             FAIL
+[10/21/26 01:25:49] INFO     Stop hook denied agent   local_conversation.py:1973
+                             stopping
+[10/21/26 01:25:49] INFO     Resumed conversation                   state.py:567
+                             4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2
+                             from persistent storage
+[10/21/26 01:25:49] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/21/26 01:25:49] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpc9u7q3dl/product/conversa
+                             tions/4b0e73094c4f45c09b693a10e51
+                             b1bc2
+[10/21/26 01:25:49] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/21/26 01:25:50] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpc9u7q3dl/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/21/26 01:25:50] INFO     Loaded 5 tools from spec                base.py:596
+[10/21/26 01:25:50] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/21/26 01:25:50] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+ok
+test_optional_sbri_failure_preserves_baseline_and_native_tool_diagnostics (tests_native.test_workflow_integration.ConnectedWorkflowTests.test_optional_sbri_failure_preserves_baseline_and_native_tool_diagnostics) ... [10/21/26 01:25:53] INFO     Created new conversation               state.py:592
+                             d7826be2-d99f-4bfd-ba3c-b84b98fc0173
+[10/21/26 01:25:53] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/21/26 01:25:53] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/21/26 01:25:54] INFO     Resumed conversation                   state.py:567
+                             d7826be2-d99f-4bfd-ba3c-b84b98fc0173
+                             from persistent storage
+[10/21/26 01:25:54] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/21/26 01:25:54] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpswkh2pzn/product/conversa
+                             tions/d7826be2d99f4bfdba3cb84b98f
+                             c0173
+[10/21/26 01:25:54] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/21/26 01:25:55] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpswkh2pzn/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/21/26 01:25:55] INFO     Loaded 5 tools from spec                base.py:596
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 12.351s
+
+OK

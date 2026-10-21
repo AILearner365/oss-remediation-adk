@@ -1,0 +1,17 @@
+{
+  "attempt": 2,
+  "baseCommit": "461fdfcadf9a933b8dc89d6ae530a1f71c2bf567",
+  "baselineDigest": "e24b26f431b6ef755f87a884606596ae18500b9919acc1f26742c3e124a931d1",
+  "candidateDigest": "678ddac8a9487417a653ba9f37f7d1d6221fff30fcce8de26566e68167bd7fd5",
+  "changedFiles": [
+    "pom.xml"
+  ],
+  "conversationId": "4b0e7309-4c4f-45c0-9b69-3a10e51b1bc2",
+  "cycle": 0,
+  "introduced": [],
+  "outcome": "PASS",
+  "reasons": [],
+  "remaining": [],
+  "taskDigest": "f0ee82aae72d460ff5e7ac689ca49622b0f630d9309498d2cc16335f8c78def0",
+  "validatedTree": "2006b2bf3c0d8f0fbacd1b0851d65cf9242b92bc"
+}

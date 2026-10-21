@@ -1,0 +1,84 @@
+{
+  "commands": [
+    {
+      "exitCode": 0,
+      "name": "build",
+      "timedOut": false
+    },
+    {
+      "exitCode": 0,
+      "name": "resolve",
+      "timedOut": false
+    },
+    {
+      "exitCode": 0,
+      "name": "scanner-version",
+      "timedOut": false
+    },
+    {
+      "exitCode": 1,
+      "name": "scan",
+      "timedOut": false
+    }
+  ],
+  "coverage": {
+    "complete": true,
+    "expected": 1,
+    "scanned": 1,
+    "scope": "Resolved Maven project dependency graphs, all scopes; excludes build-plugin/JDK/OS dependencies"
+  },
+  "findings": [
+    {
+      "affected": [],
+      "ids": [
+        "CVE-fixture",
+        "GHSA-fixture"
+      ],
+      "package": "org.example:library",
+      "summary": "",
+      "version": "1.0.0"
+    }
+  ],
+  "inventory": {
+    "graphs": [
+      {
+        "graph": {
+          "artifactId": "app",
+          "children": [
+            {
+              "artifactId": "library",
+              "groupId": "org.example",
+              "scope": "compile",
+              "version": "1.0.0"
+            }
+          ],
+          "groupId": "fixture",
+          "version": "1"
+        },
+        "path": "target/native-remediation-dependencies.json"
+      }
+    ],
+    "java_configuration": {
+      "fixture:app": {}
+    },
+    "modules": [
+      "fixture:app"
+    ],
+    "packages": [
+      {
+        "name": "org.example:library",
+        "version": "1.0.0"
+      }
+    ],
+    "properties": {
+      "fixture:app": {
+        "java.version": "21"
+      }
+    },
+    "spring_boot": "4.0.6"
+  },
+  "outcome": "COMPLETE",
+  "reasons": [],
+  "tests": 2,
+  "tree": "289f9101f5caec0f6d31bd59fc6b859e4cf67b92"
+}
