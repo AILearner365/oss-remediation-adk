@@ -1,0 +1,134 @@
+{
+  "agent": {
+    "decisions": 0,
+    "narrative": "PRIVATE_ONLY_NOT_AUTOMATICALLY_PUBLISHED",
+    "nativeEvents": 0,
+    "outcomes": 0,
+    "records": []
+  },
+  "attempts": [],
+  "baseline": {
+    "commands": [
+      {
+        "command": "build",
+        "exitCode": 0,
+        "seconds": 48.392,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "resolve",
+        "exitCode": 0,
+        "seconds": 16.242,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "scanner-version",
+        "exitCode": 0,
+        "seconds": 1.877,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "scan",
+        "exitCode": 1,
+        "seconds": 0.738,
+        "status": "RECORDED",
+        "timedOut": false
+      }
+    ],
+    "modules": 5,
+    "osv": {
+      "coverageComplete": false,
+      "expected": null,
+      "findings": null,
+      "findingsStatus": "NOT_ASSESSED",
+      "publicFindingIds": [],
+      "rawInventory": {
+        "identityMatch": false,
+        "reportedPackages": 88,
+        "unexpectedPackages": 88
+      },
+      "scanned": null
+    },
+    "outcome": "INCONCLUSIVE",
+    "reasons": [
+      {
+        "code": "Unexpected OSV package identity",
+        "sha256": "9b3aa669dec9c49950e0092688e1c633eb32be093e9c563fc354b955ae8653a8"
+      }
+    ],
+    "resolvedPackages": 88,
+    "tests": 4
+  },
+  "conversationId": "dd4e12aa-c0c8-4408-874b-48fcc6ea38ff",
+  "exclusions": [
+    "credentials",
+    "raw logs/argv",
+    "task/agent free text",
+    "workspace snapshots",
+    "private dependency names"
+  ],
+  "final": {
+    "delivery": "NOT_EXECUTED",
+    "deliveryClaim": "NOT_EXECUTED",
+    "outcome": "BASELINE_FAILED_BEFORE_INFERENCE",
+    "prUrl": null,
+    "remediationSuccess": false,
+    "validation": "NOT_EXECUTED"
+  },
+  "invocation": {
+    "failedPhase": "NONE",
+    "interrupted": false,
+    "phases": []
+  },
+  "kind": "EXISTING_STATE_EXPORT",
+  "modelExecution": {
+    "dispatchClaimed": false,
+    "nativeStatus": "idle",
+    "observedResponseEvents": 0,
+    "status": "NOT_EXECUTED",
+    "usage": {}
+  },
+  "predictionAvailability": "NOT_PROVEN_BY_PREFLIGHT",
+  "preparation": "FAILED_OR_INTERRUPTED",
+  "prerequisites": {
+    "adc_and_delivery": "NOT_CHECKED",
+    "base": "NOT_CHECKED",
+    "model": "NOT_CHECKED",
+    "sdk": "NOT_CHECKED",
+    "tools": "NOT_CHECKED"
+  },
+  "privateEvidence": {
+    "artifacts": {
+      "baseline.json": "ca586e671a814772c9574c70603f3509345d65e552186920ae469864792fa5d6",
+      "baseline/build.json": "9cba592d7e58265b0f0eea12af127d1d75630af2d01aee82dab917549c202a5c",
+      "baseline/resolve.json": "de0c742e5b9dacb169a21ee0445c661c6053fe82416eb8303434c19abc04d163",
+      "baseline/scan.json": "28c51bc9701484a9cfeb5ba76d9afdc887bf48957640f491d322f3d66ebc6130",
+      "baseline/scanner-version.json": "f8c12d4979dacafc7865fbc5db8a23d69de7a110a6fb7762bb15ff27aed8aae2",
+      "conversations/dd4e12aac0c84408874b48fcc6ea38ff/base_state.json": "887f42f2f86a1a977e154a33841e2b08fdcee0992480c0385139ad4ce3ff7a6a",
+      "preparation-intent.json": "b2009f79b681bdadffbdce968cb85cb528563614d298f9cda9cce99d7e9fe905",
+      "task.json": "d018c65014b6a12f356100348a2c74538efca3e5899a844baa61cd0e62cf725d"
+    },
+    "retention": "COMPLETE_PRIVATE_STATE_NOT_COPIED_TO_GIT"
+  },
+  "publication": "REQUESTED_RECEIPT_STORED_PRIVATELY",
+  "reportComplete": true,
+  "reportIssues": [],
+  "runId": "20261022T233103Z-43ef49265a714b13bce4f6c87b03a054",
+  "sbri": {
+    "preEdit": "NOT_EXECUTED",
+    "results": [],
+    "retainedCalls": 0
+  },
+  "schemaVersion": 1,
+  "taskIdentity": {
+    "baseBranch": "main-runrunning",
+    "baseSha": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "digest": "ee4bb56c1bb57f0b24d8fecc0bfbe45c5548c88ddce1a11c0601454a7e9c4838",
+    "model": "vertex_ai/gemini-2.5-flash",
+    "repository": "AILearner365/maven-multimodule-app"
+  },
+  "timestamp": "2026-10-22T23:31:03.598634+00:00"
+}
