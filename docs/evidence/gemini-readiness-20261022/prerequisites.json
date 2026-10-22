@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-22",
+  "startingCommit": "0f3a37e411cf5fbb5d1fdf1e996d8cabd45fac68",
+  "sdk": "1.55.1",
+  "tools": "1.55.1",
+  "python": "/tmp/openhands-sdk-1.55.1/venv/bin/python",
+  "java": "21.0.12.1",
+  "maven": "3.9.16",
+  "osvScanner": "2.6.0",
+  "vertexProjectConfigured": false,
+  "vertexLocationConfigured": false,
+  "adcRefresh": {
+    "source": "google.auth.compute_engine.credentials",
+    "validAtInspection": true,
+    "remainingSecondsAtInspection": 1634,
+    "note": "Volatile metadata token; recheck immediately before a real run. No credentials printed or changed."
+  },
+  "normalVertexPreflight": "BLOCKED_MISSING_APPROVED_PROJECT_AND_LOCATION",
+  "githubRepositoryReadable": true,
+  "githubPushPermissionGet": true,
+  "gitHttpsCredentialAvailableInProductEnvironment": true,
+  "repository": "AILearner365/maven-multimodule-app",
+  "observedBase": {
+    "branch": "main-runrunning",
+    "sha": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "check": "git ls-remote, read-only; not a replacement for task approval or a future base check"
+  },
+  "sbriOnPath": false,
+  "sbriRequiredForStartup": false,
+  "payloadChecks": {
+    "examples/maven-task.json": "VALID_TASK",
+    "examples/maven-task-draft-pr.json": "VALID_TASK"
+  },
+  "configuredModel": "vertex_ai/gemini-2.5-flash",
+  "configuredModelRetirement": {
+    "date": "2026-10-20",
+    "source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions",
+    "sourceUpdated": "2026-10-21",
+    "disposition": "EXTERNAL_BLOCKER; approve supported task.model before execution; no silent default migration"
+  },
+  "replacementModelSdkCompatibilityPermissionsQuotaBilling": "NOT_PROVEN",
+  "actualTargetBaseline": "NOT_EXECUTED",
+  "realGeminiRequests": 0,
+  "targetMutations": 0,
+  "pullRequestsCreated": 0
+}

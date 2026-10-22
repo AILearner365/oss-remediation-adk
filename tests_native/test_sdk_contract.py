@@ -128,6 +128,30 @@ class InstalledSdkTests(unittest.TestCase):
 
 @unittest.skipIf(Conversation is None, "Requires installed standalone SDK 1.55.1")
 class InstalledEvidenceToolTests(GitFixture):
+    def test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses(self):
+        import shutil
+        from native_remediation import runtime
+        from openhands.sdk.conversation.exceptions import ConversationRunError
+        destination = self.state / "real-dispatch-boundary"
+        def preparer(state, task):
+            shutil.copytree(self.workspace, state / "workspace", dirs_exist_ok=True)
+            return state / "workspace"
+        observed = []
+        def completion(llm, **kwargs):
+            observed.append(llm.model)
+            self.assertEqual(llm.model, "vertex_ai/gemini-2.5-flash")
+            self.assertIn("Baseline findings", str(kwargs["messages"]))
+            raise RuntimeError("TEST ONLY provider boundary reached; no inference")
+        # Real factory, run(), Agent.step() and LLM.generate(); no authority
+        # mock or scripted response. Trap completion before any provider I/O.
+        with patch.object(LLM, "completion", new=completion), patch.object(LLM, "resolve_runtime_metadata"):
+            runtime.prepare_task(self.task, destination, preparer=preparer,
+                                 evaluator=lambda *a, **kw: self.baseline)
+            self.assertEqual(observed, [])
+            with patch.object(runtime, "verify_base"), self.assertRaises(ConversationRunError):
+                runtime.dispatch(destination, preflight=lambda task: {})
+        self.assertEqual(observed, ["vertex_ai/gemini-2.5-flash"])
+
     def test_actual_idle_sdk_and_fixture_preparation_need_no_docker(self):
         import shutil
         from native_remediation.runtime import prepare_task, require_preparation

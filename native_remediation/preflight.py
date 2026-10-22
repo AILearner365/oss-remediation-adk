@@ -9,6 +9,10 @@ from .files import Blocked
 
 
 def vertex_adc():
+    if not ((os.environ.get("VERTEXAI_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT"))
+            and os.environ.get("VERTEXAI_LOCATION")):
+        raise Blocked("Set an approved VERTEXAI_PROJECT (or GOOGLE_CLOUD_PROJECT) and "
+                      "VERTEXAI_LOCATION in the native runtime environment")
     # No token/credential values printed, even on failure.
     code = """
 import json, os

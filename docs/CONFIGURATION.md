@@ -27,11 +27,11 @@ Classes: **A** mandatory per-task input; **B** default with approved override;
 | Model / budgets | B,D | model=vertex_ai/gemini-2.5-flash; max_iterations=40 (<=1000), max_cycles=3 (<=10 independent attempts), max_runs=2 (<=5), command_seconds=900, validation_seconds=2400, task_seconds=7200, max_decisions=12, max_self_validations=4, max_sbri_calls=3. Positive bounded limits, zero automatic model retries; explicit model-cost authorization separate from delivery |
 | Terminal waits / deadlines | D | Native PreToolUse terminal policy requires positive finite timeout <= command_seconds and remaining task admission budget; Ctrl-C/Ctrl-D/Ctrl-Z interrupts remain available after expiry. Native terminal timeouts bound foreground waits, not command lifetime or background descendants. Deterministic commands retain process-group timeout cleanup. task_seconds is an admission/evaluation deadline, NOT a hard wall-clock limit on run(). Iteration/recovery/Stop budgets remain native/bounded. Native hook infrastructure errors can fail open; direct SDK execute_tool is trusted-caller functionality bypassing action hooks. None of this provides P0 isolation |
 | Guidance | B,D | skills=[dependency-remediation-decision,maven-dependency-evidence], project_context="". Optional evidence-driven-dependency-remediation replaces, never duplicates decision Skill. SDK native loading; no ambient user/public/project Skills or memory; immutable context checked on resume |
-| Self-validation | D,B | Native validate_remediation always exposed; same validator, separate report/budget, cannot override task/policy or accept/deliver. Optional CLI self-validate; live trust guard still applies |
+| Self-validation | D,B | Native validate_remediation always exposed; same validator, separate report/budget, cannot override task/policy or accept/deliver. Optional CLI self-validate; host authority isolation deferred |
 | Research | C,B | Native terminal uses installed host tools/authorized network; tools.research_reference optional evidence reference, no special research framework or guaranteed web tool. Verify authoritative publication/compatibility, do not equate missing tools with unavailable versions |
 | Network/proxies | C | Host PATH/Java/TLS/Maven configuration and proxy environment, no forced offline/Docker mode. Metadata records executable paths/SDK versions/proxy variable presence, never credential/proxy values; availability is not proof of successful access |
 | Evidence/retention | D,C | Private task state, native conversations/events/stats plus automatic phase indexes/Git diff; separate baseline/attempts/self-validation/SBRI/journal/claims. No deletion or automatic publication; retention cleanup is an operator responsibility. No agent questionnaire or fabricated rationale |
-| Workspace | C,D | Official LocalWorkspace(state/workspace), native subprocess TerminalTool; host execution, not isolation. Private authority records outside repository; mandatory host trust guard unchanged, no bypass or sandbox.image |
+| Workspace | C,D | Official LocalWorkspace(state/workspace), native subprocess TerminalTool; host execution, not isolation. Records outside repository do not protect against the same user. Authority isolation deferred; no bypass mode or sandbox.image |
 | Delivery | B,A,D | Default delivery={mode:report_only}; draft_pr additionally requires repository,base_branch,draft:true,authorized:true matching approved task. Legacy destination-only policy remains unauthorized. Only independent exact-tree PASS may deliver; no merge, unrestricted push or push to base |
 | Credentials / recovery | C,D | Discover existing ADC/gh environment only through trusted preflight, refreshed ADC >=300s, no keys printed/created. Immutable identity/evidence, native persistence/resume, bounded claims and positive remote reconciliation; unknown mutation never blindly retried |
 
@@ -40,9 +40,10 @@ GitHub push/PR credential permission. Independent PASS yields VALIDATED and
 deliveryStatus=NOT_REQUESTED; draft confirmation yields DELIVERED. Native finished
 alone is neither. BOUNDED_FAILURE and BLOCKED do not mean vulnerability resolution.
 
-All live preparation/build/model/acceptance/delivery remains blocked because the
-same-user host cannot protect trusted records and credentials from agent/build
-code. Configuration does not waive that requirement. Current tests use safe
+Host authority isolation is explicitly deferred by product decision, not a
+per-task configurable bypass. Preparation/build/model/acceptance/delivery are no
+longer unconditionally blocked for that reason. The same-user host still cannot
+protect records/credentials from agent/build code. Current tests use safe
 temporary fixtures; no live model, network scanner or SBRI engine proof is claimed.
 
 SBRI receives approved tools.profiles automatically through --profiles, and the

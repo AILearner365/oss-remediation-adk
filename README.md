@@ -27,11 +27,18 @@ build can still access those files and host credentials. Directory placement,
 0600 permissions, stripped environment variables and instructions do not enforce
 separation from that same OS user.
 
-**Live product execution remains BLOCKED on that exact mandatory trust guarantee.**
-`require_independent_authority()` refuses real repository build/acceptance, model
-dispatch and GitHub delivery; there is no bypass flag or replacement infrastructure.
-Safe trusted temporary fixtures test the local mechanisms without claiming this
-boundary exists. This is not a Docker/image or remote Agent Server limitation.
+**Host authority isolation is explicitly deferred, not an execution blocker.**
+The legacy `require_independent_authority()` checkpoint is nonblocking under the
+approved contract. Deterministic acceptance is separate from agent self-reporting,
+but is NOT protected from the same host user. Baseline/integrity/policy checks,
+explicit model authorization and PASS-only delivery remain enforced. No new mode,
+bypass flag or replacement infrastructure. Use only an approved repository/task.
+
+See [first-run configuration and exact commands](docs/OPERATIONS.md#first-real-run).
+The SDK Gemini path is reachable; a complete real remediation is not yet proven.
+The historical gemini-2.5-flash model has a published October 20, 2026 retirement
+date; approve a supported task.model plus Vertex project/location before running
+the examples. See operations for the source and required payload override.
 
 Read [operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATION.md),
 [contract](PRODUCT-CONTRACT.md), [historical parity](docs/POC-PARITY.md),

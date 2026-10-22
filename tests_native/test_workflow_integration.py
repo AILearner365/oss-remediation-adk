@@ -69,7 +69,7 @@ class ConnectedWorkflowTests(GitFixture):
                 shutil.copyfile(source, target)
         write(destination / "facts.json", dict(
             execution="REAL_SDK_LOOP_WITH_SCRIPTED_TEST_RESPONSES_NOT_AUTONOMOUS_REASONING",
-            injected=["LLM.generate response sequence; completion forbidden", "runtime/capabilities authority test mocks",
+            injected=["LLM.generate response sequence; completion forbidden",
                 "local repository copy and local base check; fixture preflight",
                 "Maven/OSV process outputs, parsed by real validator",
                 "SBRI executable is an authored subprocess fixture",
@@ -81,9 +81,7 @@ class ConnectedWorkflowTests(GitFixture):
         self.addCleanup(stack.close)
         stack.enter_context(patch.object(LLM, "completion", side_effect=AssertionError("Paid inference forbidden")))
         stack.enter_context(patch.object(LLM, "resolve_runtime_metadata"))
-        # Explicit application-authority test seam; actual guard function/code unchanged.
-        stack.enter_context(patch.object(runtime, "require_independent_authority"))
-        stack.enter_context(patch.object(capabilities, "require_independent_authority"))
+        # Exercise the approved nonblocking authority checkpoint unmodified.
         stack.enter_context(patch.object(runtime, "verify_base", side_effect=lambda task:
             self.assertEqual(task["base_sha"], self.git("rev-parse", "HEAD"))))
         original_check = capabilities.self_validate

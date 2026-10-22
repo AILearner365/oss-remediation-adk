@@ -1,5 +1,118 @@
 # OpenHands SDK P0 and P1 readiness review
 
+## Gemini execution preparation — 2026-10-22
+
+Starting commit `0f3a37e411cf5fbb5d1fdf1e996d8cabd45fac68`. This supersedes
+earlier conclusions that deferred P0 must block execution. The product owner
+explicitly permits current same-user host execution without authority isolation.
+**P0 isolation is future work, NOT a startup blocker. No isolation is claimed.**
+No Gemini request, remediation, target modification or PR was executed here.
+
+### Blockers found, action and remaining prerequisites
+
+| Finding | Resolution / evidence |
+| --- | --- |
+| Unconditional authority exception | Fixed: `files.require_independent_authority()` is a documented nonblocking compatibility checkpoint. All existing callers remain: default prepare, dispatch, Stop, evaluate, self_validate, SBRI and delivery. No new flag/mode, lifecycle change or policy waiver. |
+| Tests expected that exception to stop real boundaries | Updated to prove preparation/base/command boundaries are reachable using safe sentinels, while missing acceptance and invalid baseline/cache still block before external work. Connected scripted integration no longer mocks authority. Tests still need no Gemini credentials or remote mutations. |
+| Vertex project and location absent | Actual environment lacks VERTEXAI_PROJECT/VERTEXAI_LOCATION; native vertex_adc preflight failed. Existing metadata ADC refreshed successfully with 1,634 seconds remaining at inspection, so configuration—not an invented credential fix—is required. Supply an approved project/location in the runtime shell. Credentials/configuration were not altered. |
+| Missing configuration reported as ADC failure | Fixed: preflight now names missing project/location before refreshing credentials. Credential lifetime, refresh/source/project checks remain unchanged; no placeholder project is silently selected. |
+| Configured Gemini model retired | Google's current [Vertex model lifecycle table](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions), updated October 21, lists gemini-2.5-flash retirement on October 20, 2026. This is a confirmed external blocker for the retained historical model setting, not merely untested IAM. A supported task.model needs approval before execution. Default/historical examples are not silently migrated; SDK compatibility and project/region access for a replacement remain unproven. |
+| Optional SBRI absent on PATH | Remains optional, not a blocker. Existing auto mode returns UNAVAILABLE and preserves strict baseline requirements. Real retained backend diagnostic and its limitations are prior evidence; no new engine/install or fixture CLI is used in production. |
+| Model/API/IAM/quota and actual project baseline | NOT PROVEN. ADC refresh does not prove Vertex prediction permission, billing/quota or selected regional model availability. Actual Maven/OSV baseline resolution, tests and scanner coverage must succeed during the first run; failures still block inference. |
+
+Read-only prerequisite inspection found installed SDK/Tools **1.55.1**, Java
+**21.0.12.1**, Maven **3.9.16**, OSV **2.6.0**, Git and gh. GitHub GET confirmed
+target repository read and push access. `git ls-remote` confirmed `main-runrunning`
+at `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`. No push/target clone/build,
+credential dump or service-account key was used for these checks. Availability
+of binaries is not proof of successful target build or network scans.
+Git HTTPS credential discovery also succeeded under `files.environment()` (the
+actual product Git environment), with only a boolean reported, never credentials.
+The official lifecycle documentation was inspected without any inference;
+its replacement recommendations do not establish SDK/project-specific access.
+
+### Real execution path and preserved gates
+
+The production path remains CLI `start` authorization → default
+`runtime.prepare_task` → native conversation initialization → approved Git
+preparation → `validation.evaluate` → `require_baseline`/durable COMPLETE →
+`dispatch` rechecks/preflight → `native.open_conversation` → native `run()` →
+`Agent.step()` → `LLM.generate()`/completion using configured Gemini.
+Production code does not import tests or scripted responses. The pinned LiteLLM
+Vertex adapter consumes VERTEXAI_PROJECT and VERTEXAI_LOCATION from the host
+environment; normal Google ADC discovery supplies credentials.
+
+New `InstalledEvidenceToolTests.test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses`
+uses the actual factory, SDK run/Agent.step/generate and no authority mock. Only
+local preparation data/base/preflight and runtime metadata lookup are fixtures;
+completion is trapped BEFORE provider I/O. It verifies the exact configured
+Gemini model and baseline task context. **PROVEN: code-path reachability, not
+a successful real Gemini invocation.** No fixture response is returned by this test.
+
+After actual agent changes, native Stop still runs the production CLI validator
+in a separate invocation against the candidate Git export. Maven/tests,
+resolution, exact OSV coverage, task constraints and policy determine PASS,
+FAIL or INCONCLUSIVE. Denial supplies feedback to the SDK; bounded retry/recovery,
+existing attempt/claims, immutable evidence/digests and exact-tree completion
+checks are unchanged. Self-validation never authorizes acceptance/delivery.
+Report-only never mutates GitHub. Draft delivery still requires explicit task
+authorization, bound independent PASS, verified base/commit/tree/destination,
+create-only branch and confirmed open draft; uncertain writes reconcile, not
+blindly replay. Independence here is deterministic/logical, not protection from
+the host user. Background-process containment and a hard run wall-clock limit
+remain unimplemented and are not claimed.
+
+### Payloads, commands and verification scope
+
+Both [report_only](../examples/maven-task.json) and
+[draft_pr](../examples/maven-task-draft-pr.json) payloads pass `load_task` and CLI
+check-task. They are schema-valid historical-model examples for the existing
+approved test base, not launch-ready payloads or permission to execute. An approved
+supported task.model must replace the retired model before use; the normal task
+configuration already supports this override. [Operations / first real run](OPERATIONS.md#first-real-run) contains
+exact existing CLI commands, approved Vertex environment requirements, safe
+preflight, first start, status and bounded resume/reconciliation. No new stage,
+coordinator, Docker infrastructure or architecture was introduced.
+
+Offline full discovery still exercises the connected scripted workflow, native
+Skills/tools/hooks/persistence, strict baseline, version policy, SBRI failure/cache,
+self-check/acceptance separation, report-only and authorized draft safe doubles.
+Previously authority-blocking tests now assert progress to controlled test
+boundaries rather than making real calls. Paid completion remains trapped;
+network/GitHub boundaries are injected only in tests. Counts and logs below
+record actual verification, not live proof. Previous Stage A and backend evidence
+is retained unchanged; it is not reclassified as real model behavior.
+
+Verification evidence: [gemini-readiness-20261022](evidence/gemini-readiness-20261022/).
+Focused regressions: **2 passed** (2.636 seconds), including real SDK completion
+boundary reachability without a scripted response. Final pinned full suite:
+**88 discovered, 83 passed, 5 skipped** (51.868 seconds). The skips are historical
+Agent Server probes; no package/version changes were made to run them.
+Stdlib-only fallback: **88 discovered, 69 passed, 19 skipped** (36.544 seconds).
+The existing scripted integration still passes, now without authority mocks.
+New tests also cover missing Vertex settings, retained ADC failure gating and
+model authorization before task creation. Compileall, shell syntax, both payload
+checks and `git diff --check` passed. SDK warnings and the intentional provider
+boundary/interruption exceptions in passing logs are not real model calls.
+
+Files/reasons: production changes are limited to `native_remediation/files.py`
+(approved deferral) and `preflight.py` (actionable configuration failure).
+`test_product.py`, `test_p1.py`, `test_sdk_contract.py` and
+`test_workflow_integration.py` adjust/add the necessary safe regressions, not
+disabled tests. README, product contract, handoff, configuration, implementation,
+operations and this report align the current guarantee/limits. The authorized
+draft payload is added; the existing report-only JSON is reused. Lifecycle,
+native agent configuration, validator, SBRI/cache, Skills, evidence persistence
+and delivery implementations are unchanged.
+
+Remaining operator action: approve a supported replacement task.model, configure
+an approved Vertex project/location and
+ensure required API/IAM/model/quota access, review the exact immutable task/base,
+then separately authorize ONE normal start. Full real Gemini remediation,
+feedback/reassessment, independent live acceptance and authorized delivery remain
+**NOT PROVEN until that first actual run**. Authority isolation remains deferred
+future work, not a condition for running under this approved contract.
+
 ## Connected product workflow verification — 2026-10-21
 
 Starting implementation: `3cdc978b8ccf170bcee712d4ba2b5480d6817872`.

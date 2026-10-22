@@ -1,0 +1,333 @@
+test_authorized_proxy_environment_is_retained_not_credential_variables (test_local_execution.LocalExecutionTests.test_authorized_proxy_environment_is_retained_not_credential_variables) ... ok
+test_command_timeout_kills_process_group_and_retains_diagnostics (test_local_execution.LocalExecutionTests.test_command_timeout_kills_process_group_and_retains_diagnostics) ... ok
+test_existing_local_runner_executes_maven_osv_standins_without_docker (test_local_execution.LocalExecutionTests.test_existing_local_runner_executes_maven_osv_standins_without_docker) ... ok
+test_ambiguous_changed_sets_or_invalid_ownership_never_pass (test_p1.BootPolicyTests.test_ambiguous_changed_sets_or_invalid_ownership_never_pass) ... ok
+test_identical_multiple_versions_have_no_artificial_movement (test_p1.BootPolicyTests.test_identical_multiple_versions_have_no_artificial_movement) ... ok
+test_module_minor_and_major_permissions_remain_enforced (test_p1.BootPolicyTests.test_module_minor_and_major_permissions_remain_enforced) ... ok
+test_module_owned_patch_upgrades_are_not_cross_paired (test_p1.BootPolicyTests.test_module_owned_patch_upgrades_are_not_cross_paired) ... ok
+test_real_and_mixed_downgrades_fail_even_when_global_sets_match (test_p1.BootPolicyTests.test_real_and_mixed_downgrades_fail_even_when_global_sets_match) ... ok
+test_root_controller_and_module_override_are_compared_independently (test_p1.BootPolicyTests.test_root_controller_and_module_override_are_compared_independently) ... ok
+test_cache_expiry_known_failure_retry_and_operator_refresh (test_p1.SbriCorrectionTests.test_cache_expiry_known_failure_retry_and_operator_refresh) ... ok
+test_cached_result_raw_evidence_and_authority_failures_still_block (test_p1.SbriCorrectionTests.test_cached_result_raw_evidence_and_authority_failures_still_block) ... ok
+test_call_budget_is_bounded_optional_intelligence_not_acceptance (test_p1.SbriCorrectionTests.test_call_budget_is_bounded_optional_intelligence_not_acceptance) ... ok
+test_exception_diagnostic_retains_actual_reason (test_p1.SbriCorrectionTests.test_exception_diagnostic_retains_actual_reason) ... ok
+test_generated_argv_against_actual_historical_cli_with_fixture_evaluator (test_p1.SbriCorrectionTests.test_generated_argv_against_actual_historical_cli_with_fixture_evaluator) ... ok
+test_interrupted_claim_is_not_replayed_and_integrity_errors_block (test_p1.SbriCorrectionTests.test_interrupted_claim_is_not_replayed_and_integrity_errors_block) ... ok
+test_missing_backend_execution_and_missing_report_are_bounded (test_p1.SbriCorrectionTests.test_missing_backend_execution_and_missing_report_are_bounded) ... ok
+test_optional_bad_report_does_not_prevent_strict_preparation (test_p1.SbriCorrectionTests.test_optional_bad_report_does_not_prevent_strict_preparation) ... ok
+test_ordinary_failures_and_malformed_responses_are_retained (test_p1.SbriCorrectionTests.test_ordinary_failures_and_malformed_responses_are_retained) ... ok
+test_partial_or_wrong_profiles_and_scopes_never_mean_complete (test_p1.SbriCorrectionTests.test_partial_or_wrong_profiles_and_scopes_never_mean_complete) ... ok
+test_pre_edit_and_agent_use_same_profiled_result_without_model (test_p1.SbriCorrectionTests.test_pre_edit_and_agent_use_same_profiled_result_without_model) ... ok
+test_profiles_settings_cache_reuse_and_agent_interface (test_p1.SbriCorrectionTests.test_profiles_settings_cache_reuse_and_agent_interface) ... ok
+test_real_fixture_command_failure_preserves_private_output_and_safe_feedback (test_p1.SbriCorrectionTests.test_real_fixture_command_failure_preserves_private_output_and_safe_feedback) ... ok
+test_source_and_binding_changes_during_execution_block (test_p1.SbriCorrectionTests.test_source_and_binding_changes_during_execution_block) ... ok
+test_summary_tampering_and_task_identity_mismatch_block (test_p1.SbriCorrectionTests.test_summary_tampering_and_task_identity_mismatch_block) ... ok
+test_tree_requests_profiles_scanner_and_backend_identity_invalidate_cache (test_p1.SbriCorrectionTests.test_tree_requests_profiles_scanner_and_backend_identity_invalidate_cache) ... ok
+test_uncertain_timeout_never_replays_but_completed_failures_can_retry (test_p1.SbriCorrectionTests.test_uncertain_timeout_never_replays_but_completed_failures_can_retry) ... ok
+test_configured_checks_are_required_on_baseline_and_candidate (test_p1.StrictBaselineTests.test_configured_checks_are_required_on_baseline_and_candidate) ... ok
+test_expired_task_blocks_dispatch_and_recovery_before_authority_or_sdk (test_p1.StrictBaselineTests.test_expired_task_blocks_dispatch_and_recovery_before_authority_or_sdk) ... ok
+test_incomplete_baseline_never_creates_complete_receipt (test_p1.StrictBaselineTests.test_incomplete_baseline_never_creates_complete_receipt) ... ok
+test_invalid_baselines_block_before_authority_or_dispatch (test_p1.StrictBaselineTests.test_invalid_baselines_block_before_authority_or_dispatch) ... ok
+test_cli_returns_explicit_deny_not_infrastructure_success (test_p1.TerminalPolicyTests.test_cli_returns_explicit_deny_not_infrastructure_success) ... ok
+test_finite_timeouts_required_and_bounded (test_p1.TerminalPolicyTests.test_finite_timeouts_required_and_bounded) ... ok
+test_identity_and_baseline_failures_cannot_allow_new_commands (test_p1.TerminalPolicyTests.test_identity_and_baseline_failures_cannot_allow_new_commands) ... ok
+test_remaining_admission_budget_expiry_and_control_input (test_p1.TerminalPolicyTests.test_remaining_admission_budget_expiry_and_control_input) ... ok
+test_automatic_native_and_git_evidence_capture_without_agent_report (test_parity.CapabilityParityTests.test_automatic_native_and_git_evidence_capture_without_agent_report) ... ok
+test_decisions_are_material_optional_and_recovery_refs_are_retained (test_parity.CapabilityParityTests.test_decisions_are_material_optional_and_recovery_refs_are_retained) ... ok
+test_report_only_failure_returns_feedback_and_authorization_is_not_inferred (test_parity.CapabilityParityTests.test_report_only_failure_returns_feedback_and_authorization_is_not_inferred) ... ok
+test_report_only_pass_never_delivers_and_missing_questionnaire_is_not_acceptance (test_parity.CapabilityParityTests.test_report_only_pass_never_delivers_and_missing_questionnaire_is_not_acceptance) ... ok
+test_sbri_availability_candidates_scope_cache_and_source_identity (test_parity.CapabilityParityTests.test_sbri_availability_candidates_scope_cache_and_source_identity) ... ok
+test_self_validation_does_not_accept_deliver_or_consume_stop_attempts (test_parity.CapabilityParityTests.test_self_validation_does_not_accept_deliver_or_consume_stop_attempts) ... ok
+test_java_and_boot_movement_are_independent_approved_constraints (test_parity.ConfigurationParityTests.test_java_and_boot_movement_are_independent_approved_constraints) ... ok
+test_reject_unverified_scanner_ambiguous_skills_or_candidate_scope (test_parity.ConfigurationParityTests.test_reject_unverified_scanner_ambiguous_skills_or_candidate_scope) ... ok
+test_safe_default_precedence_and_legacy_destination_not_authorization (test_parity.ConfigurationParityTests.test_safe_default_precedence_and_legacy_destination_not_authorization) ... ok
+test_prompt_denial_is_consumed_not_a_persistent_pre_inference_gate (test_preparation_contract.PreparationContractTests.test_prompt_denial_is_consumed_not_a_persistent_pre_inference_gate) ... skipped 'Requires installed native 1.55.1 Python; no services/inference'
+test_remote_execute_tool_is_explicitly_unsupported (test_preparation_contract.PreparationContractTests.test_remote_execute_tool_is_explicitly_unsupported) ... skipped 'Requires installed native 1.55.1 Python; no services/inference'
+test_reviewed_installed_sources_are_identical (test_preparation_contract.PreparationContractTests.test_reviewed_installed_sources_are_identical) ... skipped 'Requires installed native 1.55.1 Python; no services/inference'
+test_session_start_denial_is_observed_but_not_propagated_as_gate (test_preparation_contract.PreparationContractTests.test_session_start_denial_is_observed_but_not_propagated_as_gate) ... skipped 'Requires installed native 1.55.1 Python; no services/inference'
+test_user_prompt_command_error_and_timeout_are_not_fail_closed (test_preparation_contract.PreparationContractTests.test_user_prompt_command_error_and_timeout_are_not_fail_closed) ... skipped 'Requires installed native 1.55.1 Python; no services/inference'
+test_defaults_are_product_limits_not_smoke_recipe (test_product.ContractTests.test_defaults_are_product_limits_not_smoke_recipe) ... ok
+test_reject_bad_identity_delivery_secrets_and_unverifiable_constraints (test_product.ContractTests.test_reject_bad_identity_delivery_secrets_and_unverifiable_constraints) ... ok
+test_start_still_requires_explicit_model_authorization (test_product.ContractTests.test_start_still_requires_explicit_model_authorization) ... ok
+test_vertex_configuration_failure_is_explicit_and_adc_failure_still_blocks (test_product.ContractTests.test_vertex_configuration_failure_is_explicit_and_adc_failure_still_blocks) ... ok
+test_exact_pass_delivers_once_then_reconciles (test_product.DeliveryTests.test_exact_pass_delivers_once_then_reconciles) ... ok
+test_uncertain_pr_post_does_not_repeat (test_product.DeliveryTests.test_uncertain_pr_post_does_not_repeat) ... ok
+test_workspace_drift_blocks_before_remote_mutation (test_product.DeliveryTests.test_workspace_drift_blocks_before_remote_mutation) ... ok
+test_real_export_with_controlled_maven_osv_process_outputs (test_product.MavenPipelineTests.test_real_export_with_controlled_maven_osv_process_outputs) ... ok
+test_cycle_intent_must_precede_first_change (test_product.RepositoryTests.test_cycle_intent_must_precede_first_change) ... ok
+test_export_attributes_cannot_hide_files_from_validation (test_product.RepositoryTests.test_export_attributes_cannot_hide_files_from_validation) ... ok
+test_snapshot_captures_committed_staged_untracked_without_index_changes (test_product.RepositoryTests.test_snapshot_captures_committed_staged_untracked_without_index_changes) ... ok
+test_symlink_candidate_cannot_escape_export (test_product.RepositoryTests.test_symlink_candidate_cannot_escape_export) ... ok
+test_deferred_authority_permits_boundaries_but_preserves_other_gates (test_product.RuntimeTests.test_deferred_authority_permits_boundaries_but_preserves_other_gates) ... ok
+test_honest_bounded_failure_terminates_without_validation_or_delivery (test_product.RuntimeTests.test_honest_bounded_failure_terminates_without_validation_or_delivery) ... ok
+test_hook_command_returns_explicit_deny_on_invalid_event (test_product.RuntimeTests.test_hook_command_returns_explicit_deny_on_invalid_event) ... ok
+test_hook_pass_and_deny_have_distinct_authority (test_product.RuntimeTests.test_hook_pass_and_deny_have_distinct_authority) ... ok
+test_missing_incomplete_stale_or_tampered_preparation_blocks_run (test_product.RuntimeTests.test_missing_incomplete_stale_or_tampered_preparation_blocks_run) ... ok
+test_native_finished_alone_is_not_product_success (test_product.RuntimeTests.test_native_finished_alone_is_not_product_success) ... ok
+test_preparation_creates_conversation_first_and_never_sends_or_runs (test_product.RuntimeTests.test_preparation_creates_conversation_first_and_never_sends_or_runs) ... ok
+test_successful_gate_dispatches_once_and_recovery_rechecks_receipt (test_product.RuntimeTests.test_successful_gate_dispatches_once_and_recovery_rechecks_receipt) ... ok
+test_build_scan_module_dependency_and_test_unknowns_never_pass (test_product.ScannerTests.test_build_scan_module_dependency_and_test_unknowns_never_pass) ... ok
+test_clean_requires_exact_package_coverage (test_product.ScannerTests.test_clean_requires_exact_package_coverage) ... ok
+test_findings_aliases_and_new_findings (test_product.ScannerTests.test_findings_aliases_and_new_findings) ... ok
+test_policy_has_no_forced_upgrade_but_enforces_authorized_movement (test_product.ScannerTests.test_policy_has_no_forced_upgrade_but_enforces_authorized_movement) ... ok
+test_actual_profiled_resolution_matches_sbom_and_scanner_input (test_sbri_evidence.RetainedBackendEvidenceTests.test_actual_profiled_resolution_matches_sbom_and_scanner_input) ... ok
+test_result_matches_retained_backend_schema (test_sbri_evidence.RetainedBackendEvidenceTests.test_result_matches_retained_backend_schema) ... ok
+test_retained_raw_evidence_hashes (test_sbri_evidence.RetainedBackendEvidenceTests.test_retained_raw_evidence_hashes) ... ok
+test_actual_idle_sdk_and_fixture_preparation_need_no_docker (test_sdk_contract.InstalledEvidenceToolTests.test_actual_idle_sdk_and_fixture_preparation_need_no_docker) ... [10/22/26 20:51:08] INFO     Created new conversation               state.py:592
+                             d163e965-6fc3-419f-888d-f4f24828d2aa
+[10/22/26 20:51:08] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:08] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+ok
+test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses (test_sdk_contract.InstalledEvidenceToolTests.test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses) ... [10/22/26 20:51:08] INFO     Created new conversation               state.py:592
+                             eed821b5-1cde-4ee8-971c-1bdc6ed9157f
+[10/22/26 20:51:08] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:08] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:08] INFO     Resumed conversation                   state.py:567
+                             eed821b5-1cde-4ee8-971c-1bdc6ed9157f
+                             from persistent storage
+[10/22/26 20:51:08] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:08] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:08] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpg_6bjs_4/real-dispatch-bo
+                             undary/conversations/eed821b51cde
+                             4ee8971c1bdc6ed9157f
+[10/22/26 20:51:09] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpg_6bjs_4/real-dispatch-boundary
+                             /workspace, username: None,
+                             terminal_type: subprocess
+[10/22/26 20:51:09] INFO     Loaded 5 tools from spec                base.py:596
+[10/22/26 20:51:09] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:09] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:10] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:10] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+ok
+test_supported_local_execute_tool_records_intent_without_inference (test_sdk_contract.InstalledEvidenceToolTests.test_supported_local_execute_tool_records_intent_without_inference) ... [10/22/26 20:51:10] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/22/26 20:51:10] INFO     Loaded 1 tools from spec                base.py:596
+ok
+test_initialize_and_restore_real_sdk_without_inference (test_sdk_contract.InstalledSdkTests.test_initialize_and_restore_real_sdk_without_inference) ... [10/22/26 20:51:10] INFO     Created new conversation               state.py:592
+                             535cc405-a541-4223-bb73-061b908b9d40
+[10/22/26 20:51:10] INFO     Resumed conversation                   state.py:567
+                             535cc405-a541-4223-bb73-061b908b9d40
+                             from persistent storage
+ok
+test_native_stop_callback_executes_harmless_deny_without_inference (test_sdk_contract.InstalledSdkTests.test_native_stop_callback_executes_harmless_deny_without_inference) ... [10/22/26 20:51:10] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping: Blocked by hook
+ok
+test_native_terminal_persists_shell_without_launcher_or_model (test_sdk_contract.InstalledSdkTests.test_native_terminal_persists_shell_without_launcher_or_model) ... [10/22/26 20:51:10] INFO     Created new conversation               state.py:592
+                             75b27398-5f39-4313-9a5f-7f950e429a3e
+[10/22/26 20:51:10] INFO     $ printf SDK_WORKSPACE_FIXTURE        command.py:99
+SDK_WORKSPACE_FIXTURE/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/openhands/sdk/workspace/local.py:68: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='UTF-8'>
+  result = execute_command(
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[10/22/26 20:51:10] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:10] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:10] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmp_6hgkn1i/conversations/75
+                             b273985f3943139a5f7f950e429a3e
+[10/22/26 20:51:11] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmp_6hgkn1i/workspace, username:
+                             None, terminal_type: subprocess
+[10/22/26 20:51:11] INFO     Loaded 5 tools from spec                base.py:596
+ok
+test_real_sdk_initializes_retained_adapter_and_denies_missing_preparation (test_sdk_contract.InstalledSdkTests.test_real_sdk_initializes_retained_adapter_and_denies_missing_preparation) ... [10/22/26 20:51:12] INFO     Created new conversation               state.py:592
+                             8d4895f2-a73d-4ef0-9614-39aee6d89719
+[10/22/26 20:51:12] INFO     Loaded 0 tools from spec                base.py:596
+[10/22/26 20:51:12] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping:
+                             Preparation/baseline
+                             evidence missing or
+                             invalid; no model
+                             execution permitted
+ok
+test_registered_evidence_tool_and_stop_configuration (test_sdk_contract.InstalledSdkTests.test_registered_evidence_tool_and_stop_configuration) ... ok
+test_native_pre_tool_hook_marks_action_blocked_before_execution (test_sdk_p1.NativeP1Tests.test_native_pre_tool_hook_marks_action_blocked_before_execution) ... [10/22/26 20:51:12] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/22/26 20:51:12] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+[10/22/26 20:51:12] WARNING  Hook blocked action       conversation_hooks.py:165
+                             terminal: Terminal needs
+                             an explicit finite
+                             timeout in (0, 900]
+                             seconds
+ok
+test_native_terminal_timeout_returns_control_then_allows_interrupt (test_sdk_p1.NativeP1Tests.test_native_terminal_timeout_returns_control_then_allows_interrupt) ... [10/22/26 20:51:13] INFO     Created new conversation               state.py:592
+                             05f7716a-90bc-4ec5-a90e-01b7a4de5fa0
+[10/22/26 20:51:13] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmp__aegmxq/conversations/05
+                             f7716a90bc4ec5a90e01b7a4de5fa0
+[10/22/26 20:51:13] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:13] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:14] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmp__aegmxq/workspace, username:
+                             None, terminal_type: subprocess
+[10/22/26 20:51:14] INFO     Loaded 5 tools from spec                base.py:596
+ok
+test_loaded_skills_are_rendered_not_just_present_and_tools_are_exposed (test_sdk_parity.NativeGuidanceParityTests.test_loaded_skills_are_rendered_not_just_present_and_tools_are_exposed) ... [10/22/26 20:51:15] INFO     Created new conversation               state.py:592
+                             f664190e-7915-418a-878e-1a426a365dbb
+[10/22/26 20:51:15] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:15] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:15] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:15] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:15] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:15] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmphgwygfcb/conversations/f6
+                             64190e7915418a878e1a426a365dbb
+[10/22/26 20:51:15] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:16] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmphgwygfcb/workspace, username:
+                             None, terminal_type: subprocess
+[10/22/26 20:51:16] INFO     Loaded 5 tools from spec                base.py:596
+ok
+test_connected_denial_recovery_correction_and_report_only_acceptance (test_workflow_integration.ConnectedWorkflowTests.test_connected_denial_recovery_correction_and_report_only_acceptance) ... [10/22/26 20:51:17] INFO     Created new conversation               state.py:592
+                             15de2cf1-0c5b-4351-818e-de23b5b482ff
+[10/22/26 20:51:17] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:17] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:18] INFO     Resumed conversation                   state.py:567
+                             15de2cf1-0c5b-4351-818e-de23b5b482ff
+                             from persistent storage
+[10/22/26 20:51:18] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpfu1f5u3v/product/conversa
+                             tions/15de2cf10c5b4351818ede23b5b
+                             482ff
+[10/22/26 20:51:18] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:18] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:19] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpfu1f5u3v/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/22/26 20:51:19] INFO     Loaded 5 tools from spec                base.py:596
+[10/22/26 20:51:19] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:19] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:19] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:19] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+/tmp/openhands-sdk-1.55.1/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py:1507: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+  warnings.warn(
+[10/22/26 20:51:20] INFO     Stop hook denied          conversation_hooks.py:378
+                             stopping: Independent
+                             FAIL
+[10/22/26 20:51:20] INFO     Stop hook denied agent   local_conversation.py:1973
+                             stopping
+[10/22/26 20:51:20] INFO     Resumed conversation                   state.py:567
+                             15de2cf1-0c5b-4351-818e-de23b5b482ff
+                             from persistent storage
+[10/22/26 20:51:20] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:20] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpfu1f5u3v/product/conversa
+                             tions/15de2cf10c5b4351818ede23b5b
+                             482ff
+[10/22/26 20:51:20] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:22] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpfu1f5u3v/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/22/26 20:51:22] INFO     Loaded 5 tools from spec                base.py:596
+[10/22/26 20:51:22] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:22] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+ok
+test_optional_sbri_failure_preserves_baseline_and_native_tool_diagnostics (test_workflow_integration.ConnectedWorkflowTests.test_optional_sbri_failure_preserves_baseline_and_native_tool_diagnostics) ... [10/22/26 20:51:23] INFO     Created new conversation               state.py:592
+                             24a9b904-740a-4d24-8b30-6a5a53dbb9bf
+[10/22/26 20:51:23] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:51:23] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:51:24] INFO     Resumed conversation                   state.py:567
+                             24a9b904-740a-4d24-8b30-6a5a53dbb9bf
+                             from persistent storage
+[10/22/26 20:51:24] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:51:24] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:51:24] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmpibktkhhl/product/conversa
+                             tions/24a9b904740a4d248b306a5a53d
+                             bb9bf
+[10/22/26 20:51:25] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmpibktkhhl/product/workspace,
+                             username: None, terminal_type:
+                             subprocess
+[10/22/26 20:51:25] INFO     Loaded 5 tools from spec                base.py:596
+ok
+
+----------------------------------------------------------------------
+Ran 88 tests in 51.868s
+
+OK (skipped=5)

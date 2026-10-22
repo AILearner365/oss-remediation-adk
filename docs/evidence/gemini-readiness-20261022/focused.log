@@ -1,0 +1,47 @@
+test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses (tests_native.test_sdk_contract.InstalledEvidenceToolTests.test_default_runtime_reaches_real_sdk_gemini_completion_without_scripted_responses) ... [10/22/26 20:46:45] INFO     Created new conversation               state.py:592
+                             4af13c4a-ca98-4f9b-89f8-97486b9c27ec
+[10/22/26 20:46:45] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:46:45] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:46:45] INFO     Resumed conversation                   state.py:567
+                             4af13c4a-ca98-4f9b-89f8-97486b9c27ec
+                             from persistent storage
+[10/22/26 20:46:45] INFO     Using forced SubprocessTerminal      factory.py:149
+[10/22/26 20:46:45] INFO     TaskTrackerExecutor initialized   definition.py:179
+                             with save_dir:
+                             /tmp/tmph61zju1j/real-dispatch-bo
+                             undary/conversations/4af13c4aca98
+                             4f9b89f897486b9c27ec
+[10/22/26 20:46:45] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash
+[10/22/26 20:46:46] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir:
+                             /tmp/tmph61zju1j/real-dispatch-boundary
+                             /workspace, username: None,
+                             terminal_type: subprocess
+[10/22/26 20:46:46] INFO     Loaded 5 tools from spec                base.py:596
+[10/22/26 20:46:46] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:46:46] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+[10/22/26 20:46:46] INFO     Skill                          agent_context.py:547
+                             'dependency-remediation-decisi
+                             on' triggered by keyword
+                             'vulnerability'
+[10/22/26 20:46:46] INFO     Skill                          agent_context.py:547
+                             'maven-dependency-evidence'
+                             triggered by keyword 'maven'
+ok
+test_deferred_authority_permits_boundaries_but_preserves_other_gates (tests_native.test_product.RuntimeTests.test_deferred_authority_permits_boundaries_but_preserves_other_gates) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.636s
+
+OK

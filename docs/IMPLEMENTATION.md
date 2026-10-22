@@ -1,9 +1,11 @@
 # Autonomous OSS Vulnerability Remediation — local SDK implementation
 
-Latest scoped verification: [P1 assessment and retained actual SBRI evidence](SDK-P0-P1-READINESS-REVIEW.md#current-verification-assessment--2026-10-20).
+Current readiness: [approved isolation deferral and Gemini path](SDK-P0-P1-READINESS-REVIEW.md#gemini-execution-preparation--2026-10-22).
+Exact operator commands: [first real run](OPERATIONS.md#first-real-run).
 The P1 correction counts and fixture-only SBRI statements below describe the
 earlier implementation checkpoint; the newer report distinguishes actual backend
-diagnostics from still-blocked product execution. P0 remains deferred/unchanged.
+diagnostics from unproven live product execution. P0 isolation is deferred and
+its unconditional startup exception was removed on 2026-10-22.
 
 ## Correction from a8ba73c6
 
@@ -31,20 +33,19 @@ are outside the repository; no acceptance/delivery tool is exposed to the agent.
 
 ## Exact remaining unsupported guarantee
 
-**Live path BLOCKED, not fully completed.** LocalWorkspace/TerminalTool execute
+**Authority isolation deferred, not an execution blocker.** LocalWorkspace/TerminalTool execute
 as the host user; so does repository Maven code. They can access sibling private
 state, HOME and delivery credentials, load code from the repository and leave
 background processes. Instructions, cwd, private file modes and filtered environment
 variables do not enforce independent authority against that user. There is no
 claim of production-grade security isolation or reliable process quiescence.
 
-files.require_independent_authority explicitly blocks normal runtime.dispatch,
-default real validation.evaluate and delivery.deliver. It has no bypass option.
-Safe fixtures mock this application guard only to test otherwise retained contracts;
-they do not prove it can be removed. Actual SDK construction and harmless fixture
-tool invocations remain possible without paid inference or Docker.
+files.require_independent_authority is a documented nonblocking compatibility
+checkpoint after explicit product approval to defer isolation. Existing callers
+remain for future enforcement. There is no bypass option, separate execution
+mode or new infrastructure. All other validation/authorization gates remain.
 
-This blocker is the mandatory inability of agent/build code to modify trusted
+This future security requirement is the inability of agent/build code to modify
 preparation/acceptance records or access delivery credentials. It is not an inability
 to use SDK lifecycle APIs, a remote-server problem, or a missing Docker image.
 No additional architecture/infrastructure was designed to conceal the limitation.
@@ -59,10 +60,10 @@ No additional architecture/infrastructure was designed to conceal the limitation
 | Goal-driven reasoning/cycles | One Agent, task_tracker, AgentContext Skills | Stable general context + decision/Maven Skills; optional concise journal records; quality not live-proven |
 | Self-check / SBRI | Native ToolDefinition/execute_tool | capabilities.py reuses validator/CLI, separate evidence/budgets, no acceptance authority |
 | Independent completion | Native HookConfig.stop command/denial | runtime.hook; real adapter denies missing preparation; controlled PASS/FAIL/INCONCLUSIVE checks |
-| Acceptance | Hook invokes deterministic Python checks | Existing Maven/OSV/policy/coverage/immutable-tree code; real build blocked by missing independent authority |
-| Delivery policy | Stop PASS precedes accepted completion | Default report_only; explicit draft_pr authorization plus identity/digest/base/tree/create-only/idempotency guards; real delivery blocked |
+| Acceptance | Hook invokes deterministic Python checks | Existing Maven/OSV/policy/coverage/immutable-tree code; callable, first live full-remediation acceptance unproven |
+| Delivery policy | Stop PASS precedes accepted completion | Default report_only; explicit draft_pr authorization plus identity/digest/base/tree/create-only/idempotency guards; first live remediation delivery unproven |
 | Recovery | Native events/state/stats | Minimal task/evidence/run/attempt/delivery claims + locks retained, no history mirror |
-| Trust isolation | NOT provided by LocalWorkspace | Outside-workspace records are organizational only; live guard fails closed |
+| Trust isolation | NOT provided by LocalWorkspace | Outside-workspace records are organizational only; explicitly deferred, not a startup guard |
 
 ## Installed API authority and tests
 
@@ -121,11 +122,11 @@ COMPLETE binds any pre-edit SBRI result too; interruption cannot silently skip i
 
 runtime.complete separates VALIDATED/report_only from confirmed DELIVERED and
 BOUNDED_FAILURE. delivery.deliver independently rejects missing explicit draft_pr
-authorization. Original validation/delivery safeguards remain; no live guard was
-removed. Tests cover actual SDK tool dispatch with mocked capability results,
+authorization. Original validation/delivery safeguards remain; only the approved
+authority-isolation checkpoint became nonblocking. Tests cover actual SDK tool dispatch with mocked capability results,
 not live Maven/OSV/SBRI execution or Gemini compliance.
 
-## P1 correction status
+## P1 correction status (historical checkpoint before 2026-10-22 deferral)
 
 The historical [readiness review](SDK-P0-P1-READINESS-REVIEW.md) is preserved as a
 snapshot, not overwritten. P0 implementation is deferred: files.py, the

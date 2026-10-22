@@ -25,7 +25,7 @@ conclusion and does not replace baseline COMPLETE. sbri_intelligence permits
 additional version/range/scope investigations using the existing CLI. The CLI is
 currently not installed here. The historical backend was verified directly from
 a temporary Git extraction on an authored fixture, not through the P0-blocked
-product adapter; no live product SBRI capability is claimed. No fixed Boot
+product adapter; production SBRI remains unavailable until a compatible CLI is configured. No fixed Boot
 strategy, second engine or mandatory successful SBRI stage is introduced.
 
 ## Trust limitation and fail-closed behavior
@@ -38,19 +38,15 @@ cycle_evidence tool records agent-authored data only. An unrestricted shell stil
 can access sibling files, HOME, credentials and processes. LocalWorkspace is not
 a sandbox, cwd is not containment, and production security isolation is not claimed.
 
-The mandatory guarantee that agent commands and repository builds cannot alter
-trusted records or access delivery credentials is **not supported here**.
-files.require_independent_authority() raises Blocked before normal model dispatch,
-default real build/acceptance, and GitHub delivery (including reconciliation).
-No model-cost authorization flag disables it. This prevents knowingly claiming
-trusted independent acceptance in the unsupported environment.
-
-Consequently normal live start/prepare/run/delivery are NOT ready to execute:
-prepare initializes the idle SDK then refuses untrusted preparation before
-clone/build; it cannot issue COMPLETE. SDK initialization alone is available without
-inference. Safe temporary test fixtures explicitly inject known outputs/mock
-the authority guard; these seams are not a deployment mechanism or an end-to-end
-success. No new isolation infrastructure is introduced by this correction.
+The guarantee that agent commands/builds cannot alter trusted records or access
+delivery credentials is **not supported here and explicitly deferred** by product
+decision on 2026-10-22. files.require_independent_authority() is a documented
+nonblocking compatibility checkpoint; no new mode or per-task bypass exists.
+Normal prepare/start/run/acceptance/delivery may execute with this known host
+limitation. Separately invoked deterministic acceptance remains mandatory, but
+must not be described as process/filesystem-isolated from agent/build commands.
+Baseline, evidence integrity, task policy, authorization and delivery checks
+still fail closed. No new isolation infrastructure is introduced.
 
 ## Preserved lifecycle and interfaces
 
@@ -65,7 +61,7 @@ The implemented flow is:
 7. report_only returns VALIDATED without remote mutation. Explicitly authorized
    draft_pr verifies delivery before allowing accepted completion.
 
-These entry points preserve that flow, but remain subject to the security blocker:
+These entry points preserve that flow and its deterministic/authorization gates:
 ```bash
 python -m native_remediation check-task --task /private/approved-task.json
 python -m native_remediation prepare --task /private/approved-task.json --state /private/new-task
@@ -121,7 +117,104 @@ may terminate natively without acceptance or PR. Only explicitly authorized exac
 can enter the retained draft delivery contract: authorized repository/base SHA,
 commit parent/tree, create-only branch, exact open draft head/base checks, durable
 claim and positive reconciliation; uncertain push/POST is never blindly repeated.
-The local trust guard prevents actual delivery while independence is unestablished.
+Host isolation is future work, not a delivery gate. Explicit authorization,
+independent deterministic PASS and exact-tree/remote identity checks are still gates.
+
+## First real run
+
+Current code reaches the SDK's configured real Gemini completion path. No
+scripted response source is imported by production code. The no-model provider
+boundary regression executes real factory/run/Agent.step/LLM.generate, then
+traps completion BEFORE a provider request; it is reachability proof, not a
+successful real request. Full Gemini remediation/feedback/delivery needs a
+separately authorized first run.
+
+Payloads (both schema-validated; review and approve before use):
+
+- [report_only](../examples/maven-task.json): no branch push or PR.
+- [draft_pr](../examples/maven-task-draft-pr.json): explicit task authorization;
+  one task-owned create-only branch and open draft only after PASS, never base push.
+
+Both refer to approved test base `main-runrunning` at
+`9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, observed unchanged on 2026-10-22.
+Check it again before starting; a moved base must be explicitly re-approved,
+not silently substituted. These example files do not authorize a run by themselves.
+Their retained `vertex_ai/gemini-2.5-flash` setting is historical: Google's
+[current model lifecycle table](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions)
+lists its retirement as October 20, 2026. **Do not start these payloads unchanged.**
+An approved supported Gemini model must replace task.model before the first run.
+The table names gemini-3.8-flash and gemini-3.5-flash-lite as replacements; neither
+is silently selected or claimed compatible/live-proven by these offline tests.
+
+From the product repository, use the installed runtime and an explicitly approved
+Vertex project/location. Do NOT rely on the setup script's historical project
+fallback. No service-account key is required or recommended. Retain the current
+authorized ADC source if it refreshes reliably; if an existing refreshed user ADC
+file is required, point GOOGLE_APPLICATION_CREDENTIALS at that file outside the
+workspace without copying its contents. Temporary Cloud Shell metadata/ADC and
+/tmp SDK installation may disappear/expire. Do not lower the 300-second check.
+
+```bash
+export VERTEXAI_PROJECT='YOUR_APPROVED_VERTEX_PROJECT'
+export VERTEXAI_LOCATION='YOUR_APPROVED_VERTEX_LOCATION'
+export REMEDIATION_MODEL='vertex_ai/YOUR_APPROVED_SUPPORTED_GEMINI_MODEL'
+SDK_PY=/tmp/openhands-sdk-1.55.1/venv/bin/python
+mkdir -p -m 700 /tmp/oss-remediation-runs
+# jq creates explicit task payloads, not another product execution mode.
+# Review these files and approve the model/constraints before using them.
+jq --arg model "$REMEDIATION_MODEL" '.model = $model' examples/maven-task.json > /tmp/oss-remediation-runs/approved-report-only.json
+jq --arg model "$REMEDIATION_MODEL" '.model = $model' examples/maven-task-draft-pr.json > /tmp/oss-remediation-runs/approved-draft-pr.json
+# No model/target mutation: schema, ADC refresh, optional draft push-permission GET.
+TASK_JSON=/tmp/oss-remediation-runs/approved-report-only.json
+"$SDK_PY" -m native_remediation check-task --task "$TASK_JSON"
+"$SDK_PY" -c 'import json,sys; from native_remediation.contract import load_task; from native_remediation.files import read; from native_remediation.preflight import check; print(json.dumps(check(load_task(read(sys.argv[1])))))' "$TASK_JSON"
+git ls-remote https://github.com/AILearner365/maven-multimodule-app.git refs/heads/main-runrunning
+```
+
+Ensure the Vertex AI API, selected region/model access, quota/billing and IAM
+permission are available in that approved project. ADC refresh does not prove
+prediction permission. Current inspection found SDK/tools 1.55.1, Java 21,
+Maven 3.9.16 and OSV 2.6.0; GitHub repository read/push permission GET succeeded.
+ADC metadata credentials refreshed above 300 seconds, but project/location were
+unset, so normal Vertex preflight failed configuration. No credentials, global
+Cloud Shell configuration or model settings were changed to conceal that failure.
+
+Maven settings/proxies/repositories and OSV networking must resolve the actual
+project; baseline COMPLETE is the decisive check. Optional SBRI is not installed
+on PATH here: default auto reports UNAVAILABLE without blocking preparation.
+If desired, configure sbri.executable to an existing compatible CLI, not to a
+test fixture. SBRI is not required to start or to establish independent PASS.
+
+Only after reviewing the task, setting valid Vertex configuration and obtaining
+run authorization, execute **one** of these existing CLI paths (not both):
+
+```bash
+# Report-only first run. Parent is private and OUTSIDE the target workspace;
+# start creates the fresh task directory itself (it must not already exist).
+mkdir -p -m 700 /tmp/oss-remediation-runs
+"$SDK_PY" -m native_remediation start --task /tmp/oss-remediation-runs/approved-report-only.json --state /tmp/oss-remediation-runs/first-report-only --authorize-model-execution
+"$SDK_PY" -m native_remediation status --state /tmp/oss-remediation-runs/first-report-only
+
+# Alternative only if draft-PR delivery is explicitly authorized:
+"$SDK_PY" -m native_remediation start --task /tmp/oss-remediation-runs/approved-draft-pr.json --state /tmp/oss-remediation-runs/first-draft-pr --authorize-model-execution
+"$SDK_PY" -m native_remediation status --state /tmp/oss-remediation-runs/first-draft-pr
+```
+
+start initializes the SDK, prepares/validates the baseline, then preflights and
+dispatches. Do not run these commands in this implementation task. Preserve all
+task directories; /tmp is ephemeral, so select durable private storage before
+relying on restart survival. Never blindly rerun start or create another task
+after an uncertain response. Inspect status/evidence. Explicit bounded recovery:
+
+```bash
+"$SDK_PY" -m native_remediation resume --state /tmp/oss-remediation-runs/first-report-only --reason 'Documented interruption; prior state inspected' --authorize-model-execution
+# For an already accepted/claimed uncertain draft delivery, reconcile instead:
+"$SDK_PY" -m native_remediation reconcile-delivery --state /tmp/oss-remediation-runs/first-draft-pr
+```
+
+Recovery still requires intact preparation/persistence and remaining budgets;
+interrupted preparation is not automatically repeated. A native finish alone is
+not product success. Distinguish VALIDATED, DELIVERED, BOUNDED_FAILURE and BLOCKED.
 
 ## P1 baseline and execution semantics
 

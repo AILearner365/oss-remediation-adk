@@ -1,15 +1,16 @@
 # Product contract — Autonomous OSS Vulnerability Remediation
 
-Status: **local standalone SDK implementation; live execution BLOCKED on
-independent authority, no live remediation proof**. Use SDK/tools 1.55.1,
+Status: **local standalone SDK implementation; host authority isolation explicitly
+deferred by product decision on 2026-10-22; no live remediation proof**. Use SDK/tools 1.55.1,
 not an Agent Server extension. Normal execution creates/restores a local native
 conversation, prepares deterministically, gates on durable COMPLETE evidence, then
 sends the task and calls run(). Missing evidence blocks initial/recovery execution.
 No Docker image/launcher or offline-only networking is required. LocalWorkspace
 and native TerminalTool execute on the host, not in a sandbox. Same-user shell/
 build code can access trusted records and credentials outside its working directory;
-the mandatory authority separation below is not established. Live build/acceptance,
-model dispatch and delivery fail closed on that exact unsupported guarantee.
+authority separation is not established and is future work, not a startup gate.
+Live execution still requires approved configuration/credentials, baseline
+COMPLETE, explicit model authorization and all acceptance/delivery checks.
 See [implementation](docs/IMPLEMENTATION.md) and [operations](docs/OPERATIONS.md).
 Historical Milestone 1 smoke remains at f72e5308704960ee911f382f96bf0b7948435216.
 
@@ -57,16 +58,18 @@ Minimal integration responsibilities:
 4. **Delivery**: report_only preserves independent validation without remote writes. Explicitly authorized draft_pr after independent PASS binds output to the validated Git tree, verifies remote base/destination, uses a create-only branch/commit, and confirms an open **draft** PR identity. Preserve local claims and reconciliation; ambiguous remote mutation blocks, never blindly duplicates. Native hook-command failures cannot establish product success.
 5. **Recovery/evidence**: use native conversation/events plus small durable task/intent/outcome/validation/delivery artifacts as needed, without reimplementing native history, task API, UI or lifecycle database. Keep secrets out of workspaces and committed artifacts. Avoid unrestricted retries.
 
-### Mandatory pre-inference guarantees
+### Pre-inference guarantees and deferred isolation
 
-Normal product execution must establish all of these through supported native
+Normal product execution must establish A–E through supported native
 SDK facilities and the explicit trusted caller sequence: (A) preparation associated
 with the initialized native conversation, (B) completion
 before any Gemini inference, (C) failure prevents inference, (D) evidence bound
 to that conversation, (E) recovery cannot silently skip/duplicate preparation,
-and (F) preparation authority isolated from agent-controlled content/commands.
+and, as a deferred future security requirement, (F) preparation authority isolated
+from agent-controlled content/commands.
 Preparation is deterministic code, never an agent-selected reasoning step.
-Untrusted Maven build logic must not gain trusted evidence/credential authority.
+Preventing untrusted Maven build logic from gaining host evidence/credential
+authority is part of deferred F, not an established property of this deployment.
 
 A–E have an implementation through the standalone caller gate, durable receipt
 and native SDK persistence, with scoped offline verification. F is **not satisfied**
@@ -75,10 +78,12 @@ acceptance records and credentials remain outside the repository, but that is
 organizational separation, not protection from the same user. No agent tool
 provides acceptance/delivery operations; shell filesystem/process access is still
 unrestricted. SDK lazy repository plugin loading can also execute repository code.
-files.require_independent_authority blocks live dispatch, default untrusted builds/
-acceptance and delivery before treating those records as independently trusted.
-There is no override flag, new isolation design or weakened acceptance rule.
-Safe fixtures may replace this guard to verify contracts, never as live proof.
+The approved 2026-10-22 deferral makes files.require_independent_authority a
+documented nonblocking compatibility checkpoint at all existing call sites.
+F must not prevent current execution; there is no security-override flag, new
+mode or isolation claim. Deterministic acceptance is logically independent of
+model claims, not OS-isolated from agent/build code. A–E, immutable exports,
+identity/integrity, scanner coverage, policy and authorization remain mandatory.
 The earlier remote limitations remain [historical evidence](docs/NATIVE-PREPARATION-BLOCKER.md),
 not a blocker to the local SDK lifecycle APIs themselves.
 
@@ -95,7 +100,7 @@ Output: native event/action/observation trajectory and usage stats; automatic ph
 **NOT PROVEN by smoke:** Maven/OSV validator under native Stop Hook; full goal remediation; cycles/denials on this adapter; agent reasoning quality; policy/scanner coverage; production durability/recovery; Canvas browser activity; secure production multi-user isolation. Earlier experiments support design but are not equivalent to production proof.
 
 Known limits: same-user host authority cannot enforce the independent trust
-guarantee, so normal live execution/acceptance/delivery remain blocked. Host network
+guarantee; this is explicitly deferred and does not block execution. Host network
 and proxy settings are allowed, not forced offline; real Maven/OSV/research and
 full remediation were not exercised. Persistent ADC and durable local claims
 remain deployment responsibilities. Native command-hook infrastructure can fail
@@ -103,7 +108,8 @@ open but cannot itself establish product success. Background process quiescence
 and production-grade security isolation are not claimed for host LocalWorkspace.
 Historical smoke-specific iteration/whitelist restrictions are not acceptance
 defaults for remediation. No live model or target PR is authorized here.
-The P0 authority correction remains deferred; its unconditional guard is unchanged.
+P0 authority isolation remains future work; its former unconditional exception
+has been removed under the approved deferral. This is not security proof.
 Native terminal wait policy is a PreToolUse check, not an isolation boundary.
 task_seconds is a dispatch/tool-admission/evaluation deadline, not a hard
 wall-clock kill switch for the native run or its background processes. See the

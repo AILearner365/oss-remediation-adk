@@ -15,16 +15,18 @@ class Blocked(RuntimeError):
 
 
 def require_independent_authority():
-    """No same-user host execution can enforce the required authority separation.
+    """Legacy checkpoint: host authority isolation is explicitly deferred.
 
-    Deliberately no bypass flag: authorizing model cost is not authorizing loss
-    of the independent acceptance/credential boundary. Fixtures may mock this
-    guard; that is not a deployment mechanism or live proof.
+    LocalWorkspace, terminal and Maven execute as the same host user. This
+    checkpoint does NOT establish a sandbox or protect records/credentials from
+    that user. The approved product contract permits that known limitation;
+    it no longer refuses execution unconditionally. Keep existing call sites
+    for future authority enforcement, without a bypass flag or alternate mode.
+
+    Deterministic validation, identity/integrity, baseline, policy and delivery
+    authorization checks remain mandatory and are enforced by their callers.
     """
-    raise Blocked("LocalWorkspace/TerminalTool execute as the host user: independent "
-                  "preparation/acceptance records and delivery credentials cannot be protected "
-                  "from agent commands or repository build code. Required authority separation "
-                  "is unsupported; live execution/acceptance/delivery blocked.")
+    return None
 
 
 def read(path):

@@ -22,14 +22,17 @@ load repository code/plugins. A working directory is not a process/filesystem
 boundary. No agent-facing acceptance/delivery tool is provided, which does not
 remove that physical authority.
 
-The mandatory inability of agent/build code to modify trusted decisions or obtain
-delivery credentials is therefore unsupported in this local deployment. Existing
-production build/acceptance, dispatch and delivery paths fail closed with a
-specific Blocked error. There is deliberately no security-override flag. Offline
-fixtures may replace that guard to verify the retained contracts; this is not a
-runtime alternative, live authorization or security proof.
+Authority isolation is unsupported in this deployment and explicitly deferred
+by product decision on 2026-10-22. The legacy require_independent_authority
+checkpoint now returns without blocking; all existing call sites remain for
+future enforcement. This is not security proof or an alternate execution mode.
+Baseline COMPLETE, evidence integrity, policy, model authorization, independent
+deterministic Stop acceptance and exact-tree PASS-only delivery are unchanged.
+See docs/OPERATIONS.md for actual prerequisites and first-run commands. A real
+Gemini remediation is still unproven; no live run is authorized by this handoff.
 
-The P1 correction suite uses full `unittest discover -s tests_native`, including
+Historical P1 correction checkpoint (superseded counts in readiness report):
+the suite uses full `unittest discover -s tests_native`, including
 the existing product/local/parity/SDK checks and new test_p1/test_sdk_p1 regressions.
 Pinned SDK run: 70 passed, five optional Agent Server probes skipped (75 total).
 Stdlib-only run: 60 passed, 15 expected skips. No paid inference or live analysis.

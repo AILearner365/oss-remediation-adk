@@ -75,6 +75,27 @@ class GitFixture(unittest.TestCase):
 
 
 class ContractTests(unittest.TestCase):
+    def test_vertex_configuration_failure_is_explicit_and_adc_failure_still_blocks(self):
+        import os
+        from types import SimpleNamespace
+        from native_remediation import preflight
+        with patch.dict(os.environ, {}, clear=True), patch.object(preflight.subprocess, "run") as refresh:
+            with self.assertRaisesRegex(Blocked, "approved VERTEXAI_PROJECT"):
+                preflight.vertex_adc()
+            refresh.assert_not_called()
+        with patch.dict(os.environ, dict(VERTEXAI_PROJECT="fixture-project", VERTEXAI_LOCATION="fixture-location")), \
+                patch.object(preflight.subprocess, "run", return_value=SimpleNamespace(returncode=1)):
+            with self.assertRaisesRegex(Blocked, ">=300s lifetime"):
+                preflight.vertex_adc()
+
+    def test_start_still_requires_explicit_model_authorization(self):
+        from native_remediation import cli
+        args = cli.parser().parse_args(["start", "--task", "not-read.json", "--state", "not-created"])
+        with patch.object(runtime, "prepare_task") as prepare:
+            with self.assertRaisesRegex(Blocked, "Explicit authorization"):
+                cli.execute(args)
+            prepare.assert_not_called()
+
     def test_defaults_are_product_limits_not_smoke_recipe(self):
         task = load_task(task_input())
         self.assertEqual(task["limits"]["max_iterations"], 40)
@@ -296,25 +317,30 @@ class OfflineConversation:
 
 
 class RuntimeTests(GitFixture):
-    def test_host_authority_gap_blocks_live_run_build_and_delivery(self):
+    def test_deferred_authority_permits_boundaries_but_preserves_other_gates(self):
+        from native_remediation.files import require_independent_authority
+        self.assertIsNone(require_independent_authority())
         self.prepared()
-        with patch.object(runtime, "prepare") as clone:
-            with self.assertRaisesRegex(Blocked, "authority separation"):
+        # Safe sentinel boundaries prove reachability without cloning/building,
+        # initializing a model or connecting to GitHub.
+        with patch.object(runtime, "prepare", side_effect=Blocked("fixture preparation boundary")) as clone:
+            with self.assertRaisesRegex(Blocked, "fixture preparation boundary"):
                 runtime.prepare_task(self.task, self.state / "blocked-preparation",
                                      factory=lambda *a: OfflineConversation())
-            clone.assert_not_called()
-        with patch.object(runtime, "verify_base") as remote:
-            with self.assertRaisesRegex(Blocked, "authority separation"):
+            clone.assert_called_once()
+        with patch.object(runtime, "verify_base", side_effect=Blocked("fixture base boundary")) as remote:
+            with self.assertRaisesRegex(Blocked, "fixture base boundary"):
                 runtime.dispatch(self.state, factory=lambda *a: self.fail("Must not initialize/run"))
-            remote.assert_not_called()
+            remote.assert_called_once()
         self.assertFalse((self.state / "runs").exists())
-        with patch.object(validation, "command") as build:
-            with self.assertRaisesRegex(Blocked, "authority separation"):
-                validation.evaluate(self.workspace, self.baseline["tree"], self.task,
-                                    self.state / "untrusted-evaluation", deadline=time.time() + 5)
-            build.assert_not_called()
+        with patch.object(validation, "command", side_effect=Blocked("fixture command boundary")) as build:
+            result = validation.evaluate(self.workspace, self.baseline["tree"], self.task,
+                                         self.state / "untrusted-evaluation", deadline=time.time() + 5)
+            self.assertEqual(result["outcome"], "INCONCLUSIVE")
+            self.assertIn("fixture command boundary", result["reasons"])
+            build.assert_called_once()
         with patch.object(delivery, "GitHub") as github:
-            with self.assertRaisesRegex(Blocked, "authority separation"):
+            with self.assertRaisesRegex(Blocked, "acceptance identity mismatch"):
                 delivery.deliver(self.state, {})
             github.assert_not_called()
 

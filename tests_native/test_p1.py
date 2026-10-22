@@ -141,8 +141,9 @@ class StrictBaselineTests(PreparedFixture):
                     runtime.dispatch(self.state, factory=lambda *a: self.fail("No model initialization"))
         self.prepared()
         runtime.require_preparation(self.state)
-        with self.assertRaisesRegex(Blocked, "authority separation"):
-            runtime.dispatch(self.state)
+        with patch.object(runtime, "verify_base", side_effect=Blocked("fixture base check")):
+            with self.assertRaisesRegex(Blocked, "fixture base check"):
+                runtime.dispatch(self.state)
 
     def test_incomplete_baseline_never_creates_complete_receipt(self):
         destination = self.state / "failed-baseline"
@@ -383,7 +384,7 @@ class SbriCorrectionTests(PreparedFixture):
         write(self.state / result["resultPath"], dict(status="tampered"))
         with self.assertRaisesRegex(Blocked, "canonical result changed"):
             capabilities.sbri(self.state, runner=self.runner)
-        with self.assertRaisesRegex(Blocked, "authority separation"):
+        with self.assertRaisesRegex(Blocked, "canonical result changed"):
             capabilities.sbri(self.state)
 
     def test_summary_tampering_and_task_identity_mismatch_block(self):
@@ -464,8 +465,10 @@ class SbriCorrectionTests(PreparedFixture):
                 preparer=prepare, evaluator=lambda *a, **kw: self.baseline)
         runtime.require_preparation(destination)
         self.assertEqual(read(destination / "sbri-pre-edit.json")["status"], "INCONCLUSIVE")
-        with self.assertRaisesRegex(Blocked, "authority separation"):
-            runtime.dispatch(destination)
+        conversation = OfflineConversation()
+        with patch.object(runtime, "verify_base"):
+            runtime.dispatch(destination, factory=lambda *a: conversation, preflight=lambda task: {})
+        self.assertEqual(conversation.runs, 1)
 
 
 class TerminalPolicyTests(PreparedFixture):
