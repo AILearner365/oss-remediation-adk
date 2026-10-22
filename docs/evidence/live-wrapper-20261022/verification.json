@@ -1,0 +1,41 @@
+{
+  "startingCommit": "8f555320df0b6bf1f42bdd7c2fc3f35495bdd6ee",
+  "date": "2026-10-22",
+  "sdk": "1.55.1",
+  "tools": "1.55.1",
+  "fullSuiteRuns": 1,
+  "command": "OPENHANDS_SUPPRESS_BANNER=1 /tmp/openhands-sdk-1.55.1/venv/bin/python -m unittest discover -s tests_native -v",
+  "testsDiscovered": 103,
+  "testsPassed": 98,
+  "testsSkipped": 5,
+  "seconds": 38.126,
+  "skipReason": "Unchanged historical remote Agent Server probes; package absent",
+  "newFocusedTests": 15,
+  "testSource": "tests_native/test_live.py",
+  "supplementaryChecks": ["compileall", "bash -n", "git diff --check"],
+  "boundaries": {
+    "liveProductSubprocess": "Fixture injected; no actual live execution during implementation",
+    "publicationTests": "Actual Git commits/pushes against temporary local bare repositories only",
+    "signals": "Harmless temporary sleeping process interrupted and reaped",
+    "existingFailedState": "Actual read-only export; no rerun, install or preflight refresh",
+    "completePrivateTestLog": "/tmp/live-full-suite.log"
+  },
+  "existingFailureObserved": {
+    "baseline": "INCONCLUSIVE",
+    "reason": "Unexpected OSV package identity",
+    "buildExit": 0,
+    "resolveExit": 0,
+    "scannerVersionExit": 0,
+    "scanExit": 1,
+    "resolvedPackages": 88,
+    "rawScannerPackages": 88,
+    "unexpectedIdentities": 88,
+    "normalizedFindings": "NOT_ASSESSED",
+    "modelDispatch": "NOT_EXECUTED"
+  },
+  "realGeminiCalls": 0,
+  "targetModifications": 0,
+  "remediationPullRequests": 0,
+  "authorityIsolation": "DEFERRED; no new isolation or bypass mechanism",
+  "readiness": "Offline wrapper/export/publication contracts verified; live provider/remediation behavior NOT PROVEN"
+}

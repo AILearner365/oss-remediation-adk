@@ -35,6 +35,9 @@ explicit model authorization and PASS-only delivery remain enforced. No new mode
 bypass flag or replacement infrastructure. Use only an approved repository/task.
 
 See [first-run configuration and exact commands](docs/OPERATIONS.md#first-real-run).
+For repeated authorized runs with automatic sanitized evidence publication, use
+`bash scripts/openhands/sdk-cloudshell-setup.sh live --task examples/maven-task.json --authorize-model-execution --publish-evidence`.
+See [batch operation and existing-state reporting](docs/OPERATIONS.md#one-command-live-execution-and-evidence-publication).
 The SDK Gemini path is reachable; a complete real remediation is not yet proven.
 The historical gemini-2.5-flash model has a published October 20, 2026 retirement
 date; approve a supported task.model plus Vertex project/location before running

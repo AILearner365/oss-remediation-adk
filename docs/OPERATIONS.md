@@ -1,5 +1,109 @@
 # Autonomous OSS Vulnerability Remediation — local SDK operations
 
+## One-command live execution and evidence publication
+
+After approving the task's supported Gemini model and configuring the existing
+Cloud Shell Vertex project/location/ADC, run from the product repository:
+
+```bash
+bash scripts/openhands/sdk-cloudshell-setup.sh live --task examples/maven-task.json --authorize-model-execution --publish-evidence
+```
+
+**Review/update task.model first:** the retained example's gemini-2.5-flash model
+is retired. The wrapper rejects the published retired 2.5 model IDs, never silently
+substitutes a model, project, policy or task value. Use the approved-model payload
+procedure below or supply another approved JSON. Prerequisites: Python 3, uv if
+SDK installation is needed, Git commit identity/credentials, Maven/Java/OSV and
+approved Vertex access. Host authority isolation remains explicitly deferred.
+
+Existing prepare/verify/test/python commands remain. Live reuses prepare (pinned
+SDK/Tools 1.55.1, installed tools and uv caches), NOT the offline test suite.
+Contract validation, SDK/tool/known-model checks, existing ADC/delivery checks
+and approved remote-base verification precede exactly ONE existing product CLI
+start. Product/SDK own preparation, baseline, model loop, Stop and delivery. No
+new agent loop, fixture mode or lifecycle engine. ADC/model-name checks do not
+prove inference availability, regional access, IAM or quota. Missing approved
+Vertex environment fails; legacy setup fallbacks are not applied to live runtime.
+Both flags are required for an accepted live invocation. Authorization errors
+are captured without executing the product; no publication flag means no push.
+
+### Generated evidence layout
+
+Default private root: ~/.local/state/oss-remediation/live, not ephemeral /tmp.
+Override with --runs-dir /approved/private/path. Each invocation gets a new 0700
+directory; live never reuses or automatically retries a state:
+
+```text
+<private-root>/<timestamp>-<uuid>/
+  task-input.json             private approved task
+  invocation.json             batch phase outcomes
+  setup.stdout/.stderr        private SDK preparation logs
+  preflight.stdout/.stderr    private prerequisite logs
+  checks.json                 prerequisite results
+  execution.stdout/.stderr    private product console output
+  state/                      COMPLETE product state (when initialized)
+    conversations/ workspace/ baseline/ attempts/ self-validation/ sbri/ evidence/
+  report.json                 sanitized public projection, retained locally too
+  publication.json            verified SHA or explicit PUBLICATION_FAILED
+  failure.json / *-error.json  actual private diagnostics, if applicable
+
+<product>/docs/evidence/live-runs/<timestamp>-<uuid>/report.json
+```
+
+Public data is an allowlisted projection, NOT raw logs with regex redaction:
+statuses, numeric usage/tests, command exit/timing, inventory/coverage counts,
+public CVE/GHSA IDs, exact acceptance/delivery outcome and PR URL, decision/cycle
+indexes, and private-artifact SHA references. Task/agent prose, command argv,
+credentials/config files, private dependency names, logs and workspace snapshots
+never enter Git. Known static validator diagnostics are published; other text is
+PRIVATE_DIAGNOSTIC with a fingerprint/private reference. Narrative engineering
+choices remain available privately, not automatically published. Approved
+repository/base/model identity is public metadata; never put secrets there.
+
+NOT_EXECUTED/NOT_CHECKED differs from failed/inconclusive/interrupted. Unknown
+OSV findings are null/NOT_ASSESSED, not zero. Dispatch claims differ from observed
+response events; native finish is not independent acceptance. Malformed/unsafe/
+inconsistent evidence marks reportComplete false; export exceptions produce an
+explicit REPORT_INCOMPLETE report. Complete private state is retained; public
+reports are deliberately bounded summaries, not full conversation exports.
+
+### Publication and recovery
+
+With --publish-evidence, finalization attempts publication after success, failure
+or caught interruption. Product branch and authorized origin are verified;
+local/remote HEAD must agree before execution, and a changed HEAD during execution
+blocks publication. An isolated index and atomic expected-parent ref update commit
+only this run's report. Unrelated staged/unstaged files remain untouched. No Git
+content filter/hook can inject bytes into the report blob. No target-repository
+operation is part of publication. No force push, merge, history rewrite or blind
+retry. A push failure can leave a new LOCAL evidence commit; inspect/reconcile
+manually, do not rerun the remediation to republish it.
+
+Console output and private publication.json contain the positively verified
+publishing SHA or publishing failure. The immutable public report says publication
+was requested, not that its own future commit was already pushed. Nonzero exit
+means remediation failed, report is incomplete or publication failed; successful
+evidence publication does not turn failed remediation into success.
+
+SIGINT/SIGTERM get best-effort process-group interruption and finalization.
+SIGKILL, host loss, disk failure or another interruption during finalization cannot
+guarantee capture/publication. Existing model/task limits are unchanged; no new
+background-process containment or hard run deadline is claimed.
+
+### Existing-state export without rerun
+
+```bash
+bash scripts/openhands/sdk-cloudshell-setup.sh report --state /tmp/oss-remediation-runs/first-report-only --publish-evidence
+```
+
+No SDK install, preflight refresh, checkout/build, inference, validation or task
+rerun occurs. Omit --publish-evidence for local-only export. Source state is
+read-only; each export has a unique ID. Missing historical checks are NOT_CHECKED.
+Inspection of that state found `Unexpected OSV package identity`: build/resolve
+passed, scan exited 1, coverage normalization failed; 88 reported identities did
+not match 88 expected inventory identities. Findings are NOT_ASSESSED. No run
+claim or model response existed. This exporter does not fix/relax validation.
+
 ## Actual execution model
 
 Use the existing Python 3.12+ environment with SDK/tools 1.55.1 and installed

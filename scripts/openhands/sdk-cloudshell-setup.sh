@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Standalone OpenHands SDK Cloud Shell setup, distilled from the Gate 2 POC.
-# No Canvas, Agent Server, tmux, paid inference or repository mutation.
+# prepare/verify/test never invoke a model; live explicitly authorizes execution.
 set -euo pipefail
 
 SDK_VERSION="1.55.1"
@@ -46,10 +46,10 @@ show() {
 }
 
 prepare() {
-  require uv
   if check_install; then
     info "Reusing installed SDK at $VENV"
   else
+    require uv
     info "Preparing SDK $SDK_VERSION on temporary filesystem (not /home)"
     for directory in "$RUNTIME_ROOT" "$UV_CACHE_DIR" "$UV_PYTHON_INSTALL_DIR"; do
       case "$directory/" in /tmp/*) ;; *) die "Refusing installation outside /tmp: $directory";; esac
@@ -83,6 +83,16 @@ print("Vertex location:", os.environ["VERTEXAI_LOCATION"])
 PY
 }
 
+# live/report use the stdlib bootstrap even when the SDK is absent. Do not apply
+# historical project/region fallbacks to real execution; preflight must reject
+# missing approved configuration, never silently choose another environment.
+case "${1:-}" in
+  live|report)
+    action="$1"
+    shift
+    exec python3 "$REPO/native_remediation/live.py" "$action" "$@"
+    ;;
+esac
 resolve_vertex
 case "${1:-}" in
   prepare) prepare; show ;;
@@ -100,13 +110,16 @@ case "${1:-}" in
   status) show; check_install && info "SDK ready" || info "SDK missing; run prepare" ;;
   *)
     cat <<'USAGE'
-Usage: bash scripts/openhands/sdk-cloudshell-setup.sh prepare|verify|test|status|python [args...]
+Usage: bash scripts/openhands/sdk-cloudshell-setup.sh prepare|verify|test|status|python|live|report [args...]
 
 prepare  Reuse or install pinned SDK/tools 1.55.1 in /tmp, using /tmp UV caches.
 verify   Check installed SDK and refresh Vertex ADC without invoking Gemini.
 test     Run local SDK and product unit tests (no Gemini calls).
 status   Show configured locations and presence, without installing.
 python   Run arguments using the prepared SDK Python.
+live     --task FILE --authorize-model-execution --publish-evidence
+         Bootstrap SDK, preflight, invoke product once, export/publish safe evidence.
+report   --state EXISTING --publish-evidence (export only; never rerun).
 
 Cloud Shell /tmp may be wiped on restart; rerun prepare when needed.
 Optional: VERTEXAI_PROJECT, VERTEXAI_LOCATION, OPENHANDS_RUNTIME_ROOT,

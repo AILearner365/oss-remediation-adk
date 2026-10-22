@@ -1,5 +1,65 @@
 # OpenHands SDK P0 and P1 readiness review
 
+## Cloud Shell live batch/report entry point — 2026-10-22
+
+Added `sdk-cloudshell-setup.sh live` and `report` as batch I/O conveniences around
+the EXISTING product CLI, not a second lifecycle engine. Native SDK/Tools 1.55.1,
+agent/tools/Skills, baseline COMPLETE, independent Stop, limits, target delivery
+authorization and evidence contracts are unchanged. P0 isolation stays deferred.
+
+`native_remediation/live.py` is stdlib bootstrap + preflight invocation + one CLI
+subprocess + read-only allowlisted report projection + isolated Git publication.
+It can report SDK setup/preflight failures before any product state/inference.
+No full offline suite runs during live execution. Failed/uncertain tasks are not
+automatically retried, replaced or rebaselined. Complete private state/logs remain
+outside Git. Existing scripts' prepare/verify/test/python commands remain.
+
+Tests: `tests_native/test_live.py` covers recorded success, baseline failure,
+Stop denial, interrupted state and subprocess cleanup, safe projection/symlink
+rejection, export failure, retired-model preflight, authorization, existing-state
+read-only export, correct CLI arguments, setup failure, unrelated staged changes,
+wrong branch/remote/changed HEAD, verified local-bare push and publication failure
+receipts. All command/model boundaries in these tests are fixtures or harmless
+temporary local processes/repositories; no Gemini or target mutation.
+
+The complete pinned offline suite was run **once** for this implementation:
+**103 discovered, 98 passed, 5 skipped**, 38.126 seconds. Skips are unchanged
+historical Agent Server probes. Focused batch tests also passed during development.
+Machine-readable verification: [live-wrapper-20261022/verification.json](evidence/live-wrapper-20261022/verification.json).
+Compileall, shell syntax and diff checks are supplementary. No model call,
+target remediation or real PR was executed. Offline fixtures do NOT prove a live
+Gemini remediation or provider access. Actual wrapper execution used only report
+on the already failed state; no task rerun or credential/config change occurred.
+
+The existing state contains a reliable diagnostic beyond the generic baseline
+gate error: Maven build and resolution exited 0, scanner-version exited 0, scan
+exited 1, then validator raised `Unexpected OSV package identity`. Five modules,
+88 resolved dependencies and four tests were recorded; all 88 raw scanner
+package identities differ from expected inventory identities. Coverage/findings
+normalization did not complete, so the report does NOT claim zero findings or
+successful baseline. Native state was idle with no run claim/model response.
+This remains a genuine validation/adapter issue for a future separately scoped
+fix, not an excuse to relax acceptance in this batch-publication task.
+
+Public report security: no free text, raw command logs, argv, workspace files,
+credentials or native state documents are copied. Static known diagnostics and
+bounded structured facts are projected; other diagnostics/decisions have private
+references/fingerprints only. Approved task repository/base/model identities are
+public metadata. A report is not an OS trust boundary against the same user.
+Missing/unsafe/corrupt evidence explicitly marks an incomplete report. Publication
+uses a canonical generated blob (no clean filters), isolated index, expected-parent
+ref update, normal push and remote SHA verification. Failed push leaves local
+evidence/receipt; no blind retry, target mutation or unrelated commit.
+
+See [operations](OPERATIONS.md#one-command-live-execution-and-evidence-publication)
+for exact commands, evidence layout, recovery, required approved model/Vertex
+settings and limitations (including SIGKILL/host loss and incomplete report
+capture). The retained default model is retired; the wrapper fails clearly on
+those known retired model IDs instead of silently substituting another model.
+ADC refresh is not inference-availability proof. First live behavior is still
+NOT PROVEN. Evidence publication from existing state can be checked independently
+of remediation; it is never classified as a new autonomous run.
+
 ## Gemini execution preparation — 2026-10-22
 
 Starting commit `0f3a37e411cf5fbb5d1fdf1e996d8cabd45fac68`. This supersedes
