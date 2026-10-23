@@ -39,9 +39,9 @@ For repeated authorized runs with automatic sanitized evidence publication, use
 `bash scripts/openhands/sdk-cloudshell-setup.sh live --task examples/maven-task.json --authorize-model-execution --publish-evidence`.
 See [batch operation and existing-state reporting](docs/OPERATIONS.md#one-command-live-execution-and-evidence-publication).
 The SDK Gemini path is reachable; a complete real remediation is not yet proven.
-The historical gemini-2.5-flash model has a published October 20, 2026 retirement
-date; approve a supported task.model plus Vertex project/location before running
-the examples. See operations for the source and required payload override.
+Configure the approved Vertex project/location and ADC before running. Static
+retirement tables do not block the configured model or prove actual availability.
+Scanner configuration and adapter extension: [configuration](docs/CONFIGURATION.md#scanner-adapter-contract).
 
 Read [operations](docs/OPERATIONS.md), [implementation/proof](docs/IMPLEMENTATION.md),
 [contract](PRODUCT-CONTRACT.md), [historical parity](docs/POC-PARITY.md),

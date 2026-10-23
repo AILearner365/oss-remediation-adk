@@ -88,14 +88,12 @@ def require_preparation(state):
     require_baseline(baseline, expected["baseTree"], task)
     if "sbriDigest" in receipt:
         expected["sbriDigest"] = digest(read(state / "sbri-pre-edit.json")) if (state / "sbri-pre-edit.json").exists() else None
-    coverage = baseline.get("coverage", {})
     packages = baseline.get("inventory", {}).get("packages", [])
     count = len({(p["name"], p["version"]) for p in packages})
     if (bound.get("executionFramework") != "standalone-sdk-1.55.1"
             or any(receipt.get(k) != v for k, v in expected.items())
             or baseline.get("outcome") != "COMPLETE" or baseline.get("tree") != receipt["baseTree"]
-            or not count or coverage.get("complete") is not True
-            or coverage.get("expected") != count or coverage.get("scanned") != count
+            or not count
             or not bound["createdAt"] <= receipt.get("completedAt", 0) <= time.time()
             or time.time() >= bound["createdAt"] + task["limits"]["task_seconds"]):
         raise Blocked("Preparation missing, incomplete, stale or identity/evidence mismatch")
@@ -243,7 +241,8 @@ def hook(state, event, *, evaluator=None, delivery=deliver):
                 return dict(decision="allow", reason="BOUNDED FAILURE; independent validation did not pass; no delivery")
             return dict(decision="deny", reason="Independent " + accepted["outcome"],
                         additionalContext="Reassess facts/candidates using this evidence; preserve a concise material decision when useful. "
-                        + str(accepted["reasons"])[:3000])
+                        + str(accepted["reasons"])[:2000] + '\nFinding counts: ' + str(accepted.get('summary', {}))
+                        + '\nComplete findings, paths and evidence: ' + str(attempt / 'validation.json'))
         return complete(state, accepted, delivery=delivery)
 
 

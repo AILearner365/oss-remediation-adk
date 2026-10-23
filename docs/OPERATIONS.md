@@ -9,10 +9,11 @@ Cloud Shell Vertex project/location/ADC, run from the product repository:
 bash scripts/openhands/sdk-cloudshell-setup.sh live --task examples/maven-task.json --authorize-model-execution --publish-evidence
 ```
 
-**Review/update task.model first:** the retained example's gemini-2.5-flash model
-is retired. The wrapper rejects the published retired 2.5 model IDs, never silently
-substitutes a model, project, policy or task value. Use the approved-model payload
-procedure below or supply another approved JSON. Prerequisites: Python 3, uv if
+The wrapper retains the explicitly configured model. A published lifecycle date
+does not prove that this project/region rejects inference; no static retirement
+list blocks the approved model, and no model is silently substituted.
+Actual inference availability remains unproven until a provider response.
+Prerequisites: Python 3, uv if
 SDK installation is needed, Git commit identity/credentials, Maven/Java/OSV and
 approved Vertex access. Host authority isolation remains explicitly deferred.
 
@@ -52,9 +53,10 @@ directory; live never reuses or automatically retries a state:
 
 Public data is an allowlisted projection, NOT raw logs with regex redaction:
 statuses, numeric usage/tests, command exit/timing, inventory/coverage counts,
-public CVE/GHSA IDs, exact acceptance/delivery outcome and PR URL, decision/cycle
-indexes, and private-artifact SHA references. Task/agent prose, command argv,
-credentials/config files, private dependency names, logs and workspace snapshots
+finding IDs, Maven coordinates/versions/paths, available CVSS/fix evidence, exact
+acceptance/delivery outcome and PR URL, decision/cycle indexes, and private-artifact
+SHA references. Task/agent prose, command argv,
+credentials/config files, unrestricted scanner prose, logs and workspace snapshots
 never enter Git. Known static validator diagnostics are published; other text is
 PRIVATE_DIAGNOSTIC with a fingerprint/private reference. Narrative engineering
 choices remain available privately, not automatically published. Approved
@@ -243,12 +245,10 @@ Both refer to approved test base `main-runrunning` at
 `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`, observed unchanged on 2026-10-22.
 Check it again before starting; a moved base must be explicitly re-approved,
 not silently substituted. These example files do not authorize a run by themselves.
-Their retained `vertex_ai/gemini-2.5-flash` setting is historical: Google's
-[current model lifecycle table](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions)
-lists its retirement as October 20, 2026. **Do not start these payloads unchanged.**
-An approved supported Gemini model must replace task.model before the first run.
-The table names gemini-3.8-flash and gemini-3.5-flash-lite as replacements; neither
-is silently selected or claimed compatible/live-proven by these offline tests.
+Their configured `vertex_ai/gemini-2.5-flash` is retained. Lifecycle documentation
+is advisory, not a project-specific availability probe. Preflight validates ADC
+and configuration, not inference. The actual provider response determines whether
+the approved model can run; never substitute a model following a failed request.
 
 From the product repository, use the installed runtime and an explicitly approved
 Vertex project/location. Do NOT rely on the setup script's historical project

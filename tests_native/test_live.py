@@ -51,6 +51,19 @@ class ReportTests(GitFixture):
         self.assertFalse(report["reportComplete"])
         self.assertEqual(report["final"]["outcome"], "INCONSISTENT_RESULT")
 
+    def test_finding_details_are_structured_and_unrestricted_scanner_text_stays_private(self):
+        secret = 'SENSITIVE_SCANNER_FIXTURE_1234567890'
+        groups = dict(remaining=[dict(package='org.apache.commons:commons-text',
+            ids=['CVE-2022-42889', secret], baselineVersions=['1.9'], candidateVersions=['1.10.0'],
+            baselineFindings=[dict(summary=secret, affected=[dict(package=dict(name='org.apache.commons:commons-text'),
+                ranges=[dict(events=[dict(fixed='1.10.0')])])],
+                severity=[dict(type='CVSS_V3', score='CVSS:3.1/AV:N/AC:L', private=secret)], references=[dict(url=secret)])])])
+        projected = live.public_vulnerabilities(groups)
+        row = projected['remaining'][0]
+        self.assertEqual(row['baselineFixedVersions'], ['1.10.0'])
+        self.assertEqual(row['ids'], ['CVE-2022-42889'])
+        self.assertNotIn(secret, json.dumps(projected))
+
     def test_baseline_failure_uses_actual_recorded_reason_and_commands(self):
         baseline = dict(self.baseline, outcome="INCONCLUSIVE", reasons=["Unexpected OSV package identity"])
         write(self.state / "baseline.json", baseline)
@@ -155,16 +168,18 @@ class ReportTests(GitFixture):
             self.assertIsNotNone(phases[0]["exitCode"])
             self.assertTrue((Path(directory) / "execution.stderr").exists())
 
-    def test_retired_model_preflight_fails_before_adc_or_base(self):
+    def test_approved_model_is_not_rejected_by_a_static_retirement_table(self):
         task = self.state / "approved.json"
         result = self.state / "checks.json"
         write(task, self.task)
         with patch("importlib.metadata.version", return_value="1.55.1"), \
-                patch("native_remediation.preflight.check") as check:
-            with self.assertRaisesRegex(Blocked, "retired"):
-                live.prerequisite_check(task, result)
-            check.assert_not_called()
-        self.assertEqual(read(result), dict(sdk="PASS", model="FAIL"))
+                patch("native_remediation.preflight.check") as check, \
+                patch("native_remediation.repository.verify_base"), \
+                patch('shutil.which', return_value='/fixture/tool'), \
+                patch.object(live.subprocess, 'run', return_value=type('Result', (), dict(returncode=0, stdout='osv-scanner version: 2.6.0'))()):
+            live.prerequisite_check(task, result)
+            check.assert_called_once()
+        self.assertEqual(read(result), dict(sdk='PASS', model='PASS', tools='PASS', adc_and_delivery='PASS', base='PASS'))
 
     def test_missing_model_authorization_still_reports_without_running(self):
         task = self.state / "approved.json"

@@ -1,5 +1,28 @@
 # Autonomous OSS Vulnerability Remediation — local SDK implementation
 
+## Scanner correction — 2026-10-23
+
+`scanners.py` owns OSV invocation, input/normalization and coverage attestation;
+`validation.py` owns the single Maven/policy validator and alias-aware comparison.
+Runtime selection uses approved scanner type/version/options and a static
+registry, not dynamic imports. A frozen second adapter exercises the same
+validator without OSV or an SBOM. [Contract and extension instructions](CONFIGURATION.md#scanner-adapter-contract).
+
+Real target testing at the approved SHA reproduced artifact-only OSV names and
+proved the canonical-name/PURL correction using exact 88-coordinate coverage.
+An isolated commons-text 1.9 → 1.10.0 candidate resolves CVE-2022-42889 while
+49 findings remain; it correctly FAILs full acceptance. Both Maven builds/tests
+passed. This is deterministic integration, not autonomous reasoning or successful
+remediation. See the current readiness assessment for evidence and live status.
+
+Stop PASS already populated baseline/candidate digests. The early incomplete
+comparison paths did not; now all outcomes carry both. Publisher integrity checks
+were retained. Stop feedback adds finding counts and the complete report reference.
+Public evidence projects structured finding facts, not raw logs/scanner prose.
+Native SDK lifecycle, independent acceptance, authority deferral and delivery
+authorization are unchanged. Static model-retirement rejection was removed:
+ADC refresh/configuration cannot establish actual model availability.
+
 Current readiness: [approved isolation deferral and Gemini path](SDK-P0-P1-READINESS-REVIEW.md#gemini-execution-preparation--2026-10-22).
 Exact operator commands: [first real run](OPERATIONS.md#first-real-run).
 The P1 correction counts and fixture-only SBRI statements below describe the

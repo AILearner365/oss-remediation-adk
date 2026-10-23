@@ -23,6 +23,7 @@ if not __package__:
 
 from native_remediation.contract import load_task
 from native_remediation.files import Blocked, digest, read, write
+from native_remediation.scanners import SCANNERS
 
 ROOT = Path(__file__).resolve().parents[1]
 BRANCH = "autonomous-oss-remediation"
@@ -61,6 +62,45 @@ def enum(value, allowed, missing="NOT_EXECUTED"):
 
 def number(value):
     return value if type(value) in (int, float) and math.isfinite(value) else None
+
+
+def public_vulnerabilities(groups):
+    """Structured finding facts only: never scanner prose, logs or arbitrary URLs."""
+    def versions(values):
+        return [v for v in values if isinstance(v, str) and re.fullmatch(r'[0-9][A-Za-z0-9_.+\-]{0,99}', v)]
+    def ids(values):
+        return [v for v in values if isinstance(v, str) and re.fullmatch(r'(?:CVE|GHSA|OSV|XRAY|JFROG)-[A-Za-z0-9-]{1,100}', v)]
+    def coordinate(value):
+        return isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+', value)
+    result = {}
+    for category in ('resolved', 'remaining', 'introduced', 'unknown'):
+        rows = []
+        for finding in groups.get(category, []):
+            if not coordinate(finding.get('package')):
+                rows.append(dict(identity='UNPROVEN_OR_PRIVATE', ids=ids(finding.get('ids', []))))
+                continue
+            row = dict(package=finding['package'], ids=ids(finding.get('ids', [])))
+            for key in ('baselineVersions', 'candidateVersions', 'baselineDependencyVersions', 'candidateDependencyVersions'):
+                row[key] = versions(finding.get(key, []))
+            for side in ('baseline', 'candidate'):
+                source = finding.get(side + 'Findings', [])
+                fixed = {v for f in source for v in versions(f.get('fixedVersions', []))}
+                fixed.update({v for f in source for a in f.get('affected', [])
+                    if a.get('package', {}).get('name') == finding['package']
+                    for r in a.get('ranges', []) for event in r.get('events', []) for v in versions([event.get('fixed')])})
+                row[side + 'FixedVersions'] = sorted(fixed)
+                row[side + 'Severity'] = [dict(type=s['type'], score=s['score']) for f in source for s in f.get('severity', [])
+                    if isinstance(s, dict) and s.get('type') in ('CVSS_V2', 'CVSS_V3', 'CVSS_V4')
+                    and re.fullmatch(r'[A-Za-z0-9:/._-]{1,300}', str(s.get('score', '')))]
+            paths = finding.get('dependencyPaths', {})
+            row['dependencyPaths'] = {side: [path for path in paths.get(side, [])
+                if isinstance(path, list) and all(isinstance(v, str) and '@' in v
+                    and coordinate(v.rsplit('@', 1)[0]) and versions([v.rsplit('@', 1)[1]]) for v in path)]
+                for side in ('baseline', 'candidate')}
+            row['sourceEvidence'] = ['scan.json', 'resolved.json']
+            rows.append(row)
+        result[category] = rows
+    return result
 
 
 class Projection:
@@ -117,9 +157,20 @@ class Projection:
                 unexpectedPackages=len(observed - expected)) if scan else None
         except (ValueError, TypeError, AttributeError):
             raw_scan = dict(status="MALFORMED_PRIVATE_SCANNER_RESPONSE")
+        comparison = {}
+        if isinstance(findings, list):
+            # Same-tree comparison normalizes duplicate aliases for baseline evidence.
+            from native_remediation.validation import finding_comparison
+            comparison = public_vulnerabilities(finding_comparison(row, row, coverage.get('complete') is True))
         return dict(outcome=enum(row.get("outcome"), OUTCOMES), reasons=self.reasons(row.get("reasons", [])),
             tests=number(row.get("tests")), resolvedPackages=len(inventory["packages"]) if "packages" in inventory else None,
             modules=len(inventory["modules"]) if "modules" in inventory else None, commands=commands,
+            scanner=dict(type=enum(row.get('scanner', {}).get('type', 'osv'), SCANNERS),
+                version=row.get('scanner', {}).get('version') if re.fullmatch(r'[0-9][A-Za-z0-9_.+-]{0,80}', str(row.get('scanner', {}).get('version'))) else None,
+                coverageComplete=coverage.get('complete') is True,
+                status=enum(row.get('status'), {'COMPLETE', 'INCONCLUSIVE', 'FAILED'}),
+                expected=number(coverage.get('expected')), scanned=number(coverage.get('scanned')),
+                findingRecords=len(findings) if isinstance(findings, list) else None), vulnerabilities=comparison,
             osv=dict(coverageComplete=coverage.get("complete") is True,
                 expected=number(coverage.get("expected")), scanned=number(coverage.get("scanned")),
                 findings=len(findings) if isinstance(findings, list) else None,
@@ -150,6 +201,10 @@ def export_report(state, invocation):
         accepted = p.get(prefix + "/validation.json")
         attempts.append(dict(attempt=int(path.parent.name), outcome=enum(accepted.get("outcome"), OUTCOMES, "INTERRUPTED"),
             reasons=p.reasons(accepted.get("reasons", [])), evaluation=p.evaluation(prefix + "/candidate/evaluation.json"),
+            summary={key: number(accepted.get('summary', {}).get(key)) for key in ('baseline', 'resolved', 'remaining', 'introduced', 'unknown')},
+            vulnerabilities=public_vulnerabilities(accepted.get('vulnerabilities', {})),
+            checks={key: enum(value, {'PASS', 'FAIL', 'INCONCLUSIVE'}) for key, value in accepted.get('checks', {}).items()
+                if key in {'build', 'tests', 'scanCoverage', 'remediation', 'newVulnerabilities', 'springBootPolicy', 'javaPolicy', 'dependencyPolicy', 'evidenceIntegrity', 'taskChecks'}},
             tree=accepted.get("validatedTree") if re.fullmatch(r"[0-9a-f]{40}", str(accepted.get("validatedTree"))) else None))
     events = []
     status, usage = "NOT_INITIALIZED", {}
@@ -320,19 +375,20 @@ def prerequisite_check(task_file, result_file):
         phase = "model"
         if not task["model"].startswith("vertex_ai/gemini-"):
             raise Blocked("Live entry requires the configured Vertex Gemini model")
-        if task["model"] in {"vertex_ai/gemini-2.5-flash", "vertex_ai/gemini-2.5-pro", "vertex_ai/gemini-2.5-flash-lite"}:
-            raise Blocked("Configured model retired 2026-10-20; approve a supported task.model, never silently substitute")
+        # A lifecycle date is not an inference availability probe. Keep the
+        # approved model; only an actual provider response proves availability.
         results["model"] = "PASS"
         phase = "tools"
-        for key in ("maven", "osv"):
+        for key in (("maven", "osv") if task['scanner']['type'] == 'osv' else ("maven",)):
             if not shutil.which(task["tools"][key]):
                 raise Blocked("Configured tool executable unavailable: " + key)
         result = subprocess.run([task["tools"]["maven"], "--version"], capture_output=True, text=True, timeout=15)
         if result.returncode:
             raise Blocked("Configured Maven/Java runtime is unavailable")
-        result = subprocess.run([task["tools"]["osv"], "--version"], capture_output=True, text=True, timeout=15)
-        if result.returncode or "osv-scanner version: 2.6.0" not in result.stdout:
-            raise Blocked("Configured OSV scanner must be 2.6.0")
+        if task['scanner']['type'] == 'osv':
+            result = subprocess.run([task["tools"]["osv"], "--version"], capture_output=True, text=True, timeout=15)
+            if result.returncode or 'osv-scanner version: ' + task['scanner']['version'] not in result.stdout:
+                raise Blocked("Configured OSV scanner version mismatch")
         results["tools"] = "PASS"
         phase = "adc_and_delivery"
         preflight.check(task)

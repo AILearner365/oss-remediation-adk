@@ -1,17 +1,12 @@
-"""Build/test + resolved Maven graph + OSV coverage on an immutable Git export.
-
-OSV receives a CycloneDX inventory derived from Maven's actual resolved trees,
-not source POM guesses. Missing modules/packages or scanner errors are unknown.
-"""
+"""Shared independent Maven/policy validation and scanner-neutral comparison."""
 import json
 import re
 import time
-from urllib.parse import quote
-import uuid
 import xml.etree.ElementTree as ET
 
 from .files import Blocked, command, digest, write, require_independent_authority
 from .repository import export
+from .scanners import ScanRequest, scanner, complete_coverage, sbom, normalize_osv as scan_result
 
 TREE_FILE = "native-remediation-dependencies.json"
 DEPENDENCY_GOAL = "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree"
@@ -76,50 +71,6 @@ def resolved_inventory(source, effective):
                 spring_boot=discover_boot(source), java_configuration=java)
 
 
-def sbom(packages):
-    components = []
-    for package in packages:
-        group, artifact = package["name"].split(":", 1)
-        purl = "pkg:maven/" + quote(group, safe="") + "/" + quote(artifact, safe="") + "@" + quote(package["version"], safe="")
-        components.append(dict(type="library", group=group, name=artifact,
-                               version=package["version"], purl=purl, **{"bom-ref": purl}))
-    return dict(bomFormat="CycloneDX", specVersion="1.5", version=1,
-                serialNumber="urn:uuid:" + str(uuid.uuid4()), components=components)
-
-
-def scan_result(payload, packages, exit_code, stderr):
-    if (exit_code not in (0, 1) or not isinstance(payload, dict)
-            or not isinstance(payload.get("results"), list)
-            or re.search(r"\b(error|failed|unscannable|filtered)\b", stderr, re.I)):
-        raise Blocked("OSV error/incomplete extraction; absence of findings is not PASS")
-    expected = {(p["name"], p["version"]) for p in packages}
-    covered, findings = set(), {}
-    for source in payload["results"]:
-        if not isinstance(source.get("packages"), list):
-            raise Blocked("OSV package coverage missing")
-        for row in source["packages"]:
-            package = row.get("package", {})
-            key = (package.get("name"), package.get("version"))
-            if package.get("ecosystem") != "Maven" or key not in expected:
-                raise Blocked("Unexpected OSV package identity")
-            covered.add(key)
-            vulnerabilities = row.get("vulnerabilities", [])
-            if not isinstance(vulnerabilities, list):
-                raise Blocked("Malformed vulnerability coverage")
-            for vuln in vulnerabilities:
-                if not isinstance(vuln, dict) or not vuln.get("id"):
-                    raise Blocked("Malformed OSV finding")
-                identifiers = sorted({vuln["id"], *vuln.get("aliases", [])})
-                identity = (package["name"], tuple(identifiers))
-                findings[identity] = dict(package=package["name"], version=package["version"],
-                    ids=identifiers, summary=vuln.get("summary", ""), affected=vuln.get("affected", []))
-    if covered != expected or bool(findings) != (exit_code == 1):
-        raise Blocked("OSV exit/report disagreement or incomplete resolved-package coverage")
-    return dict(coverage=dict(expected=len(expected), scanned=len(covered), complete=True,
-                scope="Resolved Maven project dependency graphs, all scopes; excludes build-plugin/JDK/OS dependencies"),
-                findings=sorted(findings.values(), key=lambda f: (f["package"], f["ids"])))
-
-
 def test_counts(source):
     count = 0
     for pattern in ("**/surefire-reports/TEST-*.xml", "**/failsafe-reports/TEST-*.xml"):
@@ -175,17 +126,19 @@ def require_baseline(baseline, tree, task):
         packages = {(p["name"], p["version"]) for p in inventory["packages"]}
         valid = (baseline["outcome"] == "COMPLETE" and baseline["tree"] == tree
             and not baseline.get("reasons") and bool(packages)
-            and coverage.get("complete") is True
-            and type(coverage.get("expected")) is int and type(coverage.get("scanned")) is int
-            and coverage.get("expected") == coverage.get("scanned") == len(packages)
+            and ('scanner' not in baseline or baseline['scanner'] == task['scanner'])
+            and complete_coverage(baseline)
             and type(baseline["tests"]) is int and baseline["tests"] >= task["policy"]["minimum_tests"]
             and isinstance(baseline["findings"], list)
+            and all(isinstance(f, dict) and (f.get('package'), f.get('version')) in packages
+                and isinstance(f.get('ids'), list) and f['ids']
+                and all(isinstance(v, str) and v for v in f['ids']) for f in baseline['findings'])
             and set(inventory["properties"]) == set(inventory["modules"])
             and bool(module_versions(inventory)))
     except (KeyError, TypeError, ValueError, AttributeError):
         valid = False
     if not valid:
-        raise Blocked("Baseline incomplete/invalid: require build, tests, checks, reactor graphs and complete OSV coverage")
+        raise Blocked("Baseline incomplete/invalid: require build, tests, checks, reactor graphs and complete scanner coverage")
 
 
 def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
@@ -233,39 +186,37 @@ def evaluate(workspace, tree, task, directory, *, deadline, runner=None):
             result["outcome"] = "FAIL"
             raise Blocked("Executed tests below the configured minimum")
         write(directory / "resolved.json", inventory)
-        write(directory / "bom.cdx.json", sbom(inventory["packages"]))
-        config = directory / "osv-scanner.toml"
-        config.write_text("# Trusted validator: no vulnerability ignore entries.\n")
-        version = run([tool["osv"], "--version"], "scanner-version")
-        if version["exitCode"] or not re.search(r"osv-scanner version: " + re.escape(task["scanner"]["version"]) + r"\b", version["stdout"]):
-            raise Blocked("OSV 2.6.0 required for the verified CLI contract")
-        scan = run([tool["osv"], "scan", "source", "--sbom=" + str(directory / "bom.cdx.json"),
-                    "--format=json", "--all-packages", "--all-vulns", "--config=" + str(config)], "scan")
-        normalized = scan_result(json.loads(scan["stdout"]), inventory["packages"], scan["exitCode"], scan["stderr"])
-        result.update(normalized)
+        result['scanner'] = dict(task['scanner'])
+        try:
+            normalized = scanner(task['scanner']).scan(ScanRequest(inventory['packages'], source,
+                directory, task['scanner'], tool, run))
+            from .scanners import validate_result
+            validate_result(normalized, inventory['packages'])
+            result.update(normalized)
+            write(directory / 'scanner-result.json', normalized)
+            if normalized.get('status') != 'COMPLETE' or not complete_coverage(result):
+                result['reasons'].append('Scanner completion/coverage is incomplete')
+        except (Blocked, OSError, ValueError, KeyError, TypeError) as exc:
+            result['status'] = 'FAILED'
+            result['reasons'].append(str(exc)[:500])
         checks = tool["checks"] + [item["check"] for item in task["constraints"]]
         for index, argv in enumerate(checks):
             if run(argv, "acceptance-check-" + str(index))["exitCode"]:
                 result["outcome"] = "FAIL"
                 raise Blocked("Additional acceptance check failed")
-        result["outcome"] = "COMPLETE"
+        result["outcome"] = "COMPLETE" if not result['reasons'] else 'INCONCLUSIVE'
     except (Blocked, OSError, ValueError, KeyError, TypeError, ET.ParseError) as exc:
         result["reasons"].append(str(exc)[:500])
     write(directory / "evaluation.json", result)
     return result
 
 
-def compare(baseline, candidate, policy):
-    if baseline.get("outcome") != "COMPLETE" or candidate.get("outcome") != "COMPLETE":
-        return dict(outcome="FAIL" if candidate.get("outcome") == "FAIL" else "INCONCLUSIVE",
-                    reasons=candidate.get("reasons") or ["Baseline/candidate evidence incomplete"])
-    for evidence in (baseline, candidate):
-        coverage = evidence.get("coverage", {})
-        count = len({(p["name"], p["version"]) for p in evidence["inventory"]["packages"]})
-        if (coverage.get("complete") is not True or count == 0
-                or coverage.get("expected") != count or coverage.get("scanned") != count):
-            return dict(outcome="INCONCLUSIVE", reasons=["Resolved dependency/scanner coverage is incomplete"])
+def policy_checks(baseline, candidate, policy):
     reasons, unknown = [], []
+    checks = {}
+    def mark(name, previous):
+        checks[name] = 'FAIL' if len(reasons) > previous[0] else 'INCONCLUSIVE' if len(unknown) > previous[1] else 'PASS'
+    checkpoint = (0, 0)
     before, after = baseline["inventory"], candidate["inventory"]
     java_keys = ("java.version", "maven.compiler.release", "maven.compiler.source", "maven.compiler.target")
     old_java = {m: {k: p.get(k) for k in java_keys} for m, p in before["properties"].items()}
@@ -279,6 +230,8 @@ def compare(baseline, candidate, policy):
     java_values += [v for p in after.get("java_configuration", {}).values() for v in p.values() if v]
     if allowed_java and any(v not in allowed_java for v in java_values):
         reasons.append("Java version outside the approved set")
+    mark('javaPolicy', checkpoint)
+    checkpoint = (len(reasons), len(unknown))
     if before["modules"] != after["modules"]:
         unknown.append("Reactor module coverage changed")
     versions = lambda inventory: {p["name"]: set(q["version"] for q in inventory["packages"]
@@ -317,6 +270,8 @@ def compare(baseline, candidate, policy):
         movement = "downgrade" if b < a else "major" if b[0] != a[0] else "minor" if b[1] != a[1] else "patch"
         if not boot_policy[movement]:
             reasons.append("Spring Boot " + movement + " movement not authorized")
+    mark('springBootPolicy', checkpoint)
+    checkpoint = (len(reasons), len(unknown))
     missing = set(old) - set(new) - set(policy["allowed_removed_dependencies"])
     if missing:
         unknown.append("Dependencies disappeared without approval: " + ", ".join(sorted(missing)))
@@ -341,19 +296,138 @@ def compare(baseline, candidate, policy):
         for key in policy["protected_properties"]:
             if before["properties"][module].get(key) != after["properties"][module].get(key):
                 reasons.append("Protected effective property changed: " + module + ":" + key)
+    mark('dependencyPolicy', checkpoint)
+    checkpoint = (len(reasons), len(unknown))
     if candidate["tests"] < max(baseline["tests"], policy["minimum_tests"]):
         reasons.append("Executed test coverage regressed or is below the acceptance minimum")
-    remaining, introduced = candidate["findings"], []
-    for finding in remaining:
-        if not any(finding["package"] == prior["package"] and set(finding["ids"]) & set(prior["ids"])
-                   for prior in baseline["findings"]):
-            introduced.append(finding)
-    if introduced:
-        reasons.append("New vulnerabilities introduced")
-    if len(remaining) > policy["max_remaining_findings"]:
-        reasons.append("Remaining vulnerabilities exceed acceptance policy")
-    if any(set(f["ids"]) & set(policy["target_ids"]) for f in remaining):
-        reasons.append("Requested vulnerability identifiers remain")
-    return dict(outcome="FAIL" if reasons else "INCONCLUSIVE" if unknown else "PASS",
-                reasons=reasons + unknown, remaining=remaining, introduced=introduced,
-                baselineDigest=digest(baseline), candidateDigest=digest(candidate))
+    mark('tests', checkpoint)
+    return reasons, unknown, checks
+
+
+def dependency_paths(inventory, coordinate, versions):
+    paths = []
+    def walk(node, path):
+        name = node['groupId'] + ':' + node['artifactId']
+        path = path + [name + '@' + node['version']]
+        if name == coordinate and node['version'] in versions:
+            paths.append(path)
+        for child in node.get('children', []):
+            walk(child, path)
+    for graph in inventory.get('graphs', []):
+        walk(graph['graph'], [])
+    return [list(p) for p in sorted({tuple(p) for p in paths})]
+
+
+def finding_comparison(baseline, candidate, comparable):
+    """Transitive alias union, per component; versions are evidence, not identity."""
+    groups, invalid = [], []
+    for side, evaluation in (('baseline', baseline), ('candidate', candidate)):
+        inventory = {(p['name'], p['version']) for p in evaluation.get('inventory', {}).get('packages', [])}
+        for finding in evaluation.get('findings', []):
+            if (not finding.get('ids') or (finding.get('package'), finding.get('version')) not in inventory):
+                invalid.append(dict(finding, reason='Unproven affected-component/advisory identity',
+                    baselineFindings=[finding] if side == 'baseline' else [],
+                    candidateFindings=[finding] if side == 'candidate' else []))
+                continue
+            group = dict(package=finding['package'], ids=set(finding['ids']), baseline=[], candidate=[])
+            group[side].append(finding)
+            changed = True
+            while changed:
+                changed = False
+                for prior in list(groups):
+                    if prior['package'] == group['package'] and prior['ids'] & group['ids']:
+                        group['ids'].update(prior['ids'])
+                        for key in ('baseline', 'candidate'):
+                            group[key].extend(prior[key])
+                        groups.remove(prior)
+                        changed = True
+            groups.append(group)
+    result = dict(resolved=[], remaining=[], introduced=[], unknown=invalid)
+    for group in sorted(groups, key=lambda g: (g['package'], sorted(g['ids']))):
+        old, new = group['baseline'], group['candidate']
+        row = dict(package=group['package'], ids=sorted(group['ids']),
+            baselineVersions=sorted({f['version'] for f in old}), candidateVersions=sorted({f['version'] for f in new}),
+            baselineFindings=old, candidateFindings=new)
+        for side, evaluation in (('baseline', baseline), ('candidate', candidate)):
+            row[side + 'DependencyVersions'] = sorted({p['version'] for p in evaluation.get('inventory', {}).get('packages', []) if p['name'] == group['package']})
+        row['dependencyPaths'] = {side: dependency_paths(evaluation.get('inventory', {}), group['package'], row[side + 'DependencyVersions'])
+            for side, evaluation in (('baseline', baseline), ('candidate', candidate))}
+        category = 'remaining' if old and new else 'resolved' if old else 'introduced'
+        presence_proven = (baseline.get('outcome') == 'COMPLETE' and complete_coverage(baseline)
+            and baseline.get('scanner') == candidate.get('scanner')
+            and isinstance(candidate.get('findings'), list))
+        if not comparable and not (new and presence_proven):
+            category = 'unknown'
+            row['reason'] = 'Scanner configuration/completion/coverage is not comparable'
+        result[category].append(row)
+    return result
+
+
+def compare(baseline, candidate, policy):
+    """One acceptance report for all adapters, including incomplete evaluations."""
+    comparable = (baseline.get('outcome') == 'COMPLETE'
+        and complete_coverage(baseline) and complete_coverage(candidate)
+        and baseline.get('scanner') == candidate.get('scanner')
+        and isinstance(baseline.get('findings'), list) and isinstance(candidate.get('findings'), list))
+    vulnerabilities = finding_comparison(baseline, candidate, comparable)
+    checks = dict(build='INCONCLUSIVE', tests='INCONCLUSIVE', scanCoverage='PASS' if comparable else 'INCONCLUSIVE',
+        remediation='INCONCLUSIVE', newVulnerabilities='INCONCLUSIVE', springBootPolicy='INCONCLUSIVE',
+        javaPolicy='INCONCLUSIVE', dependencyPolicy='INCONCLUSIVE', evidenceIntegrity='PASS', taskChecks='INCONCLUSIVE')
+    reasons, unknown = [], []
+    if candidate.get('outcome') == 'FAIL':
+        reasons.extend(candidate.get('reasons') or ['Candidate mandatory check failed'])
+    elif candidate.get('outcome') != 'COMPLETE':
+        unknown.extend(candidate.get('reasons') or ['Baseline/candidate evidence incomplete'])
+    if candidate.get('outcome') == 'COMPLETE' and candidate.get('reasons'):
+        unknown.extend(candidate['reasons'])
+    if not comparable:
+        unknown.append('Resolved dependency/scanner coverage is incomplete')
+    if baseline.get('scanner') != candidate.get('scanner'):
+        checks['evidenceIntegrity'] = 'INCONCLUSIVE'
+        unknown.append('Scanner implementation/configuration differs from the baseline')
+    for record in candidate.get('commands', []):
+        name = record.get('name', '')
+        if name == 'build':
+            checks['build'] = 'INCONCLUSIVE' if record.get('timedOut') else 'FAIL' if record.get('exitCode') else 'PASS'
+        if name.startswith('acceptance-check-') and record.get('exitCode'):
+            checks['taskChecks'] = 'FAIL' if not record.get('timedOut') else 'INCONCLUSIVE'
+    if candidate.get('outcome') == 'COMPLETE':
+        checks['build'] = checks['tests'] = checks['taskChecks'] = 'PASS'
+    if baseline.get('inventory') and candidate.get('inventory') and 'tests' in candidate:
+        try:
+            failures, missing, policies = policy_checks(baseline, candidate, policy)
+            reasons.extend(failures)
+            unknown.extend(missing)
+            checks.update(policies)
+        except (Blocked, ValueError, KeyError, TypeError, AttributeError):
+            unknown.append('Invalid Maven ownership/policy evidence')
+            checks['evidenceIntegrity'] = 'INCONCLUSIVE'
+    current = vulnerabilities['remaining'] + vulnerabilities['introduced']
+    if comparable:
+        checks['remediation'] = checks['newVulnerabilities'] = 'PASS'
+    if vulnerabilities['introduced']:
+        reasons.append('New vulnerabilities introduced')
+        checks['newVulnerabilities'] = 'FAIL'
+    if len(current) > policy['max_remaining_findings']:
+        reasons.append('Remaining vulnerabilities exceed acceptance policy')
+        checks['remediation'] = 'FAIL'
+    if any(set(f['ids']) & set(policy['target_ids']) for f in current):
+        reasons.append('Requested vulnerability identifiers remain')
+        checks['remediation'] = 'FAIL'
+    if vulnerabilities['unknown']:
+        unknown.append('Some vulnerability identities/statuses are unknown')
+        if checks['remediation'] == 'PASS':
+            checks['remediation'] = 'INCONCLUSIVE'
+    if any(v == 'FAIL' for v in checks.values()) and not reasons:
+        reasons.append('Mandatory check failed')
+    if any(v == 'INCONCLUSIVE' for v in checks.values()) and not unknown:
+        unknown.append('Mandatory check evidence incomplete')
+    return dict(outcome='FAIL' if reasons else 'INCONCLUSIVE' if unknown else 'PASS',
+        scanner=baseline.get('scanner', {'type': 'osv', 'version': 'legacy'}),
+        reasons=list(dict.fromkeys(reasons + unknown)), feedback=list(dict.fromkeys(reasons + unknown)),
+        checks=checks, summary=dict(baseline=len(vulnerabilities['resolved']) + len(vulnerabilities['remaining'])
+            + sum(bool(f.get('baselineFindings')) for f in vulnerabilities['unknown']),
+            **{key: len(rows) for key, rows in vulnerabilities.items()}),
+        vulnerabilities=vulnerabilities, remaining=vulnerabilities['remaining'], introduced=vulnerabilities['introduced'],
+        baselineDigest=digest(baseline), candidateDigest=digest(candidate),
+        evidence=dict(baselineTree=baseline.get('tree'), candidateTree=candidate.get('tree')))

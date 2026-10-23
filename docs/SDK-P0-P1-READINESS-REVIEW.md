@@ -1,5 +1,53 @@
 # OpenHands SDK P0 and P1 readiness review
 
+## Scanner integration assessment — 2026-10-23
+
+This supersedes earlier OSV identity and hardcoded retired-model conclusions
+below; historical evidence is preserved. P0 host authority isolation remains
+explicitly deferred, not an execution blocker.
+
+| Capability | Assessment | Actual evidence |
+| --- | --- | --- |
+| OSV 2.6 namespace/coverage correction | PROVEN | Actual target remote remains `9ea1b0ed5ca255db0fc7c659d050896d3ed5db78`. Old code reproduced `Unexpected OSV package identity`. Scanner serializes the CDX display name without group/PURL; generated canonical coordinate names plus retained PURLs restore exact identity. All 88 package/version identities match, not just counts. No artifact-only namespace inference or coverage relaxation. |
+| Shared scanner boundary | PROVEN offline | ScanRequest/Protocol/static registry in scanners.py. Existing evaluate/compare handle OSV and a frozen second adapter, including a no-SBOM/no-clean-inventory attestation. No production Xray adapter is claimed. |
+| Finding comparison | PROVEN offline and on target | Alias union per coordinate, version-independent identity, complete finding arrays/counts, dependency paths and both digests. Missing coverage yields unknown, not resolved; proven policy/build violations still FAIL alongside inconclusive scan checks. |
+| Real target baseline | PROVEN | Actual Maven clean install, all 5 reactor dependency trees/effective models, 4 tests, OSV 2.6 network scan, 88 exact package/version records. Baseline collection COMPLETE; unchanged candidate correctly FAILs acceptance with 50 remaining findings. |
+| Controlled candidate | PROVEN deterministic integration | Separate detached worktree; only root POM commons-text 1.9 → 1.10.0 (+ terminal newline). Maven build/tests and coverage PASS. Resolved 1 (CVE-2022-42889 / GHSA-599f-7c49-w659), remaining 49, introduced 0, unknown 0. Overall FAIL: complete remediation goal remains unmet. No target push. |
+| Stop feedback/evidence binding | PROVEN offline | Existing native connected denial/recovery/acceptance tests retained. PASS already had both evaluation digests; only early incomplete comparisons lacked them. All outcomes now carry both. Publisher checks were not weakened. Stop adds counts and full report reference. |
+| Gemini availability guard | Corrected; inference NOT PROVEN here | Removed the unconditional date/ID rejection. Neither a lifecycle table nor ADC success proves project-specific inference availability. The configured Gemini 2.5 Flash remains unchanged; no replacement/provider retry. |
+| Full autonomous run | NOT PROVEN | Current shell lacks approved VERTEXAI_PROJECT/GOOGLE_CLOUD_PROJECT and VERTEXAI_LOCATION; gcloud has no active project. Existing live preflight must block rather than select configuration. Deterministic tests are not autonomous reasoning or live Stop proof. |
+
+Historical review: POC `openhands-poc-evaluation`, deterministic/osv.py and
+validation.py already retained original finding details and separated absent
+findings into resolved vs unknown based on coverage. Task 19 retained validation
+(`gate2-orchestrated-run-20261011T203849Z/validation.json`) reported 26 resolved,
+zero remaining/unknown but `passed:false`; vulnerability resolution alone was not
+acceptance. Its source-scan/count heuristics and repository-server infrastructure
+were not copied. Current Maven-owned exact inventory is retained independently.
+
+See [scanner configuration/extension](CONFIGURATION.md#scanner-adapter-contract),
+[operations](OPERATIONS.md#one-command-live-execution-and-evidence-publication),
+and [sanitized real integration evidence](evidence/scanner-integration-20261023/report.json).
+Private command stdout/stderr, raw scans, resolved trees/effective models,
+build/test reports, actual candidate state/diff and test logs remain outside Git.
+Public reports retain structured finding facts, available CVSS/fixed versions,
+paths, check decisions and artifact hashes, never raw credential-bearing logs.
+
+Verification: pinned SDK/Tools 1.55.1 suite **114 discovered, 109 passed, 5 skipped**;
+stdlib no-SDK suite **114 discovered, 95 passed, 19 skipped**. Existing historical
+Agent Server and unavailable-SDK skips remain explicit. Ten new scanner/comparison
+tests and one structured-publication regression supplement existing connected
+native SDK Stop/recovery/self-validation/delivery tests. An initial run exposed
+a pre-existing native soft-timeout probe timing failure; its isolated recheck and
+the subsequent full pinned suite passed unchanged. No hard terminal deadline is
+claimed. Supplementary compileall, shell syntax and diff checks passed.
+
+Limits unchanged: mutable advisory data, Maven project dependencies only (not
+plugins/JDK/OS), same-user host authority, native terminal soft timeouts, optional
+SBRI not installed, no production Xray verification. Full live model behavior,
+autonomous strategy quality, live reassessment and accepted remediation remain
+NOT PROVEN by these deterministic runs.
+
 ## Cloud Shell live batch/report entry point — 2026-10-22
 
 Added `sdk-cloudshell-setup.sh live` and `report` as batch I/O conveniences around

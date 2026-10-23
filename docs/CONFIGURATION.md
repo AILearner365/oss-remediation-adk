@@ -19,7 +19,7 @@ Classes: **A** mandatory per-task input; **B** default with approved override;
 | Other dependency movement | B,D | allow_major_upgrades=false, allow_downgrades=false; no forced upgrade recipe. Resolved package removals require allowed_removed_dependencies coordinates. Overrides/exclusions/replacements allowed within approved paths and resolved-graph/coverage/policy checks; special semantic constraints need explicit checks |
 | Edit scope | B,D | allowed_paths=[pom.xml, **/pom.xml]; protected_paths/properties=[]; approved task may widen/change scope, never bypass exact-tree/path checks |
 | Build/tests/compatibility | B,D | Maven clean install with tests; profiles=[]; no test-count regression; minimum_tests=0 enforced on baseline and candidate. tools.checks argv lists and constraints=[{description,check:argv}] are required invariants on BOTH baseline and candidate; failures are never ignored to permit model startup. No final-only check phase exists. Vulnerability-goal policy is compared after complete baseline/candidate collection. Free-text claims never substitute for checks |
-| Scanner | D,C | scanner={type:osv,version:2.6.0}; tools.osv=OSV executable name/path, tools.maven=mvn. Version/coverage checked at execution. Other scanner versions/providers (including future Xray) require a separately verified adapter, not a permissive config switch |
+| Scanner | B,D,C | scanner={type:osv,version:2.6.0}; tools.osv=OSV executable name/path, tools.maven=mvn. Select a registered adapter by type, pin its version and optional adapter-validated options. OSV remains pinned to 2.6.0 with no ignore overrides; future Xray needs an implementation/registration, not validator changes |
 | Scan arguments / coverage | D | Trusted all-packages/all-vulns OSV argv, no ignores; complete resolved reactor project-dependency graph, all scopes. Plugin/JDK/OS coverage not claimed; partial/error/unknown never PASS |
 | SBRI | B,C | mode=auto (off/auto/on supported), pre_edit=true, executable=null. Discovery: explicit executable > tools.sbri_reference > PATH sbri. Root Boot applicability is bounded, not exhaustive reactor discovery. on attempts intelligence, not a mandatory Boot solution or clean-result gate |
 | SBRI candidates | B | versions=[] OR ranges=[] (X.Y.Z / X.Y.x); scopes=[compile,runtime], max_candidates=12 (1..50). Native tool can supply validated candidate/scopes inputs. Defaults delegate release discovery to existing CLI; rank is security evidence, compatibility NOT_ASSESSED |
@@ -54,3 +54,70 @@ is retained as UNAVAILABLE/INCONCLUSIVE, not zero findings; authority, task/tree
 identity and cached-evidence mismatches still block. Existing normalized receipts
 and persisted native agents are not silently migrated to changed defaults or
 hook/tool configurations; prior evidence remains intact.
+
+## Scanner adapter contract
+
+Default task configuration (unchanged):
+
+```json
+{"scanner":{"type":"osv","version":"2.6.0"},"tools":{"osv":"osv-scanner"}}
+```
+
+`native_remediation/scanners.py` defines `VulnerabilityScanner.scan(ScanRequest)`
+and the static `SCANNERS` registry. To add Xray: implement scan, register its
+factory under `xray`, configure type/version/options, and add adapter contract
+tests. No validator, agent loop, Maven resolver or delivery change is needed.
+Keep credentials in the existing host credential source, not JSON options or
+returned evidence. Optional `validate_config(config)` rejects adapter-specific
+configuration before preparation. Do not accept arbitrary CLI flags from agents.
+
+Request: actual resolved Maven package/version list, immutable exported source,
+private evidence directory, approved scanner config/tools, and existing bounded
+`run(argv, evidence_name)` command function. This retains original stdout/stderr,
+exit status and timeout evidence. API-based adapters must preserve equivalent raw
+evidence and respect the task's command/deadline budget.
+
+Result is a JSON-compatible object:
+
+```text
+status: COMPLETE | INCONCLUSIVE | FAILED
+findings: [{package: groupId:artifactId, version, ids: [primary, aliases...], ...}]
+coverage: {complete: bool, inputDigest: digest(request.packages),
+           evidence: [relative original evidence references], scope: description}
+evidence: [relative original evidence references]
+```
+
+Preserve optional severity, fixedVersions, affected ranges, sourceEvidence references and other
+scanner facts. Never fabricate missing facts. COMPLETE means scanner execution
+and claimed scope are proven, not vulnerability-free. The adapter attests the
+entire supplied resolved scope with supporting scanner evidence; the digest
+binds that attestation, but a digest alone cannot prove scanning happened.
+Adapters need not return clean-package rows, paths, fixed versions or an SBOM.
+Maven inventory/paths, comparison, policy and acceptance stay in validation.py.
+
+OSV uses its documented `--all-packages --all-vulns` JSON contract with a trusted
+generated CycloneDX input. Canonical Maven display names and PURLs both preserve
+namespace; exact returned coordinate/version sets must match input, with no
+extraction errors/filtering. Counts alone never establish coverage. This input
+representation avoids OSV 2.6's artifact-only display-name loss; arbitrary old
+artifact-only output is still rejected, not guessed into a namespace.
+Source contracts: [OSV 2.6 result serialization](https://github.com/google/osv-scanner/blob/v2.6.0/pkg/models/results.go)
+and its pinned [CycloneDX extractor](https://github.com/google/osv-scalibr/blob/3090dbb7aaa2/extractor/filesystem/sbom/cdx/cdx.go).
+
+Shared comparison unifies aliases per component across versions. Reports retain
+all resolved/remaining/introduced/unknown arrays, original finding details,
+baseline/candidate versions and dependency paths, per-check decisions, feedback,
+and both evaluation digests on every outcome. `remaining` excludes introduced
+findings; both count against the configured candidate vulnerability limit.
+PASS requires all mandatory checks proven. A proven violation gives FAIL even
+if other checks remain inconclusive. Otherwise insufficient evidence gives
+INCONCLUSIVE. Missing scanning never means zero vulnerabilities.
+
+Run adapter/comparison tests without model/network:
+
+```bash
+bash scripts/openhands/sdk-cloudshell-setup.sh python -m unittest tests_native.test_scanners -v
+```
+
+`FrozenScanner` in those tests demonstrates a second adapter with no clean
+inventory/SBOM through the actual validator. It is not a production adapter.

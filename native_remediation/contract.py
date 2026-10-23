@@ -38,7 +38,7 @@ def load_task(value):
         raise Blocked("Unknown task fields")
     for key, item in value.items():
         if key in ("limits", "policy", "tools", "guidance", "scanner", "sbri"):
-            if not isinstance(item, dict) or set(item) - set(task[key]):
+            if not isinstance(item, dict) or set(item) - (set(task[key]) | ({'options'} if key == 'scanner' else set())):
                 raise Blocked("Unknown " + key + " fields")
             task[key].update(item)
         else:
@@ -77,8 +77,12 @@ def load_task(value):
             or any(not isinstance(v, str) or not re.fullmatch(r"\d+(?:\.\d+)*", v) for v in p["java"]["allowed_versions"])
             or any(type(v) is not bool for v in p["spring_boot"].values())):
         raise Blocked("Invalid Java/Spring Boot movement policy")
-    if task["scanner"] != DEFAULTS["scanner"]:
-        raise Blocked("Only the verified OSV 2.6.0 adapter is supported; no unverified scanner substitution")
+    from .scanners import scanner
+    scanner(task['scanner'])
+    if not isinstance(task['scanner']['version'], str) or not task['scanner']['version']:
+        raise Blocked('Scanner version is required')
+    if not isinstance(task['scanner'].get('options', {}), dict):
+        raise Blocked('Scanner options must be an object validated by its adapter')
     guidance = task["guidance"]
     names = DEFAULTS["guidance"]["skills"] + ["evidence-driven-dependency-remediation"]
     if (not isinstance(guidance["skills"], list) or not all(n in names for n in guidance["skills"])
