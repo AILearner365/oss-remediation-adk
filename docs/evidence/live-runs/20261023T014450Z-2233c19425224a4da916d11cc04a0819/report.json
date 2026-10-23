@@ -1,0 +1,135 @@
+{
+  "agent": {
+    "decisions": 0,
+    "narrative": "PRIVATE_ONLY_NOT_AUTOMATICALLY_PUBLISHED",
+    "nativeEvents": 0,
+    "outcomes": 0,
+    "records": []
+  },
+  "attempts": [],
+  "baseline": {
+    "commands": [
+      {
+        "command": "build",
+        "exitCode": null,
+        "seconds": null,
+        "status": "NOT_EXECUTED",
+        "timedOut": false
+      },
+      {
+        "command": "resolve",
+        "exitCode": null,
+        "seconds": null,
+        "status": "NOT_EXECUTED",
+        "timedOut": false
+      },
+      {
+        "command": "scanner-version",
+        "exitCode": null,
+        "seconds": null,
+        "status": "NOT_EXECUTED",
+        "timedOut": false
+      },
+      {
+        "command": "scan",
+        "exitCode": null,
+        "seconds": null,
+        "status": "NOT_EXECUTED",
+        "timedOut": false
+      }
+    ],
+    "modules": null,
+    "osv": {
+      "coverageComplete": false,
+      "expected": null,
+      "findings": null,
+      "findingsStatus": "NOT_ASSESSED",
+      "publicFindingIds": [],
+      "rawInventory": null,
+      "scanned": null
+    },
+    "outcome": "NOT_EXECUTED",
+    "reasons": [],
+    "resolvedPackages": null,
+    "scanner": {
+      "coverageComplete": false,
+      "expected": null,
+      "findingRecords": null,
+      "scanned": null,
+      "status": "NOT_EXECUTED",
+      "type": "osv",
+      "version": null
+    },
+    "tests": null,
+    "vulnerabilities": {}
+  },
+  "conversationId": null,
+  "exclusions": [
+    "credentials",
+    "raw logs/argv",
+    "task/agent free text",
+    "workspace snapshots",
+    "private dependency names"
+  ],
+  "final": {
+    "delivery": "NOT_EXECUTED",
+    "deliveryClaim": "NOT_EXECUTED",
+    "outcome": "INVOCATION_FAILED",
+    "prUrl": null,
+    "remediationSuccess": false,
+    "validation": "NOT_EXECUTED"
+  },
+  "invocation": {
+    "failedPhase": "preflight",
+    "interrupted": false,
+    "phases": [
+      {
+        "exitCode": 0,
+        "name": "setup"
+      },
+      {
+        "exitCode": 1,
+        "name": "preflight"
+      }
+    ]
+  },
+  "kind": "REAL_PRODUCT_INVOCATION",
+  "modelExecution": {
+    "dispatchClaimed": false,
+    "nativeStatus": "NOT_INITIALIZED",
+    "observedResponseEvents": 0,
+    "status": "NOT_EXECUTED",
+    "usage": {}
+  },
+  "predictionAvailability": "NOT_PROVEN_BY_PREFLIGHT",
+  "preparation": "NOT_EXECUTED",
+  "prerequisites": {
+    "adc_and_delivery": "FAIL",
+    "base": "NOT_CHECKED",
+    "model": "PASS",
+    "sdk": "PASS",
+    "tools": "PASS"
+  },
+  "privateEvidence": {
+    "artifacts": {},
+    "retention": "COMPLETE_PRIVATE_STATE_NOT_COPIED_TO_GIT"
+  },
+  "publication": "REQUESTED_RECEIPT_STORED_PRIVATELY",
+  "reportComplete": true,
+  "reportIssues": [],
+  "runId": "20261023T014450Z-2233c19425224a4da916d11cc04a0819",
+  "sbri": {
+    "preEdit": "NOT_EXECUTED",
+    "results": [],
+    "retainedCalls": 0
+  },
+  "schemaVersion": 1,
+  "taskIdentity": {
+    "baseBranch": "main-runrunning",
+    "baseSha": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "digest": "ee4bb56c1bb57f0b24d8fecc0bfbe45c5548c88ddce1a11c0601454a7e9c4838",
+    "model": "vertex_ai/gemini-2.5-flash",
+    "repository": "AILearner365/maven-multimodule-app"
+  },
+  "timestamp": "2026-10-23T01:44:50.764258+00:00"
+}
