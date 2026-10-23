@@ -17,6 +17,21 @@ explicitly deferred, not an execution blocker.
 | Gemini availability guard | Corrected; inference NOT PROVEN here | Removed the unconditional date/ID rejection. Neither a lifecycle table nor ADC success proves project-specific inference availability. The configured Gemini 2.5 Flash remains unchanged; no replacement/provider retry. |
 | Full autonomous run | NOT PROVEN | Current shell lacks approved VERTEXAI_PROJECT/GOOGLE_CLOUD_PROJECT and VERTEXAI_LOCATION; gcloud has no active project. Existing live preflight must block rather than select configuration. Deterministic tests are not autonomous reasoning or live Stop proof. |
 
+The existing live command was subsequently invoked exactly once with explicit
+model authorization and evidence publication. Run
+`20261023T014450Z-2233c19425224a4da916d11cc04a0819` stopped in preflight:
+`Set an approved VERTEXAI_PROJECT (or GOOGLE_CLOUD_PROJECT) and VERTEXAI_LOCATION
+in the native runtime environment`. SDK/model configuration/tools checks passed;
+ADC/delivery prerequisite failed before any refresh/inference, and base preflight
+was not executed (the deterministic integration separately verified the base).
+No conversation/agent dispatch, model tokens, Stop attempt or delivery occurred.
+The complete failure report was automatically committed/pushed and positively
+verified by the existing publisher:
+[live evidence](evidence/live-runs/20261023T014450Z-2233c19425224a4da916d11cc04a0819/report.json).
+No retry, credential/configuration mutation or model substitution followed.
+Next live prerequisite is operator-approved Vertex project/location and valid
+ADC; actual inference/model availability and autonomous remediation remain unproven.
+
 Historical review: POC `openhands-poc-evaluation`, deterministic/osv.py and
 validation.py already retained original finding details and separated absent
 findings into resolved vs unknown based on coverage. Task 19 retained validation
