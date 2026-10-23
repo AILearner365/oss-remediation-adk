@@ -1,0 +1,3541 @@
+{
+  "agent": {
+    "decisions": 0,
+    "narrative": "PRIVATE_ONLY_NOT_AUTOMATICALLY_PUBLISHED",
+    "nativeEvents": 3,
+    "outcomes": 0,
+    "records": []
+  },
+  "attempts": [],
+  "baseline": {
+    "commands": [
+      {
+        "command": "build",
+        "exitCode": 0,
+        "seconds": 49.562,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "resolve",
+        "exitCode": 0,
+        "seconds": 23.089,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "scanner-version",
+        "exitCode": 0,
+        "seconds": 0.121,
+        "status": "RECORDED",
+        "timedOut": false
+      },
+      {
+        "command": "scan",
+        "exitCode": 1,
+        "seconds": 0.895,
+        "status": "RECORDED",
+        "timedOut": false
+      }
+    ],
+    "modules": 5,
+    "osv": {
+      "coverageComplete": true,
+      "expected": 88,
+      "findings": 50,
+      "findingsStatus": "NORMALIZED",
+      "publicFindingIds": [
+        "CVE-2022-42889",
+        "CVE-2023-5072",
+        "CVE-2026-10532",
+        "CVE-2026-19032",
+        "CVE-2026-40983",
+        "CVE-2026-40984",
+        "CVE-2026-41001",
+        "CVE-2026-41284",
+        "CVE-2026-41293",
+        "CVE-2026-41841",
+        "CVE-2026-41842",
+        "CVE-2026-41843",
+        "CVE-2026-41844",
+        "CVE-2026-41845",
+        "CVE-2026-41846",
+        "CVE-2026-41848",
+        "CVE-2026-41850",
+        "CVE-2026-41851",
+        "CVE-2026-41852",
+        "CVE-2026-41853",
+        "CVE-2026-41854",
+        "CVE-2026-42498",
+        "CVE-2026-43512",
+        "CVE-2026-43513",
+        "CVE-2026-43514",
+        "CVE-2026-43515",
+        "CVE-2026-47884",
+        "CVE-2026-47890",
+        "CVE-2026-49844",
+        "CVE-2026-54512",
+        "CVE-2026-54513",
+        "CVE-2026-54514",
+        "CVE-2026-54515",
+        "CVE-2026-54516",
+        "CVE-2026-54517",
+        "CVE-2026-54518",
+        "CVE-2026-59888",
+        "CVE-2026-59889",
+        "CVE-2026-65182",
+        "CVE-2026-65905",
+        "CVE-2026-68494",
+        "CVE-2026-68497",
+        "CVE-2026-68525",
+        "CVE-2026-77310",
+        "CVE-2026-83557",
+        "CVE-2026-89407",
+        "CVE-2026-89425",
+        "CVE-2026-91776",
+        "CVE-2026-91777",
+        "CVE-2026-9828",
+        "GHSA-3chg-m5w7-qfv5",
+        "GHSA-3pjw-73gf-8qr5",
+        "GHSA-4jq9-2xhw-jpx7",
+        "GHSA-599f-7c49-w659",
+        "GHSA-5gvw-p9qm-jgwh",
+        "GHSA-5hh8-q8hv-fr38",
+        "GHSA-5jmj-h7xm-6q6v",
+        "GHSA-5m62-pw8w-7w9f",
+        "GHSA-5mp6-jrq3-r938",
+        "GHSA-659m-px2c-25wj",
+        "GHSA-72pg-x5f8-j25j",
+        "GHSA-7hhh-6rmp-j9qf",
+        "GHSA-7m2p-62gw-p8qq",
+        "GHSA-957g-f97v-vppc",
+        "GHSA-9f52-rjqv-25qv",
+        "GHSA-9fxm-vc8v-hj55",
+        "GHSA-9m89-8frq-c98c",
+        "GHSA-9xv2-5v5q-p794",
+        "GHSA-cjpg-rgq5-fr37",
+        "GHSA-cxp5-3px4-pw24",
+        "GHSA-fv25-8xcx-gqjc",
+        "GHSA-g3pr-3p32-fp23",
+        "GHSA-gcx9-497g-6cp6",
+        "GHSA-ggg2-9786-hwc8",
+        "GHSA-gx5v-xp9w-j4cg",
+        "GHSA-gx83-3vf8-gh7j",
+        "GHSA-h3qp-gqrc-q736",
+        "GHSA-h3x4-894j-xpx5",
+        "GHSA-h6fc-48rj-7qqh",
+        "GHSA-hgj6-7826-r7m5",
+        "GHSA-j3rv-43j4-c7qm",
+        "GHSA-j9f9-w8pj-32f8",
+        "GHSA-jhq6-gfmj-v8fx",
+        "GHSA-mq64-j8f9-9gcj",
+        "GHSA-p47f-322f-whfh",
+        "GHSA-p6pp-m3f8-5c89",
+        "GHSA-pc63-qcmh-9cmg",
+        "GHSA-q4xh-88c3-wmh7",
+        "GHSA-qv9r-c865-cp47",
+        "GHSA-r29c-68gh-xp6x",
+        "GHSA-r5w3-xv2f-j59q",
+        "GHSA-r7wm-3cxj-wff9",
+        "GHSA-rcqc-6cw3-h962",
+        "GHSA-rmj7-2vxq-3g9f",
+        "GHSA-vvgp-rfg2-7rr6",
+        "GHSA-w737-wx49-qj23",
+        "GHSA-wjgm-6hv5-3cvf",
+        "GHSA-wv8q-qhhj-9h54",
+        "GHSA-wxpp-56q6-5pcg",
+        "GHSA-x23c-287f-qqv5"
+      ],
+      "rawInventory": {
+        "identityMatch": true,
+        "reportedPackages": 88,
+        "unexpectedPackages": 0
+      },
+      "scanned": 88
+    },
+    "outcome": "COMPLETE",
+    "reasons": [],
+    "resolvedPackages": 88,
+    "scanner": {
+      "coverageComplete": true,
+      "expected": 88,
+      "findingRecords": 50,
+      "scanned": 88,
+      "status": "COMPLETE",
+      "type": "osv",
+      "version": "2.6.0"
+    },
+    "tests": 4,
+    "vulnerabilities": {
+      "introduced": [],
+      "remaining": [
+        {
+          "baselineDependencyVersions": [
+            "1.5.32"
+          ],
+          "baselineFixedVersions": [
+            "1.5.34"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:P/RE:M/U:Green",
+              "type": "CVSS_V4"
+            }
+          ],
+          "baselineVersions": [
+            "1.5.32"
+          ],
+          "candidateDependencyVersions": [
+            "1.5.32"
+          ],
+          "candidateFixedVersions": [
+            "1.5.34"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:P/RE:M/U:Green",
+              "type": "CVSS_V4"
+            }
+          ],
+          "candidateVersions": [
+            "1.5.32"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-10532",
+            "GHSA-jhq6-gfmj-v8fx"
+          ],
+          "package": "ch.qos.logback:logback-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "1.5.32"
+          ],
+          "baselineFixedVersions": [
+            "1.5.33"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:4.0/AV:L/AC:H/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:P/RE:L/U:Green",
+              "type": "CVSS_V4"
+            }
+          ],
+          "baselineVersions": [
+            "1.5.32"
+          ],
+          "candidateDependencyVersions": [
+            "1.5.32"
+          ],
+          "candidateFixedVersions": [
+            "1.5.33"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:4.0/AV:L/AC:H/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:P/RE:L/U:Green",
+              "type": "CVSS_V4"
+            }
+          ],
+          "candidateVersions": [
+            "1.5.32"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "ch.qos.logback:logback-classic@1.5.32",
+                "ch.qos.logback:logback-core@1.5.32"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-9828",
+            "GHSA-p47f-322f-whfh"
+          ],
+          "package": "ch.qos.logback:logback-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "1.16.5"
+          ],
+          "baselineFixedVersions": [
+            "1.15.12",
+            "1.16.6"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "1.16.5"
+          ],
+          "candidateDependencyVersions": [
+            "1.16.5"
+          ],
+          "candidateFixedVersions": [
+            "1.15.12",
+            "1.16.6"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "1.16.5"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-actuator@4.0.6",
+                "io.micrometer:micrometer-jakarta9@1.16.5",
+                "io.micrometer:micrometer-core@1.16.5"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-actuator@4.0.6",
+                "io.micrometer:micrometer-jakarta9@1.16.5",
+                "io.micrometer:micrometer-core@1.16.5"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-40983",
+            "GHSA-w737-wx49-qj23"
+          ],
+          "package": "io.micrometer:micrometer-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "1.16.5"
+          ],
+          "baselineFixedVersions": [
+            "1.15.12",
+            "1.16.6"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "1.16.5"
+          ],
+          "candidateDependencyVersions": [
+            "1.16.5"
+          ],
+          "candidateFixedVersions": [
+            "1.15.12",
+            "1.16.6"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "1.16.5"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-actuator@4.0.6",
+                "io.micrometer:micrometer-jakarta9@1.16.5",
+                "io.micrometer:micrometer-core@1.16.5"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-actuator@4.0.6",
+                "io.micrometer:micrometer-jakarta9@1.16.5",
+                "io.micrometer:micrometer-core@1.16.5"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-40984",
+            "GHSA-g3pr-3p32-fp23"
+          ],
+          "package": "io.micrometer:micrometer-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "1.9"
+          ],
+          "baselineFixedVersions": [
+            "1.10.0"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "1.9"
+          ],
+          "candidateDependencyVersions": [
+            "1.9"
+          ],
+          "candidateFixedVersions": [
+            "1.10.0"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "1.9"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:secure-multimodule-springboot-java21@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-common@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-domain@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:secure-multimodule-springboot-java21@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-common@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-domain@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.apache.commons:commons-text@1.9"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2022-42889",
+            "GHSA-599f-7c49-w659"
+          ],
+          "package": "org.apache.commons:commons-text",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "2.25.4"
+          ],
+          "baselineFixedVersions": [
+            "2.25.5",
+            "2.26.1"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N",
+              "type": "CVSS_V4"
+            }
+          ],
+          "baselineVersions": [
+            "2.25.4"
+          ],
+          "candidateDependencyVersions": [
+            "2.25.4"
+          ],
+          "candidateFixedVersions": [
+            "2.25.5",
+            "2.26.1"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N",
+              "type": "CVSS_V4"
+            }
+          ],
+          "candidateVersions": [
+            "2.25.4"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "org.apache.logging.log4j:log4j-to-slf4j@2.25.4",
+                "org.apache.logging.log4j:log4j-api@2.25.4"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "org.apache.logging.log4j:log4j-to-slf4j@2.25.4",
+                "org.apache.logging.log4j:log4j-api@2.25.4"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "org.apache.logging.log4j:log4j-to-slf4j@2.25.4",
+                "org.apache.logging.log4j:log4j-api@2.25.4"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-starter-logging@4.0.6",
+                "org.apache.logging.log4j:log4j-to-slf4j@2.25.4",
+                "org.apache.logging.log4j:log4j-api@2.25.4"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-49844",
+            "GHSA-qv9r-c865-cp47"
+          ],
+          "package": "org.apache.logging.log4j:log4j-api",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41284",
+            "GHSA-gx5v-xp9w-j4cg"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41293",
+            "GHSA-r29c-68gh-xp6x"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-42498",
+            "GHSA-fv25-8xcx-gqjc"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-43512",
+            "GHSA-h6fc-48rj-7qqh"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-43513",
+            "GHSA-5mp6-jrq3-r938"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-43514",
+            "GHSA-9m89-8frq-c98c"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.55",
+            "11.0.22",
+            "9.0.118"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-43515",
+            "GHSA-5m62-pw8w-7w9f"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-65182",
+            "GHSA-gcx9-497g-6cp6"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-65905",
+            "GHSA-9xv2-5v5q-p794"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "11.0.21"
+          ],
+          "baselineFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "11.0.21"
+          ],
+          "candidateDependencyVersions": [
+            "11.0.21"
+          ],
+          "candidateFixedVersions": [
+            "10.1.58",
+            "11.0.25",
+            "9.0.121"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "11.0.21"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat@4.0.6",
+                "org.springframework.boot:spring-boot-starter-tomcat-runtime@4.0.6",
+                "org.apache.tomcat.embed:tomcat-embed-core@11.0.21"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-68525",
+            "GHSA-h3x4-894j-xpx5"
+          ],
+          "package": "org.apache.tomcat.embed:tomcat-embed-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "20230227"
+          ],
+          "baselineFixedVersions": [
+            "20231013"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "20230227"
+          ],
+          "candidateDependencyVersions": [
+            "20230227"
+          ],
+          "candidateFixedVersions": [
+            "20231013"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "20230227"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:secure-multimodule-springboot-java21@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-common@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-domain@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:secure-multimodule-springboot-java21@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-common@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-domain@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.json:json@20230227"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2023-5072",
+            "GHSA-4jq9-2xhw-jpx7"
+          ],
+          "package": "org.json:json",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "4.0.6"
+          ],
+          "baselineFixedVersions": [
+            "3.5.15",
+            "4.0.7"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "4.0.6"
+          ],
+          "candidateDependencyVersions": [
+            "4.0.6"
+          ],
+          "candidateFixedVersions": [
+            "3.5.15",
+            "4.0.7"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "4.0.6"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-autoconfigure@4.0.6"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-autoconfigure@4.0.6"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-autoconfigure@4.0.6"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter@4.0.6",
+                "org.springframework.boot:spring-boot-autoconfigure@4.0.6"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41001",
+            "GHSA-ggg2-9786-hwc8"
+          ],
+          "package": "org.springframework.boot:spring-boot-autoconfigure",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-core@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework:spring-core@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-core@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-test@4.0.6",
+                "org.springframework:spring-core@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41848",
+            "GHSA-659m-px2c-25wj"
+          ],
+          "package": "org.springframework:spring-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41850",
+            "GHSA-r5w3-xv2f-j59q"
+          ],
+          "package": "org.springframework:spring-expression",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41851",
+            "GHSA-wxpp-56q6-5pcg"
+          ],
+          "package": "org.springframework:spring-expression",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ],
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "com.example.secureapp:task-service@1.0.0-SNAPSHOT",
+                "org.springframework:spring-context@7.0.7",
+                "org.springframework:spring-expression@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41852",
+            "GHSA-9f52-rjqv-25qv"
+          ],
+          "package": "org.springframework:spring-expression",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-http-converter@4.0.6",
+                "org.springframework:spring-web@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-http-converter@4.0.6",
+                "org.springframework:spring-web@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41854",
+            "GHSA-7m2p-62gw-p8qq"
+          ],
+          "package": "org.springframework:spring-web",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41841",
+            "GHSA-mq64-j8f9-9gcj"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41842",
+            "GHSA-x23c-287f-qqv5"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41843",
+            "GHSA-72pg-x5f8-j25j"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41844",
+            "GHSA-h3qp-gqrc-q736"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41845",
+            "GHSA-3chg-m5w7-qfv5"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41846",
+            "GHSA-957g-f97v-vppc"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "6.2.19",
+            "7.0.8"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-41853",
+            "GHSA-cjpg-rgq5-fr37"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "7.0.9"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "7.0.9"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-47884",
+            "GHSA-pc63-qcmh-9cmg"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "7.0.7"
+          ],
+          "baselineFixedVersions": [
+            "7.0.9"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "7.0.7"
+          ],
+          "candidateDependencyVersions": [
+            "7.0.7"
+          ],
+          "candidateFixedVersions": [
+            "7.0.9"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "7.0.7"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-webmvc@4.0.6",
+                "org.springframework:spring-webmvc@7.0.7"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-47890",
+            "GHSA-j9f9-w8pj-32f8"
+          ],
+          "package": "org.springframework:spring-webmvc",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "type": "CVSS_V4"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "type": "CVSS_V4"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-68494",
+            "GHSA-r7wm-3cxj-wff9"
+          ],
+          "package": "tools.jackson.core:jackson-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.7",
+            "3.2.2"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.7",
+            "3.2.2"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-89407",
+            "GHSA-p6pp-m3f8-5c89"
+          ],
+          "package": "tools.jackson.core:jackson-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2",
+                "tools.jackson.core:jackson-core@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-89425",
+            "GHSA-7hhh-6rmp-j9qf"
+          ],
+          "package": "tools.jackson.core:jackson-core",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-19032",
+            "GHSA-wjgm-6hv5-3cvf"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54512",
+            "GHSA-j3rv-43j4-c7qm"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54513",
+            "GHSA-rmj7-2vxq-3g9f"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "2.21.4",
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "2.21.4",
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54514",
+            "GHSA-hgj6-7826-r7m5"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54515",
+            "GHSA-5jmj-h7xm-6q6v"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54516",
+            "GHSA-9fxm-vc8v-hj55"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54517",
+            "GHSA-5hh8-q8hv-fr38"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-54518",
+            "GHSA-rcqc-6cw3-h962"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.4"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.4"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-59888",
+            "GHSA-3pjw-73gf-8qr5"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.5",
+            "3.2.1"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.5",
+            "3.2.1"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-59889",
+            "GHSA-5gvw-p9qm-jgwh"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-68497",
+            "GHSA-q4xh-88c3-wmh7"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.5",
+            "3.2.1"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.5",
+            "3.2.1"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-77310",
+            "GHSA-vvgp-rfg2-7rr6"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.6",
+            "3.2.2"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-83557",
+            "GHSA-gx83-3vf8-gh7j"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-91776",
+            "GHSA-wv8q-qhhj-9h54"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        },
+        {
+          "baselineDependencyVersions": [
+            "3.1.2"
+          ],
+          "baselineFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "baselineSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "baselineVersions": [
+            "3.1.2"
+          ],
+          "candidateDependencyVersions": [
+            "3.1.2"
+          ],
+          "candidateFixedVersions": [
+            "3.1.7",
+            "3.2.3"
+          ],
+          "candidateSeverity": [
+            {
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "type": "CVSS_V3"
+            }
+          ],
+          "candidateVersions": [
+            "3.1.2"
+          ],
+          "dependencyPaths": {
+            "baseline": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ],
+            "candidate": [
+              [
+                "com.example.secureapp:task-web@1.0.0-SNAPSHOT",
+                "org.springframework.boot:spring-boot-starter-webmvc@4.0.6",
+                "org.springframework.boot:spring-boot-starter-jackson@4.0.6",
+                "org.springframework.boot:spring-boot-jackson@4.0.6",
+                "tools.jackson.core:jackson-databind@3.1.2"
+              ]
+            ]
+          },
+          "ids": [
+            "CVE-2026-91777",
+            "GHSA-cxp5-3px4-pw24"
+          ],
+          "package": "tools.jackson.core:jackson-databind",
+          "sourceEvidence": [
+            "scan.json",
+            "resolved.json"
+          ]
+        }
+      ],
+      "resolved": [],
+      "unknown": []
+    }
+  },
+  "conversationId": "25bacdb8-682b-41b3-9e49-67b533323e14",
+  "exclusions": [
+    "credentials",
+    "raw logs/argv",
+    "task/agent free text",
+    "workspace snapshots",
+    "private dependency names"
+  ],
+  "final": {
+    "delivery": "NOT_EXECUTED",
+    "deliveryClaim": "NOT_EXECUTED",
+    "outcome": "INVOCATION_FAILED",
+    "prUrl": null,
+    "remediationSuccess": false,
+    "validation": "NOT_EXECUTED"
+  },
+  "invocation": {
+    "failedPhase": "execution",
+    "interrupted": false,
+    "phases": [
+      {
+        "exitCode": 0,
+        "name": "setup"
+      },
+      {
+        "exitCode": 0,
+        "name": "preflight"
+      },
+      {
+        "exitCode": 1,
+        "name": "execution"
+      }
+    ]
+  },
+  "kind": "REAL_PRODUCT_INVOCATION",
+  "modelExecution": {
+    "dispatchClaimed": true,
+    "nativeStatus": "error",
+    "observedResponseEvents": 0,
+    "status": "DISPATCH_CLAIMED_NO_RESPONSE_OBSERVED",
+    "usage": {
+      "accumulated_cost": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "completion_tokens": 0,
+      "prompt_tokens": 0,
+      "reasoning_tokens": 0
+    }
+  },
+  "predictionAvailability": "NOT_PROVEN_BY_PREFLIGHT",
+  "preparation": "COMPLETE",
+  "prerequisites": {
+    "adc_and_delivery": "PASS",
+    "base": "PASS",
+    "model": "PASS",
+    "sdk": "PASS",
+    "tools": "PASS"
+  },
+  "privateEvidence": {
+    "artifacts": {
+      "baseline.json": "243c8fc224dedf9a833009d8aecc8d4ea9d0749ca6257bf647cbd5a599f0de10",
+      "baseline/build.json": "43fc29b86ecd23a7e0cf577c0d92c7d4b8194eaa765ce126e4848472fe8cdd95",
+      "baseline/resolve.json": "68902798a5bc4c7f1f4ae5ee3bc3f6f75c4fdaf39e86fee70f03844990bf7d4a",
+      "baseline/scan.json": "9c65e71916a49b5580971640f033f623259fe1206fba5373f7bfcc6b0055be32",
+      "baseline/scanner-version.json": "da31bce33bcbe094b91dcfd1ff004497554a59e6a3110159d086b4bee1603bb6",
+      "conversations/25bacdb8682b41b39e4967b533323e14/base_state.json": "b5f395dcd7577fd37d00ae185ea5f97ac95f6b92a4b61e2ad487439eec68f18e",
+      "conversations/25bacdb8682b41b39e4967b533323e14/events/event-00000-4bba3ea0-647c-49be-bcb2-d3ef463be1a5.json": "90450579c1f287535cc4f2a0d763a920aa74d7bf7a0001cba3235b9469d77fe0",
+      "conversations/25bacdb8682b41b39e4967b533323e14/events/event-00001-8f8f4f96-a8df-4578-84af-e1a2ada6a692.json": "9b21261abb5f14cfc169eac7af61ce65194db9b376ece83cef0a7c6e363257f6",
+      "conversations/25bacdb8682b41b39e4967b533323e14/events/event-00002-1d724fec-9a80-4dca-84fe-5fb7f09e84dd.json": "2356a201c9dcd2e7c8808ee632118355340ee17a0b3095174ee088f5adfbbe7f",
+      "preparation-intent.json": "fb66e1bb60c22bddc4dc8ce67f0bde041e38242daefa9a31a0c7b6460405c2d2",
+      "preparation.json": "d0f9c9d0189a8120c8435d0587a42c549866739bad295a51f62935bc31203211",
+      "sbri-pre-edit.json": "1e50ccc4935be03ec0b1324e7d376948cc07387592f5d2836f8064c57abcd5c2",
+      "task.json": "12f336fd56b364ca1fe93354c1808c36ddac56dea361c42ec7b10cdd6e1a1f51"
+    },
+    "retention": "COMPLETE_PRIVATE_STATE_NOT_COPIED_TO_GIT"
+  },
+  "publication": "REQUESTED_RECEIPT_STORED_PRIVATELY",
+  "reportComplete": true,
+  "reportIssues": [],
+  "runId": "20261023T020356Z-3d4106fa542d48c081eb2b8c33954ea9",
+  "sbri": {
+    "preEdit": "UNAVAILABLE",
+    "results": [],
+    "retainedCalls": 0
+  },
+  "schemaVersion": 1,
+  "taskIdentity": {
+    "baseBranch": "main-runrunning",
+    "baseSha": "9ea1b0ed5ca255db0fc7c659d050896d3ed5db78",
+    "digest": "ee4bb56c1bb57f0b24d8fecc0bfbe45c5548c88ddce1a11c0601454a7e9c4838",
+    "model": "vertex_ai/gemini-2.5-flash",
+    "repository": "AILearner365/maven-multimodule-app"
+  },
+  "timestamp": "2026-10-23T02:03:56.128513+00:00"
+}
