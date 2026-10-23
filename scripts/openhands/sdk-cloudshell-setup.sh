@@ -17,15 +17,9 @@ info() { printf '==> %s\n' "$*"; }
 require() { command -v "$1" >/dev/null 2>&1 || die "Missing $1"; }
 
 resolve_vertex() {
-  if [ -z "${VERTEXAI_PROJECT:-}" ]; then
-    VERTEXAI_PROJECT="${GOOGLE_CLOUD_PROJECT:-}"
-  fi
-  if [ -z "$VERTEXAI_PROJECT" ] && command -v gcloud >/dev/null 2>&1; then
-    VERTEXAI_PROJECT="$(gcloud config get-value project 2>/dev/null || true)"
-    [ "$VERTEXAI_PROJECT" != "(unset)" ] || VERTEXAI_PROJECT=""
-  fi
-  # Historical POC fallback, only if no active project has been supplied/discovered.
-  VERTEXAI_PROJECT="${VERTEXAI_PROJECT:-deutschebank-aipocs}"
+  # Operator-approved defaults (AGENTS.md); explicit environment takes precedence.
+  # Do not substitute an unrelated active gcloud project or touch credentials.
+  VERTEXAI_PROJECT="${VERTEXAI_PROJECT:-${GOOGLE_CLOUD_PROJECT:-deutschebank-aipocs}}"
   VERTEXAI_LOCATION="${VERTEXAI_LOCATION:-us-central1}"
   export VERTEXAI_PROJECT VERTEXAI_LOCATION
 }
@@ -83,13 +77,14 @@ print("Vertex location:", os.environ["VERTEXAI_LOCATION"])
 PY
 }
 
-# live/report use the stdlib bootstrap even when the SDK is absent. Do not apply
-# historical project/region fallbacks to real execution; preflight must reject
-# missing approved configuration, never silently choose another environment.
+# live/report use the stdlib bootstrap even when the SDK is absent. Live exports
+# approved defaults before bootstrap so preflight and SDK inherit the same values.
+# Report-only export needs no environment preparation or credential access.
 case "${1:-}" in
   live|report)
     action="$1"
     shift
+    if [ "$action" = live ]; then resolve_vertex; fi
     exec python3 "$REPO/native_remediation/live.py" "$action" "$@"
     ;;
 esac

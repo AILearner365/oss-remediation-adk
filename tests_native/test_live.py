@@ -2,8 +2,10 @@
 from contextlib import redirect_stdout
 from io import StringIO
 import json
+import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -13,6 +15,35 @@ from native_remediation import live
 from native_remediation.contract import load_task
 from native_remediation.files import Blocked, digest, read, write
 from tests_native.test_product import GitFixture, evaluation
+
+
+class VertexSetupTests(unittest.TestCase):
+    def test_live_shell_exports_approved_defaults_and_preserves_explicit_values(self):
+        # Intercept only bootstrap python: no product run, ADC, SDK or model call.
+        script = Path(__file__).resolve().parents[1] / 'scripts/openhands/sdk-cloudshell-setup.sh'
+        cases = [({}, ('deutschebank-aipocs', 'us-central1')),
+            ({'VERTEXAI_PROJECT': '', 'VERTEXAI_LOCATION': ''}, ('deutschebank-aipocs', 'us-central1')),
+            ({'GOOGLE_CLOUD_PROJECT': 'explicit-project'}, ('explicit-project', 'us-central1')),
+            ({'VERTEXAI_PROJECT': 'vertex-project', 'GOOGLE_CLOUD_PROJECT': 'other-project',
+              'VERTEXAI_LOCATION': 'europe-west1'}, ('vertex-project', 'europe-west1'))]
+        with tempfile.TemporaryDirectory() as directory:
+            stub = Path(directory) / 'python3'
+            stub.write_text('#!' + sys.executable + '\nimport json,os,sys\n'
+                'print(json.dumps(dict(project=os.environ.get("VERTEXAI_PROJECT"), '
+                'location=os.environ.get("VERTEXAI_LOCATION"), argv=sys.argv[1:])))\n')
+            stub.chmod(0o700)
+            for values, expected in cases:
+                env = {k: v for k, v in os.environ.items()
+                    if k not in ('VERTEXAI_PROJECT', 'GOOGLE_CLOUD_PROJECT', 'VERTEXAI_LOCATION')}
+                env.update(values, PATH=directory + os.pathsep + os.environ['PATH'])
+                with self.subTest(values=values):
+                    result = subprocess.run(['bash', str(script), 'live', '--task', 'unused.json',
+                        '--authorize-model-execution', '--publish-evidence'], env=env,
+                        capture_output=True, text=True, check=True, timeout=10)
+                    observed = json.loads(result.stdout)
+                    self.assertEqual((observed['project'], observed['location']), expected)
+                    self.assertEqual(observed['argv'][1:], ['live', '--task', 'unused.json',
+                        '--authorize-model-execution', '--publish-evidence'])
 
 
 class ReportTests(GitFixture):

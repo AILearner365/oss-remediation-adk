@@ -2,8 +2,11 @@
 
 ## One-command live execution and evidence publication
 
-After approving the task's supported Gemini model and configuring the existing
-Cloud Shell Vertex project/location/ADC, run from the product repository:
+After approving the task's Gemini model and verifying existing Cloud Shell ADC,
+run from the product repository. The setup entry point automatically supplies
+the approved project `deutschebank-aipocs` and location `us-central1` when missing.
+Explicit `VERTEXAI_PROJECT` (then `GOOGLE_CLOUD_PROJECT`) and `VERTEXAI_LOCATION`
+override the corresponding defaults; credentials are never configured or stored:
 
 ```bash
 bash scripts/openhands/sdk-cloudshell-setup.sh live --task examples/maven-task.json --authorize-model-execution --publish-evidence
@@ -23,8 +26,10 @@ Contract validation, SDK/tool/known-model checks, existing ADC/delivery checks
 and approved remote-base verification precede exactly ONE existing product CLI
 start. Product/SDK own preparation, baseline, model loop, Stop and delivery. No
 new agent loop, fixture mode or lifecycle engine. ADC/model-name checks do not
-prove inference availability, regional access, IAM or quota. Missing approved
-Vertex environment fails; legacy setup fallbacks are not applied to live runtime.
+prove inference availability, regional access, IAM or quota. Invalid Vertex
+configuration still fails closed; these operator-approved
+defaults are exported consistently to preflight and the SDK, not inferred from
+an unrelated active gcloud configuration.
 Both flags are required for an accepted live invocation. Authorization errors
 are captured without executing the product; no publication flag means no push.
 
@@ -251,8 +256,9 @@ and configuration, not inference. The actual provider response determines whethe
 the approved model can run; never substitute a model following a failed request.
 
 From the product repository, use the installed runtime and an explicitly approved
-Vertex project/location. Do NOT rely on the setup script's historical project
-fallback. No service-account key is required or recommended. Retain the current
+Vertex project/location. The setup script now uses the operator-approved defaults
+documented in AGENTS.md; direct Python CLI use still requires exported values.
+No service-account key is required or recommended. Retain the current
 authorized ADC source if it refreshes reliably; if an existing refreshed user ADC
 file is required, point GOOGLE_APPLICATION_CREDENTIALS at that file outside the
 workspace without copying its contents. Temporary Cloud Shell metadata/ADC and
